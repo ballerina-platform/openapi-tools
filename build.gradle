@@ -16,8 +16,10 @@
  */
 
 plugins {
-    id "com.github.spotbugs" version "4.0.5"
-    id "com.github.johnrengelman.shadow" version "5.2.0"
+    id 'com.gradle.build-scan' version '2.1'
+    id 'maven-publish'
+    id "com.github.spotbugs" version "1.6.10"
+    id "com.github.johnrengelman.shadow" version "5.0.0"
     id "de.undercouch.download" version "4.0.4"
     id "net.researchgate.release" version "2.6.0"
 }
@@ -169,6 +171,9 @@ subprojects {
         }
     }
 }
+//task wrapper(type: Wrapper) {
+//    gradleVersion = '6.4'
+//}
 
 //task codeCoverageReport(type: JacocoReport) {
 //    executionData fileTree(project.rootDir.absolutePath).include("**/build/coverage-reports/*.exec")
@@ -190,3 +195,8 @@ subprojects {
 //        true
 //    }
 //}
+buildScan {
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+    termsOfServiceAgree = 'yes'
+}
+//buildPlugin.dependsOn check

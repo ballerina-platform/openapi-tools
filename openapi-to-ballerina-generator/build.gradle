@@ -36,11 +36,11 @@ dependencies {
     implementation 'com.github.jknack:handlebars:4.0.6'
     implementation 'info.picocli:picocli:4.0.1'
     implementation 'javax.ws.rs:javax.ws.rs-api:2.0'
-    implementation project(':ballerina-tool')
-    implementation project(':ballerina-lang')
-    implementation project(':language-server:language-server-compiler')
-    implementation project(':openapi-ballerina:ballerina-to-openapi-generator')
-    testCompile 'org.testng:testng:6.13.1'
+    compile group: 'org.ballerinalang', name: 'language-server:language-server-compiler', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+//    implementation project(':openapi-ballerina:ballerina-to-openapi-generator')
+    testCompile group: 'org.testng', name: 'testng', version: "${testngVersion}"
 }
 
 test {
