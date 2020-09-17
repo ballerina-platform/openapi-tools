@@ -37,11 +37,10 @@ clean {
     enabled = false
 }
 
-artifacts.add('default', file("$project.buildDir/checkstyle.xml")) {
+artifacts.add('default', file("${rootDir}/config/checkstyle/checkstyle.xml")) {
     builtBy('downloadMultipleFiles')
 }
 
-artifacts.add('default', file("$project.buildDir/suppressions.xml")) {
+artifacts.add('default', file("${rootDir}/config/checkstyle/suppressions.xml")) {
     builtBy('downloadMultipleFiles')
 }
-

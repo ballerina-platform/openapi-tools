@@ -36,7 +36,8 @@ dependencies {
     implementation 'com.github.jknack:handlebars:4.0.6'
     implementation 'info.picocli:picocli:4.0.1'
     implementation 'javax.ws.rs:javax.ws.rs-api:2.0'
-    compile group: 'org.ballerinalang', name: 'language-server:language-server-compiler', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
 //    implementation project(':openapi-ballerina:ballerina-to-openapi-generator')

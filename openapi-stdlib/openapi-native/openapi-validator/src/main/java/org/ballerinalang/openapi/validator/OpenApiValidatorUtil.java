@@ -23,7 +23,6 @@ import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.util.CompilerContext;
 import org.wso2.ballerinalang.compiler.util.CompilerOptions;
 
-
 import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintStream;

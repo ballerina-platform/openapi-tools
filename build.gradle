@@ -199,4 +199,9 @@ buildScan {
     termsOfServiceUrl = 'https://gradle.com/terms-of-service'
     termsOfServiceAgree = 'yes'
 }
+//checkstyle {
+//    toolVersion '7.8.2'
+//    configFile rootProject.file("build-config/checkstyle/build/checkstyle.xml")
+//    configFile file("${rootDir}/config/checkstyle/ckeckstyle.xml")
+//}
 //buildPlugin.dependsOn check

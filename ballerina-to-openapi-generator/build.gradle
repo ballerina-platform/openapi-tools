@@ -33,13 +33,15 @@ dependencies {
     implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.5'
 //    implementation project(':language-server:language-server-compiler')
-    compile group: 'org.ballerinalang', name: 'language-server:language-server-compiler', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-lang:annotations', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
     
-    testCompile group: 'org.ballerinalang', name: 'language-server:language-server-compiler', version: "${ballerinaLangVersion}"
+    testCompile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
+    testCompile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     testCompile group: 'org.testng', name: 'testng', version: "${testngVersion}"
 //    testCompile 'org.testng:testng'
     testCompile 'org.slf4j:slf4j-jdk14'

@@ -22,7 +22,7 @@ dependencies {
     compile group: 'com.github.jknack', name: 'handlebars', version: "${jknackHandlebarsVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-lang:annotations', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
 
     testCompile group: 'org.testng', name: 'testng', version: "${testngVersion}"
 //    implementation "com.github.jknack:handlebars"
@@ -41,7 +41,7 @@ jar {
 
 shadowJar {
 
-//    configurations = [project.configurations.runtimeClasspath]
+    configurations = [project.configurations.runtimeClasspath]
     dependencies {
         include(dependency('com.github.jknack:handlebars'))
         include(dependency('commons-io:commons-io'))
