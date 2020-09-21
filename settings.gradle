@@ -19,10 +19,21 @@
 //}
 rootProject.name = 'ballerina-openapi'
 include(':build-config:checkstyle')
-include ':openapi-stdlib'
+include(':openapi-stdlib')
+include(':openapi-stdlib:openapi-ballerina')
+include(':openapi-stdlib:openapi-native')
+//include(':openapi-stdlib:openapi-test-utils')
+//include(':openapi-stdlib:openapi-validator')
 include ':ballerina-client-generator'
 include ':ballerina-to-openapi-generator'
 include ':openapi-to-ballerina-generator'
+
+project(':openapi-stdlib:openapi-ballerina').projectDir = file('openapi-stdlib/openapi-ballerina')
+project(':openapi-stdlib:openapi-native').projectDir = file('openapi-stdlib/openapi-native/openapi-validator')
+//project(':openapi-stdlib:openapi-test-utils').projectDir = file('openapi-stdlib/openapi-test-utils')
+//project(':ballerina-openapi:openapi-validator').projectDir = file('openapi-stdlib/openapi-validator')
+//project(':ballerina-openapi').projectDir = file('misc/openapi-ballerina')
+
 
 //gradleEnterprise {
 //    buildScan {

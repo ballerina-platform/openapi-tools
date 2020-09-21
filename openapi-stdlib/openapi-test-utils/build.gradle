@@ -26,12 +26,12 @@ configurations {
 }
 
 dependencies {
-    jballerinaTools project(path: ':jballerina-tools', configuration: 'zip')
+    jballerinaTools group: 'org.ballerinalang', name: 'jballerina-tools', version: "${ballerinaLangVersion}"
     testCompile 'org.testng:testng'
     testCompile 'org.slf4j:slf4j-jdk14'
     implementation 'info.picocli:picocli'
 
-    implementation project(path: ':ballerina-test-utils')
+    implementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
 }
 
 task extractDistribution(type: Copy) {
@@ -43,7 +43,9 @@ task extractDistribution(type: Copy) {
 
 // Integration tests for Openapi
 test {
-    mustRunAfter ':jballerina-integration-test:test'
+    mustRunAfter group: 'org.ballerinalang', name: 'jballerina-integration-test', version: "${ballerinaLangVersion}"
+    mustRunAfter group: 'org.ballerinalang', name: 'test', version: "${ballerinaLangVersion}"
+//    ':jballerina-integration-test:test'
     dependsOn extractDistribution
     systemProperty 'enableOpenapiTests', 'true'
 

@@ -28,7 +28,7 @@ dependencies {
     implementation 'io.swagger.parser.v3:swagger-parser'
 
     // Standard libs
-    implementation project(':ballerina-lang')
+    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     testCompile 'org.testng:testng'
 }
 

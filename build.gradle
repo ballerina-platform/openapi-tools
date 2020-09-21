@@ -172,7 +172,7 @@ subprojects {
     }
 }
 //task wrapper(type: Wrapper) {
-//    gradleVersion = '6.4'
+//    gradleVersion = '5.4'
 //}
 
 //task codeCoverageReport(type: JacocoReport) {

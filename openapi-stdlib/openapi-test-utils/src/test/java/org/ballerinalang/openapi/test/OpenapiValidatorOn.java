@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package test.java.org.ballerinalang.openapi.test;
+package org.ballerinalang.openapi.test;
 
 import org.ballerinalang.test.context.BMainInstance;
 import org.ballerinalang.test.context.BallerinaTestException;

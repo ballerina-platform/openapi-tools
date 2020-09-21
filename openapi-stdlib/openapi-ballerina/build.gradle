@@ -19,16 +19,24 @@ apply from: "$rootDir/gradle/balNativeLibProject.gradle"
 apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
 
 dependencies {
-    baloCreat project(':lib-creator')
+    baloCreat group: 'org.ballerinalang', name: 'lib-creator', version: "${ballerinaLangVersion}"
+//recheck
+    baloImplementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
 
-    baloImplementation project(path: ':ballerina-lang:annotations', configuration: 'baloImplementation')
+    compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
+    compile group: 'org.ballerinalang', name: 'ballerina-logging', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'io-native', version: "${stdlibIoVersion}"
+    compile group: 'org.ballerinalang', name: 'mime-native', version: "${stdlibMimeVersion}"
+    compile group: 'org.ballerinalang', name: 'ballerina-log-api', version: "${stdlibMimeVersion}"
 
-    implementation project(':ballerina-http')
-    implementation project(':ballerina-mime')
-    implementation project(':ballerina-logging')
-    implementation project(':ballerina-log-api')
-    implementation project(':ballerina-lang:annotations')
-    implementation project(':ballerina-io')
+
+//    implementation project(':ballerina-http')
+//    implementation project(':ballerina-mime')
+//    implementation project(':ballerina-logging')
+//    implementation project(':ballerina-log-api')
+//    implementation project(':ballerina-lang:annotations')
+//    implementation project(':ballerina-io')
 }
 
 createBalo {
