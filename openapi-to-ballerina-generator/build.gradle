@@ -40,7 +40,7 @@ dependencies {
     compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-//    implementation project(':openapi-ballerina:ballerina-to-openapi-generator')
+    implementation project(':ballerina-to-openapi-generator')
     testCompile group: 'org.testng', name: 'testng', version: "${testngVersion}"
 }
 
