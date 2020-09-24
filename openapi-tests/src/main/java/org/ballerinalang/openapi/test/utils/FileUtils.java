@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package java.org.ballerinalang.openapi.test.utils;
+package org.ballerinalang.openapi.test.utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
