@@ -17,6 +17,8 @@
  
 apply from: "$rootDir/gradle/javaProject.gradle"
 
+description = 'Ballerina - OpenApi Tooling - Ballerina To OpenApi'
+
 configurations.all {
     resolutionStrategy.preferProjectModules()
 }
@@ -46,8 +48,6 @@ dependencies {
 //    testCompile 'org.testng:testng'
     testCompile 'org.slf4j:slf4j-jdk14'
 }
-
-description = 'Ballerina - OpenApi Tooling - Ballerina To OpenApi'
 
 test {
     useTestNG() {

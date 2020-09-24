@@ -1,0 +1,87 @@
+/*
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+apply plugin: 'base'
+apply from: "$rootDir/gradle/javaProject.gradle"
+
+description = 'Ballerina - Openapi Test'
+
+//def extractedDist = "$buildDir/extractedDistribution/jballerina-tools-${project.version}"
+
+configurations {
+    jbalTools
+//    project.configurations.runtimeClasspath
+//    jballerinaTools
+}
+
+dependencies {
+    jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+        transitive = false
+    }
+    compile project(":openapi-validator")
+//    compile project(":openapi-tests")
+    compile project(":openapi-to-ballerina-generator")
+//    jballerinaTools group: 'org.ballerinalang', name: 'jballerina-tools', version: "${ballerinaLangVersion}"
+    testCompile 'org.testng:testng'
+    testCompile 'org.slf4j:slf4j-jdk14'
+    implementation 'info.picocli:picocli'
+
+    implementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
+}
+clean {
+    delete "$project.projectDir/target"
+    delete "$project.projectDir/Ballerina.lock"
+}
+//Unpacked jbalTool
+task unpackJballerinaTools(type: Copy) {
+    configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        from zipTree(artifact.getFile())
+        into new File("${buildDir}/target/extracted-distributions", "jballerina-tools-zip")
+    }
+}
+task copyToLib(type: Copy) {
+    into "$project.projectDir/lib"
+//    from configurations.externalJars
+}
+//task extractDistribution(type: Copy) {
+//    dependsOn ':jballerina-tools:build'
+//    from zipTree(configurations.jballerinaTools.asPath)
+//    into "$buildDir/extractedDistribution"
+//
+//}
+
+// Integration tests for Openapi
+test {
+    mustRunAfter group: 'org.ballerinalang', name: 'jballerina-integration-test', version: "${ballerinaLangVersion}"
+    mustRunAfter group: 'org.ballerinalang', name: 'test', version: "${ballerinaLangVersion}"
+    ':jballerina-integration-test:test'
+//    dependsOn extractDistribution
+    dependsOn(unpackJballerinaTools)
+    systemProperty 'enableOpenapiTests', 'true'
+
+    maxParallelForks = 1
+    systemProperty 'basedir', "$buildDir"
+    systemProperty 'libdir', "$buildDir"
+//    systemProperty 'server.zip', configurations.jballerinaTools.asPath
+    systemProperty 'server.zip', configurations.jbalTools.asPath
+    systemProperty 'jballerina.server.zip', configurations.jbalTools.asPath
+    systemProperty 'java.util.logging.config.file', "$buildDir/src/test/resources/logging.properties"
+    systemProperty 'java.util.logging.manager', 'org.ballerinalang.logging.BLogManager'
+
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
+}

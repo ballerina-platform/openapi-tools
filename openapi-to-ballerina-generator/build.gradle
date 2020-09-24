@@ -18,6 +18,8 @@
 apply from: "$rootDir/gradle/javaProject.gradle"
 apply plugin: 'com.github.johnrengelman.shadow'
 
+description = 'Ballerina - OpenApi Tooling - OpenApi to Ballerina'
+
 configurations.all {
     resolutionStrategy.preferProjectModules()
 }
@@ -50,4 +52,3 @@ test {
     }
 }
 
-description = 'Ballerina - OpenApi Tooling - OpenApi to Ballerina'

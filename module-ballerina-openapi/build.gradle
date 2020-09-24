@@ -1,0 +1,197 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+description = 'Ballerina - OpenAPI Ballerina Generator'
+
+configurations {
+    jbalTools
+}
+dependencies {
+    jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+        transitive = false
+    }
+    compile project(':openapi-validator')
+//    baloCreat group: 'org.ballerinalang', name: 'lib-creator', version: "${ballerinaLangVersion}"
+////recheck
+//    baloImplementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
+
+    compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
+    compile group: 'org.ballerinalang', name: 'ballerina-logging', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'io-native', version: "${stdlibIoVersion}"
+    compile group: 'org.ballerinalang', name: 'mime-native', version: "${stdlibMimeVersion}"
+    compile group: 'org.ballerinalang', name: 'ballerina-log-api', version: "${stdlibMimeVersion}"
+
+}
+clean {
+    delete "$project.projectDir/target"
+    delete "$project.projectDir/Ballerina.lock"
+}
+task unpackJballerinaTools(type: Copy) {
+    configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        from zipTree(artifact.getFile())
+        into new File("${buildDir}/target/extracted-distributions", "jballerina-tools-zip")
+    }
+}
+def moduleName = "openapi"
+def moduleOrg = "ballerina"
+def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
+def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
+def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
+def artifactLibParent = file("$project.projectDir/build/lib_parent/")
+def tomlVersion = project.version.split("-")[0]
+def ballerinaCentralAccessToken = System.getenv('BALLERINA_CENTRAL_ACCESS_TOKEN')
+def targetBallerinaJar = file("$project.projectDir/target/caches/jar_cache/${moduleOrg}/${moduleName}/${tomlVersion}/${moduleOrg}-${moduleName}-${tomlVersion}.jar")
+task ballerinaBuild {
+    inputs.dir file(project.projectDir)
+
+    doLast {
+        def originalConfig = ballerinaConfigFile.text
+        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
+        newConfig = newConfig.replace("@toml.version@", tomlVersion)
+        ballerinaConfigFile.text = newConfig
+
+        def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
+        def additionalBuildParams = ""
+
+        if (project.hasProperty("skipBallerinaTests")) {
+            additionalBuildParams = "--skip-tests"
+        }
+
+        if (project.hasProperty("debugBallerina")) {
+            def port = project.getProperty("debugBallerina").toString();
+            additionalBuildParams += "--debug ${port}"
+        }
+
+        // Build and populate caches
+//        exec {
+//            workingDir project.projectDir
+//            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+//            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build ${additionalBuildParams} --code-coverage -c ${moduleName} && exit %%ERRORLEVEL%%"
+//            } else {
+//                commandLine 'sh', '-c', "$distributionBinPath/ballerina build ${additionalBuildParams} --code-coverage -c ${moduleName}"
+//            }
+//        }
+//        copy {
+//            from file("$project.projectDir/Ballerina.toml")
+//            into file("$artifactCacheParent/caches/bir/${moduleOrg}/${moduleName}/${tomlVersion}")
+//        }
+//        copy {
+//            from file("$project.projectDir/Ballerina.toml")
+//            into file("$artifactCacheParent/caches/balo/${moduleOrg}/${moduleName}/${tomlVersion}")
+//        }
+//        copy {
+//            from file("$project.projectDir/Ballerina.toml")
+//            into file("$artifactCacheParent/caches/jar/${moduleOrg}/${moduleName}/${tomlVersion}")
+//        }
+//        copy {
+//            from file("$project.projectDir/target/caches/bir_cache")
+//            into file("$artifactCacheParent/caches/bir")
+//        }
+//        copy {
+//            from file("$project.projectDir/target/balo")
+//            into file("$artifactCacheParent/caches/balo/${moduleOrg}/${moduleName}/${tomlVersion}")
+//        }
+//        copy {
+//            from targetBallerinaJar
+//            into file("$artifactCacheParent/caches/jar/${moduleOrg}/${moduleName}/${tomlVersion}")
+//        }
+//
+//        copy {
+//            from targetBallerinaJar
+//            into file("$artifactLibParent/libs")
+//        }
+
+//        // Publish to central
+//        if (!project.version.endsWith('-SNAPSHOT') && ballerinaCentralAccessToken != null && project.hasProperty("publishToCentral")) {
+//            println("Publishing to the ballerina central..")
+//            exec {
+//                workingDir project.projectDir
+//                environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+//                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//                    commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat push ${moduleName} && exit %%ERRORLEVEL%%"
+//                } else {
+//                    commandLine 'sh', '-c', "$distributionBinPath/ballerina push ${moduleName}"
+//                }
+//            }
+//
+//        }
+//        // Doc creation and packing
+//        exec {
+//            workingDir project.projectDir
+//            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+//            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc ${moduleName} && exit %%ERRORLEVEL%%"
+//            } else {
+//                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc ${moduleName}"
+//            }
+//        }
+//        copy {
+//            from file("$project.projectDir/target/apidocs/${moduleName}")
+//            into file("$project.projectDir/build/docs_parent/docs/${moduleName}")
+//        }
+//        ballerinaConfigFile.text = originalConfig
+    }
+
+    outputs.dir artifactCacheParent
+    outputs.dir artifactBallerinaDocs
+    outputs.dir artifactLibParent
+}
+
+task createArtifactZip(type: Zip) {
+    destinationDirectory = file("$buildDir/distributions")
+    from ballerinaBuild
+}
+
+ballerinaBuild.dependsOn unpackJballerinaTools
+build.dependsOn ballerinaBuild
+
+
+
+
+
+// previous gradle file
+
+//apply from: "$rootDir/gradle/balNativeLibProject.gradle"
+//apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
+//
+//dependencies {
+//    baloCreat group: 'org.ballerinalang', name: 'lib-creator', version: "${ballerinaLangVersion}"
+////recheck
+//    baloImplementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
+//
+//    compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
+//    compile group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
+//    compile group: 'org.ballerinalang', name: 'ballerina-logging', version: "${ballerinaLangVersion}"
+//    compile group: 'org.ballerinalang', name: 'io-native', version: "${stdlibIoVersion}"
+//    compile group: 'org.ballerinalang', name: 'mime-native', version: "${stdlibMimeVersion}"
+//    compile group: 'org.ballerinalang', name: 'ballerina-log-api', version: "${stdlibMimeVersion}"
+//
+//
+////    implementation project(':ballerina-http')
+////    implementation project(':ballerina-mime')
+////    implementation project(':ballerina-logging')
+////    implementation project(':ballerina-log-api')
+////    implementation project(':ballerina-lang:annotations')
+////    implementation project(':ballerina-io')
+//}
+//
+//createBalo {
+//    jvmTarget = 'true'
+//}
+//
+//description = 'Ballerina - OpenApi'

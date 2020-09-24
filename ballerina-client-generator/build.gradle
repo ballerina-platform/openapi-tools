@@ -18,6 +18,8 @@
 apply from: "$rootDir/gradle/javaProject.gradle"
 apply plugin: 'com.github.johnrengelman.shadow'
 
+description = 'Ballerina - Swagger Tooling - Client Generator'
+
 dependencies {
     compile group: 'com.github.jknack', name: 'handlebars', version: "${jknackHandlebarsVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
@@ -31,8 +33,6 @@ dependencies {
 //    implementation project(':ballerina-lang:annotations')
 //    testCompile 'org.testng:testng'
 }
-
-description = 'Ballerina - Swagger Tooling - Client Generator'
 
 jar {
     enabled = false
