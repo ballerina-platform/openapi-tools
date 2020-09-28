@@ -18,13 +18,17 @@
 //apply from: "$rootDir/gradle/javaProjectWithExtBalo.gradle"
 ////apply from: "$rootDir/gradle/javaProject.gradle"
 apply plugin: 'com.github.johnrengelman.shadow'
+//apply plugin: 'java'
 //apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
 description = 'Ballerina - OpenAPI - Validator'
 
 configurations.all {
+//    jbalTools
     resolutionStrategy.preferProjectModules()
 }
-
+//configurations {
+//    jbalTools
+//}
 dependencies {
     implementation 'io.swagger.core.v3:swagger-models:1.5.18'
     implementation 'io.swagger.parser.v3:swagger-parser:2.0.14'
@@ -37,6 +41,11 @@ dependencies {
     // Standard libs
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     testCompile 'org.testng:testng'
+
+//    jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+//        transitive = false
+//    }
+//    compile project(':openapi-validator')
 }
 
 clean {
@@ -80,7 +89,7 @@ test {
 //    publications {
 //        mavenJava(MavenPublication) {
 //            groupId project.group
-//            artifactId "openapi-native"
+//            artifactId "openapi-validator"
 //            version = project.version
 //            artifact jar
 //        }

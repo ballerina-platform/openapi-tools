@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 plugins {
     id 'com.gradle.build-scan' version '2.1'
     id 'maven-publish'
@@ -23,6 +22,12 @@ plugins {
     id "de.undercouch.download" version "4.0.4"
     id "net.researchgate.release" version "2.6.0"
 }
+
+apply plugin: 'java'
+apply plugin: 'checkstyle'
+apply plugin: "com.github.spotbugs"
+apply plugin: 'jacoco'
+
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.testngVersion = project.testngVersion
 ext.slf4jVersion = project.slf4jVersion
@@ -156,7 +161,20 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:system-ballerina:${stdlibSystemVersion}"
         ballerinaStdLibs "org.ballerinalang:config-ballerina:${stdlibConfigVersion}"
         ballerinaStdLibs "org.ballerinalang:mime-ballerina:${stdlibMimeVersion}"
+
+        implementation 'org.slf4j:slf4j-simple:1.7.26'
+        implementation 'org.slf4j:slf4j-jdk14:1.7.26'
+        implementation 'org.testng:testng:6.14.3'
+        implementation 'info.picocli:picocli:4.0.1'
+        implementation 'io.swagger.core.v3:swagger-models:1.5.18'
+        implementation 'io.swagger.parser.v3:swagger-parser:2.0.14'
+        implementation 'io.swagger.parser.v3:swagger-parser-v2-converter:2.0.14'
+        implementation 'javax.transaction:javax.transaction-api:1.3'
+        implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
+        implementation 'junit:junit:4.8.2'
+
     }
+
 
     release {
         // Disable check snapshots temporarily
@@ -171,30 +189,85 @@ subprojects {
         }
     }
 }
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+checkstyle {
+    toolVersion '7.8.2'
+    configFile file("${rootDir}/config/checkstyle/checkstyle.xml")
+}
+spotbugsMain {
+    it.effort "max"
+    it.reportLevel "low"
+    it.reports {
+        xml.enabled false
+        html.enabled true
+    }
+    def excludeFile = file('spotbugs-exclude.xml')
+    if(excludeFile.exists()) {
+        it.excludeFilter = excludeFile
+    }
+}
+
+spotbugsTest {
+    it.enabled = false
+}
+
+test {
+    testLogging {
+        // Make sure output from standard out or error is shown in Gradle output.
+        showStackTraces = true
+        showStandardStreams = true
+    }
+    systemProperty "ballerina.home", "$buildDir"
+    systemProperty "org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog"
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+task createJavadoc(type: Javadoc) {
+    source = sourceSets.main.java
+    classpath = sourceSets.main.compileClasspath
+    failOnError true
+    options.addStringOption('Xwerror', '-quiet')
+}
+
+check {
+    dependsOn createJavadoc
+}
 //task wrapper(type: Wrapper) {
 //    gradleVersion = '5.4'
 //}
 
-//task codeCoverageReport(type: JacocoReport) {
-//    executionData fileTree(project.rootDir.absolutePath).include("**/build/coverage-reports/*.exec")
-//
-//    subprojects.each {
-//        sourceSets it.sourceSets.main
-//    }
-//
-//    reports {
-//        xml.enabled = true
-//        html.enabled = true
-//        csv.enabled = true
-//        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
-//        html.destination = new File("${buildDir}/reports/jacoco/report.html")
-//        csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
-//    }
-//
-//    onlyIf = {
-//        true
-//    }
-//}
+task codeCoverageReport(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/coverage-reports/*.exec")
+
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+        csv.enabled = true
+        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
+        html.destination = new File("${buildDir}/reports/jacoco/report.html")
+        csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
+    }
+
+    onlyIf = {
+        true
+    }
+}
 buildScan {
     termsOfServiceUrl = 'https://gradle.com/terms-of-service'
     termsOfServiceAgree = 'yes'

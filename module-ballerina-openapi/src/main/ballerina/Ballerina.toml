@@ -1,0 +1,21 @@
+[project]
+org-name = "ballerina"
+version = "0.5.0"
+
+[dependencies]
+"ballerina/io" = "0.5.0"
+"ballerina/log" = "1.0.0"
+"ballerina/mime" = "@stdlib.mime.version@"
+"ballerina/runtime" = "@stdlib.runtime.version@"
+"ballerina/system" = "@stdlib.system.version@"
+"ballerina/http" = "@stdlib.http.version@"
+
+[platform]
+target = "java8"
+
+    [[platform.libraries]]
+    artifactId = "openapi"
+    version = "0.5.0"
+    path = "../openapi-validator/build/lib/openapi-validator-0.6.8-SNAPSHOT.jar"
+    groupId = "ballerina"
+    modules = ["openapi"]

@@ -15,7 +15,7 @@
  *
  */
  
-apply from: "$rootDir/gradle/javaProject.gradle"
+//apply from: "$rootDir/gradle/javaProject.gradle"
 apply plugin: 'com.github.johnrengelman.shadow'
 
 description = 'Ballerina - Swagger Tooling - Client Generator'
@@ -57,4 +57,24 @@ test {
         suites 'src/test/resources/testng.xml'
     }
 }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId "ballerina-client-generator"
+            version = project.version
+            artifact jar
+        }
+    }
 
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://github.com/ballerina-platform/ballerina-openapi")
+            credentials {
+                username = System.getenv("packageUser")
+                password = System.getenv("packagePAT")
+            }
+        }
+    }
+}

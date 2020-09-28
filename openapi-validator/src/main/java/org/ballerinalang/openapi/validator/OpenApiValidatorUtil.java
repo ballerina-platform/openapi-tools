@@ -61,6 +61,7 @@ public class OpenApiValidatorUtil {
         Compiler compiler = Compiler.getInstance(context);
         // Set an EmptyPrintStream to hide unnecessary outputs from compiler.
         compiler.setOutStream(emptyPrintStream);
+
         return compiler.compile(packageName);
     }
 

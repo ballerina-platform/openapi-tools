@@ -15,7 +15,7 @@
  *
  */
  
-apply from: "$rootDir/gradle/javaProject.gradle"
+//apply from: "$rootDir/gradle/javaProject.gradle"
 
 description = 'Ballerina - OpenApi Tooling - Ballerina To OpenApi'
 
@@ -52,5 +52,27 @@ dependencies {
 test {
     useTestNG() {
         suites 'src/test/resources/testng.xml'
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId "ballerina-to-openapi-generator"
+            version = project.version
+            artifact jar
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://github.com/ballerina-platform/ballerina-openapi")
+            credentials {
+                username = System.getenv("packageUser")
+                password = System.getenv("packagePAT")
+            }
+        }
     }
 }
