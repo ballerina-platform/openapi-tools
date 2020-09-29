@@ -46,6 +46,8 @@ public class ValidatorTest {
      */
     public static BLangPackage getBlangPackage(String fileName) throws UnsupportedEncodingException {
         Path sourceRoot = RES_DIR.resolve("project-based-tests/src");
+//        Path sourceRoot = RES_DIR.resolve("project-based-tests");
+
         String balfile = sourceRoot.resolve(fileName).toString();
         Path balFpath = Paths.get(balfile);
         Path programDir = balFpath.toAbsolutePath().getParent();

@@ -57,12 +57,16 @@ public class OpenApiValidatorUtil {
         emptyPrintStream = new EmptyPrintStream();
         CompilerContext context = getCompilerContext(sourceRoot);
         // Set the SourceDirectory to process this compilation as a program directory.
-        context.put(SourceDirectory.class, new FileSystemProgramDirectory(sourceRoot));
+        context.put(SourceDirectory .class, new FileSystemProgramDirectory(sourceRoot));
         Compiler compiler = Compiler.getInstance(context);
         // Set an EmptyPrintStream to hide unnecessary outputs from compiler.
         compiler.setOutStream(emptyPrintStream);
 
         return compiler.compile(packageName);
+
+//        Path sourcefilePath = sourceRoot.resolve(packageName);
+//        CompileResult bCompileUtil = compile(sourceRoot.toString(), packageName);
+//        return (BLangPackage) bCompileUtil.getAST();
     }
 
     /**

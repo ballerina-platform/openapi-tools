@@ -124,9 +124,9 @@ task revertTomlFile {
 
 task ballerinaTest {
     dependsOn(":openapi-validator:build")
-//    dependsOn(":ballerina-client-generator:build")
-//    dependsOn(":ballerina-to-openapi-generator:build")
-//    dependsOn(":openapi-to-ballerina-generator:build")
+    dependsOn(":ballerina-client-generator:build")
+    dependsOn(":ballerina-to-openapi-generator:build")
+    dependsOn(":openapi-to-ballerina-generator:build")
     dependsOn(unpackJballerinaTools)
     dependsOn(unpackStdLibs)
     dependsOn(copyStdlibs)
@@ -254,12 +254,12 @@ task createArtifactZip(type: Zip) {
     from ballerinaBuild
 }
 
-//publishing {
-//    publications {
-//        mavenJava(MavenPublication) {
-//            artifact source: createArtifactZip, extension: 'zip'
-//        }
-//    }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact source: createArtifactZip, extension: 'zip'
+        }
+    }
 //
 //    repositories {
 //        maven {
@@ -271,17 +271,8 @@ task createArtifactZip(type: Zip) {
 //            }
 //        }
 //    }
-//}
+}
 
-//ballerinaBuild.dependsOn(":openapi-validator:build")
-//ballerinaBuild.dependsOn(":ballerina-client-generator:build")
-//ballerinaBuild.dependsOn(":ballerina-to-openapi-generator:build")
-//ballerinaBuild.dependsOn(":openapi-to-ballerina-generator:build")
-//unpackJballerinaTools.dependsOn copyToLib
-//unpackStdLibs.dependsOn unpackJballerinaTools
-//copyStdlibs.dependsOn unpackStdLibs
-//updateTomlVerions.dependsOn copyStdlibs
-//ballerinaBuild.dependsOn updateTomlVerions
 build {
     dependsOn(ballerinaBuild)
 }

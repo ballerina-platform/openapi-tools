@@ -55,24 +55,24 @@ test {
     }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId "ballerina-to-openapi-generator"
-            version = project.version
-            artifact jar
-        }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://github.com/ballerina-platform/ballerina-openapi")
-            credentials {
-                username = System.getenv("packageUser")
-                password = System.getenv("packagePAT")
-            }
-        }
-    }
-}
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            groupId project.group
+//            artifactId "ballerina-to-openapi-generator"
+//            version = project.version
+//            artifact jar
+//        }
+//    }
+//
+//    repositories {
+//        maven {
+//            name = "GitHubPackages"
+//            url = uri("https://github.com/ballerina-platform/ballerina-openapi")
+//            credentials {
+//                username = System.getenv("packageUser")
+//                password = System.getenv("packagePAT")
+//            }
+//        }
+//    }
+//}
