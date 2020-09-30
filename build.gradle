@@ -142,6 +142,13 @@ allprojects {
                 password System.getenv("packagePAT")
             }
         }
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/ballerina-lang'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
     }
 }
 
@@ -172,6 +179,7 @@ subprojects {
         implementation 'javax.transaction:javax.transaction-api:1.3'
         implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
         implementation 'junit:junit:4.8.2'
+
 
     }
 

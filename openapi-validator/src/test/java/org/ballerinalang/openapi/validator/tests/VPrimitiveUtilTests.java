@@ -37,8 +37,7 @@ import java.util.List;
  */
 public class VPrimitiveUtilTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/recordValidation" +
-            "/swagger/")
-            .toAbsolutePath();
+            "/swagger/").toAbsolutePath();
     private OpenAPI api;
     private OpenAPI newApi;
     private BLangPackage bLangPackage;
@@ -50,7 +49,8 @@ public class VPrimitiveUtilTests {
     public void testIntegerType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("validTests/primitive/integerB.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/primitive/integerB.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests" +
+                "/primitive/integerB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);

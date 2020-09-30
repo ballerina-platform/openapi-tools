@@ -105,10 +105,26 @@ task copyStdlibs(type: Copy) {
 
 task updateTomlFile {
     doLast {
-        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
+//        def stdlibDependentCryptoVersion = project.stdlibCryptoVersion.split("-")[0]
         def stdlibDependentLogVersion = project.stdlibLogVersion.split("-")[0]
+        def stdlibDependentTimeVersion = project.stdlibTimeVersion.split("-")[0]
+        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
+        def stdlibDependentRuntimeVersion = project.stdlibRuntimeVersion.split("-")[0]
+        def stdlibDependentSystemVersion = project.stdlibSystemVersion.split("-")[0]
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
+        newConfig = newConfig.replace("@toml.version@", tomlVersion)
+        newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
+//        newConfig = newConfig.replace("@stdlib.crypto.version@", stdlibDependentCryptoVersion)
+        newConfig = newConfig.replace("@stdlib.time.version@", stdlibDependentTimeVersion)
+        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
+        newConfig = newConfig.replace("@stdlib.runtime.version@", stdlibDependentRuntimeVersion)
+        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
+        ballerinaConfigFile.text = newConfig
+//        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
+//        def stdlibDependentLogVersion = project.stdlibLogVersion.split("-")[0]
+//
+//        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
         newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)

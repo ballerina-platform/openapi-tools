@@ -41,7 +41,7 @@ public class ValidatorTest {
     /**
      * Return bLangPackage for given bal file.
      * @param fileName      String type Of file name
-     * @return BlangPackage
+     * @return BlangPackage bLangPackage
      * @throws UnsupportedEncodingException
      */
     public static BLangPackage getBlangPackage(String fileName) throws UnsupportedEncodingException {
@@ -55,6 +55,22 @@ public class ValidatorTest {
         BLangPackage bLangPackage = OpenApiValidatorUtil.compileFile(programDir, filename);
         return bLangPackage;
     }
+
+
+// different type to access the bLangPackage
+//    public static CompileResult getBlangPackage01(String fileName) throws UnsupportedEncodingException {
+//        Path sourceRoot = RES_DIR.resolve("project-based-tests/src");
+////        Path sourceRoot = RES_DIR.resolve("project-based-tests");
+//
+//        String balfile = sourceRoot.resolve(fileName).toString();
+//        Path balFpath = Paths.get(balfile);
+//        Path programDir = balFpath.toAbsolutePath().getParent();
+//        String filename = balFpath.toAbsolutePath().getFileName().toString();
+//        CompileResult bLangPackage = OpenApiValidatorUtil.compileFile01(programDir, filename);
+//        return bLangPackage;
+//    }
+
+
 
     public static Schema getComponet(OpenAPI api, String componentName) {
         return api.getComponents().getSchemas().get(componentName);

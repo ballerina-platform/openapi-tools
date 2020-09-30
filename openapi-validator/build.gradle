@@ -16,40 +16,56 @@
  */
 
 //apply from: "$rootDir/gradle/javaProjectWithExtBalo.gradle"
-////apply from: "$rootDir/gradle/javaProject.gradle"
+//apply from: "$rootDir/gradle/javaProject.gradle"
 apply plugin: 'com.github.johnrengelman.shadow'
 //apply plugin: 'java'
 //apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
 description = 'Ballerina - OpenAPI - Validator'
 
 configurations.all {
-//    jbalTools
     resolutionStrategy.preferProjectModules()
 }
-//configurations {
-//    jbalTools
-//}
+
+
 dependencies {
-    implementation 'io.swagger.core.v3:swagger-models:1.5.18'
-    implementation 'io.swagger.parser.v3:swagger-parser:2.0.14'
-    implementation 'io.swagger.parser.v3:swagger-parser-v2-converter:2.0.14'
-    implementation 'org.testng:testng:6.14.3'
+//    annotationProcessor  group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     implementation 'io.swagger.parser.v3:swagger-parser'
 
-    compile group: 'org.ballerinalang', name: 'ballerina-runtime-api', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-log-api', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-runtime-api', version: "${ballerinaLangVersion}"
+    implementation group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
+//    compile group: 'com.rabbitmq', name: 'amqp-client', version: "${amqpVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-http', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-crypto', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-java', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-time', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-system', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-io', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'value', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'typedesc', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'toml-parser', version: "${ballerinaTomlParserVersion}"
 
-    testCompile group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
-//    testCompile group: 'org.wso2.ballerinalang', name: 'compiler', version: "${ballerinaLangVersion}"
     // Standard libs
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     testCompile 'org.testng:testng'
 
-//    jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
-//        transitive = false
-//    }
-//    compile project(':openapi-validator')
+    implementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
+//    testCompile group: 'org.wso2.ballerinalang', name: 'compiler', version: "${ballerinaLangVersion}"
+}
+
+clean {
+    delete "$project.projectDir/target"
+    delete "$project.projectDir/Ballerina.lock"
+}
+
+jar {
+    enabled = false
+    dependsOn(shadowJar { classifier = null })
 }
 
 clean {

@@ -16,9 +16,8 @@
 package org.ballerinalang.openapi.validator;
 
 import org.ballerinalang.compiler.CompilerPhase;
-import org.wso2.ballerinalang.compiler.Compiler;
-import org.wso2.ballerinalang.compiler.FileSystemProgramDirectory;
-import org.wso2.ballerinalang.compiler.SourceDirectory;
+import org.ballerinalang.test.util.BCompileUtil;
+import org.ballerinalang.test.util.CompileResult;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.util.CompilerContext;
 import org.wso2.ballerinalang.compiler.util.CompilerOptions;
@@ -28,6 +27,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 import static org.ballerinalang.compiler.CompilerOptionName.COMPILER_PHASE;
@@ -54,19 +54,46 @@ public class OpenApiValidatorUtil {
      * @throws UnsupportedEncodingException throws unsupported encoding exception
      */
     public static BLangPackage compileFile(Path sourceRoot, String packageName) throws UnsupportedEncodingException {
-        emptyPrintStream = new EmptyPrintStream();
-        CompilerContext context = getCompilerContext(sourceRoot);
+//        emptyPrintStream = new EmptyPrintStream();
+//        CompilerContext context = getCompilerContext(sourceRoot);
         // Set the SourceDirectory to process this compilation as a program directory.
-        context.put(SourceDirectory .class, new FileSystemProgramDirectory(sourceRoot));
-        Compiler compiler = Compiler.getInstance(context);
+//        context.put(SourceDirectory .class, new FileSystemProgramDirectory(sourceRoot));
+//        Compiler compiler = Compiler.getInstance(context);
         // Set an EmptyPrintStream to hide unnecessary outputs from compiler.
-        compiler.setOutStream(emptyPrintStream);
-
-        return compiler.compile(packageName);
+//        compiler.setOutStream(emptyPrintStream);
+//        return compiler.compile(packageName);
 
 //        Path sourcefilePath = sourceRoot.resolve(packageName);
 //        CompileResult bCompileUtil = compile(sourceRoot.toString(), packageName);
 //        return (BLangPackage) bCompileUtil.getAST();
+
+        String resourceRoot = Paths.get("src", "test", "resources").toAbsolutePath().toString();
+        Path testResourceRoot = Paths.get(resourceRoot, "project-based-tests/src/recordValidation/ballerina" +
+                "/validTests/primitive");
+
+        CompileResult bCompileUtil = BCompileUtil.compile(testResourceRoot.resolve("integerB.bal").toString());
+        return (BLangPackage) bCompileUtil.getAST();
+    }
+
+    public static CompileResult compileFile01(Path sourceRoot, String packageName) throws UnsupportedEncodingException {
+//        emptyPrintStream = new EmptyPrintStream();
+//        CompilerContext context = getCompilerContext(sourceRoot);
+        // Set the SourceDirectory to process this compilation as a program directory.
+//        context.put(SourceDirectory .class, new FileSystemProgramDirectory(sourceRoot));
+//        Compiler compiler = Compiler.getInstance(context);
+        // Set an EmptyPrintStream to hide unnecessary outputs from compiler.
+//        compiler.setOutStream(emptyPrintStream);
+//        return compiler.compile(packageName);
+
+//        Path sourcefilePath = sourceRoot.resolve(packageName);
+//        CompileResult bCompileUtil = compile(sourceRoot.toString(), packageName);
+//        return (BLangPackage) bCompileUtil.getAST();
+
+        String resourceRoot = Paths.get("src", "test", "resources").toAbsolutePath().toString();
+        Path testResourceRoot = Paths.get(resourceRoot, "project-based-tests/recordValidation/ballerina/validTests/primitive");
+
+        CompileResult bCompileUtil = BCompileUtil.compile(testResourceRoot.resolve("integerB.bal").toString());
+        return bCompileUtil;
     }
 
     /**
