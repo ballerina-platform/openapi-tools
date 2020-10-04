@@ -31,10 +31,19 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
     compile project(":openapi-validator")
     compile project(':module-ballerina-openapi')
-    compile project(':ballerina-client-generator')
+//    compile project(':ballerina-client-generator')
     compile project(':ballerina-to-openapi-generator')
     compile project(':openapi-to-ballerina-generator')
 }
+
+
+
+
+
+
+
+
+
 //apply plugin: 'base'
 //apply from: "$rootDir/gradle/javaProject.gradle"
 //

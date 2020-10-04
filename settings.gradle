@@ -22,10 +22,13 @@ include(':config:checkstyle')
 include(':openapi-validator')
 include(':openapi-tests')
 include(':module-ballerina-openapi')
-include ':ballerina-client-generator'
-include ':ballerina-to-openapi-generator'
-include ':openapi-to-ballerina-generator'
+//include(':ballerina-client-generator')
+include (':ballerina-to-openapi-generator')
+include (':openapi-to-ballerina-generator')
 
+project(':ballerina-to-openapi-generator').projectDir = file('openapi-cli/ballerina-to-openapi-generator')
+project(':openapi-to-ballerina-generator').projectDir = file('openapi-cli/openapi-to-ballerina-generator')
+//project(':module-ballerina-openapi').projectDir = file('module-ballerina-openapi/src/main/ballerina')
 //project(':openapi-stdlib:openapi-ballerina').projectDir = file('openapi-stdlib/openapi-ballerina')
 //project(':openapi-stdlib:openapi-native').projectDir = file('openapi-stdlib/openapi-native/openapi-validator')
 //project(':openapi-stdlib:openapi-test-utils').projectDir = file('openapi-stdlib/openapi-test-utils')
