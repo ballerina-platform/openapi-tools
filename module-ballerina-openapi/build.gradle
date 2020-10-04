@@ -274,17 +274,17 @@ publishing {
             artifact source: createArtifactZip, extension: 'zip'
         }
     }
-//
-//    repositories {
-//        maven {
-//            name = "GitHubPackages"
-//            url = uri("https://maven.pkg.github.com/ballerina-platform/ballerina-openapi")
-//            credentials {
-//                username = System.getenv("packageUser")
-//                password = System.getenv("packagePAT")
-//            }
-//        }
-//    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/ballerina-platform/ballerina-openapi")
+            credentials {
+                username = System.getenv("packageUser")
+                password = System.getenv("packagePAT")
+            }
+        }
+    }
 }
 
 ballerinaBuild.dependsOn ":openapi-validator:build"
