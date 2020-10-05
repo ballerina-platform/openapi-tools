@@ -78,7 +78,7 @@ public class ConverterUtils {
      * null if annotation not found in the list
      */
     public static AnnotationAttachmentNode getAnnotationFromList(String name, String pkg,
-            List<? extends AnnotationAttachmentNode> annotations) {
+                                                                 List<? extends AnnotationAttachmentNode> annotations) {
         AnnotationAttachmentNode annotation = null;
         if (name == null || pkg == null) {
             return null;
