@@ -16,6 +16,10 @@
 
 module io.ballerina.openapi {
     requires io.ballerina.lang;
+    requires org.ballerinalang.model;
     requires org.ballerinalang.model.tree;
+    requires org.ballerinalang.annotation;
+
+
 }
 
