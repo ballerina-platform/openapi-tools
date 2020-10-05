@@ -282,8 +282,8 @@ publishing {
             credentials {
 //                username = System.getenv("packageUser")
 //                password = System.getenv("packagePAT")
-                username = System.getenv(${{ secrets.PACKAGEUSER }})
-                password = System.getenv(${{ secrets.PACKAGEPAT }})
+                username = System.getenv("packageUser")
+                password = System.getenv("packagePAT")
             }
         }
     }
