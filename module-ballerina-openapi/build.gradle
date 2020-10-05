@@ -215,8 +215,8 @@ task ballerinaBuild {
             from targetNativeJar
             into file("$artifactLibParent/libs")
         }
-//        ballerina  to openApi jar copy
-//        openApi to ballerina jar copy
+        //ballerina  to openApi jar copy
+        //openApi to ballerina jar copy
         copy {
             from targetBallerinaToOpenApiJar
             into file("$artifactLibParent/libs")
@@ -280,8 +280,6 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/ballerina-platform/ballerina-openapi")
             credentials {
-//                username = System.getenv("packageUser")
-//                password = System.getenv("packagePAT")
                 username = System.getenv("packageUser")
                 password = System.getenv("packagePAT")
             }
