@@ -23,7 +23,7 @@ jobs:
       run: |
         export packageUser=${{ secrets.PACKAGEUSER }}
         export packagePAT=${{ secrets.PACKAGEPAT }}
-        ./gradlew build
+        ./gradlew build --scan
 
 # on:
 #   repository_dispatch:
