@@ -21,6 +21,8 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.PUBLISH_PAT }}
       run: |
+        export packageUser=${{ secrets.PACKAGEUSER }}
+        export packagePAT=${{ secrets.PACKAGEPAT }}
         ./gradlew build
 
 # on:
