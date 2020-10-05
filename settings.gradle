@@ -14,9 +14,10 @@
  * limitations under the License.
  *
  */
-//plugins {
+plugins {
+    id "com.gradle.enterprise" version "3.4.1"
 //    id 'com.gradle.enterprise' version '3.2'
-//}
+}
 rootProject.name = 'ballerina-openapi'
 include(':config:checkstyle')
 include(':openapi-validator')
@@ -36,9 +37,9 @@ project(':openapi-to-ballerina-generator').projectDir = file('openapi-cli/openap
 //project(':openapi-tests').projectDir = file('openapi-tests')
 
 
-//gradleEnterprise {
-//    buildScan {
-//        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-//        termsOfServiceAgree = 'yes'
-//    }
-//}
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
+}
