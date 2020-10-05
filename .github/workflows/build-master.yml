@@ -26,7 +26,7 @@ jobs:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
-          ./gradlew publish
+          ./gradlew publish --scan
       - name: Dispatch Dependent Module Builds
         if: github.event.action != 'stdlib-publish-snapshot'
         run: |
