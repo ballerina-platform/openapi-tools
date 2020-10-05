@@ -32,7 +32,7 @@ jobs:
         run: |
           echo "Triggering dependent module builds..." && \
           curl -u ${{ secrets.BALLERINA_BOT_USERNAME }} -X POST \
-          https://api.github.com/repos/ballerina-platform/ballerina-lang/dispatches \
+          https://api.github.com/repos/lnash94/ballerina-lang/dispatches \
           -H 'Accept: application/vnd.github.v3+json' \
           -H 'Authorization: token ${{ secrets.BALLERINA_BOT_TOKEN }}' \
           --data '{
