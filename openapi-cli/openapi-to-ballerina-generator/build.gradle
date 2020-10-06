@@ -39,6 +39,15 @@ dependencies {
     implementation 'com.github.jknack:handlebars:4.0.6'
     implementation 'info.picocli:picocli:4.0.1'
     implementation 'javax.ws.rs:javax.ws.rs-api:2.0'
+    implementation ('org.apache.maven:maven-model-builder:3.6.3')
+            {
+                exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
+            }
+
+    implementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'toml-parser', version: "${ballerinaTomlParserVersion}"
+    implementation group: 'org.ballerinalang', name: 'model', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'tree', version: "${ballerinaTomlParserVersion}"
     compile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
@@ -74,3 +83,14 @@ test {
 //        }
 //    }
 //}
+//ext.moduleName = 'openapi'
+
+compileJava {
+//    inputs.property("moduleName", moduleName)
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+    }
+}

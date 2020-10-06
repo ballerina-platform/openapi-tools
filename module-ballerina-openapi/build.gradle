@@ -22,6 +22,11 @@ configurations {
 }
 
 dependencies {
+    implementation ('org.apache.maven:maven-model-builder:3.6.3')
+            {
+                exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
+            }
+
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }

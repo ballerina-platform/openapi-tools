@@ -22,12 +22,15 @@ plugins {
     id "com.github.johnrengelman.shadow" version "5.0.0"
     id "de.undercouch.download" version "4.0.4"
     id "net.researchgate.release" version "2.8.0"
+    id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
+
 }
 
 apply plugin: 'java'
 apply plugin: 'checkstyle'
 apply plugin: "com.github.spotbugs"
 apply plugin: 'jacoco'
+apply plugin: "org.javamodularity.moduleplugin"
 
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.testngVersion = project.testngVersion
@@ -52,9 +55,9 @@ allprojects {
             url = 'https://maven.wso2.org/nexus/content/repositories/releases/'
         }
 
-        maven {
-            url = 'https://maven.wso2.org/nexus/content/repositories/snapshots/'
-        }
+//        maven {
+//            url = 'https://maven.wso2.org/nexus/content/repositories/snapshots/'
+//        }
 
         maven {
             url = 'https://maven.wso2.org/nexus/content/groups/wso2-public/'
@@ -181,6 +184,7 @@ subprojects {
         implementation 'javax.transaction:javax.transaction-api:1.3'
         implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
         implementation 'junit:junit:4.8.2'
+        implementation 'org.apache.maven:maven-model-builder:3.6.3'
 //        implementation 'com.google.guava:guava:27.0.1-jre'
 
 

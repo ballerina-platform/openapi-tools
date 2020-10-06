@@ -15,7 +15,7 @@
  *
  */
  
-//apply from: "$rootDir/gradle/javaProject.gradle"
+apply from: "$rootDir/gradle/javaProject.gradle"
 
 description = 'Ballerina - OpenApi Tooling - Ballerina To OpenApi'
 
@@ -34,6 +34,9 @@ dependencies {
     implementation 'javax.ws.rs:javax.ws.rs-api'
     implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.5'
+    implementation ('org.apache.maven:maven-model-builder:3.6.3'){
+        exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
+    }
 //    implementation project(':language-server:language-server-compiler')
     compile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
@@ -74,5 +77,16 @@ test {
 //                password = System.getenv("packagePAT")
 //            }
 //        }
+//    }
+//}
+//ext.moduleName = 'openapi'
+
+//compileJava {
+////    inputs.property("moduleName", moduleName)
+//    doFirst {
+//        options.compilerArgs = [
+//                '--module-path', classpath.asPath,
+//        ]
+//        classpath = files()
 //    }
 //}

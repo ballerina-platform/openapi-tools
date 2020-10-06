@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-module io.ballerina.ballerina.openapi.convertor {
+module io.ballerina.openapi {
     requires io.ballerina.lang;
+//    requires org.ballerinalang.model;
+//    requires org.ballerinalang.model.tree;
+//    requires org.ballerinalang.annotation;
+//    requires io.ballerina.lang;
+    requires io.ballerina.cli.module;
+    requires io.ballerina.tool;
     requires io.ballerina.jvm;
+//    requires toml4j;
+    requires info.picocli;
+    requires io.ballerina.maven.resolver;
 
 }
 

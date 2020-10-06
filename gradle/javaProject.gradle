@@ -26,9 +26,9 @@ repositories {
         url = 'https://maven.wso2.org/nexus/content/repositories/releases/'
     }
 
-    maven {
-        url = 'https://maven.wso2.org/nexus/content/repositories/snapshots/'
-    }
+//    maven {
+//        url = 'https://maven.wso2.org/nexus/content/repositories/snapshots/'
+//    }
 
     maven {
         url = 'https://maven.wso2.org/nexus/content/groups/wso2-public/'
@@ -146,7 +146,7 @@ dependencies {
     }
 }
 
-sourceCompatibility = '1.8'
+sourceCompatibility = '11.0.8'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'

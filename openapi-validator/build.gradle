@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 //apply from: "$rootDir/gradle/javaProjectWithExtBalo.gradle"
 //apply from: "$rootDir/gradle/javaProject.gradle"
 apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: "org.javamodularity.moduleplugin"
 //apply plugin: 'java'
 //apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
 description = 'Ballerina - OpenAPI - Validator'
@@ -26,15 +27,23 @@ configurations.all {
     resolutionStrategy.preferProjectModules()
 }
 
-
 dependencies {
-//    annotationProcessor  group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-    implementation 'io.swagger.parser.v3:swagger-parser'
+    implementation ('io.swagger.parser.v3:swagger-parser') {
+//        exclude group: 'io.swagger.parser' , module: 'swagger-parser'
+    }
+    implementation('org.apache.maven:maven-model-builder:3.6.3')
+    {
+        exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
+    }
 
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime-api', version: "${ballerinaLangVersion}"
-    implementation group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
+    implementation (group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}") {
+        exclude group: 'org.slf4j.api', module: 'slf4j-simple'
+        exclude group: 'org.slf4j.api', module: 'slf4j-ext'
+//        exclude group: ' io.swagger.parser.v3', module: ''
+    }
 //    compile group: 'com.rabbitmq', name: 'amqp-client', version: "${amqpVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
@@ -93,7 +102,7 @@ shadowJar {
         include(dependency('io.swagger.parser.v3:swagger-parser-v2-converter'))
         include(dependency('io.swagger.parser.v3:swagger-parser-v3'))
         include(dependency('com.google.code.gson:gson'))
-        include(dependency('org.wso2.ballerinalang:ballerina-lang:compiler'))
+// //       include(dependency('org.wso2.ballerinalang:ballerina-lang:compiler'))
         exclude('META-INF/*.SF')
         exclude('META-INF/*.DSA')
         exclude('META-INF/*.RSA')
@@ -125,5 +134,16 @@ test {
 //                password = System.getenv("packagePAT")
 //            }
 //        }
+//    }
+//}
+
+//ext.moduleName = 'openapi'
+//compileJava {
+////    inputs.property("moduleName", moduleName)
+//    doFirst {
+//        options.compilerArgs = [
+//                '--module-path', classpath.asPath,
+//        ]
+//        classpath = files()
 //    }
 //}
