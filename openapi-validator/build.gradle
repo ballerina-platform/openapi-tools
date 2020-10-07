@@ -16,35 +16,51 @@
  */
 
 //apply from: "$rootDir/gradle/javaProjectWithExtBalo.gradle"
-//apply from: "$rootDir/gradle/javaProject.gradle"
+apply from: "$rootDir/gradle/javaProject.gradle"
+
 apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: "org.javamodularity.moduleplugin"
-//apply plugin: 'java'
+apply plugin: 'java'
 //apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
 description = 'Ballerina - OpenAPI - Validator'
 
 configurations.all {
-    resolutionStrategy.preferProjectModules()
+    resolutionStrategy {
+        preferProjectModules()
+    }
 }
 
 dependencies {
-    implementation ('io.swagger.parser.v3:swagger-parser') {
-//        exclude group: 'io.swagger.parser' , module: 'swagger-parser'
+    annotationProcessor  group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+
+    implementation ('io.swagger:swagger-core')  {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.yaml', module: 'snakeyaml'
+        exclude group: 'com.fasterxml.jackson.datatype', module: 'jackson-datatype-joda'
+        exclude group: 'io.swagger', module: 'swagger-annotations'
+        exclude group: 'org.slf4j', module: 'slf4j-ext'
     }
-    implementation('org.apache.maven:maven-model-builder:3.6.3')
-    {
-        exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
+    implementation ('io.swagger.core.v3:swagger-core')
+    implementation 'io.swagger.core.v3:swagger-models:2.1.4'
+    implementation 'io.swagger.parser.v3:swagger-parser-core'
+    implementation ('io.swagger.parser.v3:swagger-parser-v2-converter')  {
+        exclude group: 'io.swagger', module: 'swagger-compat-spec-parser'
+        exclude group: 'org.slf4j', module: 'slf4j-ext'
     }
+
+    compile(group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.2') {
+        exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
+    }
+    compile group: 'com.sun.mail', name: 'jakarta.mail', version: '1.6.5'
+
+//    implementation ('org.apache.maven:maven-model-builder')
+//    {
+//        exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
+//    }
 
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime-api', version: "${ballerinaLangVersion}"
-    implementation (group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}") {
-        exclude group: 'org.slf4j.api', module: 'slf4j-simple'
-        exclude group: 'org.slf4j.api', module: 'slf4j-ext'
-//        exclude group: ' io.swagger.parser.v3', module: ''
-    }
-//    compile group: 'com.rabbitmq', name: 'amqp-client', version: "${amqpVersion}"
+//    implementation (group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}")
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-http', version: "${ballerinaLangVersion}"
@@ -64,7 +80,7 @@ dependencies {
 
     implementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
-//    testCompile group: 'org.wso2.ballerinalang', name: 'compiler', version: "${ballerinaLangVersion}"
+
 }
 
 clean {
@@ -72,20 +88,10 @@ clean {
     delete "$project.projectDir/Ballerina.lock"
 }
 
-jar {
-    enabled = false
-    dependsOn(shadowJar { classifier = null })
-}
-
-clean {
-    delete "$project.projectDir/target"
-    delete "$project.projectDir/Ballerina.lock"
-}
-
-jar {
-    enabled = false
-    dependsOn(shadowJar { classifier = null })
-}
+//jar {
+//    enabled = false
+//    dependsOn(shadowJar { classifier = null })
+//}
 
 shadowJar {
     configurations = [project.configurations.runtimeClasspath]
@@ -138,12 +144,12 @@ test {
 //}
 
 //ext.moduleName = 'openapi'
-//compileJava {
-////    inputs.property("moduleName", moduleName)
-//    doFirst {
-//        options.compilerArgs = [
-//                '--module-path', classpath.asPath,
-//        ]
-//        classpath = files()
-//    }
-//}
+compileJava {
+//    inputs.property("moduleName", moduleName)
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+    }
+}

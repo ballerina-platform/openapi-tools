@@ -92,6 +92,7 @@ public class OpenAPIPathSummary {
                         openAPIParameter.setParamType(Constants.PATH);
                         openAPIParameter.setParameter(parameter);
 
+
                         if (parameter.getSchema() != null) {
                             Schema schema = parameter.getSchema();
                             String type = schema.getType();

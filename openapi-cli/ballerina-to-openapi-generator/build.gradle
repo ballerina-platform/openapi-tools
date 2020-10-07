@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,19 @@
  */
  
 apply from: "$rootDir/gradle/javaProject.gradle"
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
 
 description = 'Ballerina - OpenApi Tooling - Ballerina To OpenApi'
 
 configurations.all {
     resolutionStrategy.preferProjectModules()
+//    compileJava
 }
 
 dependencies {
+    implementation 'org.apache.commons:commons-lang3'
+    implementation 'commons-io:commons-io'
     implementation('io.swagger:swagger-core') {
         exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.yaml', module: 'snakeyaml'
@@ -37,7 +42,7 @@ dependencies {
     implementation ('org.apache.maven:maven-model-builder:3.6.3'){
         exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
     }
-//    implementation project(':language-server:language-server-compiler')
+
     compile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
@@ -81,12 +86,16 @@ test {
 //}
 //ext.moduleName = 'openapi'
 
-//compileJava {
-////    inputs.property("moduleName", moduleName)
-//    doFirst {
-//        options.compilerArgs = [
+compileJava {
+//    inputs.property("moduleName", moduleName)
+//    classpath = configurations.compile
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
 //                '--module-path', classpath.asPath,
-//        ]
-//        classpath = files()
-//    }
-//}
+//                '--add-modules', 'io.ballerina.lang',
+//                '--add-modules', 'io.ballerina.language.server.compiler'
+        ]
+        classpath = files()
+    }
+}

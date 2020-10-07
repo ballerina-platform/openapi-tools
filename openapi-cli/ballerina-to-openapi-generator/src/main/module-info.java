@@ -14,9 +14,29 @@
  * limitations under the License.
  */
 
-module io.ballerina.ballerina.openapi.convertor {
+open module io.ballerina.ballerina.openapi.convertor {
+    requires org.apache.commons.lang3;
     requires io.ballerina.lang;
+    requires io.ballerina.tool;
     requires io.ballerina.jvm;
+    requires swagger.parser.v3;
+    requires io.swagger.v3.oas.models;
+    requires  swagger.parser.core;
+    requires swagger.parser.v2.converter;
 
+    requires info.picocli;
+    requires io.ballerina.language.server.compiler;
+    requires java.ws.rs;
+
+
+    requires io.swagger.v3.core;
+    requires io.swagger.parser.v3;
+    requires swagger.parser.v2.converter;
+    requires  swagger.parser.core;
+
+
+    exports org.ballerinalang.ballerina.openapi.convertor;
+    exports org.ballerinalang.ballerina.openapi.convertor.service;
+    exports org.ballerinalang.ballerina.openapi.convertor.service.model;
 }
 

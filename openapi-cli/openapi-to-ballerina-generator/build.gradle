@@ -16,8 +16,9 @@
  */
  
 
-//apply from: "$rootDir/gradle/javaProject.gradle"
+apply from: "$rootDir/gradle/javaProject.gradle"
 apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
 
 description = 'Ballerina - OpenApi Tooling - OpenApi to Ballerina'
 
@@ -26,28 +27,35 @@ configurations.all {
 }
 
 dependencies {
-    implementation 'io.swagger.parser.v3:swagger-parser'
-    implementation 'io.swagger:swagger-core'
-    implementation 'io.swagger:swagger-models'
-    implementation 'io.swagger:swagger-parser'
-    implementation 'io.swagger.core.v3:swagger-core'
-    implementation 'io.swagger.core.v3:swagger-models'
-    implementation 'io.swagger.parser.v3:swagger-parser'
+    implementation ('io.swagger:swagger-core')  {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.yaml', module: 'snakeyaml'
+        exclude group: 'com.fasterxml.jackson.datatype', module: 'jackson-datatype-joda'
+        exclude group: 'io.swagger', module: 'swagger-annotations'
+        exclude group: 'org.slf4j', module: 'slf4j-ext'
+    }
+    implementation ('io.swagger.core.v3:swagger-core')
+    implementation 'io.swagger.core.v3:swagger-models:2.1.4'
     implementation 'io.swagger.parser.v3:swagger-parser-core'
-    implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'
-    implementation 'io.swagger.parser.v3:swagger-parser-v3'
+    implementation ('io.swagger.parser.v3:swagger-parser-v2-converter')  {
+        exclude group: 'io.swagger', module: 'swagger-compat-spec-parser'
+        exclude group: 'org.slf4j', module: 'slf4j-ext'
+    }
+//    implementation 'io.swagger.parser.v3:swagger-parser'
+//    implementation 'io.swagger:swagger-core'
+//    implementation 'io.swagger:swagger-models'
+//    implementation 'io.swagger:swagger-parser'
+//    implementation 'io.swagger.core.v3:swagger-core'
+//    implementation 'io.swagger.core.v3:swagger-models'
+//    implementation 'io.swagger.parser.v3:swagger-parser'
+//    implementation 'io.swagger.parser.v3:swagger-parser-core'
+//    implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'
+//    implementation 'io.swagger.parser.v3:swagger-parser-v3'
     implementation 'com.github.jknack:handlebars:4.0.6'
     implementation 'info.picocli:picocli:4.0.1'
     implementation 'javax.ws.rs:javax.ws.rs-api:2.0'
-    implementation ('org.apache.maven:maven-model-builder:3.6.3')
-            {
-                exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
-            }
 
-    implementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
-    implementation group: 'org.ballerinalang', name: 'toml-parser', version: "${ballerinaTomlParserVersion}"
-    implementation group: 'org.ballerinalang', name: 'model', version: "${ballerinaLangVersion}"
-    implementation group: 'org.ballerinalang', name: 'tree', version: "${ballerinaTomlParserVersion}"
+    compile group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
     compile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
@@ -90,6 +98,7 @@ compileJava {
     doFirst {
         options.compilerArgs = [
                 '--module-path', classpath.asPath,
+//                '--add-exports', 'org.ballerinalang.ballerina.openapi.convertor',
         ]
         classpath = files()
     }

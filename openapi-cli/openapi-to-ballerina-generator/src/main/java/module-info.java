@@ -13,19 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-module io.ballerina.openapi {
+open module io.ballerina.openapi {
+    requires swagger.parser.v3;
+    requires io.swagger.v3.oas.models;
+    requires  swagger.parser.core;
     requires io.ballerina.lang;
-//    requires org.ballerinalang.model;
-//    requires org.ballerinalang.model.tree;
-//    requires org.ballerinalang.annotation;
-//    requires io.ballerina.lang;
-    requires io.ballerina.cli.module;
     requires io.ballerina.tool;
-    requires io.ballerina.jvm;
-//    requires toml4j;
     requires info.picocli;
-    requires io.ballerina.maven.resolver;
+    requires io.ballerina.language.server.compiler;
+//    requires java.ws.rs;
+    requires org.apache.commons.lang3;
+//    requires java.xml.bind;
+    requires java.ws.rs;
+    requires io.ballerina.ballerina.openapi.convertor;
 
+    exports org.ballerinalang.openapi;
+    exports org.ballerinalang.openapi.cmd;
+    exports org.ballerinalang.openapi.exception;
+    exports org.ballerinalang.openapi.model;
+    exports org.ballerinalang.openapi.typemodel;
+    exports org.ballerinalang.openapi.utils;
 }
 

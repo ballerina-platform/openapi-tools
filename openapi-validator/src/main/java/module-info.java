@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-open module io.ballerina.ballerina.openapi.validator {
-
+module io.ballerina.ballerina.openapi.validator {
+    requires swagger.parser.v3;
+//    requires swagger.models;
+//    requires swagger.core;
+//    requires io.swagger.v3.core;
+    requires io.swagger.v3.oas.models;
+//    requires swagger.parser.v2.converter;
+    requires  swagger.parser.core;
     requires io.ballerina.lang;
-//    requires io.ballerina.cli.module;
-//    requires io.ballerina.tool;
-    requires io.ballerina.jvm;
-//    requires toml4j;
-//    requires info.picocli;
-//    requires io.ballerina.maven.resolver;
+//    requires io.ballerina.packerina;
+//    requires org.ballerinalang.test.util;
 
+    exports org.ballerinalang.openapi.validator;
+    exports org.ballerinalang.openapi.validator.error;
 }
 

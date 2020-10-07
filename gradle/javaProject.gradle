@@ -80,6 +80,7 @@ dependencies {
         implementation 'org.apache.geronimo.specs:geronimo-stax-api_1.0_spec:1.0.1'
         implementation 'org.apache.mina:mina-core:2.0.16'
         implementation 'org.apache.maven:maven-plugin-api:3.6.0'
+//        implementation 'org.apache.maven:maven-model-builder:3.6.3'
         implementation 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0'
         implementation 'org.apache.ws.commons.axiom:axiom-api:1.2.22'
         implementation 'org.apache.ws.commons.axiom:axiom-impl:1.2.22'
@@ -146,7 +147,7 @@ dependencies {
     }
 }
 
-sourceCompatibility = '11.0.8'
+sourceCompatibility = '1.11'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'

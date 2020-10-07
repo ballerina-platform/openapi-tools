@@ -22,10 +22,10 @@ configurations {
 }
 
 dependencies {
-    implementation ('org.apache.maven:maven-model-builder:3.6.3')
-            {
-                exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
-            }
+//    implementation ('org.apache.maven:maven-model-builder:3.6.3')
+//            {
+//                exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
+//            }
 
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
@@ -132,10 +132,10 @@ task revertTomlFile {
 }
 
 task ballerinaTest {
-    dependsOn(":openapi-validator:build")
-//    dependsOn(":ballerina-client-generator:build")
     dependsOn(":ballerina-to-openapi-generator:build")
     dependsOn(":openapi-to-ballerina-generator:build")
+    dependsOn(":openapi-validator:build")
+//    dependsOn(":ballerina-client-generator:build")
     dependsOn(unpackJballerinaTools)
     dependsOn(unpackStdLibs)
     dependsOn(copyStdlibs)
@@ -167,6 +167,8 @@ test {
 
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
+    dependsOn(":ballerina-to-openapi-generator:build")
+    dependsOn(":openapi-to-ballerina-generator:build")
     dependsOn(":openapi-validator:build")
     dependsOn(unpackJballerinaTools)
     dependsOn(unpackStdLibs)
@@ -292,6 +294,8 @@ publishing {
     }
 }
 
+ballerinaBuild.dependsOn ":ballerina-to-openapi-generator:build"
+ballerinaBuild.dependsOn ":openapi-to-ballerina-generator:build"
 ballerinaBuild.dependsOn ":openapi-validator:build"
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
