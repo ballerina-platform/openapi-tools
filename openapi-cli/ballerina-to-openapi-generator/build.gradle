@@ -47,7 +47,10 @@ dependencies {
         exclude group: 'org.slf4j', module: 'slf4j-ext'
     }
     implementation 'javax.ws.rs:javax.ws.rs-api:2.0'
-    compile group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
+    implementation group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.0'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0'
+
 
 //    implementation 'javax.ws.rs:javax.ws.rs-api'
 //    implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'

@@ -190,24 +190,24 @@ jacocoTestReport {
     }
 }
 
-task createJavadoc(type: Javadoc) {
-    source = sourceSets.main.java
-    classpath = sourceSets.main.compileClasspath
-    failOnError true
-    options.addStringOption('Xwerror', '-quiet')
-}
+//task createJavadoc(type: Javadoc) {
+//    source = sourceSets.main.java
+//    classpath = sourceSets.main.compileClasspath
+//    failOnError true
+//    options.addStringOption('Xwerror', '-quiet')
+//}
+//
+//check {
+//    dependsOn createJavadoc
+//}
 
-check {
-    dependsOn createJavadoc
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-}
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//        }
+//    }
+//}
 //publishing {
 //    mavenJava(MavenPublication){
 //        from components.java
