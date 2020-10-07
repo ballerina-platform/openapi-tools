@@ -27,21 +27,47 @@ configurations.all {
 }
 
 dependencies {
-    implementation 'org.apache.commons:commons-lang3'
-    implementation 'commons-io:commons-io'
-    implementation('io.swagger:swagger-core') {
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.5'
+    implementation "com.google.guava:guava:29.0-jre"
+    implementation group: 'io.swagger.parser.v3', name: 'swagger-parser-v3'
+    implementation ('io.swagger.core.v3:swagger-core')
+    implementation ('io.swagger:swagger-core')  {
         exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.yaml', module: 'snakeyaml'
         exclude group: 'com.fasterxml.jackson.datatype', module: 'jackson-datatype-joda'
         exclude group: 'io.swagger', module: 'swagger-annotations'
-        exclude group: 'io.swagger', module: 'swagger-parser'
+        exclude group: 'org.slf4j', module: 'slf4j-ext'
     }
-    implementation 'javax.ws.rs:javax.ws.rs-api'
-    implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.5'
-    implementation ('org.apache.maven:maven-model-builder:3.6.3'){
-        exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
+
+
+    implementation 'io.swagger.core.v3:swagger-models:2.1.4'
+    implementation 'io.swagger.parser.v3:swagger-parser-core'
+    implementation ('io.swagger.parser.v3:swagger-parser-v2-converter')  {
+        exclude group: 'io.swagger', module: 'swagger-compat-spec-parser'
+        exclude group: 'org.slf4j', module: 'slf4j-ext'
     }
+    implementation 'javax.ws.rs:javax.ws.rs-api:2.0'
+    compile group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
+
+//    implementation 'javax.ws.rs:javax.ws.rs-api'
+//    implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'
+
+
+//    implementation 'org.apache.commons:commons-lang3'
+//    implementation 'commons-io:commons-io'
+//    implementation('io.swagger:swagger-core') {
+//        exclude group: 'org.slf4j', module: 'slf4j-api'
+//        exclude group: 'org.yaml', module: 'snakeyaml'
+//        exclude group: 'com.fasterxml.jackson.datatype', module: 'jackson-datatype-joda'
+//        exclude group: 'io.swagger', module: 'swagger-annotations'
+//        exclude group: 'org.slf4j', module: 'slf4j-ext'
+//    }
+//    implementation 'javax.ws.rs:javax.ws.rs-api'
+//    implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'
+//    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.5'
+//    implementation ('org.apache.maven:maven-model-builder:3.6.3'){
+//        exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
+//    }
 
     compile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
@@ -87,14 +113,9 @@ test {
 //ext.moduleName = 'openapi'
 
 compileJava {
-//    inputs.property("moduleName", moduleName)
-//    classpath = configurations.compile
     doFirst {
         options.compilerArgs = [
                 '--module-path', classpath.asPath,
-//                '--module-path', classpath.asPath,
-//                '--add-modules', 'io.ballerina.lang',
-//                '--add-modules', 'io.ballerina.language.server.compiler'
         ]
         classpath = files()
     }

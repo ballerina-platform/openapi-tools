@@ -23,9 +23,11 @@ open module io.ballerina.openapi {
     requires io.ballerina.language.server.compiler;
 //    requires java.ws.rs;
     requires org.apache.commons.lang3;
-//    requires java.xml.bind;
-    requires java.ws.rs;
     requires io.ballerina.ballerina.openapi.convertor;
+    requires java.ws.rs;
+//    requires java.xml.bind;
+//    requires java.ws.rs;
+//    requires io.ballerina.ballerina.openapi.convertor;
 
     exports org.ballerinalang.openapi;
     exports org.ballerinalang.openapi.cmd;
