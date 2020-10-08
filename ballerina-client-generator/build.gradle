@@ -27,11 +27,6 @@ dependencies {
     compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
 
     testCompile group: 'org.testng', name: 'testng', version: "${testngVersion}"
-//    implementation "com.github.jknack:handlebars"
-//    implementation project(':ballerina-tool')
-//    implementation project(':ballerina-lang')
-//    implementation project(':ballerina-lang:annotations')
-//    testCompile 'org.testng:testng'
 }
 
 jar {
