@@ -23,7 +23,6 @@ description = 'Ballerina - OpenApi Tooling - Ballerina To OpenApi'
 
 configurations.all {
     resolutionStrategy.preferProjectModules()
-//    compileJava
 }
 
 dependencies {
@@ -51,27 +50,6 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0'
 
-
-//    implementation 'javax.ws.rs:javax.ws.rs-api'
-//    implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'
-
-
-//    implementation 'org.apache.commons:commons-lang3'
-//    implementation 'commons-io:commons-io'
-//    implementation('io.swagger:swagger-core') {
-//        exclude group: 'org.slf4j', module: 'slf4j-api'
-//        exclude group: 'org.yaml', module: 'snakeyaml'
-//        exclude group: 'com.fasterxml.jackson.datatype', module: 'jackson-datatype-joda'
-//        exclude group: 'io.swagger', module: 'swagger-annotations'
-//        exclude group: 'org.slf4j', module: 'slf4j-ext'
-//    }
-//    implementation 'javax.ws.rs:javax.ws.rs-api'
-//    implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'
-//    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.5'
-//    implementation ('org.apache.maven:maven-model-builder:3.6.3'){
-//        exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
-//    }
-
     compile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
@@ -82,7 +60,6 @@ dependencies {
     testCompile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
     testCompile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     testCompile group: 'org.testng', name: 'testng', version: "${testngVersion}"
-//    testCompile 'org.testng:testng'
     testCompile 'org.slf4j:slf4j-jdk14'
 }
 
@@ -113,7 +90,6 @@ test {
 //        }
 //    }
 //}
-//ext.moduleName = 'openapi'
 
 compileJava {
     doFirst {

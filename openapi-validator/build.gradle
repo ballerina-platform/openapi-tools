@@ -16,11 +16,12 @@
  */
 
 //apply from: "$rootDir/gradle/javaProjectWithExtBalo.gradle"
+//apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
+
 apply from: "$rootDir/gradle/javaProject.gradle"
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
-//apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
 description = 'Ballerina - OpenAPI - Validator'
 
 configurations.all {
@@ -88,10 +89,10 @@ clean {
     delete "$project.projectDir/Ballerina.lock"
 }
 
-//jar {
-//    enabled = false
-//    dependsOn(shadowJar { classifier = null })
-//}
+jar {
+    enabled = false
+    dependsOn(shadowJar { classifier = null })
+}
 
 shadowJar {
     configurations = [project.configurations.runtimeClasspath]
@@ -108,7 +109,6 @@ shadowJar {
         include(dependency('io.swagger.parser.v3:swagger-parser-v2-converter'))
         include(dependency('io.swagger.parser.v3:swagger-parser-v3'))
         include(dependency('com.google.code.gson:gson'))
-// //       include(dependency('org.wso2.ballerinalang:ballerina-lang:compiler'))
         exclude('META-INF/*.SF')
         exclude('META-INF/*.DSA')
         exclude('META-INF/*.RSA')
@@ -143,9 +143,8 @@ test {
 //    }
 //}
 
-//ext.moduleName = 'openapi'
+
 compileJava {
-//    inputs.property("moduleName", moduleName)
     doFirst {
         options.compilerArgs = [
                 '--module-path', classpath.asPath,

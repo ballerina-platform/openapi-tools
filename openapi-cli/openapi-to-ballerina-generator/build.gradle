@@ -91,14 +91,11 @@ test {
 //        }
 //    }
 //}
-//ext.moduleName = 'openapi'
 
 compileJava {
-//    inputs.property("moduleName", moduleName)
     doFirst {
         options.compilerArgs = [
                 '--module-path', classpath.asPath,
-//                '--add-exports', 'org.ballerinalang.ballerina.openapi.convertor',
         ]
         classpath = files()
     }
