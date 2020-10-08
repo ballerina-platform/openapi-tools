@@ -31,6 +31,7 @@ dependencies {
         transitive = false
     }
     compile project(':openapi-validator')
+    compile project(':openapi-cli')
 
 }
 
@@ -56,10 +57,10 @@ def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def tomlVersion = project.version.split("-")[0]
 //def ballerinaCentralAccessToken = System.getenv('BALLERINA_CENTRAL_ACCESS_TOKEN')
 def targetBallerinaJar = file("$project.projectDir/target/caches/jar_cache/${moduleOrg}/${moduleName}/${tomlVersion}/${moduleOrg}-${moduleName}-${tomlVersion}.jar")
-def targetNativeJar = file("""$project.rootDir/${moduleName}-validator/build/libs/${moduleName}-validator-
-${project.version}.jar""")
-def targetBallerinaToOpenApiJar = file("$project.rootDir/openapi-cli/ballerina-to-openapi-generator/build/libs/ballerina-to-openapi-generator-${project.version}.jar")
-def targetOepenApiToBallerinaJar = file("$project.rootDir/openapi-cli/openapi-to-ballerina-generator/build/libs/openapi-to-ballerina-generator-${project.version}.jar")
+def targetNativeJar = file("""$project.rootDir/${moduleName}-validator/build/libs/${moduleName}-validator-${project.version}.jar""")
+//def targetBallerinaToOpenApiJar = file("$project.rootDir/openapi-cli/ballerina-to-openapi-generator/build/libs/ballerina-to-openapi-generator-${project.version}.jar")
+//def targetOepenApiToBallerinaJar = file("$project.rootDir/openapi-cli/openapi-to-ballerina-generator/build/libs/openapi-to-ballerina-generator-${project.version}.jar")
+def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
 def originalConfig = ballerinaConfigFile.text
@@ -132,10 +133,8 @@ task revertTomlFile {
 }
 
 task ballerinaTest {
-    dependsOn(":ballerina-to-openapi-generator:build")
-    dependsOn(":openapi-to-ballerina-generator:build")
+    dependsOn(":openapi-cli:build")
     dependsOn(":openapi-validator:build")
-//    dependsOn(":ballerina-client-generator:build")
     dependsOn(unpackJballerinaTools)
     dependsOn(unpackStdLibs)
     dependsOn(copyStdlibs)
@@ -167,8 +166,7 @@ test {
 
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
-    dependsOn(":ballerina-to-openapi-generator:build")
-    dependsOn(":openapi-to-ballerina-generator:build")
+    dependsOn(":openapi-cli:build")
     dependsOn(":openapi-validator:build")
     dependsOn(unpackJballerinaTools)
     dependsOn(unpackStdLibs)
@@ -224,13 +222,18 @@ task ballerinaBuild {
         }
         //ballerina  to openApi jar copy
         //openApi to ballerina jar copy
-        copy {
-            from targetBallerinaToOpenApiJar
-            into file("$artifactLibParent/libs")
-        }
+//        copy {
+//            from targetBallerinaToOpenApiJar
+//            into file("$artifactLibParent/libs")
+//        }
+
+//        copy {
+//            from targetOepenApiToBallerinaJar
+//            into file("$artifactLibParent/libs")
+//        }
 
         copy {
-            from targetOepenApiToBallerinaJar
+            from targetOpenApiCliJar
             into file("$artifactLibParent/libs")
         }
 
@@ -294,15 +297,14 @@ publishing {
     }
 }
 
-ballerinaBuild.dependsOn ":ballerina-to-openapi-generator:build"
-ballerinaBuild.dependsOn ":openapi-to-ballerina-generator:build"
+//ballerinaBuild.dependsOn ":ballerina-to-openapi-generator:build"
+ballerinaBuild.dependsOn ":openapi-cli:build"
 ballerinaBuild.dependsOn ":openapi-validator:build"
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
 updateTomlFile.dependsOn copyStdlibs
 ballerinaBuild.dependsOn updateTomlFile
 //ballerinaBuild.dependsOn ":log-test-utils:build"
-//build.dependsOn ballerinaBuild
 build.dependsOn(ballerinaBuild)
 
 

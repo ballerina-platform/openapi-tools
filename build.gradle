@@ -56,9 +56,9 @@ allprojects {
             url = 'https://maven.wso2.org/nexus/content/repositories/releases/'
         }
 
-//        maven {
-//            url = 'https://maven.wso2.org/nexus/content/repositories/snapshots/'
-//        }
+        maven {
+            url = 'https://maven.wso2.org/nexus/content/repositories/snapshots/'
+        }
 
         maven {
             url = 'https://maven.wso2.org/nexus/content/groups/wso2-public/'
@@ -194,27 +194,25 @@ subprojects {
 //        implementation 'junit:junit:4.8.2'
 //        implementation 'org.apache.maven:maven-model-builder:3.6.3'
 //        implementation 'com.google.guava:guava:27.0.1-jre'
-
     }
+}
 
-    def moduleVersion = project.version
-    if (moduleVersion.indexOf('-') != -1) {
-        moduleVersion = moduleVersion.substring(0, moduleVersion.indexOf('-'))
-    }
-    release {
-        failOnPublishNeeded = false
+def moduleVersion = project.version
+if (moduleVersion.indexOf('-') != -1) {
+    moduleVersion = moduleVersion.substring(0, moduleVersion.indexOf('-'))
+}
+release {
+    failOnPublishNeeded = false
         // Disable check snapshots temporarily
-        buildTasks = ['buildProject']
+     buildTasks = ['buildProject']
 //        failOnSnapshotDependencies = false
 //        failOnCommitNeeded = false
-        versionPropertyFile = 'gradle.properties'
-        tagTemplate = 'v${version}'
-        git {
+    versionPropertyFile = 'gradle.properties'
+    tagTemplate = 'v${version}'
+    git {
             // To release from any branch
-//            requireBranch = null
-            requireBranch = "release-${moduleVersion}"
-            pushToRemote = 'origin'
-        }
+         requireBranch = "release-${moduleVersion}"
+        pushToRemote = 'origin'
     }
 }
 

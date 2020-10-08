@@ -24,9 +24,9 @@ under the License.
     <test name="openapi-ballerina-test-suite" preserve-order="true"
           parallel="false">
         <classes>
-            <class name="org.ballerinalang.openapi.cmd.OpenAPICmdTest"/>
-            <class name="org.ballerinalang.openapi.cmd.OpenAPIGenClientCmdTest"/>
-            <class name="org.ballerinalang.openapi.cmd.OpenApiGenServiceCmdTest"/>
+<!--            <class name="org.ballerinalang.openapi.cmd.OpenAPICmdTest"/>-->
+<!--            <class name="org.ballerinalang.openapi.cmd.OpenAPIGenClientCmdTest"/>-->
+<!--            <class name="org.ballerinalang.openapi.cmd.OpenApiGenServiceCmdTest"/>-->
 <!--            <class name="org.ballerinalang.openapi.util.TypeExtractorUtilTests"/>-->
 <!--            <class name="org.ballerinalang.openapi.CodeGeneratorTest"/>-->
         </classes>

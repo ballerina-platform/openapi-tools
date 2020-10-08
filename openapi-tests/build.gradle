@@ -32,8 +32,8 @@ dependencies {
     compile project(":openapi-validator")
     compile project(':module-ballerina-openapi')
 //    compile project(':ballerina-client-generator')
-    compile project(':ballerina-to-openapi-generator')
-    compile project(':openapi-to-ballerina-generator')
+//    compile project(':ballerina-to-openapi-generator')
+    compile project(':openapi-cli')
 }
 
 

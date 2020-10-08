@@ -1,17 +1,17 @@
 [project]
 org-name = "ballerina"
-version = "1.0.1"
+version = "@toml.version@"
 
 [dependencies]
-"ballerina/io" = "0.5.1"
-"ballerina/log" = "1.0.1"
+"ballerina/io" = "@stdlib.log.version@"
+"ballerina/log" = "@stdlib.io.version@"
 
 [platform]
 target = "java8"
 
     [[platform.libraries]]
     artifactId = "openapi"
-    version = "1.0.1-SNAPSHOT"
-    path = "../openapi-validator/build/libs/openapi-validator-1.0.1-SNAPSHOT.jar"
+    version = "@project.version@"
+    path = "../openapi-validator/build/libs/openapi-validator-@project.version@.jar"
     groupId = "ballerina"
     modules = ["openapi"]
