@@ -7,7 +7,7 @@ version = "@toml.version@"
 "ballerina/log" = "@stdlib.io.version@"
 
 [platform]
-target = "java8"
+target = "java11"
 
     [[platform.libraries]]
     artifactId = "openapi"
