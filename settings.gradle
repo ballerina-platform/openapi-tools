@@ -16,20 +16,14 @@
  */
 plugins {
     id "com.gradle.enterprise" version "3.4.1"
-//    id 'com.gradle.enterprise' version '3.2'
 }
 rootProject.name = 'ballerina-openapi'
 include(':config:checkstyle')
 include(':module-ballerina-openapi')
-//include(':ballerina-client-generator')
-//include (':ballerina-to-openapi-generator')
-//include (':openapi-to-ballerina-generator')
 include(':openapi-cli')
 include(':openapi-validator')
 include(':openapi-tests')
 
-//project(':ballerina-to-openapi-generator').projectDir = file('openapi-cli/ballerina-to-openapi-generator')
-//project(':openapi-to-ballerina-generator').projectDir = file('openapi-cli/openapi-to-ballerina-generator')
 
 
 gradleEnterprise {

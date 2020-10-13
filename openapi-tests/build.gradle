@@ -14,104 +14,238 @@
  * limitations under the License.
  *
  */
-plugins {
-    id 'java'
+import org.apache.tools.ant.taskdefs.condition.Os
+description = 'Ballerina - OpenAPI Ballerina Generator'
+
+configurations {
+    jbalTools
 }
-description = 'Ballerina - Openapi Tests'
 
 dependencies {
-    compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-reflect', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-core', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-io', version: "${ballerinaLangVersion}"
-
-    compile group: 'org.testng', name: 'testng', version: "${testngVersion}"
-    compile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
-    compile project(":openapi-validator")
-    compile project(':module-ballerina-openapi')
-//    compile project(':ballerina-client-generator')
-//    compile project(':ballerina-to-openapi-generator')
+    jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+        transitive = false
+    }
+    compile project(':openapi-validator')
     compile project(':openapi-cli')
+
+}
+
+clean {
+    delete "$project.projectDir/target"
+    delete "$project.projectDir/Ballerina.lock"
+}
+
+jar {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                'Implementation-Version': project.version)
+    }
+}
+
+def moduleName = "integration_tests"
+//def testModuleName = "integration_tests"
+def moduleOrg = "ballerina"
+//def ballerinaConfigFile = new File("$project.projectDir/src/main/ballerina/Ballerina.toml")
+def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
+def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
+def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
+def artifactLibParent = file("$project.projectDir/build/lib_parent/")
+def tomlVersion = project.version.split("-")[0]
+def targetBallerinaJar = file("$project.projectDir/target/caches/jar_cache/${moduleOrg}/${moduleName}/${tomlVersion}/${moduleOrg}-${moduleName}-${tomlVersion}.jar")
+def targetNativeJar = file("""$project.rootDir/${moduleName}-validator/build/libs/${moduleName}-validator-${project.version}.jar""")
+def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
+def targetModuleOpenApiCliJar = file("$project.rootDir/module-ballerina-openapi/build/libs/module-ballerina-openapi-${project.version}.jar")
+def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
+def distributionBinPath = distributionPath + "/bin"
+def originalConfig = ballerinaConfigFile.text
+
+task unpackJballerinaTools(type: Copy) {
+    configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        from zipTree(artifact.getFile())
+        into new File("${buildDir}/target/extracted-distributions", "jballerina-tools-zip")
+    }
+}
+
+task unpackStdLibs() {
+    doLast {
+        configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            copy {
+                from project.zipTree(artifact.getFile())
+                into new File("${buildDir}/target/extracted-distributions", artifact.name + "-zip")
+            }
+        }
+    }
 }
 
 
+task copyStdlibs(type: Copy) {
+    dependsOn(unpackStdLibs)
 
+    into distributionPath
+    /* Standard Libraries */
+    configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        def artifactExtractedPath = "${buildDir}/target/extracted-distributions/" + artifact.name + "-zip"
+        into("bir-cache/") {
+            from "${artifactExtractedPath}/caches/bir"
+        }
+        into("bre/lib/") {
+            from "${artifactExtractedPath}/libs"
+        }
+        into("docs/") {
+            from "${artifactExtractedPath}/docs"
+        }
+        // pack to new cache
+        into("cache/bir/") {
+            from "${artifactExtractedPath}/caches/bir"
+        }
+        into("cache/balo/") {
+            from "${artifactExtractedPath}/caches/balo"
+        }
+        into("cache/jar/") {
+            from "${artifactExtractedPath}/caches/jar"
+        }
+    }
+}
 
+task updateTomlFile {
+    doLast {
+        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
+        def stdlibDependentLogVersion = project.stdlibLogVersion.split("-")[0]
 
+        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
+        newConfig = newConfig.replace("@toml.version@", tomlVersion)
+        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
+        newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
+        ballerinaConfigFile.text = newConfig
+    }
+}
 
+task revertTomlFile {
+    doLast {
+        ballerinaConfigFile.text = originalConfig
+    }
+}
 
+task ballerinaBuild {
+    inputs.dir file(project.projectDir)
+//    dependsOn(":openapi-cli:build")
+    dependsOn(":openapi-validator:build")
+    dependsOn(":module-ballerina-openapi:build")
+    dependsOn(unpackJballerinaTools)
+    dependsOn(unpackStdLibs)
+    dependsOn(copyStdlibs)
+    dependsOn(updateTomlFile)
+    dependsOn(test)
+    finalizedBy(revertTomlFile)
 
+    doLast {
+        copy {
+            from file("$project.projectDir/Ballerina.toml")
+            into file("$artifactCacheParent/caches/bir/${moduleOrg}/${moduleName}/${tomlVersion}")
+        }
+        copy {
+            from file("$project.projectDir/Ballerina.toml")
+            into file("$artifactCacheParent/caches/balo/${moduleOrg}/${moduleName}/${tomlVersion}")
+        }
+        copy {
+            from file("$project.projectDir/Ballerina.toml")
+            into file("$artifactCacheParent/caches/jar/${moduleOrg}/${moduleName}/${tomlVersion}")
+        }
+        copy {
+            from file("$project.projectDir/target/caches/bir_cache")
+            into file("$artifactCacheParent/caches/bir")
+        }
+        copy {
+            from file("$project.projectDir/target/balo")
+            into file("$artifactCacheParent/caches/balo/${moduleOrg}/${moduleName}/${tomlVersion}")
+        }
+        copy {
+            from targetBallerinaJar
+            into file("$artifactCacheParent/caches/jar/${moduleOrg}/${moduleName}/${tomlVersion}")
+        }
 
-//apply plugin: 'base'
-//apply from: "$rootDir/gradle/javaProject.gradle"
-//
-//description = 'Ballerina - Openapi Test'
-//
-////def extractedDist = "$buildDir/extractedDistribution/jballerina-tools-${project.version}"
-//
-//configurations {
-//    jbalTools
-////    project.configurations.runtimeClasspath
-////    jballerinaTools
-//}
-//
-//dependencies {
-//    jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
-//        transitive = false
-//    }
-//    compile project(":openapi-validator")
-////    compile project(":openapi-tests")
-//    compile project(":openapi-to-ballerina-generator")
-////    jballerinaTools group: 'org.ballerinalang', name: 'jballerina-tools', version: "${ballerinaLangVersion}"
-//    testCompile 'org.testng:testng'
-//    testCompile 'org.slf4j:slf4j-jdk14'
-//    implementation 'info.picocli:picocli'
-//
-//    implementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
-//}
-//clean {
-//    delete "$project.projectDir/target"
-//    delete "$project.projectDir/Ballerina.lock"
-//}
-////Unpacked jbalTool
-//task unpackJballerinaTools(type: Copy) {
-//    configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-//        from zipTree(artifact.getFile())
-//        into new File("${buildDir}/target/extracted-distributions", "jballerina-tools-zip")
-//    }
-//}
-//task copyToLib(type: Copy) {
-//    into "$project.projectDir/lib"
-////    from configurations.externalJars
-//}
-////task extractDistribution(type: Copy) {
-////    dependsOn ':jballerina-tools:build'
-////    from zipTree(configurations.jballerinaTools.asPath)
-////    into "$buildDir/extractedDistribution"
-////
-////}
-//
-//// Integration tests for Openapi
-//test {
-//    mustRunAfter group: 'org.ballerinalang', name: 'jballerina-integration-test', version: "${ballerinaLangVersion}"
-//    mustRunAfter group: 'org.ballerinalang', name: 'test', version: "${ballerinaLangVersion}"
-//    ':jballerina-integration-test:test'
-////    dependsOn extractDistribution
-//    dependsOn(unpackJballerinaTools)
-//    systemProperty 'enableOpenapiTests', 'true'
-//
-//    maxParallelForks = 1
-//    systemProperty 'basedir', "$buildDir"
-//    systemProperty 'libdir', "$buildDir"
-////    systemProperty 'server.zip', configurations.jballerinaTools.asPath
-//    systemProperty 'server.zip', configurations.jbalTools.asPath
-//    systemProperty 'jballerina.server.zip', configurations.jbalTools.asPath
-//    systemProperty 'java.util.logging.config.file', "$buildDir/src/test/resources/logging.properties"
-//    systemProperty 'java.util.logging.manager', 'org.ballerinalang.logging.BLogManager'
-//
-//    useTestNG() {
-//        suites 'src/test/resources/testng.xml'
-//    }
-//}
+        copy {
+            from targetBallerinaJar
+            into file("$artifactLibParent/libs")
+        }
+
+        copy {
+            from targetNativeJar
+            into file("$artifactLibParent/libs")
+        }
+
+        copy {
+            from targetOpenApiCliJar
+            into file("$artifactLibParent/libs")
+        }
+
+        copy {
+            from targetModuleOpenApiCliJar
+            into file("$artifactLibParent/libs")
+        }
+    }
+
+    outputs.dir artifactCacheParent
+    outputs.dir artifactBallerinaDocs
+    outputs.dir artifactLibParent
+}
+
+task ballerinaIntegrationTests {
+    inputs.dir file(project.projectDir)
+//    dependsOn(":openapi-validator:build")
+    dependsOn(":module-ballerina-openapi:build")
+    finalizedBy(revertTomlFile)
+    doLast {
+        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
+        def stdlibDependentStringutilsVersion = project.stdlibStringUtilsVersion.split("-")[0]
+        def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
+        def stdlibDependentSystemVersion = project.stdlibSystemVersion.split("-")[0]
+        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
+        newConfig = newConfig.replace("@toml.version@", tomlVersion)
+        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
+        newConfig = newConfig.replace("@stdlib.stringutils.version@", stdlibDependentStringutilsVersion)
+        newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
+        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
+        ballerinaConfigFile.text = newConfig
+
+        copy {
+            from file("$project.rootDir/module-ballerina-openapi/build/lib_parent/libs/openapi-validator-${project.version}.jar")
+            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
+        }
+        copy {
+            from file("$project.projectDir/build/lib_parent/libs/openapi-cli-${project.version}.jar")
+            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
+        }
+        copy {
+            from file("$project.rootDir/module-ballerina-openapi/build/lib_parent/libs/ballerina-openapi-${tomlVersion}.jar")
+            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
+        }
+        copy {
+            from file("$project.rootDir/module-ballerina-openapi/build/cache_parent/caches/bir/ballerina/openapi/${tomlVersion}/openapi.bir")
+            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerina/openapi/${tomlVersion}")
+        }
+        copy {
+            from file("$project.rootDir/module-ballerina-openapi/build/cache_parent/caches/bir/ballerina/openapi/${tomlVersion}/Ballerina.toml")
+            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerina/openapi/${tomlVersion}")
+        }
+        exec {
+            workingDir project.projectDir
+            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test ${moduleName} --bal_exec_path=${distributionBinPath}/ballerina"
+            } else {
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina test ${moduleName} --bal_exec_path=${distributionBinPath}/ballerina"
+            }
+        }
+    }
+}
+
+//ballerinaBuild.dependsOn ":ballerina-to-openapi-generator:build"
+ballerinaBuild.dependsOn ":openapi-cli:build"
+ballerinaBuild.dependsOn ":openapi-validator:build"
+unpackStdLibs.dependsOn unpackJballerinaTools
+copyStdlibs.dependsOn unpackStdLibs
+updateTomlFile.dependsOn copyStdlibs
+ballerinaBuild.dependsOn updateTomlFile
+ballerinaIntegrationTests.dependsOn(ballerinaBuild)
+build.dependsOn(ballerinaIntegrationTests)

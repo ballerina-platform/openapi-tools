@@ -1,8 +1,9 @@
+import ballerina/openapi;
 import ballerina/http;
 import ballerina/log;
-import ballerina/openapi;
 
-        listener http:Listener ep0 = new(9091, config = {host: "localhost"});
+
+listener http:Listener ep0 = new(9091, config = {host: "localhost"});
 
 @openapi:ServiceInfo {
         contract: "src/openapi-validator-off/resources/openapi_validator_off.yaml",

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-open module io.ballerina.ballerina.openapi.convertor {
+open module io.ballerina.ballerina.openapi {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires com.google.common;
@@ -34,6 +34,7 @@ open module io.ballerina.ballerina.openapi.convertor {
     requires com.fasterxml.jackson.annotation;
     requires java.ws.rs;
     requires info.picocli;
+    requires io.ballerina.stdlib.http;
 
     exports org.ballerinalang.ballerina.openapi.convertor;
     exports org.ballerinalang.ballerina.openapi.convertor.service;

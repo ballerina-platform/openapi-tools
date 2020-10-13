@@ -65,7 +65,7 @@ dependencies {
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
+    implementation group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
     compile group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
