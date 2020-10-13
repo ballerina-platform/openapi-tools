@@ -1,0 +1,154 @@
+/*
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+//apply from: "$rootDir/gradle/javaProjectWithExtBalo.gradle"
+//apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
+
+apply from: "$rootDir/gradle/javaProject.gradle"
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
+description = 'Ballerina - OpenAPI - Validator'
+
+configurations.all {
+    resolutionStrategy {
+        preferProjectModules()
+    }
+}
+
+dependencies {
+    annotationProcessor  group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+
+    implementation ('io.swagger:swagger-core')  {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.yaml', module: 'snakeyaml'
+        exclude group: 'com.fasterxml.jackson.datatype', module: 'jackson-datatype-joda'
+        exclude group: 'io.swagger', module: 'swagger-annotations'
+        exclude group: 'org.slf4j', module: 'slf4j-ext'
+    }
+    implementation ('io.swagger.core.v3:swagger-core')
+    implementation 'io.swagger.core.v3:swagger-models:2.1.4'
+    implementation 'io.swagger.parser.v3:swagger-parser-core'
+    implementation ('io.swagger.parser.v3:swagger-parser-v2-converter')  {
+        exclude group: 'io.swagger', module: 'swagger-compat-spec-parser'
+        exclude group: 'org.slf4j', module: 'slf4j-ext'
+    }
+
+    compile(group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.2') {
+        exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
+    }
+    compile group: 'com.sun.mail', name: 'jakarta.mail', version: '1.6.5'
+
+//    implementation ('org.apache.maven:maven-model-builder')
+//    {
+//        exclude group: 'org.apache.maven.model.merge' , module: 'maven-model-merge'
+//    }
+
+    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-runtime-api', version: "${ballerinaLangVersion}"
+//    implementation (group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}")
+    implementation group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
+//    implementation group: 'org.ballerinalang', name: 'ballerina-http', version: "${ballerinaLangVersion}"
+//    implementation group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
+//    implementation group: 'org.ballerinalang', name: 'ballerina-crypto', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-java', version: "${ballerinaLangVersion}"
+//    implementation group: 'org.ballerinalang', name: 'time-ballerina', version: "${stdlibTimeVersion}"
+//    implementation group: 'org.ballerinalang', name: 'ballerina-system', version: "${ballerinaLangVersion}"
+//    implementation group: 'org.ballerinalang', name: 'ballerina-io', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'value', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'typedesc', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'toml-parser', version: "${ballerinaTomlParserVersion}"
+
+    // Standard libs
+    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    testCompile 'org.testng:testng'
+
+    implementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
+
+}
+
+clean {
+    delete "$project.projectDir/target"
+    delete "$project.projectDir/Ballerina.lock"
+}
+
+jar {
+    enabled = false
+    dependsOn(shadowJar { classifier = null })
+}
+
+shadowJar {
+    configurations = [project.configurations.runtimeClasspath]
+    dependencies {
+        include(dependency('commons-io:commons-io'))
+        include(dependency('javax.validation:validation-api'))
+        include(dependency('io.swagger:swagger-core'))
+        include(dependency('io.swagger:swagger-models'))
+        include(dependency('io.swagger:swagger-parser'))
+        include(dependency('io.swagger.core.v3:swagger-core'))
+        include(dependency('io.swagger.core.v3:swagger-models'))
+        include(dependency('io.swagger.parser.v3:swagger-parser'))
+        include(dependency('io.swagger.parser.v3:swagger-parser-core'))
+        include(dependency('io.swagger.parser.v3:swagger-parser-v2-converter'))
+        include(dependency('io.swagger.parser.v3:swagger-parser-v3'))
+        include(dependency('com.google.code.gson:gson'))
+        exclude('META-INF/*.SF')
+        exclude('META-INF/*.DSA')
+        exclude('META-INF/*.RSA')
+    }
+}
+
+test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
+}
+
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            groupId project.group
+//            artifactId "openapi-validator"
+//            version = project.version
+//            artifact jar
+//        }
+//    }
+//
+//    repositories {
+//        maven {
+//            name = "GitHubPackages"
+//            url = uri("https://github.com/ballerina-platform/ballerina-openapi")
+//            credentials {
+//                username = System.getenv("packageUser")
+//                password = System.getenv("packagePAT")
+//            }
+//        }
+//    }
+//}
+
+
+compileJava {
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+    }
+}
