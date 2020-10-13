@@ -1,7 +1,5 @@
 name: Build master
 on:
-  repository_dispatch:
-    types: [stdlib-publish-snapshot]
   push:
     branches:
       - master
@@ -9,9 +7,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11.0.7
@@ -25,6 +21,7 @@ jobs:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
+          ./gradlew clean build
           ./gradlew clean publish --scan
       - name: Dispatch Dependent Module Builds
         if: github.event.action != 'stdlib-publish-snapshot'
