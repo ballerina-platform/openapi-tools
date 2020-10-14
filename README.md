@@ -4,8 +4,8 @@
  [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/ballerina-openapi.svg)](https://github.com/ballerina-platform/ballerina-openapi/commits/master)
  
 The OpenAPI Specification is a specification, which creates a RESTFUL contract for APIs detailing all of its resources 
-and operations in a human and machine readable format for easy development, discovery, and integration. Ballerina
- OpenAPI tooling will make it easy for users to start development of a service documented in the OpenAPI contract 
+and operations in a human and machine-readable format for easy development, discovery, and integration. Ballerina
+ OpenAPI tooling will make it easy for users to start the development of a service documented in the OpenAPI contract 
   by generating the Ballerina service and client skeletons. The OpenAPI tools provide the following capabilities.
  
  1. Generate the Ballerina service or client code for a given OpenAPI definition. 
@@ -27,11 +27,11 @@ For more information on the operations supported, you can refer [OpenAPI Learn P
    
    * [OpenJDK](https://adoptopenjdk.net/)
    
-        > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
+        > **Note:** Set the JAVA_HOME environment variable to the pathname of the directory into which you installed JDK.
      
 ### Building the Source
 
-Execute the commands below to build from source.
+Execute the commands below to build from the source.
 
 1. To build the library:
         
@@ -51,9 +51,10 @@ Execute the commands below to build from source.
 
 ## Contributing to Ballerina
 
-As an open source project, Ballerina welcomes contributions from the community. 
+As an-open source project, Ballerina welcomes contributions from the community. 
 
-You can also check for [open issues](https://github.com/ballerina-platform/module-ballerina-http/issues) that interest you. We look forward to receiving your contributions.
+You can also check for [open issues](https://github.com/ballerina-platform/ballerina-openapi/issues) that
+ interest you. We look forward to receiving your contributions.
 
 For more information, go to the [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md).
 
