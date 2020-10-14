@@ -38,12 +38,12 @@ import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
 public class OpenAPICmdTest extends OpenAPICommandTest {
     private static final Path RES_DIR = OpenAPICommandTest.getResourceFolderPath();
     Path resourcePath = Paths.get(System.getProperty(USER_DIR));
-    private OpenAPIBallerinaProject petProject;
+//    private OpenAPIBallerinaProject petProject;
 
     @BeforeTest(description = "This will create a new ballerina project for testing below scenarios.")
     public void setupBallerinaProject() throws IOException {
         super.setup();
-        petProject = OpenAPICommandTest.createBalProject(tmpDir.toString());
+//        petProject = OpenAPICommandTest.createBalProject(tmpDir.toString());
     }
 
     @Test(description = "Test openapi command with help flag")
@@ -90,13 +90,13 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         openApiCommand.execute();
 
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("Following files were created."));
+        Assert.assertTrue(output.contains("warning : `resource_post_pets` is used as the resource name since the operation id is missing for /pets POST"));
     }
 
-    @Test(description = "Test openapi gen-service for successful service generation", enabled = false)
+    @Test(description = "Test openapi gen-service for successful service generation", enabled = true)
     public void testSuccessfulServiceGeneration() throws IOException {
         Path petstoreYaml = RES_DIR.resolve(Paths.get("petstore.yaml"));
-        String[] args = {"-i", petstoreYaml.toString(), "-o", resourcePath.toString()};
+        String[] args = {"--input", petstoreYaml.toString(), "-o", resourcePath.toString()};
         OpenApiCmd cmd = new OpenApiCmd(printStream);
         new CommandLine(cmd).parseArgs(args);
 
@@ -109,23 +109,25 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path expectedServiceFile = RES_DIR.resolve(Paths.get("expected_gen", "petstore_gen.bal"));
         Path expectedSchemaFile = RES_DIR.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
 
-        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
-        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
-        expectedServiceLines.close();
+//        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
+//        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
+//        expectedServiceLines.close();
 
         Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
         String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
         expectedSchemaLines.close();
-
-        if (Files.exists(resourcePath.resolve("petstoreClient.bal"))
-                && Files.exists(resourcePath.resolve("petstoreService.bal"))
-                && Files.exists(resourcePath.resolve("schema.bal"))) {
+//        if (Files.exists(resourcePath.resolve("petstore-client.bal")) && Files.exists(resourcePath.resolve("petstore-service.bal"))&& Files.exists(resourcePath.resolve("schema.bal"))) {
+        if (Files.exists(resourcePath.resolve("petstore-service.bal")) && Files.exists(resourcePath.resolve("schema.bal"))) {
 
             Stream<String> schemaLines = Files.lines(resourcePath.resolve("schema.bal"));
             String generatedSchema = schemaLines.collect(Collectors.joining("\n"));
             schemaLines.close();
 
-            if (expectedSchemaContent.trim().equals(generatedSchema.trim())) {
+            System.out.println(generatedSchema.trim());
+//            System.out.println(expectedSchemaContent.trim());
+            int val = (expectedSchemaContent.trim()).compareTo(generatedSchema.trim());
+            if (val == 0) {
+                System.out.println("yeeeeeeee!!");
                 Assert.assertTrue(true);
             } else {
                 Assert.fail("Expected content and actual generated content is mismatched for: "
