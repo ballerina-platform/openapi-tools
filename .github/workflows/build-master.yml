@@ -1,7 +1,5 @@
 name: Build master
 on:
-  repository_dispatch:
-    types: [stdlib-publish-snapshot]
   push:
     branches:
       - master
@@ -25,6 +23,7 @@ jobs:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
+          ./gradlew clean build
           ./gradlew clean publish --scan
       - name: Dispatch Dependent Module Builds
         if: github.event.action != 'stdlib-publish-snapshot'
