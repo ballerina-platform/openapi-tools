@@ -51,7 +51,7 @@ Execute the commands below to build from the source.
 
 ## Contributing to Ballerina
 
-As an-open source project, Ballerina welcomes contributions from the community. 
+As an open-source project, Ballerina welcomes contributions from the community. 
 
 You can also check for [open issues](https://github.com/ballerina-platform/ballerina-openapi/issues) that
  interest you. We look forward to receiving your contributions.
