@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import picocli.CommandLine;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,7 +39,6 @@ import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
 public class OpenAPICmdTest extends OpenAPICommandTest {
     private static final Path RES_DIR = OpenAPICommandTest.getResourceFolderPath();
     Path resourcePath = Paths.get(System.getProperty(USER_DIR));
-//    private OpenAPIBallerinaProject petProject;
 
     @BeforeTest(description = "This will create a new ballerina project for testing below scenarios.")
     public void setupBallerinaProject() throws IOException {
@@ -81,18 +81,6 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Assert.assertTrue(output.contains("An OpenApi definition file is required to generate the service."));
     }
 
-    @Test(description = "Test openapi command with --input flag", enabled = false)
-    public void testOpenAPICmdInput() throws IOException {
-        Path petstoreYaml = RES_DIR.resolve(Paths.get("petstore.yaml"));
-        String[] args = {"--input", petstoreYaml.toString()};
-        OpenApiCmd openApiCommand = new OpenApiCmd(printStream);
-        new CommandLine(openApiCommand).parseArgs(args);
-        openApiCommand.execute();
-
-        String output = readOutput(true);
-        Assert.assertTrue(output.contains("warning : `resource_post_pets` is used as the resource name since the operation id is missing for /pets POST"));
-    }
-
     @Test(description = "Test openapi gen-service for successful service generation", enabled = true)
     public void testSuccessfulServiceGeneration() throws IOException {
         Path petstoreYaml = RES_DIR.resolve(Paths.get("petstore.yaml"));
@@ -116,25 +104,37 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
         String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
         expectedSchemaLines.close();
-//        if (Files.exists(resourcePath.resolve("petstore-client.bal")) && Files.exists(resourcePath.resolve("petstore-service.bal"))&& Files.exists(resourcePath.resolve("schema.bal"))) {
-        if (Files.exists(resourcePath.resolve("petstore-service.bal")) && Files.exists(resourcePath.resolve("schema.bal"))) {
-
+        if (Files.exists(resourcePath.resolve("petstore-client.bal")) && Files.exists(resourcePath.resolve("petstore-service.bal"))&& Files.exists(resourcePath.resolve("schema.bal"))) {
+            //Compare schema contents
             Stream<String> schemaLines = Files.lines(resourcePath.resolve("schema.bal"));
             String generatedSchema = schemaLines.collect(Collectors.joining("\n"));
             schemaLines.close();
 
-            System.out.println(generatedSchema.trim());
-//            System.out.println(expectedSchemaContent.trim());
-            int val = (expectedSchemaContent.trim()).compareTo(generatedSchema.trim());
-            if (val == 0) {
-                System.out.println("yeeeeeeee!!");
+            generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
+            expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
+            if (expectedSchemaContent.equals(generatedSchema)) {
                 Assert.assertTrue(true);
+                deleteGeneratedFiles();
+
             } else {
                 Assert.fail("Expected content and actual generated content is mismatched for: "
                         + petstoreYaml.toString());
+                deleteGeneratedFiles();
             }
         } else {
             Assert.fail("Service generation failed.");
         }
+    }
+
+    // Delete the generated files
+    private void deleteGeneratedFiles() {
+
+        File serviceFile = new File(resourcePath.resolve("petstore-service.bal").toString());
+        File clientFile = new File(resourcePath.resolve("petstore-client.bal").toString());
+        File schemaFile = new File(resourcePath.resolve("schema.bal").toString());
+
+        serviceFile.delete();
+        clientFile.delete();
+        schemaFile.delete();
     }
 }

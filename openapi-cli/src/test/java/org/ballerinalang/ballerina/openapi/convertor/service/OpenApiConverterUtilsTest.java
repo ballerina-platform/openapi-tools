@@ -200,7 +200,7 @@ public class OpenApiConverterUtilsTest {
             "   }\n" +
             "}";
 
-    @Test(enabled = false, description = "Test ballerina to openApi conversion")
+    @Test(enabled = true, description = "Test ballerina to openApi conversion")
     public void testBallerinaToOpenApiConversion() {
         String serviceName = "";
         try {
@@ -213,7 +213,7 @@ public class OpenApiConverterUtilsTest {
     }
 
 
-    @Test(enabled = false, description = "Test OAS definition generation from ballerina service which contains " +
+    @Test(enabled = true, description = "Test OAS definition generation from ballerina service which contains " +
             "multiple " +
             "HTTP methods" +
             "defined in same resource definition inline")
@@ -229,7 +229,8 @@ public class OpenApiConverterUtilsTest {
     }
 
 
-    @Test(enabled = false,description = "Test OAS definition generation from ballerina service which do not have any HTTP methods" +
+    @Test(enabled = true,description = "Test OAS definition generation from ballerina service which do not have any " +
+            "HTTP methods" +
             "defined at resource level")
     public void testOASGenerationWithNoHTTPMethodsAtResourceLevel() {
         String serviceName = "hello";
@@ -242,7 +243,8 @@ public class OpenApiConverterUtilsTest {
         }
     }
 
-    @Test(enabled = false,description = "Test OAS definition generation from ballerina service with resource which contains only" +
+    @Test(enabled = true,description = "Test OAS definition generation from ballerina service with resource which " +
+            "contains only" +
             "one http method defined")
     public void testOASGenerationWithSingleHTTPVerbResource() {
         String serviceName = "hello";
@@ -255,7 +257,8 @@ public class OpenApiConverterUtilsTest {
         }
     }
 
-    @Test(enabled = false,description = "Test OAS definition generation from ballerina service which contains 2 resource which " +
+    @Test(enabled = true,description = "Test OAS definition generation from ballerina service which contains 2 " +
+            "resource which " +
             "contains only one http method in resource level")
     public void testOASGenerationWithTwoResource() {
         String serviceName = "hello";
@@ -268,7 +271,8 @@ public class OpenApiConverterUtilsTest {
         }
     }
 
-    @Test(enabled = false,description = "Test OAS and OpenApi definition generation from ballerina service with multiple resource" +
+    @Test(enabled = true,description = "Test OAS and OpenApi definition generation from ballerina service with " +
+            "multiple resource" +
             " which contains more than http method defined")
     public void testWithTwoResourceWithMultipleVerbs() {
         String serviceName = "hello";
@@ -286,7 +290,7 @@ public class OpenApiConverterUtilsTest {
         }
     }
 
-    @Test(enabled = false,description = "Test OAS and OpenApi definition generation from ballerina echo service")
+    @Test(enabled = true,description = "Test OAS and OpenApi definition generation from ballerina echo service")
     public void testWithEchoService() {
         try {
             String openAPI3Definition = OpenApiConverterUtils.generateOAS3Definitions(
@@ -302,13 +306,14 @@ public class OpenApiConverterUtilsTest {
         }
     }
 
-    @Test(description = "Test OAS definition generation when input ballerina service is invalid", enabled = false)
+    @Test(description = "Test OAS definition generation when input ballerina service is invalid", enabled = true)
     public void testServiceWithTypo() {
         try {
             String oasDef = OpenApiConverterUtils.generateOAS3Definitions(invalidEchoServiceBal, null);
-            Assert.fail("Error was not thrown for invalid ballerina service");
+//            Assert.fail("Please check if input source is valid and complete");
         } catch (OpenApiConverterException e) {
             Assert.assertEquals(e.getMessage(), "Please check if input source is valid and complete");
         }
     }
+
 }
