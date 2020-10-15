@@ -24,8 +24,8 @@ For more information on the supported operations,go to [Using the OpenAPI Tools]
 
 1. OpenJDK 11 ([Adopt OpenJDK](https://adoptopenjdk.net/) or any other OpenJDK distribution)
 
-    >**Info:** You can also use [Oracle JDK](https://www.oracle.com/java/technologies/javase-downloads.html).
-    >Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
+    >**Info:** You can also use [Oracle JDK](https://www.oracle.com/java/technologies/javase-downloads.html). Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
+
      
 ### Building the Source
 
