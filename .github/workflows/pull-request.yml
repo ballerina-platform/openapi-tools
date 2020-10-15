@@ -15,8 +15,8 @@ jobs:
           java-version: 11.0.7
       - name: Build with Gradle
         env:
-          packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
-          packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
+          packageUser: ${{ github.actor }}
+          packagePAT: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build
 
   windows-build:
@@ -31,6 +31,6 @@ jobs:
           java-version: 11.0.7
       - name: Build with Gradle
         env:
-          packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
-          packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
+          packageUser: ${{ github.actor }}
+          packagePAT: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew.bat build
