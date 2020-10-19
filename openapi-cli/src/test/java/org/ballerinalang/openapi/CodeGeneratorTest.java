@@ -55,7 +55,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina skeleton generation")
     public void generateSkeleton() {
         final String pkgName = "module";
-        final String serviceName = "openapi_petstore";
+        final String serviceName = "openapiPetstore";
         String definitionPath = RES_DIR + File.separator + "petstore.yaml";
         CodeGenerator generator = new CodeGenerator();
         generator.setSrcPackage(pkgName);
@@ -68,7 +68,7 @@ public class CodeGeneratorTest {
         try {
             OpenAPIBallerinaProject ballerinaProject = OpenAPICommandTest.createBalProject(projectPath.toString());
             OpenAPICommandTest.createBalProjectModule(ballerinaProject, pkgName);
-            Path outFile = ballerinaProject.getImplPath().resolve(Paths.get("openapi_petstore.bal"));
+            Path outFile = ballerinaProject.getImplPath().resolve(Paths.get("openapiPetstore-service.bal"));
             generator.generateService(projectPath.toString(), definitionPath, pathRelative.toString(), serviceName,
                     projectPath.toString(), filter);
             if (Files.exists(outFile)) {

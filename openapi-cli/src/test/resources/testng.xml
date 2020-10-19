@@ -30,7 +30,7 @@ under the License.
 <!--            <class name="org.ballerinalang.openapi.cmd.OpenAPIGenClientCmdTest"/>-->
 <!--            <class name="org.ballerinalang.openapi.cmd.OpenApiGenServiceCmdTest"/>-->
 <!--            <class name="org.ballerinalang.openapi.util.TypeExtractorUtilTests"/>-->
-<!--            <class name="org.ballerinalang.openapi.CodeGeneratorTest"/>-->
+            <class name="org.ballerinalang.openapi.CodeGeneratorTest"/>
         </classes>
     </test>
 </suite>
