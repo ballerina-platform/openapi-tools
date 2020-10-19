@@ -55,6 +55,7 @@ allprojects {
 
     apply plugin: 'jacoco'
     apply plugin: 'maven-publish'
+    apply plugin: 'checkstyle'
 
     repositories {
         mavenLocal()
@@ -206,6 +207,21 @@ allprojects {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
+    }
+    // Add checkstyles
+    checkstyle {
+        toolVersion '8.16'
+        configFile = file("$rootProject.projectDir/config/checkstyle/checkstyle.xml")
+    }
+
+    def excludePattern = '**/module-info.java'
+    tasks.withType(Checkstyle) {
+        configFile file("${rootDir}/config/checkstyle/checkstyle.xml")
+        exclude excludePattern
+    }
+
+    afterEvaluate {
+        check.dependsOn('checkstyle')
     }
 }
 
