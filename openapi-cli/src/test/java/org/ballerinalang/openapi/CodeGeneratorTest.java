@@ -15,14 +15,12 @@
  */
 package org.ballerinalang.openapi;
 
-import org.apache.commons.io.FileUtils;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.model.GenSrcFile;
 import org.ballerinalang.openapi.utils.GeneratorConstants.GenType;
 import org.ballerinalang.openapi.utils.TypeExtractorUtil;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -173,13 +171,13 @@ public class CodeGeneratorTest {
                 {"petstore.yaml", "petstore.bal"},
         };
     }
-
-    @AfterTest
-    public void afterTest() {
-        try {
-            FileUtils.deleteDirectory(projectPath.toFile());
-        } catch (IOException e) {
+//Comment because we didn't create ballerina project
+//    @AfterTest
+//    public void afterTest() {
+//        try {
+//            FileUtils.deleteDirectory(projectPath.toFile());
+//        } catch (IOException e) {
             // Ignore.
-        }
-    }
+//        }
+//    }
 }

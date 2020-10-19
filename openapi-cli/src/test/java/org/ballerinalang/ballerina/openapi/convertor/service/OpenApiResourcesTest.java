@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 /**
  * Test cases related to resources of a OAS definition.
@@ -50,12 +51,12 @@ public class OpenApiResourcesTest {
      * OAS definition.
      */
     @Test(description = "Test forward slash is added when forward slash is not in the resource path value",
-            enabled = false)
+            enabled = true)
     public void testPathNoPrefixedForwardSlash() throws OpenApiConverterException, IOException {
-        String balSrc =
-                FileUtils.readFileToString(balFilesPath.resolve("path-annotations-no-forward-slash.bal").toFile());
-        String oasSrc =
-            FileUtils.readFileToString(oasDefinitionsPath.resolve("path-annotation-no-forward-slash.yaml").toFile());
+        String balSrc = Arrays.toString(FileUtils.readFileToByteArray(balFilesPath.resolve(
+                "path-annotations-no-forward-slash.bal").toFile()));
+        String oasSrc = Arrays.toString(FileUtils.readFileToByteArray(oasDefinitionsPath.resolve("path-annotation-no" +
+                "-forward-slash.yaml").toFile()));
         
         String generatedOAS = OpenApiConverterUtils.generateOAS3Definitions(balSrc, "hello");
         
@@ -63,7 +64,7 @@ public class OpenApiResourcesTest {
         SwaggerDeserializationResult oasSrcParseResult = new SwaggerParser().readWithInfo(oasSrc);
         
         Assert.assertEquals(oasSrcParseResult.getSwagger(), resultParseResult.getSwagger(),
-                "Generated OAS resource " + "path is wrong.");
+                "Generated OAS resource path is wrong.");
     }
     
     /**
@@ -71,12 +72,12 @@ public class OpenApiResourcesTest {
      * OAS definition.
      */
     @Test(description = "Test forward slash is added when forward slash is not in the resource path value",
-            enabled = false)
+            enabled = true)
     public void testPathWithPrefixedForwardSlash() throws OpenApiConverterException, IOException {
-        String balSrc =
-                FileUtils.readFileToString(balFilesPath.resolve("path-annotations-with-forward-slash.bal").toFile());
-        String oasSrc =
-            FileUtils.readFileToString(oasDefinitionsPath.resolve("path-annotation-no-forward-slash.yaml").toFile());
+        String balSrc = Arrays.toString(FileUtils.readFileToByteArray(balFilesPath.resolve(
+                "path-annotations-with-forward-slash.bal").toFile()));
+        String oasSrc = Arrays.toString(FileUtils.readFileToByteArray(oasDefinitionsPath.resolve("path-annotation-no" +
+                "-forward-slash.yaml").toFile()));
         
         String generatedOAS = OpenApiConverterUtils.generateOAS3Definitions(balSrc, "hello");
         
