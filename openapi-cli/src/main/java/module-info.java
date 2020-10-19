@@ -35,6 +35,7 @@ open module io.ballerina.ballerina.openapi {
     requires java.ws.rs;
     requires info.picocli;
     requires io.ballerina.stdlib.http;
+    requires handlebars;
 
     exports org.ballerinalang.ballerina.openapi.convertor;
     exports org.ballerinalang.ballerina.openapi.convertor.service;
