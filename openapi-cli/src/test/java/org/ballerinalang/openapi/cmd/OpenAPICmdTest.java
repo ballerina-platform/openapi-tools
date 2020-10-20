@@ -104,7 +104,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
         String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
         expectedSchemaLines.close();
-        if (Files.exists(resourcePath.resolve("petstore-client.bal")) && Files.exists(resourcePath.resolve("petstore-service.bal"))&& Files.exists(resourcePath.resolve("schema.bal"))) {
+        if (Files.exists(resourcePath.resolve("petstore-client.bal")) &&
+                Files.exists(resourcePath.resolve("petstore-service.bal")) &&
+                Files.exists(resourcePath.resolve("schema.bal"))) {
             //Compare schema contents
             Stream<String> schemaLines = Files.lines(resourcePath.resolve("schema.bal"));
             String generatedSchema = schemaLines.collect(Collectors.joining("\n"));

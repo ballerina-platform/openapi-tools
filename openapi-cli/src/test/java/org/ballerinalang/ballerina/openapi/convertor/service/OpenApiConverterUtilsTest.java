@@ -229,9 +229,8 @@ public class OpenApiConverterUtilsTest {
     }
 
 
-    @Test(enabled = true,description = "Test OAS definition generation from ballerina service which do not have any " +
-            "HTTP methods" +
-            "defined at resource level")
+    @Test(enabled = true, description = "Test OAS definition generation from ballerina service which do not have any " +
+            "HTTP methods defined at resource level")
     public void testOASGenerationWithNoHTTPMethodsAtResourceLevel() {
         String serviceName = "hello";
         try {
@@ -243,9 +242,8 @@ public class OpenApiConverterUtilsTest {
         }
     }
 
-    @Test(enabled = true,description = "Test OAS definition generation from ballerina service with resource which " +
-            "contains only" +
-            "one http method defined")
+    @Test(enabled = true, description = "Test OAS definition generation from ballerina service with resource which " +
+            "contains only one http method defined")
     public void testOASGenerationWithSingleHTTPVerbResource() {
         String serviceName = "hello";
         try {
@@ -257,9 +255,8 @@ public class OpenApiConverterUtilsTest {
         }
     }
 
-    @Test(enabled = true,description = "Test OAS definition generation from ballerina service which contains 2 " +
-            "resource which " +
-            "contains only one http method in resource level")
+    @Test(enabled = true, description = "Test OAS definition generation from ballerina service which contains 2 " +
+            "resource which contains only one http method in resource level")
     public void testOASGenerationWithTwoResource() {
         String serviceName = "hello";
         try {
@@ -271,9 +268,8 @@ public class OpenApiConverterUtilsTest {
         }
     }
 
-    @Test(enabled = true,description = "Test OAS and OpenApi definition generation from ballerina service with " +
-            "multiple resource" +
-            " which contains more than http method defined")
+    @Test(enabled = true, description = "Test OAS and OpenApi definition generation from ballerina service with " +
+            "multiple resource which contains more than http method defined")
     public void testWithTwoResourceWithMultipleVerbs() {
         String serviceName = "hello";
         try {
@@ -290,7 +286,7 @@ public class OpenApiConverterUtilsTest {
         }
     }
 
-    @Test(enabled = true,description = "Test OAS and OpenApi definition generation from ballerina echo service")
+    @Test(enabled = true, description = "Test OAS and OpenApi definition generation from ballerina echo service")
     public void testWithEchoService() {
         try {
             String openAPI3Definition = OpenApiConverterUtils.generateOAS3Definitions(

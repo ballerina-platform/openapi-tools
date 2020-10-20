@@ -85,7 +85,7 @@ public class CodeGeneratorTest {
         CodeGenerator generator = new CodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generateClient.bal");
-            generator.generateClient( definitionPath, definitionPath, clientName, resourcePath.toString(), filter);
+            generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(), filter);
 
             if (Files.exists(resourcePath.resolve("openapipetstore-client.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore-client.bal");

@@ -28,7 +28,6 @@ plugins {
 }
 
 apply plugin: 'java'
-apply plugin: 'checkstyle'
 apply plugin: "com.github.spotbugs"
 apply plugin: 'jacoco'
 apply plugin: "org.javamodularity.moduleplugin"
@@ -47,7 +46,6 @@ ext.stdlibCryptoVersion = project.stdlibCryptoVersion
 ext.stdlibTaskVersion = project.stdlibTaskVersion
 ext.stdlibReflectVersion = project.stdlibReflectVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
-//ext.stdlibFilepathVersion = project.stdlibFilepathVersion
 
 allprojects {
     group = 'org.ballerinalang'
@@ -189,13 +187,6 @@ allprojects {
                 password System.getenv("packagePAT")
             }
         }
-//        maven {
-//            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-filepath'
-//            credentials {
-//                username System.getenv("packageUser")
-//                password System.getenv("packagePAT")
-//            }
-//        }
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-file'
             credentials {
@@ -216,13 +207,13 @@ allprojects {
 
     def excludePattern = '**/module-info.java'
     tasks.withType(Checkstyle) {
-        configFile file("${rootDir}/config/checkstyle/checkstyle.xml")
+        configFile file("${rootProject.projectDir}/config/checkstyle/checkstyle.xml")
         exclude excludePattern
     }
 
-    afterEvaluate {
-        check.dependsOn('checkstyle')
-    }
+//    afterEvaluate {
+//        check.dependsOn('checkstyle')
+//    }
 }
 
 subprojects {
@@ -249,7 +240,6 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:cache-ballerina:${stdlibCacheVersion}"
         ballerinaStdLibs "org.ballerinalang:task-ballerina:${stdlibTaskVersion}"
         ballerinaStdLibs "org.ballerinalang:reflect-ballerina:${stdlibReflectVersion}"
-//        ballerinaStdLibs "org.ballerinalang:filepath-ballerina:${stdlibFilepathVersion}"
         ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
 
     }
@@ -263,8 +253,6 @@ release {
     failOnPublishNeeded = false
         // Disable check snapshots temporarily
      buildTasks = ['buildProject']
-//        failOnSnapshotDependencies = false
-//        failOnCommitNeeded = false
     versionPropertyFile = 'gradle.properties'
     tagTemplate = 'v${version}'
     git {
@@ -275,7 +263,6 @@ release {
 }
 
 task buildProject {
-//    dependsOn('openapi-validator:build')
     dependsOn('module-ballerina-openapi:build')
 }
 
@@ -283,10 +270,6 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-checkstyle {
-    toolVersion '7.8.2'
-    configFile file("${rootDir}/config/checkstyle/checkstyle.xml")
-}
 //spotbugsMain {
 //    it.effort "max"
 //    it.reportLevel "low"
