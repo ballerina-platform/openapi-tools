@@ -312,7 +312,7 @@ task ballerinaIntegrationTests {
 
 test {
     dependsOn(ballerinaTest)
-    dependsOn(ballerinaIntegrationTests)
+//    dependsOn(ballerinaIntegrationTests)
 }
 
 

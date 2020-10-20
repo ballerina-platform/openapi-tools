@@ -79,11 +79,6 @@ clean {
     delete "$project.projectDir/Ballerina.lock"
 }
 
-jar {
-    enabled = false
-    dependsOn(shadowJar { classifier = null })
-}
-
 shadowJar {
     configurations = [project.configurations.runtimeClasspath]
     dependencies {
@@ -104,6 +99,12 @@ shadowJar {
         exclude('META-INF/*.RSA')
     }
 }
+jar {
+    enabled = false
+    dependsOn(shadowJar { classifier = null })
+}
+
+
 
 test {
     useTestNG() {

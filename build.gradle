@@ -51,10 +51,8 @@ ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
 allprojects {
     group = 'org.ballerinalang'
     version = project.version
-
-    apply plugin: 'jacoco'
-    apply plugin: 'maven-publish'
     apply plugin: 'checkstyle'
+    apply plugin: 'maven-publish'
 
     repositories {
         mavenLocal()
@@ -220,6 +218,7 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
+
 
     configurations {
         ballerinaStdLibs
