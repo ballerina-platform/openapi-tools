@@ -58,8 +58,6 @@ def targetNativeJar = file("""$project.rootDir/${moduleName}-validator/build/lib
 def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
-//def distributionBinPath02 = "/home/hansani/Ballerina_project/ballerina-lang/distribution/zip/jballerina-tools/build" +
-//        "/extracted-distributions/jballerina-tools-2.0.0-Preview5-SNAPSHOT/bin/ballerina"
 def originalConfig = ballerinaConfigFile.text
 
 task unpackJballerinaTools(type: Copy) {
