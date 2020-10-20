@@ -143,7 +143,7 @@ task ballerinaBuild {
     dependsOn(unpackStdLibs)
     dependsOn(copyStdlibs)
     dependsOn(updateTomlFile)
-//    finalizedBy(revertTomlFile)
+    finalizedBy(revertTomlFile)
 
     doLast {
         // Build and populate caches
@@ -235,9 +235,9 @@ task ballerinaBuild {
 task ballerinaTest {
     dependsOn(":openapi-cli:build")
     dependsOn(":openapi-validator:build")
-    dependsOn(unpackJballerinaTools)
-    dependsOn(unpackStdLibs)
-    dependsOn(copyStdlibs)
+//    dependsOn(unpackJballerinaTools)
+//    dependsOn(unpackStdLibs)
+//    dependsOn(copyStdlibs)
     dependsOn(updateTomlFile)
     finalizedBy(revertTomlFile)
 
@@ -317,7 +317,7 @@ task ballerinaIntegrationTests {
 
 
 test {
-    dependsOn(ballerinaTest)
+//    dependsOn(ballerinaTest)
 //    dependsOn(ballerinaIntegrationTests)
 }
 
