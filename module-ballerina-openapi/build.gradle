@@ -22,6 +22,7 @@ configurations {
 }
 
 dependencies {
+    compile group: 'org.ballerinalang', name: 'runtime-ballerina', version: "${stdlibRuntimeVersion}"
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }
@@ -57,6 +58,8 @@ def targetNativeJar = file("""$project.rootDir/${moduleName}-validator/build/lib
 def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
+//def distributionBinPath02 = "/home/hansani/Ballerina_project/ballerina-lang/distribution/zip/jballerina-tools/build" +
+//        "/extracted-distributions/jballerina-tools-2.0.0-Preview5-SNAPSHOT/bin/ballerina"
 def originalConfig = ballerinaConfigFile.text
 
 task unpackJballerinaTools(type: Copy) {
@@ -273,7 +276,7 @@ task ballerinaIntegrationTests {
         newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
         newConfig = newConfig.replace("@stdlib.stringutils.version@", stdlibDependentStringutilsVersion)
         newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
-        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
+        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion )
         ballerinaConfigFile.text = newConfig
 
         copy {

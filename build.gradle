@@ -46,6 +46,7 @@ ext.stdlibCryptoVersion = project.stdlibCryptoVersion
 ext.stdlibTaskVersion = project.stdlibTaskVersion
 ext.stdlibReflectVersion = project.stdlibReflectVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
+ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
 
 allprojects {
     group = 'org.ballerinalang'
@@ -61,9 +62,9 @@ allprojects {
             url = 'https://maven.wso2.org/nexus/content/repositories/releases/'
         }
 
-        maven {
-            url = 'https://maven.wso2.org/nexus/content/repositories/snapshots/'
-        }
+//        maven {
+//            url = 'https://maven.wso2.org/nexus/content/repositories/snapshots/'
+//        }
 
         maven {
             url = 'https://maven.wso2.org/nexus/content/groups/wso2-public/'
@@ -77,9 +78,9 @@ allprojects {
             url = 'https://repo.maven.apache.org/maven2'
         }
 
-        maven {
-            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-grpc'
-        }
+//        maven {
+//            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-grpc'
+//        }
         //stdlib module dependencies
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-io'
