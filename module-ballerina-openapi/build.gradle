@@ -22,7 +22,7 @@ configurations {
 }
 
 dependencies {
-    compile group: 'org.ballerinalang', name: 'runtime-ballerina', version: "${stdlibRuntimeVersion}"
+    compile(group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}")
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }

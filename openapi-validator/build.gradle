@@ -54,9 +54,10 @@ dependencies {
     compile group: 'com.sun.mail', name: 'jakarta.mail', version: '1.6.5'
 
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-//    implementation group: 'org.ballerinalang', name: 'runtime-native', version: "${stdlibRuntimeVersion}"
-    implementation group: 'org.ballerinalang', name: 'ballerina-runtime-api', version: "${ballerinaLangVersion}"
-//    implementation (group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}")
+    compile group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'ballerina-runtime-api', version: "${ballerinaLangVersion}"
+    compile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
+
     implementation group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-java', version: "${ballerinaLangVersion}"

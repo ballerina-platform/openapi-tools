@@ -19,6 +19,8 @@ module io.ballerina.ballerina.openapi.validator {
     requires io.swagger.v3.oas.models;
     requires swagger.parser.core;
     requires io.ballerina.lang;
+    requires io.ballerina.runtime;
+    requires io.ballerina.runtime.api;
 
     exports org.ballerinalang.openapi.validator;
     exports org.ballerinalang.openapi.validator.error;
