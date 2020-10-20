@@ -14,7 +14,7 @@ target = "java11"
 
     [[platform.libraries]]
     artifactId = "openapi"
-    version = "@project.version@"
+    version = "2.0.0-Preview5-SNAPSHOT"
     path = "../openapi-validator/build/libs/openapi-validator-@project.version@.jar"
     groupId = "ballerina"
     modules = ["openapi"]
