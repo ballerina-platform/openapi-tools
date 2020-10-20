@@ -21,7 +21,6 @@ import org.ballerinalang.openapi.model.GenSrcFile;
 import org.ballerinalang.openapi.utils.GeneratorConstants.GenType;
 import org.ballerinalang.openapi.utils.TypeExtractorUtil;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -44,14 +43,9 @@ public class CodeGeneratorTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
     Path resourcePath = Paths.get(System.getProperty(USER_DIR));
     Path expectedServiceFile = RES_DIR.resolve(Paths.get("expected_gen"));
-    private Path projectPath;
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
-    @BeforeClass
-    public void setUp() {
-        projectPath = RES_DIR.resolve(Paths.get("expected", "petStore"));
-    }
 
     @Test(description = "Test Ballerina skeleton generation")
     public void generateSkeleton() {
@@ -78,7 +72,7 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test Ballerina client generation")
+    @Test(description = "Test Ballerina client generation", enabled = true)
     public void generateClient() {
         final String clientName = "openapipetstore";
         String definitionPath = RES_DIR + File.separator + "petstore.yaml";
