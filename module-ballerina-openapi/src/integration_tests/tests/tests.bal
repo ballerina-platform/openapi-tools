@@ -14,11 +14,7 @@ public function testOpenapiValidatorOff() {
     "openapi-validator-off");
     string[] logLines = getLogLinesFromExecResult(execResult);
     string msg = "Couldn't find a Ballerina service resource for the path '/{param1}/{param2}' which is documented in the OpenAPI contract";
-    //test:assertEquals(logLines.length(), 27);
     validateLog(logLines[0],"warning","openapi-validator-off.bal:15:1", msg);
-    //io:println(logLines);
-    //io:println("ooooo");
-
 }
 
 @test:Config {}
@@ -26,14 +22,8 @@ public function testOpenapiValidatorOn() {
     system:Process|error execResult = system:exec(config:getAsString(BAL_EXEC_PATH), {}, OPENAPI_PROJECT, "build",
     "openapi-validator-on");
     string[] logLines = getLogLinesFromExecResult(execResult);
-    //String msg = "error: openapi-test/openapi-validator-on:";
-    //test:assertEquals(logLines.length(), 27);
     string msg = "Couldn't find a Ballerina service resource for the path '/{param1}/{param2}' which is documented in the OpenAPI contract";
     validateLog(logLines[0],"error","openapi-validator-on.bal:13:9:",msg);
-    //io:println(logLines);
-    //io:println("xxxxx");
-
-
 }
 // getting the log lines from execution results
 function getLogLinesFromExecResult(system:Process|error execResult) returns string[] {
