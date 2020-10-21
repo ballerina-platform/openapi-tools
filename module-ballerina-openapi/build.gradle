@@ -22,7 +22,6 @@ configurations {
 }
 
 dependencies {
-    compile(group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}")
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }
@@ -112,17 +111,11 @@ task updateTomlFile {
     doLast {
         def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
         def stdlibDependentLogVersion = project.stdlibLogVersion.split("-")[0]
-        def stdlibDependentStringutilsVersion = project.stdlibStringUtilsVersion.split("-")[0]
-        def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
-        def stdlibDependentSystemVersion = project.stdlibSystemVersion.split("-")[0]
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
         newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
-        newConfig = newConfig.replace("@stdlib.stringutils.version@", stdlibDependentStringutilsVersion)
-        newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
-        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
         ballerinaConfigFile.text = newConfig
     }
 }
@@ -141,6 +134,8 @@ task ballerinaBuild {
     dependsOn(unpackStdLibs)
     dependsOn(copyStdlibs)
     dependsOn(updateTomlFile)
+//    dependsOn(test)
+//    dependsOn(ballerinaTest)
     finalizedBy(revertTomlFile)
 
     doLast {
@@ -233,9 +228,9 @@ task ballerinaBuild {
 task ballerinaTest {
     dependsOn(":openapi-cli:build")
     dependsOn(":openapi-validator:build")
-//    dependsOn(unpackJballerinaTools)
-//    dependsOn(unpackStdLibs)
-//    dependsOn(copyStdlibs)
+    dependsOn(unpackJballerinaTools)
+    dependsOn(unpackStdLibs)
+    dependsOn(copyStdlibs)
     dependsOn(updateTomlFile)
     finalizedBy(revertTomlFile)
 
@@ -278,7 +273,7 @@ task ballerinaIntegrationTests {
         newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
         newConfig = newConfig.replace("@stdlib.stringutils.version@", stdlibDependentStringutilsVersion)
         newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
-        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion )
+        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
         ballerinaConfigFile.text = newConfig
 
         copy {
@@ -315,8 +310,8 @@ task ballerinaIntegrationTests {
 
 
 test {
-//    dependsOn(ballerinaTest)
-//    dependsOn(ballerinaIntegrationTests)
+    dependsOn(ballerinaTest)
+    dependsOn(ballerinaIntegrationTests)
 }
 
 
