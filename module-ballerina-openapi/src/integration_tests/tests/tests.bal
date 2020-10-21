@@ -24,6 +24,7 @@ public function testOpenapiValidatorOn() {
     "openapi-validator-on");
     string[] logLines = getLogLinesFromExecResult(execResult);
     string msg = "Couldn't find a Ballerina service resource for the path '/{param1}/{param2}' which is documented in the OpenAPI contract";
+    io:println(logLines);
     validateLog(logLines[0],"error","openapi-validator-on.bal:13:9:",msg);
 }
 // getting the log lines from execution results
