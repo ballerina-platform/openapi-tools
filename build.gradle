@@ -78,9 +78,9 @@ allprojects {
             url = 'https://repo.maven.apache.org/maven2'
         }
 
-        maven {
-            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-grpc'
-        }
+//        maven {
+//            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-grpc'
+//        }
         //stdlib module dependencies
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-io'
