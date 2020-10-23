@@ -66,7 +66,7 @@ dependencies {
 //    implementation group: 'org.ballerinalang', name: 'ballerina-http', version: "${ballerinaLangVersion}"
 //    implementation group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
 //    implementation group: 'org.ballerinalang', name: 'ballerina-crypto', version: "${ballerinaLangVersion}"
-    implementation group: 'org.ballerinalang', name: 'ballerina-java', version: "${ballerinaLangVersion}"
+//    implementation group: 'org.ballerinalang', name: 'ballerina-java', version: "${ballerinaLangVersion}"
 //    implementation group: 'org.ballerinalang', name: 'time-ballerina', version: "${stdlibTimeVersion}"
 //    implementation group: 'org.ballerinalang', name: 'ballerina-system', version: "${ballerinaLangVersion}"
 //    implementation group: 'org.ballerinalang', name: 'ballerina-io', version: "${ballerinaLangVersion}"
