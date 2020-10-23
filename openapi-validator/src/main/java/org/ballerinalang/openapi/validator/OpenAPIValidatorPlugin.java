@@ -128,7 +128,12 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                                         }
                                     }
                                     if (file != null && file.exists()) {
-                                        contractURI = file.getAbsolutePath();
+//                                        contractURI = file.getAbsolutePath();
+                                        try {
+                                            contractURI = file.getCanonicalPath();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 } else {
                                     dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),

@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import picocli.CommandLine;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -134,5 +135,19 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         } else {
             Assert.fail("Service generation failed.");
         }
+    }
+
+    @Test(description = "getRelative path")
+    public void getRelativePath() {
+        OpenApiCmd cmd = new OpenApiCmd();
+        File resource01 = new File("dir1/test.txt");
+        String target01 = "dir1/xft";
+        File resource02 = new File("dir1/dir2/dir3/test.txt");
+        String target02 = "dir1/dir2";
+        File resource03 = new File("xxff/ssdw/ghi/test.txt");
+        String target03 = "abc/def";
+//        Assert.assertEquals(cmd.getRelativePath(resource01, target01).toString(),"../test.txt");
+//        Assert.assertEquals(cmd.getRelativePath(resource02, target02).toString(),"ghi/test.txt");
+//        Assert.assertEquals(cmd.getRelativePath(resource03, target03).toString(),"ghi/test.txt");
     }
 }
