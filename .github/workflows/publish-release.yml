@@ -1,14 +1,11 @@
 name: Publish release
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 jobs:
   publish-release:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'ballerina-platform'
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11.0.7
@@ -34,7 +31,7 @@ jobs:
       - name: Publish artifact
         env:
           GITHUB_TOKEN: ${{ secrets.BALLERINA_BOT_TOKEN }}
-#          BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
+          BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
@@ -48,7 +45,7 @@ jobs:
           --header 'Content-Type: application/json' \
           --data-raw '{
               "tag_name": "v'"$VERSION"'",
-              "name": "module-ballerina-jwt-v'"$VERSION"'"
+              "name": "ballerina-openapi-v'"$VERSION"'"
           }'
       - name: Post release PR
         env:
