@@ -148,8 +148,8 @@ public class CodeGeneratorTest {
         return expectedServiceContent;
     }
 
-    private void deleteGeneratedFiles(String s) {
-        File serviceFile = new File(resourcePath.resolve(s).toString());
+    private void deleteGeneratedFiles(String filename) {
+        File serviceFile = new File(resourcePath.resolve(filename).toString());
         File schemaFile = new File(resourcePath.resolve("schema.bal").toString());
         serviceFile.delete();
         schemaFile.delete();
