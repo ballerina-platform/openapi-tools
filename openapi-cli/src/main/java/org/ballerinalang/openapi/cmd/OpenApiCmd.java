@@ -222,15 +222,7 @@ public class OpenApiCmd implements BLauncherCmd {
         Path relativePath = null;
         Path resourcePath = Paths.get(resourceFile.getAbsoluteFile().getParentFile().toString());
         Path targetPath = Paths.get(targetOutputPath).toAbsolutePath();
-//        if (targetPath.compareTo(resourcePath) >= 0 ) {
-//            relativePath = Paths.get(new File(targetOutputPath).toURI()
-//                    .relativize(new File(resourcePath.toString()).toURI()).getPath());
-//            relativePath = (targetPath).relativize(resourcePath);
-//        } else {
-            relativePath = (targetPath).relativize(resourcePath);
-//            relativePath = (resourcePath).relativize(targetPath);
-
-//        }
+        relativePath = (targetPath).relativize(resourcePath);
         return relativePath.resolve(resourceFile.getName());
     }
 
