@@ -289,9 +289,6 @@ public class OpenApiCmd implements BLauncherCmd {
                                    Filter filter) {
         try {
             assert resourcePath != null;
-//            Path relativeResourcePath =
-//                    Paths.get(new File(executionPath.toString()).toURI().relativize(
-//                            new File(resourcePath.toString()).toURI()).getPath());
             generator.generateBothFiles(
                     GeneratorConstants.GenType.GEN_BOTH, resourcePath.toString(), relativePath.toString(),
                     fileName, targetOutputPath.toString(), filter);
