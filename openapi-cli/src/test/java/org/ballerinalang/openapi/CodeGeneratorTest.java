@@ -52,7 +52,7 @@ public class CodeGeneratorTest {
         projectPath = RES_DIR.resolve(Paths.get("expected", "petStore"));
     }
 
-    @Test(description = "Test Ballerina skeleton generation")
+    @Test(description = "Test Ballerina skeleton generation", enabled = false)
     public void generateSkeleton() {
         final String pkgName = "module";
         final String serviceName = "openapi_petstore";
@@ -110,7 +110,7 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test Ballerina client generation")
+    @Test(description = "Test Ballerina client generation", enabled = false)
     public void generateClient() {
         final String pkgName = "client";
         String definitionPath = RES_DIR + File.separator + "petstore.yaml";
