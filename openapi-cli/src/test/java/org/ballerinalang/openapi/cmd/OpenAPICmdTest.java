@@ -146,7 +146,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         String target02 = "dir1/dir2";
         File resource03 = new File("dir2/dir3/dir4/test.txt");
         String target03 = "dir/dir1";
-        Assert.assertTrue((cmd.getRelativePath(resource01, target01).toString()).equals("../test.txt") || (cmd.getRelativePath(resource01, target01).toString()).equals("..\\\test.txt") );
+        Assert.assertTrue((cmd.getRelativePath(resource01, target01).toString()).equals("../test.txt") || (cmd.getRelativePath(resource01, target01).toString()).equals("..\\test.txt"));
         Assert.assertEquals(cmd.getRelativePath(resource02, target02).toString(), "dir3/test.txt");
         Assert.assertEquals(cmd.getRelativePath(resource03, target03).toString(), "../../dir2/dir3/dir4/test.txt");
     }
