@@ -131,7 +131,8 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                                         try {
                                             contractURI = file.getCanonicalPath();
                                         } catch (IOException e) {
-                                            e.printStackTrace();
+                                            dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),
+                                                    "Contract path should be applied as a string value");
                                         }
                                     }
                                 } else {
