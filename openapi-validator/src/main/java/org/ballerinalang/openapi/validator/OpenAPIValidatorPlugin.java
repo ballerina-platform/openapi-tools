@@ -108,7 +108,7 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                                 Path pkg = Paths.get(serviceNode.getPosition().getSource().getPackageName());
                                 Path filePath = Paths.get((pkg.toString().equals(".") ? "" : pkg.toString()),
                                         serviceNode.getPosition().getSource().getCompilationUnitName().replaceAll(
-                                                "\\w*\\.bal", "").replaceAll("^/+", ""));
+                                                "(\\w+)(-(\\w+))*(\\.bal)", "").replaceAll("^/+", ""));
 
                                 String projectDir = filePath.toString().
                                         contains(sourceDir.toString().replaceAll("^/+", "")) ?
@@ -128,7 +128,12 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                                         }
                                     }
                                     if (file != null && file.exists()) {
-                                        contractURI = file.getAbsolutePath();
+                                        try {
+                                            contractURI = file.getCanonicalPath();
+                                        } catch (IOException e) {
+                                            dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),
+                                                    "Contract path should be applied as a string value");
+                                        }
                                     }
                                 } else {
                                     dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),

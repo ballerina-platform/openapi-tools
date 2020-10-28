@@ -139,4 +139,22 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         clientFile.delete();
         schemaFile.delete();
     }
+
+    @Test(description = "getRelative path")
+    public void getRelativePath() {
+        OpenApiCmd cmd = new OpenApiCmd();
+        File resource01 = new File("dir1/test.txt");
+        String target01 = "dir1/dir2";
+        File resource02 = new File("dir1/dir2/dir3/test.txt");
+        String target02 = "dir1/dir2";
+        File resource03 = new File("dir2/dir3/dir4/test.txt");
+        String target03 = "dir/dir1";
+        Assert.assertTrue((cmd.getRelativePath(resource01, target01).toString()).equals("../test.txt") ||
+                (cmd.getRelativePath(resource01, target01).toString()).equals("..\\test.txt"));
+        Assert.assertTrue((cmd.getRelativePath(resource02, target02).toString()).equals("dir3/test.txt") ||
+                (cmd.getRelativePath(resource02, target02).toString()).equals("dir3\\test.txt"));
+        Assert.assertTrue((cmd.getRelativePath(resource03, target03).toString()).
+                equals("../../dir2/dir3/dir4/test.txt") || (cmd.getRelativePath(resource03, target03).toString()).
+                equals("..\\..\\dir2\\dir3\\dir4\\test.txt"));
+    }
 }
