@@ -21,14 +21,16 @@ under the License.
 
 <suite name="ballerina-test-suite">
 
-    <test name="openapi-ballerina-test-suite" preserve-order="true"
+    <test name="openapi-cli-test-suite" preserve-order="true"
           parallel="false">
         <classes>
             <class name="org.ballerinalang.openapi.cmd.OpenAPICmdTest"/>
+            <class name="org.ballerinalang.ballerina.openapi.convertor.service.OpenApiConverterUtilsTest"></class>
+            <class name="org.ballerinalang.ballerina.openapi.convertor.service.OpenApiResourcesTest"></class>
 <!--            <class name="org.ballerinalang.openapi.cmd.OpenAPIGenClientCmdTest"/>-->
-<!--            <class name="org.ballerinalang.openapi.cmd.OpenApiGenServiceCmdTest"/>-->
-<!--            <class name="org.ballerinalang.openapi.util.TypeExtractorUtilTests"/>-->
-<!--            <class name="org.ballerinalang.openapi.CodeGeneratorTest"/>-->
+            <class name="org.ballerinalang.openapi.cmd.OpenApiGenServiceCmdTest"/>
+            <class name="org.ballerinalang.openapi.util.TypeExtractorUtilTests"/>
+            <class name="org.ballerinalang.openapi.CodeGeneratorTest"/>
         </classes>
     </test>
 </suite>

@@ -16,7 +16,6 @@
 package org.ballerinalang.openapi.validator;
 
 import org.ballerinalang.compiler.CompilerPhase;
-import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.util.CompilerContext;
 import org.wso2.ballerinalang.compiler.util.CompilerOptions;
 
@@ -38,6 +37,7 @@ import static org.ballerinalang.compiler.CompilerOptionName.TEST_ENABLED;
 
 //import org.ballerinalang.test.util.BCompileUtil;
 //import org.ballerinalang.test.util.CompileResult;
+//import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 
 /**
  * Util class for compilation and format execution for formatting CLI tool.
@@ -75,7 +75,8 @@ public class OpenApiValidatorUtil {
 //        return (BLangPackage) bCompileUtil.getAST();
 //    }
 
-//    public static CompileResult compileFile01(Path sourceRoot, String packageName) throws UnsupportedEncodingException {
+//    public static CompileResult compileFile01(Path sourceRoot, String packageName) throws
+//    UnsupportedEncodingException {
 ////        emptyPrintStream = new EmptyPrintStream();
 ////        CompilerContext context = getCompilerContext(sourceRoot);
 //        // Set the SourceDirectory to process this compilation as a program directory.
@@ -90,7 +91,8 @@ public class OpenApiValidatorUtil {
 ////        return (BLangPackage) bCompileUtil.getAST();
 //
 //        String resourceRoot = Paths.get("src", "test", "resources").toAbsolutePath().toString();
-//        Path testResourceRoot = Paths.get(resourceRoot, "project-based-tests/recordValidation/ballerina/validTests/primitive");
+//        Path testResourceRoot = Paths.get(resourceRoot,
+//        "project-based-tests/recordValidation/ballerina/validTests/primitive");
 //
 //        CompileResult bCompileUtil = BCompileUtil.compile(testResourceRoot.resolve("integerB.bal").toString());
 //        return bCompileUtil;

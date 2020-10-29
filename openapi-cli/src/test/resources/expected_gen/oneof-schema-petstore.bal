@@ -6,8 +6,7 @@ listener http:Listener ep0 = new(80, config = {host: "petstore.openapi.io"});
 listener http:Listener ep1 = new(443, config = {host: "petstore.swagger.io"});
 
 @openapi:ServiceInfo {
-    contract: "/var/folders/mz/xmjfm34s1n99v74_jtsbsdcw0000gn/T/openapi-cmd2185287776867704749/src/oneOfModule/resources/oneof-petstore.yaml",
-    tags: [ ]
+    contract: "/var/folders/mz/xmjfm34s1n99v74_jtsbsdcw0000gn/T/openapi-cmd2185287776867704749/src/oneOfModule/resources/oneof-petstore.yaml"
 }
 @http:ServiceConfig {
     basePath: "/v1"

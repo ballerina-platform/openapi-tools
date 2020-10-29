@@ -44,16 +44,6 @@ dependencies {
         exclude group: 'io.swagger', module: 'swagger-compat-spec-parser'
         exclude group: 'org.slf4j', module: 'slf4j-ext'
     }
-//    implementation 'io.swagger.parser.v3:swagger-parser'
-//    implementation 'io.swagger:swagger-core'
-//    implementation 'io.swagger:swagger-models'
-//    implementation 'io.swagger:swagger-parser'
-//    implementation 'io.swagger.core.v3:swagger-core'
-//    implementation 'io.swagger.core.v3:swagger-models'
-//    implementation 'io.swagger.parser.v3:swagger-parser'
-//    implementation 'io.swagger.parser.v3:swagger-parser-core'
-//    implementation 'io.swagger.parser.v3:swagger-parser-v2-converter'
-//    implementation 'io.swagger.parser.v3:swagger-parser-v3'
     implementation 'com.github.jknack:handlebars:4.0.6'
     implementation 'info.picocli:picocli:4.0.1'
     implementation 'javax.ws.rs:javax.ws.rs-api:2.0'
@@ -67,8 +57,6 @@ dependencies {
     compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
     compile group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
-    compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
 
     testCompile group: 'org.testng', name: 'testng', version: "${testngVersion}"
     testCompile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
