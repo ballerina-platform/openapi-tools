@@ -81,7 +81,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Assert.assertTrue(output.contains("An OpenApi definition file is required to generate the service."));
     }
 
-    @Test(description = "Test openapi gen-service for successful service generation", enabled = true)
+    @Test(description = "Test openapi gen-service for successful service generation")
     public void testSuccessfulServiceGeneration() throws IOException {
         Path petstoreYaml = RES_DIR.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", resourcePath.toString()};

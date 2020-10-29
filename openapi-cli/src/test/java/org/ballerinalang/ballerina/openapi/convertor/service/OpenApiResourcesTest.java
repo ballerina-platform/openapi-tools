@@ -50,8 +50,7 @@ public class OpenApiResourcesTest {
      * Test case to check if path value in ResourceConfig annotation having no prefixed forward slash generates valid
      * OAS definition.
      */
-    @Test(description = "Test forward slash is added when forward slash is not in the resource path value",
-            enabled = true)
+    @Test(description = "Test forward slash is added when forward slash is not in the resource path value")
     public void testPathNoPrefixedForwardSlash() throws OpenApiConverterException, IOException {
         String balSrc = Arrays.toString(FileUtils.readFileToByteArray(balFilesPath.resolve(
                 "path-annotations-no-forward-slash.bal").toFile()));
@@ -71,8 +70,7 @@ public class OpenApiResourcesTest {
      * Test case to check if path value in ResourceConfig annotation having a prefixed forward slash generates valid
      * OAS definition.
      */
-    @Test(description = "Test forward slash is added when forward slash is not in the resource path value",
-            enabled = true)
+    @Test(description = "Test forward slash is added when forward slash is not in the resource path value")
     public void testPathWithPrefixedForwardSlash() throws OpenApiConverterException, IOException {
         String balSrc = Arrays.toString(FileUtils.readFileToByteArray(balFilesPath.resolve(
                 "path-annotations-with-forward-slash.bal").toFile()));

@@ -47,7 +47,7 @@ public class CodeGeneratorTest {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    @Test(description = "Test Ballerina skeleton generation", enabled = true)
+    @Test(description = "Test Ballerina skeleton generation")
     public void generateSkeleton() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR + File.separator + "petstore.yaml";
@@ -72,7 +72,7 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test Ballerina client generation", enabled = true)
+    @Test(description = "Test Ballerina client generation")
     public void generateClient() {
         final String clientName = "openapipetstore";
         String definitionPath = RES_DIR + File.separator + "petstore.yaml";

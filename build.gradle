@@ -218,8 +218,6 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
-
-
     configurations {
         ballerinaStdLibs
     }

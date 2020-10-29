@@ -37,7 +37,7 @@ public class TypeExtractorUtilTests {
     private OpenAPI api;
     private BallerinaOpenApiType ballerinaOpenApiType;
 
-    @Test(enabled = true, description = "Test input Tags")
+    @Test(description = "Test input Tags")
     public void testTag() throws BallerinaOpenApiException {
         Path contractPath = RES_DIR.resolve("petstore.yaml");
         api = new OpenAPIV3Parser().read(contractPath.toString());
@@ -50,7 +50,7 @@ public class TypeExtractorUtilTests {
 
     }
 
-    @Test(enabled = true, description = "Test input operations")
+    @Test(description = "Test input operations")
     public void testOperations() throws BallerinaOpenApiException {
         Path contractPath = RES_DIR.resolve("petstore.yaml");
         api = new OpenAPIV3Parser().read(contractPath.toString());
