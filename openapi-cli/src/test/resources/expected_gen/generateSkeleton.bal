@@ -1,18 +1,4 @@
-import ballerina/http;
-import ballerina/openapi;
-
-listener http:Listener ep0 = new(80, config = {host: "petstore.openapi.io"});
-
-listener http:Listener ep1 = new(443, config = {host: "petstore.swagger.io"});
-
-@openapi:ServiceInfo {
-    contract: ""
-}
-@http:ServiceConfig {
-    basePath: "/v1"
-}
-
-service   on ep0, ep1 {
+service openapipetstore on ep0, ep1 {
 
     @http:ResourceConfig {
         methods:["GET"],

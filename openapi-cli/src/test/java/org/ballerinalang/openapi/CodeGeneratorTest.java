@@ -15,17 +15,12 @@
  */
 package org.ballerinalang.openapi;
 
-import org.apache.commons.io.FileUtils;
 import org.ballerinalang.openapi.cmd.Filter;
-import org.ballerinalang.openapi.cmd.OpenAPIBallerinaProject;
-import org.ballerinalang.openapi.cmd.OpenAPICommandTest;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.model.GenSrcFile;
 import org.ballerinalang.openapi.utils.GeneratorConstants.GenType;
 import org.ballerinalang.openapi.utils.TypeExtractorUtil;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -36,72 +31,39 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
 
 /**
  * Unit tests for {@link org.ballerinalang.openapi.CodeGenerator}.
  */
 public class CodeGeneratorTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
-    private Path projectPath;
-    private Path sourceRoot;
+    Path resourcePath = Paths.get(System.getProperty(USER_DIR));
+    Path expectedServiceFile = RES_DIR.resolve(Paths.get("expected_gen"));
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
-    @BeforeClass
-    public void setUp() {
-        projectPath = RES_DIR.resolve(Paths.get("expected", "petStore"));
-    }
 
     @Test(description = "Test Ballerina skeleton generation", enabled = false)
     public void generateSkeleton() {
-        final String pkgName = "module";
-        final String serviceName = "openapi_petstore";
+        final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR + File.separator + "petstore.yaml";
         CodeGenerator generator = new CodeGenerator();
-        generator.setSrcPackage(pkgName);
-
-        //Set relative path for contract path which will be printed on the generated service bal file
-        Path absPath = Paths.get(definitionPath);
-        Path basePath = Paths.get(projectPath.toString());
-        Path pathRelative = basePath.relativize(absPath);
 
         try {
-            OpenAPIBallerinaProject ballerinaProject = OpenAPICommandTest.createBalProject(projectPath.toString());
-            OpenAPICommandTest.createBalProjectModule(ballerinaProject, pkgName);
-            Path outFile = ballerinaProject.getImplPath().resolve(Paths.get("openapi_petstore.bal"));
-            generator.generateService(projectPath.toString(), definitionPath, pathRelative.toString(), serviceName,
-                    projectPath.toString(), filter);
-            if (Files.exists(outFile)) {
-                String result = new String(Files.readAllBytes(outFile));
-                Assert.assertTrue(result.contains("service openapi_petstore on ep0, ep1 {\n" +
-                        "\n" +
-                        "    @http:ResourceConfig {\n" +
-                        "        methods:[\"GET\"],\n" +
-                        "        path:\"/pets\"\n" +
-                        "    }\n" +
-                        "    resource function listpets (http:Caller outboundEp, http:Request Req ) returns error? {\n"
-                        + "\n" +
-                        "    }\n" +
-                        "\n" +
-                        "    @http:ResourceConfig {\n" +
-                        "        methods:[\"POST\"],\n" +
-                        "        path:\"/pets\"\n" +
-                        "    }\n" +
-                        "    resource function resource__post_pets (http:Caller outboundEp, http:Request Req )" +
-                        " returns error? {\n" +
-                        "\n" +
-                        "    }\n" +
-                        "\n" +
-                        "    @http:ResourceConfig {\n" +
-                        "        methods:[\"GET\"],\n" +
-                        "        path:\"/pets/{petId}\"\n" +
-                        "    }\n" +
-                        "    resource function showpetbyid (http:Caller outboundEp, http:Request Req, string petId )" +
-                        " returns error? {\n" +
-                        "\n" +
-                        "    }\n" +
-                        "\n" +
-                        "}"));
+            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generateSkeleton.bal");
+            generator.generateService(definitionPath, definitionPath, definitionPath, serviceName,
+                    resourcePath.toString(), filter);
+            if (Files.exists(resourcePath.resolve("openapipetstore-service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore-service.bal");
+                generatedService = (generatedService.trim()).replaceAll("\\s+", "");
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
+
+                Assert.assertTrue(generatedService.contains(expectedServiceContent));
+                deleteGeneratedFiles("openapipetstore-service.bal");
             } else {
                 Assert.fail("Service was not generated");
             }
@@ -112,20 +74,20 @@ public class CodeGeneratorTest {
 
     @Test(description = "Test Ballerina client generation", enabled = false)
     public void generateClient() {
-        final String pkgName = "client";
+        final String clientName = "openapipetstore";
         String definitionPath = RES_DIR + File.separator + "petstore.yaml";
         CodeGenerator generator = new CodeGenerator();
-        generator.setSrcPackage(pkgName);
         try {
-            OpenAPIBallerinaProject ballerinaProject = OpenAPICommandTest.createBalProject(projectPath.toString()
-            );
-            Path outFile = ballerinaProject.getImplPath().resolve("client")
-                    .resolve(Paths.get("openapi_petstore.bal"));
-            generator.generateClient(projectPath.toString(), definitionPath, "openapi_petstore",
-                    projectPath.toString(), filter);
-            if (Files.exists(outFile)) {
-                String result = new String(Files.readAllBytes(outFile));
-                Assert.assertTrue(result.contains("public remote function listPets()"));
+            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generateClient.bal");
+            generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(), filter);
+
+            if (Files.exists(resourcePath.resolve("openapipetstore-client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore-client.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+                deleteGeneratedFiles("openapipetstore-client.bal");
             } else {
                 Assert.fail("Client was not generated");
             }
@@ -178,6 +140,20 @@ public class CodeGeneratorTest {
         Assert.assertEquals(TypeExtractorUtil.escapeType("getV1CoreVersion"), "getV1CoreVersion");
     }
 
+    private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
+
+        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
+        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
+        expectedServiceLines.close();
+        return expectedServiceContent;
+    }
+
+    private void deleteGeneratedFiles(String filename) {
+        File serviceFile = new File(resourcePath.resolve(filename).toString());
+        File schemaFile = new File(resourcePath.resolve("schema.bal").toString());
+        serviceFile.delete();
+        schemaFile.delete();
+    }
     @DataProvider(name = "fileProvider")
     public Object[][] fileProvider() {
         return new Object[][]{
@@ -188,14 +164,5 @@ public class CodeGeneratorTest {
                 {"nonEmptyPath.yaml", "nonEmptyPath.bal"},
                 {"petstore.yaml", "petstore.bal"},
         };
-    }
-
-    @AfterTest
-    public void afterTest() {
-        try {
-            FileUtils.deleteDirectory(projectPath.toFile());
-        } catch (IOException e) {
-            // Ignore.
-        }
     }
 }

@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import picocli.CommandLine;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,12 +39,11 @@ import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
 public class OpenAPICmdTest extends OpenAPICommandTest {
     private static final Path RES_DIR = OpenAPICommandTest.getResourceFolderPath();
     Path resourcePath = Paths.get(System.getProperty(USER_DIR));
-    private OpenAPIBallerinaProject petProject;
 
     @BeforeTest(description = "This will create a new ballerina project for testing below scenarios.")
     public void setupBallerinaProject() throws IOException {
         super.setup();
-        petProject = OpenAPICommandTest.createBalProject(tmpDir.toString());
+//        petProject = OpenAPICommandTest.createBalProject(tmpDir.toString());
     }
 
     @Test(description = "Test openapi command with help flag")
@@ -81,22 +81,10 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Assert.assertTrue(output.contains("An OpenApi definition file is required to generate the service."));
     }
 
-    @Test(description = "Test openapi command with --input flag", enabled = false)
-    public void testOpenAPICmdInput() throws IOException {
-        Path petstoreYaml = RES_DIR.resolve(Paths.get("petstore.yaml"));
-        String[] args = {"--input", petstoreYaml.toString()};
-        OpenApiCmd openApiCommand = new OpenApiCmd(printStream);
-        new CommandLine(openApiCommand).parseArgs(args);
-        openApiCommand.execute();
-
-        String output = readOutput(true);
-        Assert.assertTrue(output.contains("Following files were created."));
-    }
-
-    @Test(description = "Test openapi gen-service for successful service generation", enabled = false)
+    @Test(description = "Test openapi gen-service for successful service generation")
     public void testSuccessfulServiceGeneration() throws IOException {
         Path petstoreYaml = RES_DIR.resolve(Paths.get("petstore.yaml"));
-        String[] args = {"-i", petstoreYaml.toString(), "-o", resourcePath.toString()};
+        String[] args = {"--input", petstoreYaml.toString(), "-o", resourcePath.toString()};
         OpenApiCmd cmd = new OpenApiCmd(printStream);
         new CommandLine(cmd).parseArgs(args);
 
@@ -109,30 +97,64 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path expectedServiceFile = RES_DIR.resolve(Paths.get("expected_gen", "petstore_gen.bal"));
         Path expectedSchemaFile = RES_DIR.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
 
-        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
-        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
-        expectedServiceLines.close();
+//        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
+//        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
+//        expectedServiceLines.close();
 
         Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
         String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
         expectedSchemaLines.close();
-
-        if (Files.exists(resourcePath.resolve("petstoreClient.bal"))
-                && Files.exists(resourcePath.resolve("petstoreService.bal"))
-                && Files.exists(resourcePath.resolve("schema.bal"))) {
-
+        if (Files.exists(resourcePath.resolve("petstore-client.bal")) &&
+                Files.exists(resourcePath.resolve("petstore-service.bal")) &&
+                Files.exists(resourcePath.resolve("schema.bal"))) {
+            //Compare schema contents
             Stream<String> schemaLines = Files.lines(resourcePath.resolve("schema.bal"));
             String generatedSchema = schemaLines.collect(Collectors.joining("\n"));
             schemaLines.close();
 
-            if (expectedSchemaContent.trim().equals(generatedSchema.trim())) {
+            generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
+            expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
+            if (expectedSchemaContent.equals(generatedSchema)) {
                 Assert.assertTrue(true);
+                deleteGeneratedFiles();
+
             } else {
                 Assert.fail("Expected content and actual generated content is mismatched for: "
                         + petstoreYaml.toString());
+                deleteGeneratedFiles();
             }
         } else {
             Assert.fail("Service generation failed.");
         }
+    }
+
+    // Delete the generated files
+    private void deleteGeneratedFiles() {
+
+        File serviceFile = new File(resourcePath.resolve("petstore-service.bal").toString());
+        File clientFile = new File(resourcePath.resolve("petstore-client.bal").toString());
+        File schemaFile = new File(resourcePath.resolve("schema.bal").toString());
+
+        serviceFile.delete();
+        clientFile.delete();
+        schemaFile.delete();
+    }
+
+    @Test(description = "getRelative path")
+    public void getRelativePath() {
+        OpenApiCmd cmd = new OpenApiCmd();
+        File resource01 = new File("dir1/test.txt");
+        String target01 = "dir1/dir2";
+        File resource02 = new File("dir1/dir2/dir3/test.txt");
+        String target02 = "dir1/dir2";
+        File resource03 = new File("dir2/dir3/dir4/test.txt");
+        String target03 = "dir/dir1";
+        Assert.assertTrue((cmd.getRelativePath(resource01, target01).toString()).equals("../test.txt") ||
+                (cmd.getRelativePath(resource01, target01).toString()).equals("..\\test.txt"));
+        Assert.assertTrue((cmd.getRelativePath(resource02, target02).toString()).equals("dir3/test.txt") ||
+                (cmd.getRelativePath(resource02, target02).toString()).equals("dir3\\test.txt"));
+        Assert.assertTrue((cmd.getRelativePath(resource03, target03).toString()).
+                equals("../../dir2/dir3/dir4/test.txt") || (cmd.getRelativePath(resource03, target03).toString()).
+                equals("..\\..\\dir2\\dir3\\dir4\\test.txt"));
     }
 }

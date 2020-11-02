@@ -327,7 +327,7 @@ public class CodeGenerator {
                     CodegenUtils.writeFile(filePath, file.getContent());
                 }
             } else {
-                filePath = srcPath.resolve(file.getFileName());
+                filePath = Paths.get(srcPath.resolve(file.getFileName()).toFile().getCanonicalPath());
                 CodegenUtils.writeFile(filePath, file.getContent());
             }
         }
