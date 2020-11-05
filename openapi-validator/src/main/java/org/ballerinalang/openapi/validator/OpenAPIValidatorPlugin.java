@@ -105,11 +105,11 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                                 SourceDirectoryManager sourceDirectoryManager = SourceDirectoryManager.getInstance(
                                         compilerContext);
                                 Path sourceDir = sourceDirectoryManager.getSourceDirectory().getPath();
-//                                Path pkg = Paths.get(serviceNode.getPosition().lineRange().filePath());
 //                                Path pkg = Paths.get(serviceNode.getPosition().getSource().getPackageName());
 //                                Path filePath = Paths.get((pkg.toString().equals(".") ? "" : pkg.toString()),
 //                                        serviceNode.getPosition().getSource().getCompilationUnitName().replaceAll(
 //                                                "(\\w+)(-(\\w+))*(\\.bal)", "").replaceAll("^/+", ""));
+                                //this temporary solution util projectAPI comes
                                 Path filePath = Paths.get(serviceNode.getPosition().lineRange().filePath().replaceAll(
                                                 "(\\w+)(-(\\w+))*(\\.bal)", "").replaceAll("^/+", ""));
 
