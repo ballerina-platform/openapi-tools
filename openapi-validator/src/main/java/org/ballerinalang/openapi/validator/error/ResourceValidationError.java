@@ -15,13 +15,13 @@
  */
 package org.ballerinalang.openapi.validator.error;
 
-import org.ballerinalang.util.diagnostic.Diagnostic;
+import io.ballerina.tools.diagnostics.Location;
 
 /**
  * This model for represent the error model with the service which undocumented with contract yaml file as operation.
  */
 public class ResourceValidationError  extends ValidationError {
-    public Diagnostic.DiagnosticPosition position;
+    public Location position;
     public String resourceMethod;
     public String resourcePath;
 
@@ -31,13 +31,13 @@ public class ResourceValidationError  extends ValidationError {
         this.resourcePath = null;
     }
 
-    public ResourceValidationError(Diagnostic.DiagnosticPosition position, String resourceMethod,
+    public ResourceValidationError(Location position, String resourceMethod,
                                    String resourcePath) {
         this.position = position;
         this.resourceMethod = resourceMethod;
         this.resourcePath = resourcePath;
     }
-    public Diagnostic.DiagnosticPosition getPosition() {
+    public Location getPosition() {
         return position;
     }
     public String getresourceMethod() {
