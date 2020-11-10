@@ -48,6 +48,7 @@ import java.util.List;
 public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
     private DiagnosticLog dLog = null;
     private CompilerContext compilerContext;
+    private String packageName;
 
     @Override
     public void init(DiagnosticLog diagnosticLog) {
@@ -59,6 +60,13 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
         this.compilerContext = context;
     }
 
+    @Override
+    public void process(PackageNode packageNode) {
+        // Collect endpoints throughout the package.
+        // Assign package name for further process
+        packageName = packageNode.getPosition().lineRange().filePath();
+
+    }
     @Override
     public void process(ServiceNode serviceNode, List<AnnotationAttachmentNode> annotations) {
         AnnotationAttachmentNode annotation = null;
@@ -105,13 +113,11 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                                 SourceDirectoryManager sourceDirectoryManager = SourceDirectoryManager.getInstance(
                                         compilerContext);
                                 Path sourceDir = sourceDirectoryManager.getSourceDirectory().getPath();
-//                                Path pkg = Paths.get(serviceNode.getPosition().getSource().getPackageName());
-//                                Path filePath = Paths.get((pkg.toString().equals(".") ? "" : pkg.toString()),
-//                                        serviceNode.getPosition().getSource().getCompilationUnitName().replaceAll(
-//                                                "(\\w+)(-(\\w+))*(\\.bal)", "").replaceAll("^/+", ""));
-                                //this temporary solution util projectAPI comes
-                                Path filePath = Paths.get(serviceNode.getPosition().lineRange().filePath().replaceAll(
-                                                "(\\w+)(-(\\w+))*(\\.bal)", "").replaceAll("^/+", ""));
+                                Path pkg = Paths.get(packageName);
+                                Path filePath = Paths.get((pkg.toString().equals(".") ? "" : pkg.toString()),
+                                        (new File(serviceNode.getPosition().lineRange().filePath()).getName())
+                                                .replaceAll("(\\w+)(-(\\w+))*(\\.bal)", "")
+                                                .replaceAll("^/+", ""));
 
                                 String projectDir = filePath.toString().
                                         contains(sourceDir.toString().replaceAll("^/+", "")) ?
@@ -219,8 +225,4 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
         }
     }
 
-    @Override
-    public void process(PackageNode packageNode) {
-        // Collect endpoints throughout the package.
-    }
 }
