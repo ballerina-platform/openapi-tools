@@ -21,6 +21,8 @@ module io.ballerina.ballerina.openapi.validator {
     requires io.ballerina.lang;
     requires io.ballerina.tools.api;
     requires io.ballerina.packerina;
+    requires io.ballerina.tool;
+//    requires io.ballerina.packerina;
 //    requires io.ballerina.projects;
 //    requires io.ballerina.runtime;
 //    requires io.ballerina.runtime.api;

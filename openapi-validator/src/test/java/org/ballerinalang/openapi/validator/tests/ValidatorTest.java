@@ -17,6 +17,7 @@ package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import org.ballerinalang.openapi.validator.OpenApiValidatorUtil;
 import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.ResourcePathSummary;
 import org.ballerinalang.openapi.validator.ResourceWithOperationId;
@@ -51,8 +52,9 @@ public class ValidatorTest {
         String balfile = sourceRoot.resolve(fileName).toString();
         Path balFpath = Paths.get(balfile);
         Path programDir = balFpath.toAbsolutePath().getParent();
+//        Path programDir = balFpath.toAbsolutePath();
         String filename = balFpath.toAbsolutePath().getFileName().toString();
-//        BLangPackage bLangPackage = OpenApiValidatorUtil.compileFile(programDir, filename);
+        bLangPackage = OpenApiValidatorUtil.compileFile(programDir, filename);
         return bLangPackage;
     }
 

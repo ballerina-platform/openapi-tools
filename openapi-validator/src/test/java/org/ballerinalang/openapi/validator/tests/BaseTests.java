@@ -16,8 +16,8 @@
 
 package org.ballerinalang.openapi.validator.tests;
 
-import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
+import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.directory.BuildProject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -32,9 +32,13 @@ public class BaseTests {
     private static final Path RESOURCE_DIRECTORY = Paths.get("src/test/resources/");
     private final String dummyContent = "function foo() {\n}";
 
-    @Test (description = "tests for validator on build")
+    @Test (description = "tests for validator on build", enabled = false)
     public void testBuildProject() {
+//        Path projectPath = RESOURCE_DIRECTORY.resolve("openapi_project_api_based_tests").resolve("modules").resolve(
+//                "openapi-validator-on");
+
         Path projectPath = RESOURCE_DIRECTORY.resolve("openapi_project_api_based_tests");
+
         // 1. Initializing the project instance
         BuildProject project = null;
         try {
@@ -42,13 +46,15 @@ public class BaseTests {
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
-
         // 2. Load the package
         Package currentPackage = project.currentPackage();
         // 3. Load default module
-        Module defaultModule = currentPackage.getDefaultModule();
-        System.out.println(defaultModule.documentIds().size());
+//        Module defaultModule = currentPackage.getDefaultModule();
+
 //        Assert.assertEquals(defaultModule.documentIds().size(), 2);
+        // 4. Compile the module
+        PackageCompilation compilation = currentPackage.getCompilation();
+
     }
 
 }

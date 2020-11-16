@@ -42,7 +42,7 @@ under the License.
 <!--            <class name="org.ballerinalang.openapi.validator.tests.VPrimitiveUtilTests"/>-->
 <!--            <class name="org.ballerinalang.openapi.validator.tests.ResourceHandleIVTests"/>-->
 <!--            <class name="org.ballerinalang.openapi.validator.tests.ResourceHandleVTests"/>-->
-            <class name="org.ballerinalang.openapi.validator.tests.BaseTests"/>
+<!--            <class name="org.ballerinalang.openapi.validator.tests.BaseTests"/>-->
         </classes>
     </test>
 </suite>

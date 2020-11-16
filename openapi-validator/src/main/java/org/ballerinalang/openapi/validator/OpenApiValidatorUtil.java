@@ -16,6 +16,8 @@
 package org.ballerinalang.openapi.validator;
 
 import org.ballerinalang.compiler.CompilerPhase;
+import org.ballerinalang.tool.util.CompileResult;
+import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.util.CompilerContext;
 import org.wso2.ballerinalang.compiler.util.CompilerOptions;
 
@@ -34,16 +36,7 @@ import static org.ballerinalang.compiler.CompilerOptionName.PRESERVE_WHITESPACE;
 import static org.ballerinalang.compiler.CompilerOptionName.PROJECT_DIR;
 import static org.ballerinalang.compiler.CompilerOptionName.SKIP_TESTS;
 import static org.ballerinalang.compiler.CompilerOptionName.TEST_ENABLED;
-
-//import org.ballerinalang.test.util.CompileResult;
-//import org.wso2.ballerinalang.compiler.tree.BLangPackage;
-
-//import org.ballerinalang.test.util.CompileResult;
-//import org.wso2.ballerinalang.compiler.tree.BLangPackage;
-
-//import org.ballerinalang.test.util.BCompileUtil;
-//import org.ballerinalang.test.util.CompileResult;
-//import org.wso2.ballerinalang.compiler.tree.BLangPackage;
+import static org.ballerinalang.tool.util.BCompileUtil.compile;
 
 /**
  * Util class for compilation and format execution for formatting CLI tool.
@@ -59,7 +52,7 @@ public class OpenApiValidatorUtil {
      * @return {@link BLangPackage} ballerina package
      * @throws UnsupportedEncodingException throws unsupported encoding exception
      */
-//    public static BLangPackage compileFile(Path sourceRoot, String packageName) throws UnsupportedEncodingException {
+    public static BLangPackage compileFile(Path sourceRoot, String packageName) throws UnsupportedEncodingException {
         // previous method
 //        emptyPrintStream = new EmptyPrintStream();
 //        CompilerContext context = getCompilerContext(sourceRoot);
@@ -70,16 +63,16 @@ public class OpenApiValidatorUtil {
 //        compiler.setOutStream(emptyPrintStream);
 //        return compiler.compile(packageName);
 
-//        CompileResult bCompileUtil = compile(sourceRoot.toString(), packageName);
-//        return (BLangPackage) bCompileUtil.getAST();
-
+        CompileResult bCompileUtil = compile(sourceRoot.toString(), packageName);
+        return (BLangPackage) bCompileUtil.getAST();
+//
 //        String resourceRoot = Paths.get("src", "test", "resources").toAbsolutePath().toString();
 //        Path testResourceRoot = Paths.get(resourceRoot, "project-based-tests/src/recordValidation/ballerina" +
 //                "/validTests/primitive");
 //
 //        CompileResult bCompileUtil = BCompileUtil.compile(testResourceRoot.resolve("integerB.bal").toString());
 //        return (BLangPackage) bCompileUtil.getAST();
-//    }
+    }
 
 //    public static CompileResult compileFile01(Path sourceRoot, String packageName) throws
 //    UnsupportedEncodingException {

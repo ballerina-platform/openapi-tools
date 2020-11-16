@@ -1,4 +1,4 @@
 [package]
 org = "openapi"
-name = "myproject"
+name = "openapi_project_api_based_tests"
 version = "0.1.0"
