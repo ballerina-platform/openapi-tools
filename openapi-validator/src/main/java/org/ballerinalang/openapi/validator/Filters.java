@@ -17,7 +17,7 @@
  */
 package org.ballerinalang.openapi.validator;
 
-import org.ballerinalang.util.diagnostic.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.util.List;
 
@@ -29,10 +29,10 @@ public class Filters {
     private List<String> excludeTag;
     private List<String> operation;
     private List<String> excludeOperation;
-    private Diagnostic.Kind kind;
+    private DiagnosticSeverity kind;
 
     public Filters(List<String> tag, List<String> excludeTag, List<String> operation,
-                   List<String> excludeOperation, Diagnostic.Kind kind) {
+                   List<String> excludeOperation, DiagnosticSeverity kind) {
         this.tag = tag;
         this.excludeTag = excludeTag;
         this.operation = operation;
@@ -68,11 +68,11 @@ public class Filters {
         return excludeOperation;
     }
 
-    public Diagnostic.Kind getKind() {
+    public DiagnosticSeverity getKind() {
         return kind;
     }
 
-    public void setKind(Diagnostic.Kind kind) {
+    public void setKind(DiagnosticSeverity kind) {
         this.kind = kind;
     }
 

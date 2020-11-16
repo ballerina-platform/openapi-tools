@@ -485,9 +485,8 @@ public class OpenApiConverterUtils {
 
 
         BLangCompilationUnit topCompilationUnit = pkg.getCompilationUnits().stream()
-                .filter(bLangCompilationUnit -> bLangCompilationUnit.getName().equals(service.pos.src.cUnitName))
-                .findAny()
-                .orElse(null);
+                .filter(bLangCompilationUnit -> bLangCompilationUnit.getName().equals(new File(Paths.get(service
+                        .getPosition().lineRange().filePath()).toString()).getName())).findAny().orElse(null);
 
         if (topCompilationUnit == null) {
             throw new OpenApiConverterException("Please check if input source is valid and complete.");

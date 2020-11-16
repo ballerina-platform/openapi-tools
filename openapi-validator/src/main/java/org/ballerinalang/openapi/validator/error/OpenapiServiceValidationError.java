@@ -15,8 +15,8 @@
  */
 package org.ballerinalang.openapi.validator.error;
 
+import io.ballerina.tools.diagnostics.Location;
 import org.ballerinalang.openapi.validator.OpenAPIPathSummary;
-import org.ballerinalang.util.diagnostic.Diagnostic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.List;
  * This model for the represent the error with operation which undocumented as service in ballerina file.
  */
 public class OpenapiServiceValidationError extends ValidationError {
-    Diagnostic.DiagnosticPosition position;
+    Location position;
     String serviceOperation;
     String servicePath;
     List<String> tags;
@@ -39,7 +39,7 @@ public class OpenapiServiceValidationError extends ValidationError {
         this.openAPIPathSummary = new OpenAPIPathSummary();
     }
 
-    public OpenapiServiceValidationError(Diagnostic.DiagnosticPosition position, String serviceOperation,
+    public OpenapiServiceValidationError(Location position, String serviceOperation,
                                          String servicePath, List<String> tags, OpenAPIPathSummary openAPIPathSummary) {
         this.position = position;
         this.serviceOperation = serviceOperation;
@@ -47,7 +47,7 @@ public class OpenapiServiceValidationError extends ValidationError {
         this.tags = tags;
         this.openAPIPathSummary = openAPIPathSummary;
     }
-    public Diagnostic.DiagnosticPosition getPosition() {
+    public Location getPosition() {
         return position;
     }
     public String getServiceOperation() {

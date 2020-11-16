@@ -15,6 +15,7 @@
  */
 package org.ballerinalang.openapi.validator;
 
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -23,7 +24,6 @@ import org.ballerinalang.model.tree.FunctionNode;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinalang.openapi.validator.error.OpenapiServiceValidationError;
 import org.ballerinalang.openapi.validator.error.ResourceValidationError;
-import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangListConstructorExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangLiteral;
@@ -313,10 +313,10 @@ public class ResourceWithOperationId {
                 if (annotation.getExpression() instanceof BLangRecordLiteral) {
                     BLangRecordLiteral recordLiteral = (BLangRecordLiteral) annotation.getExpression();
                     String methodPath = null;
-                    Diagnostic.DiagnosticPosition pathPos = null;
+                    Location pathPos = null;
                     ResourceMethod resourceMethod = new ResourceMethod();
                     String methodName = null;
-                    Diagnostic.DiagnosticPosition methodPos = null;
+                    Location methodPos = null;
                     String body = null;
                     for (BLangRecordLiteral.RecordField field : recordLiteral.getFields()) {
                         BLangExpression keyExpr;
@@ -399,7 +399,7 @@ public class ResourceWithOperationId {
     }
 
     private static void setValuesResourceMethods(FunctionNode resource, ResourceMethod resourceMethod,
-                                                 String methodName, Diagnostic.DiagnosticPosition methodPos,
+                                                 String methodName, Location methodPos,
                                                  String body, ResourcePathSummary resourcePathSummary) {
 
         if (body != null) {

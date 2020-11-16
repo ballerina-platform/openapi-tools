@@ -17,13 +17,13 @@
  */
 package org.ballerinalang.openapi.validator;
 
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.compiler.plugins.AbstractCompilerPlugin;
 import org.ballerinalang.compiler.plugins.SupportedAnnotationPackages;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.PackageNode;
 import org.ballerinalang.model.tree.ServiceNode;
-import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
 import org.wso2.ballerinalang.compiler.SourceDirectoryManager;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
@@ -48,6 +48,7 @@ import java.util.List;
 public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
     private DiagnosticLog dLog = null;
     private CompilerContext compilerContext;
+    private String packageName;
 
     @Override
     public void init(DiagnosticLog diagnosticLog) {
@@ -60,6 +61,13 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
     }
 
     @Override
+    public void process(PackageNode packageNode) {
+        // Collect endpoints throughout the package.
+        // Assign package name for further process
+        packageName = packageNode.getPosition().lineRange().filePath();
+
+    }
+    @Override
     public void process(ServiceNode serviceNode, List<AnnotationAttachmentNode> annotations) {
         AnnotationAttachmentNode annotation = null;
         List<String> tags = new ArrayList<>();
@@ -68,7 +76,7 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
         List<String> excludeOperations = new ArrayList<>();
         String contractURI = null;
         Boolean failOnErrors = true;
-        Diagnostic.Kind kind;
+        DiagnosticSeverity kind;
 
         for (AnnotationAttachmentNode ann : annotations) {
             if (Constants.PACKAGE.equals(ann.getPackageAlias().getValue())
@@ -105,10 +113,11 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                                 SourceDirectoryManager sourceDirectoryManager = SourceDirectoryManager.getInstance(
                                         compilerContext);
                                 Path sourceDir = sourceDirectoryManager.getSourceDirectory().getPath();
-                                Path pkg = Paths.get(serviceNode.getPosition().getSource().getPackageName());
+                                Path pkg = Paths.get(packageName);
                                 Path filePath = Paths.get((pkg.toString().equals(".") ? "" : pkg.toString()),
-                                        serviceNode.getPosition().getSource().getCompilationUnitName().replaceAll(
-                                                "(\\w+)(-(\\w+))*(\\.bal)", "").replaceAll("^/+", ""));
+                                        (new File(serviceNode.getPosition().lineRange().filePath()).getName())
+                                                .replaceAll("(\\w+)(-(\\w+))*(\\.bal)", "")
+                                                .replaceAll("^/+", ""));
 
                                 String projectDir = filePath.toString().
                                         contains(sourceDir.toString().replaceAll("^/+", "")) ?
@@ -131,12 +140,12 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                                         try {
                                             contractURI = file.getCanonicalPath();
                                         } catch (IOException e) {
-                                            dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),
+                                            dLog.logDiagnostic(DiagnosticSeverity.ERROR, annotation.getPosition(),
                                                     "Contract path should be applied as a string value");
                                         }
                                     }
                                 } else {
-                                    dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),
+                                    dLog.logDiagnostic(DiagnosticSeverity.ERROR, annotation.getPosition(),
                                             "Contract path should be applied as a string value");
                                 }
                             }
@@ -151,7 +160,7 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                                 if (value.getValue() instanceof Boolean) {
                                     failOnErrors = (Boolean) value.getValue();
                                 } else {
-                                    dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),
+                                    dLog.logDiagnostic(DiagnosticSeverity.ERROR, annotation.getPosition(),
                                             "FailOnErrors should be applied as boolean values");
                                 }
                             }
@@ -167,19 +176,19 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
             }
 
             if (failOnErrors) {
-                kind = Diagnostic.Kind.ERROR;
+                kind = DiagnosticSeverity.ERROR;
             } else {
-                kind = Diagnostic.Kind.WARNING;
+                kind = DiagnosticSeverity.WARNING;
             }
 
 //            Checking both tags and excludeTags include same tags and operations
             if (!Collections.disjoint(tags, excludeTags)) {
-                dLog.logDiagnostic(Diagnostic.Kind.WARNING, annotation.getPosition(),
+                dLog.logDiagnostic(DiagnosticSeverity.WARNING, annotation.getPosition(),
                         ErrorMessages.tagFilterEnable());
                 excludeTags.clear();
 
             } else if (!Collections.disjoint(operations, excludeOperations)) {
-                dLog.logDiagnostic(Diagnostic.Kind.WARNING, annotation.getPosition(),
+                dLog.logDiagnostic(DiagnosticSeverity.WARNING, annotation.getPosition(),
                         ErrorMessages.operationFilterEnable());
                 excludeOperations.clear();
             }
@@ -191,7 +200,7 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                     ServiceValidator.validateResource(openAPI, serviceNode, filters,
                             kind, dLog);
                 } catch (OpenApiValidatorException e) {
-                    dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),
+                    dLog.logDiagnostic(DiagnosticSeverity.ERROR, annotation.getPosition(),
                             e.getMessage());
                 }
             }
@@ -209,15 +218,11 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                     if (expression.getValue() instanceof String) {
                         operations.add((String) expression.getValue());
                     } else {
-                        dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(), s);
+                        dLog.logDiagnostic(DiagnosticSeverity.ERROR, annotation.getPosition(), s);
                     }
                 }
             }
         }
     }
 
-    @Override
-    public void process(PackageNode packageNode) {
-        // Collect endpoints throughout the package.
-    }
 }

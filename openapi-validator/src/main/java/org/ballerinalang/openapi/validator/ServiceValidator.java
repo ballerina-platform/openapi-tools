@@ -18,6 +18,7 @@
 
 package org.ballerinalang.openapi.validator;
 
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -30,7 +31,6 @@ import org.ballerinalang.openapi.validator.error.OpenapiServiceValidationError;
 import org.ballerinalang.openapi.validator.error.ResourceValidationError;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
-import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
 
 import java.nio.file.Files;
@@ -58,7 +58,7 @@ public class ServiceValidator {
     public static void validateResource(OpenAPI openApi,
                                         ServiceNode serviceNode,
                                         Filters filters,
-                                        Diagnostic.Kind kind,
+                                        DiagnosticSeverity kind,
                                         DiagnosticLog dLog) throws OpenApiValidatorException {
 
         //  Filter openApi operation according to given filters
@@ -264,7 +264,7 @@ public class ServiceValidator {
      * @param method                validate method
      * @param postErrors            list of validationErrors
      */
-    private static void generateDlogMessage(Diagnostic.Kind kind, DiagnosticLog dLog,
+    private static void generateDlogMessage(DiagnosticSeverity kind, DiagnosticLog dLog,
                                             ResourcePathSummary resourcePathSummary,
                                             Map.Entry<String, ResourceMethod> method,
                                             List<ValidationError> postErrors) {
@@ -311,7 +311,7 @@ public class ServiceValidator {
      * @param method                current validating method
      * @param postErr               TypeMisMatchError type validation error
      */
-    private static void generateTypeMisMatchDlog(Diagnostic.Kind kind, DiagnosticLog dLog,
+    private static void generateTypeMisMatchDlog(DiagnosticSeverity kind, DiagnosticLog dLog,
                                                  ResourcePathSummary resourcePathSummary,
                                                  Map.Entry<String, ResourceMethod> method, ValidationError postErr) {
 
