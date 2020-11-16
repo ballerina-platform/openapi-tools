@@ -15,8 +15,8 @@
  */
 package org.ballerinalang.openapi.validator;
 
+import io.ballerina.tools.diagnostics.Location;
 import org.ballerinalang.model.tree.SimpleVariableNode;
-import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.wso2.ballerinalang.compiler.tree.BLangSimpleVariable;
 
 import java.util.ArrayList;
@@ -28,9 +28,9 @@ import java.util.Map;
  * Class for containing the service details.
  */
 public class ResourceMethod {
-    private Diagnostic.DiagnosticPosition resourcePosition;
+    private Location resourcePosition;
     private String method;
-    private Diagnostic.DiagnosticPosition methodPosition;
+    private Location methodPosition;
     private Map<String, BLangSimpleVariable> parameters;
     private String body;
 
@@ -42,11 +42,11 @@ public class ResourceMethod {
         this.body = null;
     }
 
-    public Diagnostic.DiagnosticPosition getMethodPosition() {
+    public Location getMethodPosition() {
         return methodPosition;
     }
 
-    public void setMethodPosition(Diagnostic.DiagnosticPosition methodsPosition) {
+    public void setMethodPosition(Location methodsPosition) {
         this.methodPosition = methodsPosition;
     }
 
@@ -92,11 +92,11 @@ public class ResourceMethod {
         this.body = body;
     }
 
-    public void setResourcePosition(Diagnostic.DiagnosticPosition position) {
+    public void setResourcePosition(Location position) {
         this.resourcePosition = position;
     }
 
-    public Diagnostic.DiagnosticPosition getResourcePosition() {
+    public Location getResourcePosition() {
         return resourcePosition;
     }
 

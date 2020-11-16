@@ -53,6 +53,7 @@ dependencies {
     compile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
+    compile group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"

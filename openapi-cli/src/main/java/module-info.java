@@ -37,6 +37,8 @@ open module io.ballerina.ballerina.openapi {
     requires io.ballerina.stdlib.http;
     requires handlebars;
     requires jsr305;
+    requires io.ballerina.tools.api;
+
 
     exports org.ballerinalang.ballerina.openapi.convertor;
     exports org.ballerinalang.ballerina.openapi.convertor.service;

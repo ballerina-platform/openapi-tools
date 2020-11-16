@@ -15,13 +15,13 @@
  */
 package org.ballerinalang.openapi.validator.tests;
 
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.openapi.validator.Filters;
 import org.ballerinalang.openapi.validator.OpenAPIPathSummary;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.ResourceWithOperationId;
 import org.ballerinalang.openapi.validator.ServiceValidator;
-import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -49,7 +49,7 @@ public class OpenApiFilterTests {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         tags.add("pets");
-        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, Diagnostic.Kind.ERROR);
+        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
         openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
         Assert.assertEquals(openAPIPathSummaries.get(0).getOperations().get("post").getOperationId(), "postPet");
@@ -61,7 +61,7 @@ public class OpenApiFilterTests {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         excludeTags.add("pets");
-        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, Diagnostic.Kind.ERROR);
+        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
         openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
         Assert.assertEquals(openAPIPathSummaries.get(0).getOperations().get("get").getOperationId(), "listPets");
@@ -73,7 +73,7 @@ public class OpenApiFilterTests {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore02.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         operations.add("listPets");
-        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, Diagnostic.Kind.ERROR);
+        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
         openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 1);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
@@ -86,7 +86,7 @@ public class OpenApiFilterTests {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore03.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         excludeOperations.add("showUser");
-        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, Diagnostic.Kind.ERROR);
+        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
         openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 3);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
@@ -102,7 +102,7 @@ public class OpenApiFilterTests {
         operations.add("listPets");
         operations.add("postPet");
         operations.add("showUser");
-        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, Diagnostic.Kind.ERROR);
+        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
         openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 1);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
@@ -119,7 +119,7 @@ public class OpenApiFilterTests {
         operations.add("listPets");
         operations.add("postPets");
         operations.add("showUser");
-        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, Diagnostic.Kind.ERROR);
+        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
         openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 2);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
@@ -136,7 +136,7 @@ public class OpenApiFilterTests {
         excludeOperations.add("listPets");
         excludeOperations.add("postPet");
         excludeOperations.add("showUser");
-        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, Diagnostic.Kind.ERROR);
+        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
         openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 2);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets/{petId}");
@@ -153,7 +153,7 @@ public class OpenApiFilterTests {
         excludeTags.add("list");
         excludeOperations.add("postPet");
         excludeOperations.add("showUser");
-        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, Diagnostic.Kind.ERROR);
+        Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
         openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 3);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
