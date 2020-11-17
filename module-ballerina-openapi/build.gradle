@@ -146,7 +146,7 @@ task ballerinaBuild {
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build --skip-tests -c ${moduleName} && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina build --skip-tests -c ${moduleName}"
+                commandLine 'sh', '-c', "${distributionBinPath}"+'/ballerina build --skip-tests'
             }
         }
         copy {

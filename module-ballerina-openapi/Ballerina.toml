@@ -1,10 +1,12 @@
-[project]
-org-name = "ballerina"
-version = "@toml.version@"
+[package]
+org = "ballerina"
+name = "openapi"
+version = "2.0.0"
+
 
 [dependencies]
-"ballerina/io" = "@stdlib.io.version@"
-"ballerina/log" = "@stdlib.log.version@"
+"ballerina/io" = "0.5.2"
+"ballerina/log" = "1.0.2"
 "ballerina/system" = "@stdlib.system.version@"
 "ballerina/config" = "@stdlib.config.version@"
 "ballerina/stringutils" = "@stdlib.stringutils.version@"
@@ -12,9 +14,3 @@ version = "@toml.version@"
 [platform]
 target = "java11"
 
-    [[platform.libraries]]
-    artifactId = "openapi"
-    version = "@project-version@"
-    path = "../openapi-validator/build/libs/openapi-validator-@project-version@.jar"
-    groupId = "ballerina"
-    modules = ["openapi"]
