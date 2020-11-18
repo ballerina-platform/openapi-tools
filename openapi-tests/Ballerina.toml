@@ -9,19 +9,19 @@ observability-included=true
 [[dependency]]
 org= "ballerina"
 name= "system"
-version= @stdlib.system.version@
+version= "@stdlib.system.version@"
 
 [[dependency]]
 org= "ballerina"
 name= "log"
-version= @stdlib.log.version@
+version= "@stdlib.log.version@"
 
 [[dependency]]
 org= "ballerina"
 name= "stringutils"
-version= @stdlib.stringutils.version@
+version= "@stdlib.stringutils.version@"
 
 [[dependency]]
 org= "ballerina"
 name= "config"
-version= @stdlib.config.version@
+version= "@stdlib.config.version@"
