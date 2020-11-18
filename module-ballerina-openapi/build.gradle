@@ -114,8 +114,8 @@ task updateTomlFile {
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
-        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
-        newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
+//        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
+//        newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
         ballerinaConfigFile.text = newConfig
     }
 }
@@ -134,7 +134,7 @@ task ballerinaBuild {
     dependsOn(unpackStdLibs)
     dependsOn(copyStdlibs)
     dependsOn(updateTomlFile)
-//    dependsOn(test)
+    dependsOn(test)
 //    dependsOn(ballerinaTest)
     finalizedBy(revertTomlFile)
 
@@ -144,9 +144,10 @@ task ballerinaBuild {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build --skip-tests -c ${moduleName} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build --skip-tests -c && exit " +
+                        "%%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "${distributionBinPath}"+'/ballerina build --skip-tests'
+                commandLine 'sh', '-c', "${distributionBinPath}"+'/ballerina build --skip-tests -c'
             }
         }
         copy {
@@ -208,9 +209,9 @@ task ballerinaBuild {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc ${moduleName} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc  && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc ${moduleName}"
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc "
             }
         }
         copy {
@@ -250,68 +251,68 @@ task ballerinaTest {
 //                commandLine 'sh', '-c', "$distributionBinPath/ballerina test  --code-coverage --all ${debugParams}"
 //            }
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test ${moduleName} ${debugParams} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test  ${debugParams} && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina test ${moduleName} ${debugParams}"
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina test  ${debugParams}"
             }
         }
     }
 }
 
-task ballerinaIntegrationTests {
-    inputs.dir file(project.projectDir)
-    dependsOn(":openapi-validator:build")
-    dependsOn(ballerinaBuild)
-    finalizedBy(revertTomlFile)
-    doLast {
-        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
-        def stdlibDependentStringutilsVersion = project.stdlibStringUtilsVersion.split("-")[0]
-        def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
-        def stdlibDependentSystemVersion = project.stdlibSystemVersion.split("-")[0]
-        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
-        newConfig = newConfig.replace("@toml.version@", tomlVersion)
-        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
-        newConfig = newConfig.replace("@stdlib.stringutils.version@", stdlibDependentStringutilsVersion)
-        newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
-        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
-        ballerinaConfigFile.text = newConfig
-
-        copy {
-            from file("$project.projectDir/build/lib_parent/libs/openapi-validator-${project.version}.jar")
-            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
-        }
-        copy {
-            from file("$project.projectDir/build/lib_parent/libs/openapi-cli-${project.version}.jar")
-            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
-        }
-        copy {
-            from file("$project.projectDir/build/lib_parent/libs/ballerina-openapi-${tomlVersion}.jar")
-            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
-        }
-        copy {
-            from file("$project.projectDir/build/cache_parent/caches/bir/ballerina/openapi/${tomlVersion}/openapi.bir")
-            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerina/openapi/${tomlVersion}")
-        }
-        copy {
-            from file("$project.projectDir/build/cache_parent/caches/bir/ballerina/openapi/${tomlVersion}/Ballerina.toml")
-            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerina/openapi/${tomlVersion}")
-        }
-        exec {
-            workingDir project.projectDir
-            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test ${testModuleName} --bal_exec_path=${distributionBinPath}/ballerina"
-            } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina test ${testModuleName} --bal_exec_path=${distributionBinPath}/ballerina"
-            }
-        }
-    }
-}
+//task ballerinaIntegrationTests {
+//    inputs.dir file(project.projectDir)
+//    dependsOn(":openapi-validator:build")
+//    dependsOn(ballerinaBuild)
+//    finalizedBy(revertTomlFile)
+//    doLast {
+//        def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
+//        def stdlibDependentStringutilsVersion = project.stdlibStringUtilsVersion.split("-")[0]
+//        def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
+//        def stdlibDependentSystemVersion = project.stdlibSystemVersion.split("-")[0]
+//        def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
+//        newConfig = newConfig.replace("@toml.version@", tomlVersion)
+//        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
+//        newConfig = newConfig.replace("@stdlib.stringutils.version@", stdlibDependentStringutilsVersion)
+//        newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
+//        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
+//        ballerinaConfigFile.text = newConfig
+//
+//        copy {
+//            from file("$project.projectDir/build/lib_parent/libs/openapi-validator-${project.version}.jar")
+//            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
+//        }
+//        copy {
+//            from file("$project.projectDir/build/lib_parent/libs/openapi-cli-${project.version}.jar")
+//            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
+//        }
+//        copy {
+//            from file("$project.projectDir/build/lib_parent/libs/ballerina-openapi-${tomlVersion}.jar")
+//            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bre/lib")
+//        }
+//        copy {
+//            from file("$project.projectDir/build/cache_parent/caches/bir/ballerina/openapi/${tomlVersion}/openapi.bir")
+//            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerina/openapi/${tomlVersion}")
+//        }
+//        copy {
+//            from file("$project.projectDir/build/cache_parent/caches/bir/ballerina/openapi/${tomlVersion}/Ballerina.toml")
+//            into file(project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bir-cache/ballerina/openapi/${tomlVersion}")
+//        }
+//        exec {
+//            workingDir project.projectDir
+//            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+//            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test ${testModuleName} --bal_exec_path=${distributionBinPath}/ballerina"
+//            } else {
+//                commandLine 'sh', '-c', "$distributionBinPath/ballerina test ${testModuleName} --bal_exec_path=${distributionBinPath}/ballerina"
+//            }
+//        }
+//    }
+//}
 
 
 test {
     dependsOn(ballerinaTest)
-    dependsOn(ballerinaIntegrationTests)
+//    dependsOn(ballerinaIntegrationTests)
 }
 
 
