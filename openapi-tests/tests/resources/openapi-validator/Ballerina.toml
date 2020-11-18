@@ -1,0 +1,7 @@
+[package]
+org= "ballerina"
+name= "openapiValidator"
+version= "2.0.0"
+
+[build-options]
+observability-included=true

@@ -43,7 +43,6 @@ jar {
 }
 
 def moduleName = "integration_tests"
-//def testModuleName = "integration_tests"
 def moduleOrg = "ballerina"
 //def ballerinaConfigFile = new File("$project.projectDir/src/main/ballerina/Ballerina.toml")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
@@ -232,9 +231,9 @@ task ballerinaIntegrationTests {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test ${moduleName} --bal_exec_path=${distributionBinPath}/ballerina"
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test --bal_exec_path=${distributionBinPath}/ballerina"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina test ${moduleName} --bal_exec_path=${distributionBinPath}/ballerina"
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina test --bal_exec_path=${distributionBinPath}/ballerina"
             }
         }
     }

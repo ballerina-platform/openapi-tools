@@ -5,7 +5,7 @@ import ballerina/stringutils;
 import ballerina/test;
 
 const BAL_EXEC_PATH = "bal_exec_path";
-const OPENAPI_PROJECT = "src/integration_tests/tests/resources/openapi-validator";
+const OPENAPI_PROJECT = "tests/resources/openapi-validator";
 const UTF_8 = "UTF-8";
 
 @test:Config {}
