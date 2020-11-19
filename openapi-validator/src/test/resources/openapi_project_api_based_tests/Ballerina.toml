@@ -1,4 +1,7 @@
 [package]
-org = "openapi"
-name = "openapi_project_api_based_tests"
-version = "0.1.0"
+org= "ballerina"
+name= "openapiValidator"
+version= "2.0.0"
+
+[build-options]
+observability-included=true

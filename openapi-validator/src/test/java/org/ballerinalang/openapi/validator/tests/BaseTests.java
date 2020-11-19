@@ -32,7 +32,7 @@ public class BaseTests {
     private static final Path RESOURCE_DIRECTORY = Paths.get("src/test/resources/");
     private final String dummyContent = "function foo() {\n}";
 
-    @Test (description = "tests for validator on build", enabled = false)
+    @Test (description = "tests for validator on build", enabled = true)
     public void testBuildProject() {
 //        Path projectPath = RESOURCE_DIRECTORY.resolve("openapi_project_api_based_tests").resolve("modules").resolve(
 //                "openapi-validator-on");
