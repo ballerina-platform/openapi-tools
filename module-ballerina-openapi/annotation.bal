@@ -46,4 +46,3 @@ public annotation ClientInformation ClientConfig on service;
 
 # Annotation for additional OpenAPI information of a Ballerina service.
 public annotation ServiceInformation ServiceInfo on service;
-

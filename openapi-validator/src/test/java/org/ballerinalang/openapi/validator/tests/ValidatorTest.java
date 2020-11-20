@@ -51,8 +51,9 @@ public class ValidatorTest {
         String balfile = sourceRoot.resolve(fileName).toString();
         Path balFpath = Paths.get(balfile);
         Path programDir = balFpath.toAbsolutePath().getParent();
+//        Path programDir = balFpath.toAbsolutePath();
         String filename = balFpath.toAbsolutePath().getFileName().toString();
-//        BLangPackage bLangPackage = OpenApiValidatorUtil.compileFile(programDir, filename);
+//        bLangPackage = OpenApiValidatorUtil.compileFile(programDir, filename);
         return bLangPackage;
     }
 
