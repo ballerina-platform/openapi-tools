@@ -29,7 +29,7 @@ import java.nio.file.Paths;
  * This BaseTests class use for main initializing of the tests.
  */
 public class BaseTests {
-    private static final Path RESOURCE_DIRECTORY = Paths.get("src/test/resources/");
+    private static final Path RESOURCE_DIRECTORY = Paths.get("src/test/resources/").toAbsolutePath();
     private final String dummyContent = "function foo() {\n}";
 
     @Test (description = "tests for validator on build", enabled = true)
@@ -37,7 +37,7 @@ public class BaseTests {
 //        Path projectPath = RESOURCE_DIRECTORY.resolve("openapi_project_api_based_tests").resolve("modules").resolve(
 //                "openapi-validator-on");
 
-        Path projectPath = RESOURCE_DIRECTORY.resolve("openapi_project_api_based_tests");
+        Path projectPath = RESOURCE_DIRECTORY.resolve("openapiValidator");
 
         // 1. Initializing the project instance
         BuildProject project = null;
