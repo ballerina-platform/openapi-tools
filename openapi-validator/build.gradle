@@ -30,6 +30,10 @@ configurations.all {
     }
 }
 
+configurations {
+    balTools
+}
+
 dependencies {
     annotationProcessor  group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
 
@@ -72,6 +76,22 @@ dependencies {
     implementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
 
+    balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+        transitive = false
+    }
+}
+
+def bDistribution = file("$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
+task jBallerinaPack {
+    doLast {
+        configurations.balTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            copy {
+                from project.zipTree(artifact.getFile())
+                into new File(project.buildDir, "extracted-distribution/")
+            }
+        }
+    }
+    outputs.dir bDistribution
 }
 
 clean {
@@ -106,6 +126,10 @@ shadowJar {
 }
 
 test {
+    dependsOn {
+        jBallerinaPack
+    }
+    systemProperty "ballerina.home", bDistribution
     useTestNG() {
         suites 'src/test/resources/testng.xml'
     }
