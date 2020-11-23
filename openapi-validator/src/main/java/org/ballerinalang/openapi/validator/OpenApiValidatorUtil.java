@@ -60,13 +60,13 @@ public class OpenApiValidatorUtil {
      * @throws UnsupportedEncodingException throws unsupported encoding exception
      */
 //    public static BLangPackage compileFile(Path sourceRoot, String packageName) throws UnsupportedEncodingException {
-        // previous method
+    // previous method
 //        emptyPrintStream = new EmptyPrintStream();
 //        CompilerContext context = getCompilerContext(sourceRoot);
-        // Set the SourceDirectory to process this compilation as a program directory.
+    // Set the SourceDirectory to process this compilation as a program directory.
 //        context.put(SourceDirectory.class, new FileSystemProgramDirectory(sourceRoot));
 //        Compiler compiler = Compiler.getInstance(context);
-        // Set an EmptyPrintStream to hide unnecessary outputs from compiler.
+    // Set an EmptyPrintStream to hide unnecessary outputs from compiler.
 //        compiler.setOutStream(emptyPrintStream);
 //        return compiler.compile(packageName);
 

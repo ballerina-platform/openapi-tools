@@ -5,7 +5,7 @@ import ballerina/stringutils;
 import ballerina/test;
 
 const BAL_EXEC_PATH = "bal_exec_path";
-const OPENAPI_PROJECT = "src/integration_tests/tests/resources/openapi-validator";
+const OPENAPI_PROJECT = "tests/resources/openapi-validator";
 const UTF_8 = "UTF-8";
 
 @test:Config {}
@@ -14,8 +14,7 @@ public function testOpenapiValidatorOff() {
     "openapi-validator-off");
     string[] logLines = getLogLinesFromExecResult(execResult);
     string msg = "Couldn't find a Ballerina service resource for the path '/{param1}/{param2}' which is documented in the OpenAPI contract";
-    io:println(logLines);
-    validateLog(logLines[0],"warning","openapi-validator-off.bal:15:1", msg);
+    validateLog(logLines[0],"warning","openapi-validator-off.bal:14:1", msg);
 }
 
 @test:Config {}
@@ -24,8 +23,9 @@ public function testOpenapiValidatorOn() {
     "openapi-validator-on");
     string[] logLines = getLogLinesFromExecResult(execResult);
     string msg = "Couldn't find a Ballerina service resource for the path '/{param1}/{param2}' which is documented in the OpenAPI contract";
-    io:println(logLines);
     validateLog(logLines[0],"error","openapi-validator-on.bal:13:9:",msg);
+
+
 }
 // getting the log lines from execution results
 function getLogLinesFromExecResult(system:Process|error execResult) returns string[] {

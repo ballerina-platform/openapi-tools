@@ -1,6 +1,6 @@
 [package]
 org= "ballerina"
-name= "openapi"
+name= "openapiValidator"
 version= "2.0.0"
 
 [build-options]
