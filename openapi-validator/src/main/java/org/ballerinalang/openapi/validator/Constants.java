@@ -52,6 +52,7 @@ public class Constants {
     public static final String RECORD = "record";
     public static final String NUMBER = "number";
     public static final String INT = "int";
+    public static final String USER_DIR = "user.dir";
 
     /**
      * Enum Type for handle the validation error types.

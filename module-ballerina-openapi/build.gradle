@@ -147,12 +147,12 @@ task ballerinaBuild {
 
         copy {
             from targetNativeJar
-            into file("$artifactLibParent/lib")
+            into file("$artifactLibParent/libs")
         }
 
         copy {
             from targetOpenApiCliJar
-            into file("$artifactLibParent/lib")
+            into file("$artifactLibParent/libs")
         }
 
         // Doc creation and packing
