@@ -42,18 +42,14 @@ jar {
     }
 }
 
-def moduleName = "openapi"
-def testModuleName = "integration_tests"
-def moduleOrg = "ballerina"
-//def ballerinaConfigFile = new File("$project.projectDir/src/main/ballerina/Ballerina.toml")
+def packageName = "openapi"
+def packageOrg = "ballerina"
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def tomlVersion = project.version.split("-")[0]
-//def ballerinaCentralAccessToken = System.getenv('BALLERINA_CENTRAL_ACCESS_TOKEN')
-def targetBallerinaJar = file("$project.projectDir/target/caches/jar_cache/${moduleOrg}/${moduleName}/${tomlVersion}/${moduleOrg}-${moduleName}-${tomlVersion}.jar")
-def targetNativeJar = file("""$project.rootDir/${moduleName}-validator/build/libs/${moduleName}-validator-${project.version}.jar""")
+def targetNativeJar = file("""$project.rootDir/${packageName}-validator/build/libs/${packageName}-validator-${project.version}.jar""")
 def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
@@ -77,32 +73,18 @@ task unpackStdLibs() {
     }
 }
 
-
 task copyStdlibs(type: Copy) {
-    dependsOn(unpackStdLibs)
+    def ballerinaDist = "build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
+    into ballerinaDist
 
-    into distributionPath
     /* Standard Libraries */
     configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
         def artifactExtractedPath = "${buildDir}/target/extracted-distributions/" + artifact.name + "-zip"
-        into("bir-cache/") {
-            from "${artifactExtractedPath}/caches/bir"
+        into("repo/balo") {
+            from "${artifactExtractedPath}/balo/"
         }
-        into("bre/lib/") {
-            from "${artifactExtractedPath}/libs"
-        }
-        into("docs/") {
-            from "${artifactExtractedPath}/docs"
-        }
-        // pack to new cache
-        into("cache/bir/") {
-            from "${artifactExtractedPath}/caches/bir"
-        }
-        into("cache/balo/") {
-            from "${artifactExtractedPath}/caches/balo"
-        }
-        into("cache/jar/") {
-            from "${artifactExtractedPath}/caches/jar"
+        into("repo/cache") {
+            from "${artifactExtractedPath}/cache"
         }
     }
 }
@@ -114,8 +96,8 @@ task updateTomlFile {
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
-//        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
-//        newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
+        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
+        newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
         ballerinaConfigFile.text = newConfig
     }
 }
@@ -150,34 +132,17 @@ task ballerinaBuild {
                 commandLine 'sh', '-c', "${distributionBinPath}"+'/ballerina build --skip-tests -c'
             }
         }
-        copy {
-            from file("$project.projectDir/Ballerina.toml")
-            into file("$artifactCacheParent/caches/bir/${moduleOrg}/${moduleName}/${tomlVersion}")
-        }
-        copy {
-            from file("$project.projectDir/Ballerina.toml")
-            into file("$artifactCacheParent/caches/balo/${moduleOrg}/${moduleName}/${tomlVersion}")
-        }
-        copy {
-            from file("$project.projectDir/Ballerina.toml")
-            into file("$artifactCacheParent/caches/jar/${moduleOrg}/${moduleName}/${tomlVersion}")
-        }
-        copy {
-            from file("$project.projectDir/target/caches/bir_cache")
-            into file("$artifactCacheParent/caches/bir")
-        }
+
         copy {
             from file("$project.projectDir/target/balo")
-            into file("$artifactCacheParent/caches/balo/${moduleOrg}/${moduleName}/${tomlVersion}")
-        }
-        copy {
-            from targetBallerinaJar
-            into file("$artifactCacheParent/caches/jar/${moduleOrg}/${moduleName}/${tomlVersion}")
+            into file("$artifactCacheParent/balo/${packageOrg}/${packageName}/${tomlVersion}")
         }
 
         copy {
-            from targetBallerinaJar
-            into file("$artifactLibParent/libs")
+            from file("$project.projectDir/target/cache")
+            exclude '**/*-testable.jar'
+            exclude '**/tests_cache/'
+            into file("$artifactCacheParent/cache/")
         }
 
         copy {
@@ -190,20 +155,6 @@ task ballerinaBuild {
             into file("$artifactLibParent/libs")
         }
 
-        // Publish to central
-//        if (!project.version.endsWith('-SNAPSHOT') && ballerinaCentralAccessToken != null && project.hasProperty("publishToCentral")) {
-//            println("Publishing to the ballerina central..")
-//            exec {
-//                workingDir project.projectDir
-//                environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-//                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-//                    commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat push ${moduleName} && exit %%ERRORLEVEL%%"
-//                } else {
-//                    commandLine 'sh', '-c', "$distributionBinPath/ballerina push ${moduleName}"
-//                }
-//            }
-//
-//        }
         // Doc creation and packing
         exec {
             workingDir project.projectDir
@@ -215,9 +166,10 @@ task ballerinaBuild {
             }
         }
         copy {
-            from file("$project.projectDir/target/apidocs/${moduleName}")
-            into file("$project.projectDir/build/docs_parent/docs/${moduleName}")
+            from file("$project.projectDir/target/apidocs/${packageName}")
+            into file("$project.projectDir/build/docs_parent/docs/${packageName}")
         }
+
         ballerinaConfigFile.text = originalConfig
     }
 
@@ -348,38 +300,3 @@ copyStdlibs.dependsOn unpackStdLibs
 updateTomlFile.dependsOn copyStdlibs
 ballerinaBuild.dependsOn updateTomlFile
 build.dependsOn(ballerinaBuild)
-
-
-
-
-// previous gradle file
-
-//apply from: "$rootDir/gradle/balNativeLibProject.gradle"
-//apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
-//
-//dependencies {
-//    baloCreat group: 'org.ballerinalang', name: 'lib-creator', version: "${ballerinaLangVersion}"
-////recheck
-//    baloImplementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
-//
-//    compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
-//    compile group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
-//    compile group: 'org.ballerinalang', name: 'ballerina-logging', version: "${ballerinaLangVersion}"
-//    compile group: 'org.ballerinalang', name: 'io-native', version: "${stdlibIoVersion}"
-//    compile group: 'org.ballerinalang', name: 'mime-native', version: "${stdlibMimeVersion}"
-//    compile group: 'org.ballerinalang', name: 'ballerina-log-api', version: "${stdlibMimeVersion}"
-//
-//
-////    implementation project(':ballerina-http')
-////    implementation project(':ballerina-mime')
-////    implementation project(':ballerina-logging')
-////    implementation project(':ballerina-log-api')
-////    implementation project(':ballerina-lang:annotations')
-////    implementation project(':ballerina-io')
-//}
-//
-//createBalo {
-//    jvmTarget = 'true'
-//}
-//
-//description = 'Ballerina - OpenApi'
