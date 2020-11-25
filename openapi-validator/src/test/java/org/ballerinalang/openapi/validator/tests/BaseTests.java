@@ -77,8 +77,7 @@ public class BaseTests {
                 SyntaxKind syntaxKind = node.kind();
                 // Take the service for validation
                 if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                    STServiceDeclarationNode stServiceDeclarationNode =
-                            (STServiceDeclarationNode)node.internalNode();
+                    STServiceDeclarationNode stServiceDeclarationNode = (STServiceDeclarationNode) node.internalNode();
                     STNode stNode = stServiceDeclarationNode.serviceBody;
                     // Extract Service Body for validate
                     if (stNode.kind.equals(SyntaxKind.SERVICE_BODY)) {
@@ -86,21 +85,24 @@ public class BaseTests {
                         for (int i = 0; i < count; i++) {
                             if (stNode.childInBucket(i).kind.equals(SyntaxKind.LIST)) {
                                 int listBucketCount = stNode.childInBucket(i).bucketCount();
-                                for (int j = 0; j < listBucketCount ; j++) {
-                                    if (stNode.childInBucket(i).childInBucket(j).kind.equals(SyntaxKind.FUNCTION_DEFINITION)) {
+                                for (int j = 0; j < listBucketCount; j++) {
+                                    if (stNode.childInBucket(i).childInBucket(j).kind
+                                            .equals(SyntaxKind.FUNCTION_DEFINITION)) {
                                         STFunctionDefinitionNode functionDefinitionNode =
                                                 (STFunctionDefinitionNode) stNode.childInBucket(i).childInBucket(j);
                                         // Function Signature handle parameter
                                         STFunctionSignatureNode stFunctionSignatureNode =
-                                                (STFunctionSignatureNode) functionDefinitionNode.functionSignature;
+                                                (STFunctionSignatureNode) functionDefinitionNode.functionSignature ;
                                         STNodeList stNodeParameter =
-                                                (STNodeList) stFunctionSignatureNode.parameters;
+                                                (STNodeList) stFunctionSignatureNode.parameters ;
                                         int parameterCount = stNodeParameter.bucketCount();
-                                        for (int k = 0; k < parameterCount ; k++) {
-                                            if (stNodeParameter.childInBucket(k).kind.equals(SyntaxKind.REQUIRED_PARAM)) {
+                                        for (int k = 0; k < parameterCount; k++) {
+                                            if (stNodeParameter.childInBucket(k).kind
+                                                    .equals(SyntaxKind.REQUIRED_PARAM)) {
                                                 STRequiredParameterNode stRequiredParameterNode =
-                                                        (STRequiredParameterNode) stNodeParameter.childInBucket(k);
-                                                if (stRequiredParameterNode.typeName.kind.equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+                                                        (STRequiredParameterNode) stNodeParameter.childInBucket(k) ;
+                                                if (stRequiredParameterNode.typeName.kind
+                                                        .equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
                                                     //take the record parameter
                                                 }
                                             }
@@ -110,27 +112,30 @@ public class BaseTests {
 //                                        STNode functionNode = stNode.childInBucket(i).childInBucket(j);
 //                                        int functionChildList = functionNode.bucketCount();
 //                                        for (int k = 0; k < functionChildList ; k++) {
-//                                            if (functionNode.childInBucket(k).kind.equals(SyntaxKind.FUNCTION_SIGNATURE)) {
+//                                            if (functionNode.childInBucket(k).kind
+//                                            .equals(SyntaxKind.FUNCTION_SIGNATURE)) {
 //                                                int functionList = functionNode.bucketCount();
-//                                                for (int l = 0; l < functionList ; l++) {
+//                                                for (int l = 0; l < functionList; l++) {
 //                                                    if (functionNode.childInBucket(l).kind.equals(SyntaxKind.LIST)) {
 //                                                        List<STNode> functionNodeList =
-//                                                                (List<STNode>) functionNode.childInBucket(l);
+//                                                                (List<STNode>) functionNode.childInBucket(l) ;
 //                                                        for (STNode functionStNode : functionNodeList) {
-//                                                            int parameterCount = functionStNode.bucketCount();
-//                                                            for (int m = 0; m < parameterCount ; m++) {
-//                                                                if (functionStNode.childInBucket(m).kind.equals(SyntaxKind.REQUIRED_PARAM)) {
+//                                                            int parameterCount = functionStNode.bucketCount() ;
+//                                                            for (int m = 0; m < parameterCount; m++) {
+//                                                                if (functionStNode.childInBucket(m).kind
+//                                                                .equals(SyntaxKind.REQUIRED_PARAM)) {
 //                                                                    STRequiredParameterNode parameterNode =
-//                                                                            (STRequiredParameterNode)functionNode.childInBucket(m);
-//                                                                    if (parameterNode.typeName.kind.equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+//                                                                            (STRequiredParameterNode)functionNode
+//                                                                            .childInBucket(m);
+//                                                                    if (parameterNode.typeName.kind
+//                                                                    .equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
 //                                                                        int countRequiredPara =
 //                                                                                parameterNode.typeName.bucketCount();
 //                                                                        for (int n = 0; n < countRequiredPara ; n++) {
 //                                                                            STSimpleNameReferenceNode parameter =
-//                                                                                    (STSimpleNameReferenceNode) parameterNode.typeName.childInBucket(n);
+//                                                                                    (STSimpleNameReferenceNode)
+//                                                                                    parameterNode.typeName.childInBucket(n);
 //                                                                        }
-//
-//
 //                                                                    }
 //                                                                }
 //                                                            }

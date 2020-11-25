@@ -25,6 +25,9 @@ import org.ballerinalang.openapi.validator.error.ValidationError;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * java.
+ */
 public class SyntaxTreeToJsonValidatorUtil {
 
     public static List<ValidationError> validate(Schema<?> schema, SyntaxTree syntaxTree) {
