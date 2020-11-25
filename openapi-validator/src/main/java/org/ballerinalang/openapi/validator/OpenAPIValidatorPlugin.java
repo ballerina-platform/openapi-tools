@@ -111,30 +111,8 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                         if (key.equals(Constants.CONTRACT)) {
                             if (valueExpr instanceof BLangLiteral) {
                                 BLangLiteral value = (BLangLiteral) valueExpr;
-//                                SourceDirectoryManager sourceDirectoryManager = SourceDirectoryManager.getInstance(
-//                                        compilerContext);
-//                                Path sourceDir = sourceDirectoryManager.getSourceDirectory().getPath();
+                                // Need to refactor with project-api changes
                                 Path sourceDir = Paths.get(System.getProperty(USER_DIR));
-//                                Path pkg = Paths.get(packageName);
-//                                String packagePath = pkg.toString();
-//                                String currentPackage = null;
-//                                String[] packageList = packagePath.split(".");
-//                                if (packageList.length != 0) {
-//                                    currentPackage = packageList[packageList.length - 1];
-//                                } else {
-//                                    currentPackage = pkg.toString();
-//                                }
-//
-//                                Path filePath = Paths.get((currentPackage.equals(".") ? "" : currentPackage),
-//                                        (new File(serviceNode.getPosition().lineRange().filePath()).getName())
-//                                                .replaceAll("(\\w+)(-(\\w+))*(\\.bal)", "")
-//                                                .replaceAll("^/+", ""));
-//
-//                                String projectDir = filePath.toString().
-//                                        contains(sourceDir.toString().replaceAll("^/+", "")) ?
-//                                        sourceDir.toString() :
-//                                        Paths.get(sourceDir.toString(), "modules", filePath.toString()).toString();
-
                                 if (value.getValue() instanceof String) {
                                     String userUri = (String) value.getValue();
 
