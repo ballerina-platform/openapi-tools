@@ -93,7 +93,18 @@ test {
 //        }
 //    }
 //}
-
+shadowJar {
+    configurations = [project.configurations.runtimeClasspath]
+    dependencies {
+        include(dependency('com.github.jknack:handlebars'))
+        include(dependency('org.antlr:antlr4:4.5'))
+        include(dependency('com.atlassian.commonmark:commonmark'))
+        include(dependency('com.atlassian.commonmark:commonmark-ext-gfm-tables'))
+        exclude('META-INF/*.SF')
+        exclude('META-INF/*.DSA')
+        exclude('META-INF/*.RSA')
+    }
+}
 
 compileJava {
     doFirst {
