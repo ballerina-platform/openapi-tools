@@ -47,7 +47,7 @@ public class ValidValidatorUtilTests {
     @Test(enabled = false, description = "Valid test case for all test case")
     public void  testValidCase() throws OpenApiValidatorException, UnsupportedEncodingException {
 //        Load yaml file
-        Path contractPath = RES_DIR.resolve("validTests/valid.yaml");
+        Path contractPath = RES_DIR.resolve("validTests/validRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        Load BlangPackage for given .bal file
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/validSchema.bal");

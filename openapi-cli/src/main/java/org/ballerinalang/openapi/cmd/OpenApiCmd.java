@@ -133,7 +133,11 @@ public class OpenApiCmd implements BLauncherCmd {
                     throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
                 }
             } else if (fileName.endsWith(".bal")) {
-                ballerinaToOpenApi(fileName);
+                try {
+                    ballerinaToOpenApi(fileName);
+                } catch (IOException e) {
+                    throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
+                }
             } else {
                 throw LauncherUtils.createLauncherException(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
             }
@@ -148,11 +152,12 @@ public class OpenApiCmd implements BLauncherCmd {
      * This util method to generate openApi contract based on the given service ballerina file.
      * @param fileName  input resource file
      */
-    private void ballerinaToOpenApi(String fileName) {
+    private void ballerinaToOpenApi(String fileName) throws IOException {
         final File balFile = new File(fileName);
+        Path balFilePath = Paths.get(balFile.getCanonicalPath());
         String serviceName = service;
         getTargetOutputPath();
-        Path resourcePath = getRelativePath(balFile, this.targetOutputPath.toString());
+        Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
         //ballerina openapi -i service.bal --serviceName serviceName --module exampleModul -o ./
         // Check service name it is mandatory
         if (module != null && service != null) {
@@ -168,13 +173,13 @@ public class OpenApiCmd implements BLauncherCmd {
             }
         } else if (serviceName != null) {
             try {
-                OpenApiConverterUtils.generateOAS3Definitions(resourcePath, targetOutputPath, serviceName);
+                OpenApiConverterUtils.generateOAS3Definitions(balFilePath, targetOutputPath, serviceName);
             } catch (IOException | OpenApiConverterException e) {
                 throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
             }
         } else {
             try {
-                OpenApiConverterUtils.generateOAS3DefinitionsAllService(resourcePath, targetOutputPath);
+                OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath);
             } catch (IOException | OpenApiConverterException | CompilationFailedException e) {
                 throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
             }
