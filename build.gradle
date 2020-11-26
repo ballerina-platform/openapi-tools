@@ -44,7 +44,7 @@ ext.stdlibCacheVersion = project.stdlibCacheVersion
 ext.stdlibTimeVersion = project.stdlibTimeVersion
 ext.stdlibCryptoVersion = project.stdlibCryptoVersion
 ext.stdlibTaskVersion = project.stdlibTaskVersion
-ext.stdlibReflectVersion = project.stdlibReflectVersion
+//ext.stdlibReflectVersion = project.stdlibReflectVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
 
@@ -172,13 +172,13 @@ allprojects {
                 password System.getenv("packagePAT")
             }
         }
-        maven {
-            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-reflect'
-            credentials {
-                username System.getenv("packageUser")
-                password System.getenv("packagePAT")
-            }
-        }
+//        maven {
+//            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-reflect'
+//            credentials {
+//                username System.getenv("packageUser")
+//                password System.getenv("packagePAT")
+//            }
+//        }
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/ballerina-lang'
             credentials {
@@ -237,7 +237,7 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:time-ballerina:${stdlibTimeVersion}"
         ballerinaStdLibs "org.ballerinalang:cache-ballerina:${stdlibCacheVersion}"
         ballerinaStdLibs "org.ballerinalang:task-ballerina:${stdlibTaskVersion}"
-        ballerinaStdLibs "org.ballerinalang:reflect-ballerina:${stdlibReflectVersion}"
+//        ballerinaStdLibs "org.ballerinalang:reflect-ballerina:${stdlibReflectVersion}"
         ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
 
     }

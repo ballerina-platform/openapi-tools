@@ -25,7 +25,6 @@ import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.PackageNode;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
-import org.wso2.ballerinalang.compiler.SourceDirectoryManager;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangListConstructorExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangLiteral;
@@ -41,20 +40,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.ballerinalang.openapi.validator.Constants.USER_DIR;
+
 /**
  * Compiler plugin for ballerina OpenAPI/service validator.
  */
 @SupportedAnnotationPackages(value = {"ballerina/openapi"})
 public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
-    private DiagnosticLog dLog = null;
     private CompilerContext compilerContext;
     private String packageName;
+    private DiagnosticLog dLog;
 
     @Override
     public void init(DiagnosticLog diagnosticLog) {
-        this.dLog = diagnosticLog;
-    }
 
+        dLog = diagnosticLog;
+    }
     @Override
     public void setCompilerContext(CompilerContext context) {
         this.compilerContext = context;
@@ -110,28 +111,18 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                         if (key.equals(Constants.CONTRACT)) {
                             if (valueExpr instanceof BLangLiteral) {
                                 BLangLiteral value = (BLangLiteral) valueExpr;
-                                SourceDirectoryManager sourceDirectoryManager = SourceDirectoryManager.getInstance(
-                                        compilerContext);
-                                Path sourceDir = sourceDirectoryManager.getSourceDirectory().getPath();
-                                Path pkg = Paths.get(packageName);
-                                Path filePath = Paths.get((pkg.toString().equals(".") ? "" : pkg.toString()),
-                                        (new File(serviceNode.getPosition().lineRange().filePath()).getName())
-                                                .replaceAll("(\\w+)(-(\\w+))*(\\.bal)", "")
-                                                .replaceAll("^/+", ""));
-
-                                String projectDir = filePath.toString().
-                                        contains(sourceDir.toString().replaceAll("^/+", "")) ?
-                                        sourceDir.toString() :
-                                        Paths.get(sourceDir.toString(), "src", filePath.toString()).toString();
+                                // Need to refactor with project-api changes
+                                Path sourceDir = Paths.get(System.getProperty(USER_DIR));
                                 if (value.getValue() instanceof String) {
                                     String userUri = (String) value.getValue();
 
                                     File file = null;
-                                    if (userUri.contains(projectDir)) {
+                                    if (userUri.contains(sourceDir.toString())) {
                                         file = new File(userUri);
                                     } else {
                                         try {
-                                            file = new File(Paths.get(projectDir, userUri).toRealPath().toString());
+                                            file = new File(Paths.get(sourceDir.toString(),
+                                                    userUri).toRealPath().toString());
                                         } catch (IOException e) {
                                             contractURI = Paths.get(userUri).toString();
                                         }
