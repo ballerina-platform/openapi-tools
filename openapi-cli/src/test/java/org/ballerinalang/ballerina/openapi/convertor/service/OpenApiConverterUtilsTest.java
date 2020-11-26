@@ -21,16 +21,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Ballerina conversion to OpenApi will test in this class.
  */
 
 public class OpenApiConverterUtilsTest {
-    private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/")
-            .toAbsolutePath();
     //Sample Ballerina Service definitions to be used for tests.
     private static String echoServiceBal = "import ballerina/http;\n" +
             "\n" +
@@ -314,14 +310,6 @@ public class OpenApiConverterUtilsTest {
         } catch (OpenApiConverterException e) {
             Assert.assertEquals(e.getMessage(), "Please check if input source is valid and complete");
         }
-    }
-
-    @Test(description = "Test for getting the project instance using ballerina file")
-    public void testProjectInstance() throws IOException, OpenApiConverterException {
-        Path ballerinaFilePath =  RES_DIR.resolve("basicService.bal");
-        Path outputPath = RES_DIR.resolve("output");
-
-        OpenApiConverterUtils.generateOAS3DefinitionsAllServiceNew(ballerinaFilePath,outputPath);
     }
 
 }

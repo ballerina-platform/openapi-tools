@@ -39,7 +39,7 @@ open module io.ballerina.ballerina.openapi {
     requires jsr305;
     requires io.ballerina.tools.api;
 
-
+    exports org.ballerinalang.ballerina;
     exports org.ballerinalang.ballerina.openapi.convertor;
     exports org.ballerinalang.ballerina.openapi.convertor.service;
     exports org.ballerinalang.ballerina.openapi.convertor.service.model;

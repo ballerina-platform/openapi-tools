@@ -16,8 +16,6 @@
 
 package org.ballerinalang.ballerina.openapi.convertor.service;
 
-import io.ballerina.projects.Project;
-import io.ballerina.projects.directory.SingleFileProject;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Swagger;
@@ -424,17 +422,6 @@ public class OpenApiConverterUtils {
         }
     }
 
-    public static void generateOAS3DefinitionsAllServiceNew(Path servicePath, Path outPath)
-            throws IOException, OpenApiConverterException {
-
-        Project project = SingleFileProject.load(servicePath);
-        //travers and filter service
-
-
-
-
-
-    }
 
     /**
      * This method use for checking the duplicate files.
