@@ -38,6 +38,10 @@ open module io.ballerina.ballerina.openapi {
     requires handlebars;
     requires jsr305;
     requires io.ballerina.tools.api;
+    requires io.ballerina.packerina;
+    requires io.ballerina.runtime;
+    requires io.ballerina.runtime.api;
+    requires io.ballerina.parser;
 
     exports org.ballerinalang.ballerina;
     exports org.ballerinalang.ballerina.openapi.convertor;
