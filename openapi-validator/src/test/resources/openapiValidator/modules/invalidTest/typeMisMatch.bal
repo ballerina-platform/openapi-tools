@@ -1,6 +1,6 @@
 
 type User record {
-    int id;
+    string id;
     string username;
     string firstName;
     string lastName;

@@ -16,14 +16,21 @@
 
 package org.ballerinalang.openapi.validator.tests;
 
-import io.ballerina.compiler.internal.parser.tree.STFunctionDefinitionNode;
-import io.ballerina.compiler.internal.parser.tree.STFunctionSignatureNode;
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.internal.parser.tree.STNode;
-import io.ballerina.compiler.internal.parser.tree.STNodeList;
-import io.ballerina.compiler.internal.parser.tree.STRequiredParameterNode;
-import io.ballerina.compiler.internal.parser.tree.STServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.compiler.syntax.tree.ServiceBodyNode;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.projects.Document;
@@ -31,138 +38,103 @@ import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.ModuleName;
 import io.ballerina.projects.Package;
-import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.PackageName;
-import io.ballerina.projects.directory.BuildProject;
+import io.ballerina.projects.directory.SingleFileProject;
+import io.ballerina.tools.text.LinePosition;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * This BaseTests class use for main initializing of the tests.
  */
 public class BaseTests {
     private static final Path RESOURCE_DIRECTORY = Paths.get("src/test/resources/").toAbsolutePath();
-    private final String dummyContent = "function foo() {\n}";
 
-    @Test (description = "tests for validator on build", enabled = true)
-    public void testBuildProject() {
-        Path projectPath = RESOURCE_DIRECTORY.resolve("openapiValidator");
+    public static Inputs returnBType(String file, String testModule) {
+        Inputs inputs = new Inputs();
+        Path projectPath = RESOURCE_DIRECTORY.resolve("openapiValidator/ballerina-files").resolve(file);
+        final TypeSymbol[] paramType = {null};
+        //should be relative to src root
+        Path fileName = Paths.get(file);
 
         // 1. Initializing the project instance
-        BuildProject project = null;
+        SingleFileProject project = null;
         try {
-            project = BuildProject.load(projectPath);
+//            project = BuildProject.load(projectPath);
+            project = SingleFileProject.load(projectPath);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
         // 2. Load the package
         Package currentPackage = project.currentPackage();
         // 3. Load default module
-        Module defaultModule = currentPackage.getDefaultModule();
+        Module module = currentPackage.getDefaultModule();
         // 4. Load syntax tree
         PackageName pkgName = PackageName.from("openapiValidator");
-        ModuleName moduleName = ModuleName.from(pkgName, "validTest");
-        Module module = currentPackage.module(moduleName);
+        ModuleName moduleName = ModuleName.from(pkgName, testModule);
+//        Module module = currentPackage.module(moduleName);
         Iterator<DocumentId> documentIterator = module.documentIds().iterator();
         while (documentIterator.hasNext()) {
             DocumentId docId = documentIterator.next();
             Document doc = module.document(docId);
             SyntaxTree syntaxTree = doc.syntaxTree();
             ModulePartNode modulePartNode = syntaxTree.rootNode();
-            for (Node node: modulePartNode.members()) {
+//            WorkspaceManager workspaceManager = new BallerinaWorkspaceManager();
+            // Load semantic Model for given ballerina file
+            SemanticModel semanticModel = currentPackage.module(moduleName).getCompilation().getSemanticModel();
+            for (Node node : modulePartNode.members()) {
                 SyntaxKind syntaxKind = node.kind();
                 // Take the service for validation
                 if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                    STServiceDeclarationNode stServiceDeclarationNode = (STServiceDeclarationNode) node.internalNode();
-                    STNode stNode = stServiceDeclarationNode.serviceBody;
+                    ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
+                    ServiceBodyNode srvBNode = (ServiceBodyNode) serviceDeclarationNode.serviceBody();
                     // Extract Service Body for validate
-                    if (stNode.kind.equals(SyntaxKind.SERVICE_BODY)) {
-                        int count = stNode.bucketCount();
-                        for (int i = 0; i < count; i++) {
-                            if (stNode.childInBucket(i).kind.equals(SyntaxKind.LIST)) {
-                                int listBucketCount = stNode.childInBucket(i).bucketCount();
-                                for (int j = 0; j < listBucketCount; j++) {
-                                    if (stNode.childInBucket(i).childInBucket(j).kind
-                                            .equals(SyntaxKind.FUNCTION_DEFINITION)) {
-                                        STFunctionDefinitionNode functionDefinitionNode =
-                                                (STFunctionDefinitionNode) stNode.childInBucket(i).childInBucket(j);
-                                        // Function Signature handle parameter
-                                        STFunctionSignatureNode stFunctionSignatureNode =
-                                                (STFunctionSignatureNode) functionDefinitionNode.functionSignature ;
-                                        STNodeList stNodeParameter =
-                                                (STNodeList) stFunctionSignatureNode.parameters ;
-                                        int parameterCount = stNodeParameter.bucketCount();
-                                        for (int k = 0; k < parameterCount; k++) {
-                                            if (stNodeParameter.childInBucket(k).kind
-                                                    .equals(SyntaxKind.REQUIRED_PARAM)) {
-                                                STRequiredParameterNode stRequiredParameterNode =
-                                                        (STRequiredParameterNode) stNodeParameter.childInBucket(k) ;
-                                                if (stRequiredParameterNode.typeName.kind
-                                                        .equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
-                                                    //take the record parameter
-                                                }
-                                            }
-                                        }
-
-                                        // ToDo function body handle
-//                                        STNode functionNode = stNode.childInBucket(i).childInBucket(j);
-//                                        int functionChildList = functionNode.bucketCount();
-//                                        for (int k = 0; k < functionChildList ; k++) {
-//                                            if (functionNode.childInBucket(k).kind
-//                                            .equals(SyntaxKind.FUNCTION_SIGNATURE)) {
-//                                                int functionList = functionNode.bucketCount();
-//                                                for (int l = 0; l < functionList; l++) {
-//                                                    if (functionNode.childInBucket(l).kind.equals(SyntaxKind.LIST)) {
-//                                                        List<STNode> functionNodeList =
-//                                                                (List<STNode>) functionNode.childInBucket(l) ;
-//                                                        for (STNode functionStNode : functionNodeList) {
-//                                                            int parameterCount = functionStNode.bucketCount() ;
-//                                                            for (int m = 0; m < parameterCount; m++) {
-//                                                                if (functionStNode.childInBucket(m).kind
-//                                                                .equals(SyntaxKind.REQUIRED_PARAM)) {
-//                                                                    STRequiredParameterNode parameterNode =
-//                                                                            (STRequiredParameterNode)functionNode
-//                                                                            .childInBucket(m);
-//                                                                    if (parameterNode.typeName.kind
-//                                                                    .equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
-//                                                                        int countRequiredPara =
-//                                                                                parameterNode.typeName.bucketCount();
-//                                                                        for (int n = 0; n < countRequiredPara ; n++) {
-//                                                                            STSimpleNameReferenceNode parameter =
-//                                                                                    (STSimpleNameReferenceNode)
-//                                                                                    parameterNode.typeName.childInBucket(n);
-//                                                                        }
-//                                                                    }
-//                                                                }
-//                                                            }
-//
-//                                                        }
-//                                                    }
-//                                                }
-//                                            }
-//                                        }
+                    int count = srvBNode.internalNode().bucketCount();
+                    STNode internalNode = srvBNode.internalNode();
+                    // Get resource list
+                    NodeList<Node> resourceList = srvBNode.resources();
+                    for (Node resource : resourceList) {
+                        if (resource instanceof FunctionDefinitionNode) {
+                            FunctionDefinitionNode functionNode = (FunctionDefinitionNode) resource;
+                            FunctionSignatureNode functionSignatureNode = functionNode.functionSignature();
+                            SeparatedNodeList<ParameterNode> parameterList = functionSignatureNode.parameters();
+                            for (ParameterNode paramNode : parameterList) {
+                                if (paramNode instanceof RequiredParameterNode) {
+                                    RequiredParameterNode requiredParameterNode = (RequiredParameterNode) paramNode;
+                                    if (requiredParameterNode.typeName().kind()
+                                            .equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+                                        Optional<Symbol> symbol = semanticModel.symbol(fileName.toString(),
+                                                LinePosition.from(requiredParameterNode.lineRange().startLine().line(),
+                                                        requiredParameterNode.lineRange().startLine().offset()));
+                                        symbol.ifPresent(symbol1 -> {
+                                            paramType[0] = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
+                                            // return record type
+                                        });
+                                        inputs.setParamType(paramType[0]);
+                                        inputs.setSyntaxTree(requiredParameterNode.syntaxTree());
+                                        inputs.setSemanticModel(semanticModel);
                                     }
-
                                 }
                             }
                         }
                     }
-
                 }
             }
         }
-
-
-//        Assert.assertEquals(defaultModule.documentIds().size(), 2);
-        // 4. Compile the module
-        PackageCompilation compilation = currentPackage.getCompilation();
-
-        Assert.assertEquals(compilation.diagnosticResult().diagnosticCount(), 2);
-
+        return inputs;
+    }
+    //Filter the given Schema
+    public static Schema getComponet(OpenAPI api, String componentName) {
+        return api.getComponents().getSchemas().get(componentName);
     }
 
+    public static Schema getSchema(OpenAPI api, String path) {
+        return  api.getPaths().get(path).getGet().getParameters().get(0).getSchema();
+    }
 }

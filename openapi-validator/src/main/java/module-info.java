@@ -20,10 +20,11 @@ module io.ballerina.ballerina.openapi.validator {
     requires swagger.parser.core;
     requires io.ballerina.lang;
     requires io.ballerina.tools.api;
-    requires io.ballerina.packerina;
+//    requires io.ballerina.packerina;
     requires io.ballerina.runtime;
     requires io.ballerina.runtime.api;
     requires io.ballerina.parser;
+//    requires io.ballerina.packerina;
 
     exports org.ballerinalang.openapi.validator;
     exports org.ballerinalang.openapi.validator.error;

@@ -63,6 +63,8 @@ dependencies {
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime-api', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
+//    implementation project(':language-server:language-server-commons')
+//    implementation project(':language-server:language-server-compiler')
 
     implementation group: 'org.ballerinalang', name: 'value', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'typedesc', version: "${ballerinaLangVersion}"
@@ -74,8 +76,8 @@ dependencies {
     testCompile 'org.testng:testng'
     testRuntime group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
 
-    implementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
-    testImplementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
+//    testCompile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+//    testImplementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
 
     balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
