@@ -39,6 +39,7 @@ import io.ballerina.projects.Module;
 import io.ballerina.projects.ModuleName;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageName;
+import io.ballerina.projects.Project;
 import io.ballerina.projects.directory.SingleFileProject;
 import io.ballerina.tools.text.LinePosition;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -58,13 +59,13 @@ public class BaseTests {
 
     public static Inputs returnBType(String file, String testModule) {
         Inputs inputs = new Inputs();
-        Path projectPath = RESOURCE_DIRECTORY.resolve("openapiValidator/ballerina-files").resolve(file);
+        Path projectPath = RESOURCE_DIRECTORY.resolve("openapiValidator/ballerina-files/validTest").resolve(file);
         final TypeSymbol[] paramType = {null};
         //should be relative to src root
         Path fileName = Paths.get(file);
 
         // 1. Initializing the project instance
-        SingleFileProject project = null;
+        Project project = null;
         try {
 //            project = BuildProject.load(projectPath);
             project = SingleFileProject.load(projectPath);
@@ -77,7 +78,7 @@ public class BaseTests {
         Module module = currentPackage.getDefaultModule();
         // 4. Load syntax tree
         PackageName pkgName = PackageName.from("openapiValidator");
-        ModuleName moduleName = ModuleName.from(pkgName, testModule);
+        ModuleName moduleName = ModuleName.from(currentPackage.packageName(), testModule);
 //        Module module = currentPackage.module(moduleName);
         Iterator<DocumentId> documentIterator = module.documentIds().iterator();
         while (documentIterator.hasNext()) {
@@ -87,7 +88,7 @@ public class BaseTests {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
 //            WorkspaceManager workspaceManager = new BallerinaWorkspaceManager();
             // Load semantic Model for given ballerina file
-            SemanticModel semanticModel = currentPackage.module(moduleName).getCompilation().getSemanticModel();
+            SemanticModel semanticModel = module.getCompilation().getSemanticModel();
             for (Node node : modulePartNode.members()) {
                 SyntaxKind syntaxKind = node.kind();
                 // Take the service for validation

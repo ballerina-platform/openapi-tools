@@ -6,7 +6,6 @@ import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.syntax.tree.DocumentationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.tools.text.LinePosition;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -21,7 +20,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class TypeSymbolToJsonValidatorUtil {
-    public static List<ValidationError> validate(Schema<?> schema, TypeSymbol typeSymbol, SemanticModel semanticModel)
+    public static List<ValidationError> validate(Schema<?> schema, TypeSymbol typeSymbol,
+                                                 SyntaxTree syntaxTree, SemanticModel semanticModel)
             throws OpenApiValidatorException {
 
         List<ValidationError> validationErrorList = new ArrayList<>();
@@ -45,19 +45,20 @@ public class TypeSymbolToJsonValidatorUtil {
                                     convertTypeToEnum(fieldSymbol.typeDescriptor().typeKind().getName()),
                                     fieldSymbol.signature());
                             validationErrorList.add(validationError);
-                        } else if (entry.getValue() instanceof ObjectSchema) {
+                        } else if ((entry.getValue() instanceof ObjectSchema) && (fieldSymbol.typeDescriptor() instanceof TypeReferenceTypeSymbol)) {
                             // Handle the nested record type
-                             DocumentationNode reference = (DocumentationNode) fieldSymbol.documentation().get();
+//                             DocumentationNode reference = (DocumentationNode) fieldSymbol.documentation().get();
+//                             fieldSymbol.typeDescriptor().langLibMethods().
                             TypeSymbol refRecordType[] = null;
-                            List<ValidationError> nestedValidationError = new ArrayList<>();
-                            SyntaxTree syntaxTree = reference.syntaxTree();
+                            List<ValidationError> nestedValidationError;
                             Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
-                                    LinePosition.from(reference.lineRange().startLine().line(),
-                                            reference.lineRange().startLine().offset()));
+                                    LinePosition.from(fieldSymbol.location().lineRange().startLine().line(),
+                                            fieldSymbol.location().lineRange().startLine().offset()));
                             symbol.ifPresent(symbol1 -> {
                                 refRecordType[0] = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
                             });
-                            nestedValidationError = validate(entry.getValue(), refRecordType[0],semanticModel);
+                            nestedValidationError = validate(entry.getValue(), refRecordType[0], syntaxTree,
+                                    semanticModel);
                             validationErrorList.addAll(nestedValidationError);
 
                         } else {

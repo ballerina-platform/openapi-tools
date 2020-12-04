@@ -77,7 +77,7 @@ public class RecordValidationTests {
     public void testNestedRecord() throws OpenApiValidatorException {
         //Extract record type for the syntax tree
         Path balfile = RESOURCE_DIRECTORY.resolve("validTest/nestedRecord.bal");
-        inputs = BaseTests.returnBType("validTest/nestedRecord.bal", "validTest");
+        inputs = BaseTests.returnBType("nestedRecord.bal", "validTest");
         //Load yaml file
         Path contractPath = RES_DIR.resolve("validTests/nestedRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());

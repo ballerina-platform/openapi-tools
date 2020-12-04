@@ -79,7 +79,8 @@ public class SyntaxTreeToJsonValidatorUtil {
                                         paramType[0] = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
                                     });
                                     // TypeSymbol validator
-                                    validationErrorList = TypeSymbolToJsonValidatorUtil.validate(schema, paramType[0],
+                                    validationErrorList = TypeSymbolToJsonValidatorUtil.validate(schema, paramType[0]
+                                            , requiredParameterNode.syntaxTree(),
                                             semanticModel);
                                 }
                             }
