@@ -23,6 +23,8 @@ import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.ServiceValidator;
 import org.ballerinalang.openapi.validator.SyntaxTreeToJsonValidatorUtil;
+import org.ballerinalang.openapi.validator.TypeSymbolToJsonValidatorUtil;
+import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.testng.Assert;
@@ -51,7 +53,7 @@ public class RecordValidationTests {
     @Test(description = "Test for the valid", enabled = true)
     public void testValidRecord() throws OpenApiValidatorException {
         //Extract record type for the syntax tree
-        inputs = BaseTests.returnBType("validRecord.bal", "validTest");
+        inputs = BaseTests.returnBType("validRecord.bal", "validTest", "");
         //Load yaml file
         Path contractPath = RES_DIR.resolve("validTests/validRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
@@ -63,7 +65,7 @@ public class RecordValidationTests {
     @Test(description = "Test for the type mismatching", enabled = true)
     public void testTypeMismatchinFieldRecord() throws OpenApiValidatorException {
         //Extract record type for the syntax tree
-        inputs = BaseTests.returnBType("typeMisMatch.bal", "invalidTest");
+        inputs = BaseTests.returnBType("typeMisMatch.bal", "invalidTest","User");
         //Load yaml file
         Path contractPath = RES_DIR.resolve("invalidTests/typeMisMatch.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
@@ -74,16 +76,34 @@ public class RecordValidationTests {
     }
 
     @Test(description = "Test for valid the nested record", enabled = true)
+    public void testExtraFiledInRecord() throws OpenApiValidatorException {
+        //Extract record type for the syntax tree
+//        Path balfile = RESOURCE_DIRECTORY.resolve("invalidTest/extraFieldInRecord.bal");
+        inputs = BaseTests.returnBType("extraFieldInRecord.bal", "invalidTest", "ExtraFieldInRecord");
+        //Load yaml file
+        Path contractPath = RES_DIR.resolve("invalidTests/extraFieldInRecord.yaml");
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        extractSchema = ValidatorTest.getComponet(api, "ExtraFieldInRecord");
+        validationErrorList = TypeSymbolToJsonValidatorUtil
+                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+        Assert.assertTrue(validationErrorList.get(0) instanceof MissingFieldInJsonSchema);
+        Assert.assertEquals(((MissingFieldInJsonSchema)validationErrorList.get(0)).getFieldName(),"status");
+    }
+
+    @Test(description = "Test for valid the nested record", enabled = true)
     public void testNestedRecord() throws OpenApiValidatorException {
         //Extract record type for the syntax tree
         Path balfile = RESOURCE_DIRECTORY.resolve("validTest/nestedRecord.bal");
-        inputs = BaseTests.returnBType("nestedRecord.bal", "validTest");
+        inputs = BaseTests.returnBType("nestedRecord.bal", "validTest", "NestedRecord");
         //Load yaml file
         Path contractPath = RES_DIR.resolve("validTests/nestedRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getComponet(api, "NestedRecord");
-        validationErrorList = SyntaxTreeToJsonValidatorUtil.validate(extractSchema, inputs.getSyntaxTree(), inputs.getSemanticModel());
-//        Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
-//        Assert.assertEquals(((TypeMismatch)validationErrorList.get(0)).getFieldName(),"id");
+        validationErrorList = TypeSymbolToJsonValidatorUtil
+                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+        Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
+        Assert.assertEquals(((TypeMismatch)validationErrorList.get(0)).getFieldName(),"id");
     }
+
+
 }

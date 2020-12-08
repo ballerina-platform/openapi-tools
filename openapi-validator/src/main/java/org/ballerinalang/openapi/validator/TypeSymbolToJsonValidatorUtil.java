@@ -6,6 +6,7 @@ import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.tools.text.LinePosition;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -25,6 +26,7 @@ public class TypeSymbolToJsonValidatorUtil {
             throws OpenApiValidatorException {
 
         List<ValidationError> validationErrorList = new ArrayList<>();
+        //Check given type is record or not
         if (typeSymbol instanceof RecordTypeSymbol) {
             Map<String, Schema> properties = schema.getProperties();
             if (schema instanceof ObjectSchema) {
@@ -49,15 +51,32 @@ public class TypeSymbolToJsonValidatorUtil {
                             // Handle the nested record type
 //                             DocumentationNode reference = (DocumentationNode) fieldSymbol.documentation().get();
 //                             fieldSymbol.typeDescriptor().langLibMethods().
-                            TypeSymbol refRecordType[] = null;
+                            TypeSymbol refRecordType = null;
                             List<ValidationError> nestedValidationError;
                             Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
                                     LinePosition.from(fieldSymbol.location().lineRange().startLine().line(),
                                             fieldSymbol.location().lineRange().startLine().offset()));
-                            symbol.ifPresent(symbol1 -> {
-                                refRecordType[0] = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
-                            });
-                            nestedValidationError = validate(entry.getValue(), refRecordType[0], syntaxTree,
+                            fieldSymbol.typeDescriptor();
+                            if (symbol != null && symbol.isPresent()) {
+                                Symbol symbol1 = symbol.get();
+                                if (symbol1 instanceof TypeReferenceTypeSymbol) {
+                                    refRecordType = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
+                                } else if (symbol1 instanceof VariableSymbol) {
+                                    VariableSymbol variableSymbol = (VariableSymbol) symbol1;
+                                    if (variableSymbol.typeDescriptor() != null) {
+                                        Symbol variable = variableSymbol.typeDescriptor();
+                                        if ( variable instanceof TypeReferenceTypeSymbol) {
+                                            if (((TypeReferenceTypeSymbol) variable).typeDescriptor() != null) {
+                                                refRecordType = ((TypeReferenceTypeSymbol)variable).typeDescriptor();
+                                            }
+                                        } else {
+                                            refRecordType = variableSymbol.typeDescriptor();
+                                        }
+
+                                    }
+                                }
+                            }
+                            nestedValidationError = validate(entry.getValue(), refRecordType, syntaxTree,
                                     semanticModel);
                             validationErrorList.addAll(nestedValidationError);
 
@@ -77,7 +96,7 @@ public class TypeSymbolToJsonValidatorUtil {
                 }
 
             }
-            //Check given type is record or not
+
 
             return validationErrorList;
         }

@@ -9,17 +9,14 @@ type Tag record {
     string name;
 };
 
-type NestedRecord record {
+type ExtraFieldInRecord record {
     int id;
-    Category category;
     string name;
-    string photoUrls;
-    //Tag [] tags;
     string status;
 };
 
 service hello on new http:Listener(9090) {
-    resource function get student (NestedRecord body) {
+    resource function get student (ExtraFieldInRecord body) {
     }
     //resource function get student (@http:Payload NestedRecord body) {
     //}

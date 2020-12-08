@@ -19,28 +19,19 @@
 package org.ballerinalang.openapi.validator;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceBodyNode;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.tools.text.LinePosition;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.error.ValidationError;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
+//import io.ballerina.compiler.syntax.tree.ServiceBodyNode;
 
 /**
  * java.
@@ -55,45 +46,54 @@ public class SyntaxTreeToJsonValidatorUtil {
         ModulePartNode modulePartNode = syntaxTree.rootNode();
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
+
+            //------------comment due to service implementing happening
+            if (syntaxKind.equals(SyntaxKind.TYPE_DEFINITION)) {
+                TypeDefinitionNode typeNode = (TypeDefinitionNode) node;
+            }
             // Take the service for validation
-            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
-                ServiceBodyNode srvBNode = (ServiceBodyNode) serviceDeclarationNode.serviceBody();
+//            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
+//                ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
+//                ServiceBodyNode srvBNode = (ServiceBodyNode) serviceDeclarationNode.serviceBody();
                 // Extract Service Body for validate
                 // Get resource list
-                NodeList<Node> resourceList = srvBNode.resources();
-                for (Node resource : resourceList) {
-                    if (resource instanceof FunctionDefinitionNode) {
-                        FunctionDefinitionNode functionNode = (FunctionDefinitionNode) resource;
-                        FunctionSignatureNode functionSignatureNode = functionNode.functionSignature();
-                        SeparatedNodeList<ParameterNode> parameterList = functionSignatureNode.parameters();
-                        for (ParameterNode paramNode : parameterList) {
-                            if (paramNode instanceof RequiredParameterNode) {
-                                RequiredParameterNode requiredParameterNode = (RequiredParameterNode) paramNode;
-                                if (requiredParameterNode.typeName().kind()
-                                        .equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
-                                    Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
-                                            LinePosition.from(requiredParameterNode.lineRange().startLine().line(),
-                                                    requiredParameterNode.lineRange().startLine().offset()));
-                                    symbol.ifPresent(symbol1 -> {
-                                        paramType[0] = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
-                                    });
-                                    // TypeSymbol validator
-                                    validationErrorList = TypeSymbolToJsonValidatorUtil.validate(schema, paramType[0]
-                                            , requiredParameterNode.syntaxTree(),
-                                            semanticModel);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+//                NodeList<Node> resourceList = serviceDeclarationNode.resources();
+//                for (Node resource : resourceList) {
+//                    if (resource instanceof FunctionDefinitionNode) {
+//                        FunctionDefinitionNode functionNode = (FunctionDefinitionNode) resource;
+//                        FunctionSignatureNode functionSignatureNode = functionNode.functionSignature();
+//                        SeparatedNodeList<ParameterNode> parameterList = functionSignatureNode.parameters();
+//                        for (ParameterNode paramNode : parameterList) {
+//                            if (paramNode instanceof RequiredParameterNode) {
+//                                RequiredParameterNode requiredParameterNode = (RequiredParameterNode) paramNode;
+//                                if (requiredParameterNode.typeName().kind()
+//                                        .equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+//                                    Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
+//                                            LinePosition.from(requiredParameterNode.lineRange().startLine().line(),
+//                                                    requiredParameterNode.lineRange().startLine().offset()));
+//                                    symbol.ifPresent(symbol1 -> {
+//                                        paramType[0] = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
+//                                    });
+//                                    // TypeSymbol validator
+//                                    validationErrorList = TypeSymbolToJsonValidatorUtil.validate(schema, paramType[0]
+//                                            , requiredParameterNode.syntaxTree(),
+//                                            semanticModel);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
+
+//                --------------------------------------------------------
+
 //        ModulePartNode modulePartNode = syntaxTree.rootNode();
 //        for (Node node : modulePartNode.members()) {
 //            SyntaxKind syntaxKind = node.kind();
 //            System.out.println(syntaxKind);
 //        }
+//                ---------------------------------------------------
 
         return validationErrorList;
     }

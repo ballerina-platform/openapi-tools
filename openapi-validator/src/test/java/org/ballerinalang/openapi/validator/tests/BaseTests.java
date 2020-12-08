@@ -20,19 +20,19 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.internal.parser.tree.STNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceBodyNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -57,9 +57,9 @@ import java.util.Optional;
 public class BaseTests {
     private static final Path RESOURCE_DIRECTORY = Paths.get("src/test/resources/").toAbsolutePath();
 
-    public static Inputs returnBType(String file, String testModule) {
+    public static Inputs returnBType(String file, String testModule, String typeName) {
         Inputs inputs = new Inputs();
-        Path projectPath = RESOURCE_DIRECTORY.resolve("openapiValidator/ballerina-files/validTest").resolve(file);
+        Path projectPath = RESOURCE_DIRECTORY.resolve("openapiValidator/ballerina-files").resolve(testModule).resolve(file);
         final TypeSymbol[] paramType = {null};
         //should be relative to src root
         Path fileName = Paths.get(file);
@@ -92,14 +92,33 @@ public class BaseTests {
             for (Node node : modulePartNode.members()) {
                 SyntaxKind syntaxKind = node.kind();
                 // Take the service for validation
+                if (syntaxKind.equals(SyntaxKind.TYPE_DEFINITION)) {
+                    TypeDefinitionNode typeNode = (TypeDefinitionNode) node;
+                    if (typeName.equals(((IdentifierToken)(typeNode.typeName())).toString().trim())) {
+
+                        Optional<Symbol> symbol = semanticModel.symbol(fileName.toString(),
+                                LinePosition.from(typeNode.lineRange().startLine().line(),
+                                        typeNode.lineRange().startLine().offset()));
+
+                        symbol.ifPresent(symbol1 -> { paramType[0] =
+                                ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();});
+
+                        Node node2 = typeNode.typeDescriptor();
+
+//                        inputs.setParamType((TypeSymbol) typeNode.typeDescriptor());
+//                        inputs.setSyntaxTree(typeNode.syntaxTree());
+//                        inputs.setSemanticModel(semanticModel);
+                    }
+                }
+                //-------------------------- comment due to service payload still
                 if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                     ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
-                    ServiceBodyNode srvBNode = (ServiceBodyNode) serviceDeclarationNode.serviceBody();
-                    // Extract Service Body for validate
-                    int count = srvBNode.internalNode().bucketCount();
-                    STNode internalNode = srvBNode.internalNode();
+//                    ServiceBodyNode srvBNode = (ServiceBodyNode) serviceDeclarationNode.serviceBody();
+//                    // Extract Service Body for validate
+//                    int count = serviceDeclarationNode.internalNode().bucketCount();
+//                    STNode internalNode = srvBNode.internalNode();
                     // Get resource list
-                    NodeList<Node> resourceList = srvBNode.resources();
+                    NodeList<Node> resourceList = serviceDeclarationNode.members();
                     for (Node resource : resourceList) {
                         if (resource instanceof FunctionDefinitionNode) {
                             FunctionDefinitionNode functionNode = (FunctionDefinitionNode) resource;

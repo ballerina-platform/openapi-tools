@@ -115,7 +115,7 @@ components:
           type: "string"
       xml:
         name: "Tag"
-    NestedRecord:
+    ExtraFieldInRecord:
       type: "object"
       required:
         - "name"
@@ -124,23 +124,8 @@ components:
         id:
           type: "integer"
           format: "int64"
-        category:
-          $ref: "#/components/schemas/Category"
         name:
           type: "string"
           example: "doggie"
-        photoUrls:
-          type: "string"
-        tags:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Tag"
-        status:
-          type: "string"
-          description: "pet status in the store"
-          enum:
-            - "available"
-            - "pending"
-            - "sold"
       xml:
         name: "NestedRecord"
