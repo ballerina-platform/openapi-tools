@@ -1,22 +1,20 @@
 import ballerina/http;
 
-type Category record {
-    int id;
-    string name;
-};
 type Tag record {
-    int id;
+    string id;
     string name;
 };
-type NestedRecord record {
+type RecordTypeArray record {
     int id;
-    Category category;
+    string category;
     string name;
+    string photoUrls;
+    Tag [] tags;
     string status;
 };
 
 service hello on new http:Listener(9090) {
     resource function sayHello(http:Caller caller,
-        http:Request req, NestedRecord body ) returns error? {
+        http:Request req, RecordTypeArray body ) returns error? {
     }
 }
