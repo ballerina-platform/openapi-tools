@@ -114,7 +114,8 @@ public class TypeExtractorUtil {
             BallerinaOpenApiPath typePath = new BallerinaOpenApiPath();
 
             typePath.setPath(pathName);
-            typePath.setOperationsList(extractOpenApiOperations(pathObject.readOperationsMap(), pathName, filter));
+            typePath.setOperationsList(extractOpenApiOperations(pathObject.readOperationsMap(), typePath,
+                    filter));
 
             paths.add(typePath);
         }
@@ -131,7 +132,7 @@ public class TypeExtractorUtil {
      * @throws BallerinaOpenApiException - throws exception if extraction fails.
      */
     public static List<BallerinaOpenApiOperation> extractOpenApiOperations(Map<PathItem.HttpMethod,
-            Operation> operationMap, String pathName, Filter filter) throws BallerinaOpenApiException {
+            Operation> operationMap, BallerinaOpenApiPath pathName, Filter filter) throws BallerinaOpenApiException {
         final Iterator<Map.Entry<PathItem.HttpMethod, Operation>> opIterator = operationMap.entrySet().iterator();
         List<BallerinaOpenApiOperation> typeOpList = new ArrayList<>();
 
@@ -141,7 +142,7 @@ public class TypeExtractorUtil {
             final Operation opObject = nextOp.getValue();
             BallerinaOpenApiOperation operation = new BallerinaOpenApiOperation();
 
-            operation.setOpMethod(opMethod.toString());
+            operation.setOpMethod(opMethod.toString().toLowerCase(Locale.ENGLISH));
             List<String> operationTags = opObject.getTags();
             String operationId = opObject.getOperationId();
             if (((filter.getTags().isEmpty()) && (filter.getOperations().isEmpty()))
@@ -163,24 +164,23 @@ public class TypeExtractorUtil {
      * @param operation     ballerinaOpenApiOperation object
      * @throws BallerinaOpenApiException throws ballerina openApi exception
      */
-    private static void setFilteredOperation(String pathName, Map.Entry<PathItem.HttpMethod, Operation> nextOp,
-                                             Operation opObject, BallerinaOpenApiOperation operation)
+    private static void setFilteredOperation(BallerinaOpenApiPath pathName, Map.Entry<PathItem.HttpMethod,
+            Operation> nextOp, Operation opObject, BallerinaOpenApiOperation operation)
             throws BallerinaOpenApiException {
 
-        if (opObject.getOperationId() == null) {
-            String resName = "resource_" + nextOp.getKey().toString().toLowerCase(Locale.ENGLISH)
-                    + pathName.replaceAll("/", "_")
-                    .replaceAll("[{}]", "");
-            operation.setOpName(resName);
-            outStream.println("warning : `" + resName + "` is used as the resource name since the " +
-                    "operation id is missing for " + pathName + " " + nextOp.getKey());
-        } else {
-            operation.setOpName(escapeIdentifier(
-                    opObject.getOperationId().replace(" ", "_")));
-        }
-
+        operation.setOpName(pathName.getPath().replaceFirst("/", ""));
         if (opObject.getParameters() != null) {
-            operation.setParameterList(extractOpenApiParameters(opObject.getParameters()));
+            List<BallerinaOpenApiParameter> parameters = extractOpenApiParameters(opObject.getParameters());
+            for (BallerinaOpenApiParameter parameter : parameters) {
+                if (parameter.isPathParam()) {
+                    operation.setOpName(pathName.getPath().replace("{" + parameter.getParamName() + "}",
+                            "[" + parameter.getParamType().getSchemaType().get(0) + " " + parameter.getParamName()
+                                    + "]").replaceFirst("/", ""));
+                }
+            }
+            operation.setParameterList(parameters);
+        } else {
+            operation.setOpName(pathName.getPath().replaceFirst("/", ""));
         }
 
         if (opObject.getRequestBody() != null) {

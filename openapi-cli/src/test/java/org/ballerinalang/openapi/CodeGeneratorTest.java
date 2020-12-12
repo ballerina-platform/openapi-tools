@@ -110,7 +110,8 @@ public class CodeGeneratorTest {
             if (generatedFileList.size() > 0) {
                 GenSrcFile actualGeneratedContent = generatedFileList.get(0);
                 Assert.assertEquals(actualGeneratedContent.getContent(), expectedContent,
-                        "expected content and actual generated content is mismatched for: " + yamlFile);
+                        "expected content and actual generated content is mismatched for: " +
+                                actualGeneratedContent.getContent());
             }
         } catch (IOException | BallerinaOpenApiException e) {
             Assert.fail("Error while generating the ballerina content for the openapi definition: "
