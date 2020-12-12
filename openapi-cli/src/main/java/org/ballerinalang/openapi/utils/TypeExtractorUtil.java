@@ -179,8 +179,6 @@ public class TypeExtractorUtil {
                 }
             }
             operation.setParameterList(parameters);
-        } else {
-            operation.setOpName(pathName.getPath().replaceFirst("/", ""));
         }
 
         if (opObject.getRequestBody() != null) {

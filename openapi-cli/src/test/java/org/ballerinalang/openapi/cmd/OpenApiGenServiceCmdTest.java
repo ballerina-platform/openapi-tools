@@ -36,7 +36,8 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
     private static final Path RES_DIR = OpenAPICommandTest.getResourceFolderPath();
     Path resourcePath = Paths.get(System.getProperty(USER_DIR));
 
-    @Test(description = "Test openapi gen-service for successful service generation with inline request body type")
+    @Test(description = "Test openapi gen-service for successful service generation with inline request body type",
+            enabled = false)
     public void testInlineRequestBodyServiceGen() throws IOException {
 
         Path inlineYaml = getExecuteCommand("inline-request-body.yaml", "inlineservice");
@@ -54,6 +55,7 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
                 //Clean the generated files
                 deleteGeneratedFiles("inlineservice-service.bal");
             } else {
+                deleteGeneratedFiles("inlineservice-service.bal");
                 Assert.fail("Expected content and actual generated content is mismatched for: "
                         + inlineYaml.toString());
             }
@@ -62,7 +64,8 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test open-api genservice for successful service generation with all of schema type")
+    @Test(description = "Test open-api genservice for successful service generation with all of schema type",
+            enabled = false)
     public void testAllOfSchemaGen() throws IOException {
         Path allOfYaml = getExecuteCommand("allof-petstore.yaml", "allOfYaml");
         Path expectedServiceFile = RES_DIR.resolve(Paths.get("expected_gen",
@@ -85,7 +88,8 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test open-api genservice for successful service generation with OneOf schema type")
+    @Test(description = "Test open-api genservice for successful service generation with OneOf schema type", enabled
+            = false)
     public void testOneOfSchemaGen() throws IOException {
         Path oneOfYaml = getExecuteCommand("oneof-petstore.yaml", "oneofservice");
         Path expectedServiceFile = RES_DIR.resolve(Paths.get("expected_gen",

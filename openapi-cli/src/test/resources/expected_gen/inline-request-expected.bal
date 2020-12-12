@@ -6,18 +6,10 @@ listener http:Listener ep0 = new(9090);
 @openapi:ServiceInfo {
     contract: "/var/folders/mz/xmjfm34s1n99v74_jtsbsdcw0000gn/T/openapi-cmd5033409960939893222/src/inlineModule/resources/inline-request-body.yaml"
 }
-@http:ServiceConfig {
-    basePath: "/"
-}
+service / on ep0 {
 
-service inlineservice on ep0 {
-
-    @http:ResourceConfig {
-        methods:["POST"],
-        path:"/user",
-        body:"body"
-    }
-    resource function addUser (http:Caller caller, http:Request req, record {  string userName; string userPhone; }  body) returns error? {
+    resource function post user(http:Caller caller, http:Request req, @http:Payload record {  string userName; string
+     userPhone; }  body) returns error? {
 
     }
 
