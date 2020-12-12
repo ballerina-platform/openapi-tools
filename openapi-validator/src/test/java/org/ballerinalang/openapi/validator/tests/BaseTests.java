@@ -17,9 +17,12 @@
 package org.ballerinalang.openapi.validator.tests;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.impl.symbols.BallerinaVariableSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
@@ -28,11 +31,14 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -122,6 +128,43 @@ public class BaseTests {
                     for (Node resource : resourceList) {
                         if (resource instanceof FunctionDefinitionNode) {
                             FunctionDefinitionNode functionNode = (FunctionDefinitionNode) resource;
+                            if (!functionNode.relativeResourcePath().isEmpty()) {
+                                NodeList<Node> parameters = functionNode.relativeResourcePath();
+                                for (Node pathParamNode: parameters) {
+                                    if (pathParamNode instanceof ResourcePathParameterNode) {
+                                        ResourcePathParameterNode pathParam = (ResourcePathParameterNode) pathParamNode;
+                                        Token para = pathParam.paramName();
+
+                                        TypeDescriptorNode type = (TypeDescriptorNode) pathParam.typeDescriptor();
+                                        if (type instanceof BuiltinSimpleNameReferenceNode) {
+                                            Optional<Symbol> symbol = semanticModel.symbol(fileName.toString(),
+                                                    LinePosition.from(type.lineRange().startLine().line(),
+                                                            type.lineRange().startLine().offset()));
+                                            symbol.ifPresent(symbol1 -> {
+                                                paramType[0] = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();});
+
+                                        } else if (type instanceof ArrayTypeDescriptorNode){
+                                            Optional<Symbol> symbol = semanticModel.symbol(fileName.toString(),
+                                                    LinePosition.from(para.lineRange().startLine().line(),
+                                                            para.lineRange().startLine().offset()));
+                                            if (symbol != null && symbol.isPresent()) {
+                                                paramType[0] = ((BallerinaVariableSymbol) symbol.get()).typeDescriptor();
+                                            }
+//                                            symbol.ifPresent(symbol1 -> {
+//                                                paramType[0] = ((ArrayTypeSymbol) symbol1).memberTypeDescriptor();});
+
+                                        }
+                                        inputs.setParamType(paramType[0]);
+                                        inputs.setSyntaxTree(type.syntaxTree());
+                                        inputs.setSemanticModel(semanticModel);
+
+
+
+
+
+                                    }
+                                }
+                            }
                             FunctionSignatureNode functionSignatureNode = functionNode.functionSignature();
                             SeparatedNodeList<ParameterNode> parameterList = functionSignatureNode.parameters();
                             for (ParameterNode paramNode : parameterList) {

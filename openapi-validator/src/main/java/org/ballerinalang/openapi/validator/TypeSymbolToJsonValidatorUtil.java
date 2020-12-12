@@ -4,7 +4,9 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.FieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.SimpleTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.VariableSymbol;
@@ -32,23 +34,66 @@ public class TypeSymbolToJsonValidatorUtil {
     public static List<ValidationError> validate(Schema<?> schema, TypeSymbol typeSymbol,
                                                  SyntaxTree syntaxTree, SemanticModel semanticModel)
             throws OpenApiValidatorException {
-
+        String paramName = "";
+        String schemaType = "";
+        String ballerinaType = "";
         List<ValidationError> validationErrorList = new ArrayList<>();
+        boolean isExitType = false;
         //Check given type is record or not
         if (typeSymbol instanceof RecordTypeSymbol) {
             Map<String, Schema> properties = schema.getProperties();
             if (schema instanceof ObjectSchema) {
                 properties = ((ObjectSchema) schema).getProperties();
             }
+            isExitType = true;
             List<ValidationError> validationError = validateRecordType((RecordTypeSymbol) typeSymbol, syntaxTree,
                     semanticModel, properties);
             validationErrorList.addAll(validationError);
+        } else if (typeSymbol instanceof SimpleTypeSymbol) {
+            paramName= "simpleParam";
+            if (typeSymbol.name().equals(convertOpenAPITypeToBallerina(schema.getType()))) {
+                // type mismatch
+                isExitType = true;
+            } else {
+                schemaType = schema.getType();
+                ballerinaType = typeSymbol.name();
+            }
+        } else if ((typeSymbol instanceof ArrayTypeSymbol) && (schema instanceof  ArraySchema)) {
+            paramName="array";
+            if (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().name().equals(convertOpenAPITypeToBallerina(((ArraySchema) schema).getItems().getType()))) {
+                isExitType = true;
+            } else if ((((ArraySchema) schema).getItems() instanceof ObjectSchema) && (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
+                TypeSymbol recordType = null;
+                isExitType = true;
+                Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
+                        LinePosition.from(((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange().startLine().line(),
+                                ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange().startLine().offset()));
+                if (symbol != null && symbol.isPresent()) {
+                    recordType = ((TypeDefinitionSymbol) symbol.get()).typeDescriptor();
+                }
+                List<ValidationError> recordValidationError = validate(((ArraySchema) schema).getItems(),
+                        recordType, syntaxTree,semanticModel );
+                validationErrorList.addAll(recordValidationError);
+
+            } else {
+                schemaType = ((ArraySchema) schema).getItems().getType();
+                ballerinaType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().name();
+            }
+
+            // handle nested array
+
+
+
+
         }
-//        else if () {
-//
-//        } else if () {
-//
-//        }
+
+        if (!isExitType) {
+            assert schema != null;
+            TypeMismatch typeMismatch = new TypeMismatch(paramName,
+                    convertTypeToEnum(schemaType),
+                    convertTypeToEnum(ballerinaType));
+            validationErrorList.add(typeMismatch);
+        }
 
         return validationErrorList;
     }

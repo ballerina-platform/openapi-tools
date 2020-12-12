@@ -32,6 +32,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BType;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -144,15 +145,59 @@ public class RecordValidationTests {
     @Test(description = "Test for valid the nested record", enabled = true)
     public void testInteger() throws OpenApiValidatorException {
         inputs = BaseTests.returnBType("typeMisMatchPrimitive.bal", "invalidTest", "");
-        Path contractPath = RES_DIR.resolve("invalidTests/arrayTypeFilRecord.yaml");
+        Path contractPath = RES_DIR.resolve("invalidTests/integerPrimitive.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-        extractSchema = ValidatorTest.getComponet(api, "ExtraFieldInRecord");
+        extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         validationErrorList = TypeSymbolToJsonValidatorUtil
                 .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
-        Assert.assertTrue(validationErrorList.get(0) instanceof MissingFieldInJsonSchema);
-        Assert.assertEquals(((MissingFieldInJsonSchema)validationErrorList.get(0)).getFieldName(),"tag");
+        Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
+        Assert.assertEquals(((TypeMismatch)validationErrorList.get(0)).getFieldName(),"paramName");
     }
 
+    @Test(description = "Test for valid the nested record", enabled = true)
+    public void testArray() throws OpenApiValidatorException {
+        inputs = BaseTests.returnBType("arrayB.bal", "invalidTest", "");
+        Path contractPath = RES_DIR.resolve("invalidTests/arrayB.yaml");
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
+        validationErrorList = TypeSymbolToJsonValidatorUtil
+                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+
+        Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
+        Assert.assertEquals(validationErrorList.get(0).getFieldName(), "array");
+        Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
+        Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeBallerinaType(), Constants.Type.INT);
+    }
+
+    @Test(description = "Test for valid the nested record", enabled = true)
+    public void testNestedArray() throws OpenApiValidatorException {
+        inputs = BaseTests.returnBType("arrayNB.bal", "invalidTest", "");
+        Path contractPath = RES_DIR.resolve("invalidTests/arrayNB.yaml");
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
+        validationErrorList = TypeSymbolToJsonValidatorUtil
+                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+
+        Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
+        Assert.assertEquals(validationErrorList.get(0).getFieldName(), "array");
+        Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
+        Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeBallerinaType(), Constants.Type.INT);
+    }
+
+    @Test(enabled = true, description = "Type mismatch with record array")
+    public void testRecordArrayType() throws UnsupportedEncodingException, OpenApiValidatorException {
+        inputs = BaseTests.returnBType("arrayRB.bal", "invalidTest", "");
+        Path contractPath = RES_DIR.resolve("invalidTests/arrayRB.yaml");
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        extractSchema = ValidatorTest.getSchema(api, "/user/{category}");
+        validationErrorList = TypeSymbolToJsonValidatorUtil
+                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+
+        Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
+        Assert.assertEquals(validationErrorList.get(0).getFieldName(), "id");
+        Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
+        Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeBallerinaType(), Constants.Type.STRING);
+    }
 
 
 
