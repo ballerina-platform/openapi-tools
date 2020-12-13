@@ -209,7 +209,9 @@ public class TypeExtractorUtil {
             if (nextParam.getIn() != null) {
                 parameter.setPathParam(nextParam.getIn().equals("path"));
             }
-
+            if (nextParam.getIn() != null) {
+                parameter.setQueryParam(nextParam.getIn().equals("query"));
+            }
             if (nextParam.get$ref() != null) {
                 parameter.setRefType(extractReferenceType(nextParam.get$ref()));
             }

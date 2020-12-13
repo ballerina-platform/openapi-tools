@@ -85,7 +85,6 @@ public class CodeGeneratorTest {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore-client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
                 expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
-
                 Assert.assertTrue(generatedClient.contains(expectedClientContent));
                 deleteGeneratedFiles("openapipetstore-client.bal");
             } else {

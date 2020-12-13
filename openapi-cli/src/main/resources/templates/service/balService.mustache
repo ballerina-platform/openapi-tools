@@ -12,8 +12,9 @@ listener http:Listener ep{{@index}} = new({{port}}{{#host}}, config = {host: "{{
 service {{servers.0.basePath}} on {{#servers}}ep{{@index}}{{#unless @last}}, {{/unless}}{{/servers}} {{=<%
 %>=}}{<%={{ }}=%>
 {{#pathList}}{{#operationsList}}
-    resource function {{opMethod}} {{{opName}}}(http:Caller caller, http:Request req{{#requestBody}}, @http:Payload
-    {{#contentType}}{{> inlineSchema}}{{/contentType}} body{{/requestBody}}) returns error? {{=<% %>=}}{<%={{ }}=%>
+    resource function {{opMethod}} {{{opName}}}(http:Caller caller, http:Request req
+    {{#parameterList}}{{#isQueryParam}}, {{#refType}}{{{refType}}}{{/refType}}{{^refType}}{{#paramType}}{{>inlineSchema
+    }}{{/paramType}}{{/refType}}{{paramName}}{{/isQueryParam}}{{/parameterList}}{{#requestBody}}, @http:Payload {{#contentType}}{{> inlineSchema}}{{/contentType}} body{{/requestBody}}) returns error? {{=<% %>=}}{<%={{ }}=%>
 
     }
 {{/operationsList}}{{/pathList}}
