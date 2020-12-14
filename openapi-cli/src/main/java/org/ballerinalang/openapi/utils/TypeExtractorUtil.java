@@ -175,11 +175,11 @@ public class TypeExtractorUtil {
                 if (parameter.isPathParam()) {
 
                     String pathName = path.getPath();
-                    String parameterName = parameter.getParamName();
                     String parameterType = parameter.getParamType().getSchemaType().get(0);
+                    String targetString = "{" + parameter.getParamName() + "}";
+                    String replaceString = "[" + parameterType + " " + parameter.getParamName() + "]";
 
-                    operation.setOpName(pathName.replace("{" + parameterName + "}",
-                            "[" + parameterType + " " + parameterName + "]").replaceFirst("/", ""));
+                    operation.setOpName(pathName.replace(targetString, replaceString).replaceFirst("/", ""));
                 }
             }
             operation.setParameterList(parameters);
