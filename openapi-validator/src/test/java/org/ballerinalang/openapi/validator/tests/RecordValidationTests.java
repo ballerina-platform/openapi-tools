@@ -169,7 +169,7 @@ public class RecordValidationTests {
         Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeBallerinaType(), Constants.Type.INT);
     }
 
-    @Test(description = "Test for valid the nested record", enabled = true)
+    @Test(description = "Test for valid the nested array", enabled = true)
     public void testNestedArray() throws OpenApiValidatorException {
         inputs = BaseTests.returnBType("arrayNB.bal", "invalidTest", "");
         Path contractPath = RES_DIR.resolve("invalidTests/arrayNB.yaml");

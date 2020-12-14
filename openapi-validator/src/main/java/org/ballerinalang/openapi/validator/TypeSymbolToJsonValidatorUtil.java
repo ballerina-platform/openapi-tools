@@ -19,6 +19,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
+import org.wso2.ballerinalang.compiler.semantics.model.types.BArrayType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,15 +76,39 @@ public class TypeSymbolToJsonValidatorUtil {
                         recordType, syntaxTree,semanticModel );
                 validationErrorList.addAll(recordValidationError);
 
+            } else if ((((ArraySchema) schema).getItems() instanceof ArraySchema) && (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof ArrayTypeSymbol)) {
+                // handle nested array
+                isExitType = true;
+                ArrayTypeSymbol traverseNestedArray = (ArrayTypeSymbol) typeSymbol;
+                ArraySchema traversSchemaNestedArray = (ArraySchema) schema;
+
+                TypeSymbol bArrayTypeSymbol = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor();
+                Schema arraySchemaItems = ((ArraySchema) schema).getItems();
+
+                if ((bArrayTypeSymbol instanceof ArrayTypeSymbol) && (arraySchemaItems instanceof ArraySchema)) {
+                    traverseNestedArray = (ArrayTypeSymbol) bArrayTypeSymbol;
+                    traversSchemaNestedArray = (ArraySchema) arraySchemaItems;
+
+                    while ((traverseNestedArray.memberTypeDescriptor() instanceof ArrayTypeSymbol) &&
+                            (traversSchemaNestedArray.getItems() instanceof ArraySchema)) {
+                        Schema<?> traversSchemaNestedArraySchemaType = traversSchemaNestedArray.getItems();
+                        if (traversSchemaNestedArraySchemaType instanceof ArraySchema) {
+                            traversSchemaNestedArray = (ArraySchema) traversSchemaNestedArraySchemaType;
+                        }
+                        TypeSymbol traverseNestedArrayBType = traverseNestedArray.memberTypeDescriptor();
+                        if (traverseNestedArrayBType instanceof BArrayType) {
+                            traverseNestedArray = (ArrayTypeSymbol) traverseNestedArrayBType;
+                        }
+                    }
+                    List<ValidationError> arrayErrors = validate(traversSchemaNestedArray,
+                            traverseNestedArray, syntaxTree, semanticModel);
+
+                    validationErrorList.addAll(arrayErrors);
+                }
             } else {
                 schemaType = ((ArraySchema) schema).getItems().getType();
                 ballerinaType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().name();
             }
-
-            // handle nested array
-
-
-
 
         }
 
