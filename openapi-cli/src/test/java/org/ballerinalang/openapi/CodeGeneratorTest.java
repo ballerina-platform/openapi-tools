@@ -85,7 +85,6 @@ public class CodeGeneratorTest {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore-client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
                 expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
-
                 Assert.assertTrue(generatedClient.contains(expectedClientContent));
                 deleteGeneratedFiles("openapipetstore-client.bal");
             } else {
@@ -109,7 +108,8 @@ public class CodeGeneratorTest {
                     definitionPath, "", "", filter);
             if (generatedFileList.size() > 0) {
                 GenSrcFile actualGeneratedContent = generatedFileList.get(0);
-                Assert.assertEquals(actualGeneratedContent.getContent(), expectedContent,
+                Assert.assertEquals((actualGeneratedContent.getContent().trim()).replaceAll("\\s+", ""),
+                        (expectedContent.trim()).replaceAll("\\s+", ""),
                         "expected content and actual generated content is mismatched for: " + yamlFile);
             }
         } catch (IOException | BallerinaOpenApiException e) {
