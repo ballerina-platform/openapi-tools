@@ -17,9 +17,8 @@
  */
 package org.ballerinalang.openapi.cmd;
 
-import org.ballerinalang.ballerina.openapi.convertor.OpenApiConverterException;
-import org.ballerinalang.ballerina.openapi.convertor.service.OpenApiConverterUtils;
-import org.ballerinalang.langserver.compiler.exception.CompilationFailedException;
+import org.ballerinalang.ballerina.OpenApiConverterException;
+import org.ballerinalang.ballerina.OpenApiConverterUtils;
 import org.ballerinalang.openapi.CodeGenerator;
 import org.ballerinalang.openapi.OpenApiMesseges;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
@@ -160,29 +159,10 @@ public class OpenApiCmd implements BLauncherCmd {
         Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
         //ballerina openapi -i service.bal --serviceName serviceName --module exampleModul -o ./
         // Check service name it is mandatory
-        if (module != null && service != null) {
-            if (!checkModuleExist(module)) {
-                throw LauncherUtils.createLauncherException(OpenApiMesseges.MESSAGE_FOR_INVALID_MODULE);
-            }
-            try {
-                OpenApiConverterUtils.generateOAS3DefinitionFromModule(module, serviceName,
-                        targetOutputPath);
-            } catch (Exception e) {
-                throw LauncherUtils.createLauncherException("Error occurred when exporting openapi file. " +
-                        "\n" + e.getMessage());
-            }
-        } else if (serviceName != null) {
-            try {
-                OpenApiConverterUtils.generateOAS3Definitions(balFilePath, targetOutputPath, serviceName);
-            } catch (IOException | OpenApiConverterException e) {
-                throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
-            }
-        } else {
-            try {
-                OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath);
-            } catch (IOException | OpenApiConverterException | CompilationFailedException e) {
-                throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
-            }
+        try {
+            OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName);
+        } catch (IOException | OpenApiConverterException e) {
+            throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
         }
     }
 

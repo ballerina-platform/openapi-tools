@@ -1,16 +1,19 @@
  import ballerina/http;
  import ballerina/log;
+ //import ballerina/openapi;
 
  listener http:Listener helloEp = new (9090);
+ //listener http:Listener helloEp02 = new (9091);
 
- service hello on helloEp {
-     resource function hi(http:Caller caller, http:Request request) {
-         http:Response res = new;
-         res.setPayload("Hello World!");
+//listener http:Listener helloEp = new(9090, config = {host: "localhost"});
+ //@openapi:ServiceInfo {
+ //     contract: "../yamls/openapi-to-ballerina.yaml"
+  //}
+ service /hello on helloEp {
+     resource function get hi/[int abc](http:Caller caller, http:Request request) {
 
-         var result = caller->respond(res);
-         if (result is error) {
-            log:printError("Error when responding", result);
-         }
      }
+     resource function post hi(http:Caller caller, http:Request request) {
+
+          }
  }

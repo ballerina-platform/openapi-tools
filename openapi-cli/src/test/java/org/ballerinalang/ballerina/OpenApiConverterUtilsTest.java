@@ -17,7 +17,6 @@
 package org.ballerinalang.ballerina;
 
 import org.ballerinalang.ballerina.openapi.convertor.OpenApiConverterException;
-import org.ballerinalang.langserver.compiler.exception.CompilationFailedException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -32,11 +31,12 @@ public class OpenApiConverterUtilsTest {
             .toAbsolutePath();
 
     @Test(description = "Test for getting the project instance using ballerina file")
-    public void testProjectInstance() throws IOException, OpenApiConverterException, CompilationFailedException {
+    public void testProjectInstance()
+            throws IOException, OpenApiConverterException, org.ballerinalang.ballerina.OpenApiConverterException {
         Path ballerinaFilePath =  RES_DIR.resolve("basicService.bal");
         Path outputPath = RES_DIR.resolve("output");
 
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath,outputPath);
+        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, outputPath, "");
     }
 
 }
