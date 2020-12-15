@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,5 +35,57 @@ public class Constants {
     public static final String DECIMAL = "decimal";
     public static final String ARRAY = "array";
     public static final String RECORD = "record";
+
+    /**
+     * Enum to select the Ballerina Type.
+     * Ballerina service, mock and client generation is available
+     */
+    public enum BallerinaType {
+        INT("int"),
+        STRING("string"),
+        DECIMAL("decimal"),
+        BOOLEAN("boolean"),
+        RECORD("record"),
+        ARRAY("array");
+
+        private String name;
+
+        BallerinaType(String name) {
+            this.name = name;
+        }
+
+        public String typeName() {
+            return name;
+        }
+
+//        @Override
+//        public String toString() {
+//            return this.name;
+//        }
+    }
+
+    /**
+     * Enum to select the Ballerina Type.
+     * Ballerina service, mock and client generation is available
+     */
+    public enum OpenAPIType {
+        INTEGER("integer"),
+        STRING("string"),
+        DECIMAL("decimal"),
+        BOOLEAN("boolean"),
+        RECORD("object"),
+        ARRAY("array");
+
+        private String name;
+
+        OpenAPIType(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
+    }
 
 }

@@ -96,22 +96,22 @@ public class ConverterUtils {
         String convertedType;
         switch (type) {
             case Constants.INT:
-                convertedType = "integer";
+                convertedType = Constants.OpenAPIType.INTEGER.toString();
                 break;
             case Constants.STRING:
-                convertedType = "string";
+                convertedType = Constants.OpenAPIType.STRING.toString();
                 break;
             case Constants.BOOLEAN:
-                convertedType = "boolean";
+                convertedType = Constants.OpenAPIType.BOOLEAN.toString();
                 break;
             case Constants.ARRAY:
-                convertedType = "array";
+                convertedType = Constants.OpenAPIType.ARRAY.toString();
                 break;
             case Constants.RECORD:
-                convertedType = "object";
+                convertedType = Constants.OpenAPIType.RECORD.toString();
                 break;
             case Constants.DECIMAL:
-                convertedType = "decimal";
+                convertedType = Constants.OpenAPIType.DECIMAL.toString();
                 break;
             default:
                 convertedType = "";

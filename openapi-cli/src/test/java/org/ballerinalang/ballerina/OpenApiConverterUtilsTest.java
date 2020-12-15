@@ -36,7 +36,7 @@ public class OpenApiConverterUtilsTest {
         Path ballerinaFilePath =  RES_DIR.resolve("basicService.bal");
         Path outputPath = RES_DIR.resolve("output");
 
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, outputPath, null);
+        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, outputPath, " ");
     }
 
 }

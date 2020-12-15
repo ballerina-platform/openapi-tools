@@ -56,6 +56,7 @@ public class OpenApiEndpointMapper {
     public Swagger convertBoundEndpointsToOpenApi(List<ListenerDeclarationNode> endpoints,
                                                   ServiceDeclarationNode service, Swagger openapi) {
 
+        //TODO check absence of endpoints and services
 //        if (endpoints == null || service == null || service.getAttachedExprs().isEmpty()
 //                || (service.getAttachedExprs().get(0).getKind() != NodeKind.SIMPLE_VARIABLE_REF
 //                && service.getAttachedExprs().get(0).getKind() != NodeKind.TYPE_INIT_EXPR)) {

@@ -55,7 +55,6 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.parser.converter.SwaggerConverter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.ballerina.service.ConverterConstants;
 import org.ballerinalang.ballerina.service.OpenApiEndpointMapper;
 import org.ballerinalang.ballerina.service.OpenApiServiceMapper;
@@ -114,7 +113,6 @@ public class OpenApiConverterUtils {
     public static void  generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName)
             throws IOException, OpenApiConverterException {
 
-
         // Load project instance for single ballerina file
         project = SingleFileProject.load(servicePath);
         //travers and filter service
@@ -156,7 +154,7 @@ public class OpenApiConverterUtils {
     private static String getOpenApiFileName(String servicePath, String serviceName) {
         String openApiFile;
 
-        if (StringUtils.isNotBlank(serviceName) || serviceName != null) {
+        if (!serviceName.isBlank()) {
             openApiFile = serviceName + ConverterConstants.OPENAPI_SUFFIX;
         } else {
             openApiFile = servicePath != null ?
@@ -261,7 +259,7 @@ public class OpenApiConverterUtils {
                         .convertBoundEndpointsToOpenApi(endpoints, serviceDefinition, openapi);
 
                     // Generate openApi string for the mentioned service name.
-                    if (StringUtils.isNotBlank(serviceName) || serviceName != null) {
+                    if (!serviceName.isBlank()) {
                         if (currentServiceName.equals(serviceName)) {
                         openapi = openApiServiceMapper.convertServiceToOpenApi(serviceDefinition, openapi, serviceName);
                         }
@@ -370,6 +368,7 @@ public class OpenApiConverterUtils {
                 return null;
         }
     }
+
     /**
      * This method use for checking the duplicate files.
      * @param outPath       output path for file generated
@@ -381,15 +380,21 @@ public class OpenApiConverterUtils {
         if (Files.exists(outPath)) {
             final File[] listFiles = new File(String.valueOf(outPath)).listFiles();
             if (listFiles != null) {
-                for (File file : listFiles) {
-                    if (file.getName().equals(openApiName)) {
-                        String userInput = System.console().readLine("There is already a/an " + file.getName() +
-                                " in the location. Do you want to override the file [Y/N]? ");
-                        if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
-                            int duplicateCount = 0;
-                            openApiName = setGeneratedFileName(listFiles, openApiName, duplicateCount);
-                        }
-                    }
+                openApiName = checkAvailabilityOfGivenName(openApiName, listFiles);
+            }
+        }
+        return openApiName;
+    }
+
+    private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles) {
+
+        for (File file : listFiles) {
+            if (file.getName().equals(openApiName)) {
+                String userInput = System.console().readLine("There is already a/an " + file.getName() +
+                        " in the location. Do you want to override the file [Y/N]? ");
+                if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
+                    int duplicateCount = 0;
+                    openApiName = setGeneratedFileName(listFiles, openApiName, duplicateCount);
                 }
             }
         }

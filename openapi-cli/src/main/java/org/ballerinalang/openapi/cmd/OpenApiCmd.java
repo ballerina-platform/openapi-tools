@@ -154,7 +154,10 @@ public class OpenApiCmd implements BLauncherCmd {
     private void ballerinaToOpenApi(String fileName) throws IOException {
         final File balFile = new File(fileName);
         Path balFilePath = Paths.get(balFile.getCanonicalPath());
-        String serviceName = service;
+        String serviceName = "";
+        if (service != null) {
+            serviceName = service;
+        }
         getTargetOutputPath();
         Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
         //ballerina openapi -i service.bal --serviceName serviceName --module exampleModul -o ./
