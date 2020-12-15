@@ -58,10 +58,6 @@ public class Constants {
             return name;
         }
 
-//        @Override
-//        public String toString() {
-//            return this.name;
-//        }
     }
 
     /**
