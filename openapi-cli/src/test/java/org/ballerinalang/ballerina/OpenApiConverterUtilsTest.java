@@ -30,7 +30,7 @@ public class OpenApiConverterUtilsTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/")
             .toAbsolutePath();
 
-    @Test(description = "Test for getting the project instance using ballerina file", enabled = false)
+    @Test(description = "Test for getting the project instance using ballerina file", enabled = true)
     public void testProjectInstance()
             throws IOException, OpenApiConverterException, org.ballerinalang.ballerina.OpenApiConverterException {
         Path ballerinaFilePath =  RES_DIR.resolve("basicService.bal");

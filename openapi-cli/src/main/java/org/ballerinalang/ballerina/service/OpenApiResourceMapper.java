@@ -17,11 +17,13 @@
 package org.ballerinalang.ballerina.service;
 
 import com.google.common.collect.Lists;
+import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
@@ -267,17 +269,18 @@ public class OpenApiResourceMapper {
 
 
         //Add path parameters if in path
-        NodeList<Node> pathParams = resource.relativeResourcePath();
-        for (Node param: pathParams) {
-            if (param instanceof ResourcePathParameterNode) {
-                ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) param;
-                PathParameter pathParameter = new PathParameter();
-                pathParameter.setName(pathParameterNode.paramName().text());
-                pathParameter.setType(convertBallerinaTypeToOpenAPIType(
-                        pathParameterNode.typeDescriptor().toString().trim()));
-                operationAdaptor.getOperation().addParameter(pathParameter);
-            }
-        }
+        this.createParametersModel(resource, operationAdaptor.getOperation() );
+//        NodeList<Node> pathParams = resource.relativeResourcePath();
+//        for (Node param: pathParams) {
+//            if (param instanceof ResourcePathParameterNode) {
+//                ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) param;
+//                PathParameter pathParameter = new PathParameter();
+//                pathParameter.setName(pathParameterNode.paramName().text());
+//                pathParameter.setType(convertBallerinaTypeToOpenAPIType(
+//                        pathParameterNode.typeDescriptor().toString().trim()));
+//                operationAdaptor.getOperation().addParameter(pathParameter);
+//            }
+//        }
 
 
         if (!"get".equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
@@ -314,11 +317,12 @@ public class OpenApiResourceMapper {
      */
     private void createParametersModel(FunctionDefinitionNode resource, Operation operation) {
         List<Parameter> parameters = new LinkedList<>();
-            //get path parameters
+        String in;
+
+        //Set path parameters
         NodeList<Node> pathParams = resource.relativeResourcePath();
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode) {
-                String in;
                 in = "path";
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
                 Parameter parameter = buildParameter(in, pathParam);
@@ -330,25 +334,35 @@ public class OpenApiResourceMapper {
                 parameters.add(parameter);
             }
         }
-        //TODO check query parameter
+
+        // set query parameter
         FunctionSignatureNode functionSignature = (FunctionSignatureNode) resource.functionSignature();
         SeparatedNodeList<ParameterNode> paramExprs = functionSignature.parameters();
         for (ParameterNode expr : paramExprs) {
-            operation.setParameters(parameters);
+            if (expr instanceof RequiredParameterNode) {
+                RequiredParameterNode queryParam = (RequiredParameterNode) expr;
+                if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode) {
+                    in = "query";
+                    Parameter parameter = buildParameter(in, queryParam);
+                    parameter.setName(queryParam.paramName().toString());
+                    parameter.setRequired(true);
+                    parameters.add(parameter);
+                }
+            }
         }
         operation.setParameters(parameters);
     }
 
-    /**
-     * Parses the 'ResourceInfo' annotation and builds openApi operation.
-     *
-     * @param resource  The resource definition.
-     * @param operation The openApi operation.
-     */
-    private void parseResourceInfo(FunctionDefinitionNode resource, Operation operation, String httpMethod) {
-        //TODO multiResourceInfo
-         addResourceInfoToOperation(resource, operation);
-    }
+//    /**
+//     * Parses the 'ResourceInfo' annotation and builds openApi operation.
+//     *
+//     * @param resource  The resource definition.
+//     * @param operation The openApi operation.
+//     */
+//    private void parseResourceInfo(FunctionDefinitionNode resource, Operation operation, String httpMethod) {
+//        //TODO multiResourceInfo
+//         addResourceInfoToOperation(resource, operation);
+//    }
 
     private void parseMultiResourceInfoAnnotationAttachment(AnnotationAttachmentNode multiResourceInfoAnnotation,
                                                             Operation operation, String httpMethod) {
@@ -372,17 +386,15 @@ public class OpenApiResourceMapper {
         }
     }
 
-    private void addResourceInfoToOperation(FunctionDefinitionNode resource, Operation operation) {
-        //TODO createTags
-        //TODO addResource Summery
-        //TODO addDescription
-        //Parameter Maps
-        if (resource != null) {
-            this.createParametersModel(resource, operation);
-        }
-
-//        this.createExternalDocsModel(attributes.get(ConverterConstants.ATTR_EXT_DOC), operation);
-    }
+//    private void addResourceInfoToOperation(FunctionDefinitionNode resource, Operation operation) {
+//        //TODO createTags
+//        //TODO addResource Summery
+//        //TODO addDescription
+//        //Parameter Maps
+//        if (resource != null) {
+//            this.createParametersModel(resource, operation);
+//        }
+//    }
 
     /**
      * Parse 'ResourceConfig' annotation attachment and build a resource operation.
@@ -490,22 +502,10 @@ public class OpenApiResourceMapper {
                 break;
             case "query":
                 QueryParameter qParam = new QueryParameter();
-//                String attrType = ConverterUtils
-//                        .getStringLiteralValue(paramAttributes.get(ConverterConstants.ATTR_TYPE)).trim();
-//                String type;
-//                switch (attrType) {
-//                    case "int":
-//                        type = "integer";
-//                        break;
-//                    case "float":
-//                        type = "number";
-//                        break;
-//                    default:
-//                        type = attrType;
-//                        break;
-//                }
-//                qParam.setType(type);
-//                param = qParam;
+                RequiredParameterNode queryParam = (RequiredParameterNode) paramAttributes;
+                qParam.setName(queryParam.paramName().toString());
+                qParam.setType(convertBallerinaTypeToOpenAPIType(queryParam.typeName().toString().trim()));
+                param = qParam;
                 break;
             case "header":
                 param = new HeaderParameter();
@@ -521,6 +521,7 @@ public class OpenApiResourceMapper {
                 PathParameter pParam = new PathParameter();
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) paramAttributes;
                 pParam.setType(convertBallerinaTypeToOpenAPIType(pathParam.typeDescriptor().toString().trim()));
+                pParam.setName(pathParam.paramName().text());
                 param = pParam;
         }
 
