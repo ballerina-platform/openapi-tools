@@ -1,20 +1,22 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
+
+
 package org.ballerinalang.ballerina.service;
 
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -66,8 +68,8 @@ public class OpenApiEndpointMapper {
             return new Swagger();
         }
         for (ListenerDeclarationNode ep : endpoints) {
-                // At the moment only the last bound endpoint will be populated in openapi
-                // we need to move to OAS3 models to support multiple server support
+            // At the moment only the last bound endpoint will be populated in openapi
+            // we need to move to OAS3 models to support multiple server support
              SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
              ExpressionNode node = exprNodes.get(0);
              if (node.toString().trim().equals(ep.variableName().text().trim())) {
@@ -90,16 +92,15 @@ public class OpenApiEndpointMapper {
             SeparatedNodeList<FunctionArgumentNode> arg = (list.get()).arguments();
             port = arg.get(0).toString();
             if (arg.size() > 1) {
-              ExpressionNode   bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
+              ExpressionNode bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
               if (bLangRecordLiteral instanceof MappingConstructorExpressionNode) {
                   host = extractHost(host, (MappingConstructorExpressionNode) bLangRecordLiteral);
 
               }
-                //TO-DO: need to add check secure socket thing
+                //TODO: need to add check secure socket thing
 //            Scheme scheme = configs.get(Constants.SECURE_SOCKETS) == null ? Scheme.HTTP : Scheme.HTTPS;
 //            schemes.add(scheme);
             }
-
         }
         // Set default values to host and port if values are not defined
         if (host == null) {
@@ -108,13 +109,11 @@ public class OpenApiEndpointMapper {
         if (port != null) {
             host += ':' + port;
         }
-
         openapi.setHost(host);
         openapi.setSchemes(schemes);
     }
 
     private String extractHost(String host, MappingConstructorExpressionNode bLangRecordLiteral) {
-
         MappingConstructorExpressionNode recordConfig = bLangRecordLiteral;
         if (recordConfig.fields() != null && !recordConfig.fields().isEmpty()) {
             SeparatedNodeList<MappingFieldNode> recordFields = recordConfig.fields();

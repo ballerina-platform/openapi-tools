@@ -53,25 +53,23 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0'
 
-    compile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime-api', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-tool', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
+    implementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
-    compile group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
+    implementation group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
 
-    testCompile group: 'org.testng', name: 'testng', version: "${testngVersion}"
-    testCompile group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
-    testCompile group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
-    testCompile group: 'org.testng', name: 'testng', version: "${testngVersion}"
-    testCompile 'org.slf4j:slf4j-jdk14'
+    testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
+    testImplementation 'org.slf4j:slf4j-jdk14'
 
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     testRuntime group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
