@@ -99,7 +99,6 @@ public class ConverterUtils {
      * @param type this string type parameter according to ballerina type
      * @return  this return the string value of openAPI type
      */
-
     public static String convertBallerinaTypeToOpenAPIType(String type) {
         String convertedType;
         switch (type) {
