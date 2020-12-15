@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,7 +273,8 @@ public class OpenApiResourceMapper {
                 ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) param;
                 PathParameter pathParameter = new PathParameter();
                 pathParameter.setName(pathParameterNode.paramName().text());
-                pathParameter.setType(pathParameterNode.typeDescriptor().toString());
+                pathParameter.setType(convertBallerinaTypeToOpenAPIType(
+                        pathParameterNode.typeDescriptor().toString().trim()));
                 operationAdaptor.getOperation().addParameter(pathParameter);
             }
         }
@@ -511,10 +512,6 @@ public class OpenApiResourceMapper {
                 param = new FormParameter();
                 break;
             case "path":
-//                PathParameter pathParameter = new PathParameter();
-//                ResourcePathParameterNode path = (ResourcePathParameterNode) paramAttributes;
-//                pathParameter.setType(convertBallerinaTypeToOpenAPIType(path.typeDescriptor().toString().trim()));
-//                param = pathParameter;
             default:
                 PathParameter pParam = new PathParameter();
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) paramAttributes;

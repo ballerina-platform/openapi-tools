@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package org.ballerinalang.ballerina;
 
 import io.ballerina.compiler.api.SemanticModel;
@@ -187,13 +204,9 @@ public class OpenApiConverterUtils {
                     throw new OpenApiConverterException("Please check the mentioned service is available " +
                             "in the ballerina source, or there content is valid");
                 }
-
                 return Yaml.pretty(converter.convert(result).getOpenAPI());
-
             }
-
         }
-
         return serviceName;
     }
 
@@ -285,6 +298,7 @@ public class OpenApiConverterUtils {
         return currentServiceName;
     }
 
+    //need to refactor with project API
     public static Property createOpenApiPropertyForBallerinaField(TypeNode node) {
         Property property = null;
         if (node instanceof BLangArrayType) {
