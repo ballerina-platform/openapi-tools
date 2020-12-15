@@ -193,7 +193,7 @@ public class OpenApiResourceMapper {
 
             // @see BallerinaOperation#buildContext
             String resName = (resource.functionName().text() + "_" + generateRelativePath(resource))
-                    .replaceAll("/", "_");
+                    .replaceAll("\\{///\\}", "_");
             op.getOperation().setOperationId(getOperationId(idIncrement, resName));
             op.getOperation().setParameters(null);
 
@@ -445,7 +445,12 @@ public class OpenApiResourceMapper {
         String relativePath = "";
         if (!resource.relativeResourcePath().isEmpty()) {
             for (Node node: resource.relativeResourcePath()) {
-                relativePath = relativePath + node.toString();
+                if (node instanceof ResourcePathParameterNode) {
+                    ResourcePathParameterNode pathNode = (ResourcePathParameterNode) node;
+                    relativePath = relativePath + "{" + pathNode.paramName() + "}";
+                } else {
+                    relativePath = relativePath + node.toString();
+                }
             }
         }
         return relativePath;
