@@ -96,7 +96,7 @@ public class CodeGeneratorTest {
     }
 
     @Test(description = "Test openapi definition to ballerina source code generation",
-            dataProvider = "fileProvider")
+            dataProvider = "fileProvider", enabled = false)
     public void openApiToBallerinaCodeGenTest(String yamlFile, String expectedFile) {
         String definitionPath = RES_DIR.resolve(yamlFile).toString();
         Path expectedFilePath = RES_DIR.resolve(Paths.get("expected", expectedFile));

@@ -422,6 +422,7 @@ public class OpenApiConverterUtils {
         }
     }
 
+
     /**
      * This method use for checking the duplicate files.
      * @param outPath       output path for file generated

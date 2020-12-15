@@ -128,6 +128,22 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
+    @Test(description = "Test ballerina to openapi")
+    public void testBallerinaToOpenAPIGeneration() throws IOException {
+
+        Path petstoreBal = RES_DIR.resolve(Paths.get("bal-files/ballerinaFile.yaml"));
+        String[] args = {"--input", petstoreBal.toString(), "-o", resourcePath.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream);
+        new CommandLine(cmd).parseArgs(args);
+
+        String output = "";
+        try {
+            cmd.execute();
+        } catch (BLauncherException e) {
+            output = e.getDetailedMessages().get(0);
+        }
+    }
+
     // Delete the generated files
     private void deleteGeneratedFiles() {
 
