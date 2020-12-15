@@ -347,7 +347,7 @@ public class OpenApiResourceMapper {
                 if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode) {
                     in = "query";
                     Parameter parameter = buildParameter(in, queryParam);
-                    parameter.setName(queryParam.paramName().toString());
+//                    parameter.setName(queryParam.paramName().toString());
                     parameter.setRequired(true);
                     parameters.add(parameter);
                 }
@@ -506,7 +506,7 @@ public class OpenApiResourceMapper {
             case "query":
                 QueryParameter qParam = new QueryParameter();
                 RequiredParameterNode queryParam = (RequiredParameterNode) paramAttributes;
-                qParam.setName(queryParam.paramName().toString());
+                qParam.setName(queryParam.paramName().get().text());
                 qParam.setType(convertBallerinaTypeToOpenAPIType(queryParam.typeName().toString().trim()));
                 param = qParam;
                 break;
