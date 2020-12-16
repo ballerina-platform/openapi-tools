@@ -32,11 +32,15 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeReferenceTypeDescNode;
 import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
+import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.CookieParameter;
 import io.swagger.models.parameters.FormParameter;
 import io.swagger.models.parameters.HeaderParameter;
@@ -49,8 +53,6 @@ import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.parameters.RequestBody;
 import org.ballerinalang.ballerina.openapi.convertor.ConverterUtils;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.expressions.ExpressionNode;
@@ -289,40 +291,40 @@ public class OpenApiResourceMapper {
                             for (AnnotationNode annotation: annotations) {
                                 if ((annotation.annotReference().toString()).trim().equals(HTTP_PAYLOAD)) {
                                     // Creating request body - required.
-                                    if (("application/" + ((RequiredParameterNode) expr).paramName().get().text()).equals(MediaType.APPLICATION_JSON)) {
-                                        RequestBody requestBody = new RequestBody();
-                                        Content content = new Content();
-                                        MediaType mediaType = MediaType.valueOf(MediaType.APPLICATION_JSON);
-                                        content.addMediaType(MediaType.APPLICATION_JSON, MediaType);
-                                        requestBody.setContent(content);
+                                    String consumes =
+                                            "application/" + ((RequiredParameterNode) expr).typeName().toString().trim();
+                                    if (consumes.equals(MediaType.APPLICATION_JSON)) {
+                                        operationAdaptor.getOperation().addConsumes(MediaType.APPLICATION_JSON);
+                                    } else if (queryParam.typeName() instanceof TypeReferenceTypeDescNode) {
+                                        // Creating request body - required.
+                                        ModelImpl messageModel = new ModelImpl();
+                                        messageModel.setType("object");
+                                        if (!definitions.containsKey(ConverterConstants.ATTR_REQUEST)) {
+                                            definitions.put(ConverterConstants.ATTR_REQUEST, messageModel);
+                                            this.openApiDefinition.setDefinitions(definitions);
+                                        }
+                                        // Creating "Request rq" parameter
+                                        //TODO request param
+                                        BodyParameter messageParameter = new BodyParameter();
+                                        messageParameter.setName(((RequiredParameterNode) expr).paramName().get().text());
+                                        RefModel refModel = new RefModel();
+                                        refModel.setReference(ConverterConstants.ATTR_REQUEST);
+                                        messageParameter.setSchema(refModel);
+                                      //  Adding conditional check for http delete operation as it cannot have body
+                                        //  parameter.
+                                      if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
+                                          operationAdaptor.getOperation().addParameter(messageParameter);
+                                      }
+
 
                                     }
-//                                    ModelImpl messageModel = new ModelImpl();
-//                                    messageModel.setType(((RequiredParameterNode) expr).typeName().toString().trim());
-//                                    String str = (((RequiredParameterNode) expr).paramName().get().text());
-//                                    String cap = str.substring(0, 1).toUpperCase() + str.substring(1);
-//                                    if (!definitions.containsKey(cap)) {
-//                                        definitions.put(cap, messageModel);
-//                                        this.openApiDefinition.setDefinitions(definitions);
-//                                    }
-//                                    // Creating "Request rq" parameter
-//                                    //TODO request param
-//                                    BodyParameter messageParameter = new BodyParameter();
-//                                    messageParameter.setName(((RequiredParameterNode) expr).paramName().get().text());
-//                                    RefModel refModel = new RefModel();
-//                                    refModel.setReference(cap);
-//                                    messageParameter.setSchema(refModel);
-//                                    //Adding conditional check for http delete operation as it cannot have
-//                                    //body parameter.
-//                                    if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
-//                                        operationAdaptor.getOperation().addParameter(messageParameter);
-//                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+
         }
     }
 
