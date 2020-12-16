@@ -15,8 +15,8 @@
  */
 
 module io.ballerina.ballerina.openapi {
-//    requires com.fasterxml.jackson.core;
-//    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.databind;
     requires io.ballerina.tool;
     requires info.picocli;
     requires handlebars;
@@ -35,9 +35,9 @@ module io.ballerina.ballerina.openapi {
 //    requires org.apache.commons.lang3;
 //    requires io.ballerina.tool;
 //    requires com.fasterxml.jackson.annotation;
-//    requires java.ws.rs;
+    requires java.ws.rs;
 //    requires info.picocli;
-//    requires io.ballerina.stdlib.http;
+    requires io.ballerina.stdlib.http;
 //    requires handlebars;
     requires jsr305;
 //    requires io.ballerina.tools.api;

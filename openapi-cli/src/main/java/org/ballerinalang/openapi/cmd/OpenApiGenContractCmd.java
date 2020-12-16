@@ -17,7 +17,7 @@
  */
 package org.ballerinalang.openapi.cmd;
 
-import org.ballerinalang.ballerina.openapi.convertor.service.OpenApiConverterUtils;
+import org.ballerinalang.ballerina.OpenApiConverterUtils;
 import org.ballerinalang.openapi.OpenApiMesseges;
 import org.ballerinalang.tool.BLauncherCmd;
 import org.ballerinalang.tool.LauncherUtils;

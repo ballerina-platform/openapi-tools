@@ -30,10 +30,11 @@ configurations {
 }
 
 dependencies {
+    implementation "com.fasterxml.jackson.core:jackson-databind"
 //    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.5'
 //    implementation "com.google.guava:guava:29.0-jre"
-    implementation "io.swagger.parser.v3:swagger-parser-v3"
-    implementation "io.swagger.core.v3:swagger-core"
+//    implementation "io.swagger.parser.v3:swagger-parser-v3"
+//    implementation "io.swagger.core.v3:swagger-core"
 //        exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
 //        exclude group: 'javax.validation', module: 'validation.api'
 //    }
@@ -41,14 +42,15 @@ dependencies {
 //        exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
 //        exclude group: 'javax.validation', module: 'validation.api'
 //    }
-    implementation 'io.swagger.parser.v3:swagger-parser-core'
-//    implementation ('io.swagger.parser.v3:swagger-parser-v2-converter')  {
-//        exclude group: 'io.swagger', module: 'swagger-compat-spec-parser'
-//        exclude group: 'org.slf4j', module: 'slf4j-ext'
-//    }
+//    implementation "io.swagger.parser.v3:swagger-parser-core"
+    implementation ("io.swagger.parser.v3:swagger-parser-v2-converter")  {
+        exclude group: 'io.swagger', module: 'swagger-compat-spec-parser'
+        exclude group: 'org.slf4j', module: 'slf4j-ext'
+        exclude group: 'javax.validation', module: 'validation-api'
+    }
     implementation "com.github.jknack:handlebars"
     implementation "info.picocli:picocli"
-//    implementation 'javax.ws.rs:javax.ws.rs-api:2.0'
+    implementation "javax.ws.rs:javax.ws.rs-api"
 //    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.0'
 //    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0'
 //
@@ -62,7 +64,7 @@ dependencies {
     implementation "com.google.code.findbugs:jsr305"
 //    implementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
 //    implementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
-//    implementation group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
+    implementation group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
 //    implementation group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
 //
 //    testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"

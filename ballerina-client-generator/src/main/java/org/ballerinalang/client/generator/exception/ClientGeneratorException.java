@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ballerinalang.ballerina.openapi.convertor.service.model;
+
+package org.ballerinalang.client.generator.exception;
 
 /**
- * OpenApi vendor extension for developer.
+ * Top level exception class of Code Generator exceptions.
  */
-public class Developer {
-    private String name;
-    private String email;
-    
-    public String getName() {
-        return name;
+public class ClientGeneratorException extends Exception {
+
+    public ClientGeneratorException(String message, Throwable cause) {
+        super(message, cause);
     }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public String getEmail() {
-        return email;
-    }
-    
-    public void setEmail(String email) {
-        this.email = email;
+
+    public ClientGeneratorException(String message) {
+        super(message);
     }
 }
