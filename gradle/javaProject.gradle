@@ -132,6 +132,7 @@ dependencies {
         implementation 'io.opentracing:opentracing-api:0.31.0'
         implementation 'io.opentracing:opentracing-util:0.31.0'
         implementation 'io.opentracing:opentracing-mock:0.31.0'
+        implementation 'io.swagger.core.v3:swagger-core:1.5.18'
         implementation 'io.swagger.core.v3:swagger-models:1.5.18'
         implementation 'io.swagger.parser.v3:swagger-parser:2.0.14'
         implementation 'io.swagger.parser.v3:swagger-parser-v2-converter:2.0.14'

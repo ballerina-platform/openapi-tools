@@ -33,15 +33,15 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.5'
     implementation "com.google.guava:guava:29.0-jre"
     implementation group: 'io.swagger.parser.v3', name: 'swagger-parser-v3'
-    implementation ('io.swagger:swagger-core')  {
+    implementation ('io.swagger:swagger-core') {
         exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.yaml', module: 'snakeyaml'
         exclude group: 'com.fasterxml.jackson.datatype', module: 'jackson-datatype-joda'
         exclude group: 'io.swagger', module: 'swagger-annotations'
         exclude group: 'org.slf4j', module: 'slf4j-ext'
     }
-    implementation ('io.swagger.core.v3:swagger-core')
-    implementation 'io.swagger.core.v3:swagger-models:2.1.4'
+    implementation 'io.swagger.core.v3:swagger-core'
+    implementation 'io.swagger.core.v3:swagger-models'
     implementation 'io.swagger.parser.v3:swagger-parser-core'
     implementation ('io.swagger.parser.v3:swagger-parser-v2-converter')  {
         exclude group: 'io.swagger', module: 'swagger-compat-spec-parser'
