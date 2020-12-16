@@ -204,7 +204,6 @@ public class OpenApiResourceMapper {
 
             // Parsing annotations.
             this.parseResourceConfigAnnotationAttachment(resource, op);
-//            this.parseResourceInfo(resource, op.getOperation(), httpMethod);
             this.addResourceParameters(resource, op);
 //            this.parseResponsesAnnotationAttachment(resource, op.getOperation());
         }
@@ -269,22 +268,8 @@ public class OpenApiResourceMapper {
             } else {
                 operationAdaptor.setPath("/");
             }
-
-
         //Add path parameters if in path
         this.createParametersModel(resource, operationAdaptor.getOperation());
-//        NodeList<Node> pathParams = resource.relativeResourcePath();
-//        for (Node param: pathParams) {
-//            if (param instanceof ResourcePathParameterNode) {
-//                ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) param;
-//                PathParameter pathParameter = new PathParameter();
-//                pathParameter.setName(pathParameterNode.paramName().text());
-//                pathParameter.setType(convertBallerinaTypeToOpenAPIType(
-//                        pathParameterNode.typeDescriptor().toString().trim()));
-//                operationAdaptor.getOperation().addParameter(pathParameter);
-//            }
-//        }
-
 
         if (!"get".equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
 
@@ -309,7 +294,6 @@ public class OpenApiResourceMapper {
 //                operationAdaptor.getOperation().addParameter(messageParameter);
 //            }
         }
-
     }
 
     /**
@@ -355,17 +339,6 @@ public class OpenApiResourceMapper {
         }
         operation.setParameters(parameters);
     }
-
-//    /**
-//     * Parses the 'ResourceInfo' annotation and builds openApi operation.
-//     *
-//     * @param resource  The resource definition.
-//     * @param operation The openApi operation.
-//     */
-//    private void parseResourceInfo(FunctionDefinitionNode resource, Operation operation, String httpMethod) {
-//        //TODO multiResourceInfo
-//         addResourceInfoToOperation(resource, operation);
-//    }
 
     private void parseMultiResourceInfoAnnotationAttachment(AnnotationAttachmentNode multiResourceInfoAnnotation,
                                                             Operation operation, String httpMethod) {
