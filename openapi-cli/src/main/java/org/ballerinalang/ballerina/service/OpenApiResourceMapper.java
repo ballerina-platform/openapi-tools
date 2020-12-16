@@ -50,7 +50,7 @@ import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
 import org.ballerinalang.ballerina.Constants;
-import org.ballerinalang.ballerina.openapi.convertor.ConverterUtils;
+import org.ballerinalang.ballerina.ConverterUtils;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.expressions.ExpressionNode;
 import org.ballerinalang.model.tree.expressions.RecordLiteralNode;
