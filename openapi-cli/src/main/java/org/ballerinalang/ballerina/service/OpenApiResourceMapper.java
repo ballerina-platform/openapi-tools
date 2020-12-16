@@ -331,7 +331,6 @@ public class OpenApiResourceMapper {
                 if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode) {
                     in = "query";
                     Parameter parameter = buildParameter(in, queryParam);
-//                    parameter.setName(queryParam.paramName().toString());
                     parameter.setRequired(true);
                     parameters.add(parameter);
                 }
@@ -362,15 +361,15 @@ public class OpenApiResourceMapper {
         }
     }
 
-//    private void addResourceInfoToOperation(FunctionDefinitionNode resource, Operation operation) {
-//        //TODO createTags
-//        //TODO addResource Summery
-//        //TODO addDescription
-//        //Parameter Maps
-//        if (resource != null) {
-//            this.createParametersModel(resource, operation);
-//        }
-//    }
+    private void addResourceInfoToOperation(FunctionDefinitionNode resource, Operation operation) {
+        //TODO createTags
+        //TODO addResource Summery
+        //TODO addDescription
+        //Parameter Maps
+        if (resource != null) {
+            this.createParametersModel(resource, operation);
+        }
+    }
 
     /**
      * Parse 'ResourceConfig' annotation attachment and build a resource operation.
