@@ -304,15 +304,12 @@ public class OpenApiResourceMapper {
      */
     private void createParametersModel(FunctionDefinitionNode resource, Operation operation) {
         List<Parameter> parameters = new LinkedList<>();
-        String in;
-
         //Set path parameters
         NodeList<Node> pathParams = resource.relativeResourcePath();
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode) {
-                in = "path";
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
-                Parameter parameter = buildParameter(in, pathParam);
+                Parameter parameter = buildParameter("path", pathParam);
                 parameter.setName(pathParam.paramName().text());
 
                 //Set param description
@@ -329,8 +326,7 @@ public class OpenApiResourceMapper {
             if (expr instanceof RequiredParameterNode) {
                 RequiredParameterNode queryParam = (RequiredParameterNode) expr;
                 if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode) {
-                    in = "query";
-                    Parameter parameter = buildParameter(in, queryParam);
+                    Parameter parameter = buildParameter("query", queryParam);
                     parameter.setRequired(true);
                     parameters.add(parameter);
                 }
