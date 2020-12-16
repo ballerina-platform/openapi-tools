@@ -38,6 +38,14 @@ public class Constants {
     public static final String DECIMAL = "decimal";
     public static final String ARRAY = "array";
     public static final String RECORD = "record";
+    public static final String OBJECT = "object";
+    public static final String PATH = "path";
+    public static final String QUERY = "query";
+    public static final String BODY = "body";
+    public static final String HEADER = "header";
+    public static final String COOKIE = "cookie";
+    public static final String FORM = "form";
+
 
     /**
      * Enum to select the Ballerina Type.

@@ -49,6 +49,7 @@ import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
+import org.ballerinalang.ballerina.Constants;
 import org.ballerinalang.ballerina.openapi.convertor.ConverterUtils;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.expressions.ExpressionNode;
@@ -309,7 +310,7 @@ public class OpenApiResourceMapper {
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode) {
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
-                Parameter parameter = buildParameter("path", pathParam);
+                Parameter parameter = buildParameter(Constants.PATH, pathParam);
                 parameter.setName(pathParam.paramName().text());
 
                 //Set param description
@@ -326,7 +327,7 @@ public class OpenApiResourceMapper {
             if (expr instanceof RequiredParameterNode) {
                 RequiredParameterNode queryParam = (RequiredParameterNode) expr;
                 if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode) {
-                    Parameter parameter = buildParameter("query", queryParam);
+                    Parameter parameter = buildParameter(Constants.QUERY, queryParam);
                     parameter.setRequired(true);
                     parameters.add(parameter);
                 }
