@@ -116,9 +116,6 @@ public class OpenApiServiceMapper {
         Info info = new Info().version("1.0.0").title(basePath.replace("/", "_"));
         openapi.setInfo(info);
         openapi.setBasePath(basePath.trim());
-        //Enable when annotation support
-//        this.parseServiceInfoAnnotationAttachment(service, openapi, basePath);
-//        this.parseConfigAnnotationAttachment(service, openapi);
 
         NodeList<Node> functions = service.members();
         List<FunctionDefinitionNode> resource = new ArrayList<>();
