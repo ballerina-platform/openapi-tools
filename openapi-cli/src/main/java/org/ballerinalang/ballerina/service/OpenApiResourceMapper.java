@@ -272,7 +272,7 @@ public class OpenApiResourceMapper {
 
 
         //Add path parameters if in path
-        this.createParametersModel(resource, operationAdaptor.getOperation() );
+        this.createParametersModel(resource, operationAdaptor.getOperation());
 //        NodeList<Node> pathParams = resource.relativeResourcePath();
 //        for (Node param: pathParams) {
 //            if (param instanceof ResourcePathParameterNode) {

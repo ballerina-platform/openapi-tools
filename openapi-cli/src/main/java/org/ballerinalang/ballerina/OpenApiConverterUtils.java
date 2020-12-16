@@ -261,13 +261,13 @@ public class OpenApiConverterUtils {
 
                     // Generate openApi string for the mentioned service name.
                     if (!serviceName.isBlank()) {
-                        if (currentServiceName.equals(serviceName)) {
+                        if (currentServiceName.trim().equals(serviceName)) {
                         openapi = openApiServiceMapper.convertServiceToOpenApi(serviceDefinition, openapi, serviceName);
                         }
                     } else {
                     // If no service name mentioned, then generate openApi definition for the first service.
                     openapi = openApiServiceMapper.convertServiceToOpenApi(serviceDefinition, openapi,
-                            currentServiceName);
+                            currentServiceName.trim());
                     }
                 }
 

@@ -11,3 +11,12 @@
 
      }
  }
+
+ service /hello02 on helloEp {
+     //resource function get hi/[int abc](http:Caller caller, http:Request request) {
+     //
+     //}
+     resource function post hi(http:Caller caller, http:Request request, int id) {
+
+     }
+ }
