@@ -35,8 +35,10 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
+import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
+import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.CookieParameter;
 import io.swagger.models.parameters.FormParameter;
 import io.swagger.models.parameters.HeaderParameter;
@@ -281,15 +283,15 @@ public class OpenApiResourceMapper {
                 definitions.put(ConverterConstants.ATTR_REQUEST, messageModel);
                 this.openApiDefinition.setDefinitions(definitions);
             }
-
             // Creating "Request rq" parameter
             //TODO request param
-//            BodyParameter messageParameter = new BodyParameter();
+            BodyParameter messageParameter = new BodyParameter();
+
 //            messageParameter.setName(resource.getParameters().get(0).getName().getValue());
-//            RefModel refModel = new RefModel();
-//            refModel.setReference(ConverterConstants.ATTR_REQUEST);
-//            messageParameter.setSchema(refModel);
-            //Adding conditional check for http delete operation as it cannot have body parameter.
+            RefModel refModel = new RefModel();
+            refModel.setReference(ConverterConstants.ATTR_REQUEST);
+            messageParameter.setSchema(refModel);
+//            Adding conditional check for http delete operation as it cannot have body parameter.
 //            if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
 //                operationAdaptor.getOperation().addParameter(messageParameter);
 //            }
