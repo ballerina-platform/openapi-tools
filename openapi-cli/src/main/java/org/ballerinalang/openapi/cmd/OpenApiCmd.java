@@ -156,6 +156,7 @@ public class OpenApiCmd implements BLauncherCmd {
         final File balFile = new File(fileName);
         Path balFilePath = Paths.get(balFile.getCanonicalPath());
         Optional<String> serviceName = Optional.ofNullable(service);
+        getTargetOutputPath();
         Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
         //ballerina openapi -i service.bal --serviceName serviceName --module exampleModul -o ./
         // Check service name it is mandatory
