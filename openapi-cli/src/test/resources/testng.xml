@@ -26,7 +26,7 @@ under the License.
         <classes>
             <class name="org.ballerinalang.openapi.cmd.OpenAPICmdTest"/>
             <class name="org.ballerinalang.ballerina.OpenApiConverterUtilsTest"></class>
-<!--            <class name="org.ballerinalang.ballerina.openapi.convertor.service.OpenApiConverterUtilsTest"></class>-->
+            <class name="org.ballerinalang.ballerina.openapi.convertor.service.OpenApiConverterUtilsTest"></class>
             <class name="org.ballerinalang.ballerina.openapi.convertor.service.OpenApiResourcesTest"></class>
 <!--            <class name="org.ballerinalang.openapi.cmd.OpenAPIGenClientCmdTest"/>-->
             <class name="org.ballerinalang.ballerina.OpenApiConverterUtilsTest"/>
