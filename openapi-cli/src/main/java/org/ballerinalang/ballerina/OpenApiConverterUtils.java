@@ -142,6 +142,9 @@ public class OpenApiConverterUtils {
                     NodeList<Node> serviceNameNodes = serviceNode.absoluteResourcePath();
                      String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceName);
                      String ballerinaSource = readFromFile(servicePath);
+//                     if (serviceName.isBlank()) {
+//                         serviceName = getServiceBasePath(serviceNode);
+//                     }
                      String openApiSource = generateOAS3Definitions(syntaxTree, serviceName);
 
                     //  Checked old generated file with same name

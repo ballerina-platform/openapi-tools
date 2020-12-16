@@ -20,6 +20,7 @@
 package org.ballerinalang.ballerina.service;
 
 import com.google.common.collect.Lists;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
@@ -32,13 +33,10 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
-import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
-import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.CookieParameter;
 import io.swagger.models.parameters.FormParameter;
 import io.swagger.models.parameters.HeaderParameter;
@@ -51,6 +49,8 @@ import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import org.ballerinalang.ballerina.openapi.convertor.ConverterUtils;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.expressions.ExpressionNode;
@@ -73,7 +73,9 @@ import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 
+import static org.ballerinalang.ballerina.Constants.HTTP_PAYLOAD;
 import static org.ballerinalang.ballerina.ConverterUtils.convertBallerinaTypeToOpenAPIType;
+import static org.ballerinalang.net.http.HttpConstants.HTTP_METHOD_GET;
 import static org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral.BLangRecordKeyValueField;
 
 /**
@@ -273,28 +275,54 @@ public class OpenApiResourceMapper {
         //Add path parameters if in path
         this.createParametersModel(resource, operationAdaptor.getOperation());
 
-        if (!"get".equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
+        if (!HTTP_METHOD_GET.toLowerCase().equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
+            // set query parameter
+            FunctionSignatureNode functionSignature = (FunctionSignatureNode) resource.functionSignature();
+            SeparatedNodeList<ParameterNode> paramExprs = functionSignature.parameters();
+            for (ParameterNode expr : paramExprs) {
+                if (expr instanceof RequiredParameterNode) {
+                    RequiredParameterNode queryParam = (RequiredParameterNode) expr;
+                    if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode) {
+                        if (!queryParam.annotations().isEmpty()) {
+                            NodeList<AnnotationNode> annotations = queryParam.annotations();
+                            Map<String, Model> definitions = new HashMap<>();
+                            for (AnnotationNode annotation: annotations) {
+                                if ((annotation.annotReference().toString()).trim().equals(HTTP_PAYLOAD)) {
+                                    // Creating request body - required.
+                                    if (("application/" + ((RequiredParameterNode) expr).paramName().get().text()).equals(MediaType.APPLICATION_JSON)) {
+                                        RequestBody requestBody = new RequestBody();
+                                        Content content = new Content();
+                                        MediaType mediaType = MediaType.valueOf(MediaType.APPLICATION_JSON);
+                                        content.addMediaType(MediaType.APPLICATION_JSON, MediaType);
+                                        requestBody.setContent(content);
 
-            // Creating request body - required.
-            ModelImpl messageModel = new ModelImpl();
-            messageModel.setType("object");
-            Map<String, Model> definitions = new HashMap<>();
-            if (!definitions.containsKey(ConverterConstants.ATTR_REQUEST)) {
-                definitions.put(ConverterConstants.ATTR_REQUEST, messageModel);
-                this.openApiDefinition.setDefinitions(definitions);
+                                    }
+//                                    ModelImpl messageModel = new ModelImpl();
+//                                    messageModel.setType(((RequiredParameterNode) expr).typeName().toString().trim());
+//                                    String str = (((RequiredParameterNode) expr).paramName().get().text());
+//                                    String cap = str.substring(0, 1).toUpperCase() + str.substring(1);
+//                                    if (!definitions.containsKey(cap)) {
+//                                        definitions.put(cap, messageModel);
+//                                        this.openApiDefinition.setDefinitions(definitions);
+//                                    }
+//                                    // Creating "Request rq" parameter
+//                                    //TODO request param
+//                                    BodyParameter messageParameter = new BodyParameter();
+//                                    messageParameter.setName(((RequiredParameterNode) expr).paramName().get().text());
+//                                    RefModel refModel = new RefModel();
+//                                    refModel.setReference(cap);
+//                                    messageParameter.setSchema(refModel);
+//                                    //Adding conditional check for http delete operation as it cannot have
+//                                    //body parameter.
+//                                    if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
+//                                        operationAdaptor.getOperation().addParameter(messageParameter);
+//                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            // Creating "Request rq" parameter
-            //TODO request param
-            BodyParameter messageParameter = new BodyParameter();
-
-//            messageParameter.setName(resource.getParameters().get(0).getName().getValue());
-            RefModel refModel = new RefModel();
-            refModel.setReference(ConverterConstants.ATTR_REQUEST);
-            messageParameter.setSchema(refModel);
-//            Adding conditional check for http delete operation as it cannot have body parameter.
-//            if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
-//                operationAdaptor.getOperation().addParameter(messageParameter);
-//            }
         }
     }
 
@@ -331,10 +359,12 @@ public class OpenApiResourceMapper {
             if (expr instanceof RequiredParameterNode) {
                 RequiredParameterNode queryParam = (RequiredParameterNode) expr;
                 if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode) {
-                    in = "query";
-                    Parameter parameter = buildParameter(in, queryParam);
-                    parameter.setRequired(true);
-                    parameters.add(parameter);
+                    if (queryParam.annotations().isEmpty()) {
+                        in = "query";
+                        Parameter parameter = buildParameter(in, queryParam);
+                        parameter.setRequired(true);
+                        parameters.add(parameter);
+                    }
                 }
             }
         }
