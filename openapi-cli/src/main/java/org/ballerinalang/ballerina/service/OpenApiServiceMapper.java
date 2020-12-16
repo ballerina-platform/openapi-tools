@@ -36,7 +36,7 @@ import io.swagger.models.License;
 import io.swagger.models.Swagger;
 import io.swagger.models.Tag;
 import io.swagger.util.Json;
-import org.ballerinalang.ballerina.openapi.convertor.ConverterUtils;
+import org.ballerinalang.ballerina.ConverterUtils;
 import org.ballerinalang.ballerina.service.model.Organization;
 import org.ballerinalang.model.tree.expressions.ExpressionNode;
 import org.slf4j.Logger;
