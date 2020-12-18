@@ -19,7 +19,6 @@
 package org.ballerinalang.ballerina;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -89,10 +88,19 @@ public class OpenApiConverterUtilsTest {
         Assert.assertTrue(Files.exists(this.tempDir.resolve("hello02-bar-baz-openapi.yaml")));
     }
 
-    @AfterMethod
-    public void cleanUp() {
-        deleteDirectory(this.tempDir);
+    @Test(description = "Generate OpenAPI spec with json payload")
+    public void testJsonPayLoad() throws IOException, OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("json_payload_service.bal");
+        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
+
+//        Assert.assertTrue(Files.exists(this.tempDir.resolve("hello-foo-bar-openapi.yaml")));
+//        Assert.assertTrue(Files.exists(this.tempDir.resolve("hello02-bar-baz-openapi.yaml")));
     }
+
+//    @AfterMethod
+//    public void cleanUp() {
+//        deleteDirectory(this.tempDir);
+//    }
 
     private void deleteDirectory(Path path) {
         try {
