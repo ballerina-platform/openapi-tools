@@ -35,9 +35,13 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
+import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
-import io.ballerina.projects.directory.SingleFileProject;
+import io.ballerina.projects.ProjectException;
+import io.ballerina.projects.ProjectKind;
+import io.ballerina.projects.directory.BuildProject;
+import io.ballerina.projects.directory.ProjectLoader;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Swagger;
@@ -60,6 +64,8 @@ import org.ballerinalang.ballerina.service.ConverterConstants;
 import org.ballerinalang.ballerina.service.OpenApiEndpointMapper;
 import org.ballerinalang.ballerina.service.OpenApiServiceMapper;
 import org.ballerinalang.model.tree.types.TypeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BErrorType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BType;
 import org.wso2.ballerinalang.compiler.tree.types.BLangArrayType;
@@ -96,7 +102,7 @@ import static org.ballerinalang.openapi.utils.CodegenUtils.writeFile;
  */
 
 public class OpenApiConverterUtils {
-
+    private static final Logger logger = LoggerFactory.getLogger(OpenApiConverterUtils.class);
     private static SyntaxTree syntaxTree;
     private static SemanticModel semanticModel;
     private static Project project;
@@ -115,40 +121,54 @@ public class OpenApiConverterUtils {
             throws IOException, OpenApiConverterException {
 
         // Load project instance for single ballerina file
-        project = SingleFileProject.load(servicePath);
-        //travers and filter service
+        try {
+            project = ProjectLoader.loadProject(servicePath);
+        } catch (ProjectException e) {
+            logger.error("Error while generating project instance:" + e);
+            return;
+        }
 
-        // Take package name for project
+        //Travers and filter service
+        //Take package name for project
         Package packageName = project.currentPackage();
-        // Take module instance for traversing the syntax tree
-        Module currentModule = packageName.getDefaultModule();
-        semanticModel =  currentModule.getCompilation().getSemanticModel();
-        Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
         List<ServiceDeclarationNode> servicesToGenerate = new ArrayList<>();
-        while (documentIterator.hasNext()) {
-            DocumentId docId = documentIterator.next();
-            Document doc = currentModule.document(docId);
-            syntaxTree = doc.syntaxTree();
-            ModulePartNode modulePartNode = syntaxTree.rootNode();
-            for (Node node : modulePartNode.members()) {
-                SyntaxKind syntaxKind = node.kind();
-                // Load a listen_declaration for the server part in the yaml spec
-                if (syntaxKind.equals(SyntaxKind.LISTENER_DECLARATION)) {
-                    ListenerDeclarationNode listener = (ListenerDeclarationNode) node;
-                    endpoints.add(listener);
-                }
-                // Load a service Node
-                if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                    ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
-                    if (serviceName.isPresent()) {
-                        // Filtering by service name
-                        if (serviceName.get().equals(getServiceBasePath(serviceNode))) {
-                            servicesToGenerate.add(serviceNode);
-                        }
-                    } else {
-                        // To generate for all services
+        DocumentId docId;
+        Document doc;
+        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
+            Optional<DocumentId> optionalDocId = ProjectLoader.getDocumentId(servicePath, (BuildProject) project);
+            docId = optionalDocId.orElseThrow();
+            ModuleId moduleId = docId.moduleId();
+            doc = project.currentPackage().module(moduleId).document(docId);
+        } else {
+            // Take module instance for traversing the syntax tree
+            Module currentModule = packageName.getDefaultModule();
+            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
+
+            docId = documentIterator.next();
+            doc = currentModule.document(docId);
+        }
+        syntaxTree = doc.syntaxTree();
+        semanticModel =  project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
+
+        ModulePartNode modulePartNode = syntaxTree.rootNode();
+        for (Node node : modulePartNode.members()) {
+            SyntaxKind syntaxKind = node.kind();
+            // Load a listen_declaration for the server part in the yaml spec
+            if (syntaxKind.equals(SyntaxKind.LISTENER_DECLARATION)) {
+                ListenerDeclarationNode listener = (ListenerDeclarationNode) node;
+                endpoints.add(listener);
+            }
+            // Load a service Node
+            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
+                ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
+                if (serviceName.isPresent()) {
+                    // Filtering by service name
+                    if (serviceName.get().equals(getServiceBasePath(serviceNode))) {
                         servicesToGenerate.add(serviceNode);
                     }
+                } else {
+                    // To generate for all services
+                    servicesToGenerate.add(serviceNode);
                 }
             }
         }
