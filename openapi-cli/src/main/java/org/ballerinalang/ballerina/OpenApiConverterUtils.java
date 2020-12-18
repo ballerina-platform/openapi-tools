@@ -194,7 +194,7 @@ public class OpenApiConverterUtils {
     private static String getOpenApiFileName(String servicePath, String serviceName) {
         String cleanedServiceName;
         if (serviceName.isBlank() || serviceName.equals("/")) {
-            cleanedServiceName = FilenameUtils.removeExtension(servicePath) + ConverterConstants.OPENAPI_SUFFIX;
+            cleanedServiceName = FilenameUtils.removeExtension(servicePath);
         } else {
             // Remove starting path separate if exists
             if (serviceName.startsWith("/")) {

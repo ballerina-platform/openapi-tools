@@ -89,6 +89,20 @@ public class OpenApiConverterUtilsTest {
         Assert.assertTrue(Files.exists(this.tempDir.resolve("hello02-bar-baz-openapi.yaml")));
     }
     
+    @Test(description = "Generate OpenAPI spec with no base path")
+    public void testServicesWithNoBasePath() throws IOException, OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("no_base_path_service.bal");
+        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("no_base_path_service-openapi.yaml")));
+    }
+    
+    @Test(description = "Generate OpenAPI spec with no base path")
+    public void testServicesWithNoBasePathWithFilterina() throws IOException, OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("no_base_path_service.bal");
+        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.of("/"));
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("no_base_path_service-openapi.yaml")));
+    }
+    
     @AfterMethod
     public void cleanUp() {
         deleteDirectory(this.tempDir);
