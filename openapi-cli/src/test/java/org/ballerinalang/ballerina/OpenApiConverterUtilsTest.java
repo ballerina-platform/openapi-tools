@@ -94,8 +94,11 @@ public class OpenApiConverterUtilsTest {
         Path ballerinaFilePath = RES_DIR.resolve("no_base_path_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
         Assert.assertTrue(Files.exists(this.tempDir.resolve("no_base_path_service-openapi.yaml")));
-        Files.delete(this.tempDir.resolve("no_base_path_service-openapi.yaml"));
-        
+    }
+    
+    @Test(description = "Generate OpenAPI spec with no base path")
+    public void testServicesWithNoBasePathWithFilterina() throws IOException, OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("no_base_path_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.of("/"));
         Assert.assertTrue(Files.exists(this.tempDir.resolve("no_base_path_service-openapi.yaml")));
     }
