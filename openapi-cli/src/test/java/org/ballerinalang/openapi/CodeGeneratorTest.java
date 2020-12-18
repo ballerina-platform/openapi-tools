@@ -68,6 +68,7 @@ public class CodeGeneratorTest {
                 Assert.fail("Service was not generated");
             }
         } catch (IOException | BallerinaOpenApiException e) {
+            deleteGeneratedFiles("openapipetstore-service.bal");
             Assert.fail("Error while generating the service. " + e.getMessage());
         }
     }
