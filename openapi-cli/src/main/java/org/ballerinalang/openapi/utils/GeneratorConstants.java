@@ -77,6 +77,10 @@ public class GeneratorConstants {
                 "private", "public", "record", "remote", "resource", "retries", "retry", "return", "returns", "service",
                 "source", "start", "stream", "string", "table", "transaction", "try", "type", "typedesc", "typeof",
                 "trap", "throw", "wait", "while", "with", "worker", "var", "version", "xml", "xmlns", "BOOLEAN_LITERAL",
-                "NULL_LITERAL", "ascending", "descending", "foreach", "map", "group", "from", "default", "field"));
+                "NULL_LITERAL", "ascending", "descending", "foreach", "map", "group", "from", "default", "field",
+                    "limit", "as", "on", "isolated", "readonly", "distinct", "where", "select", "do", "transactional"
+                    , "commit", "enum", "base16", "base64", "rollback", "configurable",  "class", "module", "never",
+                   "outer", "order", "null", "key", "let", "by"));
+
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\_{}\\s|.$])";
 }

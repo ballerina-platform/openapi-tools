@@ -102,16 +102,16 @@ public class OpenApiConverterUtils {
     private static Project project;
     private static List<ListenerDeclarationNode> endpoints = new ArrayList<>();
 
-
     /**
      * This util for generating files when not available with specific service name.
-     * @param servicePath
-     * @param outPath
-     * @throws IOException
-     * @throws OpenApiConverterException
-     * @return
+     *
+     * @param servicePath The path to a single ballerina file
+     * @param outPath     The output directory to which the OpenAPI specifications should be generated to.
+     * @param serviceName Filter the services to generate OpenAPI specification for service with this name.
+     * @throws IOException               Error when writing the OpenAPI specification file.
+     * @throws OpenApiConverterException Error occurred generating OpenAPI specification.
      */
-    public static void  generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName)
+    public static void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, Optional<String> serviceName)
             throws IOException, OpenApiConverterException {
 
         // Load project instance for single ballerina file
@@ -124,6 +124,7 @@ public class OpenApiConverterUtils {
         Module currentModule = packageName.getDefaultModule();
         semanticModel =  currentModule.getCompilation().getSemanticModel();
         Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
+        List<ServiceDeclarationNode> servicesToGenerate = new ArrayList<>();
         while (documentIterator.hasNext()) {
             DocumentId docId = documentIterator.next();
             Document doc = currentModule.document(docId);
@@ -139,34 +140,52 @@ public class OpenApiConverterUtils {
                 // Load a service Node
                 if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                     ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
-                    NodeList<Node> serviceNameNodes = serviceNode.absoluteResourcePath();
-                     String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceName);
-                     String ballerinaSource = readFromFile(servicePath);
-//                     if (serviceName.isBlank()) {
-//                         serviceName = getServiceBasePath(serviceNode);
-//                     }
-                     String openApiSource = generateOAS3Definitions(syntaxTree, serviceName);
-
-                    //  Checked old generated file with same name
-                    openApiName = checkDuplicateFiles(outPath, openApiName);
-                    writeFile(outPath.resolve(openApiName), openApiSource);
+                    if (serviceName.isPresent()) {
+                        // Filtering by service name
+                        if (serviceName.get().equals(getServiceBasePath(serviceNode))) {
+                            servicesToGenerate.add(serviceNode);
+                        }
+                    } else {
+                        // To generate for all services
+                        servicesToGenerate.add(serviceNode);
+                    }
                 }
             }
+        }
+
+        // If there are no services found for a given service name.
+        if (serviceName.isPresent() && servicesToGenerate.isEmpty()) {
+            throw new OpenApiConverterException("No Ballerina services found with name '" + serviceName.get() +
+                                                "' to generate an OpenAPI specification.");
+        }
+
+        // Generating for the services
+        for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
+            String serviceNodeName = getServiceBasePath(serviceNode);
+            String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName);
+            String openApiSource = generateOAS3Definitions(syntaxTree, serviceNodeName);
+
+            //  Checked old generated file with same name
+            openApiName = checkDuplicateFiles(outPath, openApiName);
+            writeFile(outPath.resolve(openApiName), openApiSource);
         }
     }
 
     private static String getOpenApiFileName(String servicePath, String serviceName) {
-        String openApiFile;
-
-        if (!serviceName.isBlank()) {
-            openApiFile = serviceName + ConverterConstants.OPENAPI_SUFFIX;
+        String cleanedServiceName;
+        if (serviceName.isBlank() || serviceName.equals("/")) {
+            cleanedServiceName = FilenameUtils.removeExtension(servicePath) + ConverterConstants.OPENAPI_SUFFIX;
         } else {
-            openApiFile = servicePath != null ?
-                    FilenameUtils.removeExtension(servicePath.toString()) + ConverterConstants.OPENAPI_SUFFIX :
-                    null;
+            // Remove starting path separate if exists
+            if (serviceName.startsWith("/")) {
+                serviceName = serviceName.substring(1);
+            }
+
+            // Replace rest of the path separators with hyphen
+            cleanedServiceName = serviceName.replaceAll("/", "-");
         }
 
-        return openApiFile + ConverterConstants.YAML_EXTENSION;
+        return cleanedServiceName + ConverterConstants.OPENAPI_SUFFIX + ConverterConstants.YAML_EXTENSION;
     }
 
     /**
@@ -290,14 +309,19 @@ public class OpenApiConverterUtils {
         return openapi;
     }
 
+    /**
+     * Gets the base path of a service.
+     *
+     * @param serviceDefinition The service definition node.
+     * @return The base path.
+     */
     public static String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
-
-        String currentServiceName = "";
+        StringBuilder currentServiceName = new StringBuilder();
         NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
         for (Node serviceBasedPathNode : serviceNameNodes) {
-            currentServiceName = currentServiceName + serviceBasedPathNode.toString();
+            currentServiceName.append(serviceBasedPathNode.toString());
         }
-        return currentServiceName;
+        return currentServiceName.toString().trim();
     }
 
     //need to refactor with project API
@@ -412,7 +436,6 @@ public class OpenApiConverterUtils {
      * @param duplicateCount    add the tag with duplicate number if file already exist
      */
     private static String setGeneratedFileName(File[] listFiles, String fileName, int duplicateCount) {
-
         for (File listFile : listFiles) {
             String listFileName = listFile.getName();
             if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2)

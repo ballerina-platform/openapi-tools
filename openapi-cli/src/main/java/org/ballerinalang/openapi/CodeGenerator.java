@@ -195,11 +195,14 @@ public class CodeGenerator {
                 // modelPackage is not in use at the moment. All models will be written into same package
                 // as other src files.
                 // Therefore value set to modelPackage is ignored here
+                if (serviceName != null) {
+                    api.getInfo().setTitle(serviceName.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1"));
+                }
                 BallerinaOpenApi definitionContext = new BallerinaOpenApi().buildContext(api).srcPackage(srcPackage)
                         .modelPackage(srcPackage);
                 definitionContext.setDefinitionPath(reldefinitionPath);
 
-                sourceFiles = generateClient(definitionContext);
+                sourceFiles = generateClient(definitionContext, serviceName);
                 break;
             case GEN_SERVICE:
 
@@ -373,14 +376,16 @@ public class CodeGenerator {
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private List<GenSrcFile> generateClient(BallerinaOpenApi context) throws IOException {
+    private List<GenSrcFile> generateClient(BallerinaOpenApi context, String serviceName) throws IOException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = GeneratorConstants.DEFAULT_CLIENT_PKG;
         }
 
+        if (serviceName == null) {
+            serviceName = context.getInfo().getTitle().toLowerCase(Locale.ENGLISH) + "-client.bal";
+        }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String srcFile = context.getInfo().getTitle().toLowerCase(Locale.ENGLISH)
-                .replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1") + "-client.bal";
+        String srcFile = serviceName + "-client.bal";
 
         // Generate ballerina service and resources.
         String mainContent = getContent(context, GeneratorConstants.DEFAULT_CLIENT_DIR,
@@ -402,8 +407,7 @@ public class CodeGenerator {
         }
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String concatTitle = api.getBalServiceName().toLowerCase(Locale.ENGLISH).replaceAll(
-                GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
+        String concatTitle = api.getBalServiceName().toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "-service.bal";
 
         String mainContent = getContent(api, GeneratorConstants.DEFAULT_TEMPLATE_DIR + "/service",

@@ -36,6 +36,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
 
@@ -154,10 +155,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private void ballerinaToOpenApi(String fileName) throws IOException {
         final File balFile = new File(fileName);
         Path balFilePath = Paths.get(balFile.getCanonicalPath());
-        String serviceName = "";
-        if (service != null) {
-            serviceName = service;
-        }
+        Optional<String> serviceName = Optional.ofNullable(service);
         getTargetOutputPath();
         Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
         //ballerina openapi -i service.bal --serviceName serviceName --module exampleModul -o ./

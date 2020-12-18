@@ -3,11 +3,6 @@ import ballerina/openapi;
 {{#servers}}
 listener http:Listener ep{{@index}} = new({{port}}{{#host}}, config = {host: "{{host}}"}{{/host}});
 {{/servers}}
-@openapi:ServiceInfo {{=<% %>=}}{<%={{ }}=%>
-    contract: "{{defPath}}"{{#if filteredTags}},
-    tags: [{{#each filteredTags}} {{#if @first}}"{{name}}"{{else}},"{{name}}"{{/if}} {{/each}}]{{/if}}{{#if operations}},
-    operations: [ {{#operations}}{{name}}{{/operations}} ]{{/if}}
-}
 
 service {{servers.0.basePath}} on {{#servers}}ep{{@index}}{{#unless @last}}, {{/unless}}{{/servers}} {{=<%
 %>=}}{<%={{ }}=%>

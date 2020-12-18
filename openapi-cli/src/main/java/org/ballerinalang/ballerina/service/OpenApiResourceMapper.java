@@ -53,6 +53,7 @@ import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
+import org.ballerinalang.ballerina.Constants;
 import org.ballerinalang.ballerina.openapi.convertor.ConverterUtils;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.expressions.ExpressionNode;
@@ -361,12 +362,9 @@ public class OpenApiResourceMapper {
             if (expr instanceof RequiredParameterNode) {
                 RequiredParameterNode queryParam = (RequiredParameterNode) expr;
                 if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode) {
-                    if (queryParam.annotations().isEmpty()) {
-                        in = "query";
-                        Parameter parameter = buildParameter(in, queryParam);
-                        parameter.setRequired(true);
-                        parameters.add(parameter);
-                    }
+                    Parameter parameter = buildParameter(Constants.QUERY, queryParam);
+                    parameter.setRequired(true);
+                    parameters.add(parameter);
                 }
             }
         }
