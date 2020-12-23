@@ -17,7 +17,7 @@ jobs:
         env:
           packageUser: ${{ github.actor }}
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace --scan --console=plain --no-daemon
 
   windows-build:
 
@@ -33,4 +33,4 @@ jobs:
         env:
           packageUser: ${{ github.actor }}
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew.bat build
+        run: ./gradlew.bat build --stacktrace --scan --console=plain --no-daemon
