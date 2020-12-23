@@ -17,7 +17,7 @@
  */
 package org.ballerinalang.openapi.cmd;
 
-import org.ballerinalang.tool.BLauncherException;
+import io.ballerina.cli.launcher.BLauncherException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -36,47 +36,25 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
-
 /**
  * OpenAPI command cmd common class to handle temp dirs and outputs.
  */
 public abstract class OpenAPICommandTest {
     protected Path tmpDir;
-    private ByteArrayOutputStream console;
     protected PrintStream printStream;
-    private static final Path RES_DIR = OpenAPICommandTest.getResourceFolderPath();
-    Path resourcePath = Paths.get(System.getProperty(USER_DIR));
-    private static final String REG_PATTERN = "\\s+";
-    private static final String REPLACE_STRING = "";
-
-    protected String readOutput() throws IOException {
-        return readOutput(false);
-    }
-
-    protected String readOutput(boolean slient) throws IOException {
-        String output = "";
-        output = console.toString();
-        console.close();
-        console = new ByteArrayOutputStream();
-        printStream = new PrintStream(console);
-        if (!slient) {
-            PrintStream out = System.out;
-            out.println(output);
-        }
-        return output;
-    }
-
+    protected final Path resourceDir = Paths.get("src/test/resources/").toAbsolutePath();
+    private ByteArrayOutputStream console;
+    
     @BeforeClass
     public void setup() throws IOException {
-        tmpDir = Files.createTempDirectory("openapi-cmd");
-        console = new ByteArrayOutputStream();
-        printStream = new PrintStream(console);
+        this.tmpDir = Files.createTempDirectory("openapi-cmd-test-out-" + System.nanoTime());
+        this.console = new ByteArrayOutputStream();
+        this.printStream = new PrintStream(console);
     }
 
     @AfterClass
     public void cleanup() throws IOException {
-        Files.walk(tmpDir)
+        Files.walk(this.tmpDir)
                 .sorted(Comparator.reverseOrder())
                 .forEach(path -> {
                     try {
@@ -85,17 +63,8 @@ public abstract class OpenAPICommandTest {
                         Assert.fail(e.getMessage(), e);
                     }
                 });
-        console.close();
-        printStream.close();
-    }
-
-    /**
-     * Retrieve resource location for test purpose.
-     *
-     * @return resource path.
-     */
-    public static Path getResourceFolderPath() {
-        return Paths.get("src/test/resources/").toAbsolutePath();
+        this.console.close();
+        this.printStream.close();
     }
 
     /**
@@ -105,10 +74,10 @@ public abstract class OpenAPICommandTest {
      * @return source yaml filePath return
      */
     public Path getExecuteCommand(String yamlFile, String serviceName) {
-        Path yamlPath = RES_DIR.resolve(Paths.get(yamlFile));
+        Path yamlPath = resourceDir.resolve(Paths.get(yamlFile));
         String[] args = {"--input", yamlPath.toString(), "--service-name", serviceName, "-o",
-                resourcePath.toString(), "--mode", "service"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream);
+                         this.tmpDir.toString(), "--mode", "service"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
         new CommandLine(cmd).parseArgs(args);
         String output = "";
         try {
@@ -121,15 +90,15 @@ public abstract class OpenAPICommandTest {
 
     //Delete generated service and schema files.
     public void deleteGeneratedFiles(String fileName) {
-        File serviceFile = new File(resourcePath.resolve(fileName).toString());
-        File schemaFile = new File(resourcePath.resolve("schema.bal").toString());
+        File serviceFile = new File(this.tmpDir.resolve(fileName).toString());
+        File schemaFile = new File(this.tmpDir.resolve("schema.bal").toString());
         serviceFile.delete();
         schemaFile.delete();
     }
 
     //Replace all whitespace in the given string.
     public String replaceWhiteSpace(String trimString) {
-        return (trimString.trim()).replaceAll(REG_PATTERN, REPLACE_STRING);
+        return (trimString.trim()).replaceAll("\\s+", "");
     }
 
     //Replace contract file path in generated service file with common URL.
@@ -137,11 +106,12 @@ public abstract class OpenAPICommandTest {
                                       String generatedService) {
         Pattern pattern = Pattern.compile("\\bcontract\\b: \"(.*?)\"");
         Matcher matcher = pattern.matcher(generatedService);
-        matcher.find();
-        String contractPath = "contract: " + "\"" + matcher.group(1) + "\"";
-        expectedService = expectedService.replaceAll("\\bcontract\\b: \"(.*?)\"",
-                Matcher.quoteReplacement(contractPath));
-        expectedServiceLines.close();
+        if (matcher.find()) {
+            String contractPath = "contract: " + "\"" + matcher.group(1) + "\"";
+            expectedService = expectedService.replaceAll("\\bcontract\\b: \"(.*?)\"",
+                    Matcher.quoteReplacement(contractPath));
+            expectedServiceLines.close();
+        }
         return expectedService;
     }
 
@@ -151,5 +121,18 @@ public abstract class OpenAPICommandTest {
         String generatedService = serviceLines.collect(Collectors.joining("\n"));
         serviceLines.close();
         return generatedService;
+    }
+    
+    protected String readOutput(boolean slient) throws IOException {
+        String output = "";
+        output = this.console.toString();
+        this.console.close();
+        this.console = new ByteArrayOutputStream();
+        this.printStream = new PrintStream(this.console);
+        if (!slient) {
+            PrintStream out = System.out;
+            out.println(output);
+        }
+        return output;
     }
 }

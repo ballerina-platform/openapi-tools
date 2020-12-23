@@ -49,7 +49,7 @@ import static org.ballerinalang.compiler.CompilerOptionName.TEST_ENABLED;
  * Util class for compilation and format execution for formatting CLI tool.
  */
 public class OpenApiValidatorUtil {
-    private static EmptyPrintStream emptyPrintStream;
+//    private static EmptyPrintStream emptyPrintStream;
 
     /**
      * Compile a ballerina file.
