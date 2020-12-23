@@ -1,13 +1,13 @@
 [package]
 org= "ballerina"
 name= "openapi"
-version= "2.0.2"
+version= "2.0.3"
 
 [build-options]
 observability-included=true
 
 [[platform.java11.dependency]]
-path = "../openapi-validator/build/libs/openapi-validator-2.0.2-SNAPSHOT.jar"
+path = "../openapi-validator/build/libs/openapi-validator-2.0.3-SNAPSHOT.jar"
 groupId = "ballerina"
 artifactId = "openapi"
-version = "2.0.2-SNAPSHOT"
+version = "2.0.3-SNAPSHOT"
