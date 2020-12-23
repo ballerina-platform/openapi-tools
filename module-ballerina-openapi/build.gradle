@@ -25,8 +25,8 @@ dependencies {
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }
-    compile project(':openapi-validator')
-    compile project(':openapi-cli')
+    implementation project(':openapi-validator')
+    implementation project(':openapi-cli')
 }
 
 clean {
