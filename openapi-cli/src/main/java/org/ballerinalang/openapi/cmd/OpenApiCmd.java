@@ -17,20 +17,19 @@
  */
 package org.ballerinalang.openapi.cmd;
 
+import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.cli.launcher.LauncherUtils;
 import org.ballerinalang.ballerina.OpenApiConverterException;
 import org.ballerinalang.ballerina.OpenApiConverterUtils;
 import org.ballerinalang.openapi.CodeGenerator;
 import org.ballerinalang.openapi.OpenApiMesseges;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.utils.GeneratorConstants;
-import org.ballerinalang.tool.BLauncherCmd;
-import org.ballerinalang.tool.LauncherUtils;
 import picocli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -73,9 +72,6 @@ public class OpenApiCmd implements BLauncherCmd {
             "contract")
     private String service;
 
-    @CommandLine.Option(names = {"-m", "--module"}, description = "Module name which service used to documented")
-    private  String module;
-
     @CommandLine.Option(names = {"--tags"}, description = "Tag that need to write service")
     private String tags;
 
@@ -93,9 +89,9 @@ public class OpenApiCmd implements BLauncherCmd {
         this.executionPath = Paths.get(System.getProperty("user.dir"));
     }
 
-    public OpenApiCmd(PrintStream outStream) {
+    public OpenApiCmd(PrintStream outStream, Path executionDir) {
         this.outStream = outStream;
-        this.executionPath = Paths.get(System.getProperty("user.dir"));
+        this.executionPath = executionDir;
     }
 
     @Override
@@ -157,7 +153,7 @@ public class OpenApiCmd implements BLauncherCmd {
         Path balFilePath = Paths.get(balFile.getCanonicalPath());
         Optional<String> serviceName = Optional.ofNullable(service);
         getTargetOutputPath();
-        Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
+//        Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
         //ballerina openapi -i service.bal --serviceName serviceName --module exampleModul -o ./
         // Check service name it is mandatory
         try {
@@ -282,17 +278,6 @@ public class OpenApiCmd implements BLauncherCmd {
             throw LauncherUtils.createLauncherException("Error occurred when generating service for openapi " +
                     "contract at " + argList.get(0) + ". " + e.getMessage() + ".");
         }
-    }
-
-    /**
-     * A util method to check a given module name actually exists in the current command location.
-     * @param moduleName - module name to be checked
-     * @return true if module exists.
-     */
-    private boolean checkModuleExist(String moduleName) {
-        Path userLocation = Paths.get(System.getProperty("user.dir"));
-        Path moduleLocation = userLocation.resolve("src").resolve(moduleName);
-        return Files.exists(moduleLocation);
     }
 
     @Override

@@ -94,7 +94,7 @@ public class OpenApiEndpointMapper {
             if (arg.size() > 1) {
               ExpressionNode bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
               if (bLangRecordLiteral instanceof MappingConstructorExpressionNode) {
-                  host = extractHost(host, (MappingConstructorExpressionNode) bLangRecordLiteral);
+                  host = extractHost((MappingConstructorExpressionNode) bLangRecordLiteral);
 
               }
                 //TODO: need to add check secure socket thing
@@ -113,7 +113,8 @@ public class OpenApiEndpointMapper {
         openapi.setSchemes(schemes);
     }
 
-    private String extractHost(String host, MappingConstructorExpressionNode bLangRecordLiteral) {
+    private String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
+        String host = null;
         MappingConstructorExpressionNode recordConfig = bLangRecordLiteral;
         if (recordConfig.fields() != null && !recordConfig.fields().isEmpty()) {
             SeparatedNodeList<MappingFieldNode> recordFields = recordConfig.fields();

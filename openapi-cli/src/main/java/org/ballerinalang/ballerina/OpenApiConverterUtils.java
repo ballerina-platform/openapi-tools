@@ -43,7 +43,6 @@ import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
 import io.swagger.models.Swagger;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.BooleanProperty;
@@ -58,7 +57,6 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.parser.converter.SwaggerConverter;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.ballerinalang.ballerina.service.ConverterConstants;
 import org.ballerinalang.ballerina.service.OpenApiEndpointMapper;
@@ -251,11 +249,6 @@ public class OpenApiConverterUtils {
         return serviceName;
     }
 
-    private static String readFromFile(Path servicePath) throws IOException {
-        String source = FileUtils.readFileToString(servicePath.toFile(), "UTF-8");
-        return source;
-    }
-
     /**
      * Gets the alias for a given module from a bLang file root node.
      *
@@ -317,7 +310,6 @@ public class OpenApiConverterUtils {
                 //Map records into swagger definitions
                 TypeDefinitionNode typeDefinitionNode = (TypeDefinitionNode) node;
                 if (typeDefinitionNode.typeDescriptor() instanceof RecordTypeSymbol) {
-                    Model model = new ModelImpl();
                     // TODO schema generation
 //                    model.setProperties(propertyMap);
 //                    definitions.put(typeNode.getName().getValue(), model);

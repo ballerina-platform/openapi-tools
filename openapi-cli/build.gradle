@@ -15,69 +15,37 @@
  *
  */
 
-
 apply from: "$rootDir/gradle/javaProject.gradle"
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java'
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: "java"
 
-description = 'Ballerina - OpenApi Tooling - OpenApi to Ballerina'
+description = "Ballerina - OpenAPI Tooling - OpenAPI to Ballerina"
 
 configurations.all {
     resolutionStrategy.preferProjectModules()
 }
+
 configurations {
     balTools
 }
 
 dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind"
-//    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.5'
-//    implementation "com.google.guava:guava:29.0-jre"
-//    implementation "io.swagger.parser.v3:swagger-parser-v3"
-//    implementation "io.swagger.core.v3:swagger-core"
-//        exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
-//        exclude group: 'javax.validation', module: 'validation.api'
-//    }
     implementation "io.swagger.core.v3:swagger-models"
-//        exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
-//        exclude group: 'javax.validation', module: 'validation.api'
-//    }
-//    implementation "io.swagger.parser.v3:swagger-parser-core"
     implementation ("io.swagger.parser.v3:swagger-parser-v2-converter")  {
-        exclude group: 'io.swagger', module: 'swagger-compat-spec-parser'
-        exclude group: 'org.slf4j', module: 'slf4j-ext'
-        exclude group: 'javax.validation', module: 'validation-api'
+        exclude group: "io.swagger", module: "swagger-compat-spec-parser"
+        exclude group: "org.slf4j", module: "slf4j-ext"
+        exclude group: "javax.validation", module: "validation-api"
     }
+    implementation "javax.ws.rs:javax.ws.rs-api"
     implementation "com.github.jknack:handlebars"
     implementation "info.picocli:picocli"
-    implementation "javax.ws.rs:javax.ws.rs-api"
-//    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.0'
-//    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0'
-//
-//    implementation group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
-//    implementation group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
     implementation "org.ballerinalang:ballerina-lang"
     implementation "org.ballerinalang:ballerina-parser"
-//    implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
-//    implementation group: 'org.ballerinalang', name: 'ballerina-runtime-api', version: "${ballerinaLangVersion}"
-    implementation "org.ballerinalang:ballerina-tool"
+    implementation "org.ballerinalang:ballerina-cli"
+    implementation "org.ballerinalang:http-native"
     implementation "com.google.code.findbugs:jsr305"
-//    implementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
-//    implementation group: 'org.ballerinalang', name: 'annotations', version: "${ballerinaLangVersion}"
-    implementation group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
-//    implementation group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0'
-//
-//    testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
-//    testImplementation group: 'org.ballerinalang', name: 'language-server', version: "${ballerinaLangVersion}"
-//    testImplementation group: 'org.ballerinalang', name: 'language-server-compiler', version: "${ballerinaLangVersion}"
-//    testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
-//    testImplementation 'org.slf4j:slf4j-jdk14'
-//
-//    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-//    testRuntime group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
-//
-//    implementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
-//    testImplementation group: 'org.ballerinalang', name: 'ballerina-test-utils', version: "${ballerinaLangVersion}"
+    testImplementation "org.testng:testng"
 
     balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
@@ -104,7 +72,7 @@ test {
     systemProperty "ballerina.home", bDistribution
 
     useTestNG() {
-        suites 'src/test/resources/testng.xml'
+        suites "src/test/resources/testng.xml"
     }
 }
 

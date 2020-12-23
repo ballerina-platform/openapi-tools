@@ -19,7 +19,6 @@
 
 package org.ballerinalang.ballerina.service;
 
-import com.google.common.collect.Lists;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
@@ -43,25 +42,11 @@ import io.swagger.models.parameters.HeaderParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.BooleanProperty;
-import io.swagger.models.properties.IntegerProperty;
-import io.swagger.models.properties.ObjectProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.StringProperty;
 import org.ballerinalang.ballerina.Constants;
-import org.ballerinalang.ballerina.ConverterUtils;
-import org.ballerinalang.model.tree.AnnotationAttachmentNode;
-import org.ballerinalang.model.tree.expressions.ExpressionNode;
-import org.ballerinalang.model.tree.expressions.RecordLiteralNode;
 import org.ballerinalang.net.http.HttpConstants;
-import org.wso2.ballerinalang.compiler.tree.BLangAnnotationAttachment;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangListConstructorExpr;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangLiteral;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -73,26 +58,19 @@ import java.util.Set;
 import javax.ws.rs.core.MediaType;
 
 import static org.ballerinalang.ballerina.ConverterUtils.convertBallerinaTypeToOpenAPIType;
-import static org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral.BLangRecordKeyValueField;
 
 /**
  * This class will do resource mapping from ballerina to openApi.
  */
 public class OpenApiResourceMapper {
-    private final String httpAlias;
-    private final String openApiAlias;
     private final Swagger openApiDefinition;
 
     /**
      * Initializes a resource parser for openApi.
      *
      * @param openApi      The OpenAPI definition.
-     * @param httpAlias    The alias for ballerina/http module.
-     * @param openApiAlias The alias for ballerina.openapi module.
      */
-    OpenApiResourceMapper(Swagger openApi, String httpAlias, String openApiAlias) {
-        this.httpAlias = httpAlias;
-        this.openApiAlias = openApiAlias;
+    OpenApiResourceMapper(Swagger openApi) {
         this.openApiDefinition = openApi;
     }
 
@@ -154,7 +132,7 @@ public class OpenApiResourceMapper {
             pathMap.put(operationAdaptor.getPath(), path);
         }
         Operation operation = operationAdaptor.getOperation();
-        switch (httpMethod.trim().toUpperCase()) {
+        switch (httpMethod.trim().toUpperCase(Locale.ENGLISH)) {
             case HttpConstants.ANNOTATION_METHOD_GET:
                 path.get(operation);
                 break;
@@ -219,40 +197,6 @@ public class OpenApiResourceMapper {
      */
     private String getOperationId(int idIncrement, String postFix) {
         return "operation" + idIncrement + "_" + postFix;
-    }
-
-    /**
-     * Creates headers definitions for openApi response.
-     *
-     * @param annotationExpression The annotation attribute value which has the headers.
-     * @param response             The openApi response.
-     */
-    private void createHeadersModel(BLangExpression annotationExpression, Response response) {
-        if (null != annotationExpression) {
-            BLangListConstructorExpr headerArray = (BLangListConstructorExpr) annotationExpression;
-
-            for (ExpressionNode headersValue : headerArray.getExpressions()) {
-                Map<String, BLangExpression> headersAttributes =
-                        ConverterUtils.listToMap(((BLangRecordLiteral) headersValue).getFields());
-                Map<String, Property> headers = new HashMap<>();
-
-                if (headersAttributes.containsKey(ConverterConstants.ATTR_NAME) && headersAttributes
-                        .containsKey(ConverterConstants.ATTR_HEADER_TYPE)) {
-                    String headerName = ConverterUtils
-                            .getStringLiteralValue(headersAttributes.get(ConverterConstants.ATTR_NAME));
-                    String type = ConverterUtils
-                            .getStringLiteralValue(headersAttributes.get(ConverterConstants.ATTR_HEADER_TYPE));
-                    Property property = getOpenApiProperty(type);
-
-                    if (headersAttributes.containsKey(ConverterConstants.ATTR_DESCRIPTION)) {
-                        property.setDescription(ConverterUtils
-                                .getStringLiteralValue(headersAttributes.get(ConverterConstants.ATTR_DESCRIPTION)));
-                    }
-                    headers.put(headerName, property);
-                }
-                response.setHeaders(headers);
-            }
-        }
     }
 
     /**
@@ -321,7 +265,7 @@ public class OpenApiResourceMapper {
         }
 
         // set query parameter
-        FunctionSignatureNode functionSignature = (FunctionSignatureNode) resource.functionSignature();
+        FunctionSignatureNode functionSignature = resource.functionSignature();
         SeparatedNodeList<ParameterNode> paramExprs = functionSignature.parameters();
         for (ParameterNode expr : paramExprs) {
             if (expr instanceof RequiredParameterNode) {
@@ -334,38 +278,6 @@ public class OpenApiResourceMapper {
             }
         }
         operation.setParameters(parameters);
-    }
-
-    private void parseMultiResourceInfoAnnotationAttachment(AnnotationAttachmentNode multiResourceInfoAnnotation,
-                                                            Operation operation, String httpMethod) {
-        // Get multi resource information
-        if (multiResourceInfoAnnotation != null) {
-            BLangRecordLiteral bLiteral = (BLangRecordLiteral) ((BLangAnnotationAttachment) multiResourceInfoAnnotation)
-                    .getExpression();
-            // In multi resource information there is only one key exist that is `resource information`.
-            BLangRecordKeyValueField resourceInformationAttr = bLiteral.fields.size() == 1
-                    ? (BLangRecordKeyValueField) bLiteral.fields.get(0)
-                    : null;
-            if (resourceInformationAttr != null) {
-                for (RecordLiteralNode.RecordField resourceInfo :
-                        ((BLangRecordLiteral) resourceInformationAttr.valueExpr).getFields()) {
-                    BLangRecordKeyValueField resourceInfoKeyValue = (BLangRecordKeyValueField) resourceInfo;
-                    if (((BLangLiteral) resourceInfoKeyValue.key.expr).value.equals(httpMethod)) {
-//                        addResourceInfoToOperation(((BLangRecordLiteral) resourceInfoKeyValue.valueExpr), operation);
-                    }
-                }
-            }
-        }
-    }
-
-    private void addResourceInfoToOperation(FunctionDefinitionNode resource, Operation operation) {
-        //TODO createTags
-        //TODO addResource Summery
-        //TODO addDescription
-        //Parameter Maps
-        if (resource != null) {
-            this.createParametersModel(resource, operation);
-        }
     }
 
     /**
@@ -421,7 +333,9 @@ public class OpenApiResourceMapper {
             httpMethods.add(HttpConstants.ANNOTATION_METHOD_OPTIONS);
             httpMethods.add("HEAD");
         }
-        return Lists.reverse(new ArrayList<>(httpMethods));
+        List<String> httpMethodsAsString = new ArrayList<>(httpMethods);
+        Collections.reverse(httpMethodsAsString);
+        return httpMethodsAsString;
     }
 
     private String generateRelativePath(FunctionDefinitionNode resource) {
@@ -498,36 +412,5 @@ public class OpenApiResourceMapper {
         }
 
         return param;
-    }
-
-    /**
-     * Retrieves a matching OpenApi {@link Property} for a provided ballerina type.
-     *
-     * @param type ballerina type name as a String
-     * @return OpenApi {@link Property} for type defined by {@code type}
-     */
-    private Property getOpenApiProperty(String type) {
-        Property property;
-
-        switch (type) {
-            case "string":
-                property = new StringProperty();
-                break;
-            case "boolean":
-                property = new BooleanProperty();
-                break;
-            case "array":
-                property = new ArrayProperty();
-                break;
-            case "number":
-            case "integer":
-                property = new IntegerProperty();
-                break;
-            default:
-                property = new ObjectProperty();
-                break;
-        }
-
-        return property;
     }
 }
