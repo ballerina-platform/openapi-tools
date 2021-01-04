@@ -197,15 +197,19 @@ public class OpenApiCmd implements BLauncherCmd {
 
     /**
      * A util to take the resource Path.
+     * 
      * @param resourceFile      resource file path
      * @return path of given resource file
      */
     public Path getRelativePath(File resourceFile, String targetOutputPath) {
-        Path relativePath = null;
         Path resourcePath = Paths.get(resourceFile.getAbsoluteFile().getParentFile().toString());
-        Path targetPath = Paths.get(targetOutputPath).toAbsolutePath();
-        relativePath = (targetPath).relativize(resourcePath);
-        return relativePath.resolve(resourceFile.getName());
+        Path targetPath = Paths.get(targetOutputPath).toAbsolutePath();        
+        try {
+            Path relativePath = targetPath.relativize(resourcePath);
+            return relativePath.resolve(resourceFile.getName());
+        } catch (IllegalArgumentException iaex) {
+            return resourcePath.resolve(resourceFile.getName());
+        }
     }
 
     /**
