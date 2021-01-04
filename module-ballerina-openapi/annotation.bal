@@ -28,18 +28,7 @@ public type ServiceInformation record {|
     string[]? excludeTags = [];
     string[]? excludeOperations = [];
     boolean failOnErrors = true;
-
 |};
-
-# Configuration elements for client code generation.
-#
-# + generate - generates client code if set to true
-public type ClientInformation record {|
-    boolean generate = true;
-|};
-
-# Annotation to configure client code generation.
-public annotation ClientInformation ClientConfig on service;
 
 # Annotation for additional OpenAPI information of a Ballerina service.
 public annotation ServiceInformation ServiceInfo on service;
