@@ -38,9 +38,6 @@ public type ClientInformation record {|
     boolean generate = true;
 |};
 
-# Presence of this annotation will mark this endpoint to be used as a service endpoint for client generation
-public const annotation ClientEndpoint on source listener;
-
 # Annotation to configure client code generation.
 public annotation ClientInformation ClientConfig on service;
 
