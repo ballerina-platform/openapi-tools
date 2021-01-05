@@ -19,7 +19,7 @@ jobs:
         env:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace --scan --console=plain --no-daemon
 
   windows-build:
 
@@ -35,4 +35,4 @@ jobs:
         env:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
-        run: ./gradlew.bat build
+        run: ./gradlew.bat build --stacktrace --scan --console=plain --no-daemon
