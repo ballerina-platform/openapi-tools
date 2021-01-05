@@ -21,34 +21,19 @@ package org.ballerinalang.ballerina.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.swagger.models.Contact;
-import io.swagger.models.ExternalDocs;
 import io.swagger.models.Info;
-import io.swagger.models.License;
 import io.swagger.models.Swagger;
-import io.swagger.models.Tag;
 import io.swagger.util.Json;
-import org.ballerinalang.ballerina.openapi.convertor.ConverterUtils;
-import org.ballerinalang.ballerina.service.model.Organization;
-import org.ballerinalang.model.tree.expressions.ExpressionNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangListConstructorExpr;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static org.ballerinalang.ballerina.OpenApiConverterUtils.getServiceBasePath;
 
@@ -123,225 +108,11 @@ public class OpenApiServiceMapper {
             SyntaxKind kind = function.kind();
             if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                 resource.add((FunctionDefinitionNode) function);
-                resource.get(0);
             }
         }
-        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(openapi, this.httpAlias, this.openApiAlias);
+        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(openapi);
         openapi.setPaths(resourceMapper.convertResourceToPath(resource));
         return openapi;
     }
-
-    /**
-     * Parses the 'ServiceInfo' annotation and build the openApi definition for it.
-     *
-     * @param service The ballerina service which has the 'ServiceInfo' annotation attachment.
-     * @param openapi The openapi definition to be built up.
-     */
-    private void parseServiceInfoAnnotationAttachment(ServiceDeclarationNode service, Swagger openapi,
-                                                      String basePath) {
-        Info info = new Info().version("1.0.0").title(basePath.replace("/", "_"));
-        SyntaxTree syntaxTree = service.syntaxTree();
-        ModulePartNode modulePartNode = syntaxTree.rootNode();
-        for (Node node : modulePartNode.members()) {
-            SyntaxKind syntaxKind = node.kind();
-            if (syntaxKind.equals(SyntaxKind.ANNOTATION)) {
-                //TODO ----- annotation handle
-            }
-        }
-
-//
-//        Info info = new Info().version("1.0.0").title(basePath.replace("/","_"));
-//        if (annotation != null) {
-//            BLangRecordLiteral bLiteral = ((BLangRecordLiteral) ((BLangAnnotationAttachment) annotation)
-//                    .getExpression());
-//
-//            Map<String, BLangExpression> attributes = ConverterUtils.listToMap(bLiteral.getFields());
-//            if (attributes.containsKey(ConverterConstants.ATTR_SERVICE_VERSION)) {
-//                info.version(
-//                        ConverterUtils.getStringLiteralValue(
-//                        attributes.get(ConverterConstants.ATTR_SERVICE_VERSION)));
-//            }
-//            if (attributes.containsKey(ConverterConstants.ATTR_TITLE)) {
-//                info.title(ConverterUtils.getStringLiteralValue(attributes.get(ConverterConstants.ATTR_TITLE)));
-//            }
-//            if (attributes.containsKey(ConverterConstants.ATTR_DESCRIPTION)) {
-//                info.description(
-//                        ConverterUtils.getStringLiteralValue(attributes.get(ConverterConstants.ATTR_DESCRIPTION)));
-//            }
-//            if (attributes.containsKey(ConverterConstants.ATTR_TERMS)) {
-//                info.termsOfService(
-//                        ConverterUtils.getStringLiteralValue(attributes.get(ConverterConstants.ATTR_TERMS)));
-//            }
-//            this.createContactModel(attributes.get("contact"), info);
-//            this.createLicenseModel(attributes.get("license"), info);
-//
-//            this.createExternalDocModel(attributes.get("externalDoc"), openapi);
-//            this.createTagModel(attributes.get("tags"), openapi);
-//            this.createOrganizationModel(attributes.get("organization"), info);
-//        }
-//        openapi.setInfo(info);
-    }
-
-    /**
-     * Creates vendor extension for organization.
-     *
-     * @param annotationExpression The annotation attribute value for organization vendor extension.
-     * @param info                 The info definition.
-     */
-    private void createOrganizationModel(BLangExpression annotationExpression, Info info) {
-        if (null != annotationExpression) {
-            BLangRecordLiteral orgAnnotation = (BLangRecordLiteral) annotationExpression;
-            Map<String, BLangExpression> organizationAttributes =
-                    ConverterUtils.listToMap(orgAnnotation.getFields());
-            Organization organization = new Organization();
-
-            if (organizationAttributes.containsKey(ConverterConstants.ATTR_NAME)) {
-                organization.setName(
-                        ConverterUtils.getStringLiteralValue(organizationAttributes.get(ConverterConstants.ATTR_NAME)));
-            }
-            if (organizationAttributes.containsKey(ConverterConstants.ATTR_URL)) {
-                organization.setUrl(ConverterUtils
-                        .getStringLiteralValue(organizationAttributes.get(ConverterConstants.ATTR_URL)));
-            }
-            info.setVendorExtension("x-organization", organization);
-        }
-    }
-
-    /**
-     * Creates tag openApi definition.
-     *
-     * @param annotationExpression The ballerina annotation attribute value for tag.
-     * @param openApi              The openApi definition which the tags needs to be build on.
-     */
-    private void createTagModel(BLangExpression annotationExpression, Swagger openApi) {
-        if (null != annotationExpression) {
-            List<Tag> tags = new LinkedList<>();
-            BLangListConstructorExpr tagArray = (BLangListConstructorExpr) annotationExpression;
-
-            for (ExpressionNode expr : tagArray.getExpressions()) {
-                Map<String, BLangExpression> tagAttributes =
-                        ConverterUtils.listToMap(((BLangRecordLiteral) expr).getFields());
-                Tag tag = new Tag();
-
-                if (tagAttributes.containsKey(ConverterConstants.ATTR_NAME)) {
-                    tag.setName(ConverterUtils.getStringLiteralValue(tagAttributes.get(ConverterConstants.ATTR_NAME)));
-                }
-                if (tagAttributes.containsKey(ConverterConstants.ATTR_DESCRIPTION)) {
-                    tag.setDescription(ConverterUtils
-                            .getStringLiteralValue(tagAttributes.get(ConverterConstants.ATTR_DESCRIPTION)));
-                }
-
-                tags.add(tag);
-            }
-
-            openApi.setTags(Lists.reverse(tags));
-        }
-    }
-
-    /**
-     * Creates external docs openApi definition.
-     *
-     * @param annotationExpression The ballerina annotation attribute value for external docs.
-     * @param openApi              The openApi definition which the external docs needs to be build on.
-     */
-    private void createExternalDocModel(BLangExpression annotationExpression, Swagger openApi) {
-        if (null != annotationExpression) {
-            BLangRecordLiteral docAnnotation = (BLangRecordLiteral) annotationExpression;
-            Map<String, BLangExpression> externalDocAttributes =
-                    ConverterUtils.listToMap(docAnnotation.getFields());
-            ExternalDocs externalDocs = new ExternalDocs();
-
-            if (externalDocAttributes.containsKey(ConverterConstants.ATTR_DESCRIPTION)) {
-                externalDocs.setDescription(ConverterUtils
-                        .getStringLiteralValue(externalDocAttributes.get(ConverterConstants.ATTR_DESCRIPTION)));
-            }
-            if (externalDocAttributes.containsKey(ConverterConstants.ATTR_URL)) {
-                externalDocs.setUrl(ConverterUtils
-                        .getStringLiteralValue(externalDocAttributes.get(ConverterConstants.ATTR_URL)));
-            }
     
-            openApi.setExternalDocs(externalDocs);
-        }
-    }
-
-    /**
-     * Creates the contact openApi definition.
-     *
-     * @param annotationExpression The ballerina annotation attribute value for contact.
-     * @param info                 The info definition which the contact needs to be build on.
-     */
-    private void createContactModel(BLangExpression annotationExpression, Info info) {
-        if (null != annotationExpression) {
-            BLangRecordLiteral contactAnnotation = (BLangRecordLiteral) annotationExpression;
-            Map<String, BLangExpression> contactAttributes =
-                    ConverterUtils.listToMap(contactAnnotation.getFields());
-            Contact contact = new Contact();
-
-            if (contactAttributes.containsKey(ConverterConstants.ATTR_NAME)) {
-                contact.setName(
-                        ConverterUtils.getStringLiteralValue(contactAttributes.get(ConverterConstants.ATTR_NAME)));
-            }
-            if (contactAttributes.containsKey("email")) {
-                contact.setEmail(ConverterUtils.getStringLiteralValue(contactAttributes.get("email")));
-            }
-            if (contactAttributes.containsKey(ConverterConstants.ATTR_URL)) {
-                contact.setUrl(
-                        ConverterUtils.getStringLiteralValue(contactAttributes.get(ConverterConstants.ATTR_URL)));
-            }
-    
-            info.setContact(contact);
-        }
-    }
-
-    /**
-     * Creates the license openApi definition.
-     *
-     * @param annotationExpression The ballerina annotation attribute value for license.
-     * @param info                 The info definition which the license needs to be build on.
-     */
-    private void createLicenseModel(BLangExpression annotationExpression, Info info) {
-        if (null != annotationExpression) {
-            BLangRecordLiteral licenseAnnotation = (BLangRecordLiteral) annotationExpression;
-            Map<String, BLangExpression> licenseAttributes =
-                    ConverterUtils.listToMap(licenseAnnotation.getFields());
-            License license = new License();
-
-            if (licenseAttributes.containsKey(ConverterConstants.ATTR_NAME)) {
-                license.setName(
-                        ConverterUtils.getStringLiteralValue(licenseAttributes.get(ConverterConstants.ATTR_NAME)));
-            }
-            if (licenseAttributes.containsKey(ConverterConstants.ATTR_URL)) {
-                license.setUrl(
-                        ConverterUtils.getStringLiteralValue(licenseAttributes.get(ConverterConstants.ATTR_URL)));
-            }
-            
-            info.setLicense(license);
-        }
-    }
-
-    /**
-     * Parses the ballerina/http@config annotation and builds openApi definition. Also create the consumes and
-     * produces annotations.
-     *
-     * @param service The ballerina service.
-     * @param openApi The openApi to build up.
-     */
-    private void parseConfigAnnotationAttachment(ServiceDeclarationNode service, Swagger openApi) {
-//        AnnotationAttachmentNode annotation = ConverterUtils
-//                .getAnnotationFromList(HttpConstants.ANN_NAME_HTTP_SERVICE_CONFIG, httpAlias,
-//                        service.getAnnotationAttachments());
-//
-//        if (annotation != null) {
-//            BLangRecordLiteral bLiteral = ((BLangRecordLiteral) ((BLangAnnotationAttachment) annotation)
-//                    .getExpression());
-//
-//            Map<String, BLangExpression> attributes = ConverterUtils.listToMap(bLiteral.getFields());
-//            if (attributes.containsKey(HttpConstants.ANN_CONFIG_ATTR_BASE_PATH)) {
-//                openApi.setBasePath(
-//                        ConverterUtils.getStringLiteralValue(
-//                        attributes.get(HttpConstants.ANN_CONFIG_ATTR_BASE_PATH)));
-//            }
-//        }
-    }
-
 }

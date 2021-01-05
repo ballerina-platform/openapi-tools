@@ -14,39 +14,25 @@
  * limitations under the License.
  */
 
-open module io.ballerina.ballerina.openapi {
+module io.ballerina.ballerina.openapi {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
-    requires com.google.common;
-    requires swagger.models;
-    requires swagger.core;
-    requires io.ballerina.lang;
-    requires org.slf4j;
-    requires io.ballerina.language.server.compiler;
-    requires swagger.parser;
-    requires io.swagger.v3.core;
-    requires io.swagger.v3.oas.models;
-    requires swagger.parser.v3;
-    requires swagger.parser.v2.converter;
-    requires org.apache.commons.io;
-    requires org.apache.commons.lang3;
-    requires io.ballerina.tool;
-    requires com.fasterxml.jackson.annotation;
-    requires java.ws.rs;
-    requires info.picocli;
-    requires io.ballerina.stdlib.http;
     requires handlebars;
-    requires jsr305;
-    requires io.ballerina.tools.api;
-    requires io.ballerina.runtime;
-    requires io.ballerina.runtime.api;
+    requires info.picocli;
+    requires io.ballerina.lang;
     requires io.ballerina.parser;
+    requires io.ballerina.stdlib.http;
     requires io.ballerina.cli;
-
+    requires io.swagger.v3.core;
+    requires java.ws.rs;
+    requires jsr305;
+    requires org.apache.commons.io;
+    requires org.slf4j;
+    requires swagger.core;
+    requires swagger.models;
+    requires swagger.parser;
+    requires swagger.parser.v2.converter;
     exports org.ballerinalang.ballerina;
-    exports org.ballerinalang.ballerina.openapi.convertor;
-    exports org.ballerinalang.ballerina.openapi.convertor.service;
-    exports org.ballerinalang.ballerina.openapi.convertor.service.model;
     exports org.ballerinalang.openapi;
     exports org.ballerinalang.openapi.cmd;
     exports org.ballerinalang.openapi.exception;

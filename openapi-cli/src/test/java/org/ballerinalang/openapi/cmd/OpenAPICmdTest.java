@@ -17,7 +17,7 @@
  */
 package org.ballerinalang.openapi.cmd;
 
-import org.ballerinalang.tool.BLauncherException;
+import io.ballerina.cli.launcher.BLauncherException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -31,25 +31,19 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
-
 /**
  * OpenAPI command test suit.
  */
 public class OpenAPICmdTest extends OpenAPICommandTest {
-    private static final Path RES_DIR = OpenAPICommandTest.getResourceFolderPath();
-    Path resourcePath = Paths.get(System.getProperty(USER_DIR));
-
     @BeforeTest(description = "This will create a new ballerina project for testing below scenarios.")
     public void setupBallerinaProject() throws IOException {
         super.setup();
-//        petProject = OpenAPICommandTest.createBalProject(tmpDir.toString());
     }
 
     @Test(description = "Test openapi command with help flag")
     public void testOpenAPICmdHelp() throws IOException {
         String[] args = {"-h"};
-        OpenApiCmd openApiCommand = new OpenApiCmd(printStream);
+        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir);
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
 
@@ -59,7 +53,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
 
     @Test(description = "Test openapi command without help flag")
     public void testOpenAPICmdHelpWithoutFlag() throws IOException {
-        OpenApiCmd openApiCommand = new OpenApiCmd(printStream);
+        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir);
         new CommandLine(openApiCommand);
         openApiCommand.execute();
 
@@ -70,7 +64,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     @Test(description = "Test openapi gen-service without openapi contract file")
     public void testWithoutOpenApiContract() {
         String[] args = {"--input"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream);
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir);
         new CommandLine(cmd).parseArgs(args);
         String output = "";
         try {
@@ -83,9 +77,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
 
     @Test(description = "Test openapi gen-service for successful service generation")
     public void testSuccessfulServiceGeneration() throws IOException {
-        Path petstoreYaml = RES_DIR.resolve(Paths.get("petstore.yaml"));
-        String[] args = {"--input", petstoreYaml.toString(), "-o", resourcePath.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream);
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";
@@ -94,8 +88,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         } catch (BLauncherException e) {
             output = e.getDetailedMessages().get(0);
         }
-        Path expectedServiceFile = RES_DIR.resolve(Paths.get("expected_gen", "petstore_gen.bal"));
-        Path expectedSchemaFile = RES_DIR.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
+        Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_gen.bal"));
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
 
 //        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
 //        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
@@ -104,11 +98,11 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
         String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
         expectedSchemaLines.close();
-        if (Files.exists(resourcePath.resolve("petstore-client.bal")) &&
-                Files.exists(resourcePath.resolve("petstore-service.bal")) &&
-                Files.exists(resourcePath.resolve("schema.bal"))) {
+        if (Files.exists(this.tmpDir.resolve("petstore-client.bal")) &&
+                Files.exists(this.tmpDir.resolve("petstore-service.bal")) &&
+                Files.exists(this.tmpDir.resolve("schema.bal"))) {
             //Compare schema contents
-            Stream<String> schemaLines = Files.lines(resourcePath.resolve("schema.bal"));
+            Stream<String> schemaLines = Files.lines(this.tmpDir.resolve("schema.bal"));
             String generatedSchema = schemaLines.collect(Collectors.joining("\n"));
             schemaLines.close();
 
@@ -129,11 +123,10 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     }
 
     @Test(description = "Test ballerina to openapi")
-    public void testBallerinaToOpenAPIGeneration() throws IOException {
-
-        Path petstoreBal = RES_DIR.resolve(Paths.get("bal-files/ballerinaFile.yaml"));
-        String[] args = {"--input", petstoreBal.toString(), "-o", resourcePath.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream);
+    public void testBallerinaToOpenAPIGeneration() {
+        Path petstoreBal = resourceDir.resolve(Paths.get("bal-files/ballerinaFile.bal"));
+        String[] args = {"--input", petstoreBal.toString(), "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";
@@ -141,15 +134,15 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             cmd.execute();
         } catch (BLauncherException e) {
             output = e.getDetailedMessages().get(0);
+            Assert.fail(output);
         }
     }
 
     // Delete the generated files
     private void deleteGeneratedFiles() {
-
-        File serviceFile = new File(resourcePath.resolve("petstore-service.bal").toString());
-        File clientFile = new File(resourcePath.resolve("petstore-client.bal").toString());
-        File schemaFile = new File(resourcePath.resolve("schema.bal").toString());
+        File serviceFile = new File(this.tmpDir.resolve("petstore-service.bal").toString());
+        File clientFile = new File(this.tmpDir.resolve("petstore-client.bal").toString());
+        File schemaFile = new File(this.tmpDir.resolve("schema.bal").toString());
 
         serviceFile.delete();
         clientFile.delete();
