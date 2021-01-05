@@ -19,8 +19,8 @@
 
 package org.ballerinalang.ballerina.service;
 
-import com.google.common.collect.Lists;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ChildNodeList;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -35,9 +35,9 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.TypeReferenceTypeDescNode;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
@@ -52,12 +52,6 @@ import io.swagger.models.parameters.HeaderParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.BooleanProperty;
-import io.swagger.models.properties.IntegerProperty;
-import io.swagger.models.properties.ObjectProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.StringProperty;
 import org.ballerinalang.ballerina.Constants;
 import org.ballerinalang.net.http.HttpConstants;
 
@@ -77,7 +71,6 @@ import javax.ws.rs.core.MediaType;
 import static org.ballerinalang.ballerina.Constants.HTTP_PAYLOAD;
 import static org.ballerinalang.ballerina.ConverterUtils.convertBallerinaTypeToOpenAPIType;
 import static org.ballerinalang.net.http.HttpConstants.HTTP_METHOD_GET;
-import static org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral.BLangRecordKeyValueField;
 
 /**
  * This class will do resource mapping from ballerina to openApi.
@@ -243,66 +236,85 @@ public class OpenApiResourceMapper {
             for (ParameterNode expr : paramExprs) {
                 if (expr instanceof RequiredParameterNode) {
                     RequiredParameterNode queryParam = (RequiredParameterNode) expr;
-                    if (queryParam.typeName() instanceof TypeDescriptorNode) {
-                        if (!queryParam.annotations().isEmpty()) {
-                            NodeList<AnnotationNode> annotations = queryParam.annotations();
-                            Map<String, Model> definitions = new HashMap<>();
-                            for (AnnotationNode annotation: annotations) {
-                                if ((annotation.annotReference().toString()).trim().equals(HTTP_PAYLOAD)) {
-                                    // Creating request body - required.
-                                    if (annotation.annotValue().isPresent()) {
-                                        MappingConstructorExpressionNode mapMime =
-                                                annotation.annotValue().orElseThrow();
-                                        SeparatedNodeList<MappingFieldNode> fields = mapMime.fields();
-                                        if (!fields.isEmpty() || fields.size() != 0) {
-                                            for (MappingFieldNode fieldNode: fields) {
-                                                String con = fieldNode.toString();
-                                                if (fieldNode.children() instanceof ChildNodeList) {
-                                                    ChildNodeList nodeList = fieldNode.children();
-                                                    Iterator<Node> itNode = nodeList.iterator();
-                                                    while (itNode.hasNext()) {
-                                                        Node nextNode = itNode.next();
-                                                        if (nextNode instanceof ListConstructorExpressionNode) {
-                                                            SeparatedNodeList mimeList =
-                                                                    ((ListConstructorExpressionNode) nextNode).expressions();
-
+                    if (queryParam.typeName() instanceof TypeDescriptorNode && !queryParam.annotations().isEmpty()) {
+                        NodeList<AnnotationNode> annotations = queryParam.annotations();
+                        Map<String, Model> definitions = new HashMap<>();
+                        for (AnnotationNode annotation: annotations) {
+                            if ((annotation.annotReference().toString()).trim().equals(HTTP_PAYLOAD)) {
+                                // Creating request body - required.
+                                BodyParameter bodyParameter = new BodyParameter();
+                                if (annotation.annotValue().isPresent()) {
+                                    MappingConstructorExpressionNode mapMime =
+                                            annotation.annotValue().orElseThrow();
+                                    SeparatedNodeList<MappingFieldNode> fields = mapMime.fields();
+                                    if (!fields.isEmpty() || fields.size() != 0) {
+                                        for (MappingFieldNode fieldNode: fields) {
+                                            if (fieldNode.children() instanceof ChildNodeList) {
+                                                ChildNodeList nodeList = fieldNode.children();
+                                                Iterator<Node> itNode = nodeList.iterator();
+                                                while (itNode.hasNext()) {
+                                                    Node nextNode = itNode.next();
+                                                    if (nextNode instanceof ListConstructorExpressionNode) {
+                                                        SeparatedNodeList mimeList =
+                                                                ((ListConstructorExpressionNode) nextNode).expressions();
+                                                        if (mimeList.size() != 0) {
+                                                            for (Object mime : mimeList) {
+                                                                if (mime instanceof BasicLiteralNode) {
+                                                                    String mimeType = ((BasicLiteralNode) mime).literalToken().text().replaceAll("\"","");
+                                                                    operationAdaptor.getOperation().addConsumes(mimeType);
+                                                                    bodyParameter.description("Optional description");
+                                                                    bodyParameter.name("payload");
+                                                                    operationAdaptor.getOperation().addParameter(bodyParameter);
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
-                                                //print
-                                                System.out.println(con);
-
-                                            }
-                                        }  else {
-                                            String consumes =
-                                                    "application/" + ((RequiredParameterNode) expr).typeName().toString().trim();
-                                            if (consumes.equals(MediaType.APPLICATION_JSON)) {
-                                                operationAdaptor.getOperation().addConsumes(MediaType.APPLICATION_JSON);
-                                            } else if (consumes.equals(MediaType.APPLICATION_XML)) {
-                                                operationAdaptor.getOperation().addConsumes(MediaType.APPLICATION_XML);
-                                            } else if (queryParam.typeName() instanceof TypeReferenceTypeDescNode) {
-                                                // Creating request body - required.
-                                                ModelImpl messageModel = new ModelImpl();
-                                                messageModel.setType("object");
-                                                if (!definitions.containsKey(ConverterConstants.ATTR_REQUEST)) {
-                                                    definitions.put(ConverterConstants.ATTR_REQUEST, messageModel);
-                                                    this.openApiDefinition.setDefinitions(definitions);
-                                                }
-                                                // Creating "Request rq" parameter
-                                                //TODO request param
-                                                BodyParameter messageParameter = new BodyParameter();
-                                                messageParameter.setName(((RequiredParameterNode) expr).paramName().get().text());
-                                                RefModel refModel = new RefModel();
-                                                refModel.setReference(ConverterConstants.ATTR_REQUEST);
-                                                messageParameter.setSchema(refModel);
-                                                //  Adding conditional check for http delete operation as it cannot have body
-                                                //  parameter.
-                                                if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
-                                                    operationAdaptor.getOperation().addParameter(messageParameter);
-                                                }
                                             }
                                         }
+                                    }  else {
+                                        String consumes =
+                                                "application/" + ((RequiredParameterNode) expr).typeName().toString().trim();
+                                        switch (consumes) {
+                                            case MediaType.APPLICATION_JSON:
+                                                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_JSON);
+                                                break;
+                                            case MediaType.APPLICATION_XML:
+                                                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_XML);
+                                                break;
+                                            case MediaType.TEXT_PLAIN:
+                                                addConsumes(operationAdaptor, bodyParameter, MediaType.TEXT_PLAIN);
+                                                break;
+                                            default:
+                                                if (queryParam.typeName() instanceof SimpleNameReferenceNode) {
+                                                    // Creating request body - required.
+                                                    ModelImpl messageModel = new ModelImpl();
+//                                                    messageModel.setType("object");
+                                                    SimpleNameReferenceNode referenceNode =
+                                                            (SimpleNameReferenceNode) queryParam.typeName();
+                                                    if (!definitions.containsKey(queryParam.typeName().toString().trim())) {
+                                                        //Set properties for the schema
 
+                                                        definitions.put(queryParam.typeName().toString().trim(),
+                                                                messageModel);
+                                                        this.openApiDefinition.setDefinitions(definitions);
+                                                    }
+                                                    // Creating "Request rq" parameter
+                                                    //TODO request param
+                                                    BodyParameter messageParameter = new BodyParameter();
+                                                    messageParameter.setName(((RequiredParameterNode) expr).paramName().get().text());
+                                                    RefModel refModel = new RefModel();
+                                                    refModel.setReference(queryParam.typeName().toString());
+                                                    messageParameter.setSchema(refModel);
+                                                    //  Adding conditional check for http delete operation as it cannot have body
+                                                    //  parameter.
+                                                    if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
+                                                        operationAdaptor.getOperation().addConsumes(MediaType.APPLICATION_JSON);
+                                                        operationAdaptor.getOperation().addParameter(messageParameter);
+                                                    }
+                                                }
+                                                break;
+                                        }
                                     }
                                 }
                             }
@@ -310,8 +322,14 @@ public class OpenApiResourceMapper {
                     }
                 }
             }
-
         }
+    }
+
+    private void addConsumes(OperationAdaptor operationAdaptor, BodyParameter bodyParameter, String applicationJson) {
+        operationAdaptor.getOperation().addConsumes(applicationJson);
+        bodyParameter.description(applicationJson);
+        bodyParameter.name("payload");
+        operationAdaptor.getOperation().addParameter(bodyParameter);
     }
 
     /**

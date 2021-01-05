@@ -108,7 +108,6 @@ public class OpenApiConverterUtilsTest {
         Path ballerinaFilePath = RES_DIR.resolve("json_payload_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
-//        Assert.assertTrue(Files.exists(this.tempDir.resolve("hello02-bar-baz-openapi.yaml")));
     }
     @Test(description = "Generate OpenAPI spec with xml payload")
     public void testXmlPayLoad() throws IOException, OpenApiConverterException {
@@ -116,11 +115,18 @@ public class OpenApiConverterUtilsTest {
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
     }
-    @Test(description = "Generate OpenAPI spec with xml payload")
+    @Test(description = "Generate OpenAPI spec with mulitple payload")
     public void testMultiplePayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_payload_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
-        Assert.assertTrue(Files.exists(this.tempDir.resolve("multiple_payload_service-openapi.yaml")));
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+    }
+
+    @Test(description = "Generate OpenAPI spec with mulitple payload")
+    public void testRecordPayLoad() throws IOException, OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("record_payload_service.bal");
+        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
     }
     @AfterMethod
     public void cleanUp() {
