@@ -30,7 +30,6 @@ open module io.ballerina.ballerina.openapi {
     requires swagger.parser.v2.converter;
     requires org.apache.commons.io;
     requires org.apache.commons.lang3;
-    requires io.ballerina.tool;
     requires com.fasterxml.jackson.annotation;
     requires java.ws.rs;
     requires info.picocli;
@@ -41,7 +40,10 @@ open module io.ballerina.ballerina.openapi {
     requires io.ballerina.runtime;
     requires io.ballerina.runtime.api;
     requires io.ballerina.parser;
+    requires io.ballerina.tool;
     requires io.ballerina.cli;
+//    requires io.ballerina.cli;
+//    requires io.ballerina.cli.launcher;
 
     exports org.ballerinalang.ballerina;
     exports org.ballerinalang.ballerina.openapi.convertor;

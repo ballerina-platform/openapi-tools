@@ -148,38 +148,6 @@ public class OpenApiServiceMapper {
                 //TODO ----- annotation handle
             }
         }
-
-//
-//        Info info = new Info().version("1.0.0").title(basePath.replace("/","_"));
-//        if (annotation != null) {
-//            BLangRecordLiteral bLiteral = ((BLangRecordLiteral) ((BLangAnnotationAttachment) annotation)
-//                    .getExpression());
-//
-//            Map<String, BLangExpression> attributes = ConverterUtils.listToMap(bLiteral.getFields());
-//            if (attributes.containsKey(ConverterConstants.ATTR_SERVICE_VERSION)) {
-//                info.version(
-//                        ConverterUtils.getStringLiteralValue(
-//                        attributes.get(ConverterConstants.ATTR_SERVICE_VERSION)));
-//            }
-//            if (attributes.containsKey(ConverterConstants.ATTR_TITLE)) {
-//                info.title(ConverterUtils.getStringLiteralValue(attributes.get(ConverterConstants.ATTR_TITLE)));
-//            }
-//            if (attributes.containsKey(ConverterConstants.ATTR_DESCRIPTION)) {
-//                info.description(
-//                        ConverterUtils.getStringLiteralValue(attributes.get(ConverterConstants.ATTR_DESCRIPTION)));
-//            }
-//            if (attributes.containsKey(ConverterConstants.ATTR_TERMS)) {
-//                info.termsOfService(
-//                        ConverterUtils.getStringLiteralValue(attributes.get(ConverterConstants.ATTR_TERMS)));
-//            }
-//            this.createContactModel(attributes.get("contact"), info);
-//            this.createLicenseModel(attributes.get("license"), info);
-//
-//            this.createExternalDocModel(attributes.get("externalDoc"), openapi);
-//            this.createTagModel(attributes.get("tags"), openapi);
-//            this.createOrganizationModel(attributes.get("organization"), info);
-//        }
-//        openapi.setInfo(info);
     }
 
     /**

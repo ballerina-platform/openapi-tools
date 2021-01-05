@@ -22,8 +22,12 @@ package org.ballerinalang.ballerina.service;
 import com.google.common.collect.Lists;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.ChildNodeList;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
@@ -32,6 +36,7 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceTypeDescNode;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
@@ -67,6 +72,7 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -285,38 +291,65 @@ public class OpenApiResourceMapper {
             for (ParameterNode expr : paramExprs) {
                 if (expr instanceof RequiredParameterNode) {
                     RequiredParameterNode queryParam = (RequiredParameterNode) expr;
-                    if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode) {
+                    if (queryParam.typeName() instanceof TypeDescriptorNode) {
                         if (!queryParam.annotations().isEmpty()) {
                             NodeList<AnnotationNode> annotations = queryParam.annotations();
                             Map<String, Model> definitions = new HashMap<>();
                             for (AnnotationNode annotation: annotations) {
                                 if ((annotation.annotReference().toString()).trim().equals(HTTP_PAYLOAD)) {
                                     // Creating request body - required.
-                                    String consumes =
-                                            "application/" + ((RequiredParameterNode) expr).typeName().toString().trim();
-                                    if (consumes.equals(MediaType.APPLICATION_JSON)) {
-                                        operationAdaptor.getOperation().addConsumes(MediaType.APPLICATION_JSON);
-                                    } else if (queryParam.typeName() instanceof TypeReferenceTypeDescNode) {
-                                        // Creating request body - required.
-                                        ModelImpl messageModel = new ModelImpl();
-                                        messageModel.setType("object");
-                                        if (!definitions.containsKey(ConverterConstants.ATTR_REQUEST)) {
-                                            definitions.put(ConverterConstants.ATTR_REQUEST, messageModel);
-                                            this.openApiDefinition.setDefinitions(definitions);
-                                        }
-                                        // Creating "Request rq" parameter
-                                        //TODO request param
-                                        BodyParameter messageParameter = new BodyParameter();
-                                        messageParameter.setName(((RequiredParameterNode) expr).paramName().get().text());
-                                        RefModel refModel = new RefModel();
-                                        refModel.setReference(ConverterConstants.ATTR_REQUEST);
-                                        messageParameter.setSchema(refModel);
-                                      //  Adding conditional check for http delete operation as it cannot have body
-                                        //  parameter.
-                                      if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
-                                          operationAdaptor.getOperation().addParameter(messageParameter);
-                                      }
+                                    if (annotation.annotValue().isPresent()) {
+                                        MappingConstructorExpressionNode mapMime =
+                                                annotation.annotValue().orElseThrow();
+                                        SeparatedNodeList<MappingFieldNode> fields = mapMime.fields();
+                                        if (!fields.isEmpty() || fields.size() != 0) {
+                                            for (MappingFieldNode fieldNode: fields) {
+                                                String con = fieldNode.toString();
+                                                if (fieldNode.children() instanceof ChildNodeList) {
+                                                    ChildNodeList nodeList = fieldNode.children();
+                                                    Iterator<Node> itNode = nodeList.iterator();
+                                                    while (itNode.hasNext()) {
+                                                        Node nextNode = itNode.next();
+                                                        if (nextNode instanceof ListConstructorExpressionNode) {
+                                                            SeparatedNodeList mimeList =
+                                                                    ((ListConstructorExpressionNode) nextNode).expressions();
 
+                                                        }
+                                                    }
+                                                }
+                                                //print
+                                                System.out.println(con);
+
+                                            }
+                                        }  else {
+                                            String consumes =
+                                                    "application/" + ((RequiredParameterNode) expr).typeName().toString().trim();
+                                            if (consumes.equals(MediaType.APPLICATION_JSON)) {
+                                                operationAdaptor.getOperation().addConsumes(MediaType.APPLICATION_JSON);
+                                            } else if (consumes.equals(MediaType.APPLICATION_XML)) {
+                                                operationAdaptor.getOperation().addConsumes(MediaType.APPLICATION_XML);
+                                            } else if (queryParam.typeName() instanceof TypeReferenceTypeDescNode) {
+                                                // Creating request body - required.
+                                                ModelImpl messageModel = new ModelImpl();
+                                                messageModel.setType("object");
+                                                if (!definitions.containsKey(ConverterConstants.ATTR_REQUEST)) {
+                                                    definitions.put(ConverterConstants.ATTR_REQUEST, messageModel);
+                                                    this.openApiDefinition.setDefinitions(definitions);
+                                                }
+                                                // Creating "Request rq" parameter
+                                                //TODO request param
+                                                BodyParameter messageParameter = new BodyParameter();
+                                                messageParameter.setName(((RequiredParameterNode) expr).paramName().get().text());
+                                                RefModel refModel = new RefModel();
+                                                refModel.setReference(ConverterConstants.ATTR_REQUEST);
+                                                messageParameter.setSchema(refModel);
+                                                //  Adding conditional check for http delete operation as it cannot have body
+                                                //  parameter.
+                                                if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
+                                                    operationAdaptor.getOperation().addParameter(messageParameter);
+                                                }
+                                            }
+                                        }
 
                                     }
                                 }
@@ -361,7 +394,8 @@ public class OpenApiResourceMapper {
         for (ParameterNode expr : paramExprs) {
             if (expr instanceof RequiredParameterNode) {
                 RequiredParameterNode queryParam = (RequiredParameterNode) expr;
-                if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode) {
+                if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode &&
+                        !queryParam.paramName().orElseThrow().text().equals("payload")) {
                     Parameter parameter = buildParameter(Constants.QUERY, queryParam);
                     parameter.setRequired(true);
                     parameters.add(parameter);
