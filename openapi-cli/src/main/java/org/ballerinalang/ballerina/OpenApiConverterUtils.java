@@ -231,7 +231,8 @@ public class OpenApiConverterUtils {
 
                 String httpAlias = getAlias(imports, Constants.BALLERINA_HTTP_PACKAGE_NAME);
                 String openApiAlias = getAlias(imports, Constants.OPENAPI_PACKAGE_NAME);
-                OpenApiServiceMapper openApiServiceMapper = new OpenApiServiceMapper(httpAlias, openApiAlias);
+                OpenApiServiceMapper openApiServiceMapper = new OpenApiServiceMapper(httpAlias, openApiAlias,
+                        semanticModel);
 
                 Swagger openapi = getOpenApiDefinition(new Swagger(), openApiServiceMapper, serviceName,
                         syntaxTree, endpoints, semanticModel);

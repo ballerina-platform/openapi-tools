@@ -23,6 +23,7 @@ module io.ballerina.ballerina.openapi {
     requires io.ballerina.parser;
     requires io.ballerina.stdlib.http;
     requires io.ballerina.cli;
+    requires io.ballerina.tools.api;
     requires io.swagger.v3.core;
     requires java.ws.rs;
     requires jsr305;

@@ -19,6 +19,14 @@
 
 package org.ballerinalang.ballerina.service;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
+import io.ballerina.compiler.api.symbols.FieldSymbol;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
@@ -38,6 +46,7 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.tools.text.LinePosition;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
@@ -52,6 +61,13 @@ import io.swagger.models.parameters.HeaderParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.BooleanProperty;
+import io.swagger.models.properties.IntegerProperty;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import org.ballerinalang.ballerina.Constants;
 import org.ballerinalang.net.http.HttpConstants;
 
@@ -64,6 +80,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
@@ -77,14 +94,17 @@ import static org.ballerinalang.net.http.HttpConstants.HTTP_METHOD_GET;
  */
 public class OpenApiResourceMapper {
     private final Swagger openApiDefinition;
+    private final SemanticModel semanticModel;
 
     /**
      * Initializes a resource parser for openApi.
      *
      * @param openApi      The OpenAPI definition.
+     * @param semanticModel
      */
-    OpenApiResourceMapper(Swagger openApi) {
+    OpenApiResourceMapper(Swagger openApi, SemanticModel semanticModel) {
         this.openApiDefinition = openApi;
+        this.semanticModel = semanticModel;
     }
 
     /**
@@ -244,34 +264,10 @@ public class OpenApiResourceMapper {
                                 // Creating request body - required.
                                 BodyParameter bodyParameter = new BodyParameter();
                                 if (annotation.annotValue().isPresent()) {
-                                    MappingConstructorExpressionNode mapMime =
-                                            annotation.annotValue().orElseThrow();
+                                    MappingConstructorExpressionNode mapMime = annotation.annotValue().orElseThrow();
                                     SeparatedNodeList<MappingFieldNode> fields = mapMime.fields();
                                     if (!fields.isEmpty() || fields.size() != 0) {
-                                        for (MappingFieldNode fieldNode: fields) {
-                                            if (fieldNode.children() instanceof ChildNodeList) {
-                                                ChildNodeList nodeList = fieldNode.children();
-                                                Iterator<Node> itNode = nodeList.iterator();
-                                                while (itNode.hasNext()) {
-                                                    Node nextNode = itNode.next();
-                                                    if (nextNode instanceof ListConstructorExpressionNode) {
-                                                        SeparatedNodeList mimeList =
-                                                                ((ListConstructorExpressionNode) nextNode).expressions();
-                                                        if (mimeList.size() != 0) {
-                                                            for (Object mime : mimeList) {
-                                                                if (mime instanceof BasicLiteralNode) {
-                                                                    String mimeType = ((BasicLiteralNode) mime).literalToken().text().replaceAll("\"","");
-                                                                    operationAdaptor.getOperation().addConsumes(mimeType);
-                                                                    bodyParameter.description("Optional description");
-                                                                    bodyParameter.name("payload");
-                                                                    operationAdaptor.getOperation().addParameter(bodyParameter);
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        handleMultipleMIMETypes(operationAdaptor, bodyParameter, fields);
                                     }  else {
                                         String consumes =
                                                 "application/" + ((RequiredParameterNode) expr).typeName().toString().trim();
@@ -287,31 +283,8 @@ public class OpenApiResourceMapper {
                                                 break;
                                             default:
                                                 if (queryParam.typeName() instanceof SimpleNameReferenceNode) {
-                                                    // Creating request body - required.
-                                                    ModelImpl messageModel = new ModelImpl();
-//                                                    messageModel.setType("object");
-                                                    SimpleNameReferenceNode referenceNode =
-                                                            (SimpleNameReferenceNode) queryParam.typeName();
-                                                    if (!definitions.containsKey(queryParam.typeName().toString().trim())) {
-                                                        //Set properties for the schema
-
-                                                        definitions.put(queryParam.typeName().toString().trim(),
-                                                                messageModel);
-                                                        this.openApiDefinition.setDefinitions(definitions);
-                                                    }
-                                                    // Creating "Request rq" parameter
-                                                    //TODO request param
-                                                    BodyParameter messageParameter = new BodyParameter();
-                                                    messageParameter.setName(((RequiredParameterNode) expr).paramName().get().text());
-                                                    RefModel refModel = new RefModel();
-                                                    refModel.setReference(queryParam.typeName().toString());
-                                                    messageParameter.setSchema(refModel);
-                                                    //  Adding conditional check for http delete operation as it cannot have body
-                                                    //  parameter.
-                                                    if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
-                                                        operationAdaptor.getOperation().addConsumes(MediaType.APPLICATION_JSON);
-                                                        operationAdaptor.getOperation().addParameter(messageParameter);
-                                                    }
+                                                    handleReferencePayload(operationAdaptor,
+                                                            (RequiredParameterNode) expr, queryParam, definitions);
                                                 }
                                                 break;
                                         }
@@ -325,10 +298,132 @@ public class OpenApiResourceMapper {
         }
     }
 
+    private void handleMultipleMIMETypes(OperationAdaptor operationAdaptor, BodyParameter bodyParameter,
+                                         SeparatedNodeList<MappingFieldNode> fields) {
+
+        for (MappingFieldNode fieldNode: fields) {
+            if (fieldNode.children() instanceof ChildNodeList) {
+                ChildNodeList nodeList = fieldNode.children();
+                Iterator<Node> itNode = nodeList.iterator();
+                while (itNode.hasNext()) {
+                    Node nextNode = itNode.next();
+                    if (nextNode instanceof ListConstructorExpressionNode) {
+                        SeparatedNodeList mimeList = ((ListConstructorExpressionNode) nextNode).expressions();
+                        if (mimeList.size() != 0) {
+                            for (Object mime : mimeList) {
+                                if (mime instanceof BasicLiteralNode) {
+
+                                    String mimeType = ((BasicLiteralNode) mime).literalToken().text().replaceAll("\"","");
+                                    operationAdaptor.getOperation().addConsumes(mimeType);
+                                    bodyParameter.description("Optional description");
+                                    bodyParameter.name(Constants.PAYLOAD);
+                                    operationAdaptor.getOperation().addParameter(bodyParameter);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void handleReferencePayload(OperationAdaptor operationAdaptor, RequiredParameterNode expr,
+                                         RequiredParameterNode queryParam, Map<String, Model> definitions) {
+
+        // Creating request body - required.
+        SimpleNameReferenceNode referenceNode =
+                (SimpleNameReferenceNode) queryParam.typeName();
+        Optional<Symbol> symbol = semanticModel.symbol(referenceNode.syntaxTree().filePath(),
+                LinePosition.from(referenceNode.location().lineRange().startLine().line(),
+                        referenceNode.location().lineRange().startLine().offset()));
+        TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
+        handleRecordPayload(queryParam, definitions, typeSymbol);
+        // Creating "Request rq" parameter
+        BodyParameter messageParameter = new BodyParameter();
+        messageParameter.setName(expr.paramName().get().text());
+        RefModel refModel = new RefModel();
+        refModel.setReference(queryParam.typeName().toString());
+        messageParameter.setSchema(refModel);
+        //  Adding conditional check for http delete operation as it cannot have body
+        //  parameter.
+        if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
+            operationAdaptor.getOperation().addConsumes(MediaType.APPLICATION_JSON);
+            operationAdaptor.getOperation().addParameter(messageParameter);
+        }
+    }
+
+    private void handleRecordPayload(RequiredParameterNode queryParam, Map<String, Model> definitions,
+                                     TypeSymbol typeSymbol) {
+        String componentName = typeSymbol.name().trim();
+        ModelImpl messageModel = new ModelImpl();
+        if (typeSymbol instanceof TypeReferenceTypeSymbol) {
+            TypeReferenceTypeSymbol typeRef =
+                    (TypeReferenceTypeSymbol) typeSymbol;
+            // Handle record type request body
+            if (typeRef.typeDescriptor() instanceof RecordTypeSymbol) {
+                RecordTypeSymbol recordTypeSymbol =
+                        (RecordTypeSymbol) typeRef.typeDescriptor();
+                List<FieldSymbol> rfields =
+                        recordTypeSymbol.fieldDescriptors();
+                for (FieldSymbol field: rfields) {
+                    String type =
+                            field.typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
+                    Property property = getOpenApiProperty(type);
+                    if (type.equals(Constants.TYPE_REFERENCE) && property instanceof RefProperty) {
+                        RefModel refModel = new RefModel();
+                        refModel.setReference(field.typeDescriptor().name().trim());
+                        ((RefProperty) property).set$ref(refModel.get$ref());
+
+                        Optional<Symbol> recordSymbol = semanticModel.symbol(queryParam.syntaxTree().filePath(),
+                                        LinePosition.from(field.location().lineRange().startLine().line(),
+                                                field.location().lineRange().startLine().offset()));
+
+                        VariableSymbol recordVariable = (VariableSymbol) recordSymbol.orElseThrow();
+                        if (recordVariable.typeDescriptor() instanceof TypeReferenceTypeSymbol) {
+                            TypeReferenceTypeSymbol typeRecord =
+                                    (TypeReferenceTypeSymbol) recordVariable.typeDescriptor();
+                            handleRecordPayload(queryParam, definitions, typeRecord);
+                        }
+                    }
+                    if (property instanceof ArrayProperty) {
+                        TypeSymbol symbol = field.typeDescriptor();
+                        int arrayCount = 0;
+                        while (symbol instanceof ArrayTypeSymbol) {
+                            arrayCount = arrayCount + 1;
+                            ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) symbol;
+                            symbol = arrayTypeSymbol.memberTypeDescriptor();
+                        }
+                        ((ArrayProperty) property).setItems(arrayHandle(arrayCount,
+                                getOpenApiProperty(symbol.typeKind().getName()), new ArrayProperty()));
+                    }
+                    messageModel.property(field.name(), property);
+                }
+            }
+        }
+
+        if (!definitions.containsKey(componentName)) {
+            //Set properties for the schema
+            definitions.put(componentName, messageModel);
+            this.openApiDefinition.setDefinitions(definitions);
+        }
+    }
+
+    private Property arrayHandle(int count, Property property, ArrayProperty arrayProperty) {
+        if (count == 0) {
+            Property lastArrayProperty = new ArrayProperty();
+            ((ArrayProperty) lastArrayProperty).setItems(property);
+            arrayProperty.setItems(lastArrayProperty);
+        } else if (count > 0){
+            arrayProperty.setItems(new ArrayProperty());
+            arrayProperty = (ArrayProperty) arrayHandle(count-1, property, arrayProperty);
+        }
+        return arrayProperty;
+    }
+
     private void addConsumes(OperationAdaptor operationAdaptor, BodyParameter bodyParameter, String applicationJson) {
         operationAdaptor.getOperation().addConsumes(applicationJson);
         bodyParameter.description(applicationJson);
-        bodyParameter.name("payload");
+        bodyParameter.name(Constants.PAYLOAD);
         operationAdaptor.getOperation().addParameter(bodyParameter);
     }
 
@@ -346,9 +441,8 @@ public class OpenApiResourceMapper {
         NodeList<Node> pathParams = resource.relativeResourcePath();
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode) {
-                in = "path";
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
-                Parameter parameter = buildParameter(in, pathParam);
+                Parameter parameter = buildParameter(Constants.PATH, pathParam);
                 parameter.setName(pathParam.paramName().text());
 
                 //Set param description
@@ -365,7 +459,7 @@ public class OpenApiResourceMapper {
             if (expr instanceof RequiredParameterNode) {
                 RequiredParameterNode queryParam = (RequiredParameterNode) expr;
                 if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode &&
-                        !queryParam.paramName().orElseThrow().text().equals("payload")) {
+                        !queryParam.paramName().orElseThrow().text().equals(Constants.PATH)) {
                     Parameter parameter = buildParameter(Constants.QUERY, queryParam);
                     parameter.setRequired(true);
                     parameters.add(parameter);
@@ -472,7 +566,7 @@ public class OpenApiResourceMapper {
         Parameter param = null;
 
         switch (in) {
-            case "body":
+            case Constants.BODY:
                 // TODO : support for inline and other types of schemas
 //                BodyParameter bParam = new BodyParameter();
 //                RefModel m = new RefModel();
@@ -481,23 +575,23 @@ public class OpenApiResourceMapper {
 //                bParam.setSchema(m);
 //                param = bParam;
                 break;
-            case "query":
+            case Constants.QUERY:
                 QueryParameter qParam = new QueryParameter();
                 RequiredParameterNode queryParam = (RequiredParameterNode) paramAttributes;
                 qParam.setName(queryParam.paramName().get().text());
                 qParam.setType(convertBallerinaTypeToOpenAPIType(queryParam.typeName().toString().trim()));
                 param = qParam;
                 break;
-            case "header":
+            case Constants.HEADER:
                 param = new HeaderParameter();
                 break;
-            case "cookie":
+            case Constants.COOKIE:
                 param = new CookieParameter();
                 break;
-            case "form":
+            case Constants.FORM:
                 param = new FormParameter();
                 break;
-            case "path":
+            case Constants.PATH:
             default:
                 PathParameter pParam = new PathParameter();
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) paramAttributes;
@@ -507,5 +601,40 @@ public class OpenApiResourceMapper {
         }
 
         return param;
+    }
+
+    /**
+     * Retrieves a matching OpenApi {@link Property} for a provided ballerina type.
+     *
+     * @param type ballerina type name as a String
+     * @return OpenApi {@link Property} for type defined by {@code type}
+     */
+    private Property getOpenApiProperty(String type) {
+        Property property;
+
+        switch (type) {
+            case Constants.STRING:
+                property = new StringProperty();
+                break;
+            case Constants.BOOLEAN:
+                property = new BooleanProperty();
+                break;
+            case Constants.ARRAY:
+                property = new ArrayProperty();
+                break;
+            case Constants.NUMBER:
+            case Constants.INT:
+            case Constants.INTEGER:
+                property = new IntegerProperty();
+                break;
+            case Constants.TYPE_REFERENCE:
+                property = new RefProperty();
+                break;
+            default:
+                property = new ObjectProperty();
+                break;
+        }
+
+        return property;
     }
 }
