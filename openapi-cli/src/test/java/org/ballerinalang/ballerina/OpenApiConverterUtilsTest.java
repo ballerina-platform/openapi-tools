@@ -113,7 +113,7 @@ public class OpenApiConverterUtilsTest {
     public void testXmlPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("xml_payload_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
-        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadXml-openapi.yaml")));
     }
     @Test(description = "Generate OpenAPI spec with mulitple payload")
     public void testMultiplePayLoad() throws IOException, OpenApiConverterException {
@@ -122,21 +122,21 @@ public class OpenApiConverterUtilsTest {
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
     }
 
-    @Test(description = "Generate OpenAPI spec with mulitple payload")
+    @Test(description = "Generate OpenAPI spec with record payload")
     public void testRecordPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("record_payload_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
     }
 
-    @Test(description = "Generate OpenAPI spec with mulitple payload")
+    @Test(description = "Generate OpenAPI spec with nested record payload")
     public void testNestedRecordPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("nestedRecord_payload_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
     }
 
-    @Test(description = "Generate OpenAPI spec with mulitple payload")
+    @Test(description = "Generate OpenAPI spec with nested payload")
     public void testNested2RecordPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("nested2Record_payload_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
@@ -164,6 +164,12 @@ public class OpenApiConverterUtilsTest {
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
     }
 
+    @Test(description = "Generate OpenAPI spec for build project")
+    public void testMIMERecordFiledPayLoad() throws IOException, OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("mime_with_recordpayload_service.bal");
+        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+    }
 
 
     @AfterMethod

@@ -249,7 +249,7 @@ public class OpenApiResourceMapper {
         //Add path parameters if in path and query parameters
         this.createParametersModel(resource, operationAdaptor.getOperation());
 
-        if (!HTTP_METHOD_GET.toLowerCase().equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
+        if (!HTTP_METHOD_GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
             // set body parameter
             FunctionSignatureNode functionSignature = resource.functionSignature();
             SeparatedNodeList<ParameterNode> paramExprs = functionSignature.parameters();
@@ -280,7 +280,7 @@ public class OpenApiResourceMapper {
             MappingConstructorExpressionNode mapMime = annotation.annotValue().orElseThrow();
             SeparatedNodeList<MappingFieldNode> fields = mapMime.fields();
             if (!fields.isEmpty() || fields.size() != 0) {
-                handleMultipleMIMETypes(operationAdaptor, bodyParameter, fields);
+                handleMultipleMIMETypes(operationAdaptor, bodyParameter, fields, expr, queryParam, definitions);
             }  else {
                 String consumes =
                         "application/" + expr.typeName().toString().trim();
@@ -297,7 +297,7 @@ public class OpenApiResourceMapper {
                     default:
                         if (queryParam.typeName() instanceof SimpleNameReferenceNode) {
                             handleReferencePayload(operationAdaptor,
-                                    expr, queryParam, definitions);
+                                    expr, queryParam, definitions, MediaType.APPLICATION_JSON);
                         }
                         break;
                 }
@@ -307,10 +307,11 @@ public class OpenApiResourceMapper {
     }
 
     private void handleMultipleMIMETypes(OperationAdaptor operationAdaptor, BodyParameter bodyParameter,
-                                         SeparatedNodeList<MappingFieldNode> fields) {
+                                         SeparatedNodeList<MappingFieldNode> fields, RequiredParameterNode expr,
+                                         RequiredParameterNode queryParam, Map<String, Model> definitions) {
 
         for (MappingFieldNode fieldNode: fields) {
-            if (fieldNode.children() instanceof ChildNodeList) {
+            if (fieldNode.children() != null) {
                 ChildNodeList nodeList = fieldNode.children();
                 Iterator<Node> itNode = nodeList.iterator();
                 while (itNode.hasNext()) {
@@ -320,12 +321,17 @@ public class OpenApiResourceMapper {
                         if (mimeList.size() != 0) {
                             for (Object mime : mimeList) {
                                 if (mime instanceof BasicLiteralNode) {
-
-                                    String mimeType = ((BasicLiteralNode) mime).literalToken().text().replaceAll("\"","");
-                                    operationAdaptor.getOperation().addConsumes(mimeType);
-                                    bodyParameter.description("Optional description");
-                                    bodyParameter.name(Constants.PAYLOAD);
-                                    operationAdaptor.getOperation().addParameter(bodyParameter);
+                                    String mimeType = ((BasicLiteralNode) mime).literalToken().text().
+                                            replaceAll("\"", "");
+                                    if (queryParam.typeName() instanceof SimpleNameReferenceNode) {
+                                        handleReferencePayload(operationAdaptor, expr, queryParam, definitions,
+                                                mimeType);
+                                    } else {
+                                        operationAdaptor.getOperation().addConsumes(mimeType);
+                                        bodyParameter.description("Optional description");
+                                        bodyParameter.name(Constants.PAYLOAD);
+                                        operationAdaptor.getOperation().addParameter(bodyParameter);
+                                    }
                                 }
                             }
                         }
@@ -336,7 +342,8 @@ public class OpenApiResourceMapper {
     }
 
     private void handleReferencePayload(OperationAdaptor operationAdaptor, RequiredParameterNode expr,
-                                         RequiredParameterNode queryParam, Map<String, Model> definitions) {
+                                         RequiredParameterNode queryParam, Map<String, Model> definitions,
+                                        String mediaType) {
 
         // Creating request body - required.
         SimpleNameReferenceNode referenceNode =
@@ -350,12 +357,12 @@ public class OpenApiResourceMapper {
         BodyParameter messageParameter = new BodyParameter();
         messageParameter.setName(expr.paramName().get().text());
         RefModel refModel = new RefModel();
-        refModel.setReference(queryParam.typeName().toString());
+        refModel.setReference(queryParam.typeName().toString().trim());
         messageParameter.setSchema(refModel);
         //  Adding conditional check for http delete operation as it cannot have body
         //  parameter.
         if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
-            operationAdaptor.getOperation().addConsumes(MediaType.APPLICATION_JSON);
+            operationAdaptor.getOperation().addConsumes(mediaType);
             operationAdaptor.getOperation().addParameter(messageParameter);
         }
     }
@@ -440,7 +447,7 @@ public class OpenApiResourceMapper {
         if (arrayCount > 1) {
             ArrayProperty input = new ArrayProperty();
             input.setItems(new ArrayProperty());
-            property.setItems(handleArray(arrayCount-1, symbolProperty, input));
+            property.setItems(handleArray(arrayCount - 1, symbolProperty, input));
         } else {
             property.setItems(symbolProperty);
         }
