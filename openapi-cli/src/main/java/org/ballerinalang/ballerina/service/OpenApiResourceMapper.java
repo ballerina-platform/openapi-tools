@@ -418,9 +418,9 @@ public class OpenApiResourceMapper {
                                   ArrayProperty property) {
 
         TypeSymbol symbol = field.typeDescriptor();
-        int arrayCount = 0;
+        int arrayDimensions = 0;
         while (symbol instanceof ArrayTypeSymbol) {
-            arrayCount = arrayCount + 1;
+            arrayDimensions = arrayDimensions + 1;
             ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) symbol;
             symbol = arrayTypeSymbol.memberTypeDescriptor();
         }
@@ -444,20 +444,18 @@ public class OpenApiResourceMapper {
             }
         }
         //Handle nested array type
-        if (arrayCount > 1) {
-            ArrayProperty input = new ArrayProperty();
-            input.setItems(new ArrayProperty());
-            property.setItems(handleArray(arrayCount - 1, symbolProperty, input));
+        if (arrayDimensions > 1) {
+            property.setItems(handleArray(arrayDimensions - 1, symbolProperty, new ArrayProperty()));
         } else {
             property.setItems(symbolProperty);
         }
     }
 
-    private ArrayProperty handleArray(int count, Property property, ArrayProperty arrayProperty) {
-        if (count > 1) {
+    private ArrayProperty handleArray(int arrayDimensions, Property property, ArrayProperty arrayProperty) {
+        if (arrayDimensions > 1) {
             ArrayProperty narray = new ArrayProperty();
-            arrayProperty.setItems(handleArray(count - 1, property,  narray));
-        } else if (count == 1) {
+            arrayProperty.setItems(handleArray(arrayDimensions - 1, property,  narray));
+        } else if (arrayDimensions == 1) {
             arrayProperty.setItems(property);
         }
         return arrayProperty;
@@ -478,7 +476,6 @@ public class OpenApiResourceMapper {
      */
     private void createParametersModel(FunctionDefinitionNode resource, Operation operation) {
         List<Parameter> parameters = new LinkedList<>();
-        String in;
 
         //Set path parameters
         NodeList<Node> pathParams = resource.relativeResourcePath();

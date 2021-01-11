@@ -55,10 +55,9 @@ public class OpenApiServiceMapper {
      * Initializes a service parser for OpenApi.
      *  @param httpAlias    The alias for ballerina/http module.
      * @param openApiAlias The alias for ballerina.openapi module.
-     * @param semanticModel
+     * @param semanticModel semanticModel used for the resolve the reference in the record.
      */
-    public OpenApiServiceMapper(String httpAlias, String openApiAlias,
-                                SemanticModel semanticModel) {
+    public OpenApiServiceMapper(String httpAlias, String openApiAlias, SemanticModel semanticModel) {
         // Default object mapper is JSON mapper available in openApi utils.
         this.httpAlias = httpAlias;
         this.openApiAlias = openApiAlias;

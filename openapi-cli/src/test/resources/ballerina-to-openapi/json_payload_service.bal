@@ -5,14 +5,8 @@
 
  service /payloadV on helloEp {
 
-     //resource function post hi(http:Caller caller, http:Request request, int id) {
-     //
-     //}
      resource function post hi(http:Caller caller, http:Request request, @http:Payload {} json payload) {
 
      }
-     //resource function post hi02(http:Caller caller, http:Request request, @http:Payload xml payload) {
-     //
-     //}
  }
 
