@@ -246,55 +246,63 @@ public class OpenApiResourceMapper {
             } else {
                 operationAdaptor.setPath("/");
             }
-        //Add path parameters if in path
+        //Add path parameters if in path and query parameters
         this.createParametersModel(resource, operationAdaptor.getOperation());
 
         if (!HTTP_METHOD_GET.toLowerCase().equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
-            // set query parameter
-            FunctionSignatureNode functionSignature = (FunctionSignatureNode) resource.functionSignature();
+            // set body parameter
+            FunctionSignatureNode functionSignature = resource.functionSignature();
             SeparatedNodeList<ParameterNode> paramExprs = functionSignature.parameters();
             for (ParameterNode expr : paramExprs) {
                 if (expr instanceof RequiredParameterNode) {
-                    RequiredParameterNode queryParam = (RequiredParameterNode) expr;
-                    if (queryParam.typeName() instanceof TypeDescriptorNode && !queryParam.annotations().isEmpty()) {
-                        NodeList<AnnotationNode> annotations = queryParam.annotations();
+                    RequiredParameterNode bodyParam = (RequiredParameterNode) expr;
+                    if (bodyParam.typeName() instanceof TypeDescriptorNode && !bodyParam.annotations().isEmpty()) {
+                        NodeList<AnnotationNode> annotations = bodyParam.annotations();
                         Map<String, Model> definitions = new HashMap<>();
                         for (AnnotationNode annotation: annotations) {
-                            if ((annotation.annotReference().toString()).trim().equals(HTTP_PAYLOAD)) {
-                                // Creating request body - required.
-                                BodyParameter bodyParameter = new BodyParameter();
-                                if (annotation.annotValue().isPresent()) {
-                                    MappingConstructorExpressionNode mapMime = annotation.annotValue().orElseThrow();
-                                    SeparatedNodeList<MappingFieldNode> fields = mapMime.fields();
-                                    if (!fields.isEmpty() || fields.size() != 0) {
-                                        handleMultipleMIMETypes(operationAdaptor, bodyParameter, fields);
-                                    }  else {
-                                        String consumes =
-                                                "application/" + ((RequiredParameterNode) expr).typeName().toString().trim();
-                                        switch (consumes) {
-                                            case MediaType.APPLICATION_JSON:
-                                                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_JSON);
-                                                break;
-                                            case MediaType.APPLICATION_XML:
-                                                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_XML);
-                                                break;
-                                            case MediaType.TEXT_PLAIN:
-                                                addConsumes(operationAdaptor, bodyParameter, MediaType.TEXT_PLAIN);
-                                                break;
-                                            default:
-                                                if (queryParam.typeName() instanceof SimpleNameReferenceNode) {
-                                                    handleReferencePayload(operationAdaptor,
-                                                            (RequiredParameterNode) expr, queryParam, definitions);
-                                                }
-                                                break;
-                                        }
-                                    }
-                                }
-                            }
+                            handlePayloadAnnotation(operationAdaptor, (RequiredParameterNode) expr, bodyParam,
+                                    definitions, annotation);
                         }
                     }
                 }
             }
+        }
+    }
+
+    private void handlePayloadAnnotation(OperationAdaptor operationAdaptor, RequiredParameterNode expr,
+                                         RequiredParameterNode queryParam, Map<String, Model> definitions,
+                                         AnnotationNode annotation) {
+
+        if ((annotation.annotReference().toString()).trim().equals(HTTP_PAYLOAD) &&
+                annotation.annotValue().isPresent()) {
+            // Creating request body - required.
+            BodyParameter bodyParameter = new BodyParameter();
+            MappingConstructorExpressionNode mapMime = annotation.annotValue().orElseThrow();
+            SeparatedNodeList<MappingFieldNode> fields = mapMime.fields();
+            if (!fields.isEmpty() || fields.size() != 0) {
+                handleMultipleMIMETypes(operationAdaptor, bodyParameter, fields);
+            }  else {
+                String consumes =
+                        "application/" + expr.typeName().toString().trim();
+                switch (consumes) {
+                    case MediaType.APPLICATION_JSON:
+                        addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_JSON);
+                        break;
+                    case MediaType.APPLICATION_XML:
+                        addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_XML);
+                        break;
+                    case MediaType.TEXT_PLAIN:
+                        addConsumes(operationAdaptor, bodyParameter, MediaType.TEXT_PLAIN);
+                        break;
+                    default:
+                        if (queryParam.typeName() instanceof SimpleNameReferenceNode) {
+                            handleReferencePayload(operationAdaptor,
+                                    expr, queryParam, definitions);
+                        }
+                        break;
+                }
+            }
+
         }
     }
 
@@ -366,8 +374,7 @@ public class OpenApiResourceMapper {
                 List<FieldSymbol> rfields =
                         recordTypeSymbol.fieldDescriptors();
                 for (FieldSymbol field: rfields) {
-                    String type =
-                            field.typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
+                    String type = field.typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
                     Property property = getOpenApiProperty(type);
                     if (type.equals(Constants.TYPE_REFERENCE) && property instanceof RefProperty) {
                         RefModel refModel = new RefModel();
@@ -386,15 +393,7 @@ public class OpenApiResourceMapper {
                         }
                     }
                     if (property instanceof ArrayProperty) {
-                        TypeSymbol symbol = field.typeDescriptor();
-                        int arrayCount = 0;
-                        while (symbol instanceof ArrayTypeSymbol) {
-                            arrayCount = arrayCount + 1;
-                            ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) symbol;
-                            symbol = arrayTypeSymbol.memberTypeDescriptor();
-                        }
-                        ((ArrayProperty) property).setItems(arrayHandle(arrayCount,
-                                getOpenApiProperty(symbol.typeKind().getName()), new ArrayProperty()));
+                        setArrayProperty(queryParam, definitions, field, (ArrayProperty) property);
                     }
                     messageModel.property(field.name(), property);
                 }
@@ -408,14 +407,51 @@ public class OpenApiResourceMapper {
         }
     }
 
-    private Property arrayHandle(int count, Property property, ArrayProperty arrayProperty) {
-        if (count == 0) {
-            Property lastArrayProperty = new ArrayProperty();
-            ((ArrayProperty) lastArrayProperty).setItems(property);
-            arrayProperty.setItems(lastArrayProperty);
-        } else if (count > 0){
-            arrayProperty.setItems(new ArrayProperty());
-            arrayProperty = (ArrayProperty) arrayHandle(count-1, property, arrayProperty);
+    private void setArrayProperty(RequiredParameterNode queryParam, Map<String, Model> definitions, FieldSymbol field,
+                                  ArrayProperty property) {
+
+        TypeSymbol symbol = field.typeDescriptor();
+        int arrayCount = 0;
+        while (symbol instanceof ArrayTypeSymbol) {
+            arrayCount = arrayCount + 1;
+            ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) symbol;
+            symbol = arrayTypeSymbol.memberTypeDescriptor();
+        }
+        //handle record field has nested record array type ex: Tag[] tags
+        Property symbolProperty  = getOpenApiProperty(symbol.typeKind().getName());
+        if (symbolProperty instanceof RefProperty) {
+            RefModel refModel = new RefModel();
+            refModel.setReference(symbol.name().trim());
+            ((RefProperty) symbolProperty).set$ref(refModel.get$ref());
+
+            Optional<Symbol> recordSymbol = semanticModel.symbol(queryParam.syntaxTree().filePath(),
+                    LinePosition.from(field.location().lineRange().startLine().line(),
+                            field.location().lineRange().startLine().offset()));
+            //Set the record model to the definition
+            VariableSymbol recordVariable = (VariableSymbol) recordSymbol.orElseThrow();
+            ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) recordVariable.typeDescriptor();
+            if (arrayTypeSymbol.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol) {
+                TypeReferenceTypeSymbol typeRecord =
+                        (TypeReferenceTypeSymbol) arrayTypeSymbol.memberTypeDescriptor();
+                handleRecordPayload(queryParam, definitions, typeRecord);
+            }
+        }
+        //Handle nested array type
+        if (arrayCount > 1) {
+            ArrayProperty input = new ArrayProperty();
+            input.setItems(new ArrayProperty());
+            property.setItems(handleArray(arrayCount-1, symbolProperty, input));
+        } else {
+            property.setItems(symbolProperty);
+        }
+    }
+
+    private ArrayProperty handleArray(int count, Property property, ArrayProperty arrayProperty) {
+        if (count > 1) {
+            ArrayProperty narray = new ArrayProperty();
+            arrayProperty.setItems(handleArray(count - 1, property,  narray));
+        } else if (count == 1) {
+            arrayProperty.setItems(property);
         }
         return arrayProperty;
     }
@@ -568,12 +604,6 @@ public class OpenApiResourceMapper {
         switch (in) {
             case Constants.BODY:
                 // TODO : support for inline and other types of schemas
-//                BodyParameter bParam = new BodyParameter();
-//                RefModel m = new RefModel();
-//                m.set$ref(ConverterUtils
-//                        .getStringLiteralValue(paramAttributes.get(ConverterConstants.ATTR_TYPE)));
-//                bParam.setSchema(m);
-//                param = bParam;
                 break;
             case Constants.QUERY:
                 QueryParameter qParam = new QueryParameter();
@@ -628,6 +658,7 @@ public class OpenApiResourceMapper {
                 property = new IntegerProperty();
                 break;
             case Constants.TYPE_REFERENCE:
+            case Constants.TYPEREFERENCE:
                 property = new RefProperty();
                 break;
             default:

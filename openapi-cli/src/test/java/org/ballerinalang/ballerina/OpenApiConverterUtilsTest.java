@@ -150,6 +150,22 @@ public class OpenApiConverterUtilsTest {
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
     }
 
+    @Test(description = "Generate OpenAPI spec with array field payload")
+    public void testArrayNestedRecordFiledPayLoad() throws IOException, OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("arrayRecordfield_payload_service.bal");
+        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+    }
+
+    @Test(description = "Generate OpenAPI spec for build project")
+    public void testArrayRecordFiledPayLoad() throws IOException, OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("project_bal/record_payload_service.bal");
+        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+    }
+
+
+
     @AfterMethod
     public void cleanUp() {
         deleteDirectory(this.tempDir);
