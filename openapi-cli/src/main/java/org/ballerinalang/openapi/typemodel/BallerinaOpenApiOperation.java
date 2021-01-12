@@ -27,6 +27,17 @@ public class BallerinaOpenApiOperation {
     private String opName;
     private List<BallerinaOpenApiParameter> parameterList;
     private BallerinaOpenApiRequestBody requestBody;
+    private String operationDescription;
+
+    public String getOperationDescription() {
+
+        return operationDescription;
+    }
+
+    public void setOperationDescription(String operationDescription) {
+
+        this.operationDescription = operationDescription;
+    }
 
     public BallerinaOpenApiRequestBody getRequestBody() {
         return requestBody;
