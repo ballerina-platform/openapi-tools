@@ -124,7 +124,7 @@ allprojects {
             }
         }
         maven {
-            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-system'
+            url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-os'
             credentials {
                 username System.getenv("packageUser")
                 password System.getenv("packagePAT")
@@ -208,7 +208,7 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:runtime-ballerina:${stdlibRuntimeVersion}"
         ballerinaStdLibs "org.ballerinalang:http-ballerina:${stdlibHttpVersion}"
         ballerinaStdLibs "org.ballerinalang:log-ballerina:${stdlibLogVersion}"
-        ballerinaStdLibs "org.ballerinalang:system-ballerina:${stdlibSystemVersion}"
+        ballerinaStdLibs "org.ballerinalang:os-ballerina:${stdlibOsVersion}"
         ballerinaStdLibs "org.ballerinalang:config-ballerina:${stdlibConfigVersion}"
         ballerinaStdLibs "org.ballerinalang:mime-ballerina:${stdlibMimeVersion}"
         ballerinaStdLibs "org.ballerinalang:stringutils-ballerina:${stdlibStringUtilsVersion}"
