@@ -105,7 +105,7 @@ public class OpenApiConverterUtils {
     private static SemanticModel semanticModel;
     private static Project project;
     private static List<ListenerDeclarationNode> endpoints = new ArrayList<>();
-    
+
     /**
      * This util for generating files when not available with specific service name.
      *
@@ -170,25 +170,25 @@ public class OpenApiConverterUtils {
                 }
             }
         }
-        
+
         // If there are no services found for a given service name.
         if (serviceName.isPresent() && servicesToGenerate.isEmpty()) {
             throw new OpenApiConverterException("No Ballerina services found with name '" + serviceName.get() +
                                                 "' to generate an OpenAPI specification.");
         }
-    
+
         // Generating for the services
         for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
             String serviceNodeName = getServiceBasePath(serviceNode);
             String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName);
             String openApiSource = generateOAS3Definitions(syntaxTree, serviceNodeName);
-    
+
             //  Checked old generated file with same name
             openApiName = checkDuplicateFiles(outPath, openApiName);
             writeFile(outPath.resolve(openApiName), openApiSource);
         }
     }
-    
+
     private static String getOpenApiFileName(String servicePath, String serviceName) {
         String cleanedServiceName;
         if (serviceName.isBlank() || serviceName.equals("/")) {
@@ -198,11 +198,11 @@ public class OpenApiConverterUtils {
             if (serviceName.startsWith("/")) {
                 serviceName = serviceName.substring(1);
             }
-            
+
             // Replace rest of the path separators with hyphen
             cleanedServiceName = serviceName.replaceAll("/", "-");
         }
-        
+
         return cleanedServiceName + ConverterConstants.OPENAPI_SUFFIX + ConverterConstants.YAML_EXTENSION;
     }
 
@@ -231,7 +231,8 @@ public class OpenApiConverterUtils {
 
                 String httpAlias = getAlias(imports, Constants.BALLERINA_HTTP_PACKAGE_NAME);
                 String openApiAlias = getAlias(imports, Constants.OPENAPI_PACKAGE_NAME);
-                OpenApiServiceMapper openApiServiceMapper = new OpenApiServiceMapper(httpAlias, openApiAlias);
+                OpenApiServiceMapper openApiServiceMapper = new OpenApiServiceMapper(httpAlias, openApiAlias,
+                        semanticModel);
 
                 Swagger openapi = getOpenApiDefinition(new Swagger(), openApiServiceMapper, serviceName,
                         syntaxTree, endpoints, semanticModel);
@@ -320,7 +321,7 @@ public class OpenApiConverterUtils {
 
         return openapi;
     }
-    
+
     /**
      * Gets the base path of a service.
      *
@@ -416,6 +417,7 @@ public class OpenApiConverterUtils {
      * @return              file name with duplicate number tag
      */
     private static String checkDuplicateFiles(Path outPath, String openApiName) {
+
         if (Files.exists(outPath)) {
             final File[] listFiles = new File(String.valueOf(outPath)).listFiles();
             if (listFiles != null) {
@@ -426,6 +428,7 @@ public class OpenApiConverterUtils {
     }
 
     private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles) {
+
         for (File file : listFiles) {
             if (file.getName().equals(openApiName)) {
                 String userInput = System.console().readLine("There is already a/an " + file.getName() +

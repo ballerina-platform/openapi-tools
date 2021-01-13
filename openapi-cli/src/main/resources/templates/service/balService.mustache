@@ -14,7 +14,8 @@ service {{servers.0.basePath}} on {{#servers}}ep{{@index}}{{#unless @last}}, {{/
 # + return - Error value if an error occurred, and return nil otherwise
     resource function {{opMethod}} {{{opName}}}(http:Caller caller, http:Request req
     {{#parameterList}}{{#isQueryParam}}, {{#refType}}{{{refType}}}{{/refType}}{{^refType}}{{#paramType}}{{>inlineSchema
-    }}{{/paramType}}{{/refType}}{{paramName}}{{/isQueryParam}}{{/parameterList}}{{#requestBody}}, @http:Payload {{#contentType}}{{> inlineSchema}}{{/contentType}} body{{/requestBody}}) returns error? {{=<% %>=}}{<%={{ }}=%>
+    }}? {{/paramType}}{{/refType}} {{paramName}}{{/isQueryParam}}{{/parameterList}}{{#requestBody}}, @http:Payload {}
+    {{#contentType}}{{> inlineSchema}}{{/contentType}} body{{/requestBody}}) returns error? {{=<% %>=}}{<%={{ }}=%>
 
     }
 {{/operationsList}}{{/pathList}}
