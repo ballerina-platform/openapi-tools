@@ -21,6 +21,7 @@ package org.ballerinalang.ballerina.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -47,17 +48,20 @@ public class OpenApiServiceMapper {
     private String httpAlias;
     private String openApiAlias;
     private ObjectMapper objectMapper;
+    private final SemanticModel semanticModel;
+
 
     /**
      * Initializes a service parser for OpenApi.
-     *
-     * @param httpAlias    The alias for ballerina/http module.
+     *  @param httpAlias    The alias for ballerina/http module.
      * @param openApiAlias The alias for ballerina.openapi module.
+     * @param semanticModel semanticModel used for the resolve the reference in the record.
      */
-    public OpenApiServiceMapper(String httpAlias, String openApiAlias) {
+    public OpenApiServiceMapper(String httpAlias, String openApiAlias, SemanticModel semanticModel) {
         // Default object mapper is JSON mapper available in openApi utils.
         this.httpAlias = httpAlias;
         this.openApiAlias = openApiAlias;
+        this.semanticModel = semanticModel;
         this.objectMapper = Json.mapper();
     }
 
@@ -110,9 +114,9 @@ public class OpenApiServiceMapper {
                 resource.add((FunctionDefinitionNode) function);
             }
         }
-        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(openapi);
+        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(openapi, semanticModel);
         openapi.setPaths(resourceMapper.convertResourceToPath(resource));
         return openapi;
     }
-    
+
 }
