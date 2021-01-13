@@ -19,7 +19,7 @@ paths:
               $ref: '#/components/schemas/User'
 components:
   schemas:
-    User:           # <----------
+    User:
       type: object
       required:
         - userName

@@ -28,15 +28,9 @@ public class BallerinaOpenApiParameter {
     private BallerinaOpenApiSchema paramType;
     private String paramDescription;
 
-    public String getParamDescription() {
+    public String getParamDescription() {return paramDescription;}
 
-        return paramDescription;
-    }
-
-    public void setParamDescription(String paramDescription) {
-
-        this.paramDescription = paramDescription;
-    }
+    public void setParamDescription(String paramDescription) {this.paramDescription = paramDescription;}
 
     public BallerinaOpenApiSchema getParamType() {
         return paramType;
