@@ -143,6 +143,9 @@ public class TypeExtractorUtil {
             BallerinaOpenApiOperation operation = new BallerinaOpenApiOperation();
 
             operation.setOpMethod(opMethod.toString().toLowerCase(Locale.ENGLISH));
+            if (opObject.getDescription() != null) {
+                operation.setOperationDescription(opObject.getDescription());
+            }
             List<String> operationTags = opObject.getTags();
             String operationId = opObject.getOperationId();
             if (((filter.getTags().isEmpty()) && (filter.getOperations().isEmpty()))
@@ -224,6 +227,10 @@ public class TypeExtractorUtil {
                 BallerinaOpenApiSchema typeSchema = new BallerinaOpenApiSchema();
                 extractOpenApiSchema(nextParam.getSchema(), typeSchema, true, null);
                 parameter.setParamType(typeSchema);
+            }
+
+            if (nextParam.getDescription() != null) {
+                parameter.setParamDescription(nextParam.getDescription());
             }
 
             paramList.add(parameter);
