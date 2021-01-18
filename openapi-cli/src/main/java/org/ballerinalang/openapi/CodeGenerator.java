@@ -181,10 +181,15 @@ public class CodeGenerator {
             throw new BallerinaOpenApiException("Couldn't read the definition from file: " + definitionPath);
         }
 
-        if (serviceName != null) {
-            api.getInfo().setTitle(serviceName);
-        } else if (api.getInfo() == null || api.getInfo().getTitle().isBlank()) {
-            api.getInfo().setTitle(GeneratorConstants.UNTITLED_SERVICE);
+        if (api.getInfo() == null) {
+            throw new BallerinaOpenApiException("InFo section couldn't be null in the definition from file: " +
+                    definitionPath);
+        } else {
+            if (api.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {
+                api.getInfo().setTitle(GeneratorConstants.UNTITLED_SERVICE);
+            } else {
+                api.getInfo().setTitle(serviceName);
+            }
         }
 
         List<GenSrcFile> sourceFiles;
