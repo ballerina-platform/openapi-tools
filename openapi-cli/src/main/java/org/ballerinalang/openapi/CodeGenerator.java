@@ -184,12 +184,12 @@ public class CodeGenerator {
         if (api.getInfo() == null) {
             throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
                     definitionPath);
+        }
+
+        if (api.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {
+            api.getInfo().setTitle(GeneratorConstants.UNTITLED_SERVICE);
         } else {
-            if (api.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {
-                api.getInfo().setTitle(GeneratorConstants.UNTITLED_SERVICE);
-            } else {
-                api.getInfo().setTitle(serviceName);
-            }
+            api.getInfo().setTitle(serviceName);
         }
 
         List<GenSrcFile> sourceFiles;
