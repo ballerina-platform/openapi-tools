@@ -132,8 +132,6 @@ public class OpenApiConverterUtils {
         DocumentId docId;
         Document doc;
         if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
-//            Optional<DocumentId> optionalDocId = ProjectLoader.getDocumentId(servicePath, (BuildProject) project);
-//            docId = optionalDocId.orElseThrow();
             docId = project.documentId(servicePath);
             ModuleId moduleId = docId.moduleId();
             doc = project.currentPackage().module(moduleId).document(docId);

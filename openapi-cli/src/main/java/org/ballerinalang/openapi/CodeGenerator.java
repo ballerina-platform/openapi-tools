@@ -27,7 +27,6 @@ import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.model.BallerinaOpenApi;
@@ -184,7 +183,7 @@ public class CodeGenerator {
 
         if (serviceName != null) {
             api.getInfo().setTitle(serviceName);
-        } else if (api.getInfo() == null || StringUtils.isEmpty(api.getInfo().getTitle())) {
+        } else if (api.getInfo() == null || api.getInfo().getTitle().isBlank()) {
             api.getInfo().setTitle(GeneratorConstants.UNTITLED_SERVICE);
         }
 

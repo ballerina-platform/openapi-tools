@@ -280,8 +280,7 @@ public class OpenApiResourceMapper {
             if (!fields.isEmpty() || fields.size() != 0) {
                 handleMultipleMIMETypes(operationAdaptor, bodyParameter, fields, expr, queryParam, definitions);
             }  else {
-                String consumes =
-                        "application/" + expr.typeName().toString().trim();
+                String consumes = "application/" + expr.typeName().toString().trim();
                 switch (consumes) {
                     case MediaType.APPLICATION_JSON:
                         addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_JSON);
@@ -344,8 +343,7 @@ public class OpenApiResourceMapper {
                                         String mediaType) {
 
         // Creating request body - required.
-        SimpleNameReferenceNode referenceNode =
-                (SimpleNameReferenceNode) queryParam.typeName();
+        SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) queryParam.typeName();
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         handleRecordPayload(queryParam, definitions, typeSymbol);
