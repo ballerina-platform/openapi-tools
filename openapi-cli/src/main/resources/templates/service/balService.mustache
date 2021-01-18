@@ -1,5 +1,5 @@
 import ballerina/http;
-import ballerina/openapi;
+
 {{#servers}}
 listener http:Listener ep{{@index}} = new({{port}}{{#host}}, config = {host: "{{host}}"}{{/host}});
 {{/servers}}

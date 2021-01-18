@@ -1,7 +1,6 @@
 import ballerina/config;
 import ballerina/io;
 import ballerina/system;
-import ballerina/stringutils;
 import ballerina/test;
 
 const BAL_EXEC_PATH = "bal_exec_path";
@@ -35,12 +34,12 @@ function getLogLinesFromExecResult(system:Process|error execResult) returns stri
     io:ReadableByteChannel readableResult = result.stderr();
     io:ReadableCharacterChannel sc = new (readableResult, UTF_8);
     string outText = checkpanic sc.read(100000);
-    string[] logLines = stringutils:split(outText, "\n");
+    string[] logLines = regex:split(outText, "\n");
     return logLines;
 }
 
 function validateLog(string log, string logLevel, string logLocation, string logMsg) {
-    test:assertTrue(stringutils:contains(log, logLevel));
-    test:assertTrue(stringutils:contains(log, logLocation));
-    test:assertTrue(stringutils:contains(log, logMsg));
+    test:assertTrue(log.includes(logLevel));
+    test:assertTrue(log.includes(logLocation));
+    test:assertTrue(log.includes(logMsg));
 }

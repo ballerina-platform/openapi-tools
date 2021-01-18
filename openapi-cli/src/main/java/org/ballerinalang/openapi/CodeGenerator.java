@@ -27,7 +27,6 @@ import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.model.BallerinaOpenApi;
@@ -182,10 +181,15 @@ public class CodeGenerator {
             throw new BallerinaOpenApiException("Couldn't read the definition from file: " + definitionPath);
         }
 
-        if (serviceName != null) {
-            api.getInfo().setTitle(serviceName);
-        } else if (api.getInfo() == null || StringUtils.isEmpty(api.getInfo().getTitle())) {
+        if (api.getInfo() == null) {
+            throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
+                    definitionPath);
+        }
+
+        if (api.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {
             api.getInfo().setTitle(GeneratorConstants.UNTITLED_SERVICE);
+        } else {
+            api.getInfo().setTitle(serviceName);
         }
 
         List<GenSrcFile> sourceFiles;
