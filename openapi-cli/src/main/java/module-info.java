@@ -32,8 +32,7 @@ module io.ballerina.ballerina.openapi {
     requires org.slf4j;
     requires swagger.core;
     requires swagger.models;
-    requires swagger.parser;
-    requires swagger.parser.v2.converter;
+    requires swagger.parser.core;
     requires swagger.parser.v3;
     exports org.ballerinalang.ballerina;
     exports org.ballerinalang.openapi;

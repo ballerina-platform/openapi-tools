@@ -240,10 +240,10 @@ public class OpenApiResourceMapper {
     private void addResourceParameters(FunctionDefinitionNode resource, OperationAdaptor operationAdaptor) {
         //Set Path
          if (generateRelativePath(resource) != null) {
-                String path = generateRelativePath(resource).trim();
-                operationAdaptor.setPath(path);
+            String path = generateRelativePath(resource).trim();
+            operationAdaptor.setPath(path);
          } else {
-                operationAdaptor.setPath("/");
+            operationAdaptor.setPath("/");
          }
         //Add path parameters if in path and query parameters
         this.createParametersModel(resource, operationAdaptor.getOperation());
