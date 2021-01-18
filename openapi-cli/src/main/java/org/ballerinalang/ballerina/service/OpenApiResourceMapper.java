@@ -26,7 +26,6 @@ import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
@@ -46,7 +45,6 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.tools.text.LinePosition;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
@@ -243,9 +241,9 @@ public class OpenApiResourceMapper {
          if (generateRelativePath(resource) != null) {
                 String path = generateRelativePath(resource).trim();
                 operationAdaptor.setPath(path);
-            } else {
+         } else {
                 operationAdaptor.setPath("/");
-            }
+         }
         //Add path parameters if in path and query parameters
         this.createParametersModel(resource, operationAdaptor.getOperation());
 
@@ -348,9 +346,7 @@ public class OpenApiResourceMapper {
         // Creating request body - required.
         SimpleNameReferenceNode referenceNode =
                 (SimpleNameReferenceNode) queryParam.typeName();
-        Optional<Symbol> symbol = semanticModel.symbol(referenceNode.syntaxTree().filePath(),
-                LinePosition.from(referenceNode.location().lineRange().startLine().line(),
-                        referenceNode.location().lineRange().startLine().offset()));
+        Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         handleRecordPayload(queryParam, definitions, typeSymbol);
         // Creating "Request rq" parameter
@@ -372,14 +368,11 @@ public class OpenApiResourceMapper {
         String componentName = typeSymbol.name().trim();
         ModelImpl messageModel = new ModelImpl();
         if (typeSymbol instanceof TypeReferenceTypeSymbol) {
-            TypeReferenceTypeSymbol typeRef =
-                    (TypeReferenceTypeSymbol) typeSymbol;
+            TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
             // Handle record type request body
             if (typeRef.typeDescriptor() instanceof RecordTypeSymbol) {
-                RecordTypeSymbol recordTypeSymbol =
-                        (RecordTypeSymbol) typeRef.typeDescriptor();
-                List<FieldSymbol> rfields =
-                        recordTypeSymbol.fieldDescriptors();
+                RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeRef.typeDescriptor();
+                List<FieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
                 for (FieldSymbol field: rfields) {
                     String type = field.typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
                     Property property = getOpenApiProperty(type);
@@ -387,15 +380,10 @@ public class OpenApiResourceMapper {
                         RefModel refModel = new RefModel();
                         refModel.setReference(field.typeDescriptor().name().trim());
                         ((RefProperty) property).set$ref(refModel.get$ref());
-
-                        Optional<Symbol> recordSymbol = semanticModel.symbol(queryParam.syntaxTree().filePath(),
-                                        LinePosition.from(field.location().lineRange().startLine().line(),
-                                                field.location().lineRange().startLine().offset()));
-
-                        VariableSymbol recordVariable = (VariableSymbol) recordSymbol.orElseThrow();
-                        if (recordVariable.typeDescriptor() instanceof TypeReferenceTypeSymbol) {
-                            TypeReferenceTypeSymbol typeRecord =
-                                    (TypeReferenceTypeSymbol) recordVariable.typeDescriptor();
+                        Optional<TypeSymbol> recordSymbol = semanticModel.type(field.location().lineRange());
+                        TypeSymbol recordVariable =  recordSymbol.orElseThrow();
+                        if (recordVariable instanceof TypeReferenceTypeSymbol) {
+                            TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
                             handleRecordPayload(queryParam, definitions, typeRecord);
                         }
                     }
@@ -431,15 +419,9 @@ public class OpenApiResourceMapper {
             refModel.setReference(symbol.name().trim());
             ((RefProperty) symbolProperty).set$ref(refModel.get$ref());
 
-            Optional<Symbol> recordSymbol = semanticModel.symbol(queryParam.syntaxTree().filePath(),
-                    LinePosition.from(field.location().lineRange().startLine().line(),
-                            field.location().lineRange().startLine().offset()));
             //Set the record model to the definition
-            VariableSymbol recordVariable = (VariableSymbol) recordSymbol.orElseThrow();
-            ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) recordVariable.typeDescriptor();
-            if (arrayTypeSymbol.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol) {
-                TypeReferenceTypeSymbol typeRecord =
-                        (TypeReferenceTypeSymbol) arrayTypeSymbol.memberTypeDescriptor();
+            if (symbol instanceof TypeReferenceTypeSymbol) {
+                TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) symbol;
                 handleRecordPayload(queryParam, definitions, typeRecord);
             }
         }
