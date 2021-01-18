@@ -40,7 +40,6 @@ import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
-import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.swagger.models.Model;
 import io.swagger.models.Swagger;
@@ -133,8 +132,9 @@ public class OpenApiConverterUtils {
         DocumentId docId;
         Document doc;
         if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
-            Optional<DocumentId> optionalDocId = ProjectLoader.getDocumentId(servicePath, (BuildProject) project);
-            docId = optionalDocId.orElseThrow();
+//            Optional<DocumentId> optionalDocId = ProjectLoader.getDocumentId(servicePath, (BuildProject) project);
+//            docId = optionalDocId.orElseThrow();
+            docId = project.documentId(servicePath);
             ModuleId moduleId = docId.moduleId();
             doc = project.currentPackage().module(moduleId).document(docId);
         } else {
