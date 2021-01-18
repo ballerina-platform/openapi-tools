@@ -52,7 +52,8 @@ import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
-import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FilenameUtils;
 import org.ballerinalang.ballerina.service.ConverterConstants;
@@ -233,13 +234,13 @@ public class OpenApiConverterUtils {
                 Swagger openapi = getOpenApiDefinition(new Swagger(), openApiServiceMapper, serviceName,
                         syntaxTree, endpoints, semanticModel);
                 String openApiSource = openApiServiceMapper.generateOpenApiString(openapi);
-                SwaggerParseResult result = new OpenAPIV3Parser().readContents(openApiSource);
+                SwaggerParseResult result = new OpenAPIParser().readContents(openApiSource, null, null);
 
                 if (result.getMessages().size() > 0) {
                     throw new OpenApiConverterException("Please check the mentioned service is available " +
                             "in the ballerina source, or there content is valid");
                 }
-                return result.getOpenAPI().toString();
+                return Yaml.pretty(result.getOpenAPI());
             }
         }
         return serviceName;
