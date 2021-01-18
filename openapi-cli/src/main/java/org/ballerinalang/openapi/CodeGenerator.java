@@ -182,7 +182,7 @@ public class CodeGenerator {
         }
 
         if (api.getInfo() == null) {
-            throw new BallerinaOpenApiException("InFo section couldn't be null in the definition from file: " +
+            throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
                     definitionPath);
         } else {
             if (api.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {
