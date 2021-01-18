@@ -34,7 +34,7 @@ function getLogLinesFromExecResult(system:Process|error execResult) returns stri
     io:ReadableByteChannel readableResult = result.stderr();
     io:ReadableCharacterChannel sc = new (readableResult, UTF_8);
     string outText = checkpanic sc.read(100000);
-    string[] logLines = regex:split((outText, "\n");
+    string[] logLines = regex:split(outText, "\n");
     return logLines;
 }
 
