@@ -24,6 +24,7 @@ import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.FieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
@@ -380,7 +381,7 @@ public class OpenApiResourceMapper {
                         ((RefProperty) property).set$ref(refModel.get$ref());
                         Optional<TypeSymbol> recordSymbol = semanticModel.type(field.location().lineRange());
                         TypeSymbol recordVariable =  recordSymbol.orElseThrow();
-                        if (recordVariable instanceof TypeReferenceTypeSymbol) {
+                        if (recordVariable.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
                             TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
                             handleRecordPayload(queryParam, definitions, typeRecord);
                         }
@@ -418,7 +419,7 @@ public class OpenApiResourceMapper {
             ((RefProperty) symbolProperty).set$ref(refModel.get$ref());
 
             //Set the record model to the definition
-            if (symbol instanceof TypeReferenceTypeSymbol) {
+            if (symbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
                 TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) symbol;
                 handleRecordPayload(queryParam, definitions, typeRecord);
             }
