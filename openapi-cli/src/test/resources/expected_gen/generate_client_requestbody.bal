@@ -26,9 +26,9 @@ public client class openapipetstoreClient {
         var response = resource1Ep->post("/requestBody", request);
 
         if (response is http:Response) {
-            return <http:Response> response;
+            return response;
         }
-        return <error> response;
+        return <error>response;
     }
 
 };

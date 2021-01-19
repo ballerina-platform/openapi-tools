@@ -24,7 +24,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,9 +47,9 @@ public class CodeGeneratorTest {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Test Ballerina skeleton generation")
-    public void generateSkeleton() {
+    public void generateSkeleton() throws BallerinaOpenApiException {
         final String serviceName = "openapipetstore";
-        String definitionPath = RES_DIR + File.separator + "petstore.yaml";
+        String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
 
         try {
@@ -74,9 +73,9 @@ public class CodeGeneratorTest {
     }
 
     @Test(description = "Test Ballerina client generation")
-    public void generateClient() {
+    public void generateClient() throws BallerinaOpenApiException {
         final String clientName = "openapipetstore";
-        String definitionPath = RES_DIR + File.separator + "petstore.yaml";
+        String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generateClient.bal");
@@ -98,9 +97,9 @@ public class CodeGeneratorTest {
     }
 
     @Test(description = "Test Ballerina client generation with request body")
-    public void generateClientwithRequestBody() {
+    public void generateClientwithRequestBody() throws BallerinaOpenApiException {
         final String clientName = "openapipetstore";
-        String definitionPath = RES_DIR + File.separator + "openapi-client-rb.yaml";
+        String definitionPath = RES_DIR.resolve("openapi-client-rb.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile,
@@ -123,9 +122,9 @@ public class CodeGeneratorTest {
     }
 
     @Test(description = "Test Ballerina skeleton generation")
-    public void generateSkeletonForRequestbody() {
+    public void generateSkeletonForRequestbody() throws BallerinaOpenApiException {
         final String serviceName = "openapipetstore";
-        String definitionPath = RES_DIR + File.separator + "requestBody.yaml";
+        String definitionPath = RES_DIR.resolve("requestBody.yaml").toString();;
         CodeGenerator generator = new CodeGenerator();
 
         try {
@@ -201,11 +200,13 @@ public class CodeGeneratorTest {
         return expectedServiceContent;
     }
 
-    private void deleteGeneratedFiles(String filename) {
-        File serviceFile = new File(resourcePath.resolve(filename).toString());
-        File schemaFile = new File(resourcePath.resolve("schema.bal").toString());
-        serviceFile.delete();
-        schemaFile.delete();
+    private void deleteGeneratedFiles(String filename) throws BallerinaOpenApiException {
+        try {
+            Files.deleteIfExists(resourcePath.resolve(filename));
+            Files.deleteIfExists(resourcePath.resolve("schema.bal"));
+        } catch (IOException  e) {
+            throw new BallerinaOpenApiException("No such file exists.");
+        }
     }
     @DataProvider(name = "fileProvider")
     public Object[][] fileProvider() {

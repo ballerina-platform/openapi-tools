@@ -26,9 +26,9 @@ public client class {{cut info.title " "}}Client {
         var response = ep->{{lower .}}({{../../../key}}, message = request);{{/equals}}{{/equals}}
         var response = ep->{{lower .}}({{../../../key}}, request);{{/equals}}
         if (response is http:Response) {
-            return <http:Response> response;
+            return response;
         }
-        return <error> response;
+        return <error>response;
     }
     {{/methods}}{{else}}{{#allMethods}}
     remote function {{lower .}}{{{operationId}}}({{#pathParameters}}{{>pathParams}}{{#unless @last}}, {{/unless}}{{/pathParameters}}) returns http:Response | error {
@@ -42,9 +42,9 @@ public client class {{cut info.title " "}}Client {
         var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}}, request);{{/equals}}{{/equals}}{{/equals}}
 
         if (response is http:Response) {
-            return <http:Response> response;
+            return response;
         }
-        return <error> response;
+        return <error>response;
     }
     {{/allMethods}}{{/if}}{{else}}
     remote function {{{operationId}}}({{#requestBody}}{{>reqBody}}{{/requestBody}}{{#if requestBody}}{{#if pathParameters}}, {{/if}}{{/if}}{{#pathParameters}}{{>pathParams}}{{#unless @last}}, {{/unless}}{{/pathParameters}}) returns http:Response | error {
@@ -62,9 +62,9 @@ public client class {{cut info.title " "}}Client {
         var response = {{{operationId}}}Ep->{{lower key}}({{../../key}}, request);{{/equals}}{{/equals}}{{/equals}}
 
         if (response is http:Response) {
-            return <http:Response> response;
+            return response;
         }
-        return <error> response;
+        return <error>response;
     }
     {{/equals}}{{/value}}{{/operations}}{{/value}}{{/paths}}
 };
