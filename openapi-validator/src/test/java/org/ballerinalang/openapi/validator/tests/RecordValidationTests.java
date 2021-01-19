@@ -38,6 +38,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Tests related to record validations.
+ */
 public class RecordValidationTests {
     private static BType paramType = null;
     private static SyntaxTree syntaxTree = null;
@@ -60,33 +63,36 @@ public class RecordValidationTests {
         Path contractPath = RES_DIR.resolve("validTests/validRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getComponet(api, "User");
-        validationErrorList = SyntaxTreeToJsonValidatorUtil.validate(extractSchema, inputs.getSyntaxTree(), inputs.getSemanticModel());
+        validationErrorList = SyntaxTreeToJsonValidatorUtil.validate(extractSchema, inputs.getSyntaxTree(),
+                inputs.getSemanticModel());
         Assert.assertTrue(validationErrorList.isEmpty());
     }
 
     @Test(description = "Test for the type mismatching", enabled = true)
     public void testTypeMismatchFieldRecord() throws OpenApiValidatorException {
         //Extract record type for the syntax tree
-        inputs = BaseTests.returnBType("typeMisMatch.bal", "invalidTest","User");
+        inputs = BaseTests.returnBType("typeMisMatch.bal", "invalidTest", "User");
         //Load yaml file
         Path contractPath = RES_DIR.resolve("invalidTests/typeMisMatch.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getComponet(api, "User");
-        validationErrorList = SyntaxTreeToJsonValidatorUtil.validate(extractSchema, inputs.getSyntaxTree(), inputs.getSemanticModel());
+        validationErrorList = SyntaxTreeToJsonValidatorUtil.validate(extractSchema, inputs.getSyntaxTree(),
+                inputs.getSemanticModel());
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
-        Assert.assertEquals(((TypeMismatch)validationErrorList.get(0)).getFieldName(),"id");
+        Assert.assertEquals(((TypeMismatch) validationErrorList.get(0)).getFieldName(), "id");
     }
 
     @Test(description = "Test for extra field in the record", enabled = true)
     public void testExtraFiledInRecord() throws OpenApiValidatorException {
-        inputs = BaseTests.returnBType("extraFieldInRecord.bal", "invalidTest", "ExtraFieldInRecord");
+        inputs = BaseTests.returnBType("extraFieldInRecord.bal", "invalidTest",
+                "ExtraFieldInRecord");
         Path contractPath = RES_DIR.resolve("invalidTests/extraFieldInRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getComponet(api, "ExtraFieldInRecord");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
         Assert.assertTrue(validationErrorList.get(0) instanceof MissingFieldInJsonSchema);
-        Assert.assertEquals(((MissingFieldInJsonSchema)validationErrorList.get(0)).getFieldName(),"status");
+        Assert.assertEquals(((MissingFieldInJsonSchema) validationErrorList.get(0)).getFieldName(), "status");
     }
 
     @Test(description = "Test for valid the nested record", enabled = true)
@@ -96,7 +102,7 @@ public class RecordValidationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getComponet(api, "FourNestedComponent");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
 
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrorList.get(0).getFieldName(), "month");
@@ -112,33 +118,35 @@ public class RecordValidationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getComponet(api, "NestedRecord");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
-        Assert.assertEquals(((TypeMismatch)validationErrorList.get(0)).getFieldName(),"id");
+        Assert.assertEquals(((TypeMismatch) validationErrorList.get(0)).getFieldName(), "id");
     }
 
     @Test(description = "Test for valid the nested record", enabled = true)
     public void testExtraFieldInNestedRecord() throws OpenApiValidatorException {
-        inputs = BaseTests.returnBType("extraFieldInNestedRecord.bal", "invalidTest", "ExtraFieldInRecord");
+        inputs = BaseTests.returnBType("extraFieldInNestedRecord.bal", "invalidTest",
+                "ExtraFieldInRecord");
         Path contractPath = RES_DIR.resolve("invalidTests/extraFieldInNestedRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getComponet(api, "ExtraFieldInRecord");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
         Assert.assertTrue(validationErrorList.get(0) instanceof MissingFieldInJsonSchema);
-        Assert.assertEquals(((MissingFieldInJsonSchema)validationErrorList.get(0)).getFieldName(),"tag");
+        Assert.assertEquals(((MissingFieldInJsonSchema) validationErrorList.get(0)).getFieldName(), "tag");
     }
 
     @Test(description = "Test for valid the nested record", enabled = true)
     public void testArrayTypeFieldInRecord() throws OpenApiValidatorException {
-        inputs = BaseTests.returnBType("extraFieldInNestedRecord.bal", "invalidTest", "ExtraFieldInRecord");
+        inputs = BaseTests.returnBType("extraFieldInNestedRecord.bal", "invalidTest",
+                "ExtraFieldInRecord");
         Path contractPath = RES_DIR.resolve("invalidTests/arrayTypeFilRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getComponet(api, "ExtraFieldInRecord");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
         Assert.assertTrue(validationErrorList.get(0) instanceof MissingFieldInJsonSchema);
-        Assert.assertEquals(((MissingFieldInJsonSchema)validationErrorList.get(0)).getFieldName(),"tag");
+        Assert.assertEquals(((MissingFieldInJsonSchema) validationErrorList.get(0)).getFieldName(), "tag");
     }
 
     //Primitive
@@ -149,9 +157,9 @@ public class RecordValidationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
-        Assert.assertEquals(((TypeMismatch)validationErrorList.get(0)).getFieldName(),"paramName");
+        Assert.assertEquals(((TypeMismatch) validationErrorList.get(0)).getFieldName(), "paramName");
     }
 
     @Test(description = "Test for valid the nested record", enabled = true)
@@ -161,7 +169,7 @@ public class RecordValidationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
 
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrorList.get(0).getFieldName(), "array");
@@ -176,7 +184,7 @@ public class RecordValidationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
 
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrorList.get(0).getFieldName(), "array");
@@ -191,12 +199,13 @@ public class RecordValidationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getSchema(api, "/user/{category}");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
 
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrorList.get(0).getFieldName(), "id");
         Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
-        Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeBallerinaType(), Constants.Type.STRING);
+        Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeBallerinaType(),
+                Constants.Type.STRING);
     }
 
 
@@ -205,15 +214,16 @@ public class RecordValidationTests {
     //need to do schema to record
     @Test(description = "Test for extra field in the schema", enabled = true)
     public void testExtraFiledInSchema() throws OpenApiValidatorException {
-        inputs = BaseTests.returnBType("extraFieldInRecord.bal", "invalidTest", "ExtraFieldInRecord");
+        inputs = BaseTests.returnBType("extraFieldInRecord.bal", "invalidTest",
+                "ExtraFieldInRecord");
         //Load yaml file
         Path contractPath = RES_DIR.resolve("invalidTests/extraFieldInRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getComponet(api, "ExtraFieldInRecord");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema,inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel());
         Assert.assertTrue(validationErrorList.get(0) instanceof MissingFieldInJsonSchema);
-        Assert.assertEquals(((MissingFieldInJsonSchema)validationErrorList.get(0)).getFieldName(),"status");
+        Assert.assertEquals(((MissingFieldInJsonSchema) validationErrorList.get(0)).getFieldName(), "status");
     }
 
 }

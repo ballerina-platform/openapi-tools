@@ -19,12 +19,7 @@
 package org.ballerinalang.openapi.validator;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.error.ValidationError;
 
@@ -42,15 +37,15 @@ public class SyntaxTreeToJsonValidatorUtil {
             throws OpenApiValidatorException {
 
         List<ValidationError> validationErrorList = new ArrayList<>();
-        final TypeSymbol[] paramType = {null};
-        ModulePartNode modulePartNode = syntaxTree.rootNode();
-        for (Node node : modulePartNode.members()) {
-            SyntaxKind syntaxKind = node.kind();
+//        final TypeSymbol[] paramType = {null};
+//        ModulePartNode modulePartNode = syntaxTree.rootNode();
+//        for (Node node : modulePartNode.members()) {
+//            SyntaxKind syntaxKind = node.kind();
 
             //------------comment due to service implementing happening
-            if (syntaxKind.equals(SyntaxKind.TYPE_DEFINITION)) {
-                TypeDefinitionNode typeNode = (TypeDefinitionNode) node;
-            }
+//            if (syntaxKind.equals(SyntaxKind.TYPE_DEFINITION)) {
+//                TypeDefinitionNode typeNode = (TypeDefinitionNode) node;
+//            }
             // Take the service for validation
 //            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
 //                ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
@@ -84,7 +79,7 @@ public class SyntaxTreeToJsonValidatorUtil {
 //                    }
 //                }
 //            }
-        }
+//        }
 
 //                --------------------------------------------------------
 

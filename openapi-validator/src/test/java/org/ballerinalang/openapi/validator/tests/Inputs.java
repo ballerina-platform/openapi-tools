@@ -4,6 +4,9 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 
+/**
+ * to-do.
+ */
 public class Inputs {
     private   TypeSymbol paramType;
     private   SemanticModel semanticModel;
