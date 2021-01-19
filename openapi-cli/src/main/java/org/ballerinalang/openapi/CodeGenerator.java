@@ -27,7 +27,7 @@ import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import org.apache.commons.lang3.StringUtils;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.model.BallerinaOpenApi;
@@ -176,16 +176,26 @@ public class CodeGenerator {
     public List<GenSrcFile> generateBalSource(GenType type, String definitionPath,
                                               String reldefinitionPath, String serviceName, Filter filter)
             throws IOException, BallerinaOpenApiException {
-        OpenAPI api = new OpenAPIV3Parser().read(definitionPath);
-
-        if (api == null) {
-            throw new BallerinaOpenApiException("Couldn't read the definition from file: " + definitionPath);
+        String openAPIFileContent = Files.readString(Paths.get(definitionPath));
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
+        if (parseResult.getMessages().size() > 0) {
+            throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
         }
 
-        if (serviceName != null) {
-            api.getInfo().setTitle(serviceName);
-        } else if (api.getInfo() == null || StringUtils.isEmpty(api.getInfo().getTitle())) {
+        OpenAPI api = parseResult.getOpenAPI();
+        if (api == null) {
+            throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
+        }
+
+        if (api.getInfo() == null) {
+            throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
+                    definitionPath);
+        }
+
+        if (api.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {
             api.getInfo().setTitle(GeneratorConstants.UNTITLED_SERVICE);
+        } else {
+            api.getInfo().setTitle(serviceName);
         }
 
         List<GenSrcFile> sourceFiles;
@@ -195,11 +205,14 @@ public class CodeGenerator {
                 // modelPackage is not in use at the moment. All models will be written into same package
                 // as other src files.
                 // Therefore value set to modelPackage is ignored here
+                if (serviceName != null) {
+                    api.getInfo().setTitle(serviceName.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1"));
+                }
                 BallerinaOpenApi definitionContext = new BallerinaOpenApi().buildContext(api).srcPackage(srcPackage)
                         .modelPackage(srcPackage);
                 definitionContext.setDefinitionPath(reldefinitionPath);
 
-                sourceFiles = generateClient(definitionContext);
+                sourceFiles = generateClient(definitionContext, serviceName);
                 break;
             case GEN_SERVICE:
 
@@ -373,14 +386,16 @@ public class CodeGenerator {
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private List<GenSrcFile> generateClient(BallerinaOpenApi context) throws IOException {
+    private List<GenSrcFile> generateClient(BallerinaOpenApi context, String serviceName) throws IOException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = GeneratorConstants.DEFAULT_CLIENT_PKG;
         }
 
+        if (serviceName == null) {
+            serviceName = context.getInfo().getTitle().toLowerCase(Locale.ENGLISH) + "-client.bal";
+        }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String srcFile = context.getInfo().getTitle().toLowerCase(Locale.ENGLISH)
-                .replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1") + "-client.bal";
+        String srcFile = serviceName + "-client.bal";
 
         // Generate ballerina service and resources.
         String mainContent = getContent(context, GeneratorConstants.DEFAULT_CLIENT_DIR,
@@ -402,8 +417,7 @@ public class CodeGenerator {
         }
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String concatTitle = api.getBalServiceName().toLowerCase(Locale.ENGLISH).replaceAll(
-                GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
+        String concatTitle = api.getBalServiceName().toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "-service.bal";
 
         String mainContent = getContent(api, GeneratorConstants.DEFAULT_TEMPLATE_DIR + "/service",

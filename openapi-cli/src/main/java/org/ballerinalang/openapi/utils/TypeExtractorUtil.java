@@ -114,7 +114,8 @@ public class TypeExtractorUtil {
             BallerinaOpenApiPath typePath = new BallerinaOpenApiPath();
 
             typePath.setPath(pathName);
-            typePath.setOperationsList(extractOpenApiOperations(pathObject.readOperationsMap(), pathName, filter));
+            typePath.setOperationsList(extractOpenApiOperations(pathObject.readOperationsMap(), typePath,
+                    filter));
 
             paths.add(typePath);
         }
@@ -131,7 +132,7 @@ public class TypeExtractorUtil {
      * @throws BallerinaOpenApiException - throws exception if extraction fails.
      */
     public static List<BallerinaOpenApiOperation> extractOpenApiOperations(Map<PathItem.HttpMethod,
-            Operation> operationMap, String pathName, Filter filter) throws BallerinaOpenApiException {
+            Operation> operationMap, BallerinaOpenApiPath pathName, Filter filter) throws BallerinaOpenApiException {
         final Iterator<Map.Entry<PathItem.HttpMethod, Operation>> opIterator = operationMap.entrySet().iterator();
         List<BallerinaOpenApiOperation> typeOpList = new ArrayList<>();
 
@@ -141,7 +142,10 @@ public class TypeExtractorUtil {
             final Operation opObject = nextOp.getValue();
             BallerinaOpenApiOperation operation = new BallerinaOpenApiOperation();
 
-            operation.setOpMethod(opMethod.toString());
+            operation.setOpMethod(opMethod.toString().toLowerCase(Locale.ENGLISH));
+            if (opObject.getDescription() != null) {
+                operation.setOperationDescription(opObject.getDescription());
+            }
             List<String> operationTags = opObject.getTags();
             String operationId = opObject.getOperationId();
             if (((filter.getTags().isEmpty()) && (filter.getOperations().isEmpty()))
@@ -163,24 +167,25 @@ public class TypeExtractorUtil {
      * @param operation     ballerinaOpenApiOperation object
      * @throws BallerinaOpenApiException throws ballerina openApi exception
      */
-    private static void setFilteredOperation(String pathName, Map.Entry<PathItem.HttpMethod, Operation> nextOp,
-                                             Operation opObject, BallerinaOpenApiOperation operation)
+    private static void setFilteredOperation(BallerinaOpenApiPath path, Map.Entry<PathItem.HttpMethod,
+            Operation> nextOp, Operation opObject, BallerinaOpenApiOperation operation)
             throws BallerinaOpenApiException {
 
-        if (opObject.getOperationId() == null) {
-            String resName = "resource_" + nextOp.getKey().toString().toLowerCase(Locale.ENGLISH)
-                    + pathName.replaceAll("/", "_")
-                    .replaceAll("[{}]", "");
-            operation.setOpName(resName);
-            outStream.println("warning : `" + resName + "` is used as the resource name since the " +
-                    "operation id is missing for " + pathName + " " + nextOp.getKey());
-        } else {
-            operation.setOpName(escapeIdentifier(
-                    opObject.getOperationId().replace(" ", "_")));
-        }
-
+        operation.setOpName(path.getPath().replaceFirst("/", ""));
         if (opObject.getParameters() != null) {
-            operation.setParameterList(extractOpenApiParameters(opObject.getParameters()));
+            List<BallerinaOpenApiParameter> parameters = extractOpenApiParameters(opObject.getParameters());
+            for (BallerinaOpenApiParameter parameter : parameters) {
+                if (parameter.isPathParam()) {
+
+                    String pathName = path.getPath();
+                    String parameterType = parameter.getParamType().getSchemaType().get(0);
+                    String targetString = "{" + parameter.getParamName() + "}";
+                    String replaceString = "[" + parameterType + " " + parameter.getParamName() + "]";
+
+                    operation.setOpName(pathName.replace(targetString, replaceString).replaceFirst("/", ""));
+                }
+            }
+            operation.setParameterList(parameters);
         }
 
         if (opObject.getRequestBody() != null) {
@@ -211,7 +216,9 @@ public class TypeExtractorUtil {
             if (nextParam.getIn() != null) {
                 parameter.setPathParam(nextParam.getIn().equals("path"));
             }
-
+            if (nextParam.getIn() != null) {
+                parameter.setQueryParam(nextParam.getIn().equals("query"));
+            }
             if (nextParam.get$ref() != null) {
                 parameter.setRefType(extractReferenceType(nextParam.get$ref()));
             }
@@ -220,6 +227,10 @@ public class TypeExtractorUtil {
                 BallerinaOpenApiSchema typeSchema = new BallerinaOpenApiSchema();
                 extractOpenApiSchema(nextParam.getSchema(), typeSchema, true, null);
                 parameter.setParamType(typeSchema);
+            }
+
+            if (nextParam.getDescription() != null) {
+                parameter.setParamDescription(nextParam.getDescription());
             }
 
             paramList.add(parameter);

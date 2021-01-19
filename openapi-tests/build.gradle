@@ -196,13 +196,13 @@ task ballerinaIntegrationTests {
     finalizedBy(revertTomlFile)
     doLast {
         def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
-        def stdlibDependentStringutilsVersion = project.stdlibStringUtilsVersion.split("-")[0]
+        def stdlibDependentRegexVersion = project.stdlibRegexVersion.split("-")[0]
         def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
         def stdlibDependentSystemVersion = project.stdlibSystemVersion.split("-")[0]
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
-        newConfig = newConfig.replace("@stdlib.stringutils.version@", stdlibDependentStringutilsVersion)
+        newConfig = newConfig.replace("@stdlib.regex.version@", stdlibDependentRegexVersion)
         newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
         newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
         ballerinaConfigFile.text = newConfig
@@ -231,9 +231,9 @@ task ballerinaIntegrationTests {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test --bal_exec_path=${distributionBinPath}/ballerina"
+                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test --bal_exec_path=${distributionBinPath}/ballerina"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina test --bal_exec_path=${distributionBinPath}/ballerina"
+                commandLine 'sh', '-c', "$distributionBinPath/bal test --bal_exec_path=${distributionBinPath}/ballerina"
             }
         }
     }

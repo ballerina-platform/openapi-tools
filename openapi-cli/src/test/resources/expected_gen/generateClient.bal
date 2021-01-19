@@ -1,17 +1,11 @@
 import ballerina/http;
 
-//=====================================
-//============Client Config============
-//=====================================
 public type openapipetstoreClientConfig record {
     string serviceUrl;
     http:ClientConfiguration clientConfig;
 };
 
-//==============================
-//============Client============
-//==============================
-public type openapipetstoreClient client object {
+public client class openapipetstoreClient {
     public http:Client clientEp;
     public openapipetstoreClientConfig config;
 

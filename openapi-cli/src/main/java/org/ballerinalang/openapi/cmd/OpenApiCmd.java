@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,26 +17,25 @@
  */
 package org.ballerinalang.openapi.cmd;
 
-import org.ballerinalang.ballerina.openapi.convertor.OpenApiConverterException;
-import org.ballerinalang.ballerina.openapi.convertor.service.OpenApiConverterUtils;
-import org.ballerinalang.langserver.compiler.exception.CompilationFailedException;
+import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.cli.launcher.LauncherUtils;
+import org.ballerinalang.ballerina.OpenApiConverterException;
+import org.ballerinalang.ballerina.OpenApiConverterUtils;
 import org.ballerinalang.openapi.CodeGenerator;
 import org.ballerinalang.openapi.OpenApiMesseges;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.utils.GeneratorConstants;
-import org.ballerinalang.tool.BLauncherCmd;
-import org.ballerinalang.tool.LauncherUtils;
 import picocli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
 
@@ -73,9 +72,6 @@ public class OpenApiCmd implements BLauncherCmd {
             "contract")
     private String service;
 
-    @CommandLine.Option(names = {"-m", "--module"}, description = "Module name which service used to documented")
-    private  String module;
-
     @CommandLine.Option(names = {"--tags"}, description = "Tag that need to write service")
     private String tags;
 
@@ -93,9 +89,9 @@ public class OpenApiCmd implements BLauncherCmd {
         this.executionPath = Paths.get(System.getProperty("user.dir"));
     }
 
-    public OpenApiCmd(PrintStream outStream) {
+    public OpenApiCmd(PrintStream outStream, Path executionDir) {
         this.outStream = outStream;
-        this.executionPath = Paths.get(System.getProperty("user.dir"));
+        this.executionPath = executionDir;
     }
 
     @Override
@@ -155,34 +151,15 @@ public class OpenApiCmd implements BLauncherCmd {
     private void ballerinaToOpenApi(String fileName) throws IOException {
         final File balFile = new File(fileName);
         Path balFilePath = Paths.get(balFile.getCanonicalPath());
-        String serviceName = service;
+        Optional<String> serviceName = Optional.ofNullable(service);
         getTargetOutputPath();
-        Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
+//        Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
         //ballerina openapi -i service.bal --serviceName serviceName --module exampleModul -o ./
         // Check service name it is mandatory
-        if (module != null && service != null) {
-            if (!checkModuleExist(module)) {
-                throw LauncherUtils.createLauncherException(OpenApiMesseges.MESSAGE_FOR_INVALID_MODULE);
-            }
-            try {
-                OpenApiConverterUtils.generateOAS3DefinitionFromModule(module, serviceName,
-                        targetOutputPath);
-            } catch (Exception e) {
-                throw LauncherUtils.createLauncherException("Error occurred when exporting openapi file. " +
-                        "\n" + e.getMessage());
-            }
-        } else if (serviceName != null) {
-            try {
-                OpenApiConverterUtils.generateOAS3Definitions(balFilePath, targetOutputPath, serviceName);
-            } catch (IOException | OpenApiConverterException e) {
-                throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
-            }
-        } else {
-            try {
-                OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath);
-            } catch (IOException | OpenApiConverterException | CompilationFailedException e) {
-                throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
-            }
+        try {
+            OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName);
+        } catch (IOException | OpenApiConverterException e) {
+            throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
         }
     }
 
@@ -220,15 +197,19 @@ public class OpenApiCmd implements BLauncherCmd {
 
     /**
      * A util to take the resource Path.
+     * 
      * @param resourceFile      resource file path
      * @return path of given resource file
      */
     public Path getRelativePath(File resourceFile, String targetOutputPath) {
-        Path relativePath = null;
         Path resourcePath = Paths.get(resourceFile.getAbsoluteFile().getParentFile().toString());
-        Path targetPath = Paths.get(targetOutputPath).toAbsolutePath();
-        relativePath = (targetPath).relativize(resourcePath);
-        return relativePath.resolve(resourceFile.getName());
+        Path targetPath = Paths.get(targetOutputPath).toAbsolutePath();        
+        try {
+            Path relativePath = targetPath.relativize(resourcePath);
+            return relativePath.resolve(resourceFile.getName());
+        } catch (IllegalArgumentException iaex) {
+            return resourcePath.resolve(resourceFile.getName());
+        }
     }
 
     /**
@@ -301,17 +282,6 @@ public class OpenApiCmd implements BLauncherCmd {
             throw LauncherUtils.createLauncherException("Error occurred when generating service for openapi " +
                     "contract at " + argList.get(0) + ". " + e.getMessage() + ".");
         }
-    }
-
-    /**
-     * A util method to check a given module name actually exists in the current command location.
-     * @param moduleName - module name to be checked
-     * @return true if module exists.
-     */
-    private boolean checkModuleExist(String moduleName) {
-        Path userLocation = Paths.get(System.getProperty("user.dir"));
-        Path moduleLocation = userLocation.resolve("src").resolve(moduleName);
-        return Files.exists(moduleLocation);
     }
 
     @Override

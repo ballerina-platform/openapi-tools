@@ -1,25 +1,19 @@
 import ballerina/http;
-import ballerina/openapi;
+
 {{#servers}}
 listener http:Listener ep{{@index}} = new({{port}}{{#host}}, config = {host: "{{host}}"}{{/host}});
 {{/servers}}
-@openapi:ServiceInfo {{=<% %>=}}{<%={{ }}=%>
-    contract: "{{defPath}}"{{#if filteredTags}},
-    tags: [{{#each filteredTags}} {{#if @first}}"{{name}}"{{else}},"{{name}}"{{/if}} {{/each}}]{{/if}}{{#if operations}},
-    operations: [ {{#operations}}{{name}}{{/operations}} ]{{/if}}
-}
-@http:ServiceConfig {
-    basePath: "{{servers.0.basePath}}"{{!-- {{only one base path is allowed for all endpoints}} --}}
-}
 
-service {{cut balServiceName " "}} on {{#servers}}ep{{@index}}{{#unless @last}}, {{/unless}}{{/servers}} {{=<% %>=}}{<%={{ }}=%>
+service {{servers.0.basePath}} on {{#servers}}ep{{@index}}{{#unless @last}}, {{/unless}}{{/servers}} {{=<%
+%>=}}{<%={{ }}=%>
 {{#pathList}}{{#operationsList}}
-    @http:ResourceConfig {
-        methods:["{{opMethod}}"],
-        path:"{{path}}"{{#requestBody}}{{#contentType}},
-        body:"body"{{/contentType}}{{/requestBody}}
-    }
-    resource function {{{opName}}} (http:Caller caller, http:Request req{{#parameterList}}{{#isPathParam}}, {{#refType}}{{{refType}}}{{/refType}}{{^refType}}{{#paramType}}{{> inlineSchema}}{{/paramType}}{{/refType}}{{paramName}}{{/isPathParam}}{{/parameterList}}{{#requestBody}}, {{#contentType}}{{> inlineSchema}}{{/contentType}} body{{/requestBody}}) returns error? {{=<% %>=}}{<%={{ }}=%>
+# {{operationDescription}}
+# + caller - Caller client object represents the endpoint
+# + req    - Req represents the message which came along over the network
+{{#parameterList}}# + {{paramName}} - {{paramDescription}}{{/parameterList}}
+{{#requestBody}}# + payload - Request body payload. {{/requestBody}}
+# + return - Error value if an error occurred, and return nil otherwise
+    resource function {{opMethod}} {{{opName}}}(http:Caller caller, http:Request req {{#parameterList}}{{#isQueryParam}}, {{#refType}}{{{refType}}}{{/refType}}{{^refType}}{{#paramType}}{{>inlineSchema}}? {{/paramType}}{{/refType}} {{paramName}}{{/isQueryParam}}{{/parameterList}}{{#requestBody}}, @http:Payload {}{{#contentType}}{{> inlineSchema}}{{/contentType}} payload{{/requestBody}}) returns error? {{=<% %>=}}{<%={{ }}=%>
 
     }
 {{/operationsList}}{{/pathList}}

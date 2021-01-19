@@ -22,9 +22,17 @@ package org.ballerinalang.openapi.typemodel;
  */
 public class BallerinaOpenApiParameter {
     private boolean isPathParam;
+    private boolean isQueryParam;
     private String paramName;
     private String refType;
     private BallerinaOpenApiSchema paramType;
+    private String paramDescription;
+
+    public String getParamDescription() {
+        return paramDescription; }
+
+    public void setParamDescription(String paramDescription) {
+        this.paramDescription = paramDescription; }
 
     public BallerinaOpenApiSchema getParamType() {
         return paramType;
@@ -56,5 +64,13 @@ public class BallerinaOpenApiParameter {
 
     public void setPathParam(boolean pathParam) {
         isPathParam = pathParam;
+    }
+
+    public boolean isQueryParam() {
+        return isQueryParam;
+    }
+
+    public void setQueryParam(boolean queryParam) {
+        isQueryParam = queryParam;
     }
 }

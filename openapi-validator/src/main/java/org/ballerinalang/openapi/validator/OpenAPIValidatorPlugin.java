@@ -47,8 +47,8 @@ import static org.ballerinalang.openapi.validator.Constants.USER_DIR;
  */
 @SupportedAnnotationPackages(value = {"ballerina/openapi"})
 public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
-    private CompilerContext compilerContext;
-    private String packageName;
+//    private CompilerContext compilerContext;
+//    private String packageName;
     private DiagnosticLog dLog;
 
     @Override
@@ -58,14 +58,14 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
     }
     @Override
     public void setCompilerContext(CompilerContext context) {
-        this.compilerContext = context;
+//        this.compilerContext = context;
     }
 
     @Override
     public void process(PackageNode packageNode) {
         // Collect endpoints throughout the package.
         // Assign package name for further process
-        packageName = packageNode.getPosition().lineRange().filePath();
+//        packageName = packageNode.getPosition().lineRange().filePath();
 
     }
     @Override
