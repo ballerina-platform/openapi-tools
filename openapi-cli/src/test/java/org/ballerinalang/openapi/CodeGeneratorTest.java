@@ -47,7 +47,7 @@ public class CodeGeneratorTest {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Test Ballerina skeleton generation")
-    public void generateSkeleton() throws BallerinaOpenApiException {
+    public void generateSkeleton() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
@@ -73,7 +73,7 @@ public class CodeGeneratorTest {
     }
 
     @Test(description = "Test Ballerina client generation")
-    public void generateClient() throws BallerinaOpenApiException {
+    public void generateClient() {
         final String clientName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
@@ -97,7 +97,7 @@ public class CodeGeneratorTest {
     }
 
     @Test(description = "Test Ballerina client generation with request body")
-    public void generateClientwithRequestBody() throws BallerinaOpenApiException {
+    public void generateClientwithRequestBody() {
         final String clientName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("openapi-client-rb.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
@@ -122,7 +122,7 @@ public class CodeGeneratorTest {
     }
 
     @Test(description = "Test Ballerina skeleton generation")
-    public void generateSkeletonForRequestbody() throws BallerinaOpenApiException {
+    public void generateSkeletonForRequestbody() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("requestBody.yaml").toString();;
         CodeGenerator generator = new CodeGenerator();
@@ -169,7 +169,7 @@ public class CodeGeneratorTest {
                     + yamlFile + " " + e.getMessage());
         }
     }
-    
+
     @Test
     public void escapeIdentifierTest() {
         Assert.assertEquals(TypeExtractorUtil.escapeIdentifier("abc"), "abc");
@@ -182,7 +182,7 @@ public class CodeGeneratorTest {
 //        Assert.assertEquals(TypeExtractorUtil.escapeIdentifier
 //        ("listPets resource_!$:[;"), "'listPets\\ resource_\\!\\$\\:\\[\\;");
     }
-    
+
     @Test
     public void escapeTypeTest() {
         Assert.assertEquals(TypeExtractorUtil.escapeType("abc"), "abc");
@@ -200,14 +200,15 @@ public class CodeGeneratorTest {
         return expectedServiceContent;
     }
 
-    private void deleteGeneratedFiles(String filename) throws BallerinaOpenApiException {
+    private void deleteGeneratedFiles(String filename) {
         try {
             Files.deleteIfExists(resourcePath.resolve(filename));
             Files.deleteIfExists(resourcePath.resolve("schema.bal"));
-        } catch (IOException  e) {
-            throw new BallerinaOpenApiException("No such file exists.");
+        } catch (IOException e) {
+            //Ignore the exception
         }
     }
+
     @DataProvider(name = "fileProvider")
     public Object[][] fileProvider() {
         return new Object[][]{
