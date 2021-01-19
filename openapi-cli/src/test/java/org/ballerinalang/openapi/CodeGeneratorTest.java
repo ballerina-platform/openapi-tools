@@ -24,7 +24,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,7 +49,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina skeleton generation")
     public void generateSkeleton() {
         final String serviceName = "openapipetstore";
-        String definitionPath = RES_DIR + File.separator + "petstore.yaml";
+        String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
 
         try {
@@ -63,20 +62,20 @@ public class CodeGeneratorTest {
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
 
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
-                deleteGeneratedFiles("openapipetstore-service.bal");
             } else {
                 Assert.fail("Service was not generated");
             }
         } catch (IOException | BallerinaOpenApiException e) {
-            deleteGeneratedFiles("openapipetstore-service.bal");
             Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-service.bal");
         }
     }
 
     @Test(description = "Test Ballerina client generation")
     public void generateClient() {
         final String clientName = "openapipetstore";
-        String definitionPath = RES_DIR + File.separator + "petstore.yaml";
+        String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generateClient.bal");
@@ -87,19 +86,45 @@ public class CodeGeneratorTest {
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
                 expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedClient.contains(expectedClientContent));
-                deleteGeneratedFiles("openapipetstore-client.bal");
             } else {
                 Assert.fail("Client was not generated");
             }
         } catch (IOException | BallerinaOpenApiException e) {
-            Assert.fail("Error while generating the service. " + e.getMessage());
+            Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-client.bal");
+        }
+    }
+
+    @Test(description = "Test Ballerina client generation with request body")
+    public void generateClientwithRequestBody() {
+        final String clientName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("openapi-client-rb.yaml").toString();
+        CodeGenerator generator = new CodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile,
+                    "generate_client_requestbody.bal");
+            generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(), filter);
+
+            if (Files.exists(resourcePath.resolve("openapipetstore-client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore-client.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+            } else {
+                Assert.fail("Client was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException e) {
+            Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-client.bal");
         }
     }
 
     @Test(description = "Test Ballerina skeleton generation")
     public void generateSkeletonForRequestbody() {
         final String serviceName = "openapipetstore";
-        String definitionPath = RES_DIR + File.separator + "requestBody.yaml";
+        String definitionPath = RES_DIR.resolve("requestBody.yaml").toString();;
         CodeGenerator generator = new CodeGenerator();
 
         try {
@@ -112,13 +137,13 @@ public class CodeGeneratorTest {
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
 
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
-                deleteGeneratedFiles("openapipetstore-service.bal");
             } else {
                 Assert.fail("Service was not generated");
             }
         } catch (IOException | BallerinaOpenApiException e) {
-            deleteGeneratedFiles("openapipetstore-service.bal");
             Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-service.bal");
         }
     }
 
@@ -144,7 +169,7 @@ public class CodeGeneratorTest {
                     + yamlFile + " " + e.getMessage());
         }
     }
-    
+
     @Test
     public void escapeIdentifierTest() {
         Assert.assertEquals(TypeExtractorUtil.escapeIdentifier("abc"), "abc");
@@ -157,7 +182,7 @@ public class CodeGeneratorTest {
 //        Assert.assertEquals(TypeExtractorUtil.escapeIdentifier
 //        ("listPets resource_!$:[;"), "'listPets\\ resource_\\!\\$\\:\\[\\;");
     }
-    
+
     @Test
     public void escapeTypeTest() {
         Assert.assertEquals(TypeExtractorUtil.escapeType("abc"), "abc");
@@ -176,11 +201,14 @@ public class CodeGeneratorTest {
     }
 
     private void deleteGeneratedFiles(String filename) {
-        File serviceFile = new File(resourcePath.resolve(filename).toString());
-        File schemaFile = new File(resourcePath.resolve("schema.bal").toString());
-        serviceFile.delete();
-        schemaFile.delete();
+        try {
+            Files.deleteIfExists(resourcePath.resolve(filename));
+            Files.deleteIfExists(resourcePath.resolve("schema.bal"));
+        } catch (IOException e) {
+            //Ignore the exception
+        }
     }
+
     @DataProvider(name = "fileProvider")
     public Object[][] fileProvider() {
         return new Object[][]{

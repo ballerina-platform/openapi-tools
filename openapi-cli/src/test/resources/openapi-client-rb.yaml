@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: refComponent
+  description: refComponent
+  version: 1.0.0
+servers:
+  - url: 'https'
+paths:
+  /requestBody:
+    post:
+      summary: Creates a new user.
+      responses:
+        200:
+          description: OK
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - userName
+      properties:
+        userName:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
