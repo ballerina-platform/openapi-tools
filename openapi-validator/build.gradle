@@ -42,6 +42,8 @@ dependencies {
     }
     implementation "org.ballerinalang:ballerina-lang"
     implementation "org.ballerinalang:ballerina-tools-api"
+    implementation "org.ballerinalang:ballerina-parser"
+    implementation "org.ballerinalang:ballerina-cli"
     testImplementation "org.testng:testng"
 
     balTools("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {

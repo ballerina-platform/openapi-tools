@@ -4,7 +4,6 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.FieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
-import io.ballerina.compiler.api.symbols.SimpleTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
@@ -12,7 +11,6 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.projects.Project;
-import io.ballerina.tools.text.LinePosition;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -50,7 +48,7 @@ public class TypeSymbolToJsonValidatorUtil {
             List<ValidationError> validationError = validateRecordType((RecordTypeSymbol) typeSymbol, syntaxTree,
                     semanticModel, properties);
             validationErrorList.addAll(validationError);
-        } else if (typeSymbol instanceof SimpleTypeSymbol) {
+        } else if (typeSymbol instanceof TypeSymbol) {
             paramName= "simpleParam";
             if (typeSymbol.name().equals(convertOpenAPITypeToBallerina(schema.getType()))) {
                 // type mismatch
@@ -66,9 +64,11 @@ public class TypeSymbolToJsonValidatorUtil {
             } else if ((((ArraySchema) schema).getItems() instanceof ObjectSchema) && (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
                 TypeSymbol recordType = null;
                 isExitType = true;
-                Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
-                        LinePosition.from(((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange().startLine().line(),
-                                ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange().startLine().offset()));
+//                Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
+//                        LinePosition.from(((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange().startLine().line(),
+//                                ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange().startLine().offset()));
+                Optional<TypeSymbol> symbol = semanticModel
+                        .type(((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange());
                 if (symbol != null && symbol.isPresent()) {
                     recordType = ((TypeDefinitionSymbol) symbol.get()).typeDescriptor();
                 }
@@ -146,9 +146,10 @@ public class TypeSymbolToJsonValidatorUtil {
                         // Handle the nested record type
                         TypeSymbol refRecordType = null;
                         List<ValidationError> nestedValidationError;
-                        Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
-                                LinePosition.from(fieldSymbol.location().lineRange().startLine().line(),
-                                        fieldSymbol.location().lineRange().startLine().offset()));
+//                        Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
+//                                LinePosition.from(fieldSymbol.location().lineRange().startLine().line(),
+//                                        fieldSymbol.location().lineRange().startLine().offset()));
+                        Optional<TypeSymbol> symbol = semanticModel.type(fieldSymbol.location().lineRange());
                         fieldSymbol.typeDescriptor();
                         if (symbol != null && symbol.isPresent()) {
                             Symbol symbol1 = symbol.get();
