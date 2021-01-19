@@ -63,13 +63,13 @@ public class CodeGeneratorTest {
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
 
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
-                deleteGeneratedFiles("openapipetstore-service.bal");
             } else {
                 Assert.fail("Service was not generated");
             }
         } catch (IOException | BallerinaOpenApiException e) {
-            deleteGeneratedFiles("openapipetstore-service.bal");
             Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-service.bal");
         }
     }
 
@@ -87,12 +87,12 @@ public class CodeGeneratorTest {
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
                 expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedClient.contains(expectedClientContent));
-                deleteGeneratedFiles("openapipetstore-client.bal");
             } else {
                 Assert.fail("Client was not generated");
             }
         } catch (IOException | BallerinaOpenApiException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
             deleteGeneratedFiles("openapipetstore-client.bal");
         }
     }
@@ -112,12 +112,12 @@ public class CodeGeneratorTest {
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
                 expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedClient.contains(expectedClientContent));
-                deleteGeneratedFiles("openapipetstore-client.bal");
             } else {
                 Assert.fail("Client was not generated");
             }
         } catch (IOException | BallerinaOpenApiException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
             deleteGeneratedFiles("openapipetstore-client.bal");
         }
     }
@@ -138,13 +138,13 @@ public class CodeGeneratorTest {
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
 
                 Assert.assertTrue(generatedService.contains(expectedServiceContent));
-                deleteGeneratedFiles("openapipetstore-service.bal");
             } else {
                 Assert.fail("Service was not generated");
             }
         } catch (IOException | BallerinaOpenApiException e) {
-            deleteGeneratedFiles("openapipetstore-service.bal");
             Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-service.bal");
         }
     }
 
