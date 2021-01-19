@@ -91,7 +91,7 @@ public class SyntaxTreeToJsonValidatorUtil {
 //        ModulePartNode modulePartNode = syntaxTree.rootNode();
 //        for (Node node : modulePartNode.members()) {
 //            SyntaxKind syntaxKind = node.kind();
-//            System.out.println(syntaxKind);
+//
 //        }
 //                ---------------------------------------------------
 
