@@ -92,7 +92,33 @@ public class CodeGeneratorTest {
                 Assert.fail("Client was not generated");
             }
         } catch (IOException | BallerinaOpenApiException e) {
-            Assert.fail("Error while generating the service. " + e.getMessage());
+            Assert.fail("Error while generating the client. " + e.getMessage());
+            deleteGeneratedFiles("openapipetstore-client.bal");
+        }
+    }
+
+    @Test(description = "Test Ballerina client generation with request body")
+    public void generateClientwithRequestBody() {
+        final String clientName = "openapipetstore";
+        String definitionPath = RES_DIR + File.separator + "openapi-client-rb.yaml";
+        CodeGenerator generator = new CodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile,
+                    "generate_client_requestbody.bal");
+            generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(), filter);
+
+            if (Files.exists(resourcePath.resolve("openapipetstore-client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore-client.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+                deleteGeneratedFiles("openapipetstore-client.bal");
+            } else {
+                Assert.fail("Client was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException e) {
+            Assert.fail("Error while generating the client. " + e.getMessage());
+            deleteGeneratedFiles("openapipetstore-client.bal");
         }
     }
 
