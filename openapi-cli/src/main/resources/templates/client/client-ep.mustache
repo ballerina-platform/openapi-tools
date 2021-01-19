@@ -26,7 +26,7 @@ public client class {{cut info.title " "}}Client {
         var response = ep->{{lower .}}({{../../../key}}, message = request);{{/equals}}{{/equals}}
         var response = ep->{{lower .}}({{../../../key}}, request);{{/equals}}
         if (response is http:Response) {
-            return response;
+            return <http:Response> response;
         }
         return <error> response;
     }
@@ -42,7 +42,7 @@ public client class {{cut info.title " "}}Client {
         var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}}, request);{{/equals}}{{/equals}}{{/equals}}
 
         if (response is http:Response) {
-            return response;
+            return <http:Response> response;
         }
         return <error> response;
     }
@@ -62,7 +62,7 @@ public client class {{cut info.title " "}}Client {
         var response = {{{operationId}}}Ep->{{lower key}}({{../../key}}, request);{{/equals}}{{/equals}}{{/equals}}
 
         if (response is http:Response) {
-            return response;
+            return <http:Response> response;
         }
         return <error> response;
     }

@@ -24,7 +24,7 @@ public client class openapipetstoreClient {
         var response = listPetsEp->get("/pets", message = request);
 
         if (response is http:Response) {
-            return response;
+            return <http:Response> response;
         }
         return <error> response;
     }
@@ -37,7 +37,7 @@ public client class openapipetstoreClient {
         var response = resource1Ep->post("/pets", request);
 
         if (response is http:Response) {
-            return response;
+            return <http:Response> response;
         }
         return <error> response;
     }
@@ -50,7 +50,7 @@ public client class openapipetstoreClient {
         var response = showPetByIdEp->get(string `/pets/${petId}`, message = request);
 
         if (response is http:Response) {
-            return response;
+            return <http:Response> response;
         }
         return <error> response;
     }
