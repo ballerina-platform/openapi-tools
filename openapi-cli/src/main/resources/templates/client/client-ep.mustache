@@ -10,46 +10,61 @@ public client class {{cut info.title " "}}Client {
     public {{cut info.title " "}}ClientConfig config;
 
     public function __init({{cut info.title " "}}ClientConfig config) {
-        http:Client httpEp = new(config.serviceUrl, {auth: config.clientConfig.auth, cache: config.clientConfig.cache});
+        http:Client httpEp = checkpanic new(config.serviceUrl, {auth: config.clientConfig.auth, cache:
+        config.clientConfig.cache});
         self.clientEp = httpEp;
         self.config = config;
     }
 {{#paths}}{{#value}}{{#operations}}{{#value}}{{#equals key "multi"}}{{#if methods}}{{#methods}}
-    public remote function {{lower .}}{{{operationId}}}({{#pathParameters}}{{>pathParams}}{{#unless @last}}, {{/unless}}{{/pathParameters}}) returns http:Response | error {
+    remote function {{lower .}}{{{operationId}}}({{#pathParameters}}{{>pathParams}}{{#unless @last}}, {{/unless}}{{/pathParameters}}) returns http:Response | error {
         http:Client ep = self.clientEp;
         http:Request request = new;
 
         // TODO: Update the request as needed
-    {{#equals . "GET"}}return check ep->{{lower .}}("{{../../../key}}", message = request);{{else}}{{#equals . "HEAD"}}
-        return check ep->{{lower .}}({{../../../key}}, message = request);{{else}}{{#equals . "OPTIONS"}}
-        return check ep->{{lower .}}({{../../../key}}, message = request);{{/equals}}{{/equals}}
-        return check ep->{{lower .}}({{../../../key}}, request);{{/equals}}
+    {{#equals . "GET"}}var response = ep->{{lower .}}("{{../../../key}}", message = request);{{else}}{{#equals . "HEAD"}}
+        var response = ep->{{lower .}}({{../../../key}}, message = request);{{else}}{{#equals . "OPTIONS"}}
+        var response = ep->{{lower .}}({{../../../key}}, message = request);{{/equals}}{{/equals}}
+        var response = ep->{{lower .}}({{../../../key}}, request);{{/equals}}
+        if (response is http:Response) {
+            return response;
+        }
+        return <error> response;
     }
     {{/methods}}{{else}}{{#allMethods}}
-    public remote function {{lower .}}{{{operationId}}}({{#pathParameters}}{{>pathParams}}{{#unless @last}}, {{/unless}}{{/pathParameters}}) returns http:Response | error {
+    remote function {{lower .}}{{{operationId}}}({{#pathParameters}}{{>pathParams}}{{#unless @last}}, {{/unless}}{{/pathParameters}}) returns http:Response | error {
         http:Client ep = self.clientEp;
         http:Request request = new;
 
         // TODO: Update the request as needed{{#equals key "GET"}}
-        return check {{{operationId}}}Ep->{{lower .}}({{../../../key}}, message = request);{{else}}{{#equals key "HEAD"}}
-        return check {{{operationId}}}Ep->{{lower .}}({{../../../key}}, message = request);{{else}}{{#equals key "OPTIONS"}}
-        return check {{{operationId}}}Ep->{{lower .}}({{../../../key}}, message = request);{{else}}
-        return check {{{operationId}}}Ep->{{lower .}}({{../../../key}}, request);{{/equals}}{{/equals}}{{/equals}}
+        var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}}, message = request);{{else}}{{#equals key "HEAD"}}
+        var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}}, message = request);{{else}}{{#equals key "OPTIONS"}}
+        var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}}, message = request);{{else}}
+        var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}}, request);{{/equals}}{{/equals}}{{/equals}}
+
+        if (response is http:Response) {
+            return response;
+        }
+        return <error> response;
     }
     {{/allMethods}}{{/if}}{{else}}
-    public remote function {{{operationId}}}({{#requestBody}}{{>reqBody}}{{/requestBody}}{{#if requestBody}}{{#if pathParameters}}, {{/if}}{{/if}}{{#pathParameters}}{{>pathParams}}{{#unless @last}}, {{/unless}}{{/pathParameters}}) returns http:Response | error {
+    remote function {{{operationId}}}({{#requestBody}}{{>reqBody}}{{/requestBody}}{{#if requestBody}}{{#if pathParameters}}, {{/if}}{{/if}}{{#pathParameters}}{{>pathParams}}{{#unless @last}}, {{/unless}}{{/pathParameters}}) returns http:Response | error {
         http:Client {{{operationId}}}Ep = self.clientEp;
         http:Request request = new;{{#requestBody}}{{#equals requestBody.selectedMedia.mediaType "application/json"}}
-        json {{{operationId}}}JsonBody = check json.constructFrom({{{operationId}}}Body);
+        json {{{operationId}}}JsonBody = check {{{operationId}}}Body.cloneWithType(json);
         request.setPayload({{{operationId}}}JsonBody);{{else}}
         {{^requestBody.selectedMedia.schema.type}}{{#if requestBody.selectedMedia.schema.properties}}{{#requestBody}}{{#selectedMedia}}{{#schema}}{{#properties}}
         request.setPayload({{key}});{{/properties}}{{/schema}}{{/selectedMedia}}{{/requestBody}}{{/if}}{{/requestBody.selectedMedia.schema.type}}{{/equals}}{{/requestBody}}
 
         // TODO: Update the request as needed{{#equals key "GET"}}
-        return check {{{operationId}}}Ep->{{lower key}}({{../../key}}, message = request);{{else}}{{#equals key "HEAD"}}
-        return check {{{operationId}}}Ep->{{lower key}}({{../../key}}, message = request);{{else}}{{#equals key "OPTIONS"}}
-        return check {{{operationId}}}Ep->{{lower key}}({{../../key}}, message = request);{{else}}
-        return check {{{operationId}}}Ep->{{lower key}}({{../../key}}, request);{{/equals}}{{/equals}}{{/equals}}
+        var response = {{{operationId}}}Ep->{{lower key}}({{../../key}}, message = request);{{else}}{{#equals key "HEAD"}}
+        var response = {{{operationId}}}Ep->{{lower key}}({{../../key}}, message = request);{{else}}{{#equals key "OPTIONS"}}
+        var response = {{{operationId}}}Ep->{{lower key}}({{../../key}}, message = request);{{else}}
+        var response = {{{operationId}}}Ep->{{lower key}}({{../../key}}, request);{{/equals}}{{/equals}}{{/equals}}
+
+        if (response is http:Response) {
+            return response;
+        }
+        return <error> response;
     }
     {{/equals}}{{/value}}{{/operations}}{{/value}}{{/paths}}
 };
