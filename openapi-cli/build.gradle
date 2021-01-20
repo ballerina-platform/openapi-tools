@@ -37,11 +37,6 @@ dependencies {
         exclude group: "org.slf4j", module: "slf4j-ext"
         exclude group: "javax.validation", module: "validation-api"
     }
-//    implementation ("io.swagger.parser.v3:swagger-parser") {
-//        exclude group: "io.swagger", module: "swagger-compat-spec-parser"
-//        exclude group: "org.slf4j", module: "slf4j-ext"
-//        exclude group: "javax.validation", module: "validation-api"
-//    }
 
     implementation "javax.ws.rs:javax.ws.rs-api"
     implementation "com.github.jknack:handlebars"

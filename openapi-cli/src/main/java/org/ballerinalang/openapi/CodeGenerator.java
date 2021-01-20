@@ -183,12 +183,6 @@ public class CodeGenerator {
         }
         OpenAPI api = parseResult.getOpenAPI();
 
-//        OpenAPI api = new OpenAPIV3Parser().read(definitionPath);
-//
-//        if (api == null) {
-//            throw new BallerinaOpenApiException("Couldn't read the definition from file: " + definitionPath);
-//        }
-
         if (api.getInfo() == null) {
             throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
                     definitionPath);
