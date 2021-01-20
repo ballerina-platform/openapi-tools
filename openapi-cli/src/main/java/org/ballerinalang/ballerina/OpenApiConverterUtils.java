@@ -237,14 +237,12 @@ public class OpenApiConverterUtils {
                 String openApiSource = openApiServiceMapper.generateOpenApiString(openapi);
                 SwaggerConverter converter = new SwaggerConverter();
                 SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(openApiSource, true);
-//                SwaggerParseResult result = new OpenAPIParser().readContents(openApiSource, null, null);
 
                 if (result.getMessages().size() > 0) {
                     throw new OpenApiConverterException("Please check the mentioned service is available " +
                             "in the ballerina source, or there content is valid");
                 }
                 return Yaml.pretty(converter.convert(result).getOpenAPI());
-//                return Yaml.pretty(result.getOpenAPI());
             }
         }
         return serviceName;

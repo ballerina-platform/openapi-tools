@@ -19,7 +19,6 @@ description = 'Ballerina - OpenAPI Ballerina Generator'
 
 configurations {
     jbalTools
-//    externalJars
 }
 
 dependencies {
@@ -28,40 +27,6 @@ dependencies {
     }
     implementation project(':openapi-validator')
     implementation project(':openapi-cli')
-
-
-//    externalJars (group: 'io.swagger.parser.v3', name: 'swagger-parser-core', version: '2.0.24') {
-//        transitive = false
-//    }
-//
-//    externalJars (group: 'io.swagger.parser.v3', name: 'swagger-parser-v3', version: '2.0.24') {
-//        transitive = false
-//    }
-//
-//    externalJars (group: 'io.swagger.core.v3', name: 'swagger-models', version: '2.1.6') {
-//        transitive = false
-//    }
-//
-//    externalJars (group: 'io.swagger.core.v3', name: 'swagger-core', version: '2.1.6') {
-//        transitive = false
-//    }
-
-////    externalJars (group: 'io.swagger.parser.v3', name: 'swagger-parser', version: '2.0.24') {
-////        transitive = false
-////    }
-//
-//    //ballerina-to-openapi
-////    externalJars (group: 'io.swagger', name: 'swagger-models', version: '1.5.3') {
-////        transitive = false
-////    }
-////
-////    externalJars (group: 'io.swagger', name: 'swagger-annotations', version: '1.5.3') {
-////        transitive = false
-////    }
-////
-////    externalJars (group: 'io.swagger', name: 'swagger-core', version: '1.5.3') {
-////        transitive = false
-////    }
 }
 
 clean {
@@ -188,12 +153,6 @@ task ballerinaBuild {
             from targetOpenApiCliJar
             into file("$artifactLibParent/libs")
         }
-
-        //copy external jar
-//        copy {
-//            from configurations.externalJars
-//            into file("$artifactLibParent/libs")
-//        }
 
         // Doc creation and packing
         exec {
