@@ -21,7 +21,7 @@ package org.ballerinalang.ballerina.service;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
-import io.ballerina.compiler.api.symbols.FieldSymbol;
+import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
@@ -371,8 +371,8 @@ public class OpenApiResourceMapper {
             // Handle record type request body
             if (typeRef.typeDescriptor() instanceof RecordTypeSymbol) {
                 RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeRef.typeDescriptor();
-                List<FieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
-                for (FieldSymbol field: rfields) {
+                List<RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
+                for (RecordFieldSymbol field: rfields) {
                     String type = field.typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
                     Property property = getOpenApiProperty(type);
                     if (type.equals(Constants.TYPE_REFERENCE) && property instanceof RefProperty) {
@@ -401,8 +401,8 @@ public class OpenApiResourceMapper {
         }
     }
 
-    private void setArrayProperty(RequiredParameterNode queryParam, Map<String, Model> definitions, FieldSymbol field,
-                                  ArrayProperty property) {
+    private void setArrayProperty(RequiredParameterNode queryParam, Map<String, Model> definitions,
+                                  RecordFieldSymbol field, ArrayProperty property) {
 
         TypeSymbol symbol = field.typeDescriptor();
         int arrayDimensions = 0;

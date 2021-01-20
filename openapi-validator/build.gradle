@@ -35,7 +35,8 @@ configurations {
 }
 
 dependencies {
-    implementation ("io.swagger.parser.v3:swagger-parser") {
+    implementation "io.swagger.core.v3:swagger-models"
+    implementation ("io.swagger.parser.v3:swagger-parser-v2-converter")  {
         exclude group: "io.swagger", module: "swagger-compat-spec-parser"
         exclude group: "org.slf4j", module: "slf4j-ext"
         exclude group: "javax.validation", module: "validation-api"
@@ -77,7 +78,15 @@ shadowJar {
     dependencies {
         include(dependency('commons-io:commons-io'))
         include(dependency('javax.validation:validation-api'))
+        include(dependency('io.swagger:swagger-core'))
+        include(dependency('io.swagger:swagger-models'))
+        include(dependency('io.swagger:swagger-parser'))
+        include(dependency('io.swagger.core.v3:swagger-core'))
+        include(dependency('io.swagger.core.v3:swagger-models'))
         include(dependency('io.swagger.parser.v3:swagger-parser'))
+        include(dependency('io.swagger.parser.v3:swagger-parser-core'))
+        include(dependency('io.swagger.parser.v3:swagger-parser-v2-converter'))
+        include(dependency('io.swagger.parser.v3:swagger-parser-v3'))
         include(dependency('com.google.code.gson:gson'))
         exclude('META-INF/*.SF')
         exclude('META-INF/*.DSA')
