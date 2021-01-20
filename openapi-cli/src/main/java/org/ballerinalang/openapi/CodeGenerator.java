@@ -27,7 +27,6 @@ import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.model.BallerinaOpenApi;
@@ -176,15 +175,17 @@ public class CodeGenerator {
     public List<GenSrcFile> generateBalSource(GenType type, String definitionPath,
                                               String reldefinitionPath, String serviceName, Filter filter)
             throws IOException, BallerinaOpenApiException {
-        String openAPIFileContent = Files.readString(Paths.get(definitionPath));
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
-        if (parseResult.getMessages().size() > 0) {
-            throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
-        }
+//        String openAPIFileContent = Files.readString(Paths.get(definitionPath));
+//        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
+//        if (parseResult.getMessages().size() > 0) {
+//            throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
+//        }
+//        OpenAPI api = parseResult.getOpenAPI();
 
-        OpenAPI api = parseResult.getOpenAPI();
+        OpenAPI api = new OpenAPIV3Parser().read(definitionPath);
+
         if (api == null) {
-            throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
+            throw new BallerinaOpenApiException("Couldn't read the definition from file: " + definitionPath);
         }
 
         if (api.getInfo() == null) {
