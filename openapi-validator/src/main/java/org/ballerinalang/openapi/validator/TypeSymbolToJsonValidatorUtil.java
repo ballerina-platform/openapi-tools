@@ -1,11 +1,11 @@
 package org.ballerinalang.openapi.validator;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.impl.symbols.BallerinaRecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
-import io.ballerina.compiler.api.symbols.FieldSymbol;
 import io.ballerina.compiler.api.symbols.FloatTypeSymbol;
 import io.ballerina.compiler.api.symbols.IntTypeSymbol;
+import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.StringTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
@@ -29,13 +29,10 @@ import java.util.Optional;
  * This util use for comparing the TypeSymbol with given openAPI schema.
  */
 public class TypeSymbolToJsonValidatorUtil {
-//    private Project project;
 
-//    public void init(Project project) {
-//        this.project = project;
-//    }
     public static List<ValidationError> validate(Schema<?> schema, TypeSymbol typeSymbol,
-                                                 SyntaxTree syntaxTree, SemanticModel semanticModel)
+                                                 SyntaxTree syntaxTree, SemanticModel semanticModel,
+                                                 String componentName )
             throws OpenApiValidatorException {
         String paramName = "";
         String schemaType = "";
@@ -43,14 +40,18 @@ public class TypeSymbolToJsonValidatorUtil {
         List<ValidationError> validationErrorList = new ArrayList<>();
         boolean isExitType = false;
         //Check given type is record or not
-        if (typeSymbol instanceof BallerinaRecordTypeSymbol) {
+        if (typeSymbol instanceof RecordTypeSymbol || typeSymbol instanceof TypeReferenceTypeSymbol) {
             Map<String, Schema> properties = schema.getProperties();
             if (schema instanceof ObjectSchema) {
                 properties = ((ObjectSchema) schema).getProperties();
             }
+            if (typeSymbol instanceof TypeReferenceTypeSymbol) {
+                typeSymbol = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
+
+            }
             isExitType = true;
-            List<ValidationError> validationError = validateRecordType((BallerinaRecordTypeSymbol) typeSymbol, syntaxTree,
-                    semanticModel, properties);
+            List<ValidationError> validationError = validateRecordType((RecordTypeSymbol) typeSymbol, syntaxTree,
+                    semanticModel, properties, componentName);
             validationErrorList.addAll(validationError);
         } else if (typeSymbol instanceof StringTypeSymbol || typeSymbol instanceof IntTypeSymbol
                 || typeSymbol instanceof FloatTypeSymbol) {
@@ -82,7 +83,7 @@ public class TypeSymbolToJsonValidatorUtil {
                     recordType = ((TypeDefinitionSymbol) symbol.get()).typeDescriptor();
                 }
                 List<ValidationError> recordValidationError = validate(((ArraySchema) schema).getItems(),
-                        recordType, syntaxTree, semanticModel);
+                        recordType, syntaxTree, semanticModel, componentName);
                 validationErrorList.addAll(recordValidationError);
 
             } else if ((((ArraySchema) schema).getItems() instanceof ArraySchema) &&
@@ -111,7 +112,7 @@ public class TypeSymbolToJsonValidatorUtil {
                         }
                     }
                     List<ValidationError> arrayErrors = validate(traversSchemaNestedArray,
-                            traverseNestedArray, syntaxTree, semanticModel);
+                            traverseNestedArray, syntaxTree, semanticModel, componentName);
 
                     validationErrorList.addAll(arrayErrors);
                 }
@@ -133,13 +134,13 @@ public class TypeSymbolToJsonValidatorUtil {
         return validationErrorList;
     }
 
-    private static List<ValidationError> validateRecordType(BallerinaRecordTypeSymbol typeSymbol, SyntaxTree syntaxTree,
+    private static List<ValidationError> validateRecordType(RecordTypeSymbol typeSymbol, SyntaxTree syntaxTree,
                                                             SemanticModel semanticModel,
-                                                            Map<String, Schema> properties)
+                                                            Map<String, Schema> properties, String componentName)
             throws OpenApiValidatorException {
         List<ValidationError> validationErrorList = new ArrayList<>();
-        List<FieldSymbol> fieldSymbolList = typeSymbol.fieldDescriptors();
-        for (FieldSymbol fieldSymbol : fieldSymbolList) {
+        List<RecordFieldSymbol> fieldSymbolList = typeSymbol.fieldDescriptors();
+        for (RecordFieldSymbol fieldSymbol : fieldSymbolList) {
             boolean isExist = false;
             for (Map.Entry<String, Schema> entry : properties.entrySet()) {
                 if (fieldSymbol.name().equals(entry.getKey())) {
@@ -182,13 +183,13 @@ public class TypeSymbolToJsonValidatorUtil {
                             }
                         }
                         nestedValidationError = validate(entry.getValue(), refRecordType, syntaxTree,
-                                semanticModel);
+                                semanticModel, componentName);
                         validationErrorList.addAll(nestedValidationError);
 
                     } else if ((fieldSymbol.typeDescriptor() instanceof ArrayTypeSymbol) &&
                             ((entry.getValue().getType()).equals("array"))) {
                         // Handle array type mismatching.
-                        validateArrayType(validationErrorList, fieldSymbol, entry, syntaxTree, semanticModel);
+                        validateArrayType(validationErrorList, fieldSymbol, entry, syntaxTree, semanticModel, componentName);
                     }
                 }
             }
@@ -206,9 +207,9 @@ public class TypeSymbolToJsonValidatorUtil {
         return validationErrorList;
     }
 
-    private static void validateArrayType(List<ValidationError> validationErrorList, FieldSymbol fieldSymbol,
+    private static void validateArrayType(List<ValidationError> validationErrorList, RecordFieldSymbol fieldSymbol,
                                       Map.Entry<String, Schema> entry, SyntaxTree syntaxTree,
-                                          SemanticModel semanticModel)
+                                          SemanticModel semanticModel, String componetName)
             throws OpenApiValidatorException {
 
         ArrayTypeSymbol arraySymbol = null;
@@ -253,7 +254,7 @@ public class TypeSymbolToJsonValidatorUtil {
                     TypeReferenceTypeSymbol recordRefSymbol =
                             (TypeReferenceTypeSymbol) traverseNestedArraySymbol.memberTypeDescriptor();
                     List<ValidationError> recordItemErrors = TypeSymbolToJsonValidatorUtil.validate(recordSchema,
-                            recordRefSymbol.typeDescriptor(), syntaxTree, semanticModel);
+                            recordRefSymbol.typeDescriptor(), syntaxTree, semanticModel, componetName);
                     validationErrorList.addAll(recordItemErrors);
 
                 } else if (!traverseNestedArraySymbol.memberTypeDescriptor().typeKind().getName().equals(

@@ -182,7 +182,11 @@ public class BaseTests {
                                         Symbol symbol2 = symbol.orElseThrow();
                                         if (symbol2 instanceof BallerinaVariableSymbol) {
                                             BallerinaVariableSymbol variable = (BallerinaVariableSymbol) symbol2;
-                                            paramType[0] = (TypeSymbol) variable.typeDescriptor();
+                                            if (variable.typeDescriptor() instanceof TypeReferenceTypeSymbol) {
+                                                TypeReferenceTypeSymbol typeSymbol =
+                                                        (TypeReferenceTypeSymbol) variable.typeDescriptor();
+                                                paramType[0] = typeSymbol;
+                                            }
                                         }
 
 //                                        symbol.ifPresent(symbol1 -> {
