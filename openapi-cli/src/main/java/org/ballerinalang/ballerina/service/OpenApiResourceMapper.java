@@ -371,15 +371,15 @@ public class OpenApiResourceMapper {
             // Handle record type request body
             if (typeRef.typeDescriptor() instanceof RecordTypeSymbol) {
                 RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeRef.typeDescriptor();
-                List<RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
-                for (RecordFieldSymbol field: rfields) {
-                    String type = field.typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
+                Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
+                for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
+                    String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
                     Property property = getOpenApiProperty(type);
                     if (type.equals(Constants.TYPE_REFERENCE) && property instanceof RefProperty) {
                         RefModel refModel = new RefModel();
-                        refModel.setReference(field.typeDescriptor().name().trim());
+                        refModel.setReference(field.getValue().typeDescriptor().name().trim());
                         ((RefProperty) property).set$ref(refModel.get$ref());
-                        Optional<TypeSymbol> recordSymbol = semanticModel.type(field.location().lineRange());
+                        Optional<TypeSymbol> recordSymbol = semanticModel.type(field.getValue().location().lineRange());
                         TypeSymbol recordVariable =  recordSymbol.orElseThrow();
                         if (recordVariable.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
                             TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
@@ -387,9 +387,9 @@ public class OpenApiResourceMapper {
                         }
                     }
                     if (property instanceof ArrayProperty) {
-                        setArrayProperty(queryParam, definitions, field, (ArrayProperty) property);
+                        setArrayProperty(queryParam, definitions, field.getValue(), (ArrayProperty) property);
                     }
-                    messageModel.property(field.name(), property);
+                    messageModel.property(field.getKey(), property);
                 }
             }
         }
