@@ -143,7 +143,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
-//            deleteGeneratedFiles("openapipetstore-service.bal");
+            deleteGeneratedFiles("openapipetstore-service.bal");
         }
     }
 
