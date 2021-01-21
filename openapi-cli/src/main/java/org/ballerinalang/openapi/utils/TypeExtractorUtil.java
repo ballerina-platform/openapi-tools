@@ -144,7 +144,7 @@ public class TypeExtractorUtil {
 
             operation.setOpMethod(opMethod.toString().toLowerCase(Locale.ENGLISH));
             if (opObject.getDescription() != null) {
-                operation.setOperationDescription(opObject.getDescription());
+                operation.setOperationDescription(opObject.getDescription() + ".");
             }
             List<String> operationTags = opObject.getTags();
             String operationId = opObject.getOperationId();
