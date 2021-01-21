@@ -9,10 +9,10 @@ service {{servers.0.basePath}} on {{#servers}}ep{{@index}}{{#unless @last}}, {{/
 {{#pathList}}{{#operationsList}}
 # {{operationDescription}}
 # + caller - Caller client object represents the endpoint
-# + req    - Req represents the message which came along over the network
+# + req    - Req represents the message, which came over the network
 {{#parameterList}}# + {{paramName}} - {{paramDescription}}{{/parameterList}}
-{{#requestBody}}# + payload - Request body payload. {{/requestBody}}
-# + return - Error value if an error occurred, and return nil otherwise
+{{#requestBody}}# + payload - Request body payload {{/requestBody}}
+# + return - Error value if an error occurred or return `()` otherwise
     resource function {{opMethod}} {{{opName}}}(http:Caller caller, http:Request req {{#parameterList}}{{#isQueryParam}}, {{#refType}}{{{refType}}}{{/refType}}{{^refType}}{{#paramType}}{{>inlineSchema}}? {{/paramType}}{{/refType}} {{paramName}}{{/isQueryParam}}{{/parameterList}}{{#requestBody}}, @http:Payload {}{{#contentType}}{{> inlineSchema}}{{/contentType}} payload{{/requestBody}}) returns error? {{=<% %>=}}{<%={{ }}=%>
 
     }
