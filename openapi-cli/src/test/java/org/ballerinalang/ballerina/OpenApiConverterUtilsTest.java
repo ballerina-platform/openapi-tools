@@ -108,15 +108,11 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec with json payload")
     public void testJsonPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("json_payload_service.bal");
-//        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
-//        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
-
         try {
-            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), "jason_payload" +
-                    ".yaml");
+            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), "json_payload.yaml");
             OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
             if (Files.exists(this.tempDir.resolve("payloadV-openapi.yaml"))) {
-                String generatedYaml = getStringFromGivenBalFile(this.tempDir, "openapipetstore-client.bal");
+                String generatedYaml = getStringFromGivenBalFile(this.tempDir, "payloadV-openapi.yaml");
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
                 expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
@@ -146,8 +142,23 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec with record payload")
     public void testRecordPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("record_payload_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
-        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+        try {
+            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), "record_payload" +
+                    ".yaml");
+            OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
+            if (Files.exists(this.tempDir.resolve("payloadV-openapi.yaml"))) {
+                String generatedYaml = getStringFromGivenBalFile(this.tempDir, "payloadV-openapi.yaml");
+                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+            } else {
+                Assert.fail("Yaml was not generated");
+            }
+        } catch (IOException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-service.bal");
+        }
     }
 
     @Test(description = "Generate OpenAPI spec with nested record payload")
@@ -160,8 +171,23 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec with nested payload")
     public void testNested2RecordPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("nested2Record_payload_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
-        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+        try {
+            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), "nested_2record" +
+                    ".yaml");
+            OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
+            if (Files.exists(this.tempDir.resolve("payloadV-openapi.yaml"))) {
+                String generatedYaml = getStringFromGivenBalFile(this.tempDir, "payloadV-openapi.yaml");
+                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+            } else {
+                Assert.fail("Yaml was not generated");
+            }
+        } catch (IOException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-service.bal");
+        }
     }
 
     @Test(description = "Generate OpenAPI spec with array field payload")
