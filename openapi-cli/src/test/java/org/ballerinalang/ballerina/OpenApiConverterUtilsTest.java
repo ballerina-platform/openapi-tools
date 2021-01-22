@@ -30,6 +30,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Ballerina conversion to OpenApi will test in this class.
@@ -106,8 +108,27 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec with json payload")
     public void testJsonPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("json_payload_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
-        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+//        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
+//        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+
+        try {
+            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), "jason_payload" +
+                    ".yaml");
+            OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
+            if (Files.exists(this.tempDir.resolve("payloadV-openapi.yaml"))) {
+                String generatedYaml = getStringFromGivenBalFile(this.tempDir, "openapipetstore-client.bal");
+                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+            } else {
+                Assert.fail("Yaml was not generated");
+            }
+        } catch (IOException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-service.bal");
+        }
+
     }
     @Test(description = "Generate OpenAPI spec with xml payload")
     public void testXmlPayLoad() throws IOException, OpenApiConverterException {
@@ -169,6 +190,23 @@ public class OpenApiConverterUtilsTest {
         Path ballerinaFilePath = RES_DIR.resolve("mime_with_recordpayload_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+    }
+
+    private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
+
+        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
+        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
+        expectedServiceLines.close();
+        return expectedServiceContent;
+    }
+
+    private void deleteGeneratedFiles(String filename) {
+        try {
+            Files.deleteIfExists(this.tempDir.resolve(filename));
+            Files.deleteIfExists(this.tempDir.resolve("schema.bal"));
+        } catch (IOException e) {
+            //Ignore the exception
+        }
     }
 
 
