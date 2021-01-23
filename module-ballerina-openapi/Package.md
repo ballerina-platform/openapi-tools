@@ -4,12 +4,12 @@ The OpenAPI tools provide the following capabilities.
  
  1. Generate the Ballerina service or client code for a given OpenAPI definition. 
  2. Export the OpenAPI definition of a Ballerina service.
- 3. Validate service implementation of a given OpenAPI Contract.
+ 3. Validate the service implementation of a given OpenAPI contract.
     
 The `openapi` command in Ballerina is used for OpenAPI to Ballerina and Ballerina to OpenAPI code generations. 
 Code generation from OpenAPI to Ballerina can produce `ballerina service stubs` and `ballerina client stubs`.
 The OpenAPI compiler plugin will allow you to validate a service implementation against an OpenAPI contract during
- compile time. 
+ the compile time.
 This plugin ensures that the implementation of a service does not deviate from its OpenAPI contract.   
 
 ### OpenAPI to Ballerina
@@ -25,24 +25,24 @@ bal openapi -i <openapi-contract-path>
 ```
 Generates both the Ballerina service and Ballerina client stub for a given OpenAPI file.
 
-This `-i <openapi-contract-path>` parameter of the command is mandatory. As an input, it will take the path to the
- OpenAPI contract file (i.e., `my-api.yaml` or `my-api.json`).
+This `-i <openapi-contract-path>` parameter of the command is mandatory. It will get the path to the
+ OpenAPI contract file (i.e., `my-api.yaml` or `my-api.json`) as an input.
 
 The `--service-name`  is an optional parameter, which allows you to change the generated service name.
 
 You can give the specific tags and operations that you need to document as services without documenting all the operations using these optional `--tags` and `--operations` commands.
 
-`(-o|--output)` is an optional parameter. You can use this to give the output path for the generated files.
+The `(-o|--output)` is an optional parameter. You can use this to give the output path of the generated files.
 If not, it will take the execution path as the output path.
 
 ##### Modes
-If you want to generate a Service only, you can set the mode as `service` in the OpenAPI tool.
+If you want to generate a service only, you can set the mode as `service` in the OpenAPI tool.
 
 ```bash
 bal openapi -i <openapi-contract-path> --mode service [(-o|--output) output file path]
 ```
 
-If you want to generate a Client only, you can set the mode as  `client` in the OpenAPI tool. 
+If you want to generate a client only, you can set the mode as  `client` in the OpenAPI tool. 
 This client can be used in client applications to call the service defined in the OpenAPI file.
 
 ```bash
@@ -69,7 +69,8 @@ If you need to document an OpenAPI contract for only one given service, then use
     bal openapi -i hello.yaml
 ```
 
-This will generate a Ballerina service and client stub for the `hello.yaml` OpenAPI contract named `hello-service` and client named `hello-client`. The above command can be run from anywhere on the execution path. 
+This will generate a Ballerina service and client stub for the `hello.yaml` OpenAPI contract named `hello-service
+` and client named `hello-client`. The above command can be run from within anywhere on the execution path. 
 It is not mandatory to run it from inside the Ballerina project.
 
 Output:
@@ -99,7 +100,7 @@ the service and the OpenAPI Contract and validates both against a pre-defined se
 If any of the rules fail, the plugin will give the result as one or more compilation errors.
 
 ### Annotation for Validator Plugin 
-The `@openapi:ServiceInfo` annotation is used to bind the service with an OpenAPI Contract. You need to add 
+The `@openapi:ServiceInfo` annotation is used to bind the service with an OpenAPI contract. You need to add 
 this annotation to the service file with the required values for enabling the validations.  
 The following is an example of the annotation usage.
 ```ballerina
