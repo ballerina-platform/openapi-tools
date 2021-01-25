@@ -108,8 +108,8 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec with json payload")
     public void testJsonPayLoad() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("json_payload_service.bal");
+        //Compare generated yaml file with expected yaml content
         compareWithGeneratedFile(ballerinaFilePath, "json_payload.yaml");
-
     }
     @Test(description = "Generate OpenAPI spec with xml payload")
     public void testXmlPayLoad() throws IOException, OpenApiConverterException {
@@ -120,8 +120,7 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec with mulitple payload")
     public void testMultiplePayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_payload_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
-        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV-openapi.yaml")));
+        compareWithGeneratedFile(ballerinaFilePath, "multiple_payload.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with record payload")
@@ -132,25 +131,25 @@ public class OpenApiConverterUtilsTest {
     }
 
     @Test(description = "Generate OpenAPI spec with nested record payload")
-    public void testNestedRecordPayLoad() throws IOException, OpenApiConverterException {
+    public void testNestedRecordPayLoad() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("nestedRecord_payload_service.bal");
         compareWithGeneratedFile(ballerinaFilePath, "nested_record.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with nested payload")
-    public void testNested2RecordPayLoad() throws IOException, OpenApiConverterException {
+    public void testNested2RecordPayLoad() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("nested2Record_payload_service.bal");
         compareWithGeneratedFile(ballerinaFilePath, "nested_2record.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with array field payload")
-    public void testArrayNestedRecordPayLoad() throws IOException, OpenApiConverterException {
+    public void testArrayNestedRecordPayLoad() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("arrayRecord_payload_service.bal");
         compareWithGeneratedFile(ballerinaFilePath, "nested_array.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with array field payload")
-    public void testArrayNestedRecordFiledPayLoad() throws IOException, OpenApiConverterException {
+    public void testArrayNestedRecordFiledPayLoad() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("arrayRecordfield_payload_service.bal");
         compareWithGeneratedFile(ballerinaFilePath, "record_field_array.yaml");
     }
@@ -163,7 +162,7 @@ public class OpenApiConverterUtilsTest {
     }
 
     @Test(description = "Generate OpenAPI spec for build project")
-    public void testMIMERecordFiledPayLoad() throws IOException, OpenApiConverterException {
+    public void testMIMERecordFiledPayLoad() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("mime_with_recordpayload_service.bal");
         compareWithGeneratedFile(ballerinaFilePath, "mime_with_record_payload.yaml");
     }
