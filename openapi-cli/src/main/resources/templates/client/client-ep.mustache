@@ -9,7 +9,7 @@ public client class {{cut info.title " "}}Client {
     public http:Client clientEp;
     public {{cut info.title " "}}ClientConfig config;
 
-    public function __init({{cut info.title " "}}ClientConfig config) {
+    public function init({{cut info.title " "}}ClientConfig config) {
         http:Client httpEp = checkpanic new(config.serviceUrl, {auth: config.clientConfig.auth, cache:
             config.clientConfig.cache});
         self.clientEp = httpEp;
@@ -67,4 +67,4 @@ public client class {{cut info.title " "}}Client {
         return <error>response;
     }
     {{/equals}}{{/value}}{{/operations}}{{/value}}{{/paths}}
-};
+}
