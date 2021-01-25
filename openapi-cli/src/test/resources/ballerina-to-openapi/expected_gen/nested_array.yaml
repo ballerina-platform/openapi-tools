@@ -39,5 +39,11 @@ components:
         name:
           type: string
         tag:
-          type: string
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: string
 x-original-swagger-version: "2.0"

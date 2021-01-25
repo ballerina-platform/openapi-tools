@@ -12,7 +12,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Dog'
+              $ref: '#/components/schemas/Pet'
         required: false
       responses:
         "200":
@@ -23,13 +23,6 @@ paths:
       x-codegen-request-body-name: payload
 components:
   schemas:
-    Dog:
-      type: object
-      properties:
-        perant:
-          $ref: '#/components/schemas/Pet'
-        bark:
-          type: boolean
     Pet:
       type: object
       properties:

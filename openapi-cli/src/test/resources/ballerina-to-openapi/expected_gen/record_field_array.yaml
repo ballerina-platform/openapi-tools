@@ -26,8 +26,12 @@ components:
     Dog:
       type: object
       properties:
-        perant:
-          $ref: '#/components/schemas/Pet'
+        sibling:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
         bark:
           type: boolean
     Pet:
