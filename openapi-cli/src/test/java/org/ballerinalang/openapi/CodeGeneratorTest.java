@@ -78,7 +78,7 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
         try {
-            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generateClient.bal");
+            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generate_client.bal");
             generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(), filter);
 
             if (Files.exists(resourcePath.resolve("openapipetstore-client.bal"))) {

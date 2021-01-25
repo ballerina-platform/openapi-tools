@@ -109,7 +109,8 @@ public class OpenApiConverterUtilsTest {
     public void testJsonPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("json_payload_service.bal");
         try {
-            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), "json_payload.yaml");
+            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
+                    "json_payload.yaml");
             OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
             if (Files.exists(this.tempDir.resolve("payloadV-openapi.yaml"))) {
                 String generatedYaml = getStringFromGivenBalFile(this.tempDir, "payloadV-openapi.yaml");
