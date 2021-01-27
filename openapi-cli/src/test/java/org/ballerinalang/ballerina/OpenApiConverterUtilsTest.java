@@ -167,8 +167,25 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "mime_with_record_payload.yaml");
     }
 
-    private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
+    @AfterMethod
+    public void cleanUp() {
+        deleteDirectory(this.tempDir);
+    }
 
+    private void deleteDirectory(Path path) {
+        try {
+            if (Files.exists(path)) {
+                Files.walk(path)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            }
+        } catch (IOException e) {
+            //ignore
+        }
+    }
+
+    private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
         expectedServiceLines.close();
@@ -183,6 +200,7 @@ public class OpenApiConverterUtilsTest {
             //Ignore the exception
         }
     }
+
     private void compareWithGeneratedFile(Path ballerinaFilePath, String yamlFile) throws OpenApiConverterException {
 
         try {
@@ -200,24 +218,6 @@ public class OpenApiConverterUtilsTest {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore-service.bal");
-        }
-    }
-
-    @AfterMethod
-    public void cleanUp() {
-        deleteDirectory(this.tempDir);
-    }
-
-    private void deleteDirectory(Path path) {
-        try {
-            if (Files.exists(path)) {
-                Files.walk(path)
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            }
-        } catch (IOException e) {
-            //ignore
         }
     }
 }
