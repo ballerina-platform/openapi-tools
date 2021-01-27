@@ -69,6 +69,13 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
 
     }
     @Override
+    public List<Diagnostic> codeAnalyze(Project project) {
+//        List<Diagnostic> diagnostics = new ArrayList<>();
+//
+//
+//        return diagnostics;
+//    }
+    @Override
     public void process(ServiceNode serviceNode, List<AnnotationAttachmentNode> annotations) {
         AnnotationAttachmentNode annotation = null;
         List<String> tags = new ArrayList<>();

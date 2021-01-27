@@ -32,7 +32,7 @@ public class TypeSymbolToJsonValidatorUtil {
 
     public static List<ValidationError> validate(Schema<?> schema, TypeSymbol typeSymbol,
                                                  SyntaxTree syntaxTree, SemanticModel semanticModel,
-                                                 String componentName )
+                                                 String componentName)
             throws OpenApiValidatorException {
         String paramName = "";
         String schemaType = "";
@@ -139,31 +139,31 @@ public class TypeSymbolToJsonValidatorUtil {
                                                             Map<String, Schema> properties, String componentName)
             throws OpenApiValidatorException {
         List<ValidationError> validationErrorList = new ArrayList<>();
-        List<RecordFieldSymbol> fieldSymbolList = typeSymbol.fieldDescriptors();
-        for (RecordFieldSymbol fieldSymbol : fieldSymbolList) {
+        Map<String, RecordFieldSymbol> fieldSymbolList = typeSymbol.fieldDescriptors();
+        for (Map.Entry<String, RecordFieldSymbol> fieldSymbol : fieldSymbolList.entrySet()) {
             boolean isExist = false;
             for (Map.Entry<String, Schema> entry : properties.entrySet()) {
-                if (fieldSymbol.name().equals(entry.getKey())) {
+                if (fieldSymbol.getValue().name().equals(entry.getKey())) {
                     isExist = true;
-                    if (!fieldSymbol.typeDescriptor().typeKind().getName()
+                    if (!fieldSymbol.getValue().typeDescriptor().typeKind().getName()
                             .equals(TypeSymbolToJsonValidatorUtil.convertOpenAPITypeToBallerina(entry.getValue()
                                     .getType())) && (!(entry.getValue() instanceof ObjectSchema)) &&
-                            (!(fieldSymbol.typeDescriptor() instanceof ArrayTypeSymbol))) {
-                        TypeMismatch validationError = new TypeMismatch(fieldSymbol.name(),
+                            (!(fieldSymbol.getValue().typeDescriptor() instanceof ArrayTypeSymbol))) {
+                        TypeMismatch validationError = new TypeMismatch(fieldSymbol.getValue().name(),
                                 convertTypeToEnum(entry.getValue().getType()),
-                                convertTypeToEnum(fieldSymbol.typeDescriptor().typeKind().getName()),
-                                fieldSymbol.signature());
+                                convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
+                                fieldSymbol.getValue().signature());
                         validationErrorList.add(validationError);
-                    } else if ((entry.getValue() instanceof ObjectSchema) && (fieldSymbol.typeDescriptor() instanceof
-                            TypeReferenceTypeSymbol)) {
+                    } else if ((entry.getValue() instanceof ObjectSchema) && (fieldSymbol.getValue().typeDescriptor()
+                            instanceof TypeReferenceTypeSymbol)) {
                         // Handle the nested record type
                         TypeSymbol refRecordType = null;
                         List<ValidationError> nestedValidationError;
 //                        Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
 //                                LinePosition.from(fieldSymbol.location().lineRange().startLine().line(),
 //                                        fieldSymbol.location().lineRange().startLine().offset()));
-                        Optional<TypeSymbol> symbol = semanticModel.type(fieldSymbol.location().lineRange());
-                        fieldSymbol.typeDescriptor();
+                        Optional<TypeSymbol> symbol = semanticModel.type(fieldSymbol.getValue().location().lineRange());
+                        fieldSymbol.getValue().typeDescriptor();
                         if (symbol != null && symbol.isPresent()) {
                             Symbol symbol1 = symbol.get();
                             if (symbol1 instanceof TypeReferenceTypeSymbol) {
@@ -186,19 +186,20 @@ public class TypeSymbolToJsonValidatorUtil {
                                 semanticModel, componentName);
                         validationErrorList.addAll(nestedValidationError);
 
-                    } else if ((fieldSymbol.typeDescriptor() instanceof ArrayTypeSymbol) &&
+                    } else if ((fieldSymbol.getValue().typeDescriptor() instanceof ArrayTypeSymbol) &&
                             ((entry.getValue().getType()).equals("array"))) {
                         // Handle array type mismatching.
-                        validateArrayType(validationErrorList, fieldSymbol, entry, syntaxTree, semanticModel, componentName);
+                        validateArrayType(validationErrorList, fieldSymbol.getValue(), entry, syntaxTree, semanticModel,
+                                componentName);
                     }
                 }
             }
             // Handle missing record file against to schema
             if (!isExist) {
                 MissingFieldInJsonSchema validationError =
-                        new MissingFieldInJsonSchema(fieldSymbol.name(),
-                                convertTypeToEnum(fieldSymbol.typeDescriptor().typeKind().getName()),
-                                fieldSymbol.signature());
+                        new MissingFieldInJsonSchema(fieldSymbol.getValue().name(),
+                                convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
+                                fieldSymbol.getValue().signature());
                 validationErrorList.add(validationError);
             }
 

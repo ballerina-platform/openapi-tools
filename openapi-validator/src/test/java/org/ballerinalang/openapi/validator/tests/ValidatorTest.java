@@ -15,6 +15,9 @@
  */
 package org.ballerinalang.openapi.validator.tests;
 
+import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectException;
+import io.ballerina.projects.directory.ProjectLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.ResourceMethod;
@@ -45,7 +48,7 @@ public class ValidatorTest {
      */
     public static BLangPackage getBlangPackage(String fileName) throws UnsupportedEncodingException {
         BLangPackage bLangPackage = null; //to disable the function
-        Path sourceRoot = RES_DIR.resolve("project-based-tests/src");
+        Path sourceRoot = RES_DIR.resolve("project-based-tests/modules");
 //        Path sourceRoot = RES_DIR.resolve("project-based-tests");
 
         String balfile = sourceRoot.resolve(fileName).toString();
@@ -55,6 +58,17 @@ public class ValidatorTest {
         String filename = balFpath.toAbsolutePath().getFileName().toString();
 //        bLangPackage = OpenApiValidatorUtil.compileFile(programDir, filename);
         return bLangPackage;
+    }
+
+    public static Project getProject(Path servicePath) {
+        Project project = null;
+        // Load project instance for single ballerina file
+        try {
+            project = ProjectLoader.loadProject(servicePath);
+        } catch (ProjectException e) {
+            //ignore
+        }
+        return project;
     }
 
 

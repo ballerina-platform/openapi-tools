@@ -238,6 +238,7 @@ task buildProject {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+    options.compilerArgs += '-Xlint:-removal'
 }
 
 task codeCoverageReport(type: JacocoReport) {

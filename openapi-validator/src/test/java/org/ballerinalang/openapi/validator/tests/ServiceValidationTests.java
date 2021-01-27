@@ -15,6 +15,7 @@
  */
 package org.ballerinalang.openapi.validator.tests;
 
+import io.ballerina.projects.Project;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.openapi.validator.Filters;
@@ -35,9 +36,10 @@ import java.util.List;
  * Test for serviceValidation.
  */
 public class ServiceValidationTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/serviceValidator/")
+    private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/modules/serviceValidator/")
             .toAbsolutePath();
     private OpenAPI api;
+    private Project project;
     private BLangPackage bLangPackage;
     private BLangService extractBLangservice;
     private List<String> tag = new ArrayList<>();
@@ -48,16 +50,18 @@ public class ServiceValidationTests {
     private DiagnosticLog dLog;
     private Filters filters;
 
-    @Test(enabled = false, description = "test for undocumented Path in contract")
+
+    @Test(enabled = true, description = "test for undocumented Path in contract")
     public void testUndocumentedPath() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/valid/petstore.bal");
-        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        kind = DiagnosticSeverity.ERROR;
-//        dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/valid/petstore.bal");
-        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
-//        ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
+        project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/valid/petstore.bal"));
+        ServiceValidator.validateResourceFunctions(project, api);
+//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+//        kind = DiagnosticSeverity.ERROR;
+////        dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/valid/petstore.bal");
+//        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
+////        ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
     @Test(enabled = false, description = "test for undocumented Method in contract")
     public void testUndocumentedMethod() throws OpenApiValidatorException, UnsupportedEncodingException {
