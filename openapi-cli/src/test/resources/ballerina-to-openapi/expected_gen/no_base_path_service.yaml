@@ -1,0 +1,24 @@
+openapi: 3.0.1
+info:
+  title: _
+  version: 1.0.0
+servers:
+  - url: //localhost:9090/
+paths:
+  /hi:
+    post:
+      operationId: operation1_post_hi
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful
+          content:
+            application/json:
+              example: Ok
+components: {}
+x-original-swagger-version: "2.0"
