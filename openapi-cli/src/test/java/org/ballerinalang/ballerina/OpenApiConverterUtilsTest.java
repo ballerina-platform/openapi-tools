@@ -111,12 +111,14 @@ public class OpenApiConverterUtilsTest {
         //Compare generated yaml file with expected yaml content
         compareWithGeneratedFile(ballerinaFilePath, "json_payload.yaml");
     }
+
     @Test(description = "Generate OpenAPI spec with xml payload")
     public void testXmlPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("xml_payload_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty());
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadXml-openapi.yaml")));
     }
+
     @Test(description = "Generate OpenAPI spec with mulitple payload")
     public void testMultiplePayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_payload_service.bal");
