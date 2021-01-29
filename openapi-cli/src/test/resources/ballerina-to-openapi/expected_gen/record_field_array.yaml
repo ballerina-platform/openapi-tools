@@ -1,0 +1,47 @@
+openapi: 3.0.1
+info:
+  title: _payloadV
+  version: 1.0.0
+servers:
+  - url: //localhost:9090/payloadV
+paths:
+  /hi:
+    post:
+      operationId: operation1_post_hi
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dog'
+        required: false
+      responses:
+        "200":
+          description: Successful
+          content:
+            application/json:
+              example: Ok
+      x-codegen-request-body-name: payload
+components:
+  schemas:
+    Dog:
+      type: object
+      properties:
+        sibling:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
+        bark:
+          type: boolean
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        tag:
+          type: string
+x-original-swagger-version: "2.0"
