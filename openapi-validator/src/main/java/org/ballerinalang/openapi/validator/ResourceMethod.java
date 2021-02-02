@@ -15,13 +15,11 @@
  */
 package org.ballerinalang.openapi.validator;
 
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.tools.diagnostics.Location;
-import org.ballerinalang.model.tree.SimpleVariableNode;
-import org.wso2.ballerinalang.compiler.tree.BLangSimpleVariable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,7 +29,7 @@ public class ResourceMethod {
     private Location resourcePosition;
     private String method;
     private Location methodPosition;
-    private Map<String, BLangSimpleVariable> parameters;
+    private Map<String, Node> parameters;
     private String body;
 
     ResourceMethod() {
@@ -40,6 +38,16 @@ public class ResourceMethod {
         this.resourcePosition = null;
         this.parameters = new HashMap<>();
         this.body = null;
+    }
+
+    public Map<String, Node> getParameters() {
+
+        return parameters;
+    }
+
+    public void setParameters(Map<String, Node> parameters) {
+
+        this.parameters = parameters;
     }
 
     public Location getMethodPosition() {
@@ -58,31 +66,6 @@ public class ResourceMethod {
         return this.method;
     }
 
-    public void setParameters(List<? extends SimpleVariableNode> parameters) {
-        for (int i = 0; i < parameters.size(); i++) {
-            if (i > 1) {
-                SimpleVariableNode simpleVariableNode = parameters.get(i);
-                if (simpleVariableNode instanceof BLangSimpleVariable) {
-                    BLangSimpleVariable variable = (BLangSimpleVariable) simpleVariableNode;
-                    this.parameters.put(variable.getName().getValue(), variable);
-                }
-            }
-        }
-    }
-
-    public List<ResourceParameter> getParamNames() {
-        List<ResourceParameter> paramNames = new ArrayList<>();
-        for (Map.Entry<String, BLangSimpleVariable> entry : this.parameters.entrySet()) {
-            ResourceParameter resourceParameter = new ResourceParameter();
-            resourceParameter.setName(entry.getKey());
-            if (entry.getValue().type != null && entry.getValue().type.tsymbol != null) {
-                resourceParameter.setType(entry.getValue().type.tsymbol.name.getValue());
-            }
-            resourceParameter.setParameter(entry.getValue());
-            paramNames.add(resourceParameter);
-        }
-        return paramNames;
-    }
 
     public String getBody() {
         return body;
@@ -96,7 +79,7 @@ public class ResourceMethod {
         this.resourcePosition = position;
     }
 
-    public Location getResourcePosition() {
+    public Location getResourcePosition(NodeLocation location) {
         return resourcePosition;
     }
 

@@ -20,7 +20,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.openapi.validator.Filters;
 import org.ballerinalang.openapi.validator.OpenAPIPathSummary;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
-import org.ballerinalang.openapi.validator.ResourceWithOperationId;
+import org.ballerinalang.openapi.validator.ResourceWithOperation;
 import org.ballerinalang.openapi.validator.ServiceValidator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -50,7 +50,7 @@ public class OpenApiFilterTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         tags.add("pets");
         Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
-        openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
+        openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
         Assert.assertEquals(openAPIPathSummaries.get(0).getOperations().get("post").getOperationId(), "postPet");
         tags.clear();
@@ -62,7 +62,7 @@ public class OpenApiFilterTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         excludeTags.add("pets");
         Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
-        openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
+        openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
         Assert.assertEquals(openAPIPathSummaries.get(0).getOperations().get("get").getOperationId(), "listPets");
         excludeTags.clear();
@@ -74,7 +74,7 @@ public class OpenApiFilterTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         operations.add("listPets");
         Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
-        openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
+        openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 1);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
         Assert.assertEquals(openAPIPathSummaries.get(0).getOperations().get("get").getOperationId(), "listPets");
@@ -87,7 +87,7 @@ public class OpenApiFilterTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         excludeOperations.add("showUser");
         Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
-        openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
+        openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 3);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
         Assert.assertEquals(openAPIPathSummaries.get(0).getOperations().get("get").getOperationId(), "listPets");
@@ -103,7 +103,7 @@ public class OpenApiFilterTests {
         operations.add("postPet");
         operations.add("showUser");
         Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
-        openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
+        openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 1);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
         Assert.assertEquals(openAPIPathSummaries.get(0).getOperations().get("post").getOperationId(), "postPet");
@@ -120,7 +120,7 @@ public class OpenApiFilterTests {
         operations.add("postPets");
         operations.add("showUser");
         Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
-        openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
+        openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 2);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
         Assert.assertEquals(openAPIPathSummaries.get(0).getOperations().get("get").getOperationId(), "listPets");
@@ -137,7 +137,7 @@ public class OpenApiFilterTests {
         excludeOperations.add("postPet");
         excludeOperations.add("showUser");
         Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
-        openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
+        openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 2);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets/{petId}");
         Assert.assertEquals(openAPIPathSummaries.get(1).getPath(), "/user");
@@ -154,7 +154,7 @@ public class OpenApiFilterTests {
         excludeOperations.add("postPet");
         excludeOperations.add("showUser");
         Filters filter = new Filters(tags, excludeTags, operations, excludeOperations, DiagnosticSeverity.ERROR);
-        openAPIPathSummaries = ResourceWithOperationId.filterOpenapi(api, filter);
+        openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filter);
         Assert.assertEquals(openAPIPathSummaries.size(), 3);
         Assert.assertEquals(openAPIPathSummaries.get(0).getPath(), "/pets");
         excludeOperations.clear();

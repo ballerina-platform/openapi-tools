@@ -3,9 +3,10 @@ import ballerina/http;
 listener http:Listener ep0 = new(80, config = {host: "petstore.openapi.io"});
 listener http:Listener ep1 = new(443, config = {host: "petstore.swagger.io"});
 @openapi:ServiceInfo {
-    contract: "/hhh/jjj",
+    contract: "../../swagger/valid/petstore.yaml",
     tags: [],
-    operations: []
+    operations: [],
+    failOnErrors: false
 }
 service /v1 on ep0, ep1 {
 

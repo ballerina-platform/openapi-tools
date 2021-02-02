@@ -19,8 +19,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.ResourceMethod;
-import org.ballerinalang.openapi.validator.ResourceValidator;
-import org.ballerinalang.openapi.validator.ResourceWithOperationId;
 import org.ballerinalang.openapi.validator.ServiceValidator;
 import org.ballerinalang.openapi.validator.error.OpenapiServiceValidationError;
 import org.ballerinalang.openapi.validator.error.ResourceValidationError;
@@ -58,7 +56,7 @@ public class ResourceHandleVTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/valid/petstore.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        validationErrors = ResourceWithOperationId.checkOperationIsAvailable(api, extractBLangservice);
+//        validationErrors = ResourceWithOperation.checkOperationIsAvailable(api, extractBLangservice);
         Assert.assertTrue(validationErrors.isEmpty());
     }
 
@@ -69,7 +67,7 @@ public class ResourceHandleVTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/valid/petstore.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        validationErrors = ResourceWithOperationId.checkOperationIsAvailable(api, extractBLangservice);
+//        validationErrors = ResourceWithOperation.checkOperationIsAvailable(api, extractBLangservice);
         Assert.assertTrue(validationErrors.isEmpty());
     }
 
@@ -80,9 +78,9 @@ public class ResourceHandleVTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/valid/servicePetstore.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        serviceValidationErrors =
-                ResourceWithOperationId.checkServiceAvailable(ResourceWithOperationId.summarizeOpenAPI(api),
-                        extractBLangservice);
+//        serviceValidationErrors =
+//                ResourceWithOperation.checkServiceAvailable(ResourceWithOperation.summarizeOpenAPI(api),
+//                        extractBLangservice);
         Assert.assertTrue(serviceValidationErrors.isEmpty());
     }
 
@@ -92,9 +90,9 @@ public class ResourceHandleVTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/valid/petstoreFunctionNode.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "get");
+//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "get");
         operation = api.getPaths().get("/pets/{petId}").getGet();
-        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
+//        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.isEmpty());
     }
 
@@ -104,9 +102,9 @@ public class ResourceHandleVTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/valid/inline-record.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
+//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/user").getPost();
-        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
+//        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.isEmpty());
     }
 }

@@ -15,33 +15,31 @@
  */
 package org.ballerinalang.openapi.validator;
 
-import io.ballerina.tools.diagnostics.Location;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import org.ballerinalang.model.tree.AnnotationAttachmentNode;
-import org.ballerinalang.model.tree.FunctionNode;
-import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinalang.openapi.validator.error.OpenapiServiceValidationError;
 import org.ballerinalang.openapi.validator.error.ResourceValidationError;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangListConstructorExpr;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangLiteral;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
  * This for finding out the all the filtered operations are documented as services in the ballerina file and all the
  * ballerina services are documented in the contract yaml file.
  */
-public class ResourceWithOperationId {
+public class ResourceWithOperation {
     /**
      * Filter all the operations according to the given filters.
      * @param openApi       OpenApi Object
@@ -55,7 +53,7 @@ public class ResourceWithOperationId {
         boolean operationFilteringEnabled = filters.getOperation().size() > 0;
         boolean excludeTagsFilteringEnabled = filters.getExcludeTag().size() > 0;
         boolean excludeOperationFilteringEnable = filters.getExcludeOperation().size() > 0;
-        List<OpenAPIPathSummary> openAPIPathSummaries = ResourceWithOperationId.summarizeOpenAPI(openApi);
+        List<OpenAPIPathSummary> openAPIPathSummaries = ResourceWithOperation.summarizeOpenAPI(openApi);
         // Check based on the method and path filters
         Iterator<OpenAPIPathSummary> openAPIIter = openAPIPathSummaries.iterator();
         while (openAPIIter.hasNext()) {
@@ -192,233 +190,112 @@ public class ResourceWithOperationId {
     }
 
     /**
-     * Checking the available of resource function in openApi contract.
-     * @param openAPI           openApi contract object
-     * @param serviceNode       resource service node
-     * @return                  validation Error list with ResourceValidationError type
+     *
+     * @param openAPIPathSummaries
+     * @param resourcePathSummaries
+     * @return
      */
-    public static List<ResourceValidationError> checkOperationIsAvailable(OpenAPI openAPI, ServiceNode serviceNode) {
-        List<ResourceValidationError> resourceValidationErrorList = new ArrayList<>();
-        List<ResourcePathSummary> resourcePathSummaries = summarizeResources(serviceNode);
-        List<OpenAPIPathSummary> openAPISummaries = summarizeOpenAPI(openAPI);
-        // Check given path with its methods has documented in OpenApi contract
-        for (ResourcePathSummary resourcePathSummary: resourcePathSummaries) {
-            boolean isExit = false;
-            String resourcePath = resourcePathSummary.getPath();
-            Map<String, ResourceMethod> resourcePathMethods = resourcePathSummary.getMethods();
-            for (OpenAPIPathSummary openAPIPathSummary : openAPISummaries) {
-                String servicePath = openAPIPathSummary.getPath();
-                List<String> servicePathOperations = openAPIPathSummary.getAvailableOperations();
-                if (resourcePath.equals(servicePath)) {
-                    isExit = true;
-                    if ((!servicePathOperations.isEmpty()) && (!resourcePathMethods.isEmpty())) {
-                        for (Map.Entry<String, ResourceMethod> entry : resourcePathMethods.entrySet()) {
-                            boolean isMethodExit = false;
-                            for (String operation : servicePathOperations) {
-                                if (entry.getKey().equals(operation)) {
-                                    isMethodExit = true;
-                                    break;
-                                }
+    public static List<OpenapiServiceValidationError> checkOperationsHasFunctions(List<OpenAPIPathSummary> openAPIPathSummaries,
+                                                                                  Map<String, ResourcePathSummary> resourcePathSummaries) {
+        List<OpenapiServiceValidationError> operationsValidationErrors = new ArrayList<>();
+        for (OpenAPIPathSummary openAPIPathSummary: openAPIPathSummaries) {
+            boolean isPathExit = false;
+            //----call me when it is over
+            for (Map.Entry<String, ResourcePathSummary> resourcePathSummary: resourcePathSummaries.entrySet()) {
+                if (openAPIPathSummary.getPath().equals(resourcePathSummary.getKey())) {
+                    isPathExit = true;
+                    for (String method : openAPIPathSummary.getAvailableOperations()) {
+                        boolean isMethodExit = false;
+                        for(Map.Entry<String, ResourceMethod> resourceMethod:
+                                resourcePathSummary.getValue().getMethods().entrySet()) {
+                            if (method.equals(resourceMethod.getKey())) {
+                                isMethodExit = true;
+                                break;
                             }
-                            if (!isMethodExit) {
-                                ResourceValidationError resourceValidationError =
-                                        new ResourceValidationError(entry.getValue().getMethodPosition(),
-                                                entry.getKey(), resourcePath);
-                                resourceValidationErrorList.add(resourceValidationError);
-                            }
+                        }
+                        if (!isMethodExit) {
+                            OpenapiServiceValidationError openapiServiceValidationError =
+                                    new OpenapiServiceValidationError(method, openAPIPathSummary.getPath(),
+                                            openAPIPathSummary.getOperations().get(method).getTags(),
+                                            openAPIPathSummary);
+                            operationsValidationErrors.add(openapiServiceValidationError);
                         }
                     }
                     break;
                 }
             }
-            if (!isExit) {
-                ResourceValidationError resourceValidationError =
-                        new ResourceValidationError(resourcePathSummary.getPathPosition(), null, resourcePath);
-                resourceValidationErrorList.add(resourceValidationError);
+            if (!isPathExit) {
+                OpenapiServiceValidationError openapiServiceValidationError = new OpenapiServiceValidationError(null,
+                        openAPIPathSummary.getPath(), null, openAPIPathSummary);
+                operationsValidationErrors.add(openapiServiceValidationError);
             }
         }
-        return resourceValidationErrorList;
+        return operationsValidationErrors;
     }
 
-    /**
-     * Checking the documented services are available at the resource file.
-     * @param openAPISummaries  openApi contract object
-     * @param serviceNode       resource file service
-     * @return                  validation error list type with OpenAPIServiceValidationError
-     */
-    public static List<OpenapiServiceValidationError> checkServiceAvailable(List<OpenAPIPathSummary> openAPISummaries,
-                                                                            ServiceNode serviceNode) {
-        List<OpenapiServiceValidationError> validationErrors = new ArrayList<>();
-        List<ResourcePathSummary> resourcePathSummaries = summarizeResources(serviceNode);
-        // check the contract paths are available at the resource
-        for (OpenAPIPathSummary openAPIPathSummary: openAPISummaries) {
-            boolean isServiceExit = false;
-            for (ResourcePathSummary resourcePathSummary: resourcePathSummaries) {
-                if (openAPIPathSummary.getPath().equals(resourcePathSummary.getPath())) {
-                    isServiceExit = true;
-                    //  check whether documented operations are available at resource file
-                    if (!openAPIPathSummary.getAvailableOperations().isEmpty()) {
-                        for (String operation: openAPIPathSummary.getAvailableOperations()) {
-                            boolean isOperationExit = false;
-                            if (!(resourcePathSummary.getMethods().isEmpty())) {
-                                for (Map.Entry<String, ResourceMethod> method:
-                                        resourcePathSummary.getMethods().entrySet()) {
-                                    if (operation.equals(method.getKey())) {
-                                        isOperationExit = true;
-                                        break;
-                                    }
-                                }
-                                if (!isOperationExit) {
-                                    OpenapiServiceValidationError openapiServiceValidationError =
-                                            new OpenapiServiceValidationError(serviceNode.getPosition(), operation,
-                                                    openAPIPathSummary.getPath(),
-                                                    openAPIPathSummary.getOperations().get(operation).getTags(),
-                                                    openAPIPathSummary);
-                                    validationErrors.add(openapiServiceValidationError);
-                                }
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-            if (!isServiceExit) {
-                OpenapiServiceValidationError openapiServiceValidationError =
-                        new OpenapiServiceValidationError(serviceNode.getPosition(),
-                                null, openAPIPathSummary.getPath(), null, openAPIPathSummary);
-                validationErrors.add(openapiServiceValidationError);
-            }
-        }
-        return validationErrors;
+    public List<ResourceValidationError> checkResourceHasOperation(List<OpenAPIPathSummary> openAPIPathSummaries,
+                                                                   Map<String, ResourcePathSummary> resourcePathSummaries) {
+        List<ResourceValidationError> resourceValidationErrors = new ArrayList<>();
+        return resourceValidationErrors;
     }
 
     /**
      * Extract the details to be validated from the resource.
-     * @param serviceNode         service node
+     * @param functions         documented functions
      * @return List of ResourcePathSummary
      */
-    public static List<ResourcePathSummary>  summarizeResources(ServiceNode serviceNode) {
+    public static Map<String, ResourcePathSummary>  summarizeResources(List<FunctionDefinitionNode> functions) {
         // Iterate resources available in a service and extract details to be validated.
-        List<ResourcePathSummary> resourceSummaryList = new ArrayList<>();
-        for (FunctionNode resource : serviceNode.getResources()) {
-            AnnotationAttachmentNode annotation = null;
-            // Find the "ResourceConfig" annotation.
-            for (AnnotationAttachmentNode ann : resource.getAnnotationAttachments()) {
-                if (Constants.HTTP.equals(ann.getPackageAlias().getValue())
-                        && Constants.RESOURCE_CONFIG.equals(ann.getAnnotationName().getValue())) {
-                    annotation = ann;
+        Map<String, ResourcePathSummary> resourceSummaryList = new HashMap<>();
+        for (FunctionDefinitionNode functionDefinitionNode: functions) {
+            NodeList<Node> nodes = functionDefinitionNode.relativeResourcePath();
+            String functionMethod = functionDefinitionNode.functionName().text().trim();
+            Map<String, Node> parameterNodeMap = new HashMap<>();
+
+            String functionPath = "/";
+            Iterator<Node> pathNodeIter = nodes.iterator();
+            while (pathNodeIter.hasNext()) {
+                Node next = pathNodeIter.next();
+                String node = next.toString().trim();
+                if (next instanceof ResourcePathParameterNode) {
+                    ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) next;
+                    String paramName = pathParameterNode.paramName().text();
+                    node = "{" + paramName + "}";
+                    parameterNodeMap.put(paramName, next);
                 }
+                functionPath = functionPath  + node;
             }
-            if (annotation != null) {
-                if (annotation.getExpression() instanceof BLangRecordLiteral) {
-                    BLangRecordLiteral recordLiteral = (BLangRecordLiteral) annotation.getExpression();
-                    String methodPath = null;
-                    Location pathPos = null;
-                    ResourceMethod resourceMethod = new ResourceMethod();
-                    String methodName = null;
-                    Location methodPos = null;
-                    String body = null;
-                    for (BLangRecordLiteral.RecordField field : recordLiteral.getFields()) {
-                        BLangExpression keyExpr;
-                        BLangExpression valueExpr;
-                        if (field.isKeyValueField()) {
-                            BLangRecordLiteral.BLangRecordKeyValueField keyValue =
-                                    (BLangRecordLiteral.BLangRecordKeyValueField) field;
-                            keyExpr = keyValue.getKey();
-                            valueExpr = keyValue.getValue();
-                        } else {
-                            BLangRecordLiteral.BLangRecordVarNameField varNameField =
-                                    (BLangRecordLiteral.BLangRecordVarNameField) field;
-                            keyExpr = varNameField;
-                            valueExpr = varNameField;
-                        }
-                        if (keyExpr instanceof BLangSimpleVarRef) {
-                            BLangSimpleVarRef path = (BLangSimpleVarRef) keyExpr;
-                            String contractAttr = path.getVariableName().getValue();
-                            // Extract the path and methods of the resource.
-                            if (contractAttr.equals(Constants.PATH)) {
-                                if (valueExpr instanceof BLangLiteral) {
-                                    BLangLiteral value = (BLangLiteral) valueExpr;
-                                    if (value.getValue() instanceof String) {
-                                        methodPath = (String) value.getValue();
-                                        pathPos = path.getPosition();
-                                    }
-                                }
-                            } else if (contractAttr.equals(Constants.METHODS) ||
-                                    contractAttr.equals(Constants.METHOD)) {
-
-                                if (valueExpr instanceof BLangListConstructorExpr) {
-                                    BLangListConstructorExpr methodSet = (BLangListConstructorExpr) valueExpr;
-                                    for (BLangExpression methodExpr : methodSet.exprs) {
-                                        if (methodExpr instanceof BLangLiteral) {
-                                            BLangLiteral method = (BLangLiteral) methodExpr;
-                                            methodName = ((String) method.value).toLowerCase(Locale.ENGLISH);
-                                            methodPos = path.getPosition();
-
-                                        }
-                                    }
-                                }
-                            } else if (contractAttr.equals(Constants.BODY)) {
-                                if (valueExpr instanceof BLangLiteral) {
-                                    BLangLiteral value = (BLangLiteral) valueExpr;
-                                    if (value.getValue() instanceof String) {
-                                        body = (String) value.getValue();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    Boolean isPathExit = false;
-                    if (!resourceSummaryList.isEmpty()) {
-                        for (ResourcePathSummary resourcePathSummary1 : resourceSummaryList) {
-                            isPathExit = false;
-                            if (methodPath != null) {
-                                if (methodPath.equals(resourcePathSummary1.getPath())) {
-                                    setValuesResourceMethods(resource, resourceMethod, methodName, methodPos, body,
-                                            resourcePathSummary1);
-                                    isPathExit = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (!isPathExit) {
-
-                        ResourcePathSummary resourcePathSummary = new ResourcePathSummary();
-                        resourcePathSummary.setPath(methodPath);
-                        resourcePathSummary.setPathPosition(pathPos);
-                        setValuesResourceMethods(resource, resourceMethod, methodName, methodPos, body,
-                                resourcePathSummary);
-                        // Add the resource summary to the resource summary list.
-                        resourceSummaryList.add(resourcePathSummary);
-                    }
-                }
+            if (resourceSummaryList.containsKey(functionPath)) {
+                setParametersToMethod(functionDefinitionNode, functionMethod, parameterNodeMap,
+                        resourceSummaryList.get(functionPath));
+            } else {
+                ResourcePathSummary resourcePathSummary = new ResourcePathSummary();
+                setParametersToMethod(functionDefinitionNode, functionMethod, parameterNodeMap, resourcePathSummary);
+                resourceSummaryList.put(functionPath, resourcePathSummary);
             }
         }
         return resourceSummaryList;
     }
 
-    private static void setValuesResourceMethods(FunctionNode resource, ResourceMethod resourceMethod,
-                                                 String methodName, Location methodPos,
-                                                 String body, ResourcePathSummary resourcePathSummary) {
+    private static void setParametersToMethod(FunctionDefinitionNode functionDefinitionNode, String functionMethod,
+                                              Map<String, Node> parameterNodeMap,
+                                              ResourcePathSummary resourcePathSummary2) {
 
-        if (body != null) {
-            resourceMethod.setBody(body);
+        FunctionSignatureNode functionSignatureNode = functionDefinitionNode.functionSignature();
+        SeparatedNodeList<ParameterNode> parameters = functionSignatureNode.parameters();
+        Iterator<ParameterNode> parameterIterator = parameters.iterator();
+        while (parameterIterator.hasNext()) {
+            ParameterNode param = parameterIterator.next();
+            if (!param.toString().contains("http:Caller") && !param.toString().contains("http:Request")) {
+                String paramName = param.toString().trim();
+                parameterNodeMap.put(paramName, param);
+            }
         }
-        // Extract and add the resource parameters
-        if (resource.getParameters().size() > 0) {
-            resourceMethod.setParameters(resource.getParameters());
-        }
-        if (methodName != null) {
-            resourceMethod.setMethod(methodName);
-        }
-        if (methodPos != null) {
-            resourceMethod.setMethodPosition(methodPos);
-        }
-        if (resource.getPosition() != null) {
-            resourceMethod.setResourcePosition(resource.getPosition());
-        }
-        resourcePathSummary.addMethod(methodName, resourceMethod);
+        ResourceMethod resourceMethod = new ResourceMethod();
+        resourceMethod.setMethod(functionMethod);
+        resourceMethod.setParameters(parameterNodeMap);
+        resourceMethod.getResourcePosition(functionDefinitionNode.location());
+        resourcePathSummary2.addMethod(functionMethod, resourceMethod);
     }
 
     /**
@@ -426,7 +303,7 @@ public class ResourceWithOperationId {
      * @param contract                openAPI contract
      * @return List of summarized OpenAPIPathSummary
      */
-    public static List<OpenAPIPathSummary>   summarizeOpenAPI(OpenAPI contract) {
+    public static List<OpenAPIPathSummary> summarizeOpenAPI(OpenAPI contract) {
         List<OpenAPIPathSummary> openAPISummaries = new ArrayList<>();
         io.swagger.v3.oas.models.Paths paths = contract.getPaths();
         for (Map.Entry pathItem : paths.entrySet()) {

@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,11 +53,12 @@ public class ServiceValidationTests {
 
 
     @Test(enabled = true, description = "test for undocumented Path in contract")
-    public void testUndocumentedPath() throws OpenApiValidatorException, UnsupportedEncodingException {
-        Path contractPath = RES_DIR.resolve("swagger/valid/petstore.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+    public void testUndocumentedPath() throws OpenApiValidatorException, IOException {
+//        Path contractPath = RES_DIR.resolve("swagger/valid/petstore.yaml");
+//        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/valid/petstore.bal"));
-        ServiceValidator.validateResourceFunctions(project, api);
+        ServiceValidator.validateResourceFunctions(project);
+
 //        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
 //        kind = DiagnosticSeverity.ERROR;
 ////        dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/valid/petstore.bal");

@@ -20,9 +20,6 @@ import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
-import org.ballerinalang.openapi.validator.ResourceMethod;
-import org.ballerinalang.openapi.validator.ResourcePathSummary;
-import org.ballerinalang.openapi.validator.ResourceWithOperationId;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
@@ -30,7 +27,6 @@ import org.wso2.ballerinalang.compiler.tree.BLangService;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 //import org.wso2.ballerinalang.compiler.util.diagnotic.BLangDiagnosticLogHelper;
 
@@ -71,22 +67,6 @@ public class ValidatorTest {
         return project;
     }
 
-
-// different type to access the bLangPackage
-//    public static CompileResult getBlangPackage01(String fileName) throws UnsupportedEncodingException {
-//        Path sourceRoot = RES_DIR.resolve("project-based-tests/src");
-////        Path sourceRoot = RES_DIR.resolve("project-based-tests");
-//
-//        String balfile = sourceRoot.resolve(fileName).toString();
-//        Path balFpath = Paths.get(balfile);
-//        Path programDir = balFpath.toAbsolutePath().getParent();
-//        String filename = balFpath.toAbsolutePath().getFileName().toString();
-//        CompileResult bLangPackage = OpenApiValidatorUtil.compileFile01(programDir, filename);
-//        return bLangPackage;
-//    }
-
-
-
     public static Schema getComponet(OpenAPI api, String componentName) {
         return api.getComponents().getSchemas().get(componentName);
     }
@@ -104,22 +84,4 @@ public class ValidatorTest {
         return bLangPackage.getServices().get(0);
     }
 
-    // Get the Function Node
-    public static ResourceMethod getFunction(BLangService bLangService, String method) {
-
-        List<ResourcePathSummary> resourcePathSummaryList =
-                ResourceWithOperationId.summarizeResources(bLangService);
-        ResourceMethod resourceMethod = resourcePathSummaryList.get(0).getMethods().get(method);
-        return resourceMethod;
-    }
-
-//    Get diagnostic log
-//    public static DiagnosticLog getDiagnostic(String fileName) {
-//        Path sourceRoot = RES_DIR.resolve("project-based-tests/src");
-//        String balfile = sourceRoot.resolve(fileName).toString();
-//        Path balFpath = Paths.get(balfile);
-//        Path programDir = balFpath.toAbsolutePath().getParent();
-//        CompilerContext context =  OpenApiValidatorUtil.getCompilerContext(programDir);
-//        return BLangDiagnosticLogHelper.getInstance(context);
-//    }
 }
