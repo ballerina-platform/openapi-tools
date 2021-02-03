@@ -140,9 +140,6 @@ public class BaseTests {
 
                                         TypeDescriptorNode type = (TypeDescriptorNode) pathParam.typeDescriptor();
                                         if (type instanceof BuiltinSimpleNameReferenceNode) {
-//                                            Optional<Symbol> symbol = semanticModel.symbol(fileName.toString(),
-//                                                    LinePosition.from(type.lineRange().startLine().line(),
-//                                                            type.lineRange().startLine().offset()));
                                             Optional<Symbol> symbol = semanticModel.symbol(type);
                                             symbol.ifPresent(symbol1 -> {
                                                 paramType[0] = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();

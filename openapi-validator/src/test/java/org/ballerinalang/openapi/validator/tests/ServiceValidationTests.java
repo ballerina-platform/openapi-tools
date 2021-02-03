@@ -58,13 +58,8 @@ public class ServiceValidationTests {
 //        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/valid/petstore.bal"));
         ServiceValidator.validateResourceFunctions(project);
-
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        kind = DiagnosticSeverity.ERROR;
-////        dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/valid/petstore.bal");
-//        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
-////        ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
+
     @Test(enabled = false, description = "test for undocumented Method in contract")
     public void testUndocumentedMethod() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstoreMethod.yaml");
@@ -75,7 +70,14 @@ public class ServiceValidationTests {
 //        dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/valid/petstoreMethod.bal");
         filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
 //        ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
+    }
 
+    @Test(description = "test for Path parameter")
+    public void testPathparameter() throws OpenApiValidatorException, IOException {
+//        Path contractPath = RES_DIR.resolve("swagger/valid/petstore.yaml");
+//        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/valid/petstore.bal"));
+        ServiceValidator.validateResourceFunctions(project);
     }
 
     @Test(enabled = false, description = "test for undocumented TypeMisMatch in contract")

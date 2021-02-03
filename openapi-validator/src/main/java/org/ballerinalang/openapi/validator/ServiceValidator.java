@@ -157,9 +157,7 @@ public class ServiceValidator {
 //                                            dLog.logDiagnostic(DiagnosticSeverity.ERROR, packageName.packageId(),
 //                                                    fieldNode.location() , "Contract file is not existed in the given" +
 //                                                            " path should be applied");
-
                                             }
-
                                         } else if (specificFieldNode.fieldName().toString().trim().equals("failOnErrors")) {
                                             String s = openAPIAnnotation.toString();
                                             if (s.trim().equals("false")) {
@@ -205,27 +203,63 @@ public class ServiceValidator {
                     // Make resourcePath summery
                     Map<String, ResourcePathSummary> resourcePathSummaryMap =
                             ResourceWithOperation.summarizeResources(functions);
-
                     //  Filter openApi operation according to given filters
                     List<OpenAPIPathSummary> openAPIPathSummaries = ResourceWithOperation
                             .filterOpenapi(openAPI, filters);
+
                     //  Check all the filtered operations are available at the service file
                     List<OpenapiServiceValidationError> openApiMissingServiceMethod =
                             ResourceWithOperation.checkOperationsHasFunctions(openAPIPathSummaries, resourcePathSummaryMap);
 
-                    // Clean the undocumented openapi contract functions
-                    List<OpenAPIPathSummary> cleanedOpenapiPathSummary =
-                            ResourceWithOperation.removeUndocumentedPath(openAPIPathSummaries,
-                                    openApiMissingServiceMethod);
-
+                    //  Generate errors for missing resource in service file
+                    if (!openApiMissingServiceMethod.isEmpty()) {
+                        for (OpenapiServiceValidationError openApiMissingError: openApiMissingServiceMethod) {
+                            if (openApiMissingError.getServiceOperation() == null) {
+//                                dLog.logDiagnostic(kind, serviceNode.getPosition(),
+//                                        ErrorMessages.unimplementedOpenAPIPath(openApiMissingError.getServicePath()));
+                            } else {
+//                                dLog.logDiagnostic(kind, serviceNode.getPosition(),
+//                                        ErrorMessages.unimplementedOpenAPIOperationsForPath(openApiMissingError.
+//                                                        getServiceOperation(),
+//                                                openApiMissingError.getServicePath()));
+                            }
+                        }
+                        // Clean the undocumented openapi contract functions
+                        openAPIPathSummaries = ResourceWithOperation.removeUndocumentedPath(openAPIPathSummaries,
+                                        openApiMissingServiceMethod);
+                    }
                     // Check all the documented resource functions are in openapi contract
+                    List<ResourceValidationError> resourceValidationErrors =
+                            ResourceWithOperation.checkResourceHasOperation(openAPIPathSummaries, resourcePathSummaryMap);
+                    // Clean the undocumented resources from the list
+                    if (!resourcePathSummaryMap.isEmpty()) {
+                        createListResourcePathSummary(resourceValidationErrors, resourcePathSummaryMap);
+                    }
 
-
+                    // Resource against to operation
+//                    cleanedOpenapiPathSummary
+//                    resourcePathSummaryMap
+                    for (Map.Entry<String, ResourcePathSummary> resourcePath: resourcePathSummaryMap.entrySet()) {
+                        for (OpenAPIPathSummary openApiPath : openAPIPathSummaries) {
+                            if ((resourcePath.getKey().equals(openApiPath.getPath())) &&
+                                    (!resourcePath.getValue().getMethods().isEmpty())) {
+                                Map<String, ResourceMethod> resourceMethods = resourcePath.getValue().getMethods();
+                                for (Map.Entry<String, ResourceMethod> method: resourceMethods.entrySet()) {
+                                    for (Map.Entry<String, Operation> operation: openApiPath.getOperations().entrySet()) {
+                                        if (method.getKey().equals(operation.getKey())) {
+//                                            List<ValidationError> postErrors =
+//                                                    ResourceValidator.validateResourceAgainstOperation(operation.getValue(),
+//                                                            method.getValue(), semanticModel, syntaxtree);
+//                                            generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-
-
         return validations;
     } 
 
@@ -279,11 +313,12 @@ public class ServiceValidator {
      */
 
     private static void createListResourcePathSummary(List<ResourceValidationError> resourceMissingPathMethod,
-                                                      List<ResourcePathSummary> resourcePathSummaryList) {
+                                                      Map<String, ResourcePathSummary> resourcePathSummaryList) {
 
-        Iterator<ResourcePathSummary> resourcePSIterator = resourcePathSummaryList.iterator();
+        Iterator<Map.Entry<String, ResourcePathSummary>>
+                resourcePSIterator = resourcePathSummaryList.entrySet().iterator();
         while (resourcePSIterator.hasNext()) {
-            ResourcePathSummary resourcePathSummary = resourcePSIterator.next();
+            ResourcePathSummary resourcePathSummary = (ResourcePathSummary) resourcePSIterator.next();
             if (!resourceMissingPathMethod.isEmpty()) {
                 for (ResourceValidationError resourceValidationError: resourceMissingPathMethod) {
                     if (resourcePathSummary.getPath().equals(resourceValidationError.getResourcePath())) {

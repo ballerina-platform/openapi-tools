@@ -233,9 +233,39 @@ public class ResourceWithOperation {
         return operationsValidationErrors;
     }
 
-    public List<ResourceValidationError> checkResourceHasOperation(List<OpenAPIPathSummary> openAPIPathSummaries,
+    public static List<ResourceValidationError> checkResourceHasOperation(List<OpenAPIPathSummary> openAPIPathSummaries,
                                                                    Map<String, ResourcePathSummary> resourcePathSummaries) {
         List<ResourceValidationError> resourceValidationErrors = new ArrayList<>();
+        for (Map.Entry<String, ResourcePathSummary> resourcePathSummary: resourcePathSummaries.entrySet()) {
+            boolean isResourceExit = false;
+            for (OpenAPIPathSummary openAPIPathSummary: openAPIPathSummaries) {
+                if (resourcePathSummary.getKey().equals(openAPIPathSummary.getPath())) {
+                    isResourceExit = true;
+                    for (Map.Entry<String, ResourceMethod> method : resourcePathSummary.getValue().getMethods().entrySet()) {
+                        boolean isMethodExit = false;
+                        for (String operation: openAPIPathSummary.getAvailableOperations()) {
+                            if (method.getKey().equals(operation)) {
+                                isMethodExit = true;
+                                break;
+                            }
+                        }
+                        if (!isMethodExit) {
+                            ResourceValidationError resourceValidationError =
+                                    new ResourceValidationError(method.getValue().getMethodPosition(),
+                                            method.getKey(), resourcePathSummary.getKey());
+                            resourceValidationErrors.add(resourceValidationError);
+                        }
+                    }
+                    break;
+                }
+            }
+            if (!isResourceExit) {
+                ResourceValidationError resourceValidationError =
+                        new ResourceValidationError(resourcePathSummary.getValue().getPathPosition(), null,
+                                resourcePathSummary.getKey());
+                resourceValidationErrors.add(resourceValidationError);
+            }
+        }
         return resourceValidationErrors;
     }
 
@@ -263,13 +293,15 @@ public class ResourceWithOperation {
                     node = "{" + paramName + "}";
                     parameterNodeMap.put(paramName, next);
                 }
-                functionPath = functionPath  + node;
+                functionPath = functionPath + node;
             }
             if (resourceSummaryList.containsKey(functionPath)) {
                 setParametersToMethod(functionDefinitionNode, functionMethod, parameterNodeMap,
                         resourceSummaryList.get(functionPath));
             } else {
                 ResourcePathSummary resourcePathSummary = new ResourcePathSummary();
+                //Set location as first function loacation
+                resourcePathSummary.setPathPosition(functionDefinitionNode.location());
                 setParametersToMethod(functionDefinitionNode, functionMethod, parameterNodeMap, resourcePathSummary);
                 resourceSummaryList.put(functionPath, resourcePathSummary);
             }

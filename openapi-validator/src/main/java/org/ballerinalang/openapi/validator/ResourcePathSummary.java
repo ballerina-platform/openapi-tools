@@ -17,6 +17,7 @@
  */
 package org.ballerinalang.openapi.validator;
 
+import io.ballerina.tools.diagnostics.Location;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,7 @@ import java.util.Map;
  */
 public class ResourcePathSummary {
     private String path;
-//    private Location pathPosition;
+    private Location pathPosition;
     private Map<String, ResourceMethod> methods;
 
     public ResourcePathSummary() {
@@ -62,11 +63,11 @@ public class ResourcePathSummary {
         }
         return isAvailable;
     }
-//    public Location getPathPosition() {
-//        return pathPosition;
-//    }
+    public Location getPathPosition() {
+        return pathPosition;
+    }
 
-//    public void setPathPosition(Location pathPosition) {
-//        this.pathPosition = pathPosition;
-//    }
+    public void setPathPosition(Location pathPosition) {
+        this.pathPosition = pathPosition;
+    }
 }
