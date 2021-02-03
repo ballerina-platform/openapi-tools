@@ -1,0 +1,29 @@
+openapi: 3.0.1
+info:
+  title: _payloadV
+  version: 1.0.0
+servers:
+  - url: //localhost:9090/payloadV
+paths:
+  /hi:
+    post:
+      operationId: operation1_post_hi
+      parameters:
+        - name: payload
+          in: query
+          required: true
+          schema: {}
+      requestBody:
+        description: application/json
+        content:
+          application/json: {}
+        required: false
+      responses:
+        "200":
+          description: Successful
+          content:
+            application/json:
+              example: Ok
+      x-codegen-request-body-name: payload
+components: {}
+x-original-swagger-version: "2.0"
