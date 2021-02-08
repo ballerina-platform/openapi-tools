@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class OperationHandleIVTests {
     private Operation operation;
 
     @Test(enabled = false, description = "Operation model has path parameters with request body ")
-    public void testRBwithPath() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testRBwithPath() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRBwithPathParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(
@@ -61,7 +61,7 @@ public class OperationHandleIVTests {
     }
 
     @Test(enabled = false, description = "Operation model has path parameters with request body ")
-    public void testExtraRB() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testExtraRB() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraRBParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(
@@ -74,7 +74,7 @@ public class OperationHandleIVTests {
     }
 
     @Test(enabled = false, description = "Operation model has OneOf parameters with request body ")
-    public void testOneOfRB() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testOneOfRB() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreOneOfTypeMismatch.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(

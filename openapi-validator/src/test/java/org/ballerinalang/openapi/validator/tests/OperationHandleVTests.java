@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class OperationHandleVTests {
     private Operation operation;
 
     @Test(enabled = false, description = "Operation model has path parameters primitive type")
-    public void testPrimitiveTypePath() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testPrimitiveTypePath() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstorePathPrimitive.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstorePathPrimitive.bal");
@@ -58,7 +58,7 @@ public class OperationHandleVTests {
     }
 
     @Test(enabled = false, description = "Operation model has path parameters object type")
-    public void testObjectTypePath() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testObjectTypePath() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstorePathObject.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstorePathObject.bal");
@@ -70,7 +70,7 @@ public class OperationHandleVTests {
     }
 
     @Test(enabled = false, description = "Operation model has path parameters array type")
-    public void testArrayTypePath() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testArrayTypePath() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstorePathArray.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstorePathArray.bal");
@@ -82,7 +82,7 @@ public class OperationHandleVTests {
     }
 
     @Test(enabled = false, description = "Operation model has request parameters ")
-    public void testrequestBody() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testrequestBody() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstoreRBParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstoreRBParameter.bal");
@@ -94,7 +94,7 @@ public class OperationHandleVTests {
     }
 
     @Test(enabled = false, description = "Operation model has nestedArray type parameters ")
-    public void testNestedArrayType() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testNestedArrayType() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstoreNestedArrayType.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstoreNestedArrayType.bal");

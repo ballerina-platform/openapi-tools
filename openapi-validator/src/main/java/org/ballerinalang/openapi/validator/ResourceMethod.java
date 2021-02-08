@@ -30,14 +30,14 @@ public class ResourceMethod {
     private String method;
     private Location methodPosition;
     private Map<String, Node> parameters;
-    private String body;
+    private Boolean body;
 
     ResourceMethod() {
         this.method = null;
         this.methodPosition = null;
         this.resourcePosition = null;
         this.parameters = new HashMap<>();
-        this.body = null;
+        this.body = false;
     }
 
     public Map<String, Node> getParameters() {
@@ -67,11 +67,11 @@ public class ResourceMethod {
     }
 
 
-    public String getBody() {
+    public Boolean getBody() {
         return body;
     }
 
-    public void setBody(String body) {
+    public void setBody(Boolean body) {
         this.body = body;
     }
 

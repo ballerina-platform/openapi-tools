@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class VPrimitiveUtilTests {
     private List<ValidationError> validationErrors = new ArrayList<>();
 
     @Test(enabled = false, description = "Type mismatch with integer")
-    public void testIntegerType() throws UnsupportedEncodingException, OpenApiValidatorException {
+    public void testIntegerType() throws IOException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("validTests/primitive/integerB.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests" +
@@ -58,7 +58,7 @@ public class VPrimitiveUtilTests {
     }
 
     @Test(enabled = false, description = "Type mismatch with string")
-    public void testStringType() throws UnsupportedEncodingException, OpenApiValidatorException {
+    public void testStringType() throws IOException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("validTests/primitive/stringB.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/primitive/stringB.bal");
@@ -69,7 +69,7 @@ public class VPrimitiveUtilTests {
     }
 
     @Test(enabled = false, description = "Type mismatch with boolean")
-    public void testBooleanType() throws UnsupportedEncodingException, OpenApiValidatorException {
+    public void testBooleanType() throws IOException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("validTests/primitive/booleanB.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/primitive/booleanB.bal");

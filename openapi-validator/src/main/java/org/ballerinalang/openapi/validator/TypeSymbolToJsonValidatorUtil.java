@@ -4,6 +4,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.FloatTypeSymbol;
 import io.ballerina.compiler.api.symbols.IntTypeSymbol;
+import io.ballerina.compiler.api.symbols.NilTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.StringTypeSymbol;
@@ -11,11 +12,13 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
 import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
@@ -47,7 +50,6 @@ public class TypeSymbolToJsonValidatorUtil {
             }
             if (typeSymbol instanceof TypeReferenceTypeSymbol) {
                 typeSymbol = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
-
             }
             isExitType = true;
             List<ValidationError> validationError = validateRecordType((RecordTypeSymbol) typeSymbol, syntaxTree,
@@ -55,16 +57,25 @@ public class TypeSymbolToJsonValidatorUtil {
             validationErrorList.addAll(validationError);
         } else if (typeSymbol instanceof StringTypeSymbol || typeSymbol instanceof IntTypeSymbol
                 || typeSymbol instanceof FloatTypeSymbol) {
-            paramName = "simpleParam";
-            if (typeSymbol.name().equals(convertOpenAPITypeToBallerina(schema.getType()))) {
+            if (!componentName.isBlank()) {
+                paramName = componentName;
+            } else {
+                paramName = "simpleParam";
+            }
+
+            if (typeSymbol.typeKind().getName().equals(convertOpenAPITypeToBallerina(schema.getType()))) {
                 // type mismatch
                 isExitType = true;
             } else {
                 schemaType = schema.getType();
-                ballerinaType = typeSymbol.name();
+                ballerinaType = typeSymbol.typeKind().getName();
             }
         } else if ((typeSymbol instanceof ArrayTypeSymbol) && (schema instanceof  ArraySchema)) {
-            paramName = "array";
+            if (!componentName.isBlank()) {
+                paramName = componentName;
+            } else {
+                paramName = "array";
+            }
             if (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().name()
                     .equals(convertOpenAPITypeToBallerina(((ArraySchema) schema).getItems().getType()))) {
                 isExitType = true;
@@ -72,11 +83,6 @@ public class TypeSymbolToJsonValidatorUtil {
                     (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
                 TypeSymbol recordType = null;
                 isExitType = true;
-//                Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
-//                        LinePosition.from(((ArrayTypeSymbol) typeSymbol)
-//                        .memberTypeDescriptor().location().lineRange().startLine().line(),
-//                                ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor()
-//                                .location().lineRange().startLine().offset()));
                 Optional<TypeSymbol> symbol = semanticModel
                         .type(((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange());
                 if (symbol != null && symbol.isPresent()) {
@@ -121,12 +127,27 @@ public class TypeSymbolToJsonValidatorUtil {
                 ballerinaType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().name();
             }
 
+        } else if (typeSymbol instanceof UnionTypeSymbol) {
+            List<TypeSymbol> typeSymbols = ((UnionTypeSymbol) typeSymbol).memberTypeDescriptors();
+            if (!typeSymbols.isEmpty()) {
+                isExitType = true;
+                List<ValidationError> error = new ArrayList<>();
+                for (TypeSymbol symbol: typeSymbols) {
+                    if (!(symbol instanceof NilTypeSymbol)) {
+                        error = validate(schema, symbol, syntaxTree, semanticModel,
+                                componentName);
+                        break;
+                    }
+                }
+                if (!error.isEmpty()) {
+                    validationErrorList.addAll(error);
+                }
+            }
         }
 
         if (!isExitType) {
             assert schema != null;
-            TypeMismatch typeMismatch = new TypeMismatch(paramName,
-                    convertTypeToEnum(schemaType),
+            TypeMismatch typeMismatch = new TypeMismatch(paramName, convertTypeToEnum(schemaType),
                     convertTypeToEnum(ballerinaType));
             validationErrorList.add(typeMismatch);
         }
@@ -152,16 +173,13 @@ public class TypeSymbolToJsonValidatorUtil {
                         TypeMismatch validationError = new TypeMismatch(fieldSymbol.getValue().name(),
                                 convertTypeToEnum(entry.getValue().getType()),
                                 convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
-                                fieldSymbol.getValue().signature());
+                                componentName);
                         validationErrorList.add(validationError);
                     } else if ((entry.getValue() instanceof ObjectSchema) && (fieldSymbol.getValue().typeDescriptor()
                             instanceof TypeReferenceTypeSymbol)) {
                         // Handle the nested record type
                         TypeSymbol refRecordType = null;
                         List<ValidationError> nestedValidationError;
-//                        Optional<Symbol> symbol = semanticModel.symbol(syntaxTree.filePath(),
-//                                LinePosition.from(fieldSymbol.location().lineRange().startLine().line(),
-//                                        fieldSymbol.location().lineRange().startLine().offset()));
                         Optional<TypeSymbol> symbol = semanticModel.type(fieldSymbol.getValue().location().lineRange());
                         fieldSymbol.getValue().typeDescriptor();
                         if (symbol != null && symbol.isPresent()) {
@@ -199,12 +217,24 @@ public class TypeSymbolToJsonValidatorUtil {
                 MissingFieldInJsonSchema validationError =
                         new MissingFieldInJsonSchema(fieldSymbol.getValue().name(),
                                 convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
-                                fieldSymbol.getValue().signature());
+                                componentName);
                 validationErrorList.add(validationError);
             }
-
         }
-
+        // Find missing fields in BallerinaType
+        for (Map.Entry<String, Schema> entry : properties.entrySet()) {
+            boolean isExist = false;
+            for (Map.Entry<String, RecordFieldSymbol> field : fieldSymbolList.entrySet()) {
+                if (field.getValue().name().equals(entry.getKey())) {
+                    isExist = true;
+                }
+            }
+            if (!isExist) {
+                MissingFieldInBallerinaType validationError = new MissingFieldInBallerinaType(entry.getKey(),
+                        convertTypeToEnum(entry.getValue().getType()), componentName);
+                validationErrorList.add(validationError);
+            }
+        }
         return validationErrorList;
     }
 

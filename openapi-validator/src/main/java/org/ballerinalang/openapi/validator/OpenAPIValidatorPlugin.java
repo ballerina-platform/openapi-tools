@@ -24,6 +24,7 @@ import org.ballerinalang.compiler.plugins.SupportedAnnotationPackages;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
 import org.wso2.ballerinalang.compiler.util.CompilerContext;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,6 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
 
     @Override
     public void init(DiagnosticLog diagnosticLog) {
-
         dLog = diagnosticLog;
     }
     @Override
@@ -47,8 +47,14 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
     @Override
     public List<Diagnostic> codeAnalyze(Project project) {
         List<Diagnostic> diagnostics = new ArrayList<>();
-//
-//
+        ServiceValidator serviceValidator = new ServiceValidator();
+        try {
+            diagnostics = serviceValidator.validateResourceFunctions(project);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (OpenApiValidatorException e) {
+            e.printStackTrace();
+        }
         return diagnostics;
     }
 

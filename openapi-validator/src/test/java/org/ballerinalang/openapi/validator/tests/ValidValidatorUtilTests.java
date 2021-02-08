@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -45,7 +45,7 @@ public class ValidValidatorUtilTests {
     private BVarSymbol extractBVarSymbol;
 
     @Test(enabled = false, description = "Valid test case for all test case")
-    public void  testValidCase() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void  testValidCase() throws OpenApiValidatorException, IOException {
 //        Load yaml file
         Path contractPath = RES_DIR.resolve("validTests/validRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
@@ -59,7 +59,7 @@ public class ValidValidatorUtilTests {
     @Test(enabled = false, description = "Test type mismatch with array. " +
             "Same field name has ballerina type as string array and json " +
             "type as integer array")
-    public void testTypeMismatchArrayType() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testTypeMismatchArrayType() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("validTests/validTypeMisMatchArrayType.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(
@@ -70,7 +70,7 @@ public class ValidValidatorUtilTests {
     }
 
     @Test(enabled = false, description = "Test Nested array type")
-    public void testTypeMisMatchNestedArray() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testTypeMisMatchNestedArray() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("validTests/validTypeMisMatchNestedArrayType.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(
@@ -81,7 +81,7 @@ public class ValidValidatorUtilTests {
     }
 
     @Test(enabled = false, description = "Test record field with array type of another record")
-    public void testRecordArray() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testRecordArray() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("validTests/recordTypeArray.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/recordTypeArray.bal");
@@ -91,7 +91,7 @@ public class ValidValidatorUtilTests {
     }
 
     @Test(enabled = false, description = "Test oneOf with record type")
-    public void testOneOfType() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testOneOfType() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("validTests/oneOf.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/oneOf.bal");
@@ -105,7 +105,7 @@ public class ValidValidatorUtilTests {
     }
 
     @Test(enabled = false, description = "Test for nested record")
-    public void testNestedRecord() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testNestedRecord() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("validTests/nestedRecord.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/nestedRecord.bal");

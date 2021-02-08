@@ -27,7 +27,6 @@ import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -61,7 +60,7 @@ public class ServiceValidationTests {
     }
 
     @Test(enabled = false, description = "test for undocumented Method in contract")
-    public void testUndocumentedMethod() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testUndocumentedMethod() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstoreMethod.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/valid/petstoreMethod.bal");
@@ -81,7 +80,7 @@ public class ServiceValidationTests {
     }
 
     @Test(enabled = false, description = "test for undocumented TypeMisMatch in contract")
-    public void testParameterTypeMismatch() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testParameterTypeMismatch() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstoreParameterTM.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/valid/petstoreParameterTM.bal");
@@ -93,7 +92,7 @@ public class ServiceValidationTests {
     }
 
     @Test(enabled = false, description = "test for undocumented TypeMisMatch in contract")
-    public void testRecordTypeMismatch() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testRecordTypeMismatch() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordType.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/invalid/petstoreRecordType.bal");
@@ -104,7 +103,7 @@ public class ServiceValidationTests {
 //        ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
     @Test(enabled = false, description = "test for undocumented record field  in contract")
-    public void testRecordFieldMiss() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testRecordFieldMiss() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordFieldMiss.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/invalid/petstoreRecordFieldMiss.bal");
@@ -116,7 +115,7 @@ public class ServiceValidationTests {
     }
 
     @Test(enabled = false, description = "test for undocumented path parameter  in contract")
-    public void testPathParameter() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testPathParameter() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstorePathParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/invalid/petstorePathParameter.bal");
@@ -128,7 +127,7 @@ public class ServiceValidationTests {
     }
 
     @Test(enabled = false, description = "test for undocumented field oneOf type record in contract")
-    public void testOneofscenario_01() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testOneofscenario_01() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/oneOf.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/invalid/oneOf.bal");
@@ -140,7 +139,7 @@ public class ServiceValidationTests {
     }
 
     @Test(enabled = false, description = "test for scenario 02")
-    public void testOneofscenario_02() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testOneofscenario_02() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/oneOf-scenario02.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/invalid/oneOf-scenario02.bal");
@@ -152,7 +151,7 @@ public class ServiceValidationTests {
     }
 
     @Test(enabled = false, description = "test for scenario 03")
-    public void testOneofscenario_03() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testOneofscenario_03() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/oneOf-scenario03.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/invalid/oneOf-scenario03.bal");

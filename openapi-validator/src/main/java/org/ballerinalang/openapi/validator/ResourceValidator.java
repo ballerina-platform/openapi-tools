@@ -17,17 +17,25 @@ package org.ballerinalang.openapi.validator;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.ballerinalang.openapi.validator.error.ValidationError;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,48 +55,105 @@ public class ResourceValidator {
         if (!resourceMethod.getParameters().isEmpty()) {
             for (Map.Entry<String, Node> resourceParameter : resourceMethod.getParameters().entrySet()) {
                 boolean isParameterExit = false;
-                //  Handle Path parameter
-                if (operation.getParameters() != null) {
-                    for (Parameter parameter : operation.getParameters()) {
-                        if (resourceParameter.getKey().equals(parameter.getName()) && (parameter.getSchema() != null)) {
+                String paramType = "";
+                RequiredParameterNode bodyNode = null;
+                if (resourceParameter.getValue() instanceof RequiredParameterNode) {
+                     bodyNode = (RequiredParameterNode) resourceParameter.getValue();
+                }
+                // Handle Path parameter
+                if (operation.getParameters() != null && bodyNode.typeName().toString().equals("http:Payload")) {
+                    List<Parameter> parameters = operation.getParameters();
+                    for (Parameter parameter : parameters) {
+                        String resourceParam = resourceParameter.getKey().replaceFirst("'","").trim();
+                        if (resourceParam.equals(parameter.getName()) && (parameter.getSchema() != null)) {
                             isParameterExit = true;
-                            //Handle path parameter
+                            // Handle path parameter
                             if (resourceParameter.getValue() instanceof ResourcePathParameterNode) {
                                 ResourcePathParameterNode paramNode =
                                         (ResourcePathParameterNode) resourceParameter.getValue();
+                                paramType = paramNode.typeDescriptor().toString().trim();
                                 TypeDescriptorNode typeNode = (TypeDescriptorNode) paramNode.typeDescriptor();
+                                Token paramName = paramNode.paramName();
                                 if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
-                                    Optional<Symbol> symbol = semanticModel.symbol(paramNode);
-                                    TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
+                                    Optional<Symbol> symbol = semanticModel.symbol(paramName);
+                                    TypeSymbol typeSymbol = null;
+                                    if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
+                                        VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
+                                        typeSymbol = symbol1.typeDescriptor();
+                                    }
                                     List<ValidationError> validationErrors =
                                             TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
                                                     typeSymbol, syntaxTree, semanticModel,
                                                     resourceParameter.getKey());
-
+                                    if (!validationErrors.isEmpty()) {
+                                        validationErrorList.addAll(validationErrors);
+                                    }
                                 }
                             }
+                            //Handle query parameter
+                            if (resourceParameter.getValue() instanceof RequiredParameterNode) {
+                                RequiredParameterNode queryParam = (RequiredParameterNode) resourceParameter.getValue();
+                                paramType = queryParam.typeName().toString().trim();
+                                TypeSymbol typeSymbol = getTypeSymbol(semanticModel, queryParam);
+                                List<ValidationError> validationErrors =
+                                        TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
+                                                typeSymbol, syntaxTree, semanticModel,
+                                                resourceParameter.getKey());
+                                if (!validationErrors.isEmpty()) {
+                                    validationErrorList.addAll(validationErrors);
+                                }
+                            }
+                            break;
                         }
-//                        if (resourceParameter.getName().equals(parameter.getName()) &&
-//                                (parameter.getSchema() != null)) {
-//                            isParameterExit = true;
-//                            List<ValidationError> validationErrorsResource =
-//                                    BTypeToJsonValidatorUtil.validate(parameter.getSchema(),
-//                                            resourceParameter.getParameter().symbol);
-//                            if (!validationErrorsResource.isEmpty()) {
-//                                validationErrors.addAll(validationErrorsResource);
-//                            }
-//                            break;
-//                        }
+                    }
+                }
+                // Handle Request Body
+                if (operation.getRequestBody() != null && bodyNode != null) {
+                    Map<String, Schema> requestBodyForOperation = getRequestBodyForOperation(operation);
+                    for (Map.Entry<String, Schema> requestBody: requestBodyForOperation.entrySet()) {
+                        if (resourceParameter.getKey().equals("payload")) {
+                            isParameterExit = true;
+                            Schema value = requestBody.getValue();
+                            TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
+                            List<ValidationError> validationErrors =
+                                    TypeSymbolToJsonValidatorUtil.validate(value, typeSymbol, syntaxTree, semanticModel,
+                                            bodyNode.typeName().toString().trim());
+                            if (!validationErrors.isEmpty()) {
+                                validationErrorList.addAll(validationErrors);
+                            }
+                        }
                     }
                 }
                 if (!isParameterExit) {
-//                    ValidationError validationError = new ValidationError(resourceParameter.getName(),
-//                            BTypeToJsonValidatorUtil.convertTypeToEnum(resourceParameter.getType()));
-//                    validationErrors.add(validationError);
-
+                    ValidationError validationError = new ValidationError(resourceParameter.getKey(),
+                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(paramType));
+                    validationErrorList.add(validationError);
                 }
             }
         }
         return validationErrorList;
+    }
+
+    private static TypeSymbol getTypeSymbol(SemanticModel semanticModel, RequiredParameterNode bodyNode) {
+        Optional<Token> paramName = bodyNode.paramName();
+        Token token = paramName.orElseThrow();
+        Optional<Symbol> symbol = semanticModel.symbol(token);
+        TypeSymbol typeSymbol = null;
+        if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
+            VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
+            typeSymbol = symbol1.typeDescriptor();
+        }
+        return typeSymbol;
+    }
+
+    public static Map<String, Schema> getRequestBodyForOperation(Operation operation) {
+        Map<String, Schema> requestBodySchemas = new HashMap<>();
+        if (operation.getRequestBody() != null) {
+            Content content = operation.getRequestBody().getContent();
+            for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
+                requestBodySchemas.put(mediaTypeEntry.getKey(), mediaTypeEntry.getValue().getSchema());
+            }
+        }
+        return requestBodySchemas;
     }
 }

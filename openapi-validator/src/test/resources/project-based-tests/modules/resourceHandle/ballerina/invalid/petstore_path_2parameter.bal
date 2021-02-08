@@ -18,7 +18,7 @@ service /v1 on ep0, ep1 {
 
     }
 
-    resource function get pets/[int petId] (http:Caller caller, http:Request req) returns error? {
+    resource function get pets/[int petId]/[string petName] (http:Caller caller, http:Request req) returns error? {
 
     }
 

@@ -32,7 +32,7 @@ import org.ballerinalang.util.diagnostic.DiagnosticLog;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class ResourceHandleIVTests {
     private List<ValidationError> resourceValidationErrors = new ArrayList<>();
 
     @Test(enabled = false, description = "Test for checking whether resource paths are documented in openapi contract")
-    public void testResourcePath() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testResourcePath() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstore.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstore.bal");
@@ -72,7 +72,7 @@ public class ResourceHandleIVTests {
 
     @Test(enabled = false, description = "Test for checking whether " +
             "resource paths method are documented in openapi contract")
-    public void testResourceExtraMethod() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testResourceExtraMethod() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraMethod.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreExtraMethod.bal");
@@ -84,7 +84,7 @@ public class ResourceHandleIVTests {
 
     @Test(enabled = false, description = "Test for checking whether " +
             "openapi service operations are documented in ballerina resource")
-    public void testExtraServicePath() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testExtraServicePath() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraServiceOperation.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        bLangPackage = ValidatorTest.getBlangPackage(
@@ -99,7 +99,7 @@ public class ResourceHandleIVTests {
     }
 
     @Test(enabled = false, description = "Test resource function node with openapi operation ")
-    public void testResourceFunctionNode() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testResourceFunctionNode() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreFunctionNode.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreFunctionNode.bal");
@@ -111,7 +111,7 @@ public class ResourceHandleIVTests {
     }
 
     @Test(enabled = false, description = "Test resource function node record type parameter with openapi operation ")
-    public void testResourceRecordParameter() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testResourceRecordParameter() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreRecordParameter.bal");
@@ -124,7 +124,7 @@ public class ResourceHandleIVTests {
     }
 
     @Test(enabled = false, description = "Test resource function node record type parameter with openapi operation ")
-    public void testResourceRecordParameter01() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testResourceRecordParameter01() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordParameter01.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreRecordParameter01.bal");
@@ -137,7 +137,7 @@ public class ResourceHandleIVTests {
     }
 
     @Test(enabled = false, description = "Test resource function node record type parameter with openapi operation ")
-    public void testResourceWithRequestBody() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testResourceWithRequestBody() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRBParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreRBParameter.bal");
@@ -150,7 +150,7 @@ public class ResourceHandleIVTests {
     }
 
     @Test(enabled = false, description = "Test resource function node record type parameter with openapi operation ")
-    public void testResourceWithRBPrimitive() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testResourceWithRBPrimitive() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRBPrimitiveParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        bLangPackage = ValidatorTest.getBlangPackage(
@@ -164,7 +164,7 @@ public class ResourceHandleIVTests {
     }
 
     @Test(enabled = false, description = "Test resource function node oneOf type request body with openapi operation ")
-    public void testResourceWithRBOneOf() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testResourceWithRBOneOf() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreOneOfTypeMismatch.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        bLangPackage = ValidatorTest.getBlangPackage(
@@ -198,7 +198,7 @@ public class ResourceHandleIVTests {
 //    }
 
     @Test(enabled = false, description = "Test resource function node with request body and path parameter")
-    public void testRequestBodywithPathParamter() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testRequestBodywithPathParamter() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRBwithPathParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
 //        bLangPackage = ValidatorTest.getBlangPackage(

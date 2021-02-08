@@ -316,14 +316,23 @@ public class ResourceWithOperation {
         FunctionSignatureNode functionSignatureNode = functionDefinitionNode.functionSignature();
         SeparatedNodeList<ParameterNode> parameters = functionSignatureNode.parameters();
         Iterator<ParameterNode> parameterIterator = parameters.iterator();
+        ResourceMethod resourceMethod = new ResourceMethod();
         while (parameterIterator.hasNext()) {
             ParameterNode param = parameterIterator.next();
             if (!param.toString().contains("http:Caller") && !param.toString().contains("http:Request")) {
-                String paramName = param.toString().trim();
+                String[] qParam = param.toString().trim().split(" ");
+                String paramName;
+                if (qParam.length > 1) {
+                    paramName = qParam[qParam.length - 1];
+                } else {
+                    paramName = param.toString().trim();
+                }
+                if (param.toString().contains("http:Payload")) {
+                    resourceMethod.setBody(true);
+                }
                 parameterNodeMap.put(paramName, param);
             }
         }
-        ResourceMethod resourceMethod = new ResourceMethod();
         resourceMethod.setMethod(functionMethod);
         resourceMethod.setParameters(parameterNodeMap);
         resourceMethod.getResourcePosition(functionDefinitionNode.location());
