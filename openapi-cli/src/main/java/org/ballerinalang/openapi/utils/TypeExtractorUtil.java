@@ -169,7 +169,6 @@ public class TypeExtractorUtil {
             Operation> nextOp, Operation opObject, BallerinaOpenApiOperation operation)
             throws BallerinaOpenApiException {
 
-        String[] pathNodes = path.getPath().split("/");
         String pathName = path.getPath();
         operation.setOpName(path.getPath().replaceFirst("/", ""));
         if (opObject.getParameters() != null) {

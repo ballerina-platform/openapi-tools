@@ -238,7 +238,7 @@ public class TypeSymbolToJsonValidatorUtil {
                 MissingFieldInJsonSchema validationError =
                         new MissingFieldInJsonSchema(fieldSymbol.getValue().name(),
                                 convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
-                                componentName);
+                                componentName, location);
                 validationErrorList.add(validationError);
             }
         }

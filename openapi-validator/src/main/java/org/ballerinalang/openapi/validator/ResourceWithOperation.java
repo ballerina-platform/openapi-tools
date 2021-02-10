@@ -193,10 +193,10 @@ public class ResourceWithOperation {
     }
 
     /**
-     *
-     * @param openAPIPathSummaries
-     * @param resourcePathSummaries
-     * @return
+     * This function use for checking the all the openapi operations have resource functions.
+     * @param openAPIPathSummaries  Summary of the openAPIPath
+     * @param resourcePathSummaries Summary of the resource paths
+     * @return error list with missing operations details in service file
      */
     public static List<OpenapiServiceValidationError> checkOperationsHasFunctions(
             List<OpenAPIPathSummary> openAPIPathSummaries, Map<String, ResourcePathSummary> resourcePathSummaries) {
@@ -341,7 +341,7 @@ public class ResourceWithOperation {
         }
         resourceMethod.setMethod(functionMethod);
         resourceMethod.setParameters(parameterNodeMap);
-        resourceMethod.getResourcePosition(functionDefinitionNode.location());
+        resourceMethod.setResourcePosition(functionDefinitionNode.location());
         resourcePathSummary2.addMethod(functionMethod, resourceMethod);
     }
 

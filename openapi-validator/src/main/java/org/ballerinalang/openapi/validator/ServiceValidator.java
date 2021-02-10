@@ -473,7 +473,7 @@ public class ServiceValidator {
                                     method.getKey(), resourcePathSummary.getPath());
                     DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                     OpenAPIDiagnostics diagnostics =
-                            new OpenAPIDiagnostics(method.getValue().getMethodPosition(), diagnosticInfo,
+                            new OpenAPIDiagnostics(((MissingFieldInJsonSchema) postErr).getLocation(), diagnosticInfo,
                                     error[1]);
                     validations.add(diagnostics);
                 } else if (postErr instanceof OneOfTypeValidation) {
@@ -490,8 +490,8 @@ public class ServiceValidator {
                                                 method.getKey(), resourcePathSummary.getPath());
                                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                                 OpenAPIDiagnostics diagnostics =
-                                        new OpenAPIDiagnostics(method.getValue().getMethodPosition(), diagnosticInfo,
-                                                error[1]);
+                                        new OpenAPIDiagnostics(((MissingFieldInJsonSchema) oneOfvalidation)
+                                                .getLocation(), diagnosticInfo, error[1]);
                                 validations.add(diagnostics);
                             }
                         }

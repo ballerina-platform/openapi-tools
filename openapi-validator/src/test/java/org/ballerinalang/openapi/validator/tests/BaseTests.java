@@ -101,22 +101,9 @@ public class BaseTests {
                 if (syntaxKind.equals(SyntaxKind.TYPE_DEFINITION)) {
                     TypeDefinitionNode typeNode = (TypeDefinitionNode) node;
                     if (typeName.equals(((IdentifierToken) (typeNode.typeName())).toString().trim())) {
-
-//                        Optional<Symbol> symbol = semanticModel.symbol(fileName.toString(),
-//                                LinePosition.from(typeNode.lineRange().startLine().line(),
-//                                        typeNode.lineRange().startLine().offset()));
                         Optional<Symbol> symbol = semanticModel.symbol(typeNode);
                         Symbol symbol2 = symbol.orElseThrow();
-//                        paramType[0] = (TypeSymbol) symbol2;
-//                        symbol.ifPresent(symbol1 -> {
-//                            paramType[0] = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
-//                        });
-
                         Node node2 = typeNode.typeDescriptor();
-
-//                        inputs.setParamType((TypeSymbol) typeNode.typeDescriptor());
-//                        inputs.setSyntaxTree(typeNode.syntaxTree());
-//                        inputs.setSemanticModel(semanticModel);
                     }
                 }
                 //-------------------------- comment due to service payload still
@@ -146,10 +133,9 @@ public class BaseTests {
                                             });
 
                                         } else if (type instanceof ArrayTypeDescriptorNode) {
-//                                            Optional<Symbol> symbol = semanticModel.symbol(fileName.toString(),
-//                                                    LinePosition.from(para.lineRange().startLine().line(),
-//                                                            para.lineRange().startLine().offset()));
-                                            Optional<TypeSymbol> symbol = semanticModel.type(para.lineRange());
+
+                                            Optional<Symbol> symbol =
+                                                    semanticModel.symbol((ArrayTypeDescriptorNode) type);
                                             if (symbol != null && symbol.isPresent()) {
                                                 paramType[0] = ((BallerinaVariableSymbol) symbol.get())
                                                         .typeDescriptor();

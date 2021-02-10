@@ -29,7 +29,6 @@ import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.ballerinalang.compiler.semantics.model.types.BType;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -41,12 +40,10 @@ import java.util.List;
  * Tests related to record validations.
  */
 public class RecordValidationTests {
-    private static BType paramType = null;
     private static SyntaxTree syntaxTree = null;
     private static BallerinaSemanticModel semanticModel = null;
     private static Inputs inputs = new Inputs();
     private static List<ValidationError> validationErrorList = new ArrayList<>();
-    private static final Path RESOURCE_DIRECTORY = Paths.get("src/test/resources/openapiValidator/ballerina-files");
     private static final Path RES_DIR = Paths.get("src/test/resources/openapiValidator/resources/recordValidation" +
             "/swagger/")
             .toAbsolutePath();
@@ -54,7 +51,7 @@ public class RecordValidationTests {
     private Schema extractSchema;
 
 
-    @Test(description = "Test for the valid", enabled = true)
+    @Test(description = "Test for the valid", enabled = false)
     public void testValidRecord() throws OpenApiValidatorException, IOException {
         //Extract record type for the syntax tree
         inputs = BaseTests.returnBType("validRecord.bal", "validTest", "");
@@ -67,7 +64,7 @@ public class RecordValidationTests {
         Assert.assertTrue(validationErrorList.isEmpty());
     }
 
-    @Test(description = "Test for the type mismatching", enabled = true)
+    @Test(description = "Test for the type mismatching", enabled = false)
     public void testTypeMismatchFieldRecord() throws OpenApiValidatorException, IOException {
         //Extract record type for the syntax tree
         inputs = BaseTests.returnBType("typeMisMatch.bal", "invalidTest", "User");
@@ -81,7 +78,7 @@ public class RecordValidationTests {
         Assert.assertEquals(((TypeMismatch) validationErrorList.get(0)).getFieldName(), "id");
     }
 
-    @Test(description = "Test for extra field in the record", enabled = true)
+    @Test(description = "Test for extra field in the record", enabled = false)
     public void testExtraFiledInRecord() throws OpenApiValidatorException, IOException {
         inputs = BaseTests.returnBType("extraFieldInRecord.bal", "invalidTest",
                 "ExtraFieldInRecord");
@@ -95,7 +92,7 @@ public class RecordValidationTests {
         Assert.assertEquals(((MissingFieldInJsonSchema) validationErrorList.get(0)).getFieldName(), "status");
     }
 
-    @Test(description = "Test for valid the nested record", enabled = true)
+    @Test(description = "Test for valid the nested record", enabled = false)
     public void test4NestedRecord() throws OpenApiValidatorException, IOException {
         inputs = BaseTests.returnBType("nested4Record.bal", "invalidTest",
                 "FourNestedComponent");
@@ -112,7 +109,7 @@ public class RecordValidationTests {
         Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeBallerinaType(), Constants.Type.INT);
     }
 
-    @Test(description = "Test for valid the nested record", enabled = true)
+    @Test(description = "Test for valid the nested record", enabled = false)
     public void testTypeMisMatchNestedRecord() throws OpenApiValidatorException, IOException {
         inputs = BaseTests.returnBType("nestedRecord.bal", "invalidTest", "NestedRecord");
         //Load yaml file
@@ -126,7 +123,7 @@ public class RecordValidationTests {
         Assert.assertEquals(((TypeMismatch) validationErrorList.get(0)).getFieldName(), "id");
     }
 
-    @Test(description = "Test for valid the nested record", enabled = true)
+    @Test(description = "Test for valid the nested record", enabled = false)
     public void testExtraFieldInNestedRecord() throws OpenApiValidatorException, IOException {
         inputs = BaseTests.returnBType("extraFieldInNestedRecord.bal", "invalidTest",
                 "ExtraFieldInRecord");
@@ -140,7 +137,7 @@ public class RecordValidationTests {
         Assert.assertEquals(((MissingFieldInJsonSchema) validationErrorList.get(0)).getFieldName(), "tag");
     }
 
-    @Test(description = "Test for valid the nested record", enabled = true)
+    @Test(description = "Test for valid the nested record", enabled = false)
     public void testArrayTypeFieldInRecord() throws OpenApiValidatorException, IOException {
         inputs = BaseTests.returnBType("extraFieldInNestedRecord.bal", "invalidTest",
                 "ExtraFieldInRecord");
@@ -155,7 +152,7 @@ public class RecordValidationTests {
     }
 
     //Primitive
-    @Test(description = "Test for valid the nested record", enabled = true)
+    @Test(description = "Test for valid the nested record", enabled = false)
     public void testInteger() throws OpenApiValidatorException, IOException {
         inputs = BaseTests.returnBType("typeMisMatchPrimitive.bal", "invalidTest", "");
         Path contractPath = RES_DIR.resolve("invalidTests/integerPrimitive.yaml");
@@ -168,7 +165,7 @@ public class RecordValidationTests {
         Assert.assertEquals(((TypeMismatch) validationErrorList.get(0)).getFieldName(), "paramName");
     }
 
-    @Test(description = "Test for valid the nested record", enabled = true)
+    @Test(description = "Test for valid the nested record", enabled = false)
     public void testArray() throws OpenApiValidatorException, IOException {
         inputs = BaseTests.returnBType("arrayB.bal", "invalidTest", "");
         Path contractPath = RES_DIR.resolve("invalidTests/arrayB.yaml");
@@ -184,7 +181,7 @@ public class RecordValidationTests {
         Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeBallerinaType(), Constants.Type.INT);
     }
 
-    @Test(description = "Test for valid the nested array", enabled = true)
+    @Test(description = "Test for valid the nested array", enabled = false)
     public void testNestedArray() throws OpenApiValidatorException, IOException {
         inputs = BaseTests.returnBType("arrayNB.bal", "invalidTest", "");
         Path contractPath = RES_DIR.resolve("invalidTests/arrayNB.yaml");
@@ -200,7 +197,7 @@ public class RecordValidationTests {
         Assert.assertEquals(((TypeMismatch) (validationErrorList).get(0)).getTypeBallerinaType(), Constants.Type.INT);
     }
 
-    @Test(enabled = true, description = "Type mismatch with record array")
+    @Test(enabled = false, description = "Type mismatch with record array")
     public void testRecordArrayType() throws IOException, OpenApiValidatorException {
         inputs = BaseTests.returnBType("arrayRB.bal", "invalidTest", "");
         Path contractPath = RES_DIR.resolve("invalidTests/arrayRB.yaml");
@@ -218,7 +215,7 @@ public class RecordValidationTests {
     }
 
     //need to do schema to record
-    @Test(description = "Test for extra field in the schema", enabled = true)
+    @Test(description = "Test for extra field in the schema", enabled = false)
     public void testExtraFiledInSchema() throws OpenApiValidatorException, IOException {
         inputs = BaseTests.returnBType("extraFieldInRecord.bal", "invalidTest",
                 "ExtraFieldInRecord");

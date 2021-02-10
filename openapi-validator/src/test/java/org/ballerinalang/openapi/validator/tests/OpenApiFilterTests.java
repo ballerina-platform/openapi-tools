@@ -35,7 +35,7 @@ import java.util.List;
  * This unit tests for filterOpenApi function.
  */
 public class OpenApiFilterTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/contractValidation/")
+    private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/modules/contractValidation/")
             .toAbsolutePath();
     private OpenAPI api;
     private List<OpenAPIPathSummary> openAPIPathSummaries = new ArrayList<>();
