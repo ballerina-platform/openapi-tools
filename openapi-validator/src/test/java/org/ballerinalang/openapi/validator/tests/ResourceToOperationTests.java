@@ -26,6 +26,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Tests for resource function validates against to openAPI operation.
+ */
 public class ResourceToOperationTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/modules/resourceHandle/")
             .toAbsolutePath();
@@ -46,11 +49,11 @@ public class ResourceToOperationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/valid/petstore_path_parameter.bal"));
         operation = api.getPaths().get("/pets/{petId}").getGet();
-        resourceMethod = ValidatorTest.getResourceMethod(project,"/pets/{petId}", "get" );
+        resourceMethod = ValidatorTest.getResourceMethod(project, "/pets/{petId}", "get");
         syntaxTree = ValidatorTest.getSyntaxTree(project);
         semanticModel = ValidatorTest.getSemanticModel(project);
         validationError = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod, semanticModel
-                ,syntaxTree);
+                , syntaxTree);
         Assert.assertTrue(validationError.isEmpty());
     }
 
@@ -60,11 +63,11 @@ public class ResourceToOperationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_path_parameter.bal"));
         operation = api.getPaths().get("/pets/{petId}").getGet();
-        resourceMethod = ValidatorTest.getResourceMethod(project,"/pets/{petId}", "get" );
+        resourceMethod = ValidatorTest.getResourceMethod(project, "/pets/{petId}", "get");
         syntaxTree = ValidatorTest.getSyntaxTree(project);
         semanticModel = ValidatorTest.getSemanticModel(project);
         validationError = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod, semanticModel
-                ,syntaxTree);
+                , syntaxTree);
         Assert.assertTrue(validationError.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationError.get(0).getFieldName(), "petId");
         Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
@@ -77,11 +80,11 @@ public class ResourceToOperationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_path_parameter.bal"));
         operation = api.getPaths().get("/pets/{petId}").getGet();
-        resourceMethod = ValidatorTest.getResourceMethod(project,"/pets/{petId}", "get" );
+        resourceMethod = ValidatorTest.getResourceMethod(project, "/pets/{petId}", "get");
         syntaxTree = ValidatorTest.getSyntaxTree(project);
         semanticModel = ValidatorTest.getSemanticModel(project);
         validationError = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod, semanticModel
-                ,syntaxTree);
+                , syntaxTree);
         Assert.assertTrue(validationError.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationError.get(0).getFieldName(), "petId");
         Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
@@ -94,11 +97,11 @@ public class ResourceToOperationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_path_2parameter.bal"));
         operation = api.getPaths().get("/pets/{petId}/{petName}").getGet();
-        resourceMethod = ValidatorTest.getResourceMethod(project,"/pets/{petId}/{petName}", "get" );
+        resourceMethod = ValidatorTest.getResourceMethod(project, "/pets/{petId}/{petName}", "get");
         syntaxTree = ValidatorTest.getSyntaxTree(project);
         semanticModel = ValidatorTest.getSemanticModel(project);
         validationError = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod, semanticModel
-                ,syntaxTree);
+                , syntaxTree);
         Assert.assertTrue(validationError.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationError.get(0).getFieldName(), "petId");
         Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
@@ -112,11 +115,11 @@ public void testTypeMissMatchQueryParam() throws OpenApiValidatorException, IOEx
     api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
     project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_query_parameter.bal"));
     operation = api.getPaths().get("/pets").getGet();
-    resourceMethod = ValidatorTest.getResourceMethod(project,"/pets", "get" );
+    resourceMethod = ValidatorTest.getResourceMethod(project, "/pets", "get");
     syntaxTree = ValidatorTest.getSyntaxTree(project);
     semanticModel = ValidatorTest.getSemanticModel(project);
     validationError = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod, semanticModel
-            ,syntaxTree);
+            , syntaxTree);
     Assert.assertTrue(validationError.get(0) instanceof TypeMismatch);
     Assert.assertEquals(validationError.get(0).getFieldName(), "'limit");
     Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
@@ -130,11 +133,11 @@ public void testTypeMissMatchRequestPayloadParam() throws OpenApiValidatorExcept
     api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
     project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_rb_jsonpayload.bal"));
     operation = api.getPaths().get("/pets").getPost();
-    resourceMethod = ValidatorTest.getResourceMethod(project,"/pets", "post" );
+    resourceMethod = ValidatorTest.getResourceMethod(project, "/pets", "post");
     syntaxTree = ValidatorTest.getSyntaxTree(project);
     semanticModel = ValidatorTest.getSemanticModel(project);
     validationError = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod, semanticModel
-            ,syntaxTree);
+            , syntaxTree);
     Assert.assertTrue(validationError.get(0) instanceof TypeMismatch);
     Assert.assertEquals(validationError.get(0).getFieldName(), "userName");
     Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
@@ -147,11 +150,11 @@ public void testTypeMissMatchRequestPayloadParam() throws OpenApiValidatorExcept
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_rb_missfieldpayload.bal"));
         operation = api.getPaths().get("/pets").getPost();
-        resourceMethod = ValidatorTest.getResourceMethod(project,"/pets", "post" );
+        resourceMethod = ValidatorTest.getResourceMethod(project, "/pets", "post");
         syntaxTree = ValidatorTest.getSyntaxTree(project);
         semanticModel = ValidatorTest.getSemanticModel(project);
         validationError = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod, semanticModel
-                ,syntaxTree);
+                , syntaxTree);
         Assert.assertTrue(validationError.get(0) instanceof MissingFieldInJsonSchema);
         Assert.assertEquals(validationError.get(0).getFieldName(), "id");
         Assert.assertEquals(((MissingFieldInJsonSchema) (validationError).get(0)).getType(), Constants.Type.INT);

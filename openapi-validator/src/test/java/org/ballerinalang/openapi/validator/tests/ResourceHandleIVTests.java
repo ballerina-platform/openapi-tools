@@ -63,9 +63,6 @@ public class ResourceHandleIVTests {
     public void testResourcePath() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstore.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-//        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstore.bal");
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        validationErrors = ResourceWithOperation.checkOperationIsAvailable(api, extractBLangservice);
         Assert.assertTrue(validationErrors.get(0) instanceof ResourceValidationError);
         Assert.assertEquals(validationErrors.get(0).getResourcePath(), "/extraPathPet");
     }
@@ -75,9 +72,6 @@ public class ResourceHandleIVTests {
     public void testResourceExtraMethod() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraMethod.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-//        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreExtraMethod.bal");
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        validationErrors = ResourceWithOperation.checkOperationIsAvailable(api, extractBLangservice);
         Assert.assertTrue(validationErrors.get(0) instanceof ResourceValidationError);
         Assert.assertEquals(validationErrors.get(0).getresourceMethod(), "post");
     }
@@ -87,12 +81,6 @@ public class ResourceHandleIVTests {
     public void testExtraServicePath() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraServiceOperation.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-//        bLangPackage = ValidatorTest.getBlangPackage(
-//                "resourceHandle/ballerina/invalid/petstoreExtraServiceOperation.bal");
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        serviceValidationErrors =
-//                ResourceWithOperation.checkServiceAvailable(ResourceWithOperation.summarizeOpenAPI(api),
-//                        extractBLangservice);
         Assert.assertTrue(serviceValidationErrors.get(0) instanceof OpenapiServiceValidationError);
         Assert.assertEquals(serviceValidationErrors.get(0).getServiceOperation(), "post");
         Assert.assertEquals(serviceValidationErrors.get(0).getServicePath(), "/pets/{petId}");
@@ -102,11 +90,7 @@ public class ResourceHandleIVTests {
     public void testResourceFunctionNode() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreFunctionNode.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-//        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreFunctionNode.bal");
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "get");
         operation = api.getPaths().get("/pets/{petId}").getGet();
-//        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "petId");
     }
 
@@ -114,11 +98,7 @@ public class ResourceHandleIVTests {
     public void testResourceRecordParameter() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-//        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreRecordParameter.bal");
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-//        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "name");
     }
@@ -127,11 +107,7 @@ public class ResourceHandleIVTests {
     public void testResourceRecordParameter01() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordParameter01.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-//        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreRecordParameter01.bal");
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-//        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof MissingFieldInJsonSchema);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "place");
     }
@@ -140,11 +116,7 @@ public class ResourceHandleIVTests {
     public void testResourceWithRequestBody() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRBParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-//        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreRBParameter.bal");
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-//        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "name");
     }
@@ -153,12 +125,7 @@ public class ResourceHandleIVTests {
     public void testResourceWithRBPrimitive() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRBPrimitiveParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-//        bLangPackage = ValidatorTest.getBlangPackage(
-//                "resourceHandle/ballerina/invalid/petstoreRBPrimitiveParameter.bal");
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-//        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "body");
     }
@@ -167,12 +134,7 @@ public class ResourceHandleIVTests {
     public void testResourceWithRBOneOf() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreOneOfTypeMismatch.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-//        bLangPackage = ValidatorTest.getBlangPackage(
-//                "resourceHandle/ballerina/invalid/petstoreOneOfTypeMismatch.bal");
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-//        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof OneOfTypeValidation);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "Dog");
         Assert.assertEquals(((OneOfTypeValidation) resourceValidationErrors.get(0))
@@ -201,21 +163,8 @@ public class ResourceHandleIVTests {
     public void testRequestBodywithPathParamter() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRBwithPathParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-//        bLangPackage = ValidatorTest.getBlangPackage(
-//                "resourceHandle/ballerina/invalid/petstoreRBwithPathParameter.bal");
-//        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-//        resourceValidationErrors = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "name");
-    }
-
-    @Test(description = "Test for path parameters")
-    public void testPathParameter() {
-        //        Path contractPath = RES_DIR.resolve("swagger/valid/petstore.yaml");
-//        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-        project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/valid/petstore.bal"));
-
     }
 }

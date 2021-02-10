@@ -1,18 +1,21 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+
 package org.ballerinalang.openapi.validator;
 
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -195,19 +198,20 @@ public class ResourceWithOperation {
      * @param resourcePathSummaries
      * @return
      */
-    public static List<OpenapiServiceValidationError> checkOperationsHasFunctions(List<OpenAPIPathSummary> openAPIPathSummaries,
-                                                                                  Map<String, ResourcePathSummary> resourcePathSummaries) {
+    public static List<OpenapiServiceValidationError> checkOperationsHasFunctions(
+            List<OpenAPIPathSummary> openAPIPathSummaries, Map<String, ResourcePathSummary> resourcePathSummaries) {
+
         List<OpenapiServiceValidationError> operationsValidationErrors = new ArrayList<>();
         for (OpenAPIPathSummary openAPIPathSummary: openAPIPathSummaries) {
             boolean isPathExit = false;
-            //----call me when it is over
+
             for (Map.Entry<String, ResourcePathSummary> resourcePathSummary: resourcePathSummaries.entrySet()) {
                 if (openAPIPathSummary.getPath().equals(resourcePathSummary.getKey())) {
                     isPathExit = true;
                     for (String method : openAPIPathSummary.getAvailableOperations()) {
                         boolean isMethodExit = false;
-                        for(Map.Entry<String, ResourceMethod> resourceMethod:
-                                resourcePathSummary.getValue().getMethods().entrySet()) {
+                        Map<String, ResourceMethod> methods = resourcePathSummary.getValue().getMethods();
+                        for (Map.Entry<String, ResourceMethod> resourceMethod: methods.entrySet()) {
                             if (method.equals(resourceMethod.getKey())) {
                                 isMethodExit = true;
                                 break;
@@ -225,23 +229,24 @@ public class ResourceWithOperation {
                 }
             }
             if (!isPathExit) {
-                OpenapiServiceValidationError openapiServiceValidationError = new OpenapiServiceValidationError(null,
-                        openAPIPathSummary.getPath(), null, openAPIPathSummary);
+                OpenapiServiceValidationError openapiServiceValidationError = new OpenapiServiceValidationError(
+                        null, openAPIPathSummary.getPath(), null, openAPIPathSummary);
                 operationsValidationErrors.add(openapiServiceValidationError);
             }
         }
         return operationsValidationErrors;
     }
 
-    public static List<ResourceValidationError> checkResourceHasOperation(List<OpenAPIPathSummary> openAPIPathSummaries,
-                                                                   Map<String, ResourcePathSummary> resourcePathSummaries) {
+    public static List<ResourceValidationError> checkResourceHasOperation(
+            List<OpenAPIPathSummary> openAPIPathSummaries, Map<String, ResourcePathSummary> resourcePathSummaries) {
         List<ResourceValidationError> resourceValidationErrors = new ArrayList<>();
         for (Map.Entry<String, ResourcePathSummary> resourcePathSummary: resourcePathSummaries.entrySet()) {
             boolean isResourceExit = false;
             for (OpenAPIPathSummary openAPIPathSummary: openAPIPathSummaries) {
                 if (resourcePathSummary.getKey().equals(openAPIPathSummary.getPath())) {
                     isResourceExit = true;
-                    for (Map.Entry<String, ResourceMethod> method : resourcePathSummary.getValue().getMethods().entrySet()) {
+                    Map<String, ResourceMethod> methods = resourcePathSummary.getValue().getMethods();
+                    for (Map.Entry<String, ResourceMethod> method : methods.entrySet()) {
                         boolean isMethodExit = false;
                         for (String operation: openAPIPathSummary.getAvailableOperations()) {
                             if (method.getKey().equals(operation)) {

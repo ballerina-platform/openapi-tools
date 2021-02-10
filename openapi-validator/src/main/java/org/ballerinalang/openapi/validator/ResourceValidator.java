@@ -1,18 +1,21 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+
 package org.ballerinalang.openapi.validator;
 
 import io.ballerina.compiler.api.SemanticModel;
@@ -27,6 +30,7 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -69,7 +73,7 @@ public class ResourceValidator {
                 if (operation.getParameters() != null) {
                     List<Parameter> parameters = operation.getParameters();
                     for (Parameter parameter : parameters) {
-                        String resourceParam = resourceParameter.getKey().replaceFirst("'","").trim();
+                        String resourceParam = resourceParameter.getKey().replaceFirst("'", "").trim();
                         if (resourceParam.equals(parameter.getName()) && (parameter.getSchema() != null)) {
                             isParameterExit = true;
                             // Handle path parameter
@@ -86,10 +90,13 @@ public class ResourceValidator {
                                         VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
                                         typeSymbol = symbol1.typeDescriptor();
                                     }
+
                                     List<ValidationError> validationErrors =
                                             TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
                                                     typeSymbol, syntaxTree, semanticModel,
-                                                    resourceParameter.getKey());
+                                                    resourceParameter.getKey(),
+                                                    resourceParameter.getValue().location());
+
                                     if (!validationErrors.isEmpty()) {
                                         validationErrorList.addAll(validationErrors);
                                     }
@@ -102,10 +109,13 @@ public class ResourceValidator {
                                 if (!queryParam.toString().equals("http:Payload")) {
                                     paramType = queryParam.typeName().toString().trim();
                                     TypeSymbol typeSymbol = getTypeSymbol(semanticModel, queryParam);
+
                                     List<ValidationError> validationErrors =
                                             TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
                                                     typeSymbol, syntaxTree, semanticModel,
-                                                    resourceParameter.getKey());
+                                                    resourceParameter.getKey(),
+                                                    resourceParameter.getValue().location());
+
                                     if (!validationErrors.isEmpty()) {
                                         validationErrorList.addAll(validationErrors);
                                     }
@@ -123,9 +133,12 @@ public class ResourceValidator {
                             isParameterExit = true;
                             Schema value = requestBody.getValue();
                             TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
+
                             List<ValidationError> validationErrors =
                                     TypeSymbolToJsonValidatorUtil.validate(value, typeSymbol, syntaxTree, semanticModel,
-                                            bodyNode.typeName().toString().trim());
+                                            bodyNode.typeName().toString().trim(),
+                                            resourceParameter.getValue().location());
+
                             if (!validationErrors.isEmpty()) {
                                 validationErrorList.addAll(validationErrors);
                             }
@@ -133,8 +146,11 @@ public class ResourceValidator {
                     }
                 }
                 if (!isParameterExit) {
+
                     ValidationError validationError = new ValidationError(resourceParameter.getKey(),
-                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(paramType));
+                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(paramType),
+                            resourceParameter.getValue().location());
+
                     validationErrorList.add(validationError);
                 }
             }
@@ -145,66 +161,65 @@ public class ResourceValidator {
     static List<ValidationError> validateOperationAgainstResource(Operation operation,
                                                                   ResourceMethod resourceMethod,
                                                                   SemanticModel semanticModel,
-                                                                  SyntaxTree syntaxTree)
+                                                                  SyntaxTree syntaxTree,
+                                                                  Location location)
             throws OpenApiValidatorException {
         List<ValidationError> validationErrorList = new ArrayList<>();
         if (operation.getParameters() != null) {
             for (Parameter parameter: operation.getParameters()) {
                 boolean isOParameterExist = false;
-                Map<String, Node> parameters = resourceMethod.getParameters();
-                for (Map.Entry<String, Node> parameterNode: parameters.entrySet()) {
-                    Node paramNode = parameterNode.getValue();
-
-                    if (!resourceMethod.getParameters().isEmpty()) {
-                        for (Map.Entry<String, Node> resourceParam: resourceMethod.getParameters().entrySet()) {
-                            // Check query parameters
-                            if (parameter instanceof QueryParameter && (parameter.getName().equals(resourceParam.getKey()))
-                                    && paramNode instanceof ResourcePathParameterNode) {
-                                RequiredParameterNode queryParam = (RequiredParameterNode) paramNode;
-                                //equals or contains
-                                if (!queryParam.toString().equals("http:Payload")) {
-                                    isOParameterExist = true;
-                                    TypeSymbol typeSymbol = getTypeSymbol(semanticModel, queryParam);
-                                    List<ValidationError> validationErrors =
-                                            TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
-                                                    typeSymbol, syntaxTree, semanticModel,
-                                                    resourceParam.getKey());
-                                    if (!validationErrors.isEmpty()) {
-                                        validationErrorList.addAll(validationErrors);
-                                    }
-                                }
-
-                            }
-                            //  Check whether it is path parameter
-                            if ((parameter instanceof PathParameter) && (parameter.getName().equals(resourceParam.getKey()))
-                                    && paramNode instanceof ResourcePathParameterNode) {
+                if (!resourceMethod.getParameters().isEmpty()) {
+                    Map<String, Node> parameters = resourceMethod.getParameters();
+                    for (Map.Entry<String, Node> resourceParam: parameters.entrySet()) {
+                        Node paramNode = resourceParam.getValue();
+                        // Check query parameters
+                        if (parameter instanceof QueryParameter && (parameter.getName().equals(resourceParam.getKey()))
+                                && paramNode instanceof RequiredParameterNode) {
+                            RequiredParameterNode queryParam = (RequiredParameterNode) paramNode;
+                            //equals or contains
+                            if (!queryParam.toString().equals("http:Payload")) {
                                 isOParameterExist = true;
-                                TypeDescriptorNode typeNode =
-                                        (TypeDescriptorNode) ((ResourcePathParameterNode) paramNode).typeDescriptor();
-                                Token paramName = ((ResourcePathParameterNode) paramNode).paramName();
-                                if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
-                                    Optional<Symbol> symbol = semanticModel.symbol(paramName);
-                                    TypeSymbol typeSymbol = null;
-                                    if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
-                                        VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
-                                        typeSymbol = symbol1.typeDescriptor();
-                                    }
-                                    List<ValidationError> validationErrors =
-                                            TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
-                                                    typeSymbol, syntaxTree, semanticModel,
-                                                    resourceParam.getKey());
-                                    if (!validationErrors.isEmpty()) {
-                                        validationErrorList.addAll(validationErrors);
-                                    }
+                                TypeSymbol typeSymbol = getTypeSymbol(semanticModel, queryParam);
+                                List<ValidationError> validationErrors =
+                                        TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
+                                                typeSymbol, syntaxTree, semanticModel,
+                                                resourceParam.getKey(), location);
+                                if (!validationErrors.isEmpty()) {
+                                    validationErrorList.addAll(validationErrors);
                                 }
-                                break;
                             }
+
+                        }
+                        //  Check whether it is path parameter
+                        if ((parameter instanceof PathParameter) && (parameter.getName().equals(resourceParam.getKey()))
+                                && paramNode instanceof ResourcePathParameterNode) {
+                            isOParameterExist = true;
+                            TypeDescriptorNode typeNode =
+                                    (TypeDescriptorNode) ((ResourcePathParameterNode) paramNode).typeDescriptor();
+                            Token paramName = ((ResourcePathParameterNode) paramNode).paramName();
+                            if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
+                                Optional<Symbol> symbol = semanticModel.symbol(paramName);
+                                TypeSymbol typeSymbol = null;
+                                if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
+                                    VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
+                                    typeSymbol = symbol1.typeDescriptor();
+                                }
+                                List<ValidationError> validationErrors =
+                                        TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
+                                                typeSymbol, syntaxTree, semanticModel,
+                                                resourceParam.getKey(), location);
+                                if (!validationErrors.isEmpty()) {
+                                    validationErrorList.addAll(validationErrors);
+                                }
+                            }
+                            break;
                         }
                     }
                 }
+
                 if (!isOParameterExist) {
                     ValidationError validationError = new ValidationError(parameter.getName(),
-                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(parameter.getSchema().getType()));
+                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(parameter.getSchema().getType()), location);
                     validationErrorList.add(validationError);
                 }
             }
@@ -216,7 +231,7 @@ public class ResourceValidator {
             for (Map.Entry<String, Schema> operationRB: requestBodySchemas.entrySet()) {
                 Boolean isOParamExit = false;
                 isOParamExit = validateRequestBodyOpenApiToResource(resourceMethod, validationErrorList, resourceParams,
-                        operationRB, isOParamExit, semanticModel, syntaxTree);
+                        operationRB, isOParamExit, semanticModel, syntaxTree, location);
                 if (!isOParamExit) {
                     String type = "";
                     if (operationRB.getValue().getType() == null && (operationRB.getValue().getProperties() != null)) {
@@ -225,7 +240,7 @@ public class ResourceValidator {
                         type = operationRB.getValue().getType();
                     }
                     ValidationError validationError = new ValidationError(operationRB.getKey(),
-                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(type));
+                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(type), location);
                     validationErrorList.add(validationError);
                 }
             }
@@ -261,8 +276,9 @@ public class ResourceValidator {
                                                                 Map<String, Node> resourceParam,
                                                                 Map.Entry<String, Schema> operationRB,
                                                                 Boolean isOParamExit,
-                                                               SemanticModel semanticModel,
-                                                               SyntaxTree syntaxTree) throws OpenApiValidatorException {
+                                                                SemanticModel semanticModel,
+                                                                SyntaxTree syntaxTree,
+                                                                Location location) throws OpenApiValidatorException {
 
         if (!resourceParam.isEmpty()) {
             for (Map.Entry<String, Node> resourceParameter : resourceParam.entrySet()) {
@@ -273,7 +289,7 @@ public class ResourceValidator {
                         TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
                         List<ValidationError> validationErrors =
                                 TypeSymbolToJsonValidatorUtil.validate(value, typeSymbol, syntaxTree, semanticModel,
-                                        bodyNode.typeName().toString().trim());
+                                        bodyNode.typeName().toString().trim(), location);
                         if (!validationErrors.isEmpty()) {
                             validationErrorList.addAll(validationErrors);
                         }

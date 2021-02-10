@@ -57,7 +57,8 @@ public class ServiceValidationTests {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore.bal"));
         diagnostics = ServiceValidator.validateResourceFunctions(project);
         Assert.assertTrue(!diagnostics.isEmpty());
-        Assert.assertEquals(diagnostics.get(0).message(), "Couldn't find a Ballerina service resource for the path '/user' which is documented in the OpenAPI contract" );
+        Assert.assertEquals(diagnostics.get(0).message(), "Couldn't find a Ballerina service resource for " +
+                "the path '/user' which is documented in the OpenAPI contract");
     }
 
     @Test(description = "test for undocumented Method in contract missing method in bal service")
@@ -65,7 +66,8 @@ public class ServiceValidationTests {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstoreMethod.bal"));
         diagnostics = ServiceValidator.validateResourceFunctions(project);
         Assert.assertTrue(!diagnostics.isEmpty());
-        Assert.assertEquals(diagnostics.get(0).message(), "Couldn't find Ballerina service resource(s) for http method(s) 'post' for the path '/pets' which is documented in the OpenAPI contract" );
+        Assert.assertEquals(diagnostics.get(0).message(), "Couldn't find Ballerina service resource(s) for" +
+                " http method(s) 'post' for the path '/pets' which is documented in the OpenAPI contract");
     }
 
     @Test(description = "Test for all Paths and methods documented")
@@ -80,7 +82,9 @@ public class ServiceValidationTests {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstoreParameterTM.bal"));
         diagnostics = ServiceValidator.validateResourceFunctions(project);
         Assert.assertTrue(!diagnostics.isEmpty());
-        Assert.assertEquals(diagnostics.get(0).message(), "Type mismatch with parameter 'petId' for the method 'get' of the path '/pets/{petId}'.In OpenAPI contract its type is 'string' and resources type is 'int'." );
+        Assert.assertEquals(diagnostics.get(0).message(), "Type mismatch with parameter 'petId' for the " +
+                "method 'get' of the path '/pets/{petId}'.In OpenAPI contract its type is 'string' and resources " +
+                "type is 'int'.");
     }
 
     @Test(description = "test for all the Path , Query, Payload scenarios")
@@ -88,19 +92,22 @@ public class ServiceValidationTests {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/all_petstore.bal"));
         diagnostics = ServiceValidator.validateResourceFunctions(project);
         Assert.assertTrue(!diagnostics.isEmpty());
-        Assert.assertEquals(diagnostics.get(0).message(), "Type mismatch with parameter 'id' for the method 'delete' " +
-                "of the path '/pets/{id}'.In OpenAPI contract its type is 'integer' and resources type is 'string'. " );
-        Assert.assertEquals(diagnostics.get(1).message(), "Type mismatching 'name' field in the record type of the " +
-                "parameter 'NewPet' for the method 'post' of the path '/pets'.In OpenAPI contract its type is 'string' and resources type is 'int'. " );
-        Assert.assertEquals(diagnostics.get(2).message(), "''limit1' parameter for the method 'get' of the resource " +
-                "associated with the path '/pets' is not documented in the OpenAPI contract" );
+        Assert.assertEquals(diagnostics.get(0).message(), "Type mismatch with parameter 'id' for the method" +
+                " 'delete' of the path '/pets/{id}'.In OpenAPI contract its type is 'integer' and resources type is " +
+                "'string'. ");
+        Assert.assertEquals(diagnostics.get(1).message(), "Type mismatching 'name' field in the record " +
+                "type of the parameter 'NewPet' for the method 'post' of the path '/pets'.In OpenAPI contract its " +
+                "type is 'string' and resources type is 'int'. ");
+        Assert.assertEquals(diagnostics.get(2).message(), "''limit1' parameter for the method 'get' of \the resource " +
+                "associated with the path '/pets' is not documented in the OpenAPI contract");
     }
 
     @Test(enabled = false, description = "test for undocumented record field  in contract")
     public void testRecordFieldMiss() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordFieldMiss.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/invalid/petstoreRecordFieldMiss.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "serviceValidator/ballerina/invalid/petstoreRecordFieldMiss.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = DiagnosticSeverity.ERROR;
 //        dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/invalid/petstoreRecordFieldMiss.bal");
@@ -112,7 +119,8 @@ public class ServiceValidationTests {
     public void testPathParameter() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstorePathParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("serviceValidator/ballerina/invalid/petstorePathParameter.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "serviceValidator/ballerina/invalid/petstorePathParameter.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = DiagnosticSeverity.ERROR;
 //        dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/invalid/petstorePathParameter.bal");

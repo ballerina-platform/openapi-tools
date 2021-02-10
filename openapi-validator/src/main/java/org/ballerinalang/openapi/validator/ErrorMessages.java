@@ -88,8 +88,8 @@ class ErrorMessages {
     static String[] unimplementedParameterForOperation(String paramName, String method, String path) {
         String[] error = new String[2];
         error[0] = "BO0009";
-        error[1] =  String.format("Couldn't find '%s' parameter in the Ballerina service resource for the method '%s' " +
-                "of the path '%s' which is documented in the OpenAPI contract", paramName, method, path);
+        error[1] =  String.format("Couldn't find '%s' parameter in the Ballerina service resource for the method '%s' "
+                + "of the path '%s' which is documented in the OpenAPI contract", paramName, method, path);
         return  error;
     }
 
@@ -142,8 +142,8 @@ class ErrorMessages {
                                         String method, String path) {
         String[] error = new String[2];
         error[0] = "BO0015";
-        error[1] =  String.format("Type mismatching '%s' field in the record type of the parameter '%s' for the method" +
-                        " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
+        error[1] =  String.format("Type mismatching '%s' field in the record type of the parameter '%s' for the method"
+                        + " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
                 fieldName, paramName, method,  path, openapiType , ballerinType);
         return  error;
     }
@@ -152,8 +152,9 @@ class ErrorMessages {
                                           String method, String path) {
         String[] error = new String[2];
         error[0] = "BO0016";
-        error[1] =  String.format("Type mismatch with '%s' field in the object type of the parameter '%s' for the method" +
-        " '%s' of the path '%s'.OpenAPI object schema expected '%s' type and resources has '%s' type for field.",
+        error[1] =  String.format("Type mismatch with '%s' field in the object type of the parameter '%s'" +
+                        " for the method '%s' of the path '%s'.OpenAPI object schema expected '%s' type and " +
+                        "resources has '%s' type for field.",
                 fieldName, paramName, method,  path, openapiType, ballerinType);
         return  error;
     }

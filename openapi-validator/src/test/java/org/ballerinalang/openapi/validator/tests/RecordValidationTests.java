@@ -90,7 +90,7 @@ public class RecordValidationTests {
         extractSchema = ValidatorTest.getComponet(api, "ExtraFieldInRecord");
         validationErrorList = TypeSymbolToJsonValidatorUtil
                 .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(),
-                        "ExtraFieldInRecord");
+                        "ExtraFieldInRecord", null);
         Assert.assertTrue(validationErrorList.get(0) instanceof MissingFieldInJsonSchema);
         Assert.assertEquals(((MissingFieldInJsonSchema) validationErrorList.get(0)).getFieldName(), "status");
     }
@@ -104,7 +104,7 @@ public class RecordValidationTests {
         extractSchema = ValidatorTest.getComponet(api, "FourNestedComponent");
         validationErrorList = TypeSymbolToJsonValidatorUtil
                 .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(),
-                        "FourNestedComponent");
+                        "FourNestedComponent", null);
 
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrorList.get(0).getFieldName(), "month");
@@ -121,7 +121,7 @@ public class RecordValidationTests {
         extractSchema = ValidatorTest.getComponet(api, "NestedRecord");
         validationErrorList = TypeSymbolToJsonValidatorUtil
                 .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(),
-                        "NestedRecord");
+                        "NestedRecord", null);
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
         Assert.assertEquals(((TypeMismatch) validationErrorList.get(0)).getFieldName(), "id");
     }
@@ -135,7 +135,7 @@ public class RecordValidationTests {
         extractSchema = ValidatorTest.getComponet(api, "ExtraFieldInRecord");
         validationErrorList = TypeSymbolToJsonValidatorUtil
                 .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(),
-                        "ExtraFieldInRecord");
+                        "ExtraFieldInRecord", null);
         Assert.assertTrue(validationErrorList.get(0) instanceof MissingFieldInJsonSchema);
         Assert.assertEquals(((MissingFieldInJsonSchema) validationErrorList.get(0)).getFieldName(), "tag");
     }
@@ -149,7 +149,7 @@ public class RecordValidationTests {
         extractSchema = ValidatorTest.getComponet(api, "ExtraFieldInRecord");
         validationErrorList = TypeSymbolToJsonValidatorUtil
                 .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(),
-                        "ExtraFieldInRecord");
+                        "ExtraFieldInRecord", null);
         Assert.assertTrue(validationErrorList.get(0) instanceof MissingFieldInJsonSchema);
         Assert.assertEquals(((MissingFieldInJsonSchema) validationErrorList.get(0)).getFieldName(), "tag");
     }
@@ -163,7 +163,7 @@ public class RecordValidationTests {
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         validationErrorList = TypeSymbolToJsonValidatorUtil
                 .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(),
-                        "");
+                        "", null);
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
         Assert.assertEquals(((TypeMismatch) validationErrorList.get(0)).getFieldName(), "paramName");
     }
@@ -175,7 +175,8 @@ public class RecordValidationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(), "");
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(), ""
+                        , null);
 
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrorList.get(0).getFieldName(), "array");
@@ -191,7 +192,7 @@ public class RecordValidationTests {
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         validationErrorList = TypeSymbolToJsonValidatorUtil
                 .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(),
-                        "");
+                        "", null);
 
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrorList.get(0).getFieldName(), "array");
@@ -206,7 +207,8 @@ public class RecordValidationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         extractSchema = ValidatorTest.getSchema(api, "/user/{category}");
         validationErrorList = TypeSymbolToJsonValidatorUtil
-                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(), "");
+                .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(), ""
+                        , null);
 
         Assert.assertTrue(validationErrorList.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrorList.get(0).getFieldName(), "id");
@@ -226,7 +228,7 @@ public class RecordValidationTests {
         extractSchema = ValidatorTest.getComponet(api, "ExtraFieldInRecord");
         validationErrorList = TypeSymbolToJsonValidatorUtil
                 .validate(extractSchema, inputs.getParamType(), inputs.getSyntaxTree(), inputs.getSemanticModel(),
-                        "");
+                        "", null);
         Assert.assertTrue(validationErrorList.get(0) instanceof MissingFieldInJsonSchema);
         Assert.assertEquals(((MissingFieldInJsonSchema) validationErrorList.get(0)).getFieldName(), "status");
     }

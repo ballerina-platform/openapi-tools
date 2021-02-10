@@ -29,7 +29,7 @@ service /api on ep0 {
 # + req    - Req represents the message, which came over the network
 # + tags - tags to filter by# + 'limit - maximum number of results to return
 # + return - Error value if an error occurred or return `()` otherwise
-    resource function get pets(http:Caller caller, http:Request req , ?  tags,  int ?  'limit1) returns error? {
+    resource function get pets(http:Caller caller, http:Request req , string[]?  tags,  int ?  'limit1) returns error? {
 
     }
 
