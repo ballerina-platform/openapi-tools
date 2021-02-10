@@ -215,9 +215,6 @@ public class RecordValidationTests {
                 Constants.Type.STRING);
     }
 
-
-
-    
     //need to do schema to record
     @Test(description = "Test for extra field in the schema", enabled = true)
     public void testExtraFiledInSchema() throws OpenApiValidatorException, IOException {

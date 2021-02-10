@@ -19,6 +19,7 @@
 
 package org.ballerinalang.openapi.validator.error;
 
+import io.ballerina.tools.diagnostics.Location;
 import org.ballerinalang.openapi.validator.Constants;
 
 /**
@@ -27,21 +28,33 @@ import org.ballerinalang.openapi.validator.Constants;
 public class TypeMismatch extends ValidationError {
     String recordName;
     String fieldName;
+    Location location;
     Constants.Type typeJsonSchema;
     Constants.Type typeBallerinaType;
 
-    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType) {
+    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType,
+                        Location location) {
         this.fieldName = fieldName;
         this.typeJsonSchema = typeJsonSchema;
         this.typeBallerinaType = typeBallerinaType;
         this.recordName = null;
+        this.location = location;
     }
     public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType,
-                        String recordName) {
+                        String recordName, Location location) {
         this.fieldName = fieldName;
         this.typeJsonSchema = typeJsonSchema;
         this.typeBallerinaType = typeBallerinaType;
         this.recordName = recordName;
+        this.location = location;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public void setFieldName(String fieldName) {

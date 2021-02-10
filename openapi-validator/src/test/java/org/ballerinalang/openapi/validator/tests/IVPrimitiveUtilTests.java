@@ -17,7 +17,6 @@ package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
-import org.ballerinalang.openapi.validator.BTypeToJsonValidatorUtil;
 import org.ballerinalang.openapi.validator.Constants;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.ServiceValidator;
@@ -54,7 +53,7 @@ public class IVPrimitiveUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/integerB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrors.get(0).getFieldName(), "userId");
     }
@@ -66,7 +65,7 @@ public class IVPrimitiveUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/arrayB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrors.get(0).getFieldName(), "userId");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
@@ -80,7 +79,7 @@ public class IVPrimitiveUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/iarrayB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrors.get(0).getFieldName(), "userId");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
@@ -94,7 +93,7 @@ public class IVPrimitiveUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/arrayRB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{category}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrors.get(0).getFieldName(), "id");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);

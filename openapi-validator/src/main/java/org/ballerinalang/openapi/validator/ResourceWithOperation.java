@@ -301,6 +301,7 @@ public class ResourceWithOperation {
             } else {
                 ResourcePathSummary resourcePathSummary = new ResourcePathSummary();
                 //Set location as first function loacation
+                resourcePathSummary.setPath(functionPath);
                 resourcePathSummary.setPathPosition(functionDefinitionNode.location());
                 setParametersToMethod(functionDefinitionNode, functionMethod, parameterNodeMap, resourcePathSummary);
                 resourceSummaryList.put(functionPath, resourcePathSummary);

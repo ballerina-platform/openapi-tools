@@ -148,10 +148,9 @@ public class TypeSymbolToJsonValidatorUtil {
         if (!isExitType) {
             assert schema != null;
             TypeMismatch typeMismatch = new TypeMismatch(paramName, convertTypeToEnum(schemaType),
-                    convertTypeToEnum(ballerinaType));
+                    convertTypeToEnum(ballerinaType), typeSymbol.location());
             validationErrorList.add(typeMismatch);
         }
-
         return validationErrorList;
     }
 
@@ -173,7 +172,7 @@ public class TypeSymbolToJsonValidatorUtil {
                         TypeMismatch validationError = new TypeMismatch(fieldSymbol.getValue().name(),
                                 convertTypeToEnum(entry.getValue().getType()),
                                 convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
-                                componentName);
+                                componentName, fieldSymbol.getValue().location());
                         validationErrorList.add(validationError);
                     } else if ((entry.getValue() instanceof ObjectSchema) && (fieldSymbol.getValue().typeDescriptor()
                             instanceof TypeReferenceTypeSymbol)) {
@@ -293,12 +292,11 @@ public class TypeSymbolToJsonValidatorUtil {
                                 traverseNestedArraySchema.getItems().getType()))) {
                     TypeMismatch typeMismatch = new TypeMismatch(fieldSymbol.name(),
                             convertTypeToEnum(traverseNestedArraySchema.getItems().getType()),
-                            convertTypeToEnum(traverseNestedArraySymbol.memberTypeDescriptor().typeKind().getName()));
+                            convertTypeToEnum(traverseNestedArraySymbol.memberTypeDescriptor().typeKind().getName()),
+                            itemTypeSymbol.location());
                     validationErrorList.add(typeMismatch);
                 }
             }
-
-
         }
     }
 

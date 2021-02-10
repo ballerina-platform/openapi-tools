@@ -18,7 +18,6 @@ package org.ballerinalang.openapi.validator.tests;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import org.ballerinalang.openapi.validator.BTypeToJsonValidatorUtil;
 import org.ballerinalang.openapi.validator.Constants;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.ServiceValidator;
@@ -58,7 +57,7 @@ public class InvalidValidatorUtilTests {
                 "recordValidation/ballerina/invalidTests/missingFieldInJsonSchema.bal");
         extractSchema = ValidatorTest.getComponet(api, "MissingFieldInJsonSchema");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.get(0)instanceof MissingFieldInJsonSchema);
         Assert.assertEquals(validationErrors.get(0).getFieldName(), "phone2");
     }
@@ -71,7 +70,7 @@ public class InvalidValidatorUtilTests {
                 "recordValidation/ballerina/invalidTests/missingFieldInBallerinaType.bal");
         extractSchema = ValidatorTest.getComponet(api, "MissingFieldInBallerinaType");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.get(1) instanceof MissingFieldInBallerinaType);
         Assert.assertEquals(validationErrors.get(1).getFieldName(), "middleName");
     }
@@ -84,7 +83,7 @@ public class InvalidValidatorUtilTests {
                 "recordValidation/ballerina/invalidTests/typeMisMatch.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatch");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
         Assert.assertEquals((validationErrors).get(0).getFieldName(), "id");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
@@ -100,7 +99,7 @@ public class InvalidValidatorUtilTests {
                 "recordValidation/ballerina/invalidTests/typeMisMatchArray.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatchArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
         Assert.assertEquals((validationErrors).get(0).getFieldName(), "phone");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
@@ -116,7 +115,7 @@ public class InvalidValidatorUtilTests {
                 "recordValidation/ballerina/invalidTests/typeMisMatchArrayType.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatchArrayType");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
         Assert.assertEquals((validationErrors).get(0).getFieldName(), "phone");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
@@ -131,7 +130,7 @@ public class InvalidValidatorUtilTests {
                 "recordValidation/ballerina/invalidTests/typeMisMatchNestedArrayType.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatchNestedArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
         Assert.assertEquals((validationErrors).get(0).getFieldName(), "phone");
     }
@@ -144,7 +143,7 @@ public class InvalidValidatorUtilTests {
                 "recordValidation/ballerina/invalidTests/recordTypeArray.bal");
         extractSchema = ValidatorTest.getComponet(api, "RecordTypeArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationErrors.get(0).getFieldName(), "id");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
@@ -159,7 +158,7 @@ public class InvalidValidatorUtilTests {
                 "recordValidation/ballerina/invalidTests/nestedRecord.bal");
         extractSchema = ValidatorTest.getComponet(api, "NestedRecord");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertEquals(validationErrors.get(0).getFieldName(), "id");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.STRING);
@@ -173,7 +172,7 @@ public class InvalidValidatorUtilTests {
                 "recordValidation/ballerina/invalidTests/nested4Record.bal");
         extractSchema = ValidatorTest.getComponet(api, "FourNestedComponent");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertEquals(validationErrors.get(0).getFieldName(), "month");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.INT);
@@ -189,7 +188,7 @@ public class InvalidValidatorUtilTests {
                 (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().
                         getContent().get("application/json").getSchema();
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(((TypeMismatch) validationErrors.get(0)).getTypeBallerinaType(), Constants.Type.DECIMAL);
     }
@@ -203,7 +202,7 @@ public class InvalidValidatorUtilTests {
                 (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent()
                         .get("application/json").getSchema();
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.get(0) instanceof OneOfTypeValidation);
         Assert.assertEquals(((OneOfTypeValidation) validationErrors.get(0)).getFieldName(), "Cat");
         Assert.assertEquals(((OneOfTypeValidation) validationErrors.get(0)).getBlockErrors().
@@ -220,7 +219,7 @@ public class InvalidValidatorUtilTests {
                 (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().
                         get("application/json").getSchema();
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.stream().allMatch(item -> item instanceof OneOfTypeValidation));
         Assert.assertEquals(((OneOfTypeValidation) validationErrors.get(0)).getFieldName(), "Dog");
         Assert.assertEquals(((OneOfTypeValidation) validationErrors.get(0)).getBlockErrors().get(0).getFieldName(),
@@ -241,7 +240,7 @@ public class InvalidValidatorUtilTests {
                         get("application/json").getSchema();
 
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.get(0) instanceof OneOfTypeValidation);
         Assert.assertEquals(((OneOfTypeValidation) validationErrors.get(0)).getBlockErrors().get(0).getFieldName(),
                 "place");
@@ -257,7 +256,7 @@ public class InvalidValidatorUtilTests {
                 (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().
                         get("application/json").getSchema();
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.stream().allMatch(item -> item instanceof OneOfTypeValidation));
         Assert.assertEquals(((OneOfTypeValidation) validationErrors.get(0)).getBlockErrors().get(0).getFieldName(),
                 "age");

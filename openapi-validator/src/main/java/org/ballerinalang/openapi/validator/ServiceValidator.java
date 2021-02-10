@@ -37,7 +37,6 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
-import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectKind;
@@ -57,7 +56,6 @@ import org.ballerinalang.openapi.validator.error.OpenapiServiceValidationError;
 import org.ballerinalang.openapi.validator.error.ResourceValidationError;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
-import org.ballerinalang.util.diagnostic.DiagnosticLog;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,6 +63,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -75,11 +74,9 @@ import java.util.Optional;
  * resource in the resource file.
  */
 public class ServiceValidator {
-    private static DiagnosticLog dLog;
     private static OpenAPI openAPI;
     private static SyntaxTree syntaxTree;
     private static SemanticModel semanticModel;
-    private static Project project;
     private static List<Diagnostic> validations = new ArrayList<>();
 
     public ServiceValidator() {
@@ -145,13 +142,11 @@ public class ServiceValidator {
                     if (!openApiMissingServiceMethod.isEmpty()) {
                         for (OpenapiServiceValidationError openApiMissingError: openApiMissingServiceMethod) {
                             if (openApiMissingError.getServiceOperation() == null) {
-//                                dLog.logDiagnostic(kind, serviceNode.getPosition(),
-//                                        ErrorMessages.unimplementedOpenAPIPath(openApiMissingError.getServicePath()));
                                 String[] error =
                                         ErrorMessages.unimplementedOpenAPIPath(openApiMissingError.getServicePath());
                                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                                 OpenAPIDiagnostics diagnostics =
-                                        new OpenAPIDiagnostics(openApiMissingError.getPosition(), diagnosticInfo,
+                                        new OpenAPIDiagnostics(serviceDeclarationNode.location(), diagnosticInfo,
                                                 error[1]);
                                 validations.add(diagnostics);
                             } else {
@@ -161,15 +156,12 @@ public class ServiceValidator {
                                                 openApiMissingError.getServicePath());
                                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                                 OpenAPIDiagnostics diagnostics =
-                                        new OpenAPIDiagnostics(openApiMissingError.getPosition(), diagnosticInfo,
+                                        new OpenAPIDiagnostics(serviceDeclarationNode.location(), diagnosticInfo,
                                                 error[1]);
                                 validations.add(diagnostics);
-//                                dLog.logDiagnostic(kind, serviceNode.getPosition(),
-//                                        ErrorMessages.unimplementedOpenAPIOperationsForPath(openApiMissingError.
-//                                                        getServiceOperation(),
-//                                                openApiMissingError.getServicePath()));
                             }
                         }
+
                         // Clean the undocumented openapi contract functions
                         openAPIPathSummaries = ResourceWithOperation.removeUndocumentedPath(openAPIPathSummaries,
                                         openApiMissingServiceMethod);
@@ -181,6 +173,7 @@ public class ServiceValidator {
                     if (!resourcePathSummaryMap.isEmpty()) {
                         createListResourcePathSummary(resourceValidationErrors, resourcePathSummaryMap);
                     }
+                    createListOperations(openAPIPathSummaries, resourcePathSummaryMap);
 
                     // Resource against to operation
                     for (Map.Entry<String, ResourcePathSummary> resourcePath: resourcePathSummaryMap.entrySet()) {
@@ -194,7 +187,58 @@ public class ServiceValidator {
                                             List<ValidationError> postErrors =
                                                     ResourceValidator.validateResourceAgainstOperation(operation.getValue(),
                                                             method.getValue(), semanticModel, syntaxTree);
-                                            generateDlogMessage(kind, dLog, resourcePath.getValue(), method, postErrors);
+                                            generateDiagnosticMessage(kind, resourcePath.getValue(), method, postErrors);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // Validate openApi operations against service resource in ballerina file
+                    for (OpenAPIPathSummary openAPIPathSummary: openAPIPathSummaries) {
+                        for (Map.Entry<String, ResourcePathSummary> resourcePathSummaryEntry: resourcePathSummaryMap.entrySet()) {
+                            if (openAPIPathSummary.getPath().equals(resourcePathSummaryEntry.getKey()) && (!openAPIPathSummary.
+                                    getOperations().isEmpty()) && (!resourcePathSummaryEntry.getValue().getMethods().isEmpty())) {
+                                Map<String, Operation> operations = openAPIPathSummary.getOperations();
+                                for (Map.Entry<String, Operation> operation : operations.entrySet()) {
+                                    Map<String, ResourceMethod> methods = resourcePathSummaryEntry.getValue().getMethods();
+                                    for (Map.Entry<String, ResourceMethod> method: methods.entrySet()) {
+                                        if (operation.getKey().equals(method.getKey())) {
+                                            List<ValidationError> errorList =
+                                                    ResourceValidator.validateOperationAgainstResource(operation.getValue(),
+                                                            method.getValue(), semanticModel, syntaxTree);
+                                            if (!errorList.isEmpty()) {
+                                                for (ValidationError error: errorList) {
+                                                    if (error instanceof MissingFieldInBallerinaType) {
+                                                        String[] errorMsg = ErrorMessages.unimplementedFieldInOperation(
+                                                                        error.getFieldName(),
+                                                                        ((MissingFieldInBallerinaType) error)
+                                                                                .getRecordName(), operation.getKey(),
+                                                                        openAPIPathSummary.getPath());
+                                                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(errorMsg[0],
+                                                                errorMsg[1], kind);
+                                                        OpenAPIDiagnostics diagnostics =
+                                                                new OpenAPIDiagnostics(method.getValue()
+                                                                        .getMethodPosition(), diagnosticInfo,
+                                                                        errorMsg[1]);
+                                                        validations.add(diagnostics);
+
+                                                    } else if (!(error instanceof TypeMismatch) &&
+                                                            (!(error instanceof MissingFieldInJsonSchema))) {
+
+                                                        String[] errorMsg = ErrorMessages.unimplementedParameterForOperation(
+                                                                error.getFieldName(), operation.getKey(),
+                                                                openAPIPathSummary.getPath());
+                                                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(errorMsg[0],
+                                                                errorMsg[1], kind);
+                                                        OpenAPIDiagnostics diagnostics =
+                                                                new OpenAPIDiagnostics(method.getValue()
+                                                                        .getMethodPosition(), diagnosticInfo,
+                                                                        errorMsg[1]);
+                                                        validations.add(diagnostics);
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -212,12 +256,24 @@ public class ServiceValidator {
         //Travers and filter service
         //Take package name for project
         Package packageName = project.currentPackage();
-        DocumentId docId;
-        Document doc;
+        DocumentId docId = null;
+        Document doc = null;
         if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
-            docId = project.documentId(project.sourceRoot());
-            ModuleId moduleId = docId.moduleId();
-            doc = project.currentPackage().module(moduleId).document(docId);
+//            docId = project.documentId(project.sourceRoot());
+//            ModuleId moduleId = docId.moduleId();
+//            doc = project.currentPackage().module(moduleId).document(docId);
+            Iterable<Module> modules = packageName.modules();
+            for (Module module : modules) {
+                Collection<DocumentId> documentIds = module.documentIds();
+                for (DocumentId documentId : documentIds) {
+                    docId = documentId;
+                    doc = module.document(documentId);
+                    syntaxTree = doc.syntaxTree();
+                    if (OpenAPIVisitor.isOpenAPIAnnotationAvailable(syntaxTree)) {
+                        break;
+                    }
+                }
+            }
         } else {
             // Take module instance for traversing the syntax tree
             Module currentModule = packageName.getDefaultModule();
@@ -290,7 +346,6 @@ public class ServiceValidator {
                         default:
                             break;
                     }
-                    //handle filtervalues
                 }
             }
         }
@@ -298,7 +353,6 @@ public class ServiceValidator {
     }
 
     private static List<String> setFilters(ListConstructorExpressionNode list) {
-
         SeparatedNodeList<Node> expressions = list.expressions();
         Iterator<Node> iterator = expressions.iterator();
         List<String> tags = new ArrayList<>();
@@ -315,12 +369,12 @@ public class ServiceValidator {
      * @param resourcePathSummaryList   summary list with resourcePath
      */
     private static void createListOperations(List<OpenAPIPathSummary> openAPIPathSummaries,
-                                             List<ResourcePathSummary> resourcePathSummaryList) {
+                                             Map<String, ResourcePathSummary> resourcePathSummaryList) {
 
-        Iterator<ResourcePathSummary> resourcePathSummaryIterator = resourcePathSummaryList.iterator();
+        Iterator<Map.Entry<String, ResourcePathSummary>> resourcePathSummaryIterator = resourcePathSummaryList.entrySet().iterator();
         while (resourcePathSummaryIterator.hasNext()) {
             boolean isExit = false;
-            ResourcePathSummary resourcePathSummary = resourcePathSummaryIterator.next();
+            ResourcePathSummary resourcePathSummary = resourcePathSummaryIterator.next().getValue();
             for (OpenAPIPathSummary apiPathSummary: openAPIPathSummaries) {
                 isExit = true;
                 if (!(resourcePathSummary.getMethods().isEmpty()) && !(apiPathSummary.getOperations().isEmpty())
@@ -362,7 +416,7 @@ public class ServiceValidator {
         Iterator<Map.Entry<String, ResourcePathSummary>>
                 resourcePSIterator = resourcePathSummaryList.entrySet().iterator();
         while (resourcePSIterator.hasNext()) {
-            ResourcePathSummary resourcePathSummary = (ResourcePathSummary) resourcePSIterator.next();
+            ResourcePathSummary resourcePathSummary = (ResourcePathSummary) resourcePSIterator.next().getValue();
             if (!resourceMissingPathMethod.isEmpty()) {
                 for (ResourceValidationError resourceValidationError: resourceMissingPathMethod) {
                     if (resourcePathSummary.getPath().equals(resourceValidationError.getResourcePath())) {
@@ -381,14 +435,13 @@ public class ServiceValidator {
     }
 
     /**
-     *  This for generate Dlog message with relevant type of errors.
+     *  This for generate Diagnostic message with relevant type of errors.
      * @param kind                  message type ned to display
-     * @param dLog                  diagnosticLog
      * @param resourcePathSummary   current validate ResourcePath Object
      * @param method                validate method
      * @param postErrors            list of validationErrors
      */
-    private static void generateDlogMessage(DiagnosticSeverity kind, DiagnosticLog dLog,
+    private static void generateDiagnosticMessage(DiagnosticSeverity kind,
                                             ResourcePathSummary resourcePathSummary,
                                             Map.Entry<String, ResourceMethod> method,
                                             List<ValidationError> postErrors) {
@@ -396,7 +449,7 @@ public class ServiceValidator {
         if (!postErrors.isEmpty()) {
             for (ValidationError postErr : postErrors) {
                 if (postErr instanceof TypeMismatch) {
-                    generateTypeMisMatchDlog(kind, dLog, resourcePathSummary, method, postErr);
+                    generateTypeMisMatchDiagnostic(kind, resourcePathSummary, method, postErr);
                 } else if (postErr instanceof MissingFieldInJsonSchema) {
                     String[] error =
                             ErrorMessages.undocumentedFieldInRecordParam(postErr.getFieldName(),
@@ -413,7 +466,7 @@ public class ServiceValidator {
                                 ((OneOfTypeValidation) postErr).getBlockErrors();
                         for (ValidationError oneOfvalidation : oneOferrorlist) {
                             if (oneOfvalidation instanceof TypeMismatch) {
-                                generateTypeMisMatchDlog(kind, dLog, resourcePathSummary, method, oneOfvalidation);
+                                generateTypeMisMatchDiagnostic(kind, resourcePathSummary, method, oneOfvalidation);
                             } else if (oneOfvalidation instanceof MissingFieldInJsonSchema) {
                                 String[] error =
                                         ErrorMessages.undocumentedFieldInRecordParam(oneOfvalidation.getFieldName(),
@@ -424,10 +477,6 @@ public class ServiceValidator {
                                         new OpenAPIDiagnostics(method.getValue().getMethodPosition(), diagnosticInfo,
                                                 error[1]);
                                 validations.add(diagnostics);
-//                                dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
-//                                        ErrorMessages.undocumentedFieldInRecordParam(oneOfvalidation.getFieldName(),
-//                                                ((MissingFieldInJsonSchema) oneOfvalidation).getRecordName(),
-//                                                method.getKey(), resourcePathSummary.getPath()));
                             }
                         }
                     }
@@ -440,9 +489,6 @@ public class ServiceValidator {
                             new OpenAPIDiagnostics(postErr.getParameterPos(), diagnosticInfo,
                                     error[1]);
                     validations.add(diagnostics);
-//                    dLog.logDiagnostic(kind, postErr.getParameterPos(),
-//                            ErrorMessages.undocumentedResourceParameter(postErr.getFieldName(),
-//                            method.getKey(), resourcePathSummary.getPath()));
                 }
             }
         }
@@ -451,12 +497,11 @@ public class ServiceValidator {
     /**
      *  This for finding out the kind of TypeMisMatching.
      * @param kind                  message type to need to display
-     * @param dLog                  Dlog
      * @param resourcePathSummary   current validating resourcePath
      * @param method                current validating method
      * @param postErr               TypeMisMatchError type validation error
      */
-    private static void generateTypeMisMatchDlog(DiagnosticSeverity kind, DiagnosticLog dLog,
+    private static void generateTypeMisMatchDiagnostic(DiagnosticSeverity kind,
                                                  ResourcePathSummary resourcePathSummary,
                                                  Map.Entry<String, ResourceMethod> method, ValidationError postErr) {
 
@@ -472,7 +517,7 @@ public class ServiceValidator {
                                 resourcePathSummary.getPath());
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                 OpenAPIDiagnostics diagnostics =
-                        new OpenAPIDiagnostics(method.getValue().getMethodPosition(), diagnosticInfo,
+                        new OpenAPIDiagnostics( ((TypeMismatch) postErr).getLocation(), diagnosticInfo,
                                 error[1]);
                 validations.add(diagnostics);
             } else {
@@ -485,7 +530,7 @@ public class ServiceValidator {
                                 resourcePathSummary.getPath());
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                 OpenAPIDiagnostics diagnostics =
-                        new OpenAPIDiagnostics(method.getValue().getMethodPosition(), diagnosticInfo,
+                        new OpenAPIDiagnostics(((TypeMismatch) postErr).getLocation(), diagnosticInfo,
                                 error[1]);
                 validations.add(diagnostics);
             }
@@ -523,7 +568,6 @@ public class ServiceValidator {
     }
 
     public static List<Diagnostic> getValidations() {
-
         return validations;
     }
 }

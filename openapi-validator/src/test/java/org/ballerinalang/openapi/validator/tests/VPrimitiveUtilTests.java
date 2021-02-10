@@ -17,11 +17,9 @@ package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
-import org.ballerinalang.openapi.validator.BTypeToJsonValidatorUtil;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.ServiceValidator;
 import org.ballerinalang.openapi.validator.error.ValidationError;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
@@ -53,8 +51,8 @@ public class VPrimitiveUtilTests {
                 "/primitive/integerB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
-        Assert.assertTrue(validationErrors.isEmpty());
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        Assert.assertTrue(validationErrors.isEmpty());
     }
 
     @Test(enabled = false, description = "Type mismatch with string")
@@ -64,8 +62,8 @@ public class VPrimitiveUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/primitive/stringB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
-        Assert.assertTrue(validationErrors.isEmpty());
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        Assert.assertTrue(validationErrors.isEmpty());
     }
 
     @Test(enabled = false, description = "Type mismatch with boolean")
@@ -75,7 +73,7 @@ public class VPrimitiveUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/primitive/booleanB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
-        Assert.assertTrue(validationErrors.isEmpty());
+//        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
+//        Assert.assertTrue(validationErrors.isEmpty());
     }
 }
