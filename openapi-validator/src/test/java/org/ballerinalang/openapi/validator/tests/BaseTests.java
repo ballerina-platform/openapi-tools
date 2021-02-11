@@ -106,13 +106,8 @@ public class BaseTests {
                         Node node2 = typeNode.typeDescriptor();
                     }
                 }
-                //-------------------------- comment due to service payload still
                 if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                     ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
-//                    ServiceBodyNode srvBNode = (ServiceBodyNode) serviceDeclarationNode.serviceBody();
-//                    // Extract Service Body for validate
-//                    int count = serviceDeclarationNode.internalNode().bucketCount();
-//                    STNode internalNode = srvBNode.internalNode();
                     // Get resource list
                     NodeList<Node> resourceList = serviceDeclarationNode.members();
                     for (Node resource : resourceList) {
@@ -140,9 +135,6 @@ public class BaseTests {
                                                 paramType[0] = ((BallerinaVariableSymbol) symbol.get())
                                                         .typeDescriptor();
                                             }
-//                                            symbol.ifPresent(symbol1 -> {
-//                                                paramType[0] = ((ArrayTypeSymbol) symbol1).memberTypeDescriptor();});
-
                                         }
                                         inputs.setParamType(paramType[0]);
                                         inputs.setSyntaxTree(type.syntaxTree());

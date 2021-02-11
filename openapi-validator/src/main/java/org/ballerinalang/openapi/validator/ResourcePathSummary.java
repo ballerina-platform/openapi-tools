@@ -33,7 +33,6 @@ public class ResourcePathSummary {
     public ResourcePathSummary() {
         this.methods = new HashMap<>();
         this.path = null;
-//        this.pathPosition = null;
     }
 
     public String getPath() {

@@ -65,8 +65,7 @@ public class ResourceMethod {
     public String getMethod() {
         return this.method;
     }
-
-
+    
     public Boolean getBody() {
         return body;
     }
