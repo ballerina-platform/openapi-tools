@@ -23,6 +23,7 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.VariableSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
@@ -45,6 +46,7 @@ import org.ballerinalang.openapi.validator.error.ValidationError;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -229,9 +231,11 @@ public class ResourceValidator {
             Map<String, Node> resourceParams = resourceMethod.getParameters();
             Map<String, Schema> requestBodySchemas = getRequestBodyForOperation(operation);
             for (Map.Entry<String, Schema> operationRB: requestBodySchemas.entrySet()) {
-                Boolean isOParamExit = false;
-                isOParamExit = validateRequestBodyOpenApiToResource(resourceMethod, validationErrorList, resourceParams,
-                        operationRB, isOParamExit, semanticModel, syntaxTree, location);
+                boolean isOParamExit = false;
+                if (resourceMethod.getBody()) {
+                    isOParamExit = validateRequestBodyOpenApiToResource(validationErrorList, resourceParams,
+                            operationRB, isOParamExit, semanticModel, syntaxTree, location);
+                }
                 if (!isOParamExit) {
                     String type = "";
                     if (operationRB.getValue().getType() == null && (operationRB.getValue().getProperties() != null)) {
@@ -271,8 +275,7 @@ public class ResourceValidator {
         return requestBodySchemas;
     }
 
-    private static Boolean validateRequestBodyOpenApiToResource(ResourceMethod resourceMethod,
-                                                                List<ValidationError> validationErrorList,
+    private static Boolean validateRequestBodyOpenApiToResource(List<ValidationError> validationErrorList,
                                                                 Map<String, Node> resourceParam,
                                                                 Map.Entry<String, Schema> operationRB,
                                                                 Boolean isOParamExit,
@@ -284,7 +287,17 @@ public class ResourceValidator {
             for (Map.Entry<String, Node> resourceParameter : resourceParam.entrySet()) {
                 if (resourceParameter.getValue() instanceof RequiredParameterNode) {
                     RequiredParameterNode bodyNode = (RequiredParameterNode) resourceParameter.getValue();
-                    if (resourceMethod.getBody() && (bodyNode.toString().contains("http:PayLoad"))) {
+                    Iterator<AnnotationNode> iterator = bodyNode.annotations().iterator();
+                    boolean isPayLoad = false;
+                    while (iterator.hasNext()) {
+                        AnnotationNode anno = iterator.next();
+                        Node node = anno.annotReference();
+                        if (node.toString().trim().equals("http:Payload")) {
+                            isPayLoad = true;
+                        }
+                    }
+
+                    if (isPayLoad) {
                         Schema value = operationRB.getValue();
                         TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
                         List<ValidationError> validationErrors =
