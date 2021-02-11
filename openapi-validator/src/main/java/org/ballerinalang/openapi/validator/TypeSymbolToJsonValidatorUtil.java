@@ -185,13 +185,13 @@ public class TypeSymbolToJsonValidatorUtil {
         for (Map.Entry<String, RecordFieldSymbol> fieldSymbol : fieldSymbolList.entrySet()) {
             boolean isExist = false;
             for (Map.Entry<String, Schema> entry : properties.entrySet()) {
-                if (fieldSymbol.getValue().name().equals(entry.getKey())) {
+                if (fieldSymbol.getValue().getName().orElseThrow().equals(entry.getKey())) {
                     isExist = true;
                     if (!fieldSymbol.getValue().typeDescriptor().typeKind().getName()
                             .equals(TypeSymbolToJsonValidatorUtil.convertOpenAPITypeToBallerina(entry.getValue()
                                     .getType())) && (!(entry.getValue() instanceof ObjectSchema)) &&
                             (!(fieldSymbol.getValue().typeDescriptor() instanceof ArrayTypeSymbol))) {
-                        TypeMismatch validationError = new TypeMismatch(fieldSymbol.getValue().name(),
+                        TypeMismatch validationError = new TypeMismatch(fieldSymbol.getValue().getName().orElseThrow(),
                                 convertTypeToEnum(entry.getValue().getType()),
                                 convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
                                 componentName, fieldSymbol.getValue().location());
@@ -236,7 +236,7 @@ public class TypeSymbolToJsonValidatorUtil {
             // Handle missing record file against to schema
             if (!isExist) {
                 MissingFieldInJsonSchema validationError =
-                        new MissingFieldInJsonSchema(fieldSymbol.getValue().name(),
+                        new MissingFieldInJsonSchema(fieldSymbol.getValue().getName().orElseThrow(),
                                 convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
                                 componentName, location);
                 validationErrorList.add(validationError);
@@ -246,7 +246,7 @@ public class TypeSymbolToJsonValidatorUtil {
         for (Map.Entry<String, Schema> entry : properties.entrySet()) {
             boolean isExist = false;
             for (Map.Entry<String, RecordFieldSymbol> field : fieldSymbolList.entrySet()) {
-                if (field.getValue().name().equals(entry.getKey())) {
+                if (field.getValue().getName().orElseThrow().equals(entry.getKey())) {
                     isExist = true;
                 }
             }
@@ -312,7 +312,7 @@ public class TypeSymbolToJsonValidatorUtil {
                 } else if (!traverseNestedArraySymbol.memberTypeDescriptor().typeKind().getName().equals(
                         TypeSymbolToJsonValidatorUtil.convertOpenAPITypeToBallerina(
                                 traverseNestedArraySchema.getItems().getType()))) {
-                    TypeMismatch typeMismatch = new TypeMismatch(fieldSymbol.name(),
+                    TypeMismatch typeMismatch = new TypeMismatch(fieldSymbol.getName().orElseThrow(),
                             convertTypeToEnum(traverseNestedArraySchema.getItems().getType()),
                             convertTypeToEnum(traverseNestedArraySymbol.memberTypeDescriptor().typeKind().getName()),
                             location);

@@ -26,6 +26,7 @@ import org.wso2.ballerinalang.compiler.util.CompilerContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -46,14 +47,17 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
 
     @Override
     public List<Diagnostic> codeAnalyze(Project project) {
-        List<Diagnostic> diagnostics = new ArrayList<>();
         ServiceValidator serviceValidator = new ServiceValidator();
+        List<Diagnostic> diagnostics = new ArrayList<>();
         try {
             diagnostics = serviceValidator.validateResourceFunctions(project);
+            if (diagnostics.isEmpty()) {
+                return Collections.emptyList();
+            }
         } catch (IOException e) {
-
+            // handle proper
         } catch (OpenApiValidatorException e) {
-
+            // need to handle
         }
         return diagnostics;
     }
