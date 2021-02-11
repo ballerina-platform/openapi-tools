@@ -173,6 +173,32 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test Ballerina skeleton generation for multiple Query parameter", enabled = true)
+    public void generateSkeletonForTwoQueryParameter() {
+        final String serviceName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("multiQueryParam.yaml").toString();;
+        CodeGenerator generator = new CodeGenerator();
+
+        try {
+            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "multi_query_para.bal");
+            generator.generateService(definitionPath, definitionPath, definitionPath, serviceName,
+                    resourcePath.toString(), filter);
+            if (Files.exists(resourcePath.resolve("openapipetstore-service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore-service.bal");
+                generatedService = (generatedService.trim()).replaceAll("\\s+", "");
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
+
+                Assert.assertTrue(generatedService.contains(expectedServiceContent));
+            } else {
+                Assert.fail("Service was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-service.bal");
+        }
+    }
+
     @Test(description = "Test openapi definition to ballerina source code generation",
             dataProvider = "fileProvider", enabled = false)
     public void openApiToBallerinaCodeGenTest(String yamlFile, String expectedFile) {
