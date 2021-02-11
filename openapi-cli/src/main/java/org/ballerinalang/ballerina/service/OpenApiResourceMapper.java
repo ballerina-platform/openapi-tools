@@ -364,7 +364,7 @@ public class OpenApiResourceMapper {
 
     private void handleRecordPayload(RequiredParameterNode queryParam, Map<String, Model> definitions,
                                      TypeSymbol typeSymbol) {
-        String componentName = typeSymbol.name().trim();
+        String componentName = typeSymbol.getName().orElseThrow().trim();
         ModelImpl messageModel = new ModelImpl();
         if (typeSymbol instanceof TypeReferenceTypeSymbol) {
             TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
@@ -377,7 +377,7 @@ public class OpenApiResourceMapper {
                     Property property = getOpenApiProperty(type);
                     if (type.equals(Constants.TYPE_REFERENCE) && property instanceof RefProperty) {
                         RefModel refModel = new RefModel();
-                        refModel.setReference(field.getValue().typeDescriptor().name().trim());
+                        refModel.setReference(field.getValue().typeDescriptor().getName().orElseThrow().trim());
                         ((RefProperty) property).set$ref(refModel.get$ref());
                         Optional<TypeSymbol> recordSymbol = semanticModel.type(field.getValue().location().lineRange());
                         TypeSymbol recordVariable =  recordSymbol.orElseThrow();
@@ -415,7 +415,7 @@ public class OpenApiResourceMapper {
         Property symbolProperty  = getOpenApiProperty(symbol.typeKind().getName());
         if (symbolProperty instanceof RefProperty) {
             RefModel refModel = new RefModel();
-            refModel.setReference(symbol.name().trim());
+            refModel.setReference(symbol.getName().orElseThrow().trim());
             ((RefProperty) symbolProperty).set$ref(refModel.get$ref());
 
             //Set the record model to the definition
