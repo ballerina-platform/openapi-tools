@@ -214,7 +214,10 @@ subprojects {
     }
 }
 
-def moduleVersion = project.version.replace("-SNAPSHOT", "")
+def moduleVersion = project.version
+if (moduleVersion.indexOf('-') != -1) {
+    moduleVersion = moduleVersion.substring(0, moduleVersion.indexOf('-'))
+}
 
 release {
     // Disable check snapshots temporarily
