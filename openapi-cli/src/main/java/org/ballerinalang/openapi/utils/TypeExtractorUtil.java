@@ -169,7 +169,6 @@ public class TypeExtractorUtil {
             Operation> nextOp, Operation opObject, BallerinaOpenApiOperation operation)
             throws BallerinaOpenApiException {
 
-        String[] pathNodes = path.getPath().split("/");
         String pathName = path.getPath();
         operation.setOpName(path.getPath().replaceFirst("/", ""));
         if (opObject.getParameters() != null) {
@@ -179,7 +178,7 @@ public class TypeExtractorUtil {
                     String parameterType = parameter.getParamType().getSchemaType().get(0);
                     String targetString = "{" + parameter.getParamName() + "}";
                     String replaceString = "[" + parameterType + " " + parameter.getParamName() + "]";
-                    pathName = pathName.replace(targetString,replaceString);
+                    pathName = pathName.replace(targetString, replaceString);
                 }
             }
             operation.setOpName(pathName.replaceFirst("/", ""));
