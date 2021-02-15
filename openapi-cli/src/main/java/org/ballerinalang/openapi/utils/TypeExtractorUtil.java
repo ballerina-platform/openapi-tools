@@ -161,8 +161,6 @@ public class TypeExtractorUtil {
 
     /**
      * This method will set ballerinaOpenApiOperation with given values from openApi operations.
-     * @param pathName      pathName for operation
-     * @param nextOp        operation http methods
      * @param opObject      operation object
      * @param operation     ballerinaOpenApiOperation object
      * @throws BallerinaOpenApiException throws ballerina openApi exception
@@ -171,20 +169,19 @@ public class TypeExtractorUtil {
             Operation> nextOp, Operation opObject, BallerinaOpenApiOperation operation)
             throws BallerinaOpenApiException {
 
+        String pathName = path.getPath();
         operation.setOpName(path.getPath().replaceFirst("/", ""));
         if (opObject.getParameters() != null) {
             List<BallerinaOpenApiParameter> parameters = extractOpenApiParameters(opObject.getParameters());
             for (BallerinaOpenApiParameter parameter : parameters) {
                 if (parameter.isPathParam()) {
-
-                    String pathName = path.getPath();
                     String parameterType = parameter.getParamType().getSchemaType().get(0);
                     String targetString = "{" + parameter.getParamName() + "}";
                     String replaceString = "[" + parameterType + " " + parameter.getParamName() + "]";
-
-                    operation.setOpName(pathName.replace(targetString, replaceString).replaceFirst("/", ""));
+                    pathName = pathName.replace(targetString, replaceString);
                 }
             }
+            operation.setOpName(pathName.replaceFirst("/", ""));
             operation.setParameterList(parameters);
         }
 
