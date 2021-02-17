@@ -159,14 +159,9 @@ public class OpenApiCmd implements BLauncherCmd {
 //        Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
         //ballerina openapi -i service.bal --serviceName serviceName --module exampleModul -o ./
         // Check service name it is mandatory
-        boolean isJson;
-        if (generatedFileType) {
-            isJson = true;
-        } else {
-            isJson = false;
-        }
         try {
-            OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName, isJson);
+            OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName,
+                    generatedFileType);
         } catch (IOException | OpenApiConverterException e) {
             throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
         }

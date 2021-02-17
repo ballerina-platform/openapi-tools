@@ -177,6 +177,29 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "mime_with_record_payload.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec with json file")
+    public void testNestedRecordPayLoadJson() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("nestedRecord_payload_service.bal");
+        try {
+            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen/json"),
+                    "nestedRecord.json");
+            OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
+                    , true);
+            if (Files.exists(this.tempDir.resolve("payloadV-openapi.json"))) {
+                String generatedYaml = getStringFromGivenBalFile(this.tempDir, "payloadV-openapi.json");
+                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+            } else {
+                Assert.fail("Json was not generated");
+            }
+        } catch (IOException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore-service.json");
+        }
+    }
+
     @AfterMethod
     public void cleanUp() {
         deleteDirectory(this.tempDir);
