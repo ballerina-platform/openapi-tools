@@ -81,6 +81,9 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Option(names = {"--service-name"}, description = "Service name for generated files")
     private String generatedServiceName;
 
+    @CommandLine.Option(names = {"--json"}, description = "Generate json file")
+    private boolean generatedFileType;
+
     @CommandLine.Parameters
     private List<String> argList;
 
@@ -156,8 +159,14 @@ public class OpenApiCmd implements BLauncherCmd {
 //        Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
         //ballerina openapi -i service.bal --serviceName serviceName --module exampleModul -o ./
         // Check service name it is mandatory
+        boolean isJson;
+        if (generatedFileType) {
+            isJson = true;
+        } else {
+            isJson = false;
+        }
         try {
-            OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName);
+            OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName, isJson);
         } catch (IOException | OpenApiConverterException e) {
             throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
         }

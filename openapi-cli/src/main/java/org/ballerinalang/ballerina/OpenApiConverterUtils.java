@@ -54,6 +54,7 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.parser.converter.SwaggerConverter;
 import org.apache.commons.io.FilenameUtils;
@@ -114,7 +115,8 @@ public class OpenApiConverterUtils {
      * @throws IOException               Error when writing the OpenAPI specification file.
      * @throws OpenApiConverterException Error occurred generating OpenAPI specification.
      */
-    public static void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, Optional<String> serviceName)
+    public static void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, Optional<String> serviceName
+            , Boolean needJson)
             throws IOException, OpenApiConverterException {
 
         // Load project instance for single ballerina file
@@ -178,16 +180,16 @@ public class OpenApiConverterUtils {
         // Generating for the services
         for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
             String serviceNodeName = getServiceBasePath(serviceNode);
-            String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName);
-            String openApiSource = generateOAS3Definitions(syntaxTree, serviceNodeName);
+            String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
+            String openApiSource = generateOAS3Definitions(syntaxTree, serviceNodeName, needJson);
 
             //  Checked old generated file with same name
-            openApiName = checkDuplicateFiles(outPath, openApiName);
+            openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
             writeFile(outPath.resolve(openApiName), openApiSource);
         }
     }
 
-    private static String getOpenApiFileName(String servicePath, String serviceName) {
+    private static String getOpenApiFileName(String servicePath, String serviceName, Boolean isJson) {
         String cleanedServiceName;
         if (serviceName.isBlank() || serviceName.equals("/")) {
             cleanedServiceName = FilenameUtils.removeExtension(servicePath);
@@ -200,7 +202,9 @@ public class OpenApiConverterUtils {
             // Replace rest of the path separators with hyphen
             cleanedServiceName = serviceName.replaceAll("/", "-");
         }
-
+        if (isJson) {
+            return cleanedServiceName + ConverterConstants.OPENAPI_SUFFIX + ConverterConstants.JSON_EXTENSION;
+        }
         return cleanedServiceName + ConverterConstants.OPENAPI_SUFFIX + ConverterConstants.YAML_EXTENSION;
     }
 
@@ -210,7 +214,7 @@ public class OpenApiConverterUtils {
      * @param serviceName
      * @return
      */
-    public static String generateOAS3Definitions(SyntaxTree ballerinaSource, String serviceName)
+    public static String generateOAS3Definitions(SyntaxTree ballerinaSource, String serviceName, Boolean needJson)
             throws OpenApiConverterException {
         //travers syntax tree
         //check top level node for get the annotation attachment for openapi
@@ -241,6 +245,9 @@ public class OpenApiConverterUtils {
                 if (result.getMessages().size() > 0) {
                     throw new OpenApiConverterException("Please check the mentioned service is available " +
                             "in the ballerina source, or there content is valid");
+                }
+                if (needJson) {
+                    return Json.pretty(converter.convert(result).getOpenAPI());
                 }
                 return Yaml.pretty(converter.convert(result).getOpenAPI());
             }
@@ -415,18 +422,18 @@ public class OpenApiConverterUtils {
      * @param openApiName   given file name
      * @return              file name with duplicate number tag
      */
-    private static String checkDuplicateFiles(Path outPath, String openApiName) {
+    private static String checkDuplicateFiles(Path outPath, String openApiName, Boolean isJson) {
 
         if (Files.exists(outPath)) {
             final File[] listFiles = new File(String.valueOf(outPath)).listFiles();
             if (listFiles != null) {
-                openApiName = checkAvailabilityOfGivenName(openApiName, listFiles);
+                openApiName = checkAvailabilityOfGivenName(openApiName, listFiles, isJson);
             }
         }
         return openApiName;
     }
 
-    private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles) {
+    private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
 
         for (File file : listFiles) {
             if (file.getName().equals(openApiName)) {
@@ -434,7 +441,7 @@ public class OpenApiConverterUtils {
                         " in the location. Do you want to override the file [Y/N]? ");
                 if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
                     int duplicateCount = 0;
-                    openApiName = setGeneratedFileName(listFiles, openApiName, duplicateCount);
+                    openApiName = setGeneratedFileName(listFiles, openApiName, duplicateCount, isJson);
                 }
             }
         }
@@ -447,7 +454,7 @@ public class OpenApiConverterUtils {
      * @param fileName          File name
      * @param duplicateCount    add the tag with duplicate number if file already exist
      */
-    private static String setGeneratedFileName(File[] listFiles, String fileName, int duplicateCount) {
+    private static String setGeneratedFileName(File[] listFiles, String fileName, int duplicateCount, Boolean isJson) {
         for (File listFile : listFiles) {
             String listFileName = listFile.getName();
             if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2)
@@ -455,6 +462,9 @@ public class OpenApiConverterUtils {
                     .equals(fileName.split("\\.")[0]))) {
                 duplicateCount = 1 + duplicateCount;
             }
+        }
+        if (isJson) {
+            return fileName.split("\\.")[0] + "." + (duplicateCount) + ".json";
         }
         return fileName.split("\\.")[0] + "." + (duplicateCount) + ".yaml";
     }
