@@ -24,6 +24,7 @@ package org.ballerinalang.ballerina.service;
  */
 public class ConverterConstants {
     public static final String YAML_EXTENSION = ".yaml";
+    public static final String JSON_EXTENSION = ".json";
     public static final String OPENAPI_SUFFIX = "-openapi";
 
     // annotation attribute keys
