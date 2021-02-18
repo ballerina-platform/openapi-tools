@@ -24,9 +24,18 @@ public class BallerinaServiceGeneratorTest {
     @Test(description = "Generate importors")
     public void generateImports() throws IOException, BallerinaOpenApiException {
         String definitionPath = RES_DIR.resolve("generators/swagger/petstore_listeners.yaml").toString();
-        BallerinaServiceGenerator.genetrateSyntaxTree(definitionPath, "listeners", filter);
+        BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
 
+    @Test(description = "Generate serviceDeclaration")
+    public void generateService() throws IOException, BallerinaOpenApiException {
+        String definitionPath = RES_DIR.resolve("generators/swagger/petstore_service.yaml").toString();
+        BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
 
-
+    @Test(description = "Generate functionDefinitionNode for Path parameters")
+    public void generatePathparameter() throws IOException, BallerinaOpenApiException {
+        String definitionPath = RES_DIR.resolve("generators/swagger/multiPathParam.yaml").toString();
+        BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
 }

@@ -1,37 +1,42 @@
 package org.ballerinalang.generators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
-import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ErrorTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.Minutiae;
-import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
-import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
+import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
-import org.ballerinalang.openapi.model.BallerinaServer;
 import org.ballerinalang.openapi.typemodel.BallerinaOpenApiType;
 import org.ballerinalang.openapi.utils.GeneratorConstants;
 import org.ballerinalang.openapi.utils.TypeExtractorUtil;
@@ -39,18 +44,197 @@ import org.ballerinalang.openapi.utils.TypeExtractorUtil;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import static org.ballerinalang.generators.GeneratorUtils.getListenerDeclarationNode;
+import static org.ballerinalang.generators.GeneratorUtils.getRelativeResourcePath;
 
 public class BallerinaServiceGenerator {
 
-    public static void genetrateSyntaxTree(String definitionPath, String serviceName, Filter filter) throws IOException,
+    public static void generateSyntaxTree(String definitionPath, String serviceName, Filter filter) throws IOException,
             BallerinaOpenApiException {
         // Create importors http and openapi
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode("ballerina", "http");
-        ImportDeclarationNode importForOpenapi = GeneratorUtils.getImportDeclarationNode("ballerina", "http");
+        ImportDeclarationNode importForOpenapi = GeneratorUtils.getImportDeclarationNode("ballerina", "openapi");
         // Add multiple imports
-        NodeList<ImportDeclarationNode> imports = AbstractNodeFactory.createNodeList(importForHttp);
-        imports.add(importForOpenapi);
+        NodeList<ImportDeclarationNode> imports = AbstractNodeFactory.createNodeList(importForHttp, importForOpenapi);
         // Summaries OpenAPI details
+//        final BallerinaOpenApiType openApi = getBallerinaOpenApiType(definitionPath, serviceName, filter);
+        OpenAPI openApi = getBallerinaOpenApiType(definitionPath, serviceName, filter);
+
+        final BallerinaOpenApiType openApi2 = TypeExtractorUtil.extractOpenApiObject(openApi, filter);
+        openApi2.setBalServiceName(serviceName);
+        openApi2.setServers(openApi);
+        openApi2.setTags(openApi.getTags());
+
+        // Generate listeners
+        if (!openApi.getServers().isEmpty()) {
+            for (Server server:openApi.getServers()) {
+            }
+            // Generate listener
+            ListenerDeclarationNode listener = getListenerDeclarationNode(openApi2);
+
+            // Generate ServiceDeclaration
+            NodeList<Token> qualifiers = AbstractNodeFactory.createEmptyNodeList();
+            Token serviceKeyWord = AbstractNodeFactory.createIdentifierToken(" service ");
+            String[] basePathNode = openApi2.getServers().get(0).getBasePath().split("/");
+            List<Node> nodeList = new ArrayList<>();
+            for (String node: basePathNode) {
+                if (!node.isBlank()) {
+                    Token pathNode = AbstractNodeFactory.createIdentifierToken("/" + node);
+                    nodeList.add(pathNode);
+                }
+            }
+            NodeList<Node> absoluteResourcePath = AbstractNodeFactory.createNodeList(nodeList);
+            Token onKeyWord = AbstractNodeFactory.createIdentifierToken(" on");
+
+            SimpleNameReferenceNode listenerName =
+                    NodeFactory.createSimpleNameReferenceNode(listener.variableName());
+            SeparatedNodeList<ExpressionNode> expressions = NodeFactory.createSeparatedNodeList(listenerName);
+            Token openBraceToken = AbstractNodeFactory.createIdentifierToken("{");
+
+            // Fill the members with function
+            List<Node> functions =  new ArrayList<>();
+            if (!openApi.getPaths().isEmpty()) {
+                io.swagger.v3.oas.models.Paths paths = openApi.getPaths();
+                Set<Map.Entry<String, PathItem>> pathsItems = paths.entrySet();
+                Iterator<Map.Entry<String, PathItem>> pathItr = pathsItems.iterator();
+                while (pathItr.hasNext()) {
+                    Map.Entry<String, PathItem> path = pathItr.next();
+                    if (!path.getValue().readOperationsMap().isEmpty()) {
+                        Map<PathItem.HttpMethod, Operation> operationMap = path.getValue().readOperationsMap();
+                        for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
+                            // getRelative resource path
+                            List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation);
+                            // function call
+                            getFunctionDefinitionNode(functions, path, operation, functionRelativeResourcePath);
+                        }
+                    }
+                }
+            }
+
+            NodeList<Node> members = NodeFactory.createNodeList(functions);
+            Token closeBraceToken = AbstractNodeFactory.createIdentifierToken("}");
+
+            ServiceDeclarationNode serviceDeclarationNode = NodeFactory
+                    .createServiceDeclarationNode(null, qualifiers, serviceKeyWord, null, absoluteResourcePath,
+                            onKeyWord, expressions, openBraceToken, members, closeBraceToken);
+            // Create module member declaration
+
+            NodeList<ModuleMemberDeclarationNode> moduleMembers = AbstractNodeFactory.createNodeList(listener, serviceDeclarationNode);
+
+            Token eofToken = AbstractNodeFactory.createIdentifierToken("");
+            ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, moduleMembers, eofToken);
+
+            TextDocument textDocument = TextDocuments.from("");
+            SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
+            SyntaxTree generatedSyntaxTree = syntaxTree.modifyWith(modulePartNode);
+            System.out.println(generatedSyntaxTree.toSourceCode());
+//            System.out.println(Formatter.format(generatedSyntaxTree.toSourceCode()));
+
+        } else {
+            //handel if servers empty
+        }
+
+        // Generate Service - done
+
+        // -- Generate resource function - done
+        // -- Generate multiple resource
+
+        // Create Module part Node
+
+//        Token eofToken = AbstractNodeFactory.createIdentifierToken("");
+//        ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, members, eofToken);
+//
+//        TextDocument textDocument = TextDocuments.from("");
+//        SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
+//        SyntaxTree generatedSyntaxTree = syntaxTree.modifyWith(modulePartNode);
+////        SyntaxTree generatedSyntaxTree = syntaxTree.modifyWith(im);
+//        System.out.println(generatedSyntaxTree.toSourceCode());
+////        System.out.println(Formatter.format(generatedSyntaxTree.toSourceCode()));
+
+    }
+
+    private static void getFunctionDefinitionNode(List<Node> functions, Map.Entry<String, PathItem> path,
+                                                  Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                  List<Node> pathNodes) {
+
+        Token resource = AbstractNodeFactory.createIdentifierToken("    resource");
+        NodeList<Token> qualifiersList = NodeFactory.createNodeList(resource);
+
+        Token functionKeyWord = AbstractNodeFactory.createIdentifierToken(" function ");
+
+        IdentifierToken functionName =
+                AbstractNodeFactory.createIdentifierToken(operation.getKey().name().toLowerCase(
+                        Locale.ENGLISH) + " ");
+
+        NodeList<Node> relativeResourcePath = NodeFactory.createNodeList(pathNodes);
+
+        // Create FunctionSignature
+        Token openParenToken = AbstractNodeFactory.createIdentifierToken("(");
+        List<Node> params = new ArrayList<>();
+        // Create http:Request node RequiredParam
+        // --annotation
+        NodeList<AnnotationNode> annotations = AbstractNodeFactory.createEmptyNodeList();
+        // --typeName
+        Token modulePrefix = AbstractNodeFactory.createIdentifierToken("http");
+        Token colon = AbstractNodeFactory.createIdentifierToken(":");
+        IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("Request ");
+        QualifiedNameReferenceNode typeName =
+                NodeFactory.createQualifiedNameReferenceNode(modulePrefix, colon, identifier);
+        // --paramName
+        Token paramName = AbstractNodeFactory.createIdentifierToken("request");
+        RequiredParameterNode httpNode =
+                NodeFactory.createRequiredParameterNode(annotations, typeName, paramName);
+
+        params.add(httpNode);
+
+        SeparatedNodeList<ParameterNode> parameters = AbstractNodeFactory.createSeparatedNodeList(params);
+        //return Type descriptors
+        Token returnKeyWord = AbstractNodeFactory.createIdentifierToken(" return ");
+        NodeList<AnnotationNode> returnAnnotation = NodeFactory.createEmptyNodeList();
+        // create Type
+        // --errortypeDescriptor
+        Token errorKeyWordToken = AbstractNodeFactory.createIdentifierToken("error");
+        // errorTypeParamsNode can be null
+        ErrorTypeDescriptorNode errorTypeDescriptorNode =
+                NodeFactory.createErrorTypeDescriptorNode(errorKeyWordToken, null);
+        Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
+
+        OptionalTypeDescriptorNode type =
+                NodeFactory.createOptionalTypeDescriptorNode(errorTypeDescriptorNode, questionMarkToken);
+        ReturnTypeDescriptorNode returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord, annotations,
+                type);
+        Token closeParenToken = AbstractNodeFactory.createIdentifierToken(")");
+
+        FunctionSignatureNode functionSignatureNode = NodeFactory
+                .createFunctionSignatureNode(openParenToken, parameters, closeParenToken, returnNode);
+
+        // Function Body Node
+        Token openBrace = AbstractNodeFactory.createIdentifierToken("{");
+        NodeList<StatementNode> statements = AbstractNodeFactory.createEmptyNodeList();
+        Token closeBrace = AbstractNodeFactory.createIdentifierToken("}");
+
+        FunctionBodyBlockNode functionBodyBlockNode = NodeFactory
+                .createFunctionBodyBlockNode(openBrace, null, statements, closeBrace);
+
+        FunctionDefinitionNode functionDefinitionNode = NodeFactory
+                .createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
+                        qualifiersList, functionKeyWord, functionName, relativeResourcePath,
+                        functionSignatureNode, functionBodyBlockNode);
+
+        functions.add(functionDefinitionNode);
+    }
+
+    private static OpenAPI getBallerinaOpenApiType(String definitionPath, String serviceName,
+                                                                Filter filter)
+            throws IOException, BallerinaOpenApiException {
+
         String openAPIFileContent = Files.readString(Paths.get(definitionPath));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
 
@@ -58,6 +242,9 @@ public class BallerinaServiceGenerator {
             throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
         }
         OpenAPI api = parseResult.getOpenAPI();
+        List<Server> servers = api.getServers();
+        io.swagger.v3.oas.models.Paths paths = api.getPaths();
+
 
         if (api.getInfo() == null) {
             throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
@@ -69,121 +256,11 @@ public class BallerinaServiceGenerator {
         } else {
             api.getInfo().setTitle(serviceName);
         }
-        final BallerinaOpenApiType openApi = TypeExtractorUtil.extractOpenApiObject(api, filter);
-        openApi.setBalServiceName(serviceName);
-        openApi.setServers(api);
-        openApi.setTags(api.getTags());
-
-
-        // Generate listeners
-        if (!openApi.getServers().isEmpty()) {
-            for (BallerinaServer server:openApi.getServers()) {
-
-            }
-            // Take first server to Map
-            Token listenerKeyword = AbstractNodeFactory.createIdentifierToken("listner");
-            // Create type descriptor
-            Token modulePrefix = AbstractNodeFactory.createIdentifierToken("http");
-            Token colon = AbstractNodeFactory.createIdentifierToken(":");
-            IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("Listener");
-            QualifiedNameReferenceNode typeDescriptor = NodeFactory.createQualifiedNameReferenceNode(modulePrefix,
-                    colon, identifier);
-            // Create variable
-            Token variableName = AbstractNodeFactory.createIdentifierToken("ep0");
-            MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
-            Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-            MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
-            variableName.modify(leading, trailing);
-
-            Token equalsToken = AbstractNodeFactory.createIdentifierToken("=");
-
-            // Create initializer
-            Token newKeyword = AbstractNodeFactory.createIdentifierToken("new");
-
-            // Create parenthesizedArgList
-            Token openParenToken = AbstractNodeFactory.createIdentifierToken("(");
-            // Create arguments
-            // 1. Create port Node
-            Token literalToken = AbstractNodeFactory.createLiteralValueToken(SyntaxKind.DECIMAL_INTEGER_LITERAL_TOKEN
-                    , String.valueOf(openApi.getServers().get(0).getPort()),leading, trailing);
-            BasicLiteralNode expression = NodeFactory.createBasicLiteralNode(SyntaxKind.NUMERIC_LITERAL, literalToken);
-
-            PositionalArgumentNode portNode = NodeFactory.createPositionalArgumentNode(expression);
-            // 2. Create comma
-            Token comma = AbstractNodeFactory.createIdentifierToken(",");
-
-
-            // 3. Create host node
-            Token name = AbstractNodeFactory.createIdentifierToken("config ");
-            SimpleNameReferenceNode argumentName = NodeFactory.createSimpleNameReferenceNode(name);
-            // 3.3 create expresion
-            Token openBrace = AbstractNodeFactory.createIdentifierToken("{");
-
-            Token fieldName = AbstractNodeFactory.createIdentifierToken("host");
-            Token literalHostToken = AbstractNodeFactory.createIdentifierToken(openApi.getServers().get(0).getHost(),
-                    leading, trailing);
-            BasicLiteralNode valueExpr = NodeFactory.createBasicLiteralNode(SyntaxKind.STRING_LITERAL,
-                    literalHostToken);
-            MappingFieldNode HostNode = NodeFactory.createSpecificFieldNode(null, fieldName, colon, valueExpr);
-            SeparatedNodeList<MappingFieldNode> fields = NodeFactory.createSeparatedNodeList(HostNode);
-            Token closeBrace = AbstractNodeFactory.createIdentifierToken("}");
-
-            MappingConstructorExpressionNode hostExpression =
-                    NodeFactory.createMappingConstructorExpressionNode(openBrace, fields, closeBrace);
-
-            NamedArgumentNode namedArgumentNode =
-                    NodeFactory.createNamedArgumentNode(argumentName, equalsToken, hostExpression);
-
-            SeparatedNodeList<FunctionArgumentNode> arguments = NodeFactory.createSeparatedNodeList();
-            arguments.add(portNode);
-            //For testing
-//            arguments.add(comma);
-            arguments.add(namedArgumentNode);
-
-            Token closeParenToken = AbstractNodeFactory.createIdentifierToken(")");
-
-            ParenthesizedArgList parenthesizedArgList =
-                    NodeFactory.createParenthesizedArgList(openParenToken, arguments, closeParenToken);
-            ImplicitNewExpressionNode initializer =
-                    NodeFactory.createImplicitNewExpressionNode(newKeyword, parenthesizedArgList);
-
-            Token semicolonToken = AbstractNodeFactory.createIdentifierToken(":");
-            ListenerDeclarationNode listener =
-                    NodeFactory.createListenerDeclarationNode(null, null, listenerKeyword, typeDescriptor, variableName,
-                            equalsToken, initializer, semicolonToken);
-            NodeList<ModuleMemberDeclarationNode> members = AbstractNodeFactory.createEmptyNodeList();
-            members.add(listener);
-
-            Token eofToken = AbstractNodeFactory.createIdentifierToken("");
-            ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, members, eofToken);
-            TextDocument textDocument = TextDocuments.from("");
-            SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
-            SyntaxTree generatedSyntaxTree = syntaxTree.modifyWith(modulePartNode);
-//        SyntaxTree generatedSyntaxTree = syntaxTree.modifyWith(im);
-            System.out.println(generatedSyntaxTree.toSourceCode());
-//        System.out.println(Formatter.format(generatedSyntaxTree.toSourceCode()));
-
-//            NodeFactory.createModulePartNode(imports, )
-
-        } else {
-            //handel if servers empty
-        }
-
-        // Generate Service
-
-        // -- Generate resource function
-//        ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, null, null);
-
-//        TextDocument textDocument = TextDocuments.from("");
-//        SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
-//        SyntaxTree generatedSyntaxTree = syntaxTree.modifyWith(modulePartNode);
-////        SyntaxTree generatedSyntaxTree = syntaxTree.modifyWith(im);
-//        System.out.println(generatedSyntaxTree.toSourceCode());
-////        System.out.println(Formatter.format(generatedSyntaxTree.toSourceCode()));
-
-
-
-
-
+        return api;
+//        final BallerinaOpenApiType openApi = TypeExtractorUtil.extractOpenApiObject(api, filter);
+//        openApi.setBalServiceName(serviceName);
+//        openApi.setServers(api);
+//        openApi.setTags(api.getTags());
+//        return openApi;
     }
 }
