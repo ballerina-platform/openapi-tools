@@ -2,6 +2,8 @@ package org.ballerinalang.generators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ErrorTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
@@ -32,6 +34,10 @@ import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -51,6 +57,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import static org.ballerinalang.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static org.ballerinalang.generators.GeneratorUtils.escapeIdentifier;
 import static org.ballerinalang.generators.GeneratorUtils.getListenerDeclarationNode;
 import static org.ballerinalang.generators.GeneratorUtils.getRelativeResourcePath;
 
@@ -145,6 +153,10 @@ public class BallerinaServiceGenerator {
 
         // -- Generate resource function - done
         // -- Generate multiple resource
+        // -- Generate multiple query parameters
+        // -- fix formatter issue
+        // -- fix request Payload
+        // -- fix response Payload
 
         // Create Module part Node
 
@@ -191,8 +203,83 @@ public class BallerinaServiceGenerator {
         Token paramName = AbstractNodeFactory.createIdentifierToken("request");
         RequiredParameterNode httpNode =
                 NodeFactory.createRequiredParameterNode(annotations, typeName, paramName);
-
         params.add(httpNode);
+
+        Token comma = AbstractNodeFactory.createIdentifierToken(",");
+
+        // Handle query parameter
+        //type​ ​ BasicType​ ​ boolean|int|float|decimal|string​ ;
+        //public​ ​ type​ ​ QueryParamType​ ()​ |BasicType|BasicType​ [];
+        if (operation.getValue().getParameters() != null) {
+            List<Parameter> parameters = operation.getValue().getParameters();
+            for (Parameter parameter: parameters) {
+                if (parameter.getIn().trim().equals("query")) {
+                    Schema schema = parameter.getSchema();
+                    if (parameter.getRequired()) {
+                        //Required without typeDescriptor
+                        NodeList<AnnotationNode> rAnnotations = NodeFactory.createEmptyNodeList();
+                        //When it has arrayType
+                        if (schema instanceof ArraySchema) {
+                            Schema<?> items = ((ArraySchema) schema).getItems();
+                            if (!(items instanceof ObjectSchema) || !(items instanceof ArraySchema)) {
+                                // create arrayTypeDescriptor
+                                //1. memberTypeDescriptor
+                                Token name = AbstractNodeFactory.createIdentifierToken(items.getType().trim());
+                                BuiltinSimpleNameReferenceNode memberTypeDesc =
+                                        NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
+                                //2. openBracket
+                                Token openBracket = AbstractNodeFactory.createIdentifierToken("[");
+                                //3. arraylength = null
+                                //4. closeBracket
+                                Token closeBracket = AbstractNodeFactory.createIdentifierToken("]");
+
+                                ArrayTypeDescriptorNode arrayTypeName =
+                                        NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openBracket, null,
+                                                closeBracket);
+
+                                IdentifierToken arrayParamName =
+                                        AbstractNodeFactory.createIdentifierToken(" " + escapeIdentifier(parameter.getName().trim()));
+
+                                RequiredParameterNode arrayRparam = NodeFactory
+                                        .createRequiredParameterNode(rAnnotations, arrayTypeName, arrayParamName);
+
+                                params.add(comma);
+                                params.add(arrayRparam);
+
+                            } else {
+                                // handle in case swagger has nested array or record type
+                            }
+                        } else {
+                            Token name =
+                                    AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(schema.getType().toLowerCase().trim()));
+
+                            BuiltinSimpleNameReferenceNode rTypeName =
+                                    NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
+                            IdentifierToken rParamName =
+                                    AbstractNodeFactory.createIdentifierToken(" " + GeneratorUtils.escapeIdentifier(parameter.getName().trim()));
+                            RequiredParameterNode param1 =
+                                    NodeFactory.createRequiredParameterNode(rAnnotations, rTypeName, rParamName);
+                            params.add(comma);
+                            params.add(param1);
+                        }
+                    } else {
+                        //Optional TypeDescriptor
+                        //Array type
+                        if (schema instanceof ArraySchema) {
+
+                        } else {
+
+                        }
+
+
+                        }
+                }
+            }
+
+        }
+
+
+
 
         SeparatedNodeList<ParameterNode> parameters = AbstractNodeFactory.createSeparatedNodeList(params);
         //return Type descriptors

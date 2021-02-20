@@ -38,4 +38,10 @@ public class BallerinaServiceGeneratorTest {
         String definitionPath = RES_DIR.resolve("generators/swagger/multiPathParam.yaml").toString();
         BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
+
+    @Test(description = "Generate functionDefinitionNode for Query parameters")
+    public void generateQueryparameter() throws IOException, BallerinaOpenApiException {
+        String definitionPath = RES_DIR.resolve("generators/swagger/multiQueryParam.yaml").toString();
+        BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
 }

@@ -29,11 +29,16 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.ballerinalang.ballerina.Constants;
 import org.ballerinalang.openapi.typemodel.BallerinaOpenApiType;
+import org.ballerinalang.openapi.utils.GeneratorConstants;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import static org.ballerinalang.openapi.OpenApiMesseges.BAL_KEYWORDS;
 
 public class GeneratorUtils {
 
@@ -173,6 +178,76 @@ public class GeneratorUtils {
             functionRelativeResourcePath.add(idToken);
         }
         return functionRelativeResourcePath;
+    }
+
+    /**
+     * Method for convert openApi type to ballerina type.
+     * @param type  OpenApi parameter types
+     * @return ballerina type
+     */
+    public static String convertOpenAPITypeToBallerina(String type) {
+        String convertedType;
+        switch (type) {
+            case Constants.INTEGER:
+                convertedType = "int";
+                break;
+            case Constants.STRING:
+                convertedType = "string";
+                break;
+            case Constants.BOOLEAN:
+                convertedType = "boolean";
+                break;
+            case Constants.ARRAY:
+                convertedType = "[]";
+                break;
+            case Constants.OBJECT:
+                convertedType = "record";
+                break;
+            case Constants.DECIMAL:
+                convertedType = "decimal";
+                break;
+            default:
+                convertedType = "";
+        }
+        return convertedType;
+    }
+
+
+    /**
+     * This method will escape special characters used in method names and identifiers.
+     *
+     * @param identifier - identifier or method name
+     * @return - escaped string
+     */
+    public static String escapeIdentifier(String identifier) {
+        if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") || BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
+            identifier = identifier.replace("-", "");
+            identifier = identifier.replace("$", "");
+
+            if (identifier.equals("error")) {
+                identifier = "_error";
+            } else {
+                identifier = identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
+                if (identifier.endsWith("?")) {
+                    if (identifier.charAt(identifier.length() - 2) == '\\') {
+                        StringBuilder stringBuilder = new StringBuilder(identifier);
+                        stringBuilder.deleteCharAt(identifier.length() - 2);
+                        identifier = stringBuilder.toString();
+                    }
+                    if (BAL_KEYWORDS.stream().anyMatch(Optional.ofNullable(identifier)
+                            .filter(sStr -> sStr.length() != 0)
+                            .map(sStr -> sStr.substring(0, sStr.length() - 1))
+                            .orElse(identifier)::equals)) {
+                        identifier = "'" + identifier;
+                    } else {
+                        return identifier;
+                    }
+                } else {
+                    identifier = "'" + identifier;
+                }
+            }
+        }
+        return identifier;
     }
 
 }
