@@ -150,10 +150,10 @@ public class BallerinaServiceGenerator {
         }
 
         // Generate Service - done
-
         // -- Generate resource function - done
         // -- Generate multiple resource
-        // -- Generate multiple query parameters
+        // -- Generate multiple query parameters -done
+        // -- Generate multiple path parameters -done
         // -- fix formatter issue
         // -- fix request Payload
         // -- fix response Payload
@@ -208,78 +208,12 @@ public class BallerinaServiceGenerator {
         Token comma = AbstractNodeFactory.createIdentifierToken(",");
 
         // Handle query parameter
-        //type​ ​ BasicType​ ​ boolean|int|float|decimal|string​ ;
+        // type​ ​ BasicType​ ​ boolean|int|float|decimal|string​ ;
         //public​ ​ type​ ​ QueryParamType​ ()​ |BasicType|BasicType​ [];
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
-            for (Parameter parameter: parameters) {
-                if (parameter.getIn().trim().equals("query")) {
-                    Schema schema = parameter.getSchema();
-                    if (parameter.getRequired()) {
-                        //Required without typeDescriptor
-                        NodeList<AnnotationNode> rAnnotations = NodeFactory.createEmptyNodeList();
-                        //When it has arrayType
-                        if (schema instanceof ArraySchema) {
-                            Schema<?> items = ((ArraySchema) schema).getItems();
-                            if (!(items instanceof ObjectSchema) || !(items instanceof ArraySchema)) {
-                                // create arrayTypeDescriptor
-                                //1. memberTypeDescriptor
-                                Token name = AbstractNodeFactory.createIdentifierToken(items.getType().trim());
-                                BuiltinSimpleNameReferenceNode memberTypeDesc =
-                                        NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
-                                //2. openBracket
-                                Token openBracket = AbstractNodeFactory.createIdentifierToken("[");
-                                //3. arraylength = null
-                                //4. closeBracket
-                                Token closeBracket = AbstractNodeFactory.createIdentifierToken("]");
-
-                                ArrayTypeDescriptorNode arrayTypeName =
-                                        NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openBracket, null,
-                                                closeBracket);
-
-                                IdentifierToken arrayParamName =
-                                        AbstractNodeFactory.createIdentifierToken(" " + escapeIdentifier(parameter.getName().trim()));
-
-                                RequiredParameterNode arrayRparam = NodeFactory
-                                        .createRequiredParameterNode(rAnnotations, arrayTypeName, arrayParamName);
-
-                                params.add(comma);
-                                params.add(arrayRparam);
-
-                            } else {
-                                // handle in case swagger has nested array or record type
-                            }
-                        } else {
-                            Token name =
-                                    AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(schema.getType().toLowerCase().trim()));
-
-                            BuiltinSimpleNameReferenceNode rTypeName =
-                                    NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
-                            IdentifierToken rParamName =
-                                    AbstractNodeFactory.createIdentifierToken(" " + GeneratorUtils.escapeIdentifier(parameter.getName().trim()));
-                            RequiredParameterNode param1 =
-                                    NodeFactory.createRequiredParameterNode(rAnnotations, rTypeName, rParamName);
-                            params.add(comma);
-                            params.add(param1);
-                        }
-                    } else {
-                        //Optional TypeDescriptor
-                        //Array type
-                        if (schema instanceof ArraySchema) {
-
-                        } else {
-
-                        }
-
-
-                        }
-                }
-            }
-
+            createNodeForQueryParam(params, comma, parameters);
         }
-
-
-
 
         SeparatedNodeList<ParameterNode> parameters = AbstractNodeFactory.createSeparatedNodeList(params);
         //return Type descriptors
@@ -316,6 +250,90 @@ public class BallerinaServiceGenerator {
                         functionSignatureNode, functionBodyBlockNode);
 
         functions.add(functionDefinitionNode);
+    }
+
+    private static void createNodeForQueryParam(List<Node> params, Token comma, List<Parameter> parameters) {
+
+        for (Parameter parameter: parameters) {
+            if (parameter.getIn().trim().equals("query")) {
+                params.add(comma);
+                Schema schema = parameter.getSchema();
+                NodeList<AnnotationNode> annotations = NodeFactory.createEmptyNodeList();
+                IdentifierToken parameterName =
+                        AbstractNodeFactory.createIdentifierToken(" " + escapeIdentifier(parameter.getName().trim()));
+                if (parameter.getRequired()) {
+                    //Required without typeDescriptor
+                    //When it has arrayType
+                    if (schema instanceof ArraySchema) {
+                        Schema<?> items = ((ArraySchema) schema).getItems();
+                        if (!(items instanceof ObjectSchema) || !(items instanceof ArraySchema)) {
+                            // create arrayTypeDescriptor
+                            //1. memberTypeDescriptor
+                            ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
+                            RequiredParameterNode arrayRparam = NodeFactory
+                                    .createRequiredParameterNode(annotations, arrayTypeName, parameterName);
+                            params.add(arrayRparam);
+
+                        } else {
+                            // handle in case swagger has nested array or record type
+                        }
+                    } else {
+                        Token name =
+                                AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(schema.getType().toLowerCase().trim()));
+                        BuiltinSimpleNameReferenceNode rTypeName =
+                                NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
+                        RequiredParameterNode param1 =
+                                NodeFactory.createRequiredParameterNode(annotations, rTypeName, parameterName);
+                        params.add(param1);
+                    }
+                } else {
+                    //Optional TypeDescriptor
+                    //Array type
+                    Token questionMark = NodeFactory.createIdentifierToken("?");
+                    //When it has arrayType
+                    if (schema instanceof ArraySchema) {
+                        Schema<?> items = ((ArraySchema) schema).getItems();
+                        if (!(items instanceof ObjectSchema) || !(items instanceof ArraySchema)) {
+                            // create arrayTypeDescriptor
+                            ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
+                            // create Optional type descriptor
+                            OptionalTypeDescriptorNode optionalTypeDescriptorNode =
+                                    NodeFactory.createOptionalTypeDescriptorNode(arrayTypeName, questionMark);
+                            RequiredParameterNode arrayRparam = NodeFactory
+                                    .createRequiredParameterNode(annotations, optionalTypeDescriptorNode,
+                                            parameterName);
+                            params.add(arrayRparam);
+
+                        } else {
+                            // handle in case swagger has nested array or record type
+                        }
+                    } else {
+                        Token name =
+                                AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(schema.getType().toLowerCase().trim()));
+                        BuiltinSimpleNameReferenceNode rTypeName =
+                                NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
+                        OptionalTypeDescriptorNode optionalTypeDescriptorNode =
+                                NodeFactory.createOptionalTypeDescriptorNode(rTypeName, questionMark);
+                        RequiredParameterNode param1 =
+                                NodeFactory.createRequiredParameterNode(annotations, optionalTypeDescriptorNode, parameterName);
+                        params.add(param1);
+                    }
+                }
+            }
+        }
+    }
+
+    // Create ArrayTypeDescriptorNode using Schema
+    private static ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) {
+
+        Token arrayName = AbstractNodeFactory.createIdentifierToken(items.getType().trim());
+        BuiltinSimpleNameReferenceNode memberTypeDesc =
+                NodeFactory.createBuiltinSimpleNameReferenceNode(null, arrayName);
+        Token openBracket = AbstractNodeFactory.createIdentifierToken("[");
+        Token closeBracket = AbstractNodeFactory.createIdentifierToken("]");
+
+        return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openBracket, null,
+                closeBracket);
     }
 
     private static OpenAPI getBallerinaOpenApiType(String definitionPath, String serviceName,

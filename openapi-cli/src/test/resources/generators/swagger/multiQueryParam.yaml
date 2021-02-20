@@ -23,7 +23,7 @@ paths:
         - name: tags
           in: query
           description: tags to filter by
-          required: true
+          required: false
           style: form
           schema:
             type: array
