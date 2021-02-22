@@ -50,6 +50,8 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.ballerinalang.formatter.core.Formatter;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.typemodel.BallerinaOpenApiType;
@@ -75,7 +77,7 @@ import static org.ballerinalang.generators.GeneratorUtils.getRelativeResourcePat
 public class BallerinaServiceGenerator {
 
     public static void generateSyntaxTree(String definitionPath, String serviceName, Filter filter) throws IOException,
-            BallerinaOpenApiException {
+            BallerinaOpenApiException, FormatterException {
         // Create imports http and openapi
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode("ballerina", "http");
         ImportDeclarationNode importForOpenapi = GeneratorUtils.getImportDeclarationNode("ballerina", "openapi");
@@ -152,8 +154,8 @@ public class BallerinaServiceGenerator {
             TextDocument textDocument = TextDocuments.from("");
             SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
             SyntaxTree generatedSyntaxTree = syntaxTree.modifyWith(modulePartNode);
-            System.out.println(generatedSyntaxTree.toSourceCode());
-//            System.out.println(Formatter.format(generatedSyntaxTree.toSourceCode()));
+//            System.out.println(generatedSyntaxTree.toSourceCode());
+            System.out.println(Formatter.format(generatedSyntaxTree.toSourceCode()));
 
         } else {
             //handel if servers empty
@@ -280,6 +282,7 @@ public class BallerinaServiceGenerator {
             Token literalToken = AbstractNodeFactory.createLiteralValueToken(null, text,leading, trailing);
             BasicLiteralNode basicLiteralNode = NodeFactory.createBasicLiteralNode(null, literalToken);
             literals.add(basicLiteralNode);
+            literals.add(comma);
             MediaType value = next.getValue();
             Schema schema = value.getSchema();
             if (schema.get$ref() != null) {
@@ -288,35 +291,26 @@ public class BallerinaServiceGenerator {
             } else if (schema.getType() != null) {
                 identifierToken = AbstractNodeFactory.createIdentifierToken(schema.getType() + " ");
             }
-
         }
+        literals.remove(literals.size() - 1);
         SeparatedNodeList<Node> expression = NodeFactory.createSeparatedNodeList(literals);
-
         Token closeBracket = AbstractNodeFactory.createIdentifierToken("]");
-
-        ListConstructorExpressionNode valueExpr =
-                NodeFactory.createListConstructorExpressionNode(openBracket, expression, closeBracket);
-
-        SpecificFieldNode specificFieldNode =
-                NodeFactory.createSpecificFieldNode(null, mediaType, colon, valueExpr);
-
+        ListConstructorExpressionNode valueExpr = NodeFactory.createListConstructorExpressionNode(openBracket,
+                expression, closeBracket);
+        SpecificFieldNode specificFieldNode = NodeFactory.createSpecificFieldNode(null, mediaType, colon,
+                valueExpr);
         SeparatedNodeList<MappingFieldNode> fields = NodeFactory.createSeparatedNodeList(specificFieldNode);
-
         Token closeBrace = AbstractNodeFactory.createIdentifierToken("}");
-
-        MappingConstructorExpressionNode annotValue =
-                NodeFactory.createMappingConstructorExpressionNode(openBrace, fields, closeBrace);
+        MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(openBrace,
+                fields, closeBrace);
         AnnotationNode annotationNode = NodeFactory.createAnnotationNode(atToken, annotReference, annotValue);
 
         NodeList<AnnotationNode> annotation =  NodeFactory.createNodeList(annotationNode);
-
-        // TypeName
-        SimpleNameReferenceNode typerName = NodeFactory.createSimpleNameReferenceNode(identifierToken);
-        // paramName
-        Token paramrName = AbstractNodeFactory.createIdentifierToken(" payload");
+        SimpleNameReferenceNode typeName = NodeFactory.createSimpleNameReferenceNode(identifierToken);
+        Token paramName = AbstractNodeFactory.createIdentifierToken(" payload");
 
         RequiredParameterNode payload =
-                NodeFactory.createRequiredParameterNode(annotation, typerName, paramrName);
+                NodeFactory.createRequiredParameterNode(annotation, typeName, paramName);
 
         params.add(comma);
         params.add(payload);

@@ -43,7 +43,6 @@ dependencies {
     implementation "info.picocli:picocli"
     implementation "org.ballerinalang:ballerina-lang"
     implementation "org.ballerinalang:ballerina-parser"
-    implementation "org.ballerinalang:formatter"
     implementation "org.ballerinalang:formatter-core"
     implementation "org.ballerinalang:ballerina-cli"
     implementation "org.ballerinalang:ballerina-tools-api"
