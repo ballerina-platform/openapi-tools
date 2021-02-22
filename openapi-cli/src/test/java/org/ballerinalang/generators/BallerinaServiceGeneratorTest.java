@@ -44,4 +44,22 @@ public class BallerinaServiceGeneratorTest {
         String definitionPath = RES_DIR.resolve("generators/swagger/multiQueryParam.yaml").toString();
         BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
+
+    @Test(description = "Generate functionDefinitionNode for multiple operations")
+    public void generateMultipleOperatons() throws IOException, BallerinaOpenApiException {
+        String definitionPath = RES_DIR.resolve("generators/swagger/multiOperations.yaml").toString();
+        BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Generate functionDefinitionNode for multiple paths")
+    public void generateMultiplePath() throws IOException, BallerinaOpenApiException {
+        String definitionPath = RES_DIR.resolve("generators/swagger/multiPaths.yaml").toString();
+        BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Generate functionDefinitionNode for request body with json")
+    public void generateJsonPayload() throws IOException, BallerinaOpenApiException {
+        String definitionPath = RES_DIR.resolve("generators/swagger/jsonPayload.yaml").toString();
+        BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
 }

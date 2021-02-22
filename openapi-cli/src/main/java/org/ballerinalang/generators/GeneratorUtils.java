@@ -55,6 +55,15 @@ public class GeneratorUtils {
                 moduleNodeList, null, semicolon );
     }
 
+    public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
+
+        Token modulePrefixToken = AbstractNodeFactory.createIdentifierToken(modulePrefix);
+        Token colon = AbstractNodeFactory.createIdentifierToken(":");
+        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier);
+        return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
+    }
+
+
     public static ListenerDeclarationNode getListenerDeclarationNode(BallerinaOpenApiType openApi) {
 
         // Take first server to Map
