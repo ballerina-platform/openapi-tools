@@ -47,7 +47,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/Pet'
           application/xml:
             schema:
               $ref: '#/components/schemas/Pet'

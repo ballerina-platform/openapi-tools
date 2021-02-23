@@ -42,6 +42,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -62,6 +63,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -75,7 +77,7 @@ import static org.ballerinalang.generators.GeneratorUtils.getQualifiedNameRefere
 import static org.ballerinalang.generators.GeneratorUtils.getRelativeResourcePath;
 
 public class BallerinaServiceGenerator {
-
+//1.make definition path to Path type
     public static void generateSyntaxTree(String definitionPath, String serviceName, Filter filter) throws IOException,
             BallerinaOpenApiException, FormatterException {
         // Create imports http and openapi
@@ -156,6 +158,7 @@ public class BallerinaServiceGenerator {
             SyntaxTree generatedSyntaxTree = syntaxTree.modifyWith(modulePartNode);
 //            System.out.println(generatedSyntaxTree.toSourceCode());
             System.out.println(Formatter.format(generatedSyntaxTree.toSourceCode()));
+            //Generate file with generated syntax tree
 
         } else {
             //handel if servers empty
@@ -274,24 +277,57 @@ public class BallerinaServiceGenerator {
         MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
         Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
         MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
-        Iterator<Map.Entry<String, MediaType>> content = requestBody.getContent().entrySet().iterator();
         List<Node> literals = new ArrayList<>();
-        while (content.hasNext()) {
-            Map.Entry<String, MediaType> next = content.next();
-            String text = next.getKey();
-            Token literalToken = AbstractNodeFactory.createLiteralValueToken(null, text,leading, trailing);
-            BasicLiteralNode basicLiteralNode = NodeFactory.createBasicLiteralNode(null, literalToken);
-            literals.add(basicLiteralNode);
-            literals.add(comma);
-            MediaType value = next.getValue();
-            Schema schema = value.getSchema();
-            if (schema.get$ref() != null) {
-                identifierToken =
-                        AbstractNodeFactory.createIdentifierToken(extractReferenceType(schema.get$ref()));
-            } else if (schema.getType() != null) {
-                identifierToken = AbstractNodeFactory.createIdentifierToken(schema.getType() + " ");
+
+        // Filter same data type
+        // Generate two hashMaps 1 for parent travers 2 for child travers
+        Content bodyContent = requestBody.getContent();
+        Set<Map.Entry<String, MediaType>> entries = bodyContent.entrySet();
+        Set<Map.Entry<String, MediaType>> updatedEntries = bodyContent.entrySet();
+        HashSet<Map.Entry<String, MediaType>> equalDataType =new HashSet();
+
+        Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
+        while (iterator.hasNext()) {
+            // remove element from updateEntries
+            Map.Entry<String, MediaType> mediaTypeEntry = iterator.next();
+            updatedEntries.remove(mediaTypeEntry.getKey());
+            if (!updatedEntries.isEmpty()) {
+                Iterator<Map.Entry<String, MediaType>> updateIter = updatedEntries.iterator();
+                while (updateIter.hasNext()) {
+                    Map.Entry<String, MediaType> updateNext = updateIter.next();
+                    MediaType parentValue = mediaTypeEntry.getValue();
+                    MediaType childValue = updateNext.getValue();
+                    if (parentValue.getSchema().get$ref() != null && childValue.getSchema().get$ref() != null) {
+                        String parentRef = parentValue.getSchema().get$ref().trim();
+                        String childRef = childValue.getSchema().get$ref().trim();
+                        if (extractReferenceType(parentRef).equals(extractReferenceType(childRef))) {
+                            equalDataType.add(updateNext);
+                        }
+                    }
+                }
+                if (!equalDataType.isEmpty()) {
+                    equalDataType.add(mediaTypeEntry);
+                    break;
+                }
             }
         }
+        if (!equalDataType.isEmpty()) {
+            Iterator<Map.Entry<String, MediaType>> iter = equalDataType.iterator();
+            while (iter.hasNext()) {
+                Map.Entry<String, MediaType> next =
+                        createBasicLiteralNodeList(comma, leading, trailing, literals, iter);
+                MediaType value = next.getValue();
+                Schema schema = value.getSchema();
+                identifierToken = getIdentifierToken(identifierToken, schema);
+            }
+        } else {
+            Iterator<Map.Entry<String, MediaType>> content = requestBody.getContent().entrySet().iterator();
+            Map.Entry<String, MediaType> next = createBasicLiteralNodeList(comma, leading, trailing, literals, content);
+            MediaType value = next.getValue();
+            Schema schema = value.getSchema();
+            identifierToken = getIdentifierToken(identifierToken, schema);
+        }
+
         literals.remove(literals.size() - 1);
         SeparatedNodeList<Node> expression = NodeFactory.createSeparatedNodeList(literals);
         Token closeBracket = AbstractNodeFactory.createIdentifierToken("]");
@@ -314,6 +350,31 @@ public class BallerinaServiceGenerator {
 
         params.add(comma);
         params.add(payload);
+    }
+
+    private static Map.Entry<String, MediaType> createBasicLiteralNodeList(Token comma, MinutiaeList leading,
+                                                                           MinutiaeList trailing, List<Node> literals,
+                                                                           Iterator<Map.Entry<String, MediaType>> content) {
+
+        Map.Entry<String, MediaType> next = content.next();
+        String text = next.getKey();
+        Token literalToken = AbstractNodeFactory.createLiteralValueToken(null, text, leading, trailing);
+        BasicLiteralNode basicLiteralNode = NodeFactory.createBasicLiteralNode(null, literalToken);
+        literals.add(basicLiteralNode);
+        literals.add(comma);
+        return next;
+    }
+
+    private static IdentifierToken getIdentifierToken(IdentifierToken identifierToken, Schema schema)
+            throws BallerinaOpenApiException {
+
+        if (schema.get$ref() != null) {
+            identifierToken =
+                    AbstractNodeFactory.createIdentifierToken(extractReferenceType(schema.get$ref()));
+        } else if (schema.getType() != null) {
+            identifierToken = AbstractNodeFactory.createIdentifierToken(schema.getType() + " ");
+        }
+        return identifierToken;
     }
 
     private static void createNodeForQueryParam(List<Node> params, Token comma, List<Parameter> parameters) {

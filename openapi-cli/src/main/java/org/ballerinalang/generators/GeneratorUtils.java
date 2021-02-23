@@ -67,7 +67,7 @@ public class GeneratorUtils {
     public static ListenerDeclarationNode getListenerDeclarationNode(BallerinaOpenApiType openApi) {
 
         // Take first server to Map
-        Token listenerKeyword = AbstractNodeFactory.createIdentifierToken("listner");
+        Token listenerKeyword = AbstractNodeFactory.createIdentifierToken("listener");
         // Create type descriptor
         Token modulePrefix = AbstractNodeFactory.createIdentifierToken(" http");
         Token colon = AbstractNodeFactory.createIdentifierToken(":");

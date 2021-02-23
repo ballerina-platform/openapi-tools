@@ -27,8 +27,9 @@ paths:
           style: form
           schema:
             type: array
-            items:
-              type: "string"
+              item: array
+                items:
+                  type: "string"
         - name: limit
           in: query
           description: maximum number of results to return
