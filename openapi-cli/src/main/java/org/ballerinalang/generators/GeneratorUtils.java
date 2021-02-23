@@ -30,7 +30,6 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.ballerinalang.ballerina.Constants;
-import org.ballerinalang.openapi.typemodel.BallerinaOpenApiType;
 import org.ballerinalang.openapi.utils.GeneratorConstants;
 
 import java.util.ArrayList;
@@ -64,7 +63,7 @@ public class GeneratorUtils {
     }
 
 
-    public static ListenerDeclarationNode getListenerDeclarationNode(BallerinaOpenApiType openApi) {
+    public static ListenerDeclarationNode getListenerDeclarationNode(Integer port, String host) {
 
         // Take first server to Map
         Token listenerKeyword = AbstractNodeFactory.createIdentifierToken("listener");
@@ -91,7 +90,7 @@ public class GeneratorUtils {
         // Create arguments
         // 1. Create port Node
         Token literalToken = AbstractNodeFactory.createLiteralValueToken(SyntaxKind.DECIMAL_INTEGER_LITERAL_TOKEN
-                , String.valueOf(openApi.getServers().get(0).getPort()),leading, trailing);
+                , String.valueOf(port),leading, trailing);
         BasicLiteralNode expression = NodeFactory.createBasicLiteralNode(SyntaxKind.NUMERIC_LITERAL, literalToken);
 
         PositionalArgumentNode portNode = NodeFactory.createPositionalArgumentNode(expression);
@@ -105,8 +104,7 @@ public class GeneratorUtils {
         Token openBrace = AbstractNodeFactory.createIdentifierToken("{");
 
         Token fieldName = AbstractNodeFactory.createIdentifierToken("host");
-        Token literalHostToken = AbstractNodeFactory.createIdentifierToken(openApi.getServers().get(0).getHost(),
-                leading, trailing);
+        Token literalHostToken = AbstractNodeFactory.createIdentifierToken(host, leading, trailing);
         BasicLiteralNode valueExpr = NodeFactory.createBasicLiteralNode(SyntaxKind.STRING_LITERAL,
                 literalHostToken);
         MappingFieldNode HostNode = NodeFactory.createSpecificFieldNode(null, fieldName, colon, valueExpr);
