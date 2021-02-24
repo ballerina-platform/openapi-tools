@@ -173,6 +173,29 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test openapi definition to ballerina source code generation",
+            dataProvider = "fileProvider", enabled = false)
+    public void openApiToBallerinaCodeGenTest(String yamlFile, String expectedFile) {
+        String definitionPath = RES_DIR.resolve(yamlFile).toString();
+        Path expectedFilePath = RES_DIR.resolve(Paths.get("expected", expectedFile));
+
+        CodeGenerator generator = new CodeGenerator();
+        try {
+            String expectedContent = new String(Files.readAllBytes(expectedFilePath));
+            List<GenSrcFile> generatedFileList = generator.generateBalSource(GenType.GEN_SERVICE,
+                    definitionPath, "", "", filter);
+            if (generatedFileList.size() > 0) {
+                GenSrcFile actualGeneratedContent = generatedFileList.get(0);
+                Assert.assertEquals((actualGeneratedContent.getContent().trim()).replaceAll("\\s+", ""),
+                        (expectedContent.trim()).replaceAll("\\s+", ""),
+                        "expected content and actual generated content is mismatched for: " + yamlFile);
+            }
+        } catch (IOException | BallerinaOpenApiException e) {
+            Assert.fail("Error while generating the ballerina content for the openapi definition: "
+                    + yamlFile + " " + e.getMessage());
+        }
+    }
+
     @Test(description = "Test Ballerina skeleton generation for multiple Query parameter", enabled = true)
     public void generateSkeletonForTwoQueryParameter() {
         final String serviceName = "openapipetstore";
@@ -199,28 +222,6 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test openapi definition to ballerina source code generation",
-            dataProvider = "fileProvider", enabled = false)
-    public void openApiToBallerinaCodeGenTest(String yamlFile, String expectedFile) {
-        String definitionPath = RES_DIR.resolve(yamlFile).toString();
-        Path expectedFilePath = RES_DIR.resolve(Paths.get("expected", expectedFile));
-
-        CodeGenerator generator = new CodeGenerator();
-        try {
-            String expectedContent = new String(Files.readAllBytes(expectedFilePath));
-            List<GenSrcFile> generatedFileList = generator.generateBalSource(GenType.GEN_SERVICE,
-                    definitionPath, "", "", filter);
-            if (generatedFileList.size() > 0) {
-                GenSrcFile actualGeneratedContent = generatedFileList.get(0);
-                Assert.assertEquals((actualGeneratedContent.getContent().trim()).replaceAll("\\s+", ""),
-                        (expectedContent.trim()).replaceAll("\\s+", ""),
-                        "expected content and actual generated content is mismatched for: " + yamlFile);
-            }
-        } catch (IOException | BallerinaOpenApiException e) {
-            Assert.fail("Error while generating the ballerina content for the openapi definition: "
-                    + yamlFile + " " + e.getMessage());
-        }
-    }
 
     @Test
     public void escapeIdentifierTest() {
