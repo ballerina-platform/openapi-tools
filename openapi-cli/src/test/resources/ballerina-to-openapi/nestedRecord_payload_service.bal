@@ -13,7 +13,19 @@ type Pet record {
      boolean bark;
   };
  service /payloadV on helloEp {
-     resource function post hi(http:Caller caller, http:Request request, @http:Payload { mediaType:[​
-     "application/json"] } Dog payload) {
+     //resource function post hi(http:Caller caller, http:Request request, @http:Payload { mediaType:[​
+     //"application/json"] } Dog payload) {
+     //
+     //}
 
-     }}
+     //resource function post pets (​http:Request request, @http:Payload {mediaType["application/json"]​} ​ json ​
+     //payload​) returns http:Ok {
+     //     }
+     //}
+
+     resource function get users (​ http:Caller​ ​ caller​, http:Request request) returns @http:Payload
+     {mediaType:["application/json"]} ArrayOfUsers |
+     @http:Payload {mediaType:["text/plain"]} string {
+
+      }
+

@@ -48,6 +48,8 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -249,19 +251,62 @@ public class BallerinaServiceGenerator {
         SeparatedNodeList<ParameterNode> parameters = AbstractNodeFactory.createSeparatedNodeList(params);
         //return Type descriptors
         Token returnKeyWord = AbstractNodeFactory.createIdentifierToken(" returns ");
-        NodeList<AnnotationNode> returnAnnotation = NodeFactory.createEmptyNodeList();
-        // create Type
-        // --errortypeDescriptor
-        Token errorKeyWordToken = AbstractNodeFactory.createIdentifierToken("error");
-        // errorTypeParamsNode can be null
-        ErrorTypeDescriptorNode errorTypeDescriptorNode =
-                NodeFactory.createErrorTypeDescriptorNode(errorKeyWordToken, null);
-        Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
+        // Check return type is available
+        List<Node> returnNodeList =  new ArrayList<>();
+        ReturnTypeDescriptorNode returnNode = null;
+        if (operation.getValue().getResponses() != null) {
+            ApiResponses responses = operation.getValue().getResponses();
+            Iterator<Map.Entry<String, ApiResponse>> responseIter = responses.entrySet().iterator();
+            while (responseIter.hasNext()) {
+                Map.Entry<String, ApiResponse> response = responseIter.next();
+                if (response.getKey().trim().equals("200")) {
+                    if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
+                        // Scenario 01:
+                        Token modulePrefix = AbstractNodeFactory.createIdentifierToken("http");
+                        Token colon = AbstractNodeFactory.createIdentifierToken(":");
+                        IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("OK");
+                        QualifiedNameReferenceNode ok_200 = NodeFactory.createQualifiedNameReferenceNode(modulePrefix, colon,
+                                identifier);
+                        returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord, annotations, ok_200);
 
-        OptionalTypeDescriptorNode type =
-                NodeFactory.createOptionalTypeDescriptorNode(errorTypeDescriptorNode, questionMarkToken);
-        ReturnTypeDescriptorNode returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord, annotations,
-                type);
+                    } else if (response.getValue().getContent() != null) {
+                        Content content = response.getValue().getContent();
+                        Iterator<Map.Entry<String, MediaType>> contentItr = content.entrySet().iterator();
+                        while (contentItr.hasNext()) {
+                            Map.Entry<String, MediaType> mediaTypeEntry = contentItr.next();
+                            String mediaType = mediaTypeEntry.getKey();
+                            String dataType;
+                            if (mediaTypeEntry.getValue().getSchema() != null) {
+                                Schema schema = mediaTypeEntry.getValue().getSchema();
+                                if (schema.get$ref() != null) {
+                                    dataType = extractReferenceType(schema.get$ref().trim());
+                                } else {
+                                    dataType = convertOpenAPITypeToBallerina(schema.getType());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // --errorTypeDescriptor
+            Token errorKeyWordToken = AbstractNodeFactory.createIdentifierToken("error");
+            // errorTypeParamsNode can be null
+            ErrorTypeDescriptorNode errorTypeDescriptorNode =
+                    NodeFactory.createErrorTypeDescriptorNode(errorKeyWordToken, null);
+            Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
+
+            OptionalTypeDescriptorNode type =
+                    NodeFactory.createOptionalTypeDescriptorNode(errorTypeDescriptorNode, questionMarkToken);
+            returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord, annotations,
+                    type);
+//            returnNodeList.add(returnNode);
+        }
+//        NodeList<AnnotationNode> returnAnnotation = NodeFactory.createNodeList(returnNodeList);
+        // create Type
+
+        
+        
         Token closeParenToken = AbstractNodeFactory.createIdentifierToken(")");
 
         FunctionSignatureNode functionSignatureNode = NodeFactory

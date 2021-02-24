@@ -65,4 +65,16 @@ public class BallerinaServiceGeneratorTest {
         Path definitionPath = RES_DIR.resolve("generators/swagger/jsonPayload.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
+
+    @Test(description = "Generate functionDefinitionNode for request body with json")
+    public void generateResponsePayload() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/responsePayload.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Generate functionDefinitionNode for request body with json")
+    public void generateResponsePayloadWithRef() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/responseRefPayload.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
 }
