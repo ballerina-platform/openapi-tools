@@ -77,4 +77,32 @@ public class BallerinaServiceGeneratorTest {
         Path definitionPath = RES_DIR.resolve("generators/swagger/responseRefPayload.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
+
+    @Test(description = "Generate functionDefinitionNode for request body with json")
+    public void generateResponsePayloadWithRefMulti() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/responseMultipleRefPayload.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Generate functionDefinitionNode for request body with json")
+    public void generateResponsePayloadWithDifferentStatusCode() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/responseDifferentStatusCode.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Generate functionDefinitionNode for request body with json")
+    public void generateResponseDifferentStatusCode() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/responseDifferentCodes.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Generate functionDefinitionNode for request body with json")
+    public void generateResponserecordInline() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/responseRecordInline.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
 }

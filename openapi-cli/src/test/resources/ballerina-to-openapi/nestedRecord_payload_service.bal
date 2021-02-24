@@ -23,9 +23,21 @@ type Pet record {
      //     }
      //}
 
-     resource function get users (​ http:Caller​ ​ caller​, http:Request request) returns @http:Payload
-     {mediaType:["application/json"]} ArrayOfUsers |
-     @http:Payload {mediaType:["text/plain"]} string {
+     //resource function get users(http:Caller caller​, http:Request request) returns @http:Payload
+     //{mediaType:["application/json"]} ArrayOfUsers | @http:Payload{mediaType:["text/plain"]} string {
+     //
+     // }
 
-      }
+      //resource function get users(http:Caller caller, http:Request request) returns @http:Payload{mediaType:["text/plain"]} string {}
 
+      //resource function get pets(http:Request request ​ payload) returns @http:Payload {mediaType:["text/plain"]​} record {|*http:BadRequest; string body;|} {}
+ //resource function get pets (​ http:Caller​ ​ caller​, http:Request request ​ payload​ ) returns http:Ok|
+ //http:BadRequest | http:Unauthorized  | http:NotFound {
+ //  }
+
+ resource function get users() returns @http:Payload {mediaType:"application/json"} record {|*http:Ok; record {| int
+  id; string username;|} body;|} {
+ }
+
+
+}

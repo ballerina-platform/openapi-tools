@@ -26,6 +26,8 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
@@ -36,6 +38,9 @@ import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -252,60 +257,9 @@ public class BallerinaServiceGenerator {
         //return Type descriptors
         Token returnKeyWord = AbstractNodeFactory.createIdentifierToken(" returns ");
         // Check return type is available
-        List<Node> returnNodeList =  new ArrayList<>();
         ReturnTypeDescriptorNode returnNode = null;
-        if (operation.getValue().getResponses() != null) {
-            ApiResponses responses = operation.getValue().getResponses();
-            Iterator<Map.Entry<String, ApiResponse>> responseIter = responses.entrySet().iterator();
-            while (responseIter.hasNext()) {
-                Map.Entry<String, ApiResponse> response = responseIter.next();
-                if (response.getKey().trim().equals("200")) {
-                    if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
-                        // Scenario 01:
-                        Token modulePrefix = AbstractNodeFactory.createIdentifierToken("http");
-                        Token colon = AbstractNodeFactory.createIdentifierToken(":");
-                        IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("OK");
-                        QualifiedNameReferenceNode ok_200 = NodeFactory.createQualifiedNameReferenceNode(modulePrefix, colon,
-                                identifier);
-                        returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord, annotations, ok_200);
-
-                    } else if (response.getValue().getContent() != null) {
-                        Content content = response.getValue().getContent();
-                        Iterator<Map.Entry<String, MediaType>> contentItr = content.entrySet().iterator();
-                        while (contentItr.hasNext()) {
-                            Map.Entry<String, MediaType> mediaTypeEntry = contentItr.next();
-                            String mediaType = mediaTypeEntry.getKey();
-                            String dataType;
-                            if (mediaTypeEntry.getValue().getSchema() != null) {
-                                Schema schema = mediaTypeEntry.getValue().getSchema();
-                                if (schema.get$ref() != null) {
-                                    dataType = extractReferenceType(schema.get$ref().trim());
-                                } else {
-                                    dataType = convertOpenAPITypeToBallerina(schema.getType());
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            // --errorTypeDescriptor
-            Token errorKeyWordToken = AbstractNodeFactory.createIdentifierToken("error");
-            // errorTypeParamsNode can be null
-            ErrorTypeDescriptorNode errorTypeDescriptorNode =
-                    NodeFactory.createErrorTypeDescriptorNode(errorKeyWordToken, null);
-            Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
-
-            OptionalTypeDescriptorNode type =
-                    NodeFactory.createOptionalTypeDescriptorNode(errorTypeDescriptorNode, questionMarkToken);
-            returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord, annotations,
-                    type);
-//            returnNodeList.add(returnNode);
-        }
-//        NodeList<AnnotationNode> returnAnnotation = NodeFactory.createNodeList(returnNodeList);
+        returnNode = getReturnTypeDescriptorNode(operation, annotations, returnKeyWord, returnNode);
         // create Type
-
-        
         
         Token closeParenToken = AbstractNodeFactory.createIdentifierToken(")");
 
@@ -324,6 +278,236 @@ public class BallerinaServiceGenerator {
                         qualifiersList, functionKeyWord, functionName, relativeResourcePath,
                         functionSignatureNode, functionBodyBlockNode);
         functions.add(functionDefinitionNode);
+    }
+
+    private static ReturnTypeDescriptorNode getReturnTypeDescriptorNode(
+            Map.Entry<PathItem.HttpMethod, Operation> operation, NodeList<AnnotationNode> annotations,
+            Token returnKeyWord, ReturnTypeDescriptorNode returnNode) throws BallerinaOpenApiException {
+
+        List<AnnotationNode> annotationsReturn = new ArrayList<>();
+        if (operation.getValue().getResponses() != null) {
+            ApiResponses responses = operation.getValue().getResponses();
+            Iterator<Map.Entry<String, ApiResponse>> responseIter = responses.entrySet().iterator();
+            if (responses.size() > 1) {
+                // here call recursion --- Scenario 04
+                UnionTypeDescriptorNode type = getUnionNode(responseIter);
+                returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord, annotations, type);
+            } else {
+                while (responseIter.hasNext()) {
+                    Map.Entry<String, ApiResponse> response = responseIter.next();
+
+                    // Create annotations -- common details
+                    Token atToken = AbstractNodeFactory.createIdentifierToken("@");
+                    QualifiedNameReferenceNode annotationReference = getQualifiedNameReferenceNode("http",
+                            "Payload");
+                    Token openBrace = AbstractNodeFactory.createIdentifierToken("{");
+                    // Fields
+                    // --readonlyKey word can be null
+                    IdentifierToken media = AbstractNodeFactory.createIdentifierToken("mediaType");
+                    Token colon = AbstractNodeFactory.createIdentifierToken(":");
+                    // --create value expression
+                    Token openBracket = AbstractNodeFactory.createIdentifierToken("[");
+                    // add basicLiteralNode
+                    MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
+                    Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+                    MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
+                    List<Node> literals = new ArrayList<>();
+                    List<Node> fields = new ArrayList<>();
+
+                    if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
+                        String code = getHttpStatusCode(response.getKey().trim());
+                        // Scenario 01
+                        QualifiedNameReferenceNode statues = getQualifiedNameReferenceNode("http", code);
+                        returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord, annotations, statues);
+                    } else if (response.getValue().getContent() != null) {
+                        
+                        if (response.getKey().trim().equals("200")) {
+                            returnNode = getReturnTypeDescriptorNodeFor200(returnKeyWord, annotationsReturn, response,
+                                    atToken, annotationReference, openBrace,
+                                    media, colon, openBracket, leading, trailing, literals, fields);
+                        } else {
+                            String code = getHttpStatusCode(response.getKey().trim());
+                            Content content = response.getValue().getContent();
+                            Iterator<Map.Entry<String, MediaType>> contentItr = content.entrySet().iterator();
+                            // Handle for only first content type
+                            String dataType = null;
+                            String mediaType;
+                            TypeDescriptorNode type = null;
+                            while (contentItr.hasNext()) {
+                                Map.Entry<String, MediaType> mediaTypeEntry = contentItr.next();
+                                mediaType = '"' + mediaTypeEntry.getKey().trim() + '"';
+
+                                if (mediaTypeEntry.getValue().getSchema() != null) {
+                                    Schema schema = mediaTypeEntry.getValue().getSchema();
+                                    if (schema.get$ref() != null) {
+                                        dataType = extractReferenceType(schema.get$ref().trim());
+                                        type = NodeFactory.createBuiltinSimpleNameReferenceNode(null,
+                                                NodeFactory.createIdentifierToken(dataType));
+                                    } else if( schema instanceof ObjectSchema ) {
+                                        // Create Type
+                                        Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record ");
+                                        Token bodyStartDelimiter = AbstractNodeFactory.createIdentifierToken("{|");
+                                        // Create record fields
+                                        List<Node> recordfields = new ArrayList<>();
+                                        if (schema.getProperties() != null) {
+                                            Map<String, Schema> properties =
+                                                    (Map<String, Schema>) schema.getProperties();
+                                            for (Map.Entry<String, Schema> field: properties.entrySet()) {
+                                                Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
+                                                Token fieldName = AbstractNodeFactory.createIdentifierToken(field.getKey().trim());
+                                                String typeF;
+                                                if (field.getValue().get$ref() != null) {
+                                                    typeF = extractReferenceType(field.getValue().get$ref());
+                                                } else {
+                                                    typeF = convertOpenAPITypeToBallerina(field.getValue().getType());
+                                                }
+                                                Token typeR = AbstractNodeFactory.createIdentifierToken(typeF + " ");
+                                                RecordFieldNode recordFieldNode =
+                                                        NodeFactory.createRecordFieldNode(null, null, typeR, fieldName, null, semicolonToken);
+                                                recordfields.add(recordFieldNode);
+                                            }
+                                        }
+                                        
+                                        NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordfields);
+                                        Token bodyEndDelimiter = AbstractNodeFactory.createIdentifierToken("|}");
+                                        type = NodeFactory.createRecordTypeDescriptorNode(recordKeyWord,
+                                                bodyStartDelimiter, fieldsList, null,
+                                                bodyEndDelimiter);
+                                    }else {
+                                        dataType = convertOpenAPITypeToBallerina(schema.getType());
+                                        type = NodeFactory.createBuiltinSimpleNameReferenceNode(null,
+                                                NodeFactory.createIdentifierToken(dataType));
+                                    }
+                                }
+                                // ---create expression
+                                Token literalToken = AbstractNodeFactory.createLiteralValueToken(null, mediaType, leading, trailing);
+                                BasicLiteralNode basicLiteralNode = NodeFactory.createBasicLiteralNode(null, literalToken);
+                                literals.add(basicLiteralNode);
+                                SeparatedNodeList<Node> expression = NodeFactory.createSeparatedNodeList(literals);
+                                Token closeBracket = AbstractNodeFactory.createIdentifierToken("]");
+                                ListConstructorExpressionNode valueExpr = NodeFactory.createListConstructorExpressionNode(openBracket,
+                                        expression, closeBracket);
+                                SpecificFieldNode specificFieldNode = NodeFactory.createSpecificFieldNode(null, media, colon,
+                                        valueExpr);
+                                fields.add(specificFieldNode);
+                                break;
+                            }
+                            RecordTypeDescriptorNode recordType = getRecordTypeDescriptorNode(code, type);
+
+                            SeparatedNodeList<MappingFieldNode> field = NodeFactory.createSeparatedNodeList(fields);
+                            Token closeBrace = AbstractNodeFactory.createIdentifierToken("}");
+                            MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(openBrace,
+                                    field, closeBrace);
+                            AnnotationNode annotationNode = NodeFactory.createAnnotationNode(atToken, annotationReference, annotValue);
+                            annotationsReturn.add(annotationNode);
+                            NodeList<AnnotationNode> ann  = NodeFactory.createNodeList(annotationsReturn);
+                            returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord,ann, recordType);
+                        }
+                    }
+                }
+            }
+        } else {
+            // --errorTypeDescriptor
+            Token errorKeyWordToken = AbstractNodeFactory.createIdentifierToken("error");
+            // errorTypeParamsNode can be null
+            ErrorTypeDescriptorNode errorTypeDescriptorNode =
+                    NodeFactory.createErrorTypeDescriptorNode(errorKeyWordToken, null);
+            Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
+
+            OptionalTypeDescriptorNode type =
+                    NodeFactory.createOptionalTypeDescriptorNode(errorTypeDescriptorNode, questionMarkToken);
+            returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord, annotations,
+                    type);
+        }
+        return returnNode;
+    }
+
+    private static RecordTypeDescriptorNode getRecordTypeDescriptorNode(String code,
+                                                                        TypeDescriptorNode type) {
+
+        // Create Type
+        Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record ");
+        Token bodyStartDelimiter = AbstractNodeFactory.createIdentifierToken("{|");
+        // Create record fields
+        List<Node> recordfields = new ArrayList<>();
+        // Type reference node
+        Token asteriskToken = AbstractNodeFactory.createIdentifierToken("*");
+        QualifiedNameReferenceNode typeNameField = getQualifiedNameReferenceNode("http", code);
+        Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
+        TypeReferenceNode typeReferenceNode =
+                NodeFactory.createTypeReferenceNode(asteriskToken, typeNameField, semicolonToken);
+        recordfields.add(typeReferenceNode);
+        // Record field name
+        IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(" body");
+        RecordFieldNode recordFieldNode =
+                NodeFactory.createRecordFieldNode(null, null, type, fieldName, null, semicolonToken);
+        recordfields.add(recordFieldNode);
+
+        NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordfields);
+        Token bodyEndDelimiter = AbstractNodeFactory.createIdentifierToken("|}");
+
+        return NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
+                fieldsList, null, bodyEndDelimiter);
+    }
+
+    private static ReturnTypeDescriptorNode getReturnTypeDescriptorNodeFor200(Token returnKeyWord,
+                                                                              List<AnnotationNode> annotationsReturn,
+                                                                              Map.Entry<String, ApiResponse> response,
+                                                                              Token atToken,
+                                                                              QualifiedNameReferenceNode annotationReference,
+                                                                              Token openBrace, IdentifierToken media,
+                                                                              Token colon, Token openBracket,
+                                                                              MinutiaeList leading,
+                                                                              MinutiaeList trailing,
+                                                                              List<Node> literals, List<Node> fields)
+            throws BallerinaOpenApiException {
+
+        ReturnTypeDescriptorNode returnNode;
+        Content content = response.getValue().getContent();
+        Iterator<Map.Entry<String, MediaType>> contentItr = content.entrySet().iterator();
+
+        // Handle for only first content type
+        String dataType = null;
+        String mediaType;
+        while (contentItr.hasNext()) {
+            Map.Entry<String, MediaType> mediaTypeEntry = contentItr.next();
+            mediaType = '"' + mediaTypeEntry.getKey().trim() + '"';
+
+            if (mediaTypeEntry.getValue().getSchema() != null) {
+                Schema schema = mediaTypeEntry.getValue().getSchema();
+                if (schema.get$ref() != null) {
+                    dataType = extractReferenceType(schema.get$ref().trim());
+                } else {
+                    dataType = convertOpenAPITypeToBallerina(schema.getType());
+                }
+            }
+            // ---create expression
+            Token literalToken = AbstractNodeFactory.createLiteralValueToken(null, mediaType, leading, trailing);
+            BasicLiteralNode
+                    basicLiteralNode = NodeFactory.createBasicLiteralNode(null, literalToken);
+            literals.add(basicLiteralNode);
+            SeparatedNodeList<Node> expression = NodeFactory.createSeparatedNodeList(literals);
+            Token closeBracket = AbstractNodeFactory.createIdentifierToken("]");
+            ListConstructorExpressionNode
+                    valueExpr = NodeFactory.createListConstructorExpressionNode(openBracket,
+                    expression, closeBracket);
+            SpecificFieldNode
+                    specificFieldNode = NodeFactory.createSpecificFieldNode(null, media, colon,
+                    valueExpr);
+            fields.add(specificFieldNode);
+            break;
+        }
+        SeparatedNodeList<MappingFieldNode> field = NodeFactory.createSeparatedNodeList(fields);
+        Token closeBrace = AbstractNodeFactory.createIdentifierToken("}");
+        MappingConstructorExpressionNode
+                annotValue = NodeFactory.createMappingConstructorExpressionNode(openBrace,
+                field, closeBrace);
+        AnnotationNode annotationNode = NodeFactory.createAnnotationNode(atToken, annotationReference, annotValue);
+        annotationsReturn.add(annotationNode);
+        NodeList<AnnotationNode> ann  = NodeFactory.createNodeList(annotationsReturn);
+        Token type = AbstractNodeFactory.createIdentifierToken(dataType);
+        returnNode = NodeFactory.createReturnTypeDescriptorNode(returnKeyWord,ann, type);
+        return returnNode;
     }
 
     private static void createNodeForRequestBody(List<Node> params, Token comma, RequestBody requestBody)
@@ -589,4 +773,46 @@ public class BallerinaServiceGenerator {
         }
         return url;
     }
+
+    private static String getHttpStatusCode(String code) {
+        switch (code) {
+            case "200":
+                return "Ok";
+            case "400":
+                return "BadRequest";
+            case "401":
+                return "Unauthorized";
+            case "404":
+                return "NotFound";
+            default:
+                return "";
+        }
+    }
+
+    private static UnionTypeDescriptorNode getUnionNode(Iterator<Map.Entry<String, ApiResponse>> responseIter) {
+        List<QualifiedNameReferenceNode> qualifiedNodes = new ArrayList<>();
+        Token pipeToken = AbstractNodeFactory.createIdentifierToken("|");
+
+        while (responseIter.hasNext()) {
+            Map.Entry<String, ApiResponse> response = responseIter.next();
+            String code = getHttpStatusCode(response.getKey().trim());
+            if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
+                //key and value
+                QualifiedNameReferenceNode node = getQualifiedNameReferenceNode("http", code);
+                qualifiedNodes.add(node);
+            }
+        }
+        QualifiedNameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
+        QualifiedNameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
+        UnionTypeDescriptorNode traversUnion = NodeFactory.createUnionTypeDescriptorNode(traversRight, pipeToken,
+                right);
+        if (qualifiedNodes.size() >= 3) {
+            for (int i = qualifiedNodes.size() - 3; i >= 0 ; i--) {
+                traversUnion = NodeFactory.createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken, traversUnion);
+                System.out.println(qualifiedNodes.get(i));
+            }
+        }
+        return traversUnion;
+    }
+
 }
