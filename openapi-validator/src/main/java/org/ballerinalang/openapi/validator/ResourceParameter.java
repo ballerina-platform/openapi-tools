@@ -17,7 +17,7 @@
  */
 package org.ballerinalang.openapi.validator;
 
-import org.wso2.ballerinalang.compiler.tree.BLangSimpleVariable;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 
 /**
  * Container to hold the resource parameter details needed for the Resource param.
@@ -25,7 +25,7 @@ import org.wso2.ballerinalang.compiler.tree.BLangSimpleVariable;
 public class ResourceParameter {
     private String name;
     private String type;
-    private BLangSimpleVariable parameter;
+    private ParameterNode parameter;
 
     ResourceParameter() {
         name = null;
@@ -45,11 +45,11 @@ public class ResourceParameter {
         this.type = type;
     }
 
-    BLangSimpleVariable getParameter() {
+    ParameterNode getParameter() {
         return parameter;
     }
 
-    void setParameter(BLangSimpleVariable parameter) {
+    void setParameter(ParameterNode parameter) {
         this.parameter = parameter;
     }
 

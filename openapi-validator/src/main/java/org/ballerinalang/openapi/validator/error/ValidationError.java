@@ -32,9 +32,10 @@ public class ValidationError {
         fieldName = null;
         type = null;
     }
-    public ValidationError(String fieldName, Constants.Type type) {
+    public ValidationError(String fieldName, Constants.Type type, Location location) {
         this.fieldName = fieldName;
         this.type = type;
+        this.parameterPos = location;
     }
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;

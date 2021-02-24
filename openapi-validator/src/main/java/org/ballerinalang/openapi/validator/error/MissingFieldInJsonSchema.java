@@ -19,6 +19,7 @@
 
 package org.ballerinalang.openapi.validator.error;
 
+import io.ballerina.tools.diagnostics.Location;
 import org.ballerinalang.openapi.validator.Constants;
 
 /**
@@ -28,17 +29,29 @@ public class MissingFieldInJsonSchema extends ValidationError {
     String fieldName;
     Constants.Type type;
     String recordName;
+    Location location;
 
-    public MissingFieldInJsonSchema(String fieldName, Constants.Type type) {
+    public MissingFieldInJsonSchema(String fieldName, Constants.Type type, Location location) {
         this.fieldName = fieldName;
         this.type = type;
         this.recordName = null;
+        this.location = location;
     }
-    public MissingFieldInJsonSchema(String fieldName, Constants.Type type, String recordName) {
+    public MissingFieldInJsonSchema(String fieldName, Constants.Type type, String recordName, Location location) {
         this.fieldName = fieldName;
         this.type = type;
         this.recordName = recordName;
+        this.location = location;
     }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
     }

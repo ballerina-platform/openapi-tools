@@ -19,7 +19,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.ResourceMethod;
-import org.ballerinalang.openapi.validator.ResourceValidator;
 import org.ballerinalang.openapi.validator.ServiceValidator;
 import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
@@ -29,7 +28,7 @@ import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -49,41 +48,41 @@ public class OperationHandleIVTests {
     private Operation operation;
 
     @Test(enabled = false, description = "Operation model has path parameters with request body ")
-    public void testRBwithPath() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testRBwithPath() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRBwithPathParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(
                 "operationHandle/ballerina/invalid/petstoreRBwithPathParameter.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
+//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        validationErrors = ResourceValidator.validateOperationAgainstResource(operation, resourceMethod);
+//        validationErrors = ResourceValidator.validateOperationAgainstResource(operation, resourceMethod);
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
     }
 
     @Test(enabled = false, description = "Operation model has path parameters with request body ")
-    public void testExtraRB() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testExtraRB() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraRBParameter.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(
                 "operationHandle/ballerina/invalid/petstoreExtraRBParameter.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
+//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        validationErrors = ResourceValidator.validateOperationAgainstResource(operation, resourceMethod);
+//        validationErrors = ResourceValidator.validateOperationAgainstResource(operation, resourceMethod);
         Assert.assertEquals(validationErrors.get(0).getFieldName(), "bark");
     }
 
     @Test(enabled = false, description = "Operation model has OneOf parameters with request body ")
-    public void testOneOfRB() throws OpenApiValidatorException, UnsupportedEncodingException {
+    public void testOneOfRB() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreOneOfTypeMismatch.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(
                 "operationHandle/ballerina/invalid/petstoreOneOfTypeMismatch.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
+//        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        validationErrors = ResourceValidator.validateOperationAgainstResource(operation, resourceMethod);
+//        validationErrors = ResourceValidator.validateOperationAgainstResource(operation, resourceMethod);
         Assert.assertTrue(validationErrors.get(0) instanceof OneOfTypeValidation);
         Assert.assertEquals(((OneOfTypeValidation) validationErrors.get(0)).
                 getBlockErrors().get(0).getFieldName(), "bark");

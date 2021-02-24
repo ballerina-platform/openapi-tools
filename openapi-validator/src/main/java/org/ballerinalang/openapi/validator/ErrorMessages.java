@@ -22,100 +22,159 @@ package org.ballerinalang.openapi.validator;
  */
 class ErrorMessages {
 
-    static String invalidFilePath(String path) {
-        return String.format("OpenAPI contract doesn't exist in the given location:%n%s", path);
+    static String[] invalidFilePath(String path) {
+        String[] error = new String[2];
+        error[0] = "BO0001";
+        error[1] = String.format("OpenAPI contract doesn't exist in the given location:%n%s", path);
+        return error;
     }
 
-    static String invalidFile() {
-        return "Invalid file type. Provide either a .yaml or .json file.";
+    static String[] invalidFile() {
+        String[] error = new String[2];
+        error[0] = "BO0002";
+        error[1] = "Invalid file type. Provide either a .yaml or .json file.";
+        return  error;
     }
 
-    static String parserException(String path) {
-        return String.format("Couldn't read the OpenAPI contract from the given file: %s", path);
+    static String[] parserException(String path) {
+        String[] error = new String[2];
+        error[0] = "BO0003";
+        error[1] =  String.format("Couldn't read the OpenAPI contract from the given file: %s", path);
+        return  error;
     }
 
-    static String undocumentedResourcePath(String path) {
-        return String.format("Ballerina service contains a Resource that is not"
+    static String[] undocumentedResourcePath(String path) {
+        String[] error = new String[2];
+        error[0] = "BO0004";
+        error[1] =  String.format("Ballerina service contains a Resource that is not"
                 + " documented in the OpenAPI contract."
                 + " Error Resource path '%s'", path);
+        return  error;
     }
 
-    static String undocumentedResourceParameter(String paramName, String method, String path) {
-        return String.format("'%s' parameter for the method '%s' " +
+    static String[] undocumentedResourceParameter(String paramName, String method, String path) {
+        String[] error = new String[2];
+        error[0] = "BO0005";
+        error[1] =  String.format("'%s' parameter for the method '%s' " +
                 "of the resource associated with the path '%s' " +
                 "is not documented in the OpenAPI contract", paramName, method, path);
+        return  error;
     }
 
-    static String undocumentedResourceMethods(String methods, String path) {
-        return String.format("OpenAPI contract doesn't contain the" +
+    static String[] undocumentedResourceMethods(String methods, String path) {
+        String[] error = new String[2];
+        error[0] = "BO0006";
+        error[1] =  String.format("OpenAPI contract doesn't contain the" +
                 " documentation for http method(s) '%s' for the path '%s'", methods, path);
+        return  error;
     }
 
-    static String unimplementedOpenAPIPath(String path) {
-        return String.format("Couldn't find a Ballerina service resource for the path '%s' " +
+    static String[] unimplementedOpenAPIPath(String path) {
+        String[] error = new String[2];
+        error[0] = "BO0007";
+        error[1] =  String.format("Couldn't find a Ballerina service resource for the path '%s' " +
                 "which is documented in the OpenAPI contract", path);
+        return  error;
     }
 
-    static String unimplementedOpenAPIOperationsForPath(String methods, String path) {
-        return String.format("Couldn't find Ballerina service resource(s) for http method(s) '%s' " +
+    static String[] unimplementedOpenAPIOperationsForPath(String methods, String path) {
+        String[] error = new String[2];
+        error[0] = "BO0008";
+        error[1] =  String.format("Couldn't find Ballerina service resource(s) for http method(s) '%s' " +
                 "for the path '%s' which is documented in the OpenAPI contract", methods, path);
+        return  error;
     }
 
-    static String unimplementedParameterForOperation(String paramName, String method, String path) {
-        return String.format("Couldn't find '%s' parameter in the Ballerina service resource for the method '%s' " +
-                "of the path '%s' which is documented in the OpenAPI contract", paramName, method, path);
+    static String[] unimplementedParameterForOperation(String paramName, String method, String path) {
+        String[] error = new String[2];
+        error[0] = "BO0009";
+        error[1] =  String.format("Couldn't find '%s' parameter in the Ballerina service resource for the method '%s' "
+                + "of the path '%s' which is documented in the OpenAPI contract", paramName, method, path);
+        return  error;
     }
 
-    static String undocumentedFieldInRecordParam(String fieldName, String paramName, String method, String path) {
-        return String.format("The '%s' field in the '%s' type record of the parameter " +
+    static String[] undocumentedFieldInRecordParam(String fieldName, String paramName, String method, String path) {
+        String[] error = new String[2];
+        error[0] = "BO0010";
+        error[1] =  String.format("The '%s' field in the '%s' type record of the parameter " +
                         "is not documented in the OpenAPI contract for the method '%s' of the path '%s'",
                 fieldName, paramName, method, path);
+        return  error;
     }
 
-    static String unimplementedFieldInOperation(String fieldName, String paramName, String operation, String path) {
-        return String.format("Couldn't find the '%s' field in the record type of the parameter '%s' " +
+    static String[] unimplementedFieldInOperation(String fieldName, String paramName, String operation, String path) {
+        String[] error = new String[2];
+        error[0] = "BO0011";
+        error[1] =  String.format("Couldn't find the '%s' field in the record type of the parameter '%s' " +
                         "for the method '%s' of the path '%s' which is documented in the OpenAPI contract",
                 fieldName, paramName, operation, path);
+        return  error;
     }
 
-    static String tagFilterEnable() {
-        return String.format("Both Tags and excludeTags fields include the same tag(s). Make sure to use one" +
+    static String[] tagFilterEnable() {
+        String[] error = new String[2];
+        error[0] = "BO0012";
+        error[1] =  String.format("Both Tags and excludeTags fields include the same tag(s). Make sure to use one" +
                 " field of tag filtering when using the openapi annotation. ");
+        return  error;
     }
 
-    static String operationFilterEnable() {
-        return String.format("Both Operations and excludeOperations fields include" +
+    static String[] operationFilterEnable() {
+        String[] error = new String[2];
+        error[0] = "BO0013";
+        error[1] =  String.format("Both Operations and excludeOperations fields include" +
                 " the same operation(s). Make sure to use one field of operation filtering" +
                 " when using the openapi annotation.");
+        return  error;
     }
 
-    static String typeMismatching(String fieldName, String openapiType, String ballerinType,
+    static String[] typeMismatching(String fieldName, String openapiType, String ballerinType,
                                   String method, String path) {
-        return String.format("Type mismatch with parameter '%s' for the method" +
+        String[] error = new String[2];
+        error[0] = "BO0014";
+        error[1] =  String.format("Type mismatch with parameter '%s' for the method" +
                         " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
                 fieldName, method,  path, openapiType, ballerinType);
+        return  error;
     }
 
-    static String typeMismatchingRecord(String fieldName, String paramName, String openapiType, String ballerinType,
+    static String[] typeMismatchingRecord(String fieldName, String paramName, String openapiType, String ballerinType,
                                         String method, String path) {
-        return String.format("Type mismatching '%s' field in the record type of the parameter '%s' for the method" +
-                        " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
+        String[] error = new String[2];
+        error[0] = "BO0015";
+        error[1] =  String.format("Type mismatching '%s' field in the record type of the parameter '%s' for the method"
+                        + " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
                 fieldName, paramName, method,  path, openapiType , ballerinType);
+        return  error;
     }
 
-    static String typeMismatchOneOfObject(String fieldName, String paramName, String openapiType, String ballerinType,
+    static String[] typeMismatchOneOfObject(String fieldName, String paramName, String openapiType, String ballerinType,
                                           String method, String path) {
-        return String.format("Type mismatch with '%s' field in the object type of the parameter '%s' for the method" +
-        " '%s' of the path '%s'.OpenAPI object schema expected '%s' type and resources has '%s' type for field.",
+        String[] error = new String[2];
+        error[0] = "BO0016";
+        error[1] =  String.format("Type mismatch with '%s' field in the object type of the parameter '%s'" +
+                        " for the method '%s' of the path '%s'.OpenAPI object schema expected '%s' type and " +
+                        "resources has '%s' type for field.",
                 fieldName, paramName, method,  path, openapiType, ballerinType);
+        return  error;
     }
 
-    static String typeMismatchOneOfRecord(String fieldName, String paramName, String openapiType, String ballerinType,
+    static String[] typeMismatchOneOfRecord(String fieldName, String paramName, String openapiType, String ballerinType,
                                           String method, String path) {
-        return String.format("Type mismatch with '%s' field in the record type of the parameter '%s' " +
+        String[] error = new String[2];
+        error[0] = "BO0017";
+        error[1] =  String.format("Type mismatch with '%s' field in the record type of the parameter '%s' " +
                         "for the method '%s' of the path '%s'.OpenAPI object schema expected '%s' " +
                         "type and resources has '%s' type for field.",
                 fieldName, paramName, method,  path, openapiType, ballerinType);
+        return  error;
+    }
+
+    static String[] contactFileMissinginPath() {
+        String[] error = new String[2];
+        error[0] = "BO0018";
+        error[1] = "Contract file is not existed in the given path should be applied ";
+        return error;
     }
 
 }

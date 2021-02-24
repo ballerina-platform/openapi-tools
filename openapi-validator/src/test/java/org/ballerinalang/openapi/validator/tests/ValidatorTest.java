@@ -15,11 +15,30 @@
  */
 package org.ballerinalang.openapi.validator.tests;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.projects.Document;
+import io.ballerina.projects.DocumentId;
+import io.ballerina.projects.Module;
+import io.ballerina.projects.ModuleId;
+import io.ballerina.projects.Package;
+import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectException;
+import io.ballerina.projects.ProjectKind;
+import io.ballerina.projects.directory.ProjectLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.ResourcePathSummary;
-import org.ballerinalang.openapi.validator.ResourceWithOperationId;
+import org.ballerinalang.openapi.validator.ResourceWithOperation;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
@@ -27,7 +46,12 @@ import org.wso2.ballerinalang.compiler.tree.BLangService;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 //import org.wso2.ballerinalang.compiler.util.diagnotic.BLangDiagnosticLogHelper;
 
@@ -45,7 +69,7 @@ public class ValidatorTest {
      */
     public static BLangPackage getBlangPackage(String fileName) throws UnsupportedEncodingException {
         BLangPackage bLangPackage = null; //to disable the function
-        Path sourceRoot = RES_DIR.resolve("project-based-tests/src");
+        Path sourceRoot = RES_DIR.resolve("project-based-tests/modules");
 //        Path sourceRoot = RES_DIR.resolve("project-based-tests");
 
         String balfile = sourceRoot.resolve(fileName).toString();
@@ -57,21 +81,16 @@ public class ValidatorTest {
         return bLangPackage;
     }
 
-
-// different type to access the bLangPackage
-//    public static CompileResult getBlangPackage01(String fileName) throws UnsupportedEncodingException {
-//        Path sourceRoot = RES_DIR.resolve("project-based-tests/src");
-////        Path sourceRoot = RES_DIR.resolve("project-based-tests");
-//
-//        String balfile = sourceRoot.resolve(fileName).toString();
-//        Path balFpath = Paths.get(balfile);
-//        Path programDir = balFpath.toAbsolutePath().getParent();
-//        String filename = balFpath.toAbsolutePath().getFileName().toString();
-//        CompileResult bLangPackage = OpenApiValidatorUtil.compileFile01(programDir, filename);
-//        return bLangPackage;
-//    }
-
-
+    public static Project getProject(Path servicePath) {
+        Project project = null;
+        // Load project instance for single ballerina file
+        try {
+            project = ProjectLoader.loadProject(servicePath);
+        } catch (ProjectException e) {
+            //ignore
+        }
+        return project;
+    }
 
     public static Schema getComponet(OpenAPI api, String componentName) {
         return api.getComponents().getSchemas().get(componentName);
@@ -90,22 +109,93 @@ public class ValidatorTest {
         return bLangPackage.getServices().get(0);
     }
 
-    // Get the Function Node
-    public static ResourceMethod getFunction(BLangService bLangService, String method) {
+    // Summaries the all the functions
+    public static ResourceMethod getResourceMethod(Project project, String path, String method) {
+        List<FunctionDefinitionNode> functions = new ArrayList<>();
+        Map<String, ResourcePathSummary> resourcePathSummaryMap = new HashMap<>();
+        SyntaxTree syntaxTree;
+        Package packageName = project.currentPackage();
+        DocumentId docId;
+        Document doc;
+        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
+            docId = project.documentId(project.sourceRoot());
+            ModuleId moduleId = docId.moduleId();
+            doc = project.currentPackage().module(moduleId).document(docId);
+        } else {
+            // Take module instance for traversing the syntax tree
+            Module currentModule = packageName.getDefaultModule();
+            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
 
-        List<ResourcePathSummary> resourcePathSummaryList =
-                ResourceWithOperationId.summarizeResources(bLangService);
-        ResourceMethod resourceMethod = resourcePathSummaryList.get(0).getMethods().get(method);
-        return resourceMethod;
+            docId = documentIterator.next();
+            doc = currentModule.document(docId);
+        }
+        syntaxTree = doc.syntaxTree();
+        ModulePartNode modulePartNode = syntaxTree.rootNode();
+        for (Node node : modulePartNode.members()) {
+            SyntaxKind syntaxKind = node.kind();
+            // Load a listen_declaration for the server part in the yaml spec
+            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
+                ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
+                // Check annotation is available
+                Optional<MetadataNode> metadata = serviceDeclarationNode.metadata();
+                MetadataNode openApi = metadata.orElseThrow();
+                if (!openApi.annotations().isEmpty()) {
+                    NodeList<AnnotationNode> annotations = openApi.annotations();
+
+                    //summaries functions
+                    NodeList<Node> members = serviceDeclarationNode.members();
+                    Iterator<Node> iterator = members.iterator();
+                    while (iterator.hasNext()) {
+                        Node next = iterator.next();
+                        if (next instanceof FunctionDefinitionNode) {
+                            functions.add((FunctionDefinitionNode) next);
+                        }
+                    }
+                    // Make resourcePath summery
+                    resourcePathSummaryMap = ResourceWithOperation.summarizeResources(functions);
+                }
+            }
+        }
+        ResourcePathSummary resourcePathSummary = resourcePathSummaryMap.get(path);
+        Map<String, ResourceMethod> methods = resourcePathSummary.getMethods();
+        return methods.get(method);
     }
 
-//    Get diagnostic log
-//    public static DiagnosticLog getDiagnostic(String fileName) {
-//        Path sourceRoot = RES_DIR.resolve("project-based-tests/src");
-//        String balfile = sourceRoot.resolve(fileName).toString();
-//        Path balFpath = Paths.get(balfile);
-//        Path programDir = balFpath.toAbsolutePath().getParent();
-//        CompilerContext context =  OpenApiValidatorUtil.getCompilerContext(programDir);
-//        return BLangDiagnosticLogHelper.getInstance(context);
-//    }
+    // Take semantic model
+    public static SemanticModel getSemanticModel(Project project) {
+        Package packageName = project.currentPackage();
+        DocumentId docId;
+        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
+            docId = project.documentId(project.sourceRoot());
+            ModuleId moduleId = docId.moduleId();
+        } else {
+            // Take module instance for traversing the syntax tree
+            Module currentModule = packageName.getDefaultModule();
+            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
+            docId = documentIterator.next();
+        }
+        return project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
+    }
+
+    //Take syntax tree
+    public static SyntaxTree getSyntaxTree(Project project) {
+        //Travers and filter service
+        //Take package name for project
+        Package packageName = project.currentPackage();
+        DocumentId docId;
+        Document doc;
+        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
+            docId = project.documentId(project.sourceRoot());
+            ModuleId moduleId = docId.moduleId();
+            doc = project.currentPackage().module(moduleId).document(docId);
+        } else {
+            // Take module instance for traversing the syntax tree
+            Module currentModule = packageName.getDefaultModule();
+            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
+
+            docId = documentIterator.next();
+            doc = currentModule.document(docId);
+        }
+        return doc.syntaxTree();
+    }
 }
