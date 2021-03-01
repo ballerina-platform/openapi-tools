@@ -99,10 +99,10 @@ public class BallerinaServiceGeneratorTest {
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
 
-    @Test(description = "Generate functionDefinitionNode for request body with json")
-    public void generateResponserecordInline() throws IOException, BallerinaOpenApiException,
+    @Test(description = "oneOf and anyOf, so you can specify alternate schemas for the response body.")
+    public void generateResponserecordOnof() throws IOException, BallerinaOpenApiException,
             FormatterException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/responseRecordInline.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/swagger/responseOneOf.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
 }

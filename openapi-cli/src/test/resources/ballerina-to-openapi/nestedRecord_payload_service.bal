@@ -35,9 +35,16 @@ type Pet record {
  //http:BadRequest | http:Unauthorized  | http:NotFound {
  //  }
 
- resource function get users() returns @http:Payload {mediaType:"application/json"} record {|*http:Ok; record {| int
-  id; string username;|} body;|} {
- }
+ //resource function get users() returns @http:Payload {mediaType:"application/json"} record {|*http:Ok; record {| int
+ // id; string username;|} body;|} {
+ //}
 
+//resource function get users() returns @http:Payload {mediaType:"application/json"} record {|*http:Ok; Cat | Dog |
+//Hamster body;|} {
+//}
+
+    resource function get pets(​http:Request req​, int offset) returns http:Ok {
+
+    }
 
 }
