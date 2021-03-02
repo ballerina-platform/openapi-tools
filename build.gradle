@@ -267,7 +267,7 @@ tasks.withType(JavaCompile) {
 task codeCoverageReport(type: JacocoReport) {
     dependsOn('openapi-validator:copyJavaClassFiles')
     dependsOn('openapi-cli:copyJavaClassFiles')
-    dependsOn('module-ballerina-openapi:extractBallerinaClassFiles')
+//    dependsOn('module-ballerina-openapi:extractBallerinaClassFiles')
 
     executionData fileTree(project.rootDir.absolutePath).include("**/target/cache/tests_cache/coverage/ballerina.exec")
     additionalClassDirs files("${buildDir}/classes")
