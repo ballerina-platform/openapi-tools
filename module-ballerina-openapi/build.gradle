@@ -131,7 +131,7 @@ task ballerinaBuild {
                 commandLine 'cmd', '/c', "$distributionBinPath/bal.bat build --skip-tests -c && exit " +
                         "%%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "${distributionBinPath}"+'/bal build --skip-tests -c --offline'
+                commandLine 'sh', '-c', "${distributionBinPath}"+'/bal build --skip-tests -c'
             }
         }
 
@@ -242,7 +242,7 @@ publishing {
         }
     }
 }
-
+// comment due to disabling integration tests
 //task extractBallerinaClassFiles(type: Copy) {
 //    def jars = fileTree(artifactTestableJar).findAll {
 //        it.name.endsWith("-testable.jar")
