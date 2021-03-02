@@ -1,8 +1,0 @@
-fixes:
-  - "ballerina/openapi/*/::openapi-ballerina/"
-  - "ballerina/openapi$0046parser/*::module-ballerina-openapi/modules/parser"
-
-ignore:
-  - "**/test"
-
-  
