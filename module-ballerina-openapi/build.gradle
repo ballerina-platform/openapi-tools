@@ -131,7 +131,7 @@ task ballerinaBuild {
                 commandLine 'cmd', '/c', "$distributionBinPath/bal.bat build --skip-tests -c && exit " +
                         "%%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "${distributionBinPath}"+'/bal build --skip-tests -c'
+                commandLine 'sh', '-c', "${distributionBinPath}"+'/bal build --skip-tests -c --offline'
             }
         }
 
@@ -227,7 +227,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact source: createArtifactZip, extension: 'zip'
-            artifact source: artifactCodeCoverageReport, classifier: 'jacoco'
+//            artifact source: artifactCodeCoverageReport, classifier: 'jacoco'
         }
     }
 
@@ -243,19 +243,19 @@ publishing {
     }
 }
 
-task extractBallerinaClassFiles(type: Copy) {
-    def jars = fileTree(artifactTestableJar).findAll {
-        it.name.endsWith("-testable.jar")
-    }
-
-    jars.forEach { file ->
-        from zipTree(file).matching {
-            exclude '**/tests/*'
-            include '**/*.class'
-        }
-        into "${project.rootDir.absolutePath}/build/classes"
-    }
-}
+//task extractBallerinaClassFiles(type: Copy) {
+//    def jars = fileTree(artifactTestableJar).findAll {
+//        it.name.endsWith("-testable.jar")
+//    }
+//
+//    jars.forEach { file ->
+//        from zipTree(file).matching {
+//            exclude '**/tests/*'
+//            include '**/*.class'
+//        }
+//        into "${project.rootDir.absolutePath}/build/classes"
+//    }
+//}
 
 ballerinaBuild.dependsOn ":openapi-cli:build"
 ballerinaBuild.dependsOn ":openapi-validator:build"
