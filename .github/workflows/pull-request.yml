@@ -20,14 +20,9 @@ jobs:
         run: |
             ./gradlew build --stacktrace --scan --console=plain --no-daemon
             ./gradlew codeCoverageReport --no-daemon
-      - name: Archive Code Coverage JSON
-          uses: actions/upload-artifact@v2
-          with:
-            name: Code Coverage JSON
-            path: openapi-ballerina/target/report/test_results.json
-            if-no-files-found: ignore
-            - name: Generate Codecov Report
-              uses: codecov/codecov-action@v1
+      - name: Generate Codecov Report
+        if:  github.event_name == 'pull_request'
+        uses: codecov/codecov-action@v1
 
   windows-build:
 
