@@ -241,35 +241,12 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-//task codeCoverageReport(type: JacocoReport) {
-//    dependsOn = subprojects.test
-//
-//    executionData fileTree(project.rootDir.absolutePath).include("**/build/coverage-reports/*.exec")
-//
-//    subprojects.each {
-//        sourceSets it.sourceSets.main
-//    }
-//
-//    reports {
-//        xml.enabled = true
-//        html.enabled = true
-//        csv.enabled = true
-//        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
-//        html.destination = new File("${buildDir}/reports/jacoco/report.html")
-//        csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
-//    }
-//
-//    onlyIf = {
-//        true
-//    }
-//}
-
 task codeCoverageReport(type: JacocoReport) {
     dependsOn('openapi-validator:copyJavaClassFiles')
     dependsOn('openapi-cli:copyJavaClassFiles')
 //    dependsOn('module-ballerina-openapi:extractBallerinaClassFiles')
 
-    executionData fileTree(project.rootDir.absolutePath).include("**/target/cache/tests_cache/coverage/ballerina.exec")
+//    executionData fileTree(project.rootDir.absolutePath).include("**/target/cache/tests_cache/coverage/ballerina.exec")
     additionalClassDirs files("${buildDir}/classes")
 
     subprojects.each {
@@ -279,8 +256,11 @@ task codeCoverageReport(type: JacocoReport) {
     reports {
         xml.enabled = true
         html.enabled = true
+        csv.enabled = true
         xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
         html.destination = new File("${buildDir}/reports/jacoco/report.html")
+        csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
+
     }
 
     onlyIf = {
