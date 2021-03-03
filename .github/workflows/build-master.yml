@@ -23,6 +23,9 @@ jobs:
         run: |
           ./gradlew clean build --stacktrace --scan --console=plain --no-daemon
           ./gradlew clean publish --scan
+          ./gradlew codeCoverageReport --no-daemon
+      - name: Archive Code Coverage JSON
+        uses: actions/upload-artifact@v2
       - name: Dispatch Dependent Module Builds
         if: github.event.action != 'stdlib-publish-snapshot'
         run: |
