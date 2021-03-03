@@ -54,7 +54,6 @@ def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
 def originalConfig = ballerinaConfigFile.text
-def artifactCodeCoverageReport = file("$project.projectDir/target/cache/tests_cache/coverage/ballerina.exec")
 def artifactTestableJar = file("$project.projectDir/target/cache/${packageOrg}/${packageName}/${tomlVersion}/any/")
 
 task unpackJballerinaTools(type: Copy) {
@@ -227,8 +226,6 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact source: createArtifactZip, extension: 'zip'
-            // Commented due to disabling ballerina integration tests
-//            artifact source: artifactCodeCoverageReport, classifier: 'jacoco'
         }
     }
 
