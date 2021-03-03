@@ -227,6 +227,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact source: createArtifactZip, extension: 'zip'
+            // Commented due to disabling ballerina integration tests
 //            artifact source: artifactCodeCoverageReport, classifier: 'jacoco'
         }
     }
@@ -242,7 +243,8 @@ publishing {
         }
     }
 }
-// comment due to disabling integration tests
+// Commented due to disabling ballerina integration tests
+//
 //task extractBallerinaClassFiles(type: Copy) {
 //    def jars = fileTree(artifactTestableJar).findAll {
 //        it.name.endsWith("-testable.jar")
