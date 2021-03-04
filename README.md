@@ -2,6 +2,7 @@
  [![Build master](https://github.com/ballerina-platform/ballerina-openapi/workflows/Build%20master/badge.svg?branch=master)](https://github.com/ballerina-platform/ballerina-openapi/actions?query=workflow%3ABuild)
  [![Daily build](https://github.com/ballerina-platform/ballerina-openapi/workflows/Daily%20build/badge.svg)](https://github.com/ballerina-platform/ballerina-openapi/actions?query=workflow%3A%22Daily+build%22)
  [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/ballerina-openapi.svg)](https://github.com/ballerina-platform/ballerina-openapi/commits/master)
+ [![codecov](https://codecov.io/gh/ballerina-platform/ballerina-openapi/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/ballerina-openapi)
  
 The OpenAPI Specification is a specification, which creates a RESTFUL contract for APIs detailing all of its resources 
 and operations in a both human and machine readable format for easy development, discovery, and integration. Ballerina
