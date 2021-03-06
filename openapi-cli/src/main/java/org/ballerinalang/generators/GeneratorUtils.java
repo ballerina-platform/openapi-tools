@@ -149,11 +149,14 @@ public class GeneratorUtils {
                             }
                             if (pathParam.trim().equals(parameter.getName().trim()) && parameter.getIn().equals("path")) {
                                 Token ppOpenB = AbstractNodeFactory.createIdentifierToken("[");
-                                NodeList<AnnotationNode> ppAnnotation =
-                                        NodeFactory.createEmptyNodeList();
+                                NodeList<AnnotationNode> ppAnnotation = NodeFactory.createEmptyNodeList();
                                 // TypeDescriptor
-                                Token name =
-                                        AbstractNodeFactory.createIdentifierToken(parameter.getSchema().getType());
+                                Token name;
+                                if (parameter.getSchema() == null) {
+                                    name = AbstractNodeFactory.createIdentifierToken("string");
+                                } else {
+                                    name = AbstractNodeFactory.createIdentifierToken(parameter.getSchema().getType());
+                                }
                                 BuiltinSimpleNameReferenceNode builtSNRNode =
                                         NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
                                 IdentifierToken paramName =

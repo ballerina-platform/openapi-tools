@@ -43,8 +43,13 @@ type Pet record {
 //Hamster body;|} {
 //}
 
-    resource function get pets(​http:Request req​, int offset) returns http:Ok {
-
+    //resource function get pets(​http:Request req​, int offset) returns http:Ok {
+    //
+    //}
+// Header param
+//    resource function get ping(@http:Header{} string xclient, @http:Header{} string[] xservice) returns json {
+//    }
+// parameter has content type
+    resource function post user(http:Request request, @http:Payload {} byte[] payload) returns http:Ok {
     }
-
 }

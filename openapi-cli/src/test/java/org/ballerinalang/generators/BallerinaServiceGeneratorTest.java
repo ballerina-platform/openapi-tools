@@ -36,18 +36,6 @@ public class BallerinaServiceGeneratorTest {
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
 
-    @Test(description = "Generate functionDefinitionNode for Path parameters")
-    public void generatePathparameter() throws IOException, BallerinaOpenApiException, FormatterException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/multiPathParam.yaml");
-        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
-    }
-
-    @Test(description = "Generate functionDefinitionNode for Query parameters")
-    public void generateQueryparameter() throws IOException, BallerinaOpenApiException, FormatterException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/multiQueryParam.yaml");
-        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
-    }
-
     @Test(description = "Generate functionDefinitionNode for multiple operations")
     public void generateMultipleOperatons() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/multiOperations.yaml");
@@ -60,15 +48,66 @@ public class BallerinaServiceGeneratorTest {
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
 
-    @Test(description = "Generate functionDefinitionNode for request body with json")
-    public void generateJsonPayload() throws IOException, BallerinaOpenApiException, FormatterException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/jsonPayload.yaml");
+    //Scenario 01 - Path parameters.
+    @Test(description = "Generate functionDefinitionNode for Path parameters")
+    public void generatePathparameter() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/multiPathParam.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
 
-    @Test(description = "Generate functionDefinitionNode for request body with json")
-    public void generateResponsePayload() throws IOException, BallerinaOpenApiException, FormatterException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/responsePayload.yaml");
+    //Scenario 02 - Query parameters.
+    @Test(description = "Generate functionDefinitionNode for Query parameters")
+    public void generateQueryparameter() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/multiQueryParam.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+    //Scenario 03 - Header parameters.
+    @Test(description = "Generate functionDefinitionNode for Header parameters")
+    public void generateHeaderParameter() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/multiHeaderParam.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Generate functionDefinitionNode for paramter for content instead of schema")
+    public void generateParameterHasContent() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/parameterTypehasContent.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    //Request Body Scenarios
+    @Test(description = "Scenario 01 - Request Body has single content type(application/json)")
+    public void generateJsonPayload() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/scenario01_rb.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Scenario 01.02 - Request Body has single content type(application/octet-stream)")
+    public void generateOtherPayload() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/scenario01_02_rb.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Scenario 02 - Request Body has multiple content types with Same dataBind schema type.\n")
+    public void generateRBsameDataBindingPayload() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/scenario02_rb.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Scenario 03 - Request Body has multiple content types with Different dataBind schema types.")
+    public void generateMultipleContent() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/scenario03_rb.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+    //Response scenarios
+    @Test(description = "Scenario 01 - Response has single response without content type")
+    public void generateResponseScenario01() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_01_rs.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+    }
+
+    @Test(description = "Scenario 02 - Single response with content type")
+    public void generateResponseScenario02() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_02_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
 
@@ -105,4 +144,8 @@ public class BallerinaServiceGeneratorTest {
         Path definitionPath = RES_DIR.resolve("generators/swagger/responseOneOf.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
+
+
+
+
 }
