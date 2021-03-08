@@ -108,9 +108,10 @@ public class BallerinaServiceGenerator {
             BallerinaOpenApiException, FormatterException {
         // Create imports http and openapi
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode("ballerina", "http");
-        ImportDeclarationNode importForOpenapi = GeneratorUtils.getImportDeclarationNode("ballerina", "openapi");
+        //Disable openapi import adding due to validator is disable
+        //ImportDeclarationNode importForOpenapi = GeneratorUtils.getImportDeclarationNode("ballerina", "openapi");
         // Add multiple imports
-        NodeList<ImportDeclarationNode> imports = AbstractNodeFactory.createNodeList(importForHttp, importForOpenapi);
+        NodeList<ImportDeclarationNode> imports = AbstractNodeFactory.createNodeList(importForHttp);
         // Summaries OpenAPI details
         OpenAPI openApi = getBallerinaOpenApiType(definitionPath, serviceName);
         // Assign host port value to listeners
@@ -140,12 +141,12 @@ public class BallerinaServiceGenerator {
                 }
             } else {
                 basePath = "/";
-                host = null;
+                host = "localhost";
                 port = 9090;
             }
         } else {
             basePath = "/";
-            host = null;
+            host = "localhost";
             port = 9090;
         }
         // Generate listener
@@ -183,7 +184,7 @@ public class BallerinaServiceGenerator {
                         // getRelative resource path
                         List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation);
                         // function call
-                        getFunctionDefinitionNode(functions, path, operation, functionRelativeResourcePath);
+                        getFunctionDefinitionNode(functions, operation, functionRelativeResourcePath);
                     }
                 }
             }
@@ -209,7 +210,7 @@ public class BallerinaServiceGenerator {
 
     }
 
-    private static void getFunctionDefinitionNode(List<Node> functions, Map.Entry<String, PathItem> path,
+    private static void getFunctionDefinitionNode(List<Node> functions,
                                                   Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                   List<Node> pathNodes) throws BallerinaOpenApiException {
 
@@ -230,13 +231,6 @@ public class BallerinaServiceGenerator {
         // Create http:Request node RequiredParam
         // --annotation
         NodeList<AnnotationNode> annotations = AbstractNodeFactory.createEmptyNodeList();
-        // --typeName
-        QualifiedNameReferenceNode typeName = getQualifiedNameReferenceNode("http", "Request ");
-        // --paramName
-        Token paramName = AbstractNodeFactory.createIdentifierToken("request");
-        RequiredParameterNode httpNode =
-                NodeFactory.createRequiredParameterNode(annotations, typeName, paramName);
-        params.add(httpNode);
 
         Token comma = AbstractNodeFactory.createIdentifierToken(",");
         // Handle header and query parameters
@@ -264,6 +258,9 @@ public class BallerinaServiceGenerator {
                 createNodeForRequestBody(params, comma, requestBody);
             }
         }
+        if (params.size() > 1) {
+            params.remove(params.size() -1);
+        }
 
         SeparatedNodeList<ParameterNode> parameters = AbstractNodeFactory.createSeparatedNodeList(params);
         //return Type descriptors
@@ -290,7 +287,6 @@ public class BallerinaServiceGenerator {
 
     private static void createNodeForHeaderParameter(List<Node> params, Token comma, Parameter parameter) {
 
-        params.add(comma);
         Schema schema = parameter.getSchema();
         String type = "string";
         TypeDescriptorNode headerTypeName;
@@ -332,17 +328,18 @@ public class BallerinaServiceGenerator {
             RequiredParameterNode param =  NodeFactory.createRequiredParameterNode(header_annotations,
                     headerTypeName, parameterName);
             params.add(param);
+            params.add(comma);
         }
     }
 
     /**
      * This function used to generate return function node in the function signature.
      * Payload media type will not be added to the annotation.
-     * @param operation
-     * @param annotations
-     * @param returnKeyWord
-     * @param returnNode
-     * @return
+     * @param operation     Openapi operation
+     * @param annotations   Annotation node list
+     * @param returnKeyWord    Keyword for return
+     * @param returnNode    return Node
+     * @return return returnNode
      * @throws BallerinaOpenApiException
      */
     private static ReturnTypeDescriptorNode getReturnTypeDescriptorNode(
@@ -437,9 +434,6 @@ public class BallerinaServiceGenerator {
 
     /**
      * This for generate record node for object schema.
-     * @param schema
-     * @return
-     * @throws BallerinaOpenApiException
      */
     private static TypeDescriptorNode getRecordTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
 
@@ -475,13 +469,9 @@ public class BallerinaServiceGenerator {
     }
 
     /**
-     *
-     * @param code
-     * @param type
-     * @return
+     * Create recordType TypeDescriptor.
      */
-    private static RecordTypeDescriptorNode createRecordTypeDescriptorNode(String code,
-                                                                        TypeDescriptorNode type) {
+    private static RecordTypeDescriptorNode createRecordTypeDescriptorNode(String code, TypeDescriptorNode type) {
 
         // Create Type
         Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record ");
@@ -508,11 +498,7 @@ public class BallerinaServiceGenerator {
     }
 
     /**
-     *
-     * @param params
-     * @param comma
-     * @param requestBody
-     * @throws BallerinaOpenApiException
+     * This for creating request Body for given request object.
      */
     private static void createNodeForRequestBody(List<Node> params, Token comma, RequestBody requestBody)
             throws BallerinaOpenApiException {
@@ -560,7 +546,7 @@ public class BallerinaServiceGenerator {
                 Iterator<Map.Entry<String, MediaType>> iter = equalDataType.iterator();
                 while (iter.hasNext()) {
                     Map.Entry<String, MediaType> next = iter.next();
-                    literals.add(AbstractNodeFactory.createIdentifierToken(next.getKey()));
+                    literals.add(AbstractNodeFactory.createIdentifierToken('"'+ next.getKey().trim() + '"'));
                     literals.add(comma);
                 }
                 literals.remove(literals.size() - 1);
@@ -593,19 +579,11 @@ public class BallerinaServiceGenerator {
         RequiredParameterNode payload =
                 NodeFactory.createRequiredParameterNode(annotation, typeName, paramName);
 
-        params.add(comma);
         params.add(payload);
+        params.add(comma);
     }
 
-    /**
-     *
-     * @param comma
-     * @param leading
-     * @param trailing
-     * @param literals
-     * @param content
-     * @return
-     */
+
     private static Map.Entry<String, MediaType> createBasicLiteralNodeList(Token comma, MinutiaeList leading,
                                                                            MinutiaeList trailing, List<Node> literals,
                                                                            Iterator<Map.Entry<String, MediaType>> content) {
@@ -620,10 +598,7 @@ public class BallerinaServiceGenerator {
     }
 
     /**
-     *
-     * @param schema
-     * @return
-     * @throws BallerinaOpenApiException
+     * Generate typeDescriptor for application/json type.
      */
     private static TypeDescriptorNode getIdentifierTokenForJsonSchema(Schema schema) throws BallerinaOpenApiException {
         IdentifierToken identifierToken;
@@ -666,10 +641,7 @@ public class BallerinaServiceGenerator {
     }
 
     /**
-     *
-     * @param mediaType
-     * @return
-     * @throws BallerinaOpenApiException
+     * Generate TypeDescriptor for all the mediaTypes.
      */
     private static TypeDescriptorNode getIdentifierToken(Map.Entry<String, MediaType> mediaType)
             throws BallerinaOpenApiException {
@@ -697,13 +669,9 @@ public class BallerinaServiceGenerator {
 
     /**
      * This for generate query parameter nodes.
-     * @param params
-     * @param comma
-     * @param parameter
      */
     private static void createNodeForQueryParam(List<Node> params, Token comma, Parameter parameter) {
         if (parameter.getIn().trim().equals("query")) {
-            params.add(comma);
             Schema schema = parameter.getSchema();
             NodeList<AnnotationNode> annotations = NodeFactory.createEmptyNodeList();
             IdentifierToken parameterName =
@@ -713,6 +681,7 @@ public class BallerinaServiceGenerator {
                         NodeFactory.createRequiredParameterNode(NodeFactory.createEmptyNodeList(),
                                 AbstractNodeFactory.createIdentifierToken("string"), parameterName);
                 params.add(param);
+                params.add(comma);
                 //Diagnostic for null schema
             } else {
                 if (parameter.getRequired()) {
@@ -727,10 +696,11 @@ public class BallerinaServiceGenerator {
                             RequiredParameterNode arrayRparam = NodeFactory
                                     .createRequiredParameterNode(annotations, arrayTypeName, parameterName);
                             params.add(arrayRparam);
+                            params.add(comma);
 
                         } else {
                             // handle in case swagger has nested array or record type
-//                            create optional query parameter
+                            //create optional query parameter
                             Token arrayName = AbstractNodeFactory.createIdentifierToken("string");
                             BuiltinSimpleNameReferenceNode memberTypeDesc =
                                     NodeFactory.createBuiltinSimpleNameReferenceNode(null, arrayName);
@@ -743,6 +713,7 @@ public class BallerinaServiceGenerator {
                                     .createRequiredParameterNode(annotations, optionalTypeDescriptorNode,
                                             parameterName);
                             params.add(arrayRparam);
+                            params.add(comma);
                         }
                     } else {
                         Token name =
@@ -752,6 +723,7 @@ public class BallerinaServiceGenerator {
                         RequiredParameterNode param1 =
                                 NodeFactory.createRequiredParameterNode(annotations, rTypeName, parameterName);
                         params.add(param1);
+                        params.add(comma);
                     }
                 } else {
                     //Optional TypeDescriptor
@@ -759,7 +731,7 @@ public class BallerinaServiceGenerator {
                     //When it has arrayType
                     if (schema instanceof ArraySchema) {
                         Schema<?> items = ((ArraySchema) schema).getItems();
-                        if (!(items instanceof ObjectSchema) || !(items instanceof ArraySchema)) {
+                        if (!(items instanceof ObjectSchema) && !(items.getType().equals("array"))) {
                             // create arrayTypeDescriptor
                             ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                             // create Optional type descriptor
@@ -769,10 +741,11 @@ public class BallerinaServiceGenerator {
                                     .createRequiredParameterNode(annotations, optionalTypeDescriptorNode,
                                             parameterName);
                             params.add(arrayRparam);
+                            params.add(comma);
 
                         } else {
                             // handle in case swagger has nested array or record type
-                            // create diagnostic
+                            // create diagnostic after checking with team.
                         }
                     } else {
                         Token name =
@@ -784,9 +757,11 @@ public class BallerinaServiceGenerator {
                         RequiredParameterNode param1 =
                                 NodeFactory.createRequiredParameterNode(annotations, optionalTypeDescriptorNode, parameterName);
                         params.add(param1);
+                        params.add(comma);
                     }
                 }
             }
+            System.out.println(params.size());
         }
     }
 
@@ -801,12 +776,7 @@ public class BallerinaServiceGenerator {
     }
 
     /**
-     *
-     * @param definitionPath
-     * @param serviceName
-     * @return
-     * @throws IOException
-     * @throws BallerinaOpenApiException
+     * Util for take OpenApi spec from given yaml file
      */
     private static OpenAPI getBallerinaOpenApiType(Path definitionPath, String serviceName)
             throws IOException, BallerinaOpenApiException {
@@ -869,9 +839,9 @@ public class BallerinaServiceGenerator {
     }
 
     /**
-     *
-     * @param code
-     * @return
+     * Util for select http key words with http codes.
+     * @param code http code.
+     * @return Http identification word.
      */
     private static String getHttpStatusCode(String code) {
         switch (code) {
@@ -889,10 +859,7 @@ public class BallerinaServiceGenerator {
     }
 
     /**
-     *
-     * @param responseIter
-     * @return
-     * @throws BallerinaOpenApiException
+     * Generate union type node when operation has multiple responses.
      */
     private static UnionTypeDescriptorNode getUnionNode(Iterator<Map.Entry<String, ApiResponse>> responseIter)
             throws BallerinaOpenApiException {
@@ -907,13 +874,14 @@ public class BallerinaServiceGenerator {
                 QualifiedNameReferenceNode node = getQualifiedNameReferenceNode("http", code);
                 qualifiedNodes.add(node);
             } else if (response.getValue().getContent() != null){
-//                TypeDescriptorNode record =
-//                        getRecordTypeDescriptorNode(response.getValue().getContent().entrySet().iterator().next().getValue().getSchema());
-                        TypeDescriptorNode record =
+                TypeDescriptorNode record =
                         getIdentifierToken(response.getValue().getContent().entrySet().iterator().next());
-                RecordTypeDescriptorNode node = createRecordTypeDescriptorNode(code, record);
-
-                qualifiedNodes.add(node);
+                if (response.getKey().trim().equals("200") || response.getKey().trim().equals("default")) {
+                    qualifiedNodes.add(record);
+                } else {
+                    RecordTypeDescriptorNode node = createRecordTypeDescriptorNode(code, record);
+                    qualifiedNodes.add(node);
+                }
             }
         }
         TypeDescriptorNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
@@ -929,10 +897,7 @@ public class BallerinaServiceGenerator {
     }
 
     /**
-     *
-     * @param iterator
-     * @return
-     * @throws BallerinaOpenApiException
+     * Generate union type node when response has multiple content types.
      */
     private static UnionTypeDescriptorNode getUnionNodeForContent (Iterator<Map.Entry<String, MediaType>> iterator)
             throws BallerinaOpenApiException {
@@ -957,12 +922,6 @@ public class BallerinaServiceGenerator {
         return traversUnion;
     }
 
-    /**
-     *
-     * @param iterator
-     * @return
-     * @throws BallerinaOpenApiException
-     */
     private static UnionTypeDescriptorNode getUnionNodeForOneOf(Iterator<Schema> iterator)
             throws BallerinaOpenApiException {
 
@@ -987,12 +946,6 @@ public class BallerinaServiceGenerator {
         return traversUnion;
     }
 
-    /**
-     *
-     * @param identifier
-     * @param annotValue
-     * @return
-     */
     private static AnnotationNode getAnnotationNode(String identifier, MappingConstructorExpressionNode annotValue) {
         // Create annotation
         Token atToken = AbstractNodeFactory.createIdentifierToken("@");

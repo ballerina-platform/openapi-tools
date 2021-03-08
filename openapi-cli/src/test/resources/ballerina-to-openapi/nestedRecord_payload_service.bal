@@ -13,57 +13,7 @@ type Pet record {
      boolean bark;
   };
  service /payloadV on helloEp {
-     //resource function post hi(http:Caller caller, http:Request request, @http:Payload { mediaType:[​
-     //"application/json"] } Dog payload) {
-     //
-     //}
+     resource function post hi(http:Caller caller, http:Request request, @http:Payload {} Dog payload) {
 
-     //resource function post pets (​http:Request request, @http:Payload {mediaType["application/json"]​} ​ json ​
-     //payload​) returns http:Ok {
-     //     }
-     //}
-
-     //resource function get users(http:Caller caller​, http:Request request) returns @http:Payload
-     //{mediaType:["application/json"]} ArrayOfUsers | @http:Payload{mediaType:["text/plain"]} string {
-     //
-     // }
-
-      //resource function get users(http:Caller caller, http:Request request) returns @http:Payload{mediaType:["text/plain"]} string {}
-
-      //resource function get pets(http:Request request ​ payload) returns @http:Payload {mediaType:["text/plain"]​} record {|*http:BadRequest; string body;|} {}
- //resource function get pets (​ http:Caller​ ​ caller​, http:Request request ​ payload​ ) returns http:Ok|
- //http:BadRequest | http:Unauthorized  | http:NotFound {
- //  }
-
- //resource function get users() returns @http:Payload {mediaType:"application/json"} record {|*http:Ok; record {| int
- // id; string username;|} body;|} {
- //}
-
-//resource function get users() returns @http:Payload {mediaType:"application/json"} record {|*http:Ok; Cat | Dog |
-//Hamster body;|} {
-//}
-
-    //resource function get pets(​http:Request req​, int offset) returns http:Ok {
-    //
-    //}
-// Header param
-    resource function get ping(@http:Header{} string xclient, @http:Header{} string[] xservice) returns json {
-    }
-// parameter has content type
-//    resource function post user(http:Request request, @http:Payload {} byte[] payload) returns http:Ok {
-//    }
-//resource function get pets () returns string {
-//}
-
-//resource function get pets () returns record {| *http:NotFound , string body;|} {
-//}
-
-
-//resource function get users(​) returns ArrayOfUsers |  xml | string {
-//}
-
-//resource function get users() returns record {| int id; string username;|} {
-//}
-
-
-}
+     }
+     }

@@ -1,8 +1,6 @@
 import ballerina/http;
-import ballerina/openapi;
 
 listener http:Listener ep0 = new(9090);
-
 
 service  / on ep0 {
 

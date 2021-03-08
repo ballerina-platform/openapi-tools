@@ -120,102 +120,119 @@ public class BallerinaServiceGeneratorTest {
     public void generateResponseScenario01() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_01_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_01_rs.bal");
     }
 
     @Test(description = "Scenario 02 - Single response with content type")
     public void generateResponseScenario02() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_02_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_02_rs.bal");
     }
 
     @Test(description = "Scenario 03 - Single response with content type application/json")
     public void generateResponseScenario03() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_03_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_03_rs.bal");
     }
 
     @Test(description = "Scenario 04 - Response has multiple responses without content type")
     public void generateResponseScenario04() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_04_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_04_rs.bal");
     }
 
     @Test(description = "Scenario 05 - Error response with a schema")
     public void generateResponseScenario05() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_05_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_05_rs.bal");
     }
 
     @Test(description = "Scenario 06 - Error response with a schema with application/json")
     public void generateResponseScenario06() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_06_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_06_rs.bal");
     }
 
     @Test(description = "Scenario 07 - Single response has multiple content types")
     public void generateResponseScenario07() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_07_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_07_rs.bal");
     }
 
     @Test(description = "Scenario 08 - Single response has inline record for dataType")
     public void generateResponseScenario08() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_08_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_08_rs.bal");
     }
 
     @Test(description = "Scenario 09 - Single response has inline record for dataType with different status code")
     public void generateResponseScenario09() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_09_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_09_rs.bal");
     }
 
     @Test(description = "Scenario 10 - Response with a custom media type")
     public void generateResponseScenario10() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_10_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_10_rs.bal");
     }
 
     @Test(description = "Scenario 11 - Response has OneOf and AnyOf type 200 ok")
     public void generateResponseScenario11() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_11_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_11_rs.bal");
     }
 
     @Test(description = "Scenario 12 - Response has OneOf and AnyOf type for error status code")
     public void generateResponseScenario12() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_12_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_12_rs.bal");
     }
 
     @Test(description = "Scenario 13 - Single response has multiple content types with different error code")
     public void generateResponseScenario13() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_13_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_13_rs.bal");
     }
 
     @Test(description = "Scenario 14 - Multiple response with same mediaType")
     public void generateResponseScenario14() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_14_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_14_rs.bal");
     }
 
     @Test(description = "Scenario 15 - Response has array type data Binding")
     public void generateResponseScenario15() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_15_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_15_rs.bal");
     }
 
     @Test(description = "Scenario 16 - Response has array type data Binding with error code")
     public void generateResponseScenario16() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_16_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_16_rs.bal");
     }
     // Scenario 17, 18 is invalid
     @Test(description = "Scenario 19 - Multiple response with different mediaType")
     public void generateResponseScenario19() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/scenario_19_rs.yaml");
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("scenario_19_rs.bal");
     }
 
     @Test(description = "Generate functionDefinitionNode for request body with json")
