@@ -98,6 +98,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import static org.ballerinalang.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static org.ballerinalang.generators.GeneratorUtils.getListenerDeclarationNode;
 import static org.ballerinalang.generators.GeneratorUtils.getQualifiedNameReferenceNode;
@@ -114,8 +116,6 @@ public class BallerinaServiceGenerator {
     private static Token closeBraceToken = AbstractNodeFactory.createIdentifierToken("}");
     private static Token openSBracketToken = AbstractNodeFactory.createIdentifierToken("[");
     private static Token closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]");
-    private static Token openBracketToken = AbstractNodeFactory.createIdentifierToken("(");
-    private static Token closeBracketToken = AbstractNodeFactory.createIdentifierToken(")");
     private static Token colon = AbstractNodeFactory.createIdentifierToken(":");
     private static Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
     // Add basicLiteralNode
@@ -286,8 +286,8 @@ public class BallerinaServiceGenerator {
         //return Type descriptors
         Token returnKeyWord = AbstractNodeFactory.createIdentifierToken(" returns ");
         // Generate return type is node
-        ReturnTypeDescriptorNode returnNode = null;
-        returnNode = getReturnTypeDescriptorNode(operation, annotations, returnKeyWord, returnNode);
+        ReturnTypeDescriptorNode returnNode = getReturnTypeDescriptorNode(operation, annotations,
+                returnKeyWord);
 
         Token closeParenToken = AbstractNodeFactory.createIdentifierToken(")");
 
@@ -329,7 +329,7 @@ public class BallerinaServiceGenerator {
                 String arrayType = ((ArraySchema) schema).getItems().getType();
                 BuiltinSimpleNameReferenceNode headerArrayItemTypeName =
                         NodeFactory.createBuiltinSimpleNameReferenceNode(null,
-                                AbstractNodeFactory.createIdentifierToken(type));
+                                AbstractNodeFactory.createIdentifierToken(arrayType));
                 headerTypeName = NodeFactory
                         .createArrayTypeDescriptorNode(headerArrayItemTypeName, openSBracketToken, null,
                                 closeSBracketToken);
@@ -356,17 +356,17 @@ public class BallerinaServiceGenerator {
     /**
      * This function used to generate return function node in the function signature.
      * Payload media type will not be added to the annotation.
-     * @param operation     Openapi operation
+     * @param operation     OpenApi operation
      * @param annotations   Annotation node list
      * @param returnKeyWord    Keyword for return
-     * @param returnNode    return Node
      * @return return returnNode
      * @throws BallerinaOpenApiException
      */
     private static ReturnTypeDescriptorNode getReturnTypeDescriptorNode(
-            Map.Entry<PathItem.HttpMethod, Operation> operation, NodeList<AnnotationNode> annotations,
-            Token returnKeyWord, ReturnTypeDescriptorNode returnNode) throws BallerinaOpenApiException {
+            @Nonnull Map.Entry<PathItem.HttpMethod, Operation> operation, @Nonnull NodeList<AnnotationNode> annotations,
+            @Nonnull Token returnKeyWord) throws BallerinaOpenApiException {
 
+        ReturnTypeDescriptorNode returnNode = null;
         if (operation.getValue().getResponses() != null) {
             ApiResponses responses = operation.getValue().getResponses();
             Iterator<Map.Entry<String, ApiResponse>> responseIter = responses.entrySet().iterator();
@@ -715,14 +715,13 @@ public class BallerinaServiceGenerator {
                     //When it has arrayType
                     if (schema instanceof ArraySchema) {
                         Schema<?> items = ((ArraySchema) schema).getItems();
-                        if (!(items instanceof ObjectSchema) || !(items instanceof ArraySchema)) {
+                        if (!(items instanceof ArraySchema)) {
                             // create arrayTypeDescriptor
                             //1. memberTypeDescriptor
                             ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                             RequiredParameterNode arrayRparam = NodeFactory
                                     .createRequiredParameterNode(annotations, arrayTypeName, parameterName);
                             params.add(arrayRparam);
-                            params.add(comma);
 
                         } else {
                             // handle in case swagger has nested array or record type
@@ -739,19 +738,18 @@ public class BallerinaServiceGenerator {
                                     .createRequiredParameterNode(annotations, optionalTypeDescriptorNode,
                                             parameterName);
                             params.add(arrayRparam);
-                            params.add(comma);
                         }
                     } else {
                         Token name =
                                 AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(
-                                        schema.getType().toLowerCase().trim()));
+                                        schema.getType().toLowerCase(Locale.ENGLISH).trim()));
                         BuiltinSimpleNameReferenceNode rTypeName =
                                 NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
                         RequiredParameterNode param1 =
                                 NodeFactory.createRequiredParameterNode(annotations, rTypeName, parameterName);
                         params.add(param1);
-                        params.add(comma);
                     }
+                    params.add(comma);
                 } else {
                     //Optional TypeDescriptor
                     //Array type
@@ -777,7 +775,7 @@ public class BallerinaServiceGenerator {
                     } else {
                         Token name =
                                 AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(
-                                        schema.getType().toLowerCase().trim()));
+                                        schema.getType().toLowerCase(Locale.ENGLISH).trim()));
                         BuiltinSimpleNameReferenceNode rTypeName =
                                 NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
                         OptionalTypeDescriptorNode optionalTypeDescriptorNode =
