@@ -51,6 +51,7 @@ import org.ballerinalang.ballerina.Constants;
 import org.ballerinalang.openapi.utils.GeneratorConstants;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -282,6 +283,10 @@ public class GeneratorUtils {
             }
         }
         return identifier;
+    }
+
+    public static boolean hasTags(List<String> tags, List<String> filterTags) {
+        return !Collections.disjoint(filterTags, tags);
     }
 
 }

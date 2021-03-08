@@ -79,7 +79,6 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.utils.GeneratorConstants;
@@ -123,9 +122,9 @@ public class BallerinaServiceGenerator {
     private static Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
     private static MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
     private static Token questionMark = NodeFactory.createIdentifierToken("?");
-
+@Nonnull
     public static SyntaxTree generateSyntaxTree(Path definitionPath, String serviceName, Filter filter) throws
-            IOException, BallerinaOpenApiException, FormatterException {
+            IOException, BallerinaOpenApiException {
         // Create imports http and openapi
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode("ballerina"
                 , "http");
@@ -203,10 +202,35 @@ public class BallerinaServiceGenerator {
                 if (!path.getValue().readOperationsMap().isEmpty()) {
                     Map<PathItem.HttpMethod, Operation> operationMap = path.getValue().readOperationsMap();
                     for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
-                        // getRelative resource path
-                        List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation);
-                        // function call
-                        getFunctionDefinitionNode(functions, operation, functionRelativeResourcePath);
+                        //Add filter availability
+                        //1.Tag filter
+                        //2.Operation filter
+                        //3. Both tag and operation filter
+                        List<String> filterTags = filter.getTags();
+                        List<String> operationTags = operation.getValue().getTags();
+                        List<String> filterOperations  = filter.getOperations();
+                        if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
+                            if (operationTags != null || ((!filterOperations.isEmpty())
+                                    && (operation.getValue().getOperationId() != null))) {
+                                if (GeneratorUtils.hasTags(operationTags, filterTags) ||
+                                        ((operation.getValue().getOperationId() != null) &&
+                                        filterOperations.contains(operation.getValue().getOperationId().trim()))) {
+                                    // getRelative resource path
+                                    List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation);
+                                    // function call
+                                    getFunctionDefinitionNode(functions, operation, functionRelativeResourcePath);
+                                } else {
+//                                    skip
+                                }
+                            } else {
+//                                skip
+                            }
+                        } else {
+                            // getRelative resource path
+                            List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation);
+                            // function call
+                            getFunctionDefinitionNode(functions, operation, functionRelativeResourcePath);
+                        }
                     }
                 }
             }
