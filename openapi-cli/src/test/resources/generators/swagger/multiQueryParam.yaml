@@ -1,18 +1,36 @@
+#openapi: "3.0.0"
+#info:
+#  version: 1.0.0
+#  title: Swagger Petstore
+#  description: A sample API that uses a petstore as an example to demonstrate features in the OpenAPI 3.0 specification
+#  termsOfService: http://swagger.io/terms/
+#  contact:
+#    name: Swagger API Team
+#    email: apiteam@swagger.io
+#    url: http://swagger.io
+#  license:
+#    name: Apache 2.0
+#    url: https://www.apache.org/licenses/LICENSE-2.0.html
+#servers:
+#  - url: http://petstore.swagger.io/api
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Swagger Petstore
-  description: A sample API that uses a petstore as an example to demonstrate features in the OpenAPI 3.0 specification
-  termsOfService: http://swagger.io/terms/
-  contact:
-    name: Swagger API Team
-    email: apiteam@swagger.io
-    url: http://swagger.io
+  title: OpenApi Petstore
   license:
-    name: Apache 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
+    name: MIT
 servers:
-  - url: http://petstore.swagger.io/api
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+        description: this value is assigned by the service provider
+tags:
+  - name: pets
+    description: Pets Tag
+  - name: list
+    description: List Tag
 paths:
   /pets:
     get:
@@ -27,9 +45,10 @@ paths:
           style: form
           schema:
             type: array
-              item: array
-                items:
-                  type: "string"
+            items:
+              type: array
+              items:
+                type: string
         - name: limit
           in: query
           description: maximum number of results to return

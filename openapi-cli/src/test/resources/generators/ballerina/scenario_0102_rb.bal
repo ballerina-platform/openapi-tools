@@ -4,6 +4,6 @@ import ballerina/openapi;
 listener http:Listener ep0 = new (80, config = {host: petstore.openapi.io});
 
 service /v1 on ep0 {
-    resource function get pets(http:Request request, int? 'limit) returns Pets|Error {
+    resource function post user(http:Request request, @http:Payload {} byte[] payload) returns http:Ok {
     }
 }

@@ -47,9 +47,23 @@ type Pet record {
     //
     //}
 // Header param
-//    resource function get ping(@http:Header{} string xclient, @http:Header{} string[] xservice) returns json {
-//    }
-// parameter has content type
-    resource function post user(http:Request request, @http:Payload {} byte[] payload) returns http:Ok {
+    resource function get ping(@http:Header{} string xclient, @http:Header{} string[] xservice) returns json {
     }
+// parameter has content type
+//    resource function post user(http:Request request, @http:Payload {} byte[] payload) returns http:Ok {
+//    }
+//resource function get pets () returns string {
+//}
+
+//resource function get pets () returns record {| *http:NotFound , string body;|} {
+//}
+
+
+//resource function get users(​) returns ArrayOfUsers |  xml | string {
+//}
+
+//resource function get users() returns record {| int id; string username;|} {
+//}
+
+
 }
