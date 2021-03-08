@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.ballerinalang.generators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
@@ -39,6 +57,9 @@ import java.util.Optional;
 
 import static org.ballerinalang.openapi.OpenApiMesseges.BAL_KEYWORDS;
 
+/**
+ * This class util for store all the common scenarios.
+ */
 public class GeneratorUtils {
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
@@ -47,11 +68,12 @@ public class GeneratorUtils {
         Token slashToken = AbstractNodeFactory.createIdentifierToken("/");
         ImportOrgNameNode importOrgNameNode = NodeFactory.createImportOrgNameNode(orgNameToken, slashToken);
         Token moduleNameToken = AbstractNodeFactory.createIdentifierToken(moduleName);
-        SeparatedNodeList<IdentifierToken> moduleNodeList = AbstractNodeFactory.createSeparatedNodeList(moduleNameToken);
+        SeparatedNodeList<IdentifierToken> moduleNodeList = AbstractNodeFactory.createSeparatedNodeList(
+                moduleNameToken);
         Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
 
         return NodeFactory.createImportDeclarationNode(importKeyword, importOrgNameNode,
-                moduleNodeList, null, semicolon );
+                moduleNodeList, null, semicolon);
     }
 
     public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
@@ -90,7 +112,7 @@ public class GeneratorUtils {
         // Create arguments
         // 1. Create port Node
         Token literalToken = AbstractNodeFactory.createLiteralValueToken(SyntaxKind.DECIMAL_INTEGER_LITERAL_TOKEN
-                , String.valueOf(port),leading, trailing);
+                , String.valueOf(port), leading, trailing);
         BasicLiteralNode expression = NodeFactory.createBasicLiteralNode(SyntaxKind.NUMERIC_LITERAL, literalToken);
 
         PositionalArgumentNode portNode = NodeFactory.createPositionalArgumentNode(expression);
@@ -107,8 +129,8 @@ public class GeneratorUtils {
         Token literalHostToken = AbstractNodeFactory.createIdentifierToken(host, leading, trailing);
         BasicLiteralNode valueExpr = NodeFactory.createBasicLiteralNode(SyntaxKind.STRING_LITERAL,
                 literalHostToken);
-        MappingFieldNode HostNode = NodeFactory.createSpecificFieldNode(null, fieldName, colon, valueExpr);
-        SeparatedNodeList<MappingFieldNode> fields = NodeFactory.createSeparatedNodeList(HostNode);
+        MappingFieldNode hostNode = NodeFactory.createSpecificFieldNode(null, fieldName, colon, valueExpr);
+        SeparatedNodeList<MappingFieldNode> fields = NodeFactory.createSeparatedNodeList(hostNode);
         Token closeBrace = AbstractNodeFactory.createIdentifierToken("}");
 
         MappingConstructorExpressionNode hostExpression =
@@ -147,7 +169,9 @@ public class GeneratorUtils {
                             if (parameter.getIn() == null) {
                                 break;
                             }
-                            if (pathParam.trim().equals(parameter.getName().trim()) && parameter.getIn().equals("path")) {
+                            if (pathParam.trim().equals(parameter.getName().trim())
+                                    && parameter.getIn().equals("path")) {
+
                                 Token ppOpenB = AbstractNodeFactory.createIdentifierToken("[");
                                 NodeList<AnnotationNode> ppAnnotation = NodeFactory.createEmptyNodeList();
                                 // TypeDescriptor
@@ -159,8 +183,8 @@ public class GeneratorUtils {
                                 }
                                 BuiltinSimpleNameReferenceNode builtSNRNode =
                                         NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
-                                IdentifierToken paramName =
-                                        AbstractNodeFactory.createIdentifierToken(" " + parameter.getName().trim());
+                                String parameterName = " " + parameter.getName().trim();
+                                IdentifierToken paramName = AbstractNodeFactory.createIdentifierToken(parameterName);
                                 Token ppCloseB = AbstractNodeFactory.createIdentifierToken("]");
 
                                 ResourcePathParameterNode resourcePathParameterNode = NodeFactory
