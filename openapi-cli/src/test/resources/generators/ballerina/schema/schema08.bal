@@ -1,3 +1,4 @@
+
 type  Pet record  {
     int  id;
     string  name;
@@ -5,7 +6,6 @@ type  Pet record  {
     string  'type?;
 };
 
-type  Error record  {
-    int  code;
-    string  message;
+type  Pets record  {
+    Pet[]  petslist;
 };

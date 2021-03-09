@@ -29,12 +29,6 @@ tags:
     description: Pets Tag
   - name: list
     description: List Tag
-security:
-- petstore_auth:
-  - write:pets
-  - read:pets
-- user_auth:
-  - read:user
 
 paths:
   /pets:
@@ -73,13 +67,10 @@ components:
           type: string
         type:
           type: string
-    Error:
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
+    Dog:
+      allOf:
+        - $ref: "#/components/schemas/Pet"
+        - type: object
+          properties:
+            bark:
+              type: boolean

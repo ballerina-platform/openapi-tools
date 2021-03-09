@@ -307,4 +307,9 @@ public class GeneratorUtils {
         return !Collections.disjoint(filterTags, tags);
     }
 
+    // Create ArrayTypeDescriptorNode using Schema
+//    public static ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Token typeName) {
+//
+//    }
+
 }

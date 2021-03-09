@@ -29,12 +29,6 @@ tags:
     description: Pets Tag
   - name: list
     description: List Tag
-security:
-- petstore_auth:
-  - write:pets
-  - read:pets
-- user_auth:
-  - read:user
 
 paths:
   /pets:
@@ -56,7 +50,22 @@ paths:
       responses:
         '200':
           description: An paged array of pets
-
+  /action:
+    x-MULTI:
+      operationId: getAction
+      responses:
+        '200':
+          description: Successful
+          examples:
+            application/json: Ok
+      x-METHODS:
+        - HEAD
+        - OPTIONS
+        - PATCH
+        - DELETE
+        - POST
+        - PUT
+        - GET
 components:
   schemas:
     Pet:
@@ -70,16 +79,11 @@ components:
         name:
           type: string
         tag:
-          type: string
-        type:
-          type: string
-    Error:
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: string
+

@@ -56,7 +56,6 @@ paths:
       responses:
         '200':
           description: An paged array of pets
-
 components:
   schemas:
     Pet:
@@ -71,15 +70,11 @@ components:
           type: string
         tag:
           type: string
-        type:
-          type: string
-    Error:
+    Dog:
       required:
-        - code
-        - message
+        - bark
       properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
+        pets:
+          $ref: "#/components/schemas/Pet"
+        bark:
+          type: boolean

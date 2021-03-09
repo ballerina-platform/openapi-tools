@@ -19,6 +19,7 @@
 package org.ballerinalang.generators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
@@ -32,16 +33,20 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.typemodel.BallerinaOpenApiSchema;
 
 import java.io.IOException;
@@ -50,23 +55,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static org.ballerinalang.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static org.ballerinalang.generators.GeneratorUtils.escapeIdentifier;
+import static org.ballerinalang.generators.GeneratorUtils.extractReferenceType;
 
 /**
- *
+ *This class wraps the {@link Schema} from openapi models inorder to overcome complications
+ *while populating syntax tree.
  */
 public class BallerinaSchemaGenerator {
     private static final PrintStream outStream = System.err;
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath)
-            throws OpenApiException, FormatterException, IOException {
+            throws OpenApiException, FormatterException, IOException, BallerinaOpenApiException {
         OpenAPI openApi = parseOpenAPIFile(definitionPath.toString());
         // imports null
         // TypeDefinitionNodes their
@@ -89,33 +97,43 @@ public class BallerinaSchemaGenerator {
                     //3.2 bodyStartDelimiter
                     Token bodyStartDelimiter = AbstractNodeFactory.createIdentifierToken("{ ");
                     //3.3 fields
-                    if (schema.getValue().getProperties() != null) {
-                        Map<String, Schema> fields = schema.getValue().getProperties();
-                        List<Node> recordFieldList = new ArrayList<>();
-                        for (Map.Entry<String, Schema> field : fields.entrySet()) {
-                            //Generate RecordFiled
-                            RecordFieldNode recordFieldNode;
-                            TypeDescriptorNode fieldTypeName = extractOpenApiSchema(field.getValue());
-                            Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
-                            //FiledName
-                            IdentifierToken fieldName =
-                                    AbstractNodeFactory.createIdentifierToken(" " + escapeIdentifier(field.getKey().trim()));
-                            //GetType
-//                                Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("");
-                            if (required != null) {
-                                if (!required.contains(field.getKey().trim())) {
-                                    Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
-                                    recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
-                                            fieldTypeName, fieldName, questionMarkToken, semicolonToken);
-                                } else {
-                                    recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
-                                            fieldTypeName, fieldName, null, semicolonToken);
+                    //Generate RecordFiled
+                    List<Node> recordFieldList = new ArrayList<>();
+
+                    if (schema.getValue() instanceof ComposedSchema) {
+                        if (((ComposedSchema) schema.getValue()).getAllOf() != null) {
+                            List<Schema> allOf = ((ComposedSchema) schema.getValue()).getAllOf();
+                            for (Schema allOfschema: allOf) {
+                                if (allOfschema.getType() == null && allOfschema.get$ref() != null) {
+                                    //Generate typeReferenceNode
+                                    Token typeRef =
+                                            AbstractNodeFactory.createIdentifierToken(escapeIdentifier(extractReferenceType(allOfschema.get$ref())));
+                                    Token asterisk = AbstractNodeFactory.createIdentifierToken("*");
+                                    Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
+                                    TypeReferenceNode recordField =
+                                            NodeFactory.createTypeReferenceNode(asterisk, typeRef, semicolon);
+                                    recordFieldList.add(recordField);
+                                } else if (allOfschema instanceof ObjectSchema && (allOfschema.getProperties() != null) ) {
+                                    Map<String, Schema> properties = allOfschema.getProperties();
+                                    for (Map.Entry<String, Schema> field : properties.entrySet()) {
+                                        addRecordFields(required, recordFieldList, field);
+                                    }
                                 }
-                            } else {
-                                recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
-                                        fieldTypeName, fieldName, null, semicolonToken);
                             }
-                            recordFieldList.add(recordFieldNode);
+                            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
+                            Token bodyEndDelimiter = AbstractNodeFactory.createIdentifierToken("}");
+                            RecordTypeDescriptorNode recordTypeDescriptorNode =
+                                    NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
+                                            fieldNodes, null, bodyEndDelimiter);
+                            Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
+                            TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null, null,
+                                    typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
+                            typeDefinitionNodeList.add(typeDefinitionNode);
+                        }
+                    } else if (schema.getValue().getProperties() != null || schema.getValue() instanceof ObjectSchema) {
+                        Map<String, Schema> fields = schema.getValue().getProperties();
+                        for (Map.Entry<String, Schema> field : fields.entrySet()) {
+                            addRecordFields(required, recordFieldList, field);
                         }
                         NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
                         Token bodyEndDelimiter = AbstractNodeFactory.createIdentifierToken("}");
@@ -126,6 +144,39 @@ public class BallerinaSchemaGenerator {
                         TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null, null,
                                 typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
                         typeDefinitionNodeList.add(typeDefinitionNode);
+                    } else if (schema.getValue().getType().equals("array")) {
+                        if (schema.getValue() instanceof ArraySchema) {
+                            Token openSBracketToken = AbstractNodeFactory.createIdentifierToken("[");
+                            Token closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]");
+                            IdentifierToken fieldName =
+                                    AbstractNodeFactory.createIdentifierToken(" " + escapeIdentifier(schema.getKey().trim().toLowerCase(
+                                            Locale.ENGLISH)) +"list");
+                            Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
+                            TypeDescriptorNode fieldTypeName;
+                            if (((ArraySchema) schema.getValue()).getItems() != null) {
+                                //Generate RecordFiled
+                                //FiledName
+                                fieldTypeName = extractOpenApiSchema(((ArraySchema) schema.getValue()).getItems());
+                            } else {
+                                Token type =
+                                        AbstractNodeFactory.createIdentifierToken("string ");
+                                fieldTypeName =  NodeFactory.createBuiltinSimpleNameReferenceNode(null, type);
+                            }
+                            ArrayTypeDescriptorNode arrayField =
+                                    NodeFactory.createArrayTypeDescriptorNode(fieldTypeName, openSBracketToken, null
+                                            , closeSBracketToken);
+                            RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
+                                    arrayField, fieldName, null, semicolonToken);
+                            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldNode);
+                            Token bodyEndDelimiter = AbstractNodeFactory.createIdentifierToken("}");
+                            RecordTypeDescriptorNode recordTypeDescriptorNode =
+                                    NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
+                                            fieldNodes, null, bodyEndDelimiter);
+                            Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
+                            TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null, null,
+                                    typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
+                            typeDefinitionNodeList.add(typeDefinitionNode);
+                        }
                     }
                 }
             }
@@ -135,9 +186,8 @@ public class BallerinaSchemaGenerator {
 
 
         // Create module member declaration
-//        NodeList<Node> members = NodeFactory.createNodeList(typeDefinitionNodeList);
         NodeList<ModuleMemberDeclarationNode> moduleMembers =
-                AbstractNodeFactory.createNodeList(typeDefinitionNodeList.get(0));
+                AbstractNodeFactory.createNodeList(typeDefinitionNodeList.toArray(new TypeDefinitionNode[typeDefinitionNodeList.size()]));
 
         Token eofToken = AbstractNodeFactory.createIdentifierToken("");
         ModulePartNode modulePartNode = NodeFactory.createModulePartNode(imports, moduleMembers, eofToken);
@@ -146,6 +196,39 @@ public class BallerinaSchemaGenerator {
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         System.out.println(Formatter.format(syntaxTree.modifyWith(modulePartNode)));
         return syntaxTree.modifyWith(modulePartNode);
+    }
+
+    /**
+     *
+     * @param required
+     * @param recordFieldList
+     * @param field
+     * @throws BallerinaOpenApiException
+     */
+    private static void addRecordFields(List<String> required, List<Node> recordFieldList,
+                                        Map.Entry<String, Schema> field) throws BallerinaOpenApiException {
+
+        RecordFieldNode recordFieldNode;
+        //FiledName
+        IdentifierToken fieldName =
+                AbstractNodeFactory.createIdentifierToken(" " + escapeIdentifier(field.getKey().trim()));
+
+        TypeDescriptorNode fieldTypeName = extractOpenApiSchema(field.getValue());
+        Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
+        Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
+        if (required != null) {
+            if (!required.contains(field.getKey().trim())) {
+                recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
+                        fieldTypeName, fieldName, questionMarkToken, semicolonToken);
+            } else {
+                recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
+                        fieldTypeName, fieldName, null, semicolonToken);
+            }
+        } else {
+            recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
+                    fieldTypeName, fieldName, questionMarkToken, semicolonToken);
+        }
+        recordFieldList.add(recordFieldNode);
     }
 
     /**
@@ -177,23 +260,42 @@ public class BallerinaSchemaGenerator {
      *
      * @param schema - OpenApi Schema
      */
-    private static TypeDescriptorNode extractOpenApiSchema(Schema schema) {
+    private static TypeDescriptorNode extractOpenApiSchema(Schema schema) throws BallerinaOpenApiException {
 
         if (schema.getType() != null || schema.getProperties() != null) {
             if (schema.getType() != null && ((schema.getType().equals("integer") || schema.getType().equals("number"))
                     || schema.getType().equals("string") || schema.getType().equals("boolean"))) {
                  Token typeName =
                         AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(schema.getType().trim()));
-                return NodeFactory.createBuiltinSimpleNameReferenceNode(null, typeName);
-//                setSchemaType(typeSchema, "boolean");
+                return createBuiltinSimpleNameReferenceNode(null, typeName);
             } else if (schema.getType() != null && schema.getType().equals("array")) {
                 if (schema instanceof ArraySchema) {
                     final ArraySchema arraySchema = (ArraySchema) schema;
-//                    typeSchema.setArray(true);
+
                     if (arraySchema.getItems() != null) {
-                        BallerinaOpenApiSchema arrayItems = new BallerinaOpenApiSchema();
-//                        extractOpenApiSchema(arraySchema.getItems(), arrayItems, isInline, composedSchemaType);
-//                        typeSchema.setItemsSchema(arrayItems);
+                        //single array
+                        Token openSBracketToken = AbstractNodeFactory.createIdentifierToken("[");
+                        Token closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]");
+                        String type;
+                        Token typeName;
+                        TypeDescriptorNode memberTypeDesc;
+                        if (arraySchema.getItems().get$ref() != null) {
+                            type = extractReferenceType(arraySchema.getItems().get$ref());
+                            typeName = AbstractNodeFactory.createIdentifierToken(type);
+                            memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
+                            return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken, null,
+                                    closeSBracketToken);
+                        } else if (arraySchema.getItems() instanceof ArraySchema) {
+                            memberTypeDesc = extractOpenApiSchema(arraySchema.getItems());
+                            return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken, null,
+                                    closeSBracketToken);
+                        } else {
+                            type = arraySchema.getItems().getType();
+                            typeName = AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(type));
+                            memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
+                            return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken, null,
+                                    closeSBracketToken);
+                        }
                     }
                 }
             } else if ((schema.getType() != null && schema.getType().equals("object")) ||
@@ -228,6 +330,8 @@ public class BallerinaSchemaGenerator {
 //                setSchemaType(typeSchema, "any");
             }
         } else if (schema.get$ref() != null) {
+            Token typeName = AbstractNodeFactory.createIdentifierToken(extractReferenceType(schema.get$ref()));
+            return createBuiltinSimpleNameReferenceNode(null, typeName);
 //            if (composedSchemaType != null && composedSchemaType.equals("ALL_OF")) {
 ////                setComposedSchemaType(typeSchema, extractReferenceType(schema.get$ref()));
 //            } else {
@@ -242,15 +346,6 @@ public class BallerinaSchemaGenerator {
         }
         Token typeName =
                 AbstractNodeFactory.createIdentifierToken("any");
-        return NodeFactory.createBuiltinSimpleNameReferenceNode(null, typeName);
+        return createBuiltinSimpleNameReferenceNode(null, typeName);
     }
-
-    private static Collection<TypeDefinitionNode> getTokenList(List<TypeDefinitionNode> stringList) {
-        List<TypeDefinitionNode> tokenList = new LinkedList<>();
-        for (TypeDefinitionNode value : stringList) {
-            tokenList.add(value);
-        }
-        return tokenList;
-    }
-
 }

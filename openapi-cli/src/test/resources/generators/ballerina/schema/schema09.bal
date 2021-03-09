@@ -5,7 +5,7 @@ type  Pet record  {
     string  'type?;
 };
 
-type  Error record  {
-    int  code;
-    string  message;
+type  Dog record  {
+    *Pet;
+    boolean  bark?;
 };
