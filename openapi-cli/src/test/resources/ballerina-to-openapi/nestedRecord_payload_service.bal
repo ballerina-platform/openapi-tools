@@ -1,6 +1,6 @@
-import ballerina/http;
+//import ballerina/http;
 
-listener http:Listener helloEp = new (9090);
+//listener http:Listener helloEp = new (9090);
 
 type Pet record {
     int id;
@@ -8,12 +8,12 @@ type Pet record {
     string tag?;
  };
 
- type Dog record {
-     Pet perant;
-     boolean bark;
-  };
- service /payloadV on helloEp {
-     resource function post hi(http:Caller caller, http:Request request, @http:Payload {} Dog payload) {
-
-     }
-     }
+ //type Dog record {
+ //    Pet perant;
+ //    boolean bark;
+ // };
+ //service /payloadV on helloEp {
+ //    resource function post hi(http:Caller caller, http:Request request, @http:Payload {} Dog payload) {
+ //
+ //    }
+ //    }

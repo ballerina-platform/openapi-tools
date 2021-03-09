@@ -48,6 +48,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.ballerinalang.ballerina.Constants;
+import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.utils.GeneratorConstants;
 
 import java.util.ArrayList;
@@ -256,9 +257,8 @@ public class GeneratorUtils {
      */
     public static String escapeIdentifier(String identifier) {
         if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") || BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
-            identifier = identifier.replace("-", "");
-            identifier = identifier.replace("$", "");
 
+            // TODO: Remove this `if`. Refer - https://github.com/ballerina-platform/ballerina-lang/issues/23045
             if (identifier.equals("error")) {
                 identifier = "_error";
             } else {
@@ -283,6 +283,24 @@ public class GeneratorUtils {
             }
         }
         return identifier;
+    }
+
+    /**
+     * This method will extract reference type by splitting the reference string.
+     *
+     * @param referenceVariable - Reference String
+     * @return Reference variable name
+     * @throws BallerinaOpenApiException - Throws an exception if the reference string is incompatible.
+     *                                     Note : Current implementation will not support external links a references.
+     */
+    public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
+        if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
+            String[] refArray = referenceVariable.split("/");
+            return escapeIdentifier(refArray[refArray.length - 1]);
+        } else {
+            throw new BallerinaOpenApiException("Invalid reference value : " + referenceVariable
+                    + "\nBallerina only supports local reference values.");
+        }
     }
 
     public static boolean hasTags(List<String> tags, List<String> filterTags) {
