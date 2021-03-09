@@ -19,7 +19,7 @@
 package org.ballerinalang.generators;
 
 /**
- *
+ * This util class for generate record syntax tree for component schemas.
  */
 public class BallerinaSchemaGenerator {
 

@@ -6,4 +6,3 @@ service /v1 on ep0 {
     resource function get user(string filter) returns http:Ok {
     }
 }
-

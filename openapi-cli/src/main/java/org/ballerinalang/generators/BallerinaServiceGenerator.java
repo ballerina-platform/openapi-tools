@@ -109,20 +109,21 @@ import static org.ballerinalang.openapi.OpenApiMesseges.BAL_KEYWORDS;
  * This Util class use for generating ballerina service file according to given yaml file.
  */
 public class BallerinaServiceGenerator {
-    private static int httpPort = 80;
-    private static int httpsPort = 443;
-    private static Token openBraceToken = AbstractNodeFactory.createIdentifierToken("{");
-    private static Token closeBraceToken = AbstractNodeFactory.createIdentifierToken("}");
-    private static Token openSBracketToken = AbstractNodeFactory.createIdentifierToken("[");
-    private static Token closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]");
-    private static Token colon = AbstractNodeFactory.createIdentifierToken(":");
-    private static Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
+    private static final int httpPort = 80;
+    private static final int httpsPort = 443;
+    private static final Token openBraceToken = AbstractNodeFactory.createIdentifierToken("{");
+    private static final Token closeBraceToken = AbstractNodeFactory.createIdentifierToken("}");
+    private static final Token openSBracketToken = AbstractNodeFactory.createIdentifierToken("[");
+    private static final Token closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]");
+    private static final Token colon = AbstractNodeFactory.createIdentifierToken(":");
+    private static final Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
     // Add basicLiteralNode
-    private static MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
-    private static Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-    private static MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
-    private static Token questionMark = NodeFactory.createIdentifierToken("?");
-@Nonnull
+    private static final MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
+    private static final Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+    private static final MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
+    private static final Token questionMark = NodeFactory.createIdentifierToken("?");
+
+    @Nonnull
     public static SyntaxTree generateSyntaxTree(Path definitionPath, String serviceName, Filter filter) throws
             IOException, BallerinaOpenApiException {
         // Create imports http and openapi

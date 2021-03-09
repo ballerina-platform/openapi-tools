@@ -7,6 +7,4 @@ service  / on ep0 {
     resource function get ping(string filter) returns json {
 
    }
-
 }
-
