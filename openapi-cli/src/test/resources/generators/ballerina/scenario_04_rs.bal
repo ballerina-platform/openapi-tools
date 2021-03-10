@@ -6,4 +6,3 @@ service /v1 on ep0 {
     resource function post user() returns http:Ok|http:BadRequest|http:Unauthorized|http:NotFound {
     }
 }
-

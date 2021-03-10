@@ -8,4 +8,3 @@ service /v1 on ep0 {
     resource function post pets() returns http:|Error {
     }
 }
-
