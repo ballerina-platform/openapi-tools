@@ -30,7 +30,9 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.ballerinalang.generators.BallerinaSchemaGenerator;
 import org.ballerinalang.generators.BallerinaServiceGenerator;
+import org.ballerinalang.generators.OpenApiException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.model.BallerinaOpenApi;
@@ -94,7 +96,7 @@ public class CodeGenerator {
      */
     private void generate(GenType type, String executionPath, String definitionPath,
                           String reldefinitionPath , String serviceName, String outPath, Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException {
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
 
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
@@ -104,7 +106,7 @@ public class CodeGenerator {
 
     public void generateBothFiles(GenType type, String definitionPath,
                           String reldefinitionPath , String serviceName, String outPath , Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException {
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles =  new ArrayList<>();
@@ -135,7 +137,7 @@ public class CodeGenerator {
      */
     public void generateClient(String executionPath, String definitionPath, String serviceName, String outPath,
                                Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException {
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         generate(GenType.GEN_CLIENT, executionPath, definitionPath, null, serviceName, outPath, filter);
     }
 
@@ -155,7 +157,7 @@ public class CodeGenerator {
      */
     public void generateService(String executionPath, String definitionPath,
                                 String reldefinitionPath, String serviceName, String outPath, Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException {
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         generate(GEN_SERVICE, executionPath, definitionPath, reldefinitionPath, serviceName, outPath, filter);
     }
 
@@ -178,7 +180,7 @@ public class CodeGenerator {
      */
     public List<GenSrcFile> generateBalSource(GenType type, String definitionPath,
                                               String reldefinitionPath, String serviceName, Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException {
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         String openAPIFileContent = Files.readString(Paths.get(definitionPath));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
         if (parseResult.getMessages().size() > 0) {
@@ -211,7 +213,7 @@ public class CodeGenerator {
                         .modelPackage(srcPackage);
                 definitionContext.setDefinitionPath(reldefinitionPath);
 
-                sourceFiles = generateClient(definitionContext, serviceName);
+                sourceFiles = generateClient(definitionContext, serviceName, Paths.get(definitionPath));
                 break;
             case GEN_SERVICE:
 
@@ -385,7 +387,8 @@ public class CodeGenerator {
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private List<GenSrcFile> generateClient(BallerinaOpenApi context, String serviceName) throws IOException {
+    private List<GenSrcFile> generateClient(BallerinaOpenApi context, String serviceName, Path openAPI)
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = GeneratorConstants.DEFAULT_CLIENT_PKG;
         }
@@ -402,8 +405,7 @@ public class CodeGenerator {
         sourceFiles.add(new GenSrcFile(GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         // Generate ballerina records to represent schemas.
-        String schemaContent = getContent(context, GeneratorConstants.DEFAULT_MODEL_DIR,
-                GeneratorConstants.SCHEMA_TEMPLATE_NAME);
+        String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
         sourceFiles.add(new GenSrcFile(GenFileType.MODEL_SRC, srcPackage, GeneratorConstants.SCHEMA_FILE_NAME,
                 schemaContent));
 
@@ -412,7 +414,7 @@ public class CodeGenerator {
 
     private List<GenSrcFile> generateBallerinaService(BallerinaOpenApiType api, Path openAPI, String serviceName,
                                                       Filter filter)
-            throws IOException, FormatterException, BallerinaOpenApiException {
+            throws IOException, FormatterException, BallerinaOpenApiException, OpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = GeneratorConstants.DEFAULT_MOCK_PKG;
         }
@@ -425,29 +427,11 @@ public class CodeGenerator {
                         filter)).toString();
         sourceFiles.add(new GenSrcFile(GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
-        String schemaContent = getContent(api, GeneratorConstants.DEFAULT_TEMPLATE_DIR + "/service",
-                "schemaList");
+        String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
         sourceFiles.add(new GenSrcFile(GenFileType.GEN_SRC, srcPackage, GeneratorConstants.SCHEMA_FILE_NAME,
                 schemaContent));
 
         return sourceFiles;
-    }
-
-    /**
-     * Retrieve generated source content as a String value.
-     *
-     * @param object       context to be used by template engine
-     * @param templateDir  templates directory
-     * @param templateName name of the template to be used for this code generation
-     * @return String with populated template
-     * @throws IOException when template population fails
-     */
-    private String getContent(BallerinaOpenApiType object, String templateDir, String templateName) throws IOException {
-        Template template = compileTemplate(templateDir, templateName);
-        Context context = Context.newBuilder(object)
-                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
-                .build();
-        return template.apply(context);
     }
 
     /**
