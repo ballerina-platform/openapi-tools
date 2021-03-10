@@ -1,15 +1,20 @@
+type  Pet record  { 
+    int  id;
+    string  name;
+    string  tag?;
+    string  'type?;
+};
 
-type Pet record {
-     int id;
-     string name;
-     string tag?;
-     string 'type?;
-};
-type Dog record {
+type  Dog record  { 
     *Pet;
-     boolean bark?;
+    boolean  bark?;
 };
-type Error record {
-     int code;
-     string message;
+
+type  Pets record  { 
+    Pet[]  petslist;
+};
+
+type  Error record  { 
+    int  code;
+    string  message;
 };
