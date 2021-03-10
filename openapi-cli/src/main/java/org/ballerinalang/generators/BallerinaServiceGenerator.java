@@ -79,6 +79,7 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.utils.GeneratorConstants;
@@ -125,7 +126,7 @@ public class BallerinaServiceGenerator {
 
     @Nonnull
     public static SyntaxTree generateSyntaxTree(Path definitionPath, String serviceName, Filter filter) throws
-            IOException, BallerinaOpenApiException {
+            IOException, BallerinaOpenApiException, FormatterException {
         // Create imports http and openapi
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode("ballerina"
                 , "http");
@@ -896,16 +897,36 @@ public class BallerinaServiceGenerator {
      */
     private static String getHttpStatusCode(String code) {
         switch (code) {
+            case "100":
+                return "Continue";
             case "200":
                 return "Ok";
+            case "201":
+                return "Created";
+            case "202":
+                return "Accepted";
             case "400":
                 return "BadRequest";
             case "401":
                 return "Unauthorized";
+            case "402":
+                return "PaymentRequired";
+            case "403":
+                return "Forbidden";
             case "404":
                 return "NotFound";
+            case "405":
+                return "MethodNotAllowed";
+            case "500":
+                return "InternalServerError";
+            case "501":
+                return "NotImplemented";
+            case "502":
+                return "BadGateway";
+            case "503":
+                return "ServiceUnavailable";
             default:
-                return "";
+                return "Ok";
         }
     }
 
