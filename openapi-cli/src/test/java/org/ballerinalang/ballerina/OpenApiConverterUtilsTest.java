@@ -177,6 +177,12 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "mime_with_record_payload.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for build project")
+    public void testForResponse01() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/scenario01.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "response/response01.yaml");
+    }
+
     @Test(description = "Generate OpenAPI spec with json file")
     public void testNestedRecordPayLoadJson() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("nestedRecord_payload_service.bal");

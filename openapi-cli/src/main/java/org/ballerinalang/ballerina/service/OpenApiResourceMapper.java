@@ -39,8 +39,10 @@ import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
+import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -203,9 +205,6 @@ public class OpenApiResourceMapper {
         if (resource != null) {
             op.setHttpOperation(httpMethod);
             op.setPath('/' + generateRelativePath(resource));
-            Response response = new Response().description("Successful").
-                    example(MediaType.APPLICATION_JSON, "Ok");
-            op.getOperation().response(200, response);
 
             // @see BallerinaOperation#buildContext
             String resName = (resource.functionName().text() + "_" + generateRelativePath(resource))
@@ -216,9 +215,39 @@ public class OpenApiResourceMapper {
             // Parsing annotations.
             this.parseResourceConfigAnnotationAttachment(resource, op);
             this.addResourceParameters(resource, op);
-//            this.parseResponsesAnnotationAttachment(resource, op.getOperation());
+            this.parseResponsesAnnotationAttachment(resource, op);
         }
         return op;
+    }
+
+    private void parseResponsesAnnotationAttachment(FunctionDefinitionNode resource, OperationAdaptor op) {
+
+        FunctionSignatureNode functionSignatureNode = resource.functionSignature();
+        Optional<ReturnTypeDescriptorNode> returnTypeDescriptorNode = functionSignatureNode.returnTypeDesc();
+        Operation operation = op.getOperation();
+        Response response = new Response();
+        if (returnTypeDescriptorNode.isPresent()) {
+            ReturnTypeDescriptorNode returnNode = returnTypeDescriptorNode.orElseThrow();
+            NodeList<AnnotationNode> annotations = returnNode.annotations();
+            Node typeNode = returnNode.type();
+            if (!annotations.isEmpty()) {
+
+            } else {
+                if (typeNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
+                    QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) typeNode;
+                    if (qNode.modulePrefix().toString().trim().equals("http") && qNode.identifier().toString().trim().equals("Ok")) {
+                        response.description(qNode.identifier().toString());
+                        operation.response(200, response);
+
+                    }
+                }
+            }
+        } else {
+
+            response.description("Successful").
+                    example(MediaType.APPLICATION_JSON, "Ok");
+            operation.response(200, response);
+        }
     }
 
     /**
