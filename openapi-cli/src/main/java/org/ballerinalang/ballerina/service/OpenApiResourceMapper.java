@@ -498,7 +498,13 @@ public class OpenApiResourceMapper {
      */
     private void parseResourceConfigAnnotationAttachment(FunctionDefinitionNode resource, OperationAdaptor operation) {
 
-            operation.setPath(resource.relativeResourcePath().get(0).toString());
+        String path = resource.relativeResourcePath().get(0).toString();
+        if (path.equals(".") || path.equals("/")) {
+            operation.setPath("/");
+        } else {
+            operation.setPath(path);
+        }
+
         // TODO: Implement consumer definitions.
         // TODO: Implement producer definitions.
         // TODO: Implement security definitions.
@@ -556,6 +562,9 @@ public class OpenApiResourceMapper {
                 if (node instanceof ResourcePathParameterNode) {
                     ResourcePathParameterNode pathNode = (ResourcePathParameterNode) node;
                     relativePath = relativePath + "{" + pathNode.paramName() + "}";
+                } else if ((resource.relativeResourcePath().size() == 1 ) &&
+                        (node.toString().trim().equals(".") || node.toString().trim().equals("/"))) {
+                    relativePath = relativePath + "/";
                 } else {
                     relativePath = relativePath + node.toString();
                 }
@@ -571,8 +580,7 @@ public class OpenApiResourceMapper {
      * @return The path value.
      */
     private String getPath(FunctionDefinitionNode resource) {
-        String path = "/" + resource.relativeResourcePath().get(0).toString();
-
+        String path = generateRelativePath(resource);
         return path;
     }
 

@@ -163,6 +163,24 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "record_field_array.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for resource has .")
+    public void testPathscenario01() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("path_scenario01.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "path_scenario01.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec multiple resource")
+    public void testPathscenario02() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("path_scenario02.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "path_scenario02.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec with multipath including .")
+    public void testPathscenario03() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("path_scenario03.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "path_scenario03.yaml");
+    }
+
     @Test(description = "Generate OpenAPI spec for build project")
     public void testRecordFieldPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("project_bal/record_payload_service.bal");
