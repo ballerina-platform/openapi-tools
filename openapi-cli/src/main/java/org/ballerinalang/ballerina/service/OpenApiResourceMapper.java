@@ -562,7 +562,7 @@ public class OpenApiResourceMapper {
                 if (node instanceof ResourcePathParameterNode) {
                     ResourcePathParameterNode pathNode = (ResourcePathParameterNode) node;
                     relativePath = relativePath + "{" + pathNode.paramName() + "}";
-                } else if ((resource.relativeResourcePath().size() == 1 ) &&
+                } else if ((resource.relativeResourcePath().size() == 1) &&
                         (node.toString().trim().equals(".") || node.toString().trim().equals("/"))) {
                     relativePath = relativePath + "/";
                 } else {

@@ -182,7 +182,6 @@ public class OpenApiConverterUtils {
             String serviceNodeName = getServiceBasePath(serviceNode);
             String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
             String openApiSource = generateOAS3Definitions(syntaxTree, serviceNodeName, needJson);
-            System.out.println(openApiSource);
 
             //  Checked old generated file with same name
             openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
