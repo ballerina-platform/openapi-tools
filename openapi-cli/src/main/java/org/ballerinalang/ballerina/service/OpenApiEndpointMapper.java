@@ -27,12 +27,13 @@ import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.swagger.models.Scheme;
-import io.swagger.models.Swagger;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.servers.Server;
 import org.ballerinalang.ballerina.Constants;
 
 import java.util.ArrayList;
@@ -46,45 +47,36 @@ public class OpenApiEndpointMapper {
 
     /**
      * Convert endpoints bound to {@code service} openapi server information.
-     * Currently this method only selects last endpoint bound to {@code service}
-     * as the Server for openapi definition. This is due to OAS2 not supporting
-     * multiple Server definitions.
      *
+     * @param openAPI   openapi definition to attach extracted information
      * @param endpoints all endpoints defined in ballerina source
      * @param service   service node with bound endpoints
-     * @param openapi   openapi definition to attach extracted information
      * @return openapi definition with Server information
      */
-    public Swagger convertBoundEndpointsToOpenApi(List<ListenerDeclarationNode> endpoints,
-                                                  ServiceDeclarationNode service, Swagger openapi) {
-
-        //TODO check absence of endpoints and services
-//        if (endpoints == null || service == null || service.getAttachedExprs().isEmpty()
-//                || (service.getAttachedExprs().get(0).getKind() != NodeKind.SIMPLE_VARIABLE_REF
-//                && service.getAttachedExprs().get(0).getKind() != NodeKind.TYPE_INIT_EXPR)) {
-//            return openapi;
-//        }
-        if (openapi == null) {
-            return new Swagger();
+    public OpenAPI convertListenerEndPointToOpenAPI (OpenAPI openAPI,List<ListenerDeclarationNode> endpoints,
+                                                     ServiceDeclarationNode service ) {
+        if (openAPI == null) {
+            return new OpenAPI();
         }
+        List<Server> servers = new ArrayList<>();
         for (ListenerDeclarationNode ep : endpoints) {
-            // At the moment only the last bound endpoint will be populated in openapi
-            // we need to move to OAS3 models to support multiple server support
-             SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
-             ExpressionNode node = exprNodes.get(0);
-             if (node.toString().trim().equals(ep.variableName().text().trim())) {
-                 extractServer(ep, openapi);
-                 break;
+            SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
+            for (ExpressionNode node : exprNodes) {
+                if (node.toString().trim().equals(ep.variableName().text().trim())) {
+                    String serviceBasePath = getServiceBasePath(service);
+                    Server server = extractServer(ep, serviceBasePath);
+                    servers.add(server);
                 }
             }
-        return openapi;
+        }
+        openAPI.setServers(servers);
+        return openAPI;
     }
 
-    private void extractServer(ListenerDeclarationNode ep, Swagger openapi) {
+    private Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
 
         ImplicitNewExpressionNode  bTypeInit = (ImplicitNewExpressionNode) ep.initializer();
         Optional<ParenthesizedArgList> list = bTypeInit.parenthesizedArgList();
-        List<Scheme> schemes = new ArrayList<>();
         String port = null;
         String host = null;
 
@@ -95,11 +87,7 @@ public class OpenApiEndpointMapper {
               ExpressionNode bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
               if (bLangRecordLiteral instanceof MappingConstructorExpressionNode) {
                   host = extractHost((MappingConstructorExpressionNode) bLangRecordLiteral);
-
               }
-                //TODO: need to add check secure socket thing
-//            Scheme scheme = configs.get(Constants.SECURE_SOCKETS) == null ? Scheme.HTTP : Scheme.HTTPS;
-//            schemes.add(scheme);
             }
         }
         // Set default values to host and port if values are not defined
@@ -109,8 +97,12 @@ public class OpenApiEndpointMapper {
         if (port != null) {
             host += ':' + port;
         }
-        openapi.setHost(host);
-        openapi.setSchemes(schemes);
+        if (!serviceBasePath.isBlank()) {
+            host += serviceBasePath;
+        }
+        Server server = new Server();
+        server.setUrl(host);
+        return  server;
     }
 
     private String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
@@ -131,5 +123,20 @@ public class OpenApiEndpointMapper {
             }
         }
         return host;
+    }
+
+    /**
+     * Gets the base path of a service.
+     *
+     * @param serviceDefinition The service definition node.
+     * @return The base path.
+     */
+    public static String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
+        StringBuilder currentServiceName = new StringBuilder();
+        NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
+        for (Node serviceBasedPathNode : serviceNameNodes) {
+            currentServiceName.append(serviceBasedPathNode.toString());
+        }
+        return currentServiceName.toString().trim();
     }
 }

@@ -42,7 +42,6 @@ import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.swagger.models.Model;
-import io.swagger.models.Swagger;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.ByteArrayProperty;
@@ -52,11 +51,7 @@ import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
-import io.swagger.parser.SwaggerParser;
-import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.parser.converter.SwaggerConverter;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.io.FilenameUtils;
 import org.ballerinalang.ballerina.service.ConverterConstants;
 import org.ballerinalang.ballerina.service.OpenApiEndpointMapper;
@@ -93,6 +88,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.ballerinalang.ballerina.service.OpenApiEndpointMapper.getServiceBasePath;
 import static org.ballerinalang.openapi.utils.CodegenUtils.writeFile;
 
 /**
@@ -236,20 +232,19 @@ public class OpenApiConverterUtils {
                 OpenApiServiceMapper openApiServiceMapper = new OpenApiServiceMapper(httpAlias, openApiAlias,
                         semanticModel);
 
-                Swagger openapi = getOpenApiDefinition(new Swagger(), openApiServiceMapper, serviceName,
-                        syntaxTree, endpoints, semanticModel);
-                String openApiSource = openApiServiceMapper.generateOpenApiString(openapi);
-                SwaggerConverter converter = new SwaggerConverter();
-                SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(openApiSource, true);
-
-                if (result.getMessages().size() > 0) {
-                    throw new OpenApiConverterException("Please check the mentioned service is available " +
-                            "in the ballerina source, or there content is valid");
-                }
-                if (needJson) {
-                    return Json.pretty(converter.convert(result).getOpenAPI());
-                }
-                return Yaml.pretty(converter.convert(result).getOpenAPI());
+                OpenAPI openapi = getOpenApiDefinition(new OpenAPI(), openApiServiceMapper, serviceName, endpoints);
+//                String openApiSource = openApiServiceMapper.generateOpenApiString(openapi);
+//                SwaggerConverter converter = new SwaggerConverter();
+//                SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(openApiSource, true);
+//
+//                if (result.getMessages().size() > 0) {
+//                    throw new OpenApiConverterException("Please check the mentioned service is available " +
+//                            "in the ballerina source, or there content is valid");
+//                }
+//                if (needJson) {
+//                    return Json.pretty(converter.convert(result).getOpenAPI());
+//                }
+//                return Yaml.pretty(converter.convert(result).getOpenAPI());
             }
         }
         return serviceName;
@@ -283,9 +278,8 @@ public class OpenApiConverterUtils {
         return null;
     }
 
-    private static Swagger getOpenApiDefinition(Swagger openapi, OpenApiServiceMapper openApiServiceMapper,
-                                                String serviceName, SyntaxTree topCompilationUnit,
-                                                List<ListenerDeclarationNode> endpoints, SemanticModel semanticModel) {
+    private static OpenAPI getOpenApiDefinition(OpenAPI openapi, OpenApiServiceMapper openApiServiceMapper,
+                                                String serviceName, List<ListenerDeclarationNode> endpoints) {
         Map<String, Model> definitions = new HashMap<>();
 
         ModulePartNode modulePartNode = syntaxTree.rootNode();
@@ -296,10 +290,9 @@ public class OpenApiConverterUtils {
                 ServiceDeclarationNode serviceDefinition = (ServiceDeclarationNode) node;
                 //Take base path of service
                 String currentServiceName = getServiceBasePath(serviceDefinition);
-                if (openapi.getBasePath() == null) {
-                    openapi = new OpenApiEndpointMapper()
-                        .convertBoundEndpointsToOpenApi(endpoints, serviceDefinition, openapi);
-
+                if (openapi.getServers() == null) {
+                    openapi = new OpenApiEndpointMapper().convertListenerEndPointToOpenAPI(openapi, endpoints,
+                            serviceDefinition);
                     // Generate openApi string for the mentioned service name.
                     if (!serviceName.isBlank()) {
                         if (currentServiceName.trim().equals(serviceName)) {
@@ -308,8 +301,8 @@ public class OpenApiConverterUtils {
                         }
                     } else {
                     // If no service name mentioned, then generate openApi definition for the first service.
-                    openapi = openApiServiceMapper.convertServiceToOpenApi(serviceDefinition, openapi,
-                            currentServiceName.trim());
+//                    openapi = openApiServiceMapper.convertServiceToOpenApi(serviceDefinition, openapi,
+//                            currentServiceName.trim());
                     }
                 }
 
@@ -320,7 +313,7 @@ public class OpenApiConverterUtils {
                     // TODO schema generation
 //                    model.setProperties(propertyMap);
 //                    definitions.put(typeNode.getName().getValue(), model);
-                    openapi.setDefinitions(definitions);
+//                    openapi.setDefinitions(definitions);
                 }
             }
         }
@@ -328,20 +321,6 @@ public class OpenApiConverterUtils {
         return openapi;
     }
 
-    /**
-     * Gets the base path of a service.
-     *
-     * @param serviceDefinition The service definition node.
-     * @return The base path.
-     */
-    public static String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
-        StringBuilder currentServiceName = new StringBuilder();
-        NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
-        for (Node serviceBasedPathNode : serviceNameNodes) {
-            currentServiceName.append(serviceBasedPathNode.toString());
-        }
-        return currentServiceName.toString().trim();
-    }
 
     //need to refactor with project API
     public static Property createOpenApiPropertyForBallerinaField(TypeNode node) {

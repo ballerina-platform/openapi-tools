@@ -183,6 +183,31 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "response/response01.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for build project")
+    public void testForResponse02() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/scenario02.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "response/response02.yaml");
+    }
+
+    //Listeners
+    @Test(description = "Generate OpenAPI spec for single listener")
+    public void testListners01() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("listener/ballerina/scenario01.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "response/response02.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for listner only have port")
+    public void testListners02() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("listener/ballerina/scenario02.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "response/response02.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for multiple listners")
+    public void testListners03() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("listener/ballerina/scenario03.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "response/response02.yaml");
+    }
+
     @Test(description = "Generate OpenAPI spec with json file")
     public void testNestedRecordPayLoadJson() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("nestedRecord_payload_service.bal");

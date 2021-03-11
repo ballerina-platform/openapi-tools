@@ -238,8 +238,25 @@ public class OpenApiResourceMapper {
                     if (qNode.modulePrefix().toString().trim().equals("http") && qNode.identifier().toString().trim().equals("Ok")) {
                         response.description(qNode.identifier().toString());
                         operation.response(200, response);
-
                     }
+                } else if (typeNode.kind().equals(SyntaxKind.STRING_TYPE_DESC)) {
+//                    ApiResponse apiResponse = new ApiResponse();
+//                    apiResponse.description("Successful");
+//                    apiResponse.content(new Content().addMediaType("text/plain",
+//                            new io.swagger.v3.oas.models.media.MediaType().schema(new StringSchema())));
+                    HeaderParameter responseBody = new HeaderParameter();
+//                    operationAdaptor.getOperation().addConsumes(applicationJson);
+//                    bodyParameter.description(applicationJson);
+//                    bodyParameter.name(Constants.PAYLOAD);
+//                    operationAdaptor.getOperation().addParameter(bodyParameter);
+                    operation.addProduces("text/plain");
+//                    responseBody.description("text/plain");
+//                    responseBody.name("response");
+//                    operation.addParameter(responseBody);
+                    response.setDescription("test/plain");
+                    operation.addResponse("200", response);
+
+
                 }
             }
         } else {
