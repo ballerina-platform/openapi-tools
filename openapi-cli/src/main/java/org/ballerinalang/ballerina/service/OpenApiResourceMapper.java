@@ -499,7 +499,7 @@ public class OpenApiResourceMapper {
     private void parseResourceConfigAnnotationAttachment(FunctionDefinitionNode resource, OperationAdaptor operation) {
 
         String path = resource.relativeResourcePath().get(0).toString();
-        if (path.equals(".") || path.equals("/")) {
+        if (path.equals(".")) {
             operation.setPath("/");
         } else {
             operation.setPath(path);
@@ -562,8 +562,7 @@ public class OpenApiResourceMapper {
                 if (node instanceof ResourcePathParameterNode) {
                     ResourcePathParameterNode pathNode = (ResourcePathParameterNode) node;
                     relativePath = relativePath + "{" + pathNode.paramName() + "}";
-                } else if ((resource.relativeResourcePath().size() == 1) &&
-                        (node.toString().trim().equals(".") || node.toString().trim().equals("/"))) {
+                } else if ((resource.relativeResourcePath().size() == 1) && (node.toString().trim().equals("."))) {
                     relativePath = relativePath + "/";
                 } else {
                     relativePath = relativePath + node.toString();
