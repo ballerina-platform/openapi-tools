@@ -1,0 +1,18 @@
+openapi: 3.0.1
+info:
+  title: ' payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /pets:
+    get:
+      operationId: operation1_get_/pets
+      responses:
+        "404":
+          description: NotFound
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}

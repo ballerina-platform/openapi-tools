@@ -1,0 +1,18 @@
+openapi: 3.0.1
+info:
+  title: ' payloadV'
+  version: 1.0.0
+servers:
+  - url: petstore.openapi.io:80/payloadV
+paths:
+  /user:
+    post:
+      operationId: operation1_post_/user
+      responses:
+        "200":
+          description: Successful
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}

@@ -27,16 +27,15 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.swagger.models.Info;
-import io.swagger.models.Swagger;
 import io.swagger.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.ballerinalang.ballerina.OpenApiConverterUtils.getServiceBasePath;
+import static org.ballerinalang.ballerina.service.OpenApiEndpointMapper.getServiceBasePath;
 
 /**
  * OpenApiServiceMapper provides functionality for reading and writing OpenApi, either to and from ballerina service, or
@@ -45,23 +44,24 @@ import static org.ballerinalang.ballerina.OpenApiConverterUtils.getServiceBasePa
 public class OpenApiServiceMapper {
     private static final Logger logger = LoggerFactory.getLogger(
             OpenApiServiceMapper.class);
-    private String httpAlias;
-    private String openApiAlias;
+    private  SemanticModel semanticModel;
+
+    public SemanticModel getSemanticModel() {
+        return semanticModel;
+    }
+
+    public void setSemanticModel(SemanticModel semanticModel) {
+        this.semanticModel = semanticModel;
+    }
+
     private ObjectMapper objectMapper;
-    private final SemanticModel semanticModel;
 
 
     /**
      * Initializes a service parser for OpenApi.
-     *  @param httpAlias    The alias for ballerina/http module.
-     * @param openApiAlias The alias for ballerina.openapi module.
-     * @param semanticModel semanticModel used for the resolve the reference in the record.
      */
-    public OpenApiServiceMapper(String httpAlias, String openApiAlias, SemanticModel semanticModel) {
+    public OpenApiServiceMapper() {
         // Default object mapper is JSON mapper available in openApi utils.
-        this.httpAlias = httpAlias;
-        this.openApiAlias = openApiAlias;
-        this.semanticModel = semanticModel;
         this.objectMapper = Json.mapper();
     }
 
@@ -71,7 +71,7 @@ public class OpenApiServiceMapper {
      * @param openapi OpenApi definition
      * @return String representation of current service object.
      */
-    public String generateOpenApiString(Swagger openapi) {
+    public String generateOpenApiString(OpenAPI openapi) {
         try {
             return objectMapper.writeValueAsString(openapi);
         } catch (JsonProcessingException e) {
@@ -86,8 +86,8 @@ public class OpenApiServiceMapper {
      * @param service ballerina @Service object to be map to openapi definition
      * @return OpenApi object which represent current service.
      */
-    public Swagger convertServiceToOpenApi(ServiceDeclarationNode service) {
-        Swagger openapi = new Swagger();
+    public OpenAPI convertServiceToOpenApi(ServiceDeclarationNode service) {
+        OpenAPI openapi = new OpenAPI();
         String currentServiceName = getServiceBasePath(service);
         return convertServiceToOpenApi(service, openapi, currentServiceName);
     }
@@ -100,11 +100,9 @@ public class OpenApiServiceMapper {
      * @param basePath for string base path
      * @return OpenApi object which represent current service.
      */
-    public Swagger convertServiceToOpenApi(ServiceDeclarationNode service, Swagger openapi, String basePath) {
+    public OpenAPI convertServiceToOpenApi(ServiceDeclarationNode service, OpenAPI openapi, String basePath) {
         // Setting default values.
-        Info info = new Info().version("1.0.0").title(basePath.replace("/", "_"));
-        openapi.setInfo(info);
-        openapi.setBasePath(basePath.trim());
+        openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(basePath.replace("/", " ")));
 
         NodeList<Node> functions = service.members();
         List<FunctionDefinitionNode> resource = new ArrayList<>();
@@ -114,8 +112,9 @@ public class OpenApiServiceMapper {
                 resource.add((FunctionDefinitionNode) function);
             }
         }
-        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(openapi, semanticModel);
+        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(this.semanticModel);
         openapi.setPaths(resourceMapper.convertResourceToPath(resource));
+        openapi.setComponents(resourceMapper.getComponents());
         return openapi;
     }
 

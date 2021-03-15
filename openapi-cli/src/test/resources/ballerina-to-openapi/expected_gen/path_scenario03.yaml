@@ -1,41 +1,44 @@
 openapi: 3.0.1
 info:
-  title: _payloadV
+  title: ' payloadV'
   version: 1.0.0
 servers:
-  - url: //localhost:9090/payloadV
+  - url: localhost:9090/payloadV
 paths:
   /:
     get:
       operationId: operation2_get_/
       responses:
         "200":
-          description: Successful
+          description: Ok
           content:
-            application/json:
-              example: Ok
+            text/plain:
+              schema:
+                type: string
     post:
       operationId: operation1_get_/
       responses:
         "200":
-          description: Successful
+          description: Ok
           content:
-            application/json:
-              example: Ok
+            text/plain:
+              schema:
+                type: string
   /v1/{id}:
     get:
-      operationId: "operation1_get_v1/{id}"
+      operationId: "operation1_get_/v1/{id}"
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: integer
+            format: int32
       responses:
         "200":
-          description: Successful
+          description: Ok
           content:
-            application/json:
-              example: Ok
+            text/plain:
+              schema:
+                type: string
 components: {}
-x-original-swagger-version: "2.0"

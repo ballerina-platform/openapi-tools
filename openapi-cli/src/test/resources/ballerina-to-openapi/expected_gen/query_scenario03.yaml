@@ -1,0 +1,22 @@
+openapi: 3.0.1
+info:
+  title: ' payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /pets:
+    get:
+      operationId: operation1_get_/pets
+      parameters:
+        - name: tags
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: Ok
+components: {}
