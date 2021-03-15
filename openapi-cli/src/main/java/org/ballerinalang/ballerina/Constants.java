@@ -58,9 +58,6 @@ public class Constants {
     public static final String JSON = "json";
     public static final String PLAIN = "plain";
 
-
-
-
     /**
      * Enum to select the Ballerina Type.
      * Ballerina service, mock and client generation is available
