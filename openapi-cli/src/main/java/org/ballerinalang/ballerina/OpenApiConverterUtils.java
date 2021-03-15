@@ -19,14 +19,9 @@
 package org.ballerinalang.ballerina;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -50,6 +45,7 @@ import io.swagger.models.properties.StringProperty;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.servers.Server;
 import org.apache.commons.io.FilenameUtils;
 import org.ballerinalang.ballerina.service.ConverterConstants;
 import org.ballerinalang.ballerina.service.OpenApiEndpointMapper;
@@ -158,7 +154,6 @@ public class OpenApiConverterUtils {
             String serviceNodeName = getServiceBasePath(serviceNode);
             String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
             String openApiSource = generateOAS3Definitions(syntaxTree, serviceNodeName, needJson);
-            System.out.println(openApiSource);
             //  Checked old generated file with same name
             openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
             writeFile(outPath.resolve(openApiName), openApiSource);
@@ -198,12 +193,8 @@ public class OpenApiConverterUtils {
                 // TO-Do
 
             } else if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                NodeList<ImportDeclarationNode> imports = modulePartNode.imports();
-
-                String httpAlias = getAlias(imports, Constants.BALLERINA_HTTP_PACKAGE_NAME);
-                String openApiAlias = getAlias(imports, Constants.OPENAPI_PACKAGE_NAME);
-                OpenApiServiceMapper openApiServiceMapper = new OpenApiServiceMapper(httpAlias, openApiAlias,
-                        semanticModel);
+                OpenApiServiceMapper openApiServiceMapper = new OpenApiServiceMapper();
+                openApiServiceMapper.setSemanticModel(semanticModel);
                 OpenAPI openapi = getOpenApiDefinition(new OpenAPI(), openApiServiceMapper, serviceName, endpoints);
                 if (needJson) {
                     return Json.pretty(openapi);
@@ -212,34 +203,6 @@ public class OpenApiConverterUtils {
             }
         }
         return serviceName;
-    }
-
-    /**
-     * Gets the alias for a given module from a bLang file root node.
-     *
-     * @param imports The root node.
-     * @param packageName        The module name.
-     * @return The alias.
-     */
-    private static String getAlias(NodeList<ImportDeclarationNode> imports, String packageName) {
-
-        if ((imports != null) && (!imports.isEmpty())) {
-            for (ImportDeclarationNode importNode : imports) {
-                SeparatedNodeList<IdentifierToken> tokens = importNode.moduleName();
-                Optional<ImportOrgNameNode> orgName = importNode.orgName();
-                String packagePath = "";
-                if (orgName != null && orgName.isPresent()) {
-                    packagePath = orgName.get().toString();
-                }
-                for (IdentifierToken token : tokens) {
-                    packagePath = packagePath + token.text();
-                    if (packageName.equals(packagePath)) {
-                        return  token.text();
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     private static OpenAPI getOpenApiDefinition(OpenAPI openapi, OpenApiServiceMapper openApiServiceMapper,
@@ -253,8 +216,15 @@ public class OpenApiConverterUtils {
                 //Take base path of service
                 String currentServiceName = getServiceBasePath(serviceDefinition);
                 if (openapi.getServers() == null) {
-                    openapi = new OpenApiEndpointMapper().convertListenerEndPointToOpenAPI(openapi, endpoints,
+                    OpenApiEndpointMapper openApiEndpointMapper = new OpenApiEndpointMapper();
+                    openapi = openApiEndpointMapper.convertListenerEndPointToOpenAPI(openapi, endpoints,
                             serviceDefinition);
+                    if (openapi.getServers().isEmpty()) {
+                        List<Server> servers = new ArrayList<>();
+                        Server server = new Server().url(currentServiceName);
+                        servers.add(server);
+                        openapi.setServers(servers);
+                    }
                     // Generate openApi string for the mentioned service name.
                     if (!serviceName.isBlank()) {
                         if (currentServiceName.trim().equals(serviceName)) {

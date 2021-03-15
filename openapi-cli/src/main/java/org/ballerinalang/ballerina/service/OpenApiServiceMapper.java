@@ -44,19 +44,24 @@ import static org.ballerinalang.ballerina.service.OpenApiEndpointMapper.getServi
 public class OpenApiServiceMapper {
     private static final Logger logger = LoggerFactory.getLogger(
             OpenApiServiceMapper.class);
+    private  SemanticModel semanticModel;
+
+    public SemanticModel getSemanticModel() {
+        return semanticModel;
+    }
+
+    public void setSemanticModel(SemanticModel semanticModel) {
+        this.semanticModel = semanticModel;
+    }
+
     private ObjectMapper objectMapper;
-    private final SemanticModel semanticModel;
 
 
     /**
      * Initializes a service parser for OpenApi.
-     *  @param httpAlias    The alias for ballerina/http module.
-     * @param openApiAlias The alias for ballerina.openapi module.
-     * @param semanticModel semanticModel used for the resolve the reference in the record.
      */
-    public OpenApiServiceMapper(String httpAlias, String openApiAlias, SemanticModel semanticModel) {
+    public OpenApiServiceMapper() {
         // Default object mapper is JSON mapper available in openApi utils.
-        this.semanticModel = semanticModel;
         this.objectMapper = Json.mapper();
     }
 
@@ -107,7 +112,7 @@ public class OpenApiServiceMapper {
                 resource.add((FunctionDefinitionNode) function);
             }
         }
-        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(semanticModel);
+        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(this.semanticModel);
         openapi.setPaths(resourceMapper.convertResourceToPath(resource));
         openapi.setComponents(resourceMapper.getComponents());
         return openapi;

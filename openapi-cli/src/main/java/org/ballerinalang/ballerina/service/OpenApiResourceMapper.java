@@ -24,7 +24,6 @@ import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -87,6 +86,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.core.MediaType;
 
 import static org.ballerinalang.ballerina.Constants.HTTP_HEADER;
@@ -98,18 +98,19 @@ import static org.ballerinalang.net.http.HttpConstants.HTTP_METHOD_GET;
  * This class will do resource mapping from ballerina to openApi.
  */
 public class OpenApiResourceMapper {
-    private final SemanticModel semanticModel;
-    private final Paths pathObject;
-    private final Components components;
+    private SemanticModel semanticModel;
+    private Paths pathObject = new Paths();;
+    private Components components = new Components();
 
     /**
      * Initializes a resource parser for openApi.
-     * @param semanticModel
      */
     OpenApiResourceMapper(SemanticModel semanticModel) {
         this.semanticModel = semanticModel;
-        this.pathObject = new Paths();
-        this.components =  new Components();
+    }
+
+    public void setSemanticModel(SemanticModel semanticModel) {
+        this.semanticModel = semanticModel;
     }
 
     public Components getComponents() {
@@ -279,7 +280,8 @@ public class OpenApiResourceMapper {
             } else {
                 if (typeNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
                     QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) typeNode;
-                    if (qNode.modulePrefix().toString().trim().equals("http") && qNode.identifier().toString().trim().equals("Ok")) {
+                    if (qNode.modulePrefix().toString().trim().equals("http") &&
+                            qNode.identifier().toString().trim().equals("Ok")) {
                         ApiResponse apiResponse = new ApiResponse();
                         apiResponse.description("Ok");
                         apiResponses.put("200", apiResponse);
@@ -326,7 +328,8 @@ public class OpenApiResourceMapper {
 //                        UnionTypeDescriptorNode traversRightNode = (UnionTypeDescriptorNode) rightNode;
 //                        while (traversRightNode.rightTypeDesc() != null) {
 //                            if (leftNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
-//                                String identifier = ((QualifiedNameReferenceNode) leftNode).identifier().text().trim();
+//                                String identifier = ((QualifiedNameReferenceNode)
+//                                leftNode).identifier().text().trim();
 //                                String code = generateApiResponseCode(identifier);
 //                                ApiResponse apiResponse = new ApiResponse();
 //                                apiResponse.description(identifier);
@@ -377,7 +380,8 @@ public class OpenApiResourceMapper {
                                 Map<String, Schema> schemas = new HashMap<>();
                                 mediaType = MediaType.APPLICATION_JSON;
                                 SimpleNameReferenceNode nameRefNode =  (SimpleNameReferenceNode) type;
-                                handleReferencePayload(op, nameRefNode, schemas, mediaType, null, apiResponses);
+                                handleReferencePayload(op, nameRefNode, schemas, mediaType, null,
+                                        apiResponses);
                             } else {
                                 schema = getOpenApiSchema(nodeType);
                             }
@@ -524,10 +528,6 @@ public class OpenApiResourceMapper {
                             SimpleNameReferenceNode record = (SimpleNameReferenceNode) node;
                             handleReferencePayload(operationAdaptor, record, schema,
                                     MediaType.APPLICATION_JSON, new RequestBody(), null);
-                        } else if (node instanceof RecordTypeDescriptorNode) {
-                            RecordTypeDescriptorNode recordNode = (RecordTypeDescriptorNode) node;
-                            Schema objectSchema = new ObjectSchema();
-                            //Need to handle later- TO-DO
                         }
                         break;
                 }
@@ -565,12 +565,14 @@ public class OpenApiResourceMapper {
                                         Schema mimeSchema;
                                         if (bodyParameter.getContent() != null) {
                                             media = new io.swagger.v3.oas.models.media.MediaType();
-                                            mimeSchema = getOpenApiSchema(mimeType.split("/")[1].toLowerCase());
+                                            mimeSchema = getOpenApiSchema(mimeType.split("/")[1]
+                                                    .toLowerCase(Locale.ENGLISH));
                                             media.setSchema(mimeSchema);
                                             Content content = bodyParameter.getContent();
                                             content.addMediaType(mimeType, media);
                                         } else {
-                                            mimeSchema = getOpenApiSchema(mimeType.split("/")[1].toLowerCase());
+                                            mimeSchema = getOpenApiSchema(mimeType.split("/")[1].
+                                                    toLowerCase(Locale.ENGLISH));
                                             media.setSchema(mimeSchema);
                                             bodyParameter.setContent(new Content().addMediaType(mimeType,
                                                     media));
@@ -587,20 +589,14 @@ public class OpenApiResourceMapper {
     }
 
     private void handleReferencePayload(OperationAdaptor operationAdaptor, SimpleNameReferenceNode recordNode,
-                                        Map<String, Schema> schema, String mediaType, RequestBody bodyParameter,
-                                        ApiResponses apiResponses) {
+                                        Map<String, Schema> schema, String mediaType,
+                                        @Nullable RequestBody bodyParameter,
+                                        @Nullable ApiResponses apiResponses) {
 
         // Creating request body - required.
         SimpleNameReferenceNode referenceNode = recordNode;
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
-        Symbol symbolType = symbol.orElseThrow();
-        TypeSymbol typeSymbol;
-        if (symbolType.kind().equals(SymbolKind.TYPE_DEFINITION)) {
-            //This should return the TypeReferenceTypeSymbol response scenario -06
-        } else {
-            typeSymbol = (TypeSymbol) symbol.orElseThrow();
-        }
-        typeSymbol = (TypeSymbol) symbol.orElseThrow();
+        TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
 
 
         //handel record for components
@@ -614,7 +610,7 @@ public class OpenApiResourceMapper {
             apiResponse.description("Ok");
             apiResponses.put("200", apiResponse);
             operationAdaptor.getOperation().setResponses(apiResponses);
-        } else {
+        } else if (bodyParameter != null) {
             if (bodyParameter.getContent() != null) {
                 Content content = bodyParameter.getContent();
                 content.addMediaType(mediaType, media);
@@ -644,8 +640,9 @@ public class OpenApiResourceMapper {
                 for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
                     String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
                     Schema property = getOpenApiSchema(type);
-                    if (type.equals(Constants.TYPE_REFERENCE) && property.get$ref().equals("#/components/schemas/true")) {
-                        property.set$ref(field.getValue().typeDescriptor().getName().orElseThrow().trim() );
+                    if (type.equals(Constants.TYPE_REFERENCE) && property.get$ref().
+                            equals("#/components/schemas/true")) {
+                        property.set$ref(field.getValue().typeDescriptor().getName().orElseThrow().trim());
                         Optional<TypeSymbol> recordSymbol = semanticModel.type(field.getValue().location().lineRange());
                         TypeSymbol recordVariable =  recordSymbol.orElseThrow();
                         if (recordVariable.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
@@ -808,7 +805,8 @@ public class OpenApiResourceMapper {
                                     io.swagger.v3.oas.models.parameters.HeaderParameter headerParameter =
                                             new io.swagger.v3.oas.models.parameters.HeaderParameter();
                                     headerParameter.schema(arraySchema);
-                                    headerParameter.setName(queryParam.paramName().get().text().replaceAll("\\\\", ""));
+                                    headerParameter.setName(queryParam.paramName().get().text().replaceAll("\\\\",
+                                            ""));
                                     parameters.add(headerParameter);
                                 }
                             } else {

@@ -53,8 +53,8 @@ public class OpenApiEndpointMapper {
      * @param service   service node with bound endpoints
      * @return openapi definition with Server information
      */
-    public OpenAPI convertListenerEndPointToOpenAPI (OpenAPI openAPI,List<ListenerDeclarationNode> endpoints,
-                                                     ServiceDeclarationNode service ) {
+    public OpenAPI convertListenerEndPointToOpenAPI (OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
+                                                     ServiceDeclarationNode service) {
         if (openAPI == null) {
             return new OpenAPI();
         }
@@ -73,7 +73,7 @@ public class OpenApiEndpointMapper {
         return openAPI;
     }
 
-    private Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
+    private static Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
 
         ImplicitNewExpressionNode  bTypeInit = (ImplicitNewExpressionNode) ep.initializer();
         Optional<ParenthesizedArgList> list = bTypeInit.parenthesizedArgList();
@@ -105,7 +105,7 @@ public class OpenApiEndpointMapper {
         return  server;
     }
 
-    private String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
+    private static String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
         String host = null;
         MappingConstructorExpressionNode recordConfig = bLangRecordLiteral;
         if (recordConfig.fields() != null && !recordConfig.fields().isEmpty()) {

@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 public class OpenApiConverterUtilsTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
     private Path tempDir;
+    private OpenApiConverterUtils openApiConverterUtils;
 
     @BeforeMethod
     public void setup() throws IOException {
@@ -61,7 +62,7 @@ public class OpenApiConverterUtilsTest {
                                             "specification.")
     public void testBasicServicesWithInvalidServiceName() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("basic_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.of("/abc"),
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.of("/abc"),
                 false);
     }
     
@@ -78,7 +79,7 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec by filtering service name")
     public void testBasicServicesByFiltering() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("basic_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir,
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir,
                 Optional.of("/hello02"), false);
 
         Assert.assertFalse(Files.exists(this.tempDir.resolve("hello-openapi.yaml")));
@@ -388,6 +389,7 @@ public class OpenApiConverterUtilsTest {
     @AfterMethod
     public void cleanUp() {
         deleteDirectory(this.tempDir);
+        openApiConverterUtils = null;
     }
 
     private void deleteDirectory(Path path) {
@@ -422,6 +424,7 @@ public class OpenApiConverterUtilsTest {
     private void compareWithGeneratedFile(Path ballerinaFilePath, String yamlFile) throws OpenApiConverterException {
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
+
             OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
                     , false);
             if (Files.exists(this.tempDir.resolve("payloadV-openapi.yaml"))) {
@@ -436,6 +439,7 @@ public class OpenApiConverterUtilsTest {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("payloadV-openapi.yaml");
+            deleteDirectory(this.tempDir);
         }
     }
 }
