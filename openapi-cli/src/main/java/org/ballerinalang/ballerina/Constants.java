@@ -51,6 +51,15 @@ public class Constants {
     public static final String HTTP_PAYLOAD = "http:Payload";
     public static final String PAYLOAD = "payload";
     public static final String TYPEREFERENCE = "typeReference";
+    public static final String HTTP_HEADER = "http:Header";
+    public static final String BYTE_ARRAY = "byte[]";
+    public static final String OCTET_STREAM = "octet-stream";
+    public static final String XML = "xml";
+    public static final String JSON = "json";
+    public static final String PLAIN = "plain";
+
+
+
 
     /**
      * Enum to select the Ballerina Type.

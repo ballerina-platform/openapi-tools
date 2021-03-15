@@ -1,16 +1,16 @@
 {
   "openapi" : "3.0.1",
   "info" : {
-    "title" : "_payloadV",
+    "title" : " payloadV",
     "version" : "1.0.0"
   },
   "servers" : [ {
-    "url" : "//localhost:9090/payloadV"
+    "url" : "localhost:9090/payloadV"
   } ],
   "paths" : {
     "/hi" : {
       "post" : {
-        "operationId" : "operation1_post_hi",
+        "operationId" : "operation1_post_/hi",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -18,20 +18,20 @@
                 "$ref" : "#/components/schemas/Dog"
               }
             }
-          },
-          "required" : false
+          }
         },
         "responses" : {
           "200" : {
-            "description" : "Successful",
+            "description" : "Ok",
             "content" : {
-              "application/json" : {
-                "example" : "Ok"
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
               }
             }
           }
-        },
-        "x-codegen-request-body-name" : "payload"
+        }
       }
     }
   },
@@ -40,23 +40,23 @@
       "Dog" : {
         "type" : "object",
         "properties" : {
-          "perant" : {
-            "$ref" : "#/components/schemas/Pet"
-          },
           "bark" : {
             "type" : "boolean"
+          },
+          "perant" : {
+            "$ref" : "#/components/schemas/Pet"
           }
         }
       },
       "Pet" : {
         "type" : "object",
         "properties" : {
+          "name" : {
+            "type" : "string"
+          },
           "id" : {
             "type" : "integer",
             "format" : "int32"
-          },
-          "name" : {
-            "type" : "string"
           },
           "tag" : {
             "type" : "string"
@@ -64,6 +64,5 @@
         }
       }
     }
-  },
-  "x-original-swagger-version" : "2.0"
+  }
 }

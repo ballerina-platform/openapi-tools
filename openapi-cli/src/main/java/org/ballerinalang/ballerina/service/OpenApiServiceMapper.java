@@ -27,8 +27,6 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.swagger.models.Info;
-import io.swagger.models.Swagger;
 import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
@@ -68,7 +66,7 @@ public class OpenApiServiceMapper {
      * @param openapi OpenApi definition
      * @return String representation of current service object.
      */
-    public String generateOpenApiString(Swagger openapi) {
+    public String generateOpenApiString(OpenAPI openapi) {
         try {
             return objectMapper.writeValueAsString(openapi);
         } catch (JsonProcessingException e) {
@@ -83,8 +81,8 @@ public class OpenApiServiceMapper {
      * @param service ballerina @Service object to be map to openapi definition
      * @return OpenApi object which represent current service.
      */
-    public Swagger convertServiceToOpenApi(ServiceDeclarationNode service) {
-        Swagger openapi = new Swagger();
+    public OpenAPI convertServiceToOpenApi(ServiceDeclarationNode service) {
+        OpenAPI openapi = new OpenAPI();
         String currentServiceName = getServiceBasePath(service);
         return convertServiceToOpenApi(service, openapi, currentServiceName);
     }
@@ -109,8 +107,9 @@ public class OpenApiServiceMapper {
                 resource.add((FunctionDefinitionNode) function);
             }
         }
-        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(openapi, semanticModel);
+        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(semanticModel);
         openapi.setPaths(resourceMapper.convertResourceToPath(resource));
+        openapi.setComponents(resourceMapper.getComponents());
         return openapi;
     }
 
