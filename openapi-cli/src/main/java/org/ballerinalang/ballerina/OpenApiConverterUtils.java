@@ -90,6 +90,7 @@ public class OpenApiConverterUtils {
     public static void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, Optional<String> serviceName
             , Boolean needJson)
             throws IOException, OpenApiConverterException {
+        endpoints.clear();
 
         // Load project instance for single ballerina file
         try {

@@ -44,6 +44,7 @@ public class OpenApiConverterUtilsTest {
     @BeforeMethod
     public void setup() throws IOException {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
     }
 
     @Test(description = "Generate OpenAPI spec")
@@ -369,7 +370,7 @@ public class OpenApiConverterUtilsTest {
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen/json"),
                     "nestedRecord.json");
-            OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
+            openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
                     , true);
             if (Files.exists(this.tempDir.resolve("payloadV-openapi.json"))) {
                 String generatedYaml = getStringFromGivenBalFile(this.tempDir, "payloadV-openapi.json");
@@ -425,7 +426,7 @@ public class OpenApiConverterUtilsTest {
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
 
-            OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
+            openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
                     , false);
             if (Files.exists(this.tempDir.resolve("payloadV-openapi.yaml"))) {
                 String generatedYaml = getStringFromGivenBalFile(this.tempDir, "payloadV-openapi.yaml");
@@ -440,6 +441,7 @@ public class OpenApiConverterUtilsTest {
         } finally {
             deleteGeneratedFiles("payloadV-openapi.yaml");
             deleteDirectory(this.tempDir);
+            System.gc();
         }
     }
 }

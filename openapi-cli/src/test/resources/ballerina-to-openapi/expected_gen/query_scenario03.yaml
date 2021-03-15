@@ -9,7 +9,7 @@ paths:
     get:
       operationId: operation1_get_/pets
       parameters:
-        - name: tags​
+        - name: tags
           in: query
           required: true
           schema:
