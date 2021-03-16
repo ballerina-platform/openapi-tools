@@ -395,7 +395,7 @@ public class OpenApiResourceMapper {
                     apiResponse.content(new Content().addMediaType(mediaType, media));
                     apiResponses.put(identifier, apiResponse);
 
-                } else if (typeNode.toString().trim().equals("error") || typeNode.toString().trim().equals("error?")){
+                } else if (typeNode.toString().trim().equals("error") || typeNode.toString().trim().equals("error?")) {
                     //Return type is not given as error or error? in ballerina it will generate 500 response.
                     ApiResponse apiResponse = new ApiResponse();
                     apiResponse.description("Found unexpected output");
