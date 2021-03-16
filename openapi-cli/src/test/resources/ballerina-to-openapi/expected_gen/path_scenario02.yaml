@@ -16,7 +16,7 @@ paths:
               schema:
                 type: string
     post:
-      operationId: operation1_get_/
+      operationId: operation2_post_/
       responses:
         "200":
           description: Ok

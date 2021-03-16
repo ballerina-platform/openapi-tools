@@ -147,8 +147,11 @@ public class OpenApiResourceMapper {
             for (String httpMethod : httpMethods) {
                 //Iterate through http methods and fill path map.
                 //If can send a paths it is better
-                operation = this.convertResourceToOperation(resource, httpMethod, i).getOperation();
-                generatePathItem(httpMethod, pathObject, operation, path);
+                if (resource.functionName().toString().trim().equals(httpMethod)) {
+                    operation = this.convertResourceToOperation(resource, httpMethod, i).getOperation();
+                    generatePathItem(httpMethod, pathObject, operation, path);
+                    break;
+                }
                 i++;
             }
         }
@@ -280,11 +283,11 @@ public class OpenApiResourceMapper {
             } else {
                 if (typeNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
                     QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) typeNode;
-                    if (qNode.modulePrefix().toString().trim().equals("http") &&
-                            qNode.identifier().toString().trim().equals("Ok")) {
+                    if (qNode.modulePrefix().toString().trim().equals("http")) {
                         ApiResponse apiResponse = new ApiResponse();
-                        apiResponse.description("Ok");
-                        apiResponses.put("200", apiResponse);
+                        String code = generateApiResponseCode(qNode.identifier().toString().trim());
+                        apiResponse.description(qNode.identifier().toString().trim());
+                        apiResponses.put(code, apiResponse);
                     }
                 } else if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
                     ApiResponse apiResponse = new ApiResponse();
@@ -392,6 +395,17 @@ public class OpenApiResourceMapper {
                     apiResponse.content(new Content().addMediaType(mediaType, media));
                     apiResponses.put(identifier, apiResponse);
 
+                } else if (typeNode.toString().trim().equals("error") || typeNode.toString().trim().equals("error?")){
+                    //Return type is not given as error or error? in ballerina it will generate 500 response.
+                    ApiResponse apiResponse = new ApiResponse();
+                    apiResponse.description("Found unexpected output");
+                    apiResponse.content(new Content().addMediaType("text/plain",
+                            new io.swagger.v3.oas.models.media.MediaType().schema(new StringSchema())));
+                    apiResponses.put("500", apiResponse);
+                } else {
+                    ApiResponse apiResponse = new ApiResponse();
+                    apiResponse.description("Ok");
+                    apiResponses.put("200", apiResponse);
                 }
             }
         } else {

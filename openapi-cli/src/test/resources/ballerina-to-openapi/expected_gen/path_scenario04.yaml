@@ -23,14 +23,7 @@ paths:
               schema:
                 type: string
     post:
-      operationId: operation1_get_/
-      parameters:
-        - name: tag
-          in: query
-          required: true
-          schema:
-            type: integer
-            format: int32
+      operationId: operation2_post_/
       responses:
         "200":
           description: Ok
