@@ -4,6 +4,6 @@ service /v1 on ep0 {
     }
     resource function post pets() returns http:Created|Error {
     }
-    resource function get /pets/[string petId]() returns Pets|Error {
+    resource function get pets/[string petId]() returns Pets|Error {
     }
 }

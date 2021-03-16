@@ -160,7 +160,7 @@ public class GeneratorUtils {
                                                      Map.Entry<PathItem.HttpMethod, Operation> operation) {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
-        String[] pathNodes = path.getKey().split("/");
+        String[] pathNodes = path.getKey().trim().split("/");
         Token slash = AbstractNodeFactory.createIdentifierToken("/");
         if (pathNodes.length > 2) {
             for (String pathNode: pathNodes) {
@@ -200,7 +200,7 @@ public class GeneratorUtils {
                             }
                         }
                     }
-                } else {
+                } else if (!pathNode.isBlank()) {
                     IdentifierToken idToken =
                             AbstractNodeFactory.createIdentifierToken(pathNode.trim());
                     functionRelativeResourcePath.add(idToken);
@@ -208,9 +208,11 @@ public class GeneratorUtils {
                 }
             }
             functionRelativeResourcePath.remove(functionRelativeResourcePath.size() - 1);
+        } else if (pathNodes.length == 0) {
+            IdentifierToken idToken = AbstractNodeFactory.createIdentifierToken(".");
+            functionRelativeResourcePath.add(idToken);
         } else {
-            IdentifierToken idToken =
-                    AbstractNodeFactory.createIdentifierToken(pathNodes[1]);
+            IdentifierToken idToken = AbstractNodeFactory.createIdentifierToken(pathNodes[1].trim());
             functionRelativeResourcePath.add(idToken);
         }
         return functionRelativeResourcePath;
