@@ -209,12 +209,10 @@ public class GeneratorUtils {
             }
             functionRelativeResourcePath.remove(functionRelativeResourcePath.size() - 1);
         } else if (pathNodes.length == 0) {
-            IdentifierToken idToken =
-                    AbstractNodeFactory.createIdentifierToken(".");
+            IdentifierToken idToken = AbstractNodeFactory.createIdentifierToken(".");
             functionRelativeResourcePath.add(idToken);
         } else {
-            IdentifierToken idToken =
-                    AbstractNodeFactory.createIdentifierToken(pathNodes[1].trim());
+            IdentifierToken idToken = AbstractNodeFactory.createIdentifierToken(pathNodes[1].trim());
             functionRelativeResourcePath.add(idToken);
         }
         return functionRelativeResourcePath;
