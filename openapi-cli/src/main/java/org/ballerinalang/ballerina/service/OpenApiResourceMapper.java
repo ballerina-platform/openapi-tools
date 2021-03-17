@@ -402,6 +402,28 @@ public class OpenApiResourceMapper {
                     apiResponse.content(new Content().addMediaType("text/plain",
                             new io.swagger.v3.oas.models.media.MediaType().schema(new StringSchema())));
                     apiResponses.put("500", apiResponse);
+                } else if (typeNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
+                    ArrayTypeDescriptorNode array = (ArrayTypeDescriptorNode) typeNode;
+                    Map<String, Schema> schemas = new HashMap<>();
+                    if (array.memberTypeDesc().kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+                        handleReferencePayload(op, (SimpleNameReferenceNode) array.memberTypeDesc(), schemas,
+                                MediaType.APPLICATION_JSON, null ,
+                                apiResponses);
+                    } else {
+                        ApiResponse apiResponse = new ApiResponse();
+                        ArraySchema arraySchema = new ArraySchema();
+                        io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
+                        String type =
+                                array.memberTypeDesc().kind().toString().trim().split("_")[0].toLowerCase(Locale.ENGLISH);
+                        Schema openApiSchema = getOpenApiSchema(type);
+                        String mimeType = generateMIMETypeForBallerinaType(type);
+                        arraySchema.setItems(openApiSchema);
+                        mediaType.setSchema(arraySchema);
+                        apiResponse.description("Ok");
+                        apiResponse.content(new Content().addMediaType(mimeType, mediaType));
+                        apiResponses.put("200", apiResponse);
+
+                    }
                 } else {
                     ApiResponse apiResponse = new ApiResponse();
                     apiResponse.description("Ok");
@@ -617,14 +639,27 @@ public class OpenApiResourceMapper {
         handleRecordPayload(recordNode, schema, typeSymbol);
 
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
-        media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
+//        media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
         if (bodyParameter == null && (apiResponses != null)) {
-            ApiResponse apiResponse = new ApiResponse();
-            apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
-            apiResponse.description("Ok");
-            apiResponses.put("200", apiResponse);
+            if (recordNode.parent().kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
+                ArraySchema arraySchema = new ArraySchema();
+                ApiResponse apiResponse = new ApiResponse();
+                arraySchema.setItems(new Schema().$ref(referenceNode.name().toString().trim()));
+                media.setSchema(arraySchema);
+                apiResponse.description("Ok");
+                apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
+                apiResponses.put("200", apiResponse);
+
+            } else {
+                media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
+                ApiResponse apiResponse = new ApiResponse();
+                apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
+                apiResponse.description("Ok");
+                apiResponses.put("200", apiResponse);
+            }
             operationAdaptor.getOperation().setResponses(apiResponses);
         } else if (bodyParameter != null) {
+            media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
             if (bodyParameter.getContent() != null) {
                 Content content = bodyParameter.getContent();
                 content.addMediaType(mediaType, media);

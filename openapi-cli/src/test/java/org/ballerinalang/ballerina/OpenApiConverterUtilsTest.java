@@ -324,6 +324,12 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "rs_scenario09.yaml");
     }
 
+    @Test(description = "Response scenario 10 - Array type response with a schema")
+    public void testResponse10() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("rs_scenario10.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "rs_scenario10.yaml");
+    }
+
     @Test(description = "Generate OpenAPI spec for build project")
     public void testRecordFieldPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("project_bal/record_payload_service.bal");

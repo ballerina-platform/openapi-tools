@@ -56,6 +56,20 @@ public class BallerinaServiceGeneratorTest {
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("importors.bal");
     }
 
+    @Test(description = "Generate listeners")
+    public void generatelisteners() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/petstore_listeners02.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners.bal");
+    }
+
+    @Test(description = "Generate listeners")
+    public void generatelisteners02() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/petstore_listeners03.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners03.bal");
+    }
+
     @Test(description = "Generate serviceDeclaration")
     public void generateService() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/petstore_service.yaml");
@@ -84,7 +98,13 @@ public class BallerinaServiceGeneratorTest {
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("path_parameters.bal");
     }
-
+    //Scenario 02 - Path parameters.
+    @Test(description = "Generate functionDefinitionNode for only Path parameters")
+    public void generatePathparameter02() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/multiPathParam02.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("path_parameters02.bal");
+    }
     //Scenario 02 - Query parameters.
     @Test(description = "Generate functionDefinitionNode for Query parameters")
     public void generateQueryparameter() throws IOException, BallerinaOpenApiException, FormatterException {
