@@ -162,6 +162,11 @@ public class BallerinaServiceGenerator {
                     throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
                             server.getUrl(), e);
                 }
+            } else if (!server.getUrl().isBlank()) {
+                String[] split = server.getUrl().trim().split("/");
+                basePath =  "/" + split[split.length - 1];
+                host = "localhost";
+                port = 9090;
             } else {
                 basePath = "/";
                 host = "localhost";

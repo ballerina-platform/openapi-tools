@@ -162,7 +162,7 @@ public class GeneratorUtils {
         List<Node> functionRelativeResourcePath = new ArrayList<>();
         String[] pathNodes = path.getKey().trim().split("/");
         Token slash = AbstractNodeFactory.createIdentifierToken("/");
-        if (pathNodes.length > 2) {
+        if (pathNodes.length >= 2) {
             for (String pathNode: pathNodes) {
                 if (pathNode.contains("{")) {
                     String pathParam = pathNode.replaceAll("[{}]", "");
