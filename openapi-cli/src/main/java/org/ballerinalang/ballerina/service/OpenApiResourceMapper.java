@@ -412,9 +412,11 @@ public class OpenApiResourceMapper {
                     } else {
                         ApiResponse apiResponse = new ApiResponse();
                         ArraySchema arraySchema = new ArraySchema();
-                        io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
+                        io.swagger.v3.oas.models.media.MediaType mediaType =
+                                new io.swagger.v3.oas.models.media.MediaType();
                         String type =
-                                array.memberTypeDesc().kind().toString().trim().split("_")[0].toLowerCase(Locale.ENGLISH);
+                                array.memberTypeDesc().kind().toString().trim().split("_")[0].
+                                        toLowerCase(Locale.ENGLISH);
                         Schema openApiSchema = getOpenApiSchema(type);
                         String mimeType = generateMIMETypeForBallerinaType(type);
                         arraySchema.setItems(openApiSchema);
