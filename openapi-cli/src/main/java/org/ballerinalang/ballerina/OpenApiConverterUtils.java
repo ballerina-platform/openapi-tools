@@ -19,19 +19,12 @@
 package org.ballerinalang.ballerina;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -41,9 +34,6 @@ import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
-import io.swagger.models.Model;
-import io.swagger.models.Swagger;
-import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.ByteArrayProperty;
 import io.swagger.models.properties.DecimalProperty;
@@ -52,47 +42,29 @@ import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
-import io.swagger.parser.SwaggerParser;
-import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.parser.converter.SwaggerConverter;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.servers.Server;
 import org.apache.commons.io.FilenameUtils;
 import org.ballerinalang.ballerina.service.ConverterConstants;
 import org.ballerinalang.ballerina.service.OpenApiEndpointMapper;
 import org.ballerinalang.ballerina.service.OpenApiServiceMapper;
-import org.ballerinalang.model.tree.types.TypeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.ballerinalang.compiler.semantics.model.types.BErrorType;
-import org.wso2.ballerinalang.compiler.semantics.model.types.BType;
-import org.wso2.ballerinalang.compiler.tree.types.BLangArrayType;
-import org.wso2.ballerinalang.compiler.tree.types.BLangBuiltInRefTypeNode;
-import org.wso2.ballerinalang.compiler.tree.types.BLangConstrainedType;
-import org.wso2.ballerinalang.compiler.tree.types.BLangErrorType;
-import org.wso2.ballerinalang.compiler.tree.types.BLangFiniteTypeNode;
-import org.wso2.ballerinalang.compiler.tree.types.BLangFunctionTypeNode;
-import org.wso2.ballerinalang.compiler.tree.types.BLangObjectTypeNode;
-import org.wso2.ballerinalang.compiler.tree.types.BLangRecordTypeNode;
-import org.wso2.ballerinalang.compiler.tree.types.BLangStructureTypeNode;
-import org.wso2.ballerinalang.compiler.tree.types.BLangTupleTypeNode;
-import org.wso2.ballerinalang.compiler.tree.types.BLangUnionTypeNode;
-import org.wso2.ballerinalang.compiler.tree.types.BLangUserDefinedType;
-import org.wso2.ballerinalang.compiler.tree.types.BLangValueType;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.ballerinalang.ballerina.service.OpenApiEndpointMapper.getServiceBasePath;
 import static org.ballerinalang.openapi.utils.CodegenUtils.writeFile;
 
 /**
@@ -118,6 +90,7 @@ public class OpenApiConverterUtils {
     public static void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, Optional<String> serviceName
             , Boolean needJson)
             throws IOException, OpenApiConverterException {
+        endpoints.clear();
 
         // Load project instance for single ballerina file
         try {
@@ -182,7 +155,6 @@ public class OpenApiConverterUtils {
             String serviceNodeName = getServiceBasePath(serviceNode);
             String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
             String openApiSource = generateOAS3Definitions(syntaxTree, serviceNodeName, needJson);
-
             //  Checked old generated file with same name
             openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
             writeFile(outPath.resolve(openApiName), openApiSource);
@@ -208,14 +180,7 @@ public class OpenApiConverterUtils {
         return cleanedServiceName + ConverterConstants.OPENAPI_SUFFIX + ConverterConstants.YAML_EXTENSION;
     }
 
-    /**
-     *
-     * @param ballerinaSource
-     * @param serviceName
-     * @return
-     */
-    public static String generateOAS3Definitions(SyntaxTree ballerinaSource, String serviceName, Boolean needJson)
-            throws OpenApiConverterException {
+    public static String generateOAS3Definitions(SyntaxTree ballerinaSource, String serviceName, Boolean needJson) {
         //travers syntax tree
         //check top level node for get the annotation attachment for openapi
 
@@ -229,65 +194,20 @@ public class OpenApiConverterUtils {
                 // TO-Do
 
             } else if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                NodeList<ImportDeclarationNode> imports = modulePartNode.imports();
-
-                String httpAlias = getAlias(imports, Constants.BALLERINA_HTTP_PACKAGE_NAME);
-                String openApiAlias = getAlias(imports, Constants.OPENAPI_PACKAGE_NAME);
-                OpenApiServiceMapper openApiServiceMapper = new OpenApiServiceMapper(httpAlias, openApiAlias,
-                        semanticModel);
-
-                Swagger openapi = getOpenApiDefinition(new Swagger(), openApiServiceMapper, serviceName,
-                        syntaxTree, endpoints, semanticModel);
-                String openApiSource = openApiServiceMapper.generateOpenApiString(openapi);
-                SwaggerConverter converter = new SwaggerConverter();
-                SwaggerDeserializationResult result = new SwaggerParser().readWithInfo(openApiSource, true);
-
-                if (result.getMessages().size() > 0) {
-                    throw new OpenApiConverterException("Please check the mentioned service is available " +
-                            "in the ballerina source, or there content is valid");
-                }
+                OpenApiServiceMapper openApiServiceMapper = new OpenApiServiceMapper();
+                openApiServiceMapper.setSemanticModel(semanticModel);
+                OpenAPI openapi = getOpenApiDefinition(new OpenAPI(), openApiServiceMapper, serviceName, endpoints);
                 if (needJson) {
-                    return Json.pretty(converter.convert(result).getOpenAPI());
+                    return Json.pretty(openapi);
                 }
-                return Yaml.pretty(converter.convert(result).getOpenAPI());
+                return Yaml.pretty(openapi);
             }
         }
         return serviceName;
     }
 
-    /**
-     * Gets the alias for a given module from a bLang file root node.
-     *
-     * @param imports The root node.
-     * @param packageName        The module name.
-     * @return The alias.
-     */
-    private static String getAlias(NodeList<ImportDeclarationNode> imports, String packageName) {
-
-        if ((imports != null) && (!imports.isEmpty())) {
-            for (ImportDeclarationNode importNode : imports) {
-                SeparatedNodeList<IdentifierToken> tokens = importNode.moduleName();
-                Optional<ImportOrgNameNode> orgName = importNode.orgName();
-                String packagePath = "";
-                if (orgName != null && orgName.isPresent()) {
-                    packagePath = orgName.get().toString();
-                }
-                for (IdentifierToken token : tokens) {
-                    packagePath = packagePath + token.text();
-                    if (packageName.equals(packagePath)) {
-                        return  token.text();
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private static Swagger getOpenApiDefinition(Swagger openapi, OpenApiServiceMapper openApiServiceMapper,
-                                                String serviceName, SyntaxTree topCompilationUnit,
-                                                List<ListenerDeclarationNode> endpoints, SemanticModel semanticModel) {
-        Map<String, Model> definitions = new HashMap<>();
-
+    private static OpenAPI getOpenApiDefinition(OpenAPI openapi, OpenApiServiceMapper openApiServiceMapper,
+                                                String serviceName, List<ListenerDeclarationNode> endpoints) {
         ModulePartNode modulePartNode = syntaxTree.rootNode();
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
@@ -296,10 +216,16 @@ public class OpenApiConverterUtils {
                 ServiceDeclarationNode serviceDefinition = (ServiceDeclarationNode) node;
                 //Take base path of service
                 String currentServiceName = getServiceBasePath(serviceDefinition);
-                if (openapi.getBasePath() == null) {
-                    openapi = new OpenApiEndpointMapper()
-                        .convertBoundEndpointsToOpenApi(endpoints, serviceDefinition, openapi);
-
+                if (openapi.getServers() == null) {
+                    OpenApiEndpointMapper openApiEndpointMapper = new OpenApiEndpointMapper();
+                    openapi = openApiEndpointMapper.convertListenerEndPointToOpenAPI(openapi, endpoints,
+                            serviceDefinition);
+                    if (openapi.getServers().isEmpty()) {
+                        List<Server> servers = new ArrayList<>();
+                        Server server = new Server().url(currentServiceName);
+                        servers.add(server);
+                        openapi.setServers(servers);
+                    }
                     // Generate openApi string for the mentioned service name.
                     if (!serviceName.isBlank()) {
                         if (currentServiceName.trim().equals(serviceName)) {
@@ -312,83 +238,12 @@ public class OpenApiConverterUtils {
                             currentServiceName.trim());
                     }
                 }
-
-            } else if (syntaxKind.equals(SyntaxKind.TYPE_DEFINITION)) {
-                //Map records into swagger definitions
-                TypeDefinitionNode typeDefinitionNode = (TypeDefinitionNode) node;
-                if (typeDefinitionNode.typeDescriptor() instanceof RecordTypeSymbol) {
-                    // TODO schema generation
-//                    model.setProperties(propertyMap);
-//                    definitions.put(typeNode.getName().getValue(), model);
-                    openapi.setDefinitions(definitions);
-                }
             }
         }
 
         return openapi;
     }
 
-    /**
-     * Gets the base path of a service.
-     *
-     * @param serviceDefinition The service definition node.
-     * @return The base path.
-     */
-    public static String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
-        StringBuilder currentServiceName = new StringBuilder();
-        NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
-        for (Node serviceBasedPathNode : serviceNameNodes) {
-            currentServiceName.append(serviceBasedPathNode.toString());
-        }
-        return currentServiceName.toString().trim();
-    }
-
-    //need to refactor with project API
-    public static Property createOpenApiPropertyForBallerinaField(TypeNode node) {
-        Property property = null;
-        if (node instanceof BLangArrayType) {
-            final BLangArrayType fieldTypeNode = (BLangArrayType) node;
-            ArrayProperty arr = new ArrayProperty();
-            arr.setItems(mapBallerinaTypes(fieldTypeNode.getElementType()
-                    .type.getKind().typeName(), true));
-            property = arr;
-        } else if (node instanceof BLangBuiltInRefTypeNode) {
-            final BLangBuiltInRefTypeNode fieldTypeNode = (BLangBuiltInRefTypeNode) node;
-            property = mapBallerinaTypes(fieldTypeNode.typeKind.typeName(), false);
-        } else if (node instanceof BLangConstrainedType) {
-            //TODO handle constrained types
-        } else if (node instanceof BLangErrorType) {
-            //TODO Error type is handled as string variables. Need to discuss
-            final BLangErrorType fieldTypeNode = (BLangErrorType) node;
-            final BType bErrorType = fieldTypeNode.type;
-            if (bErrorType instanceof BErrorType) {
-                assert false;
-//                property = mapBallerinaTypes(((BErrorType) bErrorType)
-//                        .getReasonType().getKind().typeName(), false);
-            }
-        } else if (node instanceof BLangFiniteTypeNode) {
-            //TODO handle finite types
-        } else if (node instanceof BLangFunctionTypeNode) {
-            //TODO handle function types
-        } else if (node instanceof BLangObjectTypeNode) {
-            //TODO handle object types
-        } else if (node instanceof BLangRecordTypeNode) {
-            //TODO handle record types
-        } else if (node instanceof BLangStructureTypeNode) {
-            //TODO handle structure types
-        } else if (node instanceof BLangTupleTypeNode) {
-            //TODO handle tuple types
-        } else if (node instanceof BLangUnionTypeNode) {
-            //TODO handle union types
-        } else if (node instanceof BLangUserDefinedType) {
-            final BLangUserDefinedType fieldTypeNode = (BLangUserDefinedType) node;
-            property = mapBallerinaTypes(fieldTypeNode.getTypeName().value, false);
-        } else if (node instanceof BLangValueType) {
-            final BLangValueType fieldTypeNode = (BLangValueType) node;
-            property = mapBallerinaTypes(fieldTypeNode.getTypeKind().typeName(), false);
-        }
-        return property;
-    }
 
     public static Property mapBallerinaTypes(String type, boolean isArray) {
         switch (type) {

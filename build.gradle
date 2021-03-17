@@ -42,6 +42,7 @@ ext.stdlibCryptoVersion = project.stdlibCryptoVersion
 ext.stdlibTaskVersion = project.stdlibTaskVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
+ext.stdlibHttpVersion = project.stdlibHttpVersion
 ext.puppycrawlCheckstyleVersion = "8.18"
 
 allprojects {
@@ -248,7 +249,6 @@ task codeCoverageReport(type: JacocoReport) {
     subprojects.each {
         sourceSets it.sourceSets.main
     }
-
     reports {
         xml.enabled = true
         html.enabled = true
@@ -262,3 +262,4 @@ task codeCoverageReport(type: JacocoReport) {
         true
     }
 }
+

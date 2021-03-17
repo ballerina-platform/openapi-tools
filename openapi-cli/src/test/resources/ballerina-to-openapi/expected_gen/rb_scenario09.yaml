@@ -1,0 +1,20 @@
+openapi: 3.0.1
+info:
+  title: ' payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /ping:
+    post:
+      operationId: operation1_post_/ping
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: uuid
+      responses:
+        "200":
+          description: Ok
+components: {}

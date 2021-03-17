@@ -56,6 +56,7 @@ dependencies {
         implementation "org.ballerinalang:ballerina-lang:${ballerinaLangVersion}"
         implementation "org.ballerinalang:ballerina-parser:${ballerinaLangVersion}"
         implementation "org.ballerinalang:ballerina-cli:${ballerinaLangVersion}"
+        implementation "org.ballerinalang:formatter-core:${ballerinaLangVersion}"
         implementation "org.ballerinalang:ballerina-tools-api:${ballerinaLangVersion}"
         implementation "org.ballerinalang:http-native:${stdlibHttpVersion}"
         testImplementation "org.testng:testng:${testngVersion}"
@@ -86,7 +87,7 @@ test {
         exceptionFormat "full"
     }
     jacoco {
-        enabled = false
+        enabled = true
         destinationFile = file("$buildDir/coverage-reports/jacoco.exec")
         includeNoLocationClasses = true
         excludes = ['jdk.internal.*']

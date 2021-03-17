@@ -17,7 +17,12 @@ jobs:
         env:
           packageUser: ${{ github.actor }}
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build --stacktrace --scan --console=plain --no-daemon
+        run: |
+            ./gradlew build --stacktrace --scan --console=plain --no-daemon
+            ./gradlew codeCoverageReport --no-daemon
+      - name: Generate Codecov Report
+        if:  github.event_name == 'pull_request'
+        uses: codecov/codecov-action@v1
 
   windows-build:
 

@@ -21,6 +21,8 @@ import io.ballerina.cli.BLauncherCmd;
 import io.ballerina.cli.launcher.LauncherUtils;
 import org.ballerinalang.ballerina.OpenApiConverterException;
 import org.ballerinalang.ballerina.OpenApiConverterUtils;
+import org.ballerinalang.formatter.core.FormatterException;
+import org.ballerinalang.generators.OpenApiException;
 import org.ballerinalang.openapi.CodeGenerator;
 import org.ballerinalang.openapi.OpenApiMesseges;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
@@ -241,7 +243,7 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             generator.generateClient(executionPath.toString(), resourcePath.toString(), clientName,
                     targetOutputPath.toString(), filter);
-        } catch (IOException | BallerinaOpenApiException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             if (e.getLocalizedMessage() != null) {
                 throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
             } else {
@@ -263,7 +265,7 @@ public class OpenApiCmd implements BLauncherCmd {
             assert resourcePath != null;
             generator.generateService(executionPath.toString(), resourcePath.toString(),
                     relativePath.toString(), serviceName, targetOutputPath.toString(), filter);
-        } catch (IOException | BallerinaOpenApiException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             throw LauncherUtils.createLauncherException("Error occurred when generating service for openapi " +
                     "contract at " + argList.get(0) + ". " + e.getMessage() + ".");
         }
@@ -282,7 +284,7 @@ public class OpenApiCmd implements BLauncherCmd {
             generator.generateBothFiles(
                     GeneratorConstants.GenType.GEN_BOTH, resourcePath.toString(), relativePath.toString(),
                     fileName, targetOutputPath.toString(), filter);
-        } catch (IOException | BallerinaOpenApiException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             throw LauncherUtils.createLauncherException("Error occurred when generating service for openapi " +
                     "contract at " + argList.get(0) + ". " + e.getMessage() + ".");
         }

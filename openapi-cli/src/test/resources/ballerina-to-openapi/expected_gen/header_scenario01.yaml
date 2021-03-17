@@ -1,0 +1,32 @@
+openapi: 3.0.1
+info:
+  title: ' payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /ping:
+    get:
+      operationId: operation1_get_/ping
+      parameters:
+        - name: X-Client
+          in: header
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+  /v1:
+    get:
+      operationId: operation1_get_/v1
+      parameters:
+        - name: XClient
+          in: header
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: Ok
+components: {}

@@ -19,7 +19,7 @@
 
 package org.ballerinalang.ballerina.service;
 
-import io.swagger.models.Operation;
+import io.swagger.v3.oas.models.Operation;
 
 /**
  * This class will hold operation details specific to HTTP operation.
@@ -31,7 +31,7 @@ public class OperationAdaptor {
     private String httpOperation;
 
     OperationAdaptor() {
-        this.operation = new Operation();
+        this.operation = new io.swagger.v3.oas.models.Operation();
     }
 
     public Operation getOperation() {

@@ -43,6 +43,7 @@ jar {
 
 def packageName = "openapi"
 def packageOrg = "ballerina"
+def platform = "any"
 def snapshotVersion = "-SNAPSHOT"
 def tomlVersion = project.version.replace("${snapshotVersion}", "")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
@@ -54,6 +55,7 @@ def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
 def originalConfig = ballerinaConfigFile.text
+def artifactTestableJar = file("$project.projectDir/target/cache/${packageOrg}/${packageName}/${tomlVersion}/any/")
 
 task unpackJballerinaTools(type: Copy) {
     configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
@@ -133,9 +135,12 @@ task ballerinaBuild {
             }
         }
 
-        copy {
-            from file("$project.projectDir/target/bala")
-            into file("$artifactCacheParent/bala/${packageOrg}/${packageName}/${tomlVersion}")
+        // extract bala file to artifact cache directory
+        file("$project.projectDir/target/bala").eachFileMatch(~/.*.bala/) { balaFile ->
+            copy {
+                from zipTree(balaFile)
+                into file("$artifactCacheParent/bala/${packageOrg}/${packageName}/${tomlVersion}/${platform}")
+            }
         }
 
         copy {
@@ -239,6 +244,21 @@ publishing {
         }
     }
 }
+// Commented due to disabling ballerina integration tests
+//
+//task extractBallerinaClassFiles(type: Copy) {
+//    def jars = fileTree(artifactTestableJar).findAll {
+//        it.name.endsWith("-testable.jar")
+//    }
+//
+//    jars.forEach { file ->
+//        from zipTree(file).matching {
+//            exclude '**/tests/*'
+//            include '**/*.class'
+//        }
+//        into "${project.rootDir.absolutePath}/build/classes"
+//    }
+//}
 
 ballerinaBuild.dependsOn ":openapi-cli:build"
 ballerinaBuild.dependsOn ":openapi-validator:build"

@@ -82,5 +82,5 @@ public class GeneratorConstants {
                     , "commit", "enum", "base16", "base64", "rollback", "configurable",  "class", "module", "never",
                    "outer", "order", "null", "key", "let", "by"));
 
-    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\_{}\\s|.$])";
+    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*-=^+();:\\_{}\\s|.$])";
 }
