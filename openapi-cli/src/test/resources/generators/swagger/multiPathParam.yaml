@@ -31,7 +31,7 @@ paths:
           required: true
           description: The id of the pet to retrieve
           schema:
-            type: string
+            type: integer
         - name: petName
           in: path
           required: true
