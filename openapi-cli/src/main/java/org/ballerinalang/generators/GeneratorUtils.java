@@ -181,7 +181,8 @@ public class GeneratorUtils {
                                 if (parameter.getSchema() == null) {
                                     name = AbstractNodeFactory.createIdentifierToken("string");
                                 } else {
-                                    name = AbstractNodeFactory.createIdentifierToken(parameter.getSchema().getType());
+                                    name = AbstractNodeFactory.createIdentifierToken(
+                                                    convertOpenAPITypeToBallerina(parameter.getSchema().getType()));
                                 }
                                 BuiltinSimpleNameReferenceNode builtSNRNode =
                                         NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
