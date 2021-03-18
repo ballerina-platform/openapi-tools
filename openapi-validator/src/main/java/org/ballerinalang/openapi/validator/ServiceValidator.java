@@ -40,6 +40,8 @@ import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectKind;
+import io.ballerina.projects.plugins.AnalysisTask;
+import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -73,27 +75,19 @@ import java.util.Optional;
  * This model used to filter and validate all the operations according to the given filter and filter the service
  * resource in the resource file.
  */
-public class ServiceValidator {
+public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext> {
     private static OpenAPI openAPI;
     private static SyntaxTree syntaxTree;
     private static SemanticModel semanticModel;
     private static List<Diagnostic> validations = new ArrayList<>();
 
-    public ServiceValidator() {
-    }
-
-    /**
-     * This method use to extract project details and generate diagnostic.
-     * @param project   project instance related to package
-     * @return Diagnostic List
-     */
-    public static List<Diagnostic> validateResourceFunctions(Project project)
-            throws IOException, OpenApiValidatorException {
+    @Override
+    public void perform(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
         List<FunctionDefinitionNode> functions = new ArrayList<>();
         DiagnosticSeverity kind = DiagnosticSeverity.ERROR;
         Filters filters = new Filters(kind);
-        boolean isAnnotationAvailble = extractProjectDetails(project);
-        if (isAnnotationAvailble) {
+//        boolean isAnnotationAvailble = extractProjectDetails(project);
+//        if (isAnnotationAvailble) {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
             for (Node node : modulePartNode.members()) {
                 SyntaxKind syntaxKind = node.kind();
@@ -115,7 +109,7 @@ public class ServiceValidator {
                                 SeparatedNodeList<MappingFieldNode> fields = exprNode.fields();
                                 //Filter annotation attributes
                                 if (!fields.isEmpty()) {
-                                    kind = extractOpenAPIAnnotation(project, kind, filters, fields);
+//                                    kind = extractOpenAPIAnnotation(project, kind, filters, fields);
                                 }
                             }
                         }
@@ -189,10 +183,14 @@ public class ServiceValidator {
                                         Map<String, Operation> operations = openApiPath.getOperations();
                                         for (Map.Entry<String, Operation> operation: operations.entrySet()) {
                                             if (method.getKey().equals(operation.getKey())) {
-                                                List<ValidationError> postErrors =
-                                                        ResourceValidator.validateResourceAgainstOperation(
-                                                                operation.getValue(), method.getValue(), semanticModel,
-                                                                syntaxTree);
+                                                List<ValidationError> postErrors = null;
+                                                try {
+                                                    postErrors = ResourceValidator.validateResourceAgainstOperation(
+                                                            operation.getValue(), method.getValue(), semanticModel,
+                                                            syntaxTree);
+                                                } catch (OpenApiValidatorException e) {
+                                                    e.printStackTrace();
+                                                }
                                                 generateDiagnosticMessage(kind, resourcePath.getValue(), method,
                                                         postErrors);
                                             }
@@ -202,14 +200,146 @@ public class ServiceValidator {
                             }
                         }
                         // Validate openApi operations against service resource in ballerina file
-                        openAPIPathAgainstToBallerinaServicePath(kind, serviceDeclarationNode,
-                                resourcePathMap, openAPIPathSummaries);
+                        try {
+                            openAPIPathAgainstToBallerinaServicePath(kind, serviceDeclarationNode,
+                                    resourcePathMap, openAPIPathSummaries);
+                        } catch (OpenApiValidatorException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
-        }
-        return validations;
+//        }
     }
+
+//    /**
+//     * This method use to extract project details and generate diagnostic.
+//     * @param project   project instance related to package
+//     * @return Diagnostic List
+//     */
+//    public static List<Diagnostic> validateResourceFunctions(Project project)
+//            throws IOException, OpenApiValidatorException {
+//        List<FunctionDefinitionNode> functions = new ArrayList<>();
+//        DiagnosticSeverity kind = DiagnosticSeverity.ERROR;
+//        Filters filters = new Filters(kind);
+//        boolean isAnnotationAvailble = extractProjectDetails(project);
+//        if (isAnnotationAvailble) {
+//            ModulePartNode modulePartNode = syntaxTree.rootNode();
+//            for (Node node : modulePartNode.members()) {
+//                SyntaxKind syntaxKind = node.kind();
+//                // Load a listen_declaration for the server part in the yaml spec
+//                if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
+//                    ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
+//                    // Check annotation is available
+//                    Optional<MetadataNode> metadata = serviceDeclarationNode.metadata();
+//                    MetadataNode openApi  = metadata.orElseThrow();
+//                    if (!openApi.annotations().isEmpty()) {
+//                        NodeList<AnnotationNode> annotations = openApi.annotations();
+//                        for (AnnotationNode annotationNode: annotations) {
+//                            Node annotationRefNode = annotationNode.annotReference();
+//                            if (annotationRefNode.toString().trim().equals("openapi:ServiceInfo")) {
+//                                Optional<MappingConstructorExpressionNode> mappingConstructorExpressionNode =
+//                                        annotationNode.annotValue();
+//                                MappingConstructorExpressionNode exprNode = mappingConstructorExpressionNode
+//                                        .orElseThrow();
+//                                SeparatedNodeList<MappingFieldNode> fields = exprNode.fields();
+//                                //Filter annotation attributes
+//                                if (!fields.isEmpty()) {
+//                                    kind = extractOpenAPIAnnotation(project, kind, filters, fields);
+//                                }
+//                            }
+//                        }
+//                        // Summaries functions
+//                        NodeList<Node> members = serviceDeclarationNode.members();
+//                        Iterator<Node> iterator = members.iterator();
+//                        while (iterator.hasNext()) {
+//                            Node next = iterator.next();
+//                            if (next instanceof FunctionDefinitionNode) {
+//                                functions.add((FunctionDefinitionNode) next);
+//                            }
+//                        }
+//                        // Make resourcePath summery
+//                        Map<String, ResourcePathSummary> resourcePathMap =
+//                                ResourceWithOperation.summarizeResources(functions);
+//                        //  Filter openApi operation according to given filters
+//                        List<OpenAPIPathSummary> openAPIPathSummaries = ResourceWithOperation
+//                                .filterOpenapi(openAPI, filters);
+//
+//                        //  Check all the filtered operations are available at the service file
+//                        List<OpenapiServiceValidationError> openApiMissingServiceMethod =
+//                                ResourceWithOperation.checkOperationsHasFunctions(openAPIPathSummaries,
+//                                        resourcePathMap);
+//
+//                        //  Generate errors for missing resource in service file
+//                        if (!openApiMissingServiceMethod.isEmpty()) {
+//                            for (OpenapiServiceValidationError openApiMissingError: openApiMissingServiceMethod) {
+//                                if (openApiMissingError.getServiceOperation() == null) {
+//                                    String[] error =
+//                                            ErrorMessages.unimplementedOpenAPIPath(openApiMissingError
+//                                                    .getServicePath());
+//                                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
+//                                    OpenAPIDiagnostics diagnostics =
+//                                            new OpenAPIDiagnostics(serviceDeclarationNode.location(), diagnosticInfo,
+//                                                    error[1]);
+//                                    validations.add(diagnostics);
+//                                } else {
+//                                    String[] error =
+//                                            ErrorMessages.unimplementedOpenAPIOperationsForPath(openApiMissingError.
+//                                                            getServiceOperation(),
+//                                                    openApiMissingError.getServicePath());
+//                                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
+//                                    OpenAPIDiagnostics diagnostics =
+//                                            new OpenAPIDiagnostics(serviceDeclarationNode.location(), diagnosticInfo,
+//                                                    error[1]);
+//                                    validations.add(diagnostics);
+//                                }
+//                            }
+//
+//                            // Clean the undocumented openapi contract functions
+//                            openAPIPathSummaries = ResourceWithOperation.removeUndocumentedPath(openAPIPathSummaries,
+//                                    openApiMissingServiceMethod);
+//                        }
+//                        // Check all the documented resource functions are in openapi contract
+//                        List<ResourceValidationError> resourceValidationErrors =
+//                                ResourceWithOperation.checkResourceHasOperation(openAPIPathSummaries,
+//                                        resourcePathMap);
+//                        // Clean the undocumented resources from the list
+//                        if (!resourcePathMap.isEmpty()) {
+//                            createListResourcePathSummary(resourceValidationErrors, resourcePathMap);
+//                        }
+//                        createListOperations(openAPIPathSummaries, resourcePathMap);
+//
+//                        // Resource against to operation
+//                        for (Map.Entry<String, ResourcePathSummary> resourcePath: resourcePathMap.entrySet()) {
+//                            for (OpenAPIPathSummary openApiPath : openAPIPathSummaries) {
+//                                if ((resourcePath.getKey().equals(openApiPath.getPath())) &&
+//                                        (!resourcePath.getValue().getMethods().isEmpty())) {
+//                                    Map<String, ResourceMethod> resourceMethods = resourcePath.getValue().getMethods();
+//                                    for (Map.Entry<String, ResourceMethod> method: resourceMethods.entrySet()) {
+//                                        Map<String, Operation> operations = openApiPath.getOperations();
+//                                        for (Map.Entry<String, Operation> operation: operations.entrySet()) {
+//                                            if (method.getKey().equals(operation.getKey())) {
+//                                                List<ValidationError> postErrors =
+//                                                        ResourceValidator.validateResourceAgainstOperation(
+//                                                                operation.getValue(), method.getValue(), semanticModel,
+//                                                                syntaxTree);
+//                                                generateDiagnosticMessage(kind, resourcePath.getValue(), method,
+//                                                        postErrors);
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                        // Validate openApi operations against service resource in ballerina file
+//                        openAPIPathAgainstToBallerinaServicePath(kind, serviceDeclarationNode,
+//                                resourcePathMap, openAPIPathSummaries);
+//                    }
+//                }
+//            }
+//        }
+//        return validations;
+//    }
 
     private static void openAPIPathAgainstToBallerinaServicePath(DiagnosticSeverity kind,
                                                                  ServiceDeclarationNode serviceDeclarationNode,
