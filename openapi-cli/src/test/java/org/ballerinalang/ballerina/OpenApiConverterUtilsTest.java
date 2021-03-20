@@ -29,7 +29,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,8 +40,6 @@ public class OpenApiConverterUtilsTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
     private Path tempDir;
     private OpenApiConverterUtils openApiConverterUtils;
-    private static final String OS = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
-
 
     @BeforeMethod
     public void setup() throws IOException {
@@ -82,7 +79,6 @@ public class OpenApiConverterUtilsTest {
 
     @Test(description = "Generate OpenAPI spec by filtering service name")
     public void testBasicServicesByFiltering() throws IOException, OpenApiConverterException {
-
         Path ballerinaFilePath = RES_DIR.resolve("basic_service.bal");
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir,
                 Optional.of("/hello02"), false);
@@ -111,7 +107,6 @@ public class OpenApiConverterUtilsTest {
 
     @Test(description = "Generate OpenAPI spec with no base path")
     public void testServicesWithNoBasePathWithFilterina() throws IOException, OpenApiConverterException {
-
         Path ballerinaFilePath = RES_DIR.resolve("no_base_path_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.of("/"),
                 false);
@@ -154,7 +149,6 @@ public class OpenApiConverterUtilsTest {
 
     @Test(description = "Generate OpenAPI spec with nested payload")
     public void testNested2RecordPayLoad() throws OpenApiConverterException {
-
         Path ballerinaFilePath = RES_DIR.resolve("nested2Record_payload_service.bal");
         compareWithGeneratedFile(ballerinaFilePath, "nested_2record.yaml");
     }
@@ -173,7 +167,6 @@ public class OpenApiConverterUtilsTest {
 
     @Test(description = "Generate OpenAPI spec for resource has .")
     public void testPathscenario01() throws OpenApiConverterException {
-
         Path ballerinaFilePath = RES_DIR.resolve("path_scenario01.bal");
         compareWithGeneratedFile(ballerinaFilePath, "path_scenario01.yaml");
     }
@@ -260,14 +253,12 @@ public class OpenApiConverterUtilsTest {
 
     @Test(description = "RequestBody without mediaType, nested record type with nested array field has payload")
     public void testRequestBodyscenario06() throws OpenApiConverterException {
-
         Path ballerinaFilePath = RES_DIR.resolve("rb_scenario06.bal");
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario06.yaml");
     }
 
     @Test(description = "RequestBody without mediaType, payload has xml type")
     public void testRequestBodyscenario07() throws OpenApiConverterException {
-
         Path ballerinaFilePath = RES_DIR.resolve("rb_scenario07.bal");
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario07.yaml");
     }
@@ -333,7 +324,7 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "rs_scenario09.yaml");
     }
 
-    @Test(description = "Response scenario 10 - Array type response with a schema", enabled = false)
+    @Test(description = "Response scenario 10 - Array type response with a schema")
     public void testResponse10() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("rs_scenario10.bal");
         compareWithGeneratedFile(ballerinaFilePath, "rs_scenario10.yaml");
@@ -341,7 +332,6 @@ public class OpenApiConverterUtilsTest {
 
     @Test(description = "Generate OpenAPI spec for build project")
     public void testRecordFieldPayLoad() throws IOException, OpenApiConverterException {
-
         Path ballerinaFilePath = RES_DIR.resolve("project_bal/record_payload_service.bal");
         OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
                 false);
@@ -362,7 +352,6 @@ public class OpenApiConverterUtilsTest {
 
     @Test(description = "Generate OpenAPI spec for build project")
     public void testForResponse02() throws OpenApiConverterException {
-
         Path ballerinaFilePath = RES_DIR.resolve("scenario02.bal");
         compareWithGeneratedFile(ballerinaFilePath, "response02.yaml");
     }
@@ -374,7 +363,7 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "listener_scenario01.yaml");
     }
 
-    @Test(description = "Generate OpenAPI spec for listner only have port", enabled = false)
+    @Test(description = "Generate OpenAPI spec for listner only have port")
     public void testListners02() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("listener_scenario02.bal");
         compareWithGeneratedFile(ballerinaFilePath, "listener_scenario02.yaml");
@@ -465,9 +454,5 @@ public class OpenApiConverterUtilsTest {
             deleteDirectory(this.tempDir);
             System.gc();
         }
-    }
-
-    public static boolean isWindows() {
-        return (OS.contains("win"));
     }
 }
