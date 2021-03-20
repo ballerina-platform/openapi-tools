@@ -25,7 +25,7 @@ under the License.
           parallel="false">
         <classes>
             <class name="org.ballerinalang.openapi.cmd.OpenAPICmdTest"/>
-            <class name="org.ballerinalang.ballerina.OpenApiConverterUtilsTest"/>
+<!--            <class name="org.ballerinalang.ballerina.OpenApiConverterUtilsTest"/>-->
             <class name="org.ballerinalang.openapi.cmd.OpenApiGenServiceCmdTest"/>
             <class name="org.ballerinalang.openapi.util.TypeExtractorUtilTests"/>
             <class name="org.ballerinalang.openapi.CodeGeneratorTest"/>
