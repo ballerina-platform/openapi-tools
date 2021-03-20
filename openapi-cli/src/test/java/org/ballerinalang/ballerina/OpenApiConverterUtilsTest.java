@@ -42,7 +42,7 @@ public class OpenApiConverterUtilsTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
     private Path tempDir;
     private OpenApiConverterUtils openApiConverterUtils;
-    private static final String OS = System.getProperty("os.name").toLowerCase(Locale.getDefault());
+    private static final String OS = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 
 
     @BeforeMethod
