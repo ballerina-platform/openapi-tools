@@ -1,5 +1,4 @@
 import ballerina/http;
-import ballerina/log;
 
 listener http:Listener helloEp = new (9090);
 type  Pet record  {
