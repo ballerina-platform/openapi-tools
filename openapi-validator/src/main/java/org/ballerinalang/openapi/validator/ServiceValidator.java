@@ -86,6 +86,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         List<FunctionDefinitionNode> functions = new ArrayList<>();
         DiagnosticSeverity kind = DiagnosticSeverity.ERROR;
         Filters filters = new Filters(kind);
+        semanticModel = syntaxNodeAnalysisContext.semanticModel();
 //        boolean isAnnotationAvailble = extractProjectDetails(project);
 //        if (isAnnotationAvailble) {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
@@ -109,7 +110,11 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                 SeparatedNodeList<MappingFieldNode> fields = exprNode.fields();
                                 //Filter annotation attributes
                                 if (!fields.isEmpty()) {
-//                                    kind = extractOpenAPIAnnotation(project, kind, filters, fields);
+                                    try {
+                                        kind = extractOpenAPIAnnotation(serviceDeclarationNode, kind, filters, fields);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         }
@@ -122,7 +127,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                 functions.add((FunctionDefinitionNode) next);
                             }
                         }
-                        // Make resourcePath summery
+                        // Make resourcePath summary
                         Map<String, ResourcePathSummary> resourcePathMap =
                                 ResourceWithOperation.summarizeResources(functions);
                         //  Filter openApi operation according to given filters
@@ -174,31 +179,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                         createListOperations(openAPIPathSummaries, resourcePathMap);
 
                         // Resource against to operation
-                        for (Map.Entry<String, ResourcePathSummary> resourcePath: resourcePathMap.entrySet()) {
-                            for (OpenAPIPathSummary openApiPath : openAPIPathSummaries) {
-                                if ((resourcePath.getKey().equals(openApiPath.getPath())) &&
-                                        (!resourcePath.getValue().getMethods().isEmpty())) {
-                                    Map<String, ResourceMethod> resourceMethods = resourcePath.getValue().getMethods();
-                                    for (Map.Entry<String, ResourceMethod> method: resourceMethods.entrySet()) {
-                                        Map<String, Operation> operations = openApiPath.getOperations();
-                                        for (Map.Entry<String, Operation> operation: operations.entrySet()) {
-                                            if (method.getKey().equals(operation.getKey())) {
-                                                List<ValidationError> postErrors = null;
-                                                try {
-                                                    postErrors = ResourceValidator.validateResourceAgainstOperation(
-                                                            operation.getValue(), method.getValue(), semanticModel,
-                                                            syntaxTree);
-                                                } catch (OpenApiValidatorException e) {
-                                                    e.printStackTrace();
-                                                }
-                                                generateDiagnosticMessage(kind, resourcePath.getValue(), method,
-                                                        postErrors);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        resourcePathAgainstToOpenAPIPath(kind, resourcePathMap, openAPIPathSummaries);
                         // Validate openApi operations against service resource in ballerina file
                         try {
                             openAPIPathAgainstToBallerinaServicePath(kind, serviceDeclarationNode,
@@ -210,6 +191,37 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 }
             }
 //        }
+    }
+
+    private void resourcePathAgainstToOpenAPIPath(DiagnosticSeverity kind,
+                                                  Map<String, ResourcePathSummary> resourcePathMap,
+                                                  List<OpenAPIPathSummary> openAPIPathSummaries) {
+
+        for (Map.Entry<String, ResourcePathSummary> resourcePath: resourcePathMap.entrySet()) {
+            for (OpenAPIPathSummary openApiPath : openAPIPathSummaries) {
+                if ((resourcePath.getKey().equals(openApiPath.getPath())) &&
+                        (!resourcePath.getValue().getMethods().isEmpty())) {
+                    Map<String, ResourceMethod> resourceMethods = resourcePath.getValue().getMethods();
+                    for (Map.Entry<String, ResourceMethod> method: resourceMethods.entrySet()) {
+                        Map<String, Operation> operations = openApiPath.getOperations();
+                        for (Map.Entry<String, Operation> operation: operations.entrySet()) {
+                            if (method.getKey().equals(operation.getKey())) {
+                                List<ValidationError> postErrors = null;
+                                try {
+                                    postErrors = ResourceValidator.validateResourceAgainstOperation(
+                                            operation.getValue(), method.getValue(), semanticModel,
+                                            syntaxTree);
+                                } catch (OpenApiValidatorException e) {
+                                    e.printStackTrace();
+                                }
+                                generateDiagnosticMessage(kind, resourcePath.getValue(), method,
+                                        postErrors);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 //    /**
@@ -436,7 +448,8 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         return isAnnotationExit;
     }
 
-    private static DiagnosticSeverity extractOpenAPIAnnotation(Project project, DiagnosticSeverity kind,
+    private static DiagnosticSeverity extractOpenAPIAnnotation(ServiceDeclarationNode serviceDeclarationNode ,
+                                                               DiagnosticSeverity kind,
                                                                Filters filters,
                                                                SeparatedNodeList<MappingFieldNode> fields)
             throws IOException {
@@ -448,7 +461,8 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 //Handle openapi contract path if path is empty return exceptions.
                 ExpressionNode openAPIAnnotation = expressionNode.orElseThrow();
                 if (specificFieldNode.fieldName().toString().trim().equals("contract")) {
-                    Path sourceRoot = project.sourceRoot();
+//                    Path sourceRoot = serviceDeclarationNode.parent().sourceRoot();
+                    Path sourceRoot = Paths.get("///xxx");
                     Path openapiPath = Paths.get(openAPIAnnotation.toString().replaceAll("\"", "").trim());
                     Path relativePath;
                     if (Paths.get(openapiPath.toString()).isAbsolute()) {

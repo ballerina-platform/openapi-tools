@@ -15,6 +15,7 @@
  */
 package org.ballerinalang.openapi.validator.tests;
 
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.projects.Project;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -39,6 +40,7 @@ public class ServiceValidationTests {
             .toAbsolutePath();
     private OpenAPI api;
     private Project project;
+    private ServiceDeclarationNode serviceDeclarationNode;
     private List<String> tag = new ArrayList<>();
     private List<String> operation = new ArrayList<>();
     private List<String> excludeTag = new ArrayList<>();
@@ -61,7 +63,7 @@ public class ServiceValidationTests {
     @Test(description = "test for undocumented Method in contract missing method in bal service")
     public void testUndocumentedMethod() throws OpenApiValidatorException, IOException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstoreMethod.bal"));
-        diagnostics = ServiceValidator.validateResourceFunctions(project);
+//        diagnostics = ServiceValidator.validateResourceFunctions(project);
         Assert.assertTrue(!diagnostics.isEmpty());
         Assert.assertEquals(diagnostics.get(0).message(), "Couldn't find Ballerina service resource(s) for" +
                 " http method(s) 'post' for the path '/pets' which is documented in the OpenAPI contract");
@@ -71,7 +73,7 @@ public class ServiceValidationTests {
     @Test(description = "Test for all Paths and methods documented")
     public void testPathandMethodsCorrectlyDocumented() throws OpenApiValidatorException, IOException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/valid/petstore.bal"));
-        diagnostics = ServiceValidator.validateResourceFunctions(project);
+//        diagnostics = ServiceValidator.validateResourceFunctions(project);
         Assert.assertTrue(diagnostics.isEmpty());
         diagnostics.clear();
     }
@@ -79,7 +81,7 @@ public class ServiceValidationTests {
     @Test(description = "test for undocumented TypeMisMatch in Path parameter")
     public void testParameterTypeMismatch() throws OpenApiValidatorException, IOException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstoreParameterTM.bal"));
-        diagnostics = ServiceValidator.validateResourceFunctions(project);
+//        diagnostics = ServiceValidator.validateResourceFunctions(project);
         Assert.assertTrue(!diagnostics.isEmpty());
         Assert.assertEquals(diagnostics.get(0).message(), "Type mismatch with parameter 'petId' for the " +
                 "method 'get' of the path '/pets/{petId}'.In OpenAPI contract its type is 'string' and resources " +
@@ -90,7 +92,7 @@ public class ServiceValidationTests {
     @Test(description = "test for all the Path , Query, Payload scenarios")
     public void testRecordTypeMismatch() throws OpenApiValidatorException, IOException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/all_petstore.bal"));
-        diagnostics = ServiceValidator.validateResourceFunctions(project);
+//        diagnostics = ServiceValidator.validateResourceFunctions(project);
         Assert.assertTrue(!diagnostics.isEmpty());
         Assert.assertEquals(diagnostics.get(0).message(), "Type mismatch with parameter 'id' for the method" +
                 " 'delete' of the path '/pets/{id}'.In OpenAPI contract its type is 'integer' and resources type is " +
@@ -132,6 +134,19 @@ public class ServiceValidationTests {
         Path contractPath = RES_DIR.resolve("swagger/invalid/oneOf-scenario03.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
     }
+
+    @Test(enabled = true, description = "Test for extracting details from openapi annotaions")
+    public void testExtractAnnotation() throws OpenApiValidatorException, IOException {
+        project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/annotation/petstore.bal"));
+//        diagnostics = ServiceValidator.validateResourceFunctions(project);
+        serviceDeclarationNode
+        Assert.assertTrue(!diagnostics.isEmpty());
+        Assert.assertEquals(diagnostics.get(0).message(), "Couldn't find a Ballerina service resource for " +
+                "the path '/user' which is documented in the OpenAPI contract");
+        diagnostics.clear();
+    }
+
+
     /**
      * OneOf - Invalid Scenario examples
      */

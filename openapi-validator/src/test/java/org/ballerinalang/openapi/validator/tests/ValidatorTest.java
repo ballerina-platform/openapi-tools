@@ -198,4 +198,8 @@ public class ValidatorTest {
         }
         return doc.syntaxTree();
     }
+
+    public static ServiceDeclarationNode getServiceDeclarationNode(Project project) {
+
+    }
 }
