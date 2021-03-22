@@ -122,7 +122,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test ballerina to openapi", enabled = true)
+    @Test(description = "Test ballerina to openapi")
     public void testBallerinaToOpenAPIGeneration() {
         Path petstoreBal = resourceDir.resolve(Paths.get("bal-files/ballerinaFile.bal"));
         String[] args = {"--input", petstoreBal.toString(), "-o", this.tmpDir.toString()};
