@@ -1,5 +1,4 @@
  import ballerina/http;
- import ballerina/log;
 
  //listener http:Listener helloEp = new (9090);
  listener http:Listener ep1 = new(443, config = {host: "petstore.swagger.io"});
