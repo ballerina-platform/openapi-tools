@@ -99,7 +99,7 @@ import static org.ballerinalang.net.http.HttpConstants.HTTP_METHOD_GET;
  */
 public class OpenApiResourceMapper {
     private SemanticModel semanticModel;
-    private Paths pathObject = new Paths();;
+    private Paths pathObject = new Paths();
     private Components components = new Components();
 
     /**
@@ -116,7 +116,6 @@ public class OpenApiResourceMapper {
     public Components getComponents() {
         return components;
     }
-
     /**
      * This method will convert ballerina resource to openApi path objects.
      *
@@ -318,7 +317,7 @@ public class OpenApiResourceMapper {
                     apiResponses.put("200", apiResponse);
                 } else if (typeNode instanceof SimpleNameReferenceNode) {
                     SimpleNameReferenceNode recordNode  = (SimpleNameReferenceNode) typeNode;
-                    Map<String, Schema> schema = new HashMap<>();
+                    Map<String, Schema> schema = components.getSchemas();
                     handleReferencePayload(op, recordNode, schema, MediaType.APPLICATION_JSON, null, apiResponses);
                 } else if (typeNode.kind().equals(SyntaxKind.UNION_TYPE_DESC)) {
                     //line-No 304 - 330 commented due to handle advance response scenario in further implementation.
@@ -380,7 +379,7 @@ public class OpenApiResourceMapper {
                             String nodeType = type.toString().toLowerCase(Locale.ENGLISH).trim();
                             mediaType = generateMIMETypeForBallerinaType(nodeType);
                             if (type.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
-                                Map<String, Schema> schemas = new HashMap<>();
+                                Map<String, Schema> schemas = components.getSchemas();
                                 mediaType = MediaType.APPLICATION_JSON;
                                 SimpleNameReferenceNode nameRefNode =  (SimpleNameReferenceNode) type;
                                 handleReferencePayload(op, nameRefNode, schemas, mediaType, null,
@@ -404,7 +403,7 @@ public class OpenApiResourceMapper {
                     apiResponses.put("500", apiResponse);
                 } else if (typeNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
                     ArrayTypeDescriptorNode array = (ArrayTypeDescriptorNode) typeNode;
-                    Map<String, Schema> schemas = new HashMap<>();
+                    Map<String, Schema> schemas = components.getSchemas();
                     if (array.memberTypeDesc().kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
                         handleReferencePayload(op, (SimpleNameReferenceNode) array.memberTypeDesc(), schemas,
                                 MediaType.APPLICATION_JSON, null ,
@@ -521,7 +520,7 @@ public class OpenApiResourceMapper {
                     RequiredParameterNode bodyParam = (RequiredParameterNode) expr;
                     if (bodyParam.typeName() instanceof TypeDescriptorNode && !bodyParam.annotations().isEmpty()) {
                         NodeList<AnnotationNode> annotations = bodyParam.annotations();
-                        Map<String, Schema> schema = new HashMap<>();
+                        Map<String, Schema> schema = components.getSchemas();
                         for (AnnotationNode annotation: annotations) {
                             handlePayloadAnnotation(operationAdaptor, (RequiredParameterNode) expr, bodyParam,
                                     schema, annotation);
@@ -699,19 +698,24 @@ public class OpenApiResourceMapper {
                         if (recordVariable.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
                             TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
                             handleRecordPayload(queryParam, schema, typeRecord);
+                            schema = components.getSchemas();
                         }
                     }
                     if (property instanceof ArraySchema) {
                         setArrayProperty(queryParam, schema, field.getValue(), (ArraySchema) property);
+                        schema = components.getSchemas();
                     }
                     schemaProperties.put(field.getKey(), property);
                 }
                 componentSchema.setProperties(schemaProperties);
             }
         }
-
-        if (!schema.containsKey(componentName)) {
+        if ((schema != null) && (!schema.containsKey(componentName))) {
             //Set properties for the schema
+            schema.put(componentName, componentSchema);
+            this.components.setSchemas(schema);
+        } else if (schema == null) {
+            schema = new HashMap<>();
             schema.put(componentName, componentSchema);
             this.components.setSchemas(schema);
         }
