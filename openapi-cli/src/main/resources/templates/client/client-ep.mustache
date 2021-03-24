@@ -22,8 +22,8 @@ public client class {{cut info.title " "}}Client {
 
         // TODO: Update the request as needed
     {{#equals . "GET"}}var response = ep->{{lower .}}("{{../../../key}}", message = request);{{else}}{{#equals . "HEAD"}}
-        var response = ep->{{lower .}}({{../../../key}}, message = request);{{else}}{{#equals . "OPTIONS"}}
-        var response = ep->{{lower .}}({{../../../key}}, message = request);{{/equals}}{{/equals}}
+        var response = ep->{{lower .}}({{../../../key}});{{else}}{{#equals . "OPTIONS"}}
+        var response = ep->{{lower .}}({{../../../key}});{{/equals}}{{/equals}}
         var response = ep->{{lower .}}({{../../../key}}, request);{{/equals}}
         if (response is http:Response) {
             return response;
@@ -36,9 +36,9 @@ public client class {{cut info.title " "}}Client {
         http:Request request = new;
 
         // TODO: Update the request as needed{{#equals key "GET"}}
-        var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}}, message = request);{{else}}{{#equals key "HEAD"}}
-        var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}}, message = request);{{else}}{{#equals key "OPTIONS"}}
-        var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}}, message = request);{{else}}
+        var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}});{{else}}{{#equals key "HEAD"}}
+        var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}});{{else}}{{#equals key "OPTIONS"}}
+        var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}});{{else}}
         var response = {{{operationId}}}Ep->{{lower .}}({{../../../key}}, request);{{/equals}}{{/equals}}{{/equals}}
 
         if (response is http:Response) {
@@ -56,9 +56,9 @@ public client class {{cut info.title " "}}Client {
         request.setPayload({{key}});{{/properties}}{{/schema}}{{/selectedMedia}}{{/requestBody}}{{/if}}{{/requestBody.selectedMedia.schema.type}}{{/equals}}{{/requestBody}}
 
         // TODO: Update the request as needed{{#equals key "GET"}}
-        var response = {{{operationId}}}Ep->{{lower key}}({{../../key}}, message = request);{{else}}{{#equals key "HEAD"}}
-        var response = {{{operationId}}}Ep->{{lower key}}({{../../key}}, message = request);{{else}}{{#equals key "OPTIONS"}}
-        var response = {{{operationId}}}Ep->{{lower key}}({{../../key}}, message = request);{{else}}
+        var response = {{{operationId}}}Ep->{{lower key}}({{../../key}});{{else}}{{#equals key "HEAD"}}
+        var response = {{{operationId}}}Ep->{{lower key}}({{../../key}});{{else}}{{#equals key "OPTIONS"}}
+        var response = {{{operationId}}}Ep->{{lower key}}({{../../key}});{{else}}
         var response = {{{operationId}}}Ep->{{lower key}}({{../../key}}, request);{{/equals}}{{/equals}}{{/equals}}
 
         if (response is http:Response) {
