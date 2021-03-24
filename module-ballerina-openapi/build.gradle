@@ -47,6 +47,7 @@ def platform = "any"
 def snapshotVersion = "-SNAPSHOT"
 def tomlVersion = project.version.replace("${snapshotVersion}", "")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
+def ballerinaCompileConfigFile = new File("$project.projectDir/CompilerPlugin.toml")
 def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
@@ -55,6 +56,7 @@ def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
 def originalConfig = ballerinaConfigFile.text
+def originalCompilerConfig = ballerinaCompileConfigFile.text
 def artifactTestableJar = file("$project.projectDir/target/cache/${packageOrg}/${packageName}/${tomlVersion}/any/")
 
 task unpackJballerinaTools(type: Copy) {
@@ -104,9 +106,23 @@ task updateTomlFile {
     }
 }
 
+task updateCompilerTomlFile {
+    doLast {
+        def stdlibDependentIoVersion = project.stdlibIoVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentLogVersion = project.stdlibLogVersion.replace("${snapshotVersion}", "")
+
+        def newConfig = ballerinaCompileConfigFile.text.replace("@project.version@", project.version)
+        newConfig = newConfig.replace("@toml.version@", tomlVersion)
+        newConfig = newConfig.replace("@stdlib.io.version@", stdlibDependentIoVersion)
+        newConfig = newConfig.replace("@stdlib.log.version@", stdlibDependentLogVersion)
+        ballerinaCompileConfigFile.text = newConfig
+    }
+}
+
 task revertTomlFile {
     doLast {
         ballerinaConfigFile.text = originalConfig
+        ballerinaCompileConfigFile.text = originalCompilerConfig
     }
 }
 
@@ -118,6 +134,7 @@ task ballerinaBuild {
     dependsOn(unpackStdLibs)
     dependsOn(copyStdlibs)
     dependsOn(updateTomlFile)
+    dependsOn(updateCompilerTomlFile)
     dependsOn(test)
 //    dependsOn(ballerinaTest)
     finalizedBy(revertTomlFile)
@@ -176,6 +193,7 @@ task ballerinaBuild {
         }
 
         ballerinaConfigFile.text = originalConfig
+        ballerinaCompileConfigFile.text = originalCompilerConfig
     }
 
     outputs.dir artifactCacheParent
@@ -190,6 +208,7 @@ task ballerinaTest {
     dependsOn(unpackStdLibs)
     dependsOn(copyStdlibs)
     dependsOn(updateTomlFile)
+    dependsOn(updateCompilerTomlFile)
     finalizedBy(revertTomlFile)
 
     def debugParams = ""
@@ -265,5 +284,6 @@ ballerinaBuild.dependsOn ":openapi-validator:build"
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
 updateTomlFile.dependsOn copyStdlibs
-ballerinaBuild.dependsOn updateTomlFile
+updateCompilerTomlFile.dependsOn updateTomlFile
+ballerinaBuild.dependsOn updateCompilerTomlFile
 build.dependsOn(ballerinaBuild)

@@ -200,6 +200,43 @@ public class ValidatorTest {
     }
 
     public static ServiceDeclarationNode getServiceDeclarationNode(Project project) {
+        SyntaxTree syntaxTree;
+        Package packageName = project.currentPackage();
+        DocumentId docId;
+        Document doc;
+        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
+            docId = project.documentId(project.sourceRoot());
+            ModuleId moduleId = docId.moduleId();
+            doc = project.currentPackage().module(moduleId).document(docId);
+        } else {
+            // Take module instance for traversing the syntax tree
+            Module currentModule = packageName.getDefaultModule();
+            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
 
+            docId = documentIterator.next();
+            doc = currentModule.document(docId);
+        }
+        syntaxTree = doc.syntaxTree();
+        ModulePartNode modulePartNode = syntaxTree.rootNode();
+        for (Node node : modulePartNode.members()) {
+            SyntaxKind syntaxKind = node.kind();
+            // Load a listen_declaration for the server part in the yaml spec
+            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
+                return (ServiceDeclarationNode) node;
+            }
+        }
+        return null;
+    }
+    public static AnnotationNode getAnnotationNode(ServiceDeclarationNode serviceDeclarationNode) {
+        // Check annotation is available
+        Optional<MetadataNode> metadata = serviceDeclarationNode.metadata();
+        MetadataNode openApi  = metadata.orElseThrow();
+        if (!openApi.annotations().isEmpty()) {
+            NodeList<AnnotationNode> annotations = openApi.annotations();
+            for (AnnotationNode annotationNode : annotations) {
+                return annotationNode;
+            }
+        }
+        return null;
     }
 }

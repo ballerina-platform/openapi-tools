@@ -45,6 +45,7 @@ under the License.
             <class name="org.ballerinalang.openapi.validator.tests.BaseTests"/>
             <class name="org.ballerinalang.openapi.validator.tests.RecordValidationTests"/>
             <class name="org.ballerinalang.openapi.validator.tests.ResourceToOperationTests"/>
+<!--            <class name="org.ballerinalang.openapi.validator.tests.ServiceValidationTests"></class>-->
 
         </classes>
     </test>

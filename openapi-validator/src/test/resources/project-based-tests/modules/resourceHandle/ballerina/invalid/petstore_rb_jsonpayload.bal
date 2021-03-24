@@ -1,4 +1,5 @@
 import ballerina/http;
+import ballerina/openapi;
 
 type User record {
      int userName;

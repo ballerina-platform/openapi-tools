@@ -19,6 +19,7 @@
 package org.ballerinalang.openapi.validator;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -260,7 +261,11 @@ public class ResourceValidator {
         if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
             VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
             typeSymbol = symbol1.typeDescriptor();
+        } else if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.PARAMETER)) {
+            ParameterSymbol symbol1 = (ParameterSymbol) symbol.orElseThrow();
+            typeSymbol = symbol1.typeDescriptor();
         }
+
         return typeSymbol;
     }
 

@@ -17,43 +17,18 @@
  */
 package org.ballerinalang.openapi.validator;
 
-import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.CompilerPlugin;
 import io.ballerina.projects.plugins.CompilerPluginContext;
-import io.ballerina.tools.diagnostics.Diagnostic;
-import org.ballerinalang.compiler.plugins.SupportedAnnotationPackages;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Compiler plugin for ballerina OpenAPI/service validator.
  */
-@SupportedAnnotationPackages(value = {"ballerina/openapi"})
+//@SupportedAnnotationPackages(value = {"ballerina/openapi"})
 public class OpenAPIValidatorPlugin extends CompilerPlugin {
 
     @Override
     public void init(CompilerPluginContext compilerPluginContext) {
         compilerPluginContext.addCodeAnalyzer(new OpenAPICodeAnalyzer());
-    }
-
-
-    public List<Diagnostic> codeAnalyze(Project project) {
-        ServiceValidator serviceValidator = new ServiceValidator();
-        List<Diagnostic> diagnostics = new ArrayList<>();
-        try {
-            diagnostics = serviceValidator.validateResourceFunctions(project);
-            if (diagnostics.isEmpty()) {
-                return Collections.emptyList();
-            }
-        } catch (IOException e) {
-            // handle proper
-        } catch (OpenApiValidatorException e) {
-            // need to handle
-        }
-        return diagnostics;
     }
 
 }

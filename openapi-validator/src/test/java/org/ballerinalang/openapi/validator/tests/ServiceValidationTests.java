@@ -15,7 +15,9 @@
  */
 package org.ballerinalang.openapi.validator.tests;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.projects.Project;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -40,6 +42,7 @@ public class ServiceValidationTests {
             .toAbsolutePath();
     private OpenAPI api;
     private Project project;
+    private SyntaxTree syntaxTree;
     private ServiceDeclarationNode serviceDeclarationNode;
     private List<String> tag = new ArrayList<>();
     private List<String> operation = new ArrayList<>();
@@ -54,10 +57,12 @@ public class ServiceValidationTests {
     public void testUndocumentedPath() throws OpenApiValidatorException, IOException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore.bal"));
 //        diagnostics = ServiceValidator.validateResourceFunctions(project);
-        Assert.assertTrue(!diagnostics.isEmpty());
-        Assert.assertEquals(diagnostics.get(0).message(), "Couldn't find a Ballerina service resource for " +
+        syntaxTree = ValidatorTest.getSyntaxTree(project);
+        syntaxTree.diagnostics();
+        Assert.assertTrue(!this.diagnostics.isEmpty());
+        Assert.assertEquals(this.diagnostics.get(0).message(), "Couldn't find a Ballerina service resource for " +
                 "the path '/user' which is documented in the OpenAPI contract");
-        diagnostics.clear();
+        this.diagnostics.clear();
     }
 
     @Test(description = "test for undocumented Method in contract missing method in bal service")
@@ -135,11 +140,14 @@ public class ServiceValidationTests {
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
     }
 
-    @Test(enabled = true, description = "Test for extracting details from openapi annotaions")
-    public void testExtractAnnotation() throws OpenApiValidatorException, IOException {
+    @Test(description = "Test for extracting details from openapi annotaions")
+    public void testExtractAnnotation() throws IOException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/annotation/petstore.bal"));
 //        diagnostics = ServiceValidator.validateResourceFunctions(project);
-        serviceDeclarationNode
+        serviceDeclarationNode = ValidatorTest.getServiceDeclarationNode(project);
+        AnnotationNode annotationNode = ValidatorTest.getAnnotationNode(serviceDeclarationNode);
+        DiagnosticSeverity kind = DiagnosticSeverity.ERROR;
+//        DiagnosticSeverity diag = ServiceValidator.extractOpenAPIAnnotation(kind, filters, annotationNode);
         Assert.assertTrue(!diagnostics.isEmpty());
         Assert.assertEquals(diagnostics.get(0).message(), "Couldn't find a Ballerina service resource for " +
                 "the path '/user' which is documented in the OpenAPI contract");

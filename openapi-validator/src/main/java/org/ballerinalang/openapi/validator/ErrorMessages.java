@@ -72,7 +72,7 @@ class ErrorMessages {
     static String[] unimplementedOpenAPIPath(String path) {
         String[] error = new String[2];
         error[0] = "BO0007";
-        error[1] =  String.format("Couldn't find a Ballerina service resource for the path '%s' " +
+        error[1] =  String.format("Could not find a Ballerina service resource for the path %s " +
                 "which is documented in the OpenAPI contract", path);
         return  error;
     }
