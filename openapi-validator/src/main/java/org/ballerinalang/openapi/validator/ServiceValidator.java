@@ -109,6 +109,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         }
     }
 
+    //Method for getting diagnostic using serviceNode.
     private DiagnosticSeverity getDiagnosticFromServiceNode(List<FunctionDefinitionNode> functions,
                                                             DiagnosticSeverity kind, Filters filters,
                                                             SemanticModel semanticModel, SyntaxTree syntaxTree,
@@ -207,6 +208,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         return kind;
     }
 
+    //Method for validate summarised resource function path against to openapi operations paths.
     private void resourcePathAgainstToOpenAPIPath(DiagnosticSeverity kind,
                                                   Map<String, ResourcePathSummary> resourcePathMap,
                                                   List<OpenAPIPathSummary> openAPIPathSummaries,
@@ -241,6 +243,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         }
     }
 
+    //Method for validate openapi operations paths against to summarised resource function path.
     private static void openAPIPathAgainstToBallerinaServicePath(DiagnosticSeverity kind,
                                                                  ServiceDeclarationNode serviceDeclarationNode,
                                                                  Map<String, ResourcePathSummary> resourcePathMap,
@@ -296,6 +299,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         }
     }
 
+    //Extract details from openapi annotation.
     public static DiagnosticSeverity extractOpenAPIAnnotation(DiagnosticSeverity kind, Filters filters,
                                                               AnnotationNode annotationNode, Path ballerinaFilePath)
             throws IOException {
@@ -559,7 +563,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         parseOptions.setResolve(true);
         parseOptions.setResolveFully(true);
         // Enable this if you need to create new schema from references
-//        parseOptions.setFlatten(true);
+        //parseOptions.setFlatten(true);
 
         if (!Files.exists(contractPath)) {
             throw new OpenApiValidatorException(ErrorMessages.invalidFilePath(definitionURI)[1]);

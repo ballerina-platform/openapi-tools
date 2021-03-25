@@ -73,7 +73,6 @@ public class BaseTests {
         // 1. Initializing the project instance
         Project project = null;
         try {
-//            project = BuildProject.load(projectPath);
             project = SingleFileProject.load(projectPath);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -85,14 +84,14 @@ public class BaseTests {
         // 4. Load syntax tree
         PackageName pkgName = PackageName.from("openapiValidator");
         ModuleName moduleName = ModuleName.from(currentPackage.packageName(), testModule);
-//        Module module = currentPackage.module(moduleName);
+        //Module module = currentPackage.module(moduleName);
         Iterator<DocumentId> documentIterator = module.documentIds().iterator();
         while (documentIterator.hasNext()) {
             DocumentId docId = documentIterator.next();
             Document doc = module.document(docId);
             SyntaxTree syntaxTree = doc.syntaxTree();
             ModulePartNode modulePartNode = syntaxTree.rootNode();
-//            WorkspaceManager workspaceManager = new BallerinaWorkspaceManager();
+            //WorkspaceManager workspaceManager = new BallerinaWorkspaceManager();
             // Load semantic Model for given ballerina file
             SemanticModel semanticModel = module.getCompilation().getSemanticModel();
             for (Node node : modulePartNode.members()) {
@@ -149,10 +148,6 @@ public class BaseTests {
                                     RequiredParameterNode requiredParameterNode = (RequiredParameterNode) paramNode;
                                     if (requiredParameterNode.typeName().kind()
                                             .equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
-//                                        Optional<Symbol> symbol = semanticModel.symbol(fileName.toString(),
-//                                                LinePosition.from(requiredParameterNode.lineRange().
-//                                                startLine().line(),
-//                                                     requiredParameterNode.lineRange().startLine().offset()));
                                         Optional<Symbol> symbol = semanticModel.symbol(requiredParameterNode);
                                         Symbol symbol2 = symbol.orElseThrow();
                                         if (symbol2 instanceof BallerinaVariableSymbol) {
@@ -163,11 +158,6 @@ public class BaseTests {
                                                 paramType[0] = typeSymbol;
                                             }
                                         }
-
-//                                        symbol.ifPresent(symbol1 -> {
-//                                            paramType[0] = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
-//                                             //return record type
-//                                        });
                                         inputs.setParamType(paramType[0]);
                                         inputs.setSyntaxTree(requiredParameterNode.syntaxTree());
                                         inputs.setSemanticModel(semanticModel);
