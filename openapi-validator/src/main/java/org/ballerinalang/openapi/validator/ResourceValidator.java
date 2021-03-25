@@ -308,9 +308,9 @@ public class ResourceValidator {
                         List<ValidationError> validationErrors =
                                 TypeSymbolToJsonValidatorUtil.validate(value, typeSymbol, syntaxTree, semanticModel,
                                         bodyNode.typeName().toString().trim(), location);
-                        if (!validationErrors.isEmpty()) {
-                            validationErrorList.addAll(validationErrors);
-                        }
+//                        if (!validationErrors.isEmpty()) {
+//                            validationErrorList.addAll(validationErrors);
+//                        }
                         if (validationErrors.isEmpty()) {
                             isOParamExit = true;
                         } else {
