@@ -375,8 +375,8 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "listener_scenario03.yaml");
     }
 
-    @Test(description = "Generate OpenAPI spec for multiple listners")
-    public void tetsMultipleRecords() throws OpenApiConverterException {
+    @Test(description = "Generate OpenAPI spec for multiple records")
+    public void testMultipleRecords() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("rb_scenario11.bal");
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario11.yaml");
     }

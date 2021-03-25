@@ -710,7 +710,7 @@ public class OpenApiResourceMapper {
                 componentSchema.setProperties(schemaProperties);
             }
         }
-        if ((schema != null) && (!schema.containsKey(componentName))) {
+        if (schema != null && !schema.containsKey(componentName)) {
             //Set properties for the schema
             schema.put(componentName, componentSchema);
             this.components.setSchemas(schema);
