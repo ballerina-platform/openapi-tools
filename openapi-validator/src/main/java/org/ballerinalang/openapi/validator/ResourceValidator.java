@@ -259,11 +259,11 @@ public class ResourceValidator {
         Optional<Symbol> symbol = semanticModel.symbol(token);
         TypeSymbol typeSymbol = null;
         if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
-            VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
-            typeSymbol = symbol1.typeDescriptor();
+            VariableSymbol symbolVar = (VariableSymbol) symbol.orElseThrow();
+            typeSymbol = symbolVar.typeDescriptor();
         } else if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.PARAMETER)) {
-            ParameterSymbol symbol1 = (ParameterSymbol) symbol.orElseThrow();
-            typeSymbol = symbol1.typeDescriptor();
+            ParameterSymbol symbolParam = (ParameterSymbol) symbol.orElseThrow();
+            typeSymbol = symbolParam.typeDescriptor();
         }
 
         return typeSymbol;
