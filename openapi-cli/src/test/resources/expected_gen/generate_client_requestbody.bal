@@ -11,7 +11,7 @@ public client class openapipetstoreClient {
 
     public function init(openapipetstoreClientConfig config) {
         http:Client httpEp = checkpanic new(config.serviceUrl, {auth: config.clientConfig.auth, cache:
-        config.clientConfig.cache});
+            config.clientConfig.cache});
         self.clientEp = httpEp;
         self.config = config;
     }
@@ -30,5 +30,4 @@ public client class openapipetstoreClient {
         }
         return <error>response;
     }
-
 }

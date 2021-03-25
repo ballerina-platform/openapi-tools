@@ -11,7 +11,7 @@ public client class openapipetstoreClient {
 
     public function init(openapipetstoreClientConfig config) {
         http:Client httpEp = checkpanic new(config.serviceUrl, {auth: config.clientConfig.auth, cache:
-        config.clientConfig.cache});
+            config.clientConfig.cache});
         self.clientEp = httpEp;
         self.config = config;
     }
@@ -21,7 +21,7 @@ public client class openapipetstoreClient {
         http:Request request = new;
 
         // TODO: Update the request as needed
-        var response = listPetsEp->get("/pets", message = request);
+        var response = listPetsEp->get("/pets");
 
         if (response is http:Response) {
             return response;
@@ -47,7 +47,7 @@ public client class openapipetstoreClient {
         http:Request request = new;
 
         // TODO: Update the request as needed
-        var response = showPetByIdEp->get(string `/pets/${petId}`, message = request);
+        var response = showPetByIdEp->get(string `/pets/${petId}`);
 
         if (response is http:Response) {
             return response;
