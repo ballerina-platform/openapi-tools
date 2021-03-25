@@ -1,4 +1,4 @@
-importballerina/http;
+import ballerina/http;
 
 listener http:Listener helloEp = new (9090);
 
