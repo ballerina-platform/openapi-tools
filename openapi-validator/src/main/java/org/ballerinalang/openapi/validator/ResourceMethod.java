@@ -77,9 +77,4 @@ public class ResourceMethod {
     public void setResourcePosition(Location position) {
         this.resourcePosition = position;
     }
-
-    public Location getResourcePosition(NodeLocation location) {
-        return resourcePosition;
-    }
-
 }
