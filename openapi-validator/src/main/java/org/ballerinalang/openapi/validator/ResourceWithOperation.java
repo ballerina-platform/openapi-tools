@@ -287,29 +287,31 @@ public class ResourceWithOperation {
             String functionMethod = functionDefinitionNode.functionName().text().trim();
             Map<String, Node> parameterNodeMap = new HashMap<>();
 
+            StringBuilder stringBuilder = new StringBuilder();
             String functionPath = "/";
+            stringBuilder.append(functionPath);
             Iterator<Node> pathNodeIter = nodes.iterator();
             while (pathNodeIter.hasNext()) {
                 Node next = pathNodeIter.next();
                 String node = next.toString().trim();
                 if (next instanceof ResourcePathParameterNode) {
                     ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) next;
-                    String paramName = pathParameterNode.paramName().text();
+                    String paramName = pathParameterNode.paramName().text().trim();
                     node = "{" + paramName + "}";
                     parameterNodeMap.put(paramName, next);
                 }
-                functionPath = functionPath + node;
+                stringBuilder.append(node);
             }
-            if (resourceSummaryList.containsKey(functionPath)) {
+            if (resourceSummaryList.containsKey(stringBuilder.toString())) {
                 setParametersToMethod(functionDefinitionNode, functionMethod, parameterNodeMap,
-                        resourceSummaryList.get(functionPath));
+                        resourceSummaryList.get(stringBuilder.toString()));
             } else {
                 ResourcePathSummary resourcePathSummary = new ResourcePathSummary();
-                //Set location as first function loacation
-                resourcePathSummary.setPath(functionPath);
+                //Set location as first function location
+                resourcePathSummary.setPath(stringBuilder.toString());
                 resourcePathSummary.setPathPosition(functionDefinitionNode.location());
                 setParametersToMethod(functionDefinitionNode, functionMethod, parameterNodeMap, resourcePathSummary);
-                resourceSummaryList.put(functionPath, resourcePathSummary);
+                resourceSummaryList.put(stringBuilder.toString(), resourcePathSummary);
             }
         }
         return resourceSummaryList;
@@ -350,7 +352,7 @@ public class ResourceWithOperation {
      * @param contract                openAPI contract
      * @return List of summarized OpenAPIPathSummary
      */
-    public static List<OpenAPIPathSummary> summarizeOpenAPI(OpenAPI contract) {
+    private static List<OpenAPIPathSummary> summarizeOpenAPI(OpenAPI contract) {
         List<OpenAPIPathSummary> openAPISummaries = new ArrayList<>();
         io.swagger.v3.oas.models.Paths paths = contract.getPaths();
         for (Map.Entry pathItem : paths.entrySet()) {

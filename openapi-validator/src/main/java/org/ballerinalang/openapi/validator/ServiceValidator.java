@@ -84,7 +84,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         SemanticModel semanticModel = syntaxNodeAnalysisContext.semanticModel();
         SyntaxTree syntaxTree = syntaxNodeAnalysisContext.syntaxTree();
 
-        //Generate ballerina file path
+        // Generate ballerina file path
         Package aPackage = syntaxNodeAnalysisContext.currentPackage();
         DocumentId documentId = syntaxNodeAnalysisContext.documentId();
         Optional<Path> path = aPackage.project().documentPath(documentId);
@@ -132,8 +132,9 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                         try {
                             kind = extractOpenAPIAnnotation(kind, filters, annotationNode, ballerinaFilePath);
                         } catch (IOException e) {
-                            DiagnosticInfo diagnosticInfo = new DiagnosticInfo("BAL_OPENAPI_VALIDATOR_0019",
-                                    e.getMessage(), DiagnosticSeverity.ERROR);
+                            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
+                                    ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019, e.getMessage(),
+                                    DiagnosticSeverity.ERROR);
                             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
                                     , location);
                             validations.add(diagnostic);
@@ -198,7 +199,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 openAPIPathAgainstToBallerinaServicePath(kind, serviceDeclarationNode, resourcePathMap,
                         openAPIPathSummaries, semanticModel, syntaxTree);
             } catch (OpenApiValidatorException e) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo("BAL_OPENAPI_VALIDATOR_0019",
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019,
                         e.getMessage(), DiagnosticSeverity.ERROR);
                 Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
                         , location);
@@ -228,8 +229,9 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                     postErrors = ResourceValidator.validateResourceAgainstOperation(
                                             operation.getValue(), method.getValue(), semanticModel, syntaxTree);
                                 } catch (OpenApiValidatorException e) {
-                                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo("BAL_OPENAPI_VALIDATOR_0019",
-                                            e.getMessage(), DiagnosticSeverity.ERROR);
+                                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
+                                            ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019, e.getMessage(),
+                                            DiagnosticSeverity.ERROR);
                                     Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
                                             , location);
                                     validations.add(diagnostic);
@@ -300,7 +302,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
     }
 
     //Extract details from openapi annotation.
-    public static DiagnosticSeverity extractOpenAPIAnnotation(DiagnosticSeverity kind, Filters filters,
+    private static DiagnosticSeverity extractOpenAPIAnnotation(DiagnosticSeverity kind, Filters filters,
                                                               AnnotationNode annotationNode, Path ballerinaFilePath)
             throws IOException {
         SeparatedNodeList<MappingFieldNode> fields = annotationNode.annotValue().orElseThrow().fields();
@@ -311,13 +313,12 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 //Handle openapi contract path if path is empty return exceptions.
                 ExpressionNode openAPIAnnotation = expressionNode.orElseThrow();
                 if (specificFieldNode.fieldName().toString().trim().equals("contract")) {
-                    Path sourceRoot = ballerinaFilePath;
                     Path openapiPath = Paths.get(openAPIAnnotation.toString().replaceAll("\"", "").trim());
                     Path relativePath;
                     if (Paths.get(openapiPath.toString()).isAbsolute()) {
                         relativePath = Paths.get(openapiPath.toString());
                     } else {
-                        File file = new File(sourceRoot.toString());
+                        File file = new File(ballerinaFilePath.toString());
                         File parentFolder = new File(file.getParent());
                         File openapiContract = new File(parentFolder, openapiPath.toString());
                         relativePath = Paths.get(openapiContract.getCanonicalPath());
@@ -326,8 +327,9 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                         try {
                             openAPI = ServiceValidator.parseOpenAPIFile(relativePath.toString());
                         } catch (OpenApiValidatorException e) {
-                            DiagnosticInfo diagnosticInfo = new DiagnosticInfo("BAL_OPENAPI_VALIDATOR_0019",
-                                    e.getMessage(), DiagnosticSeverity.ERROR);
+                            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
+                                    ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019, e.getMessage(),
+                                    DiagnosticSeverity.ERROR);
                             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
                                     , annotationNode.location());
                             validations.add(diagnostic);
@@ -357,9 +359,6 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                         case "excludeTags":
                             List<String> eTags = setFilters(list);
                             filters.setExcludeTag(eTags);
-                            break;
-                        case "operatoins":
-                        case "excludeOperations":
                             break;
                         default:
                             break;
@@ -470,32 +469,17 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 if (postErr instanceof TypeMismatch) {
                     generateTypeMisMatchDiagnostic(kind, resourcePathSummary, method, postErr);
                 } else if (postErr instanceof MissingFieldInJsonSchema) {
-
-                    String[] error =
-                            ErrorMessages.undocumentedFieldInRecordParam(postErr.getFieldName(),
-                                    ((MissingFieldInJsonSchema) postErr).getRecordName(),
-                                    method.getKey(), resourcePathSummary.getPath());
-                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
-                    Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                                    ((MissingFieldInJsonSchema) postErr).getLocation());
-                    validations.add(diagnostic);
-
+                    generateMissingFieldInJsonSchemaDiagnostic(kind, resourcePathSummary, method,
+                            (MissingFieldInJsonSchema) postErr);
                 } else if (postErr instanceof OneOfTypeValidation) {
                     if (!(((OneOfTypeValidation) postErr).getBlockErrors()).isEmpty()) {
-                        List<ValidationError> oneOferrorlist = ((OneOfTypeValidation) postErr).getBlockErrors();
-                        for (ValidationError oneOfvalidation : oneOferrorlist) {
-                            if (oneOfvalidation instanceof TypeMismatch) {
-                                generateTypeMisMatchDiagnostic(kind, resourcePathSummary, method, oneOfvalidation);
-                            } else if (oneOfvalidation instanceof MissingFieldInJsonSchema) {
-
-                                String[] error =
-                                        ErrorMessages.undocumentedFieldInRecordParam(oneOfvalidation.getFieldName(),
-                                                ((MissingFieldInJsonSchema) oneOfvalidation).getRecordName(),
-                                                method.getKey(), resourcePathSummary.getPath());
-                                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
-                                Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                                                ((MissingFieldInJsonSchema) oneOfvalidation).getLocation());
-                                validations.add(diagnostic);
+                        List<ValidationError> oneOfErrorlist = ((OneOfTypeValidation) postErr).getBlockErrors();
+                        for (ValidationError oneOfValidation : oneOfErrorlist) {
+                            if (oneOfValidation instanceof TypeMismatch) {
+                                generateTypeMisMatchDiagnostic(kind, resourcePathSummary, method, oneOfValidation);
+                            } else if (oneOfValidation instanceof MissingFieldInJsonSchema) {
+                                generateMissingFieldInJsonSchemaDiagnostic(kind, resourcePathSummary, method,
+                                        (MissingFieldInJsonSchema) oneOfValidation);
                             }
                         }
                     }
@@ -509,6 +493,18 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 }
             }
         }
+    }
+
+    private static void generateMissingFieldInJsonSchemaDiagnostic(DiagnosticSeverity kind,
+                                                                   ResourcePathSummary resourcePathSummary,
+                                                                   Map.Entry<String, ResourceMethod> method,
+                                                                   MissingFieldInJsonSchema postErr) {
+
+        String[] error = ErrorMessages.undocumentedFieldInRecordParam(postErr.getFieldName(),
+                        postErr.getRecordName(), method.getKey(), resourcePathSummary.getPath());
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
+        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, postErr.getLocation());
+        validations.add(diagnostic);
     }
 
     /**
@@ -562,8 +558,6 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
         parseOptions.setResolveFully(true);
-        // Enable this if you need to create new schema from references
-        //parseOptions.setFlatten(true);
 
         if (!Files.exists(contractPath)) {
             throw new OpenApiValidatorException(ErrorMessages.invalidFilePath(definitionURI)[1]);

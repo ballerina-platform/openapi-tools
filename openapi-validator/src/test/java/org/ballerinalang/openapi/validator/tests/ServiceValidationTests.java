@@ -19,7 +19,6 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.projects.Project;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -55,16 +54,13 @@ public class ServiceValidationTests {
             .toAbsolutePath();
     private OpenAPI api;
     private Project project;
-    private SyntaxTree syntaxTree;
-    private ServiceDeclarationNode serviceDeclarationNode;
     private List<String> tag = new ArrayList<>();
     private List<String> operation = new ArrayList<>();
     private List<String> excludeTag = new ArrayList<>();
     private List<String> excludeOperation = new ArrayList<>();
-    private DiagnosticSeverity kind;
     private List<Diagnostic> diagnostics;
 
-    @Test(enabled = true, description = "test for undocumented Path in contract not in service")
+    @Test(description = "test for undocumented Path in contract not in service")
     public void testUndocumentedPath() throws OpenApiValidatorException, IOException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore.bal"));
         ServiceDeclarationNode serviceDeclarationNode = ValidatorTest.getServiceDeclarationNode(project);
@@ -78,7 +74,7 @@ public class ServiceValidationTests {
         List<OpenAPIPathSummary> openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filters);
         List<OpenapiServiceValidationError> openApiMissingServiceMethod =
                 ResourceWithOperation.checkOperationsHasFunctions(openAPIPathSummaries, resourcePathMap);
-        Assert.assertTrue(!openApiMissingServiceMethod.isEmpty());
+        Assert.assertFalse(openApiMissingServiceMethod.isEmpty());
         Assert.assertTrue(openApiMissingServiceMethod.get(0) instanceof OpenapiServiceValidationError);
         Assert.assertEquals(openApiMissingServiceMethod.get(0).getServicePath(), "/user");
     }
@@ -112,7 +108,7 @@ public class ServiceValidationTests {
         List<OpenAPIPathSummary> openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filters);
         List<OpenapiServiceValidationError> openApiMissingServiceMethod =
                 ResourceWithOperation.checkOperationsHasFunctions(openAPIPathSummaries, resourcePathMap);
-        Assert.assertTrue(!openApiMissingServiceMethod.isEmpty());
+        Assert.assertFalse(openApiMissingServiceMethod.isEmpty());
         Assert.assertTrue(openApiMissingServiceMethod.get(0) instanceof OpenapiServiceValidationError);
         Assert.assertEquals(openApiMissingServiceMethod.get(0).getServicePath(), "/pets");
         Assert.assertEquals(openApiMissingServiceMethod.get(0).getServiceOperation(), "post");
@@ -159,9 +155,8 @@ public class ServiceValidationTests {
     }
 
     @Test(description = "test for all the Path , Query, Payload scenarios", enabled = false)
-    public void testRecordTypeMismatch() throws OpenApiValidatorException, IOException {
+    public void testRecordTypeMismatch() {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/all_petstore.bal"));
-//        diagnostics = ServiceValidator.validateResourceFunctions(project);
         Assert.assertTrue(!diagnostics.isEmpty());
         Assert.assertEquals(diagnostics.get(0).message(), "Type mismatch with parameter 'id' for the method" +
                 " 'delete' of the path '/pets/{id}'.In OpenAPI contract its type is 'integer' and resources type is " +

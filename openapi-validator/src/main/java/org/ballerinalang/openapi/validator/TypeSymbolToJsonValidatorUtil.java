@@ -62,7 +62,7 @@ public class TypeSymbolToJsonValidatorUtil {
         String ballerinaType = "";
         List<ValidationError> validationErrorList = new ArrayList<>();
         boolean isExitType = false;
-        //Check given type is record or not
+        //Check given type is a record or not
         if (typeSymbol instanceof RecordTypeSymbol || typeSymbol instanceof TypeReferenceTypeSymbol) {
             Map<String, Schema> properties = schema.getProperties();
             if (schema instanceof ObjectSchema) {
@@ -105,7 +105,7 @@ public class TypeSymbolToJsonValidatorUtil {
                 isExitType = true;
                 Optional<TypeSymbol> symbol = semanticModel
                         .type(((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange());
-                if (symbol != null && symbol.isPresent()) {
+                if (symbol.isPresent()) {
                     recordType = ((TypeDefinitionSymbol) symbol.get()).typeDescriptor();
                 }
                 List<ValidationError> recordValidationError = validate(((ArraySchema) schema).getItems(),
@@ -116,15 +116,13 @@ public class TypeSymbolToJsonValidatorUtil {
                     (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof ArrayTypeSymbol)) {
                 // handle nested array
                 isExitType = true;
-                ArrayTypeSymbol traverseNestedArray = (ArrayTypeSymbol) typeSymbol;
-                ArraySchema traversSchemaNestedArray = (ArraySchema) schema;
 
                 TypeSymbol bArrayTypeSymbol = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor();
                 Schema arraySchemaItems = ((ArraySchema) schema).getItems();
 
                 if ((bArrayTypeSymbol instanceof ArrayTypeSymbol) && (arraySchemaItems instanceof ArraySchema)) {
-                    traverseNestedArray = (ArrayTypeSymbol) bArrayTypeSymbol;
-                    traversSchemaNestedArray = (ArraySchema) arraySchemaItems;
+                    ArrayTypeSymbol traverseNestedArray = (ArrayTypeSymbol) bArrayTypeSymbol;
+                    ArraySchema traversSchemaNestedArray = (ArraySchema) arraySchemaItems;
 
                     while ((traverseNestedArray.memberTypeDescriptor() instanceof ArrayTypeSymbol) &&
                             (traversSchemaNestedArray.getItems() instanceof ArraySchema)) {
@@ -167,7 +165,9 @@ public class TypeSymbolToJsonValidatorUtil {
         }
 
         if (!isExitType) {
-            assert schema != null;
+            if (schema == null) {
+                throw new AssertionError();
+            }
             TypeMismatch typeMismatch = new TypeMismatch(paramName, convertTypeToEnum(schemaType),
                     convertTypeToEnum(ballerinaType), location);
             validationErrorList.add(typeMismatch);
@@ -261,7 +261,7 @@ public class TypeSymbolToJsonValidatorUtil {
 
     private static void validateArrayType(List<ValidationError> validationErrorList, RecordFieldSymbol fieldSymbol,
                                       Map.Entry<String, Schema> entry, SyntaxTree syntaxTree,
-                                          SemanticModel semanticModel, String componetName, Location location)
+                                          SemanticModel semanticModel, String componentName, Location location)
             throws OpenApiValidatorException {
 
         ArrayTypeSymbol arraySymbol = null;
@@ -306,7 +306,7 @@ public class TypeSymbolToJsonValidatorUtil {
                     TypeReferenceTypeSymbol recordRefSymbol =
                             (TypeReferenceTypeSymbol) traverseNestedArraySymbol.memberTypeDescriptor();
                     List<ValidationError> recordItemErrors = TypeSymbolToJsonValidatorUtil.validate(recordSchema,
-                            recordRefSymbol.typeDescriptor(), syntaxTree, semanticModel, componetName, location);
+                            recordRefSymbol.typeDescriptor(), syntaxTree, semanticModel, componentName, location);
                     validationErrorList.addAll(recordItemErrors);
 
                 } else if (!traverseNestedArraySymbol.memberTypeDescriptor().typeKind().getName().equals(
@@ -369,7 +369,7 @@ public class TypeSymbolToJsonValidatorUtil {
      * @param type  OpenApi parameter types
      * @return ballerina type
      */
-    public static String convertOpenAPITypeToBallerina(String type) {
+    private static String convertOpenAPITypeToBallerina(String type) {
         String convertedType;
         switch (type) {
             case Constants.INTEGER:

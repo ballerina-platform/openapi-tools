@@ -26,10 +26,10 @@ import org.ballerinalang.openapi.validator.Constants;
  * This for identify the missing field in json schema against to given bVarSymbol.
  */
 public class MissingFieldInJsonSchema extends ValidationError {
-    String fieldName;
-    Constants.Type type;
-    String recordName;
-    Location location;
+    private String fieldName;
+    private Constants.Type type;
+    private String recordName;
+    private Location location;
 
     public MissingFieldInJsonSchema(String fieldName, Constants.Type type, Location location) {
         this.fieldName = fieldName;

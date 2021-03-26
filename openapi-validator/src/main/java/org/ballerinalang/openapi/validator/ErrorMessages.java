@@ -24,28 +24,28 @@ class ErrorMessages {
 
     static String[] invalidFilePath(String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0001";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0001;
         error[1] = String.format("OpenAPI contract doesn't exist in the given location:%n%s", path);
         return error;
     }
 
     static String[] invalidFile() {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0002";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0002;
         error[1] = "Invalid file type. Provide either a .yaml or .json file.";
         return  error;
     }
 
     static String[] parserException(String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0003";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0003;
         error[1] =  String.format("Couldn't read the OpenAPI contract from the given file: %s", path);
         return  error;
     }
 
     static String[] undocumentedResourcePath(String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0004";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0004;
         error[1] =  String.format("Ballerina service contains a Resource that is not"
                 + " documented in the OpenAPI contract."
                 + " Error Resource path '%s'", path);
@@ -54,7 +54,7 @@ class ErrorMessages {
 
     static String[] undocumentedResourceParameter(String paramName, String method, String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0005";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0005;
         error[1] =  String.format("'%s' parameter for the method '%s' " +
                 "of the resource associated with the path '%s' " +
                 "is not documented in the OpenAPI contract.", paramName, method, path);
@@ -63,7 +63,7 @@ class ErrorMessages {
 
     static String[] undocumentedResourceMethods(String methods, String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0006";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0006;
         error[1] =  String.format("OpenAPI contract doesn't contain the" +
                 " documentation for http method(s) '%s' for the path '%s'.", methods, path);
         return  error;
@@ -71,7 +71,7 @@ class ErrorMessages {
 
     static String[] unimplementedOpenAPIPath(String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0007";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0007;
         error[1] =  String.format("Could not find a Ballerina service resource for the path '%s' " +
                 "which is documented in the OpenAPI contract.", path);
         return  error;
@@ -79,7 +79,7 @@ class ErrorMessages {
 
     static String[] unimplementedOpenAPIOperationsForPath(String methods, String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0008";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0008;
         error[1] =  String.format("Couldn't find Ballerina service resource(s) for http method(s) '%s' " +
                 "for the path '%s' which is documented in the OpenAPI contract.", methods, path);
         return  error;
@@ -87,7 +87,7 @@ class ErrorMessages {
 
     static String[] unimplementedParameterForOperation(String paramName, String method, String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0009";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0009;
         error[1] =  String.format("Couldn't find '%s' parameter in the Ballerina service resource for the method '%s' "
                 + "of the path '%s' which is documented in the OpenAPI contract.", paramName, method, path);
         return  error;
@@ -95,7 +95,7 @@ class ErrorMessages {
 
     static String[] undocumentedFieldInRecordParam(String fieldName, String paramName, String method, String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0010";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0010;
         error[1] =  String.format("The '%s' field in the '%s' type record of the parameter " +
                         "is not documented in the OpenAPI contract for the method '%s' of the path '%s'.",
                 fieldName, paramName, method, path);
@@ -104,7 +104,7 @@ class ErrorMessages {
 
     static String[] unimplementedFieldInOperation(String fieldName, String paramName, String operation, String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0011";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0011;
         error[1] =  String.format("Couldn't find the '%s' field in the record type of the parameter '%s' " +
                         "for the method '%s' of the path '%s' which is documented in the OpenAPI contract.",
                 fieldName, paramName, operation, path);
@@ -113,7 +113,7 @@ class ErrorMessages {
 
     static String[] tagFilterEnable() {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0012";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0012;
         error[1] =  String.format("Both Tags and excludeTags fields include the same tag(s). Make sure to use one" +
                 " field of tag filtering when using the OpenAPI annotation. ");
         return  error;
@@ -121,7 +121,7 @@ class ErrorMessages {
 
     static String[] operationFilterEnable() {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0013";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0013;
         error[1] =  String.format("Both Operations and excludeOperations fields include" +
                 " the same operation(s). Make sure to use one field of operation filtering" +
                 " when using the openapi annotation.");
@@ -131,7 +131,7 @@ class ErrorMessages {
     static String[] typeMismatching(String fieldName, String openapiType, String ballerinType,
                                   String method, String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0014";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0014;
         error[1] =  String.format("Type mismatch with parameter '%s' for the method" +
                         " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
                 fieldName, method,  path, openapiType, ballerinType);
@@ -141,7 +141,7 @@ class ErrorMessages {
     static String[] typeMismatchingRecord(String fieldName, String paramName, String openapiType, String ballerinType,
                                         String method, String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0015";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0015;
         error[1] =  String.format("Type mismatching '%s' field in the record type of the parameter '%s' for the method"
                         + " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
                 fieldName, paramName, method,  path, openapiType , ballerinType);
@@ -151,7 +151,7 @@ class ErrorMessages {
     static String[] typeMismatchOneOfObject(String fieldName, String paramName, String openapiType, String ballerinType,
                                           String method, String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0016";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0016;
         error[1] =  String.format("Type mismatch with '%s' field in the object type of the parameter '%s'" +
                         " for the method '%s' of the path '%s'.OpenAPI object schema expected '%s' type and " +
                         "resources has '%s' type for field.",
@@ -162,7 +162,7 @@ class ErrorMessages {
     static String[] typeMismatchOneOfRecord(String fieldName, String paramName, String openapiType, String ballerinType,
                                           String method, String path) {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0017";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0017;
         error[1] =  String.format("Type mismatch with '%s' field in the record type of the parameter '%s' " +
                         "for the method '%s' of the path '%s'.OpenAPI object schema expected '%s' " +
                         "type and resources has '%s' type for field.",
@@ -172,7 +172,7 @@ class ErrorMessages {
 
     static String[] contactFileMissinginPath() {
         String[] error = new String[2];
-        error[0] = "BAL_OPENAPI_VALIDATOR_0018";
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0018;
         error[1] = "Contract file is not existed in the given path should be applied.";
         return error;
     }

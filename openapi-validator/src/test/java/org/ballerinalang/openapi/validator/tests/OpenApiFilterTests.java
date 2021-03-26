@@ -96,7 +96,7 @@ public class OpenApiFilterTests {
     }
 
     @Test(description = "When tag and operation filter enable")
-    public void testOperationswithTag() throws OpenApiValidatorException, IOException {
+    public void testOperationsWithTag() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore04.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         tags.add("pets");
@@ -113,7 +113,7 @@ public class OpenApiFilterTests {
     }
 
     @Test(description = "When operation and exclude tag filter enable")
-    public void testOperationswithExcludeTag() throws OpenApiValidatorException, IOException {
+    public void testOperationsWithExcludeTag() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore05.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         excludeTags.add("pets");
@@ -130,7 +130,7 @@ public class OpenApiFilterTests {
     }
 
     @Test(description = "When tag and exclude operation filter enable")
-    public void testExcludeOperationswithTag() throws OpenApiValidatorException, IOException {
+    public void testExcludeOperationsWithTag() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore06.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         tags.add("pets");
@@ -148,7 +148,7 @@ public class OpenApiFilterTests {
     }
 
     @Test(description = "When exclude tag and exclude operations enables")
-     public void testBothexcludeTagsandoperations() throws OpenApiValidatorException, IOException {
+     public void testBothExcludeTagsAndOperations() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore07.yaml");
         api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         excludeTags.add("list");

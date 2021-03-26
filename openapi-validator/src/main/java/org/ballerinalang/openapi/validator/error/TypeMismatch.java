@@ -26,11 +26,11 @@ import org.ballerinalang.openapi.validator.Constants;
  * This for identify the fields that are same names with different data type in given json schema and bVarsymbol.
  */
 public class TypeMismatch extends ValidationError {
-    String recordName;
-    String fieldName;
-    Location location;
-    Constants.Type typeJsonSchema;
-    Constants.Type typeBallerinaType;
+    private String recordName;
+    private String fieldName;
+    private Location location;
+    private Constants.Type typeJsonSchema;
+    private Constants.Type typeBallerinaType;
 
     public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType,
                         Location location) {
