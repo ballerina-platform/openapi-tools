@@ -84,14 +84,15 @@ public class BallerinaSchemaGenerator {
                     List<String> required = schema.getValue().getRequired();
 
                     //1.typeKeyWord
-                    Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("type ");
+                    Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("type");
                     //2.typeName
-                    IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(schema.getKey());
+                    IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(
+                            GeneratorUtils.escapeIdentifier(schema.getKey().trim()));
                     //3.typeDescriptor - RecordTypeDescriptor
                     //3.1 recordKeyWord
-                    Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record ");
+                    Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record");
                     //3.2 bodyStartDelimiter
-                    Token bodyStartDelimiter = AbstractNodeFactory.createIdentifierToken("{ ");
+                    Token bodyStartDelimiter = AbstractNodeFactory.createIdentifierToken("{");
                     //3.3 fields
                     //Generate RecordFiled
                     List<Node> recordFieldList = new ArrayList<>();
@@ -149,7 +150,7 @@ public class BallerinaSchemaGenerator {
                             Token openSBracketToken = AbstractNodeFactory.createIdentifierToken("[");
                             Token closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]");
                             IdentifierToken fieldName =
-                                    AbstractNodeFactory.createIdentifierToken(" " + escapeIdentifier(
+                                    AbstractNodeFactory.createIdentifierToken(escapeIdentifier(
                                             schema.getKey().trim().toLowerCase(Locale.ENGLISH)) + "list");
                             Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
                             TypeDescriptorNode fieldTypeName;
@@ -205,7 +206,7 @@ public class BallerinaSchemaGenerator {
         RecordFieldNode recordFieldNode;
         //FiledName
         IdentifierToken fieldName =
-                AbstractNodeFactory.createIdentifierToken(" " + escapeIdentifier(field.getKey().trim()));
+                AbstractNodeFactory.createIdentifierToken(escapeIdentifier(field.getKey().trim()));
 
         TypeDescriptorNode fieldTypeName = extractOpenApiSchema(field.getValue());
         Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
