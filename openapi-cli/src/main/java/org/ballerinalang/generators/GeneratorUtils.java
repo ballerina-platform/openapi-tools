@@ -186,7 +186,7 @@ public class GeneratorUtils {
                                 }
                                 BuiltinSimpleNameReferenceNode builtSNRNode =
                                         NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
-                                String parameterName = " " + parameter.getName().trim();
+                                String parameterName = " " + escapeIdentifier(parameter.getName().trim());
                                 IdentifierToken paramName = AbstractNodeFactory.createIdentifierToken(parameterName);
                                 Token ppCloseB = AbstractNodeFactory.createIdentifierToken("]");
 
@@ -246,7 +246,7 @@ public class GeneratorUtils {
                 convertedType = "decimal";
                 break;
             default:
-                convertedType = "";
+                convertedType = "any";
         }
         return convertedType;
     }
@@ -309,10 +309,4 @@ public class GeneratorUtils {
     public static boolean hasTags(List<String> tags, List<String> filterTags) {
         return !Collections.disjoint(filterTags, tags);
     }
-
-    // Create ArrayTypeDescriptorNode using Schema
-//    public static ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Token typeName) {
-//
-//    }
-
 }
