@@ -319,7 +319,7 @@ public class CodeGenerator {
                     for (GenSrcFile gFile : sources) {
                         if (file.getName().equals(gFile.getFileName())) {
                             String userInput = System.console().readLine("There is already a/an " + file.getName() +
-                                    " in the location. Do you want to override the file [y/n]? ");
+                                    " in the location. Do you want to override the file [N]? ");
                             if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
                                 int duplicateCount = 0;
                                 setGeneratedFileName(listFiles, gFile, duplicateCount);
