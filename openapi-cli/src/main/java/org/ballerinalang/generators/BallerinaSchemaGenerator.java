@@ -86,8 +86,8 @@ public class BallerinaSchemaGenerator {
                     //1.typeKeyWord
                     Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("type");
                     //2.typeName
-                    IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(""+
-                            GeneratorUtils.escapeIdentifier(schema.getKey().trim())+ "");
+                    IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken("" +
+                            GeneratorUtils.escapeIdentifier(schema.getKey().trim()) + "");
                     //3.typeDescriptor - RecordTypeDescriptor
                     //3.1 recordKeyWord
                     Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record");
