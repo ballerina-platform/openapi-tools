@@ -269,7 +269,7 @@ public class ResourceValidator {
         return typeSymbol;
     }
 
-    public static Map<String, Schema> getRequestBodyForOperation(Operation operation) {
+    private static Map<String, Schema> getRequestBodyForOperation(Operation operation) {
         Map<String, Schema> requestBodySchemas = new HashMap<>();
         if (operation.getRequestBody() != null) {
             Content content = operation.getRequestBody().getContent();
