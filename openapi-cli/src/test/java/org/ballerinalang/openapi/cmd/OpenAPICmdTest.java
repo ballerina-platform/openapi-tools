@@ -72,7 +72,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         } catch (BLauncherException e) {
             output = e.getDetailedMessages().get(0);
         }
-        Assert.assertTrue(output.contains("An OpenApi definition file is required to generate the service."));
+        Assert.assertTrue(output.contains("An OpenAPI definition file is required to generate the service."));
     }
 
     @Test(description = "Test openapi gen-service for successful service generation")
@@ -98,8 +98,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
         String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
         expectedSchemaLines.close();
-        if (Files.exists(this.tmpDir.resolve("petstore-client.bal")) &&
-                Files.exists(this.tmpDir.resolve("petstore-service.bal")) &&
+        if (Files.exists(this.tmpDir.resolve("petstore_client.bal")) &&
+                Files.exists(this.tmpDir.resolve("petstore_service.bal")) &&
                 Files.exists(this.tmpDir.resolve("schema.bal"))) {
             //Compare schema contents
             Stream<String> schemaLines = Files.lines(this.tmpDir.resolve("schema.bal"));
@@ -140,8 +140,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
 
     // Delete the generated files
     private void deleteGeneratedFiles() {
-        File serviceFile = new File(this.tmpDir.resolve("petstore-service.bal").toString());
-        File clientFile = new File(this.tmpDir.resolve("petstore-client.bal").toString());
+        File serviceFile = new File(this.tmpDir.resolve("petstore_service.bal").toString());
+        File clientFile = new File(this.tmpDir.resolve("petstore_client.bal").toString());
         File schemaFile = new File(this.tmpDir.resolve("schema.bal").toString());
 
         serviceFile.delete();

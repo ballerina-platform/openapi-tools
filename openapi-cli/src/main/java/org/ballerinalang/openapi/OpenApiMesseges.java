@@ -26,49 +26,12 @@ import java.util.List;
  */
 public class OpenApiMesseges {
 
-    public static final String CLIENT_MANDATORY = "Client name is mandatory to generate the ballerina client. " +
-            "\nE.g. ballerina openapi gen-client [<module>]:<servicename> <openapicontract>";
-    public static final String OPENAPI_FILE_MANDATORY = "An OpenApi definition file is required to " +
-            "generate the client. \nE.g: ballerina openapi gen-client [<module>]:<servicename> <OpenApiContract>";
-    public static final String OPENAPI_CLIENT_EXCEPTION = "Error occurred when generating client for openapi contract";
+    public static final String OPENAPI_CLIENT_EXCEPTION = "Error occurred when generating client for OpenAPI contract";
 
-
-    public static final String CONTRACT_SERVICE_MANDATORY = "A service name is mandatory to generate an OpenApi " +
-            "contract. \nballerina openapi gen-contract [moduleName]:serviceName [-i: ballerinaFile]";
-    public static final String CONTRACT_BALLERINA_DOC_MANDATORY = "Please specify a ballerina document path in" +
-            " order generate an OpenApi contract for the service \nballerina openapi gen-contract " +
-            "[moduleName]:serviceName [-i: ballerinaFile]";
-
-    public static final String GEN_CLIENT_PROJECT_ROOT = "Output path is not a valid ballerina project directory." +
-            "\nUse 'ballerina new' to generate a new project";
-    public static final String GEN_SERVICE_MODULE_ARGS_REQUIRED = "A module name and a service name is required " +
-            "in order to generate the ballerina service for the provided OpenApi contract. \nE.g. ballerina " +
-            "openapi gen-service <module_name>:<service_name> <openapi_contract>";
-    public static final String GEN_SERVICE_MODULE_REQUIRED = "A module name is required in order to generate the " +
-            "ballerina service for the provided OpenApi contract. \nE.g. ballerina openapi gen-service " +
-            "<module_name>:<service_name> <openapi_contract>";
-    public static final String GEN_SERVICE_SERVICE_NAME_REQUIRED = "A service name is required in order to generate " +
-            "the ballerina service for the provided OpenApi contract. \nE.g. ballerina openapi gen-service " +
-            "<module_name>:<service_name> <openapi_contract>";
-    public static final String GEN_SERVICE_PROJECT_ROOT = "Ballerina service generation should be done from the " +
-            "project root. \nIf you like to start with a new project " +
-            "use `ballerina new` command to create a new project.";
-    public static final String MODULE_DIRECTORY_EXCEPTION = "Unable to create module directory. File system error " +
-            "occured.";
-    public static final String RESOURCE_DIRECTORY_EXCEPTION = "Unable to create resource directory. File system error" +
-            " occured.";
-    public static final String TESTS_DIRECTORY_EXCEPTION = "Unable to create tests directory. File system error " +
-            "occured";
-    public static final String SOURCE_DIRECTORY_EXCEPTION = "Unable to create source directory. File system error " +
-            "occured.";
-    public static final String MODULE_MD_EXCEPTION = "Unable to create moudle.md file. File system error occured.";
-    public static final String DEFINITION_EXISTS = "There is already an OpenApi contract in the location.";
     public static final String EXPERIMENTAL_FEATURE = "Note: This is an experimental tool, which only" +
             " supports a limited set of functionality.";
-    public static final String MESSAGE_FOR_MISSING_INPUT = "An OpenApi definition file is required to generate the " +
-            "service. \nE.g: ballerina openapi --input <OpenApiContract> or <Ballerina file>";
-    public static final String MESSAGE_FOR_INVALID_MODULE = "The module provided is not found in the " +
-            "current location.";
+    public static final String MESSAGE_FOR_MISSING_INPUT = "An OpenAPI definition file is required to generate the " +
+            "service. \ne.g: bal OpenAPI --input <OpenAPIContract> or <Ballerina file>";
 
     //TODO Update keywords if Ballerina Grammer changes
     private static final String[] KEYWORDS = new String[]{"abort", "aborted", "abstract", "all", "annotation",
