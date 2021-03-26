@@ -319,7 +319,7 @@ public class CodeGenerator {
                     for (GenSrcFile gFile : sources) {
                         if (file.getName().equals(gFile.getFileName())) {
                             String userInput = System.console().readLine("There is already a/an " + file.getName() +
-                                    " in the location. Do you want to override the file [Y/N]? ");
+                                    " in the location. Do you want to override the file [y/n]? ");
                             if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
                                 int duplicateCount = 0;
                                 setGeneratedFileName(listFiles, gFile, duplicateCount);
@@ -348,7 +348,7 @@ public class CodeGenerator {
 
         //This will print the generated files to the console
         if (type.equals(GEN_SERVICE)) {
-            outStream.println("Service generated successfully and the OpenApi contract is copied to path " + srcPath
+            outStream.println("Service generated successfully and the OpenAPI contract is copied to path " + srcPath
                     + ".");
         } else if (type.equals(GEN_CLIENT)) {
             outStream.println("Client generated successfully.");
@@ -397,7 +397,7 @@ public class CodeGenerator {
             serviceName = context.getInfo().getTitle().toLowerCase(Locale.ENGLISH) + "-client.bal";
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String srcFile = serviceName + "-client.bal";
+        String srcFile = serviceName + "_client.bal";
 
         // Generate ballerina service and resources.
         String mainContent = getContent(context, GeneratorConstants.DEFAULT_CLIENT_DIR,
@@ -421,7 +421,7 @@ public class CodeGenerator {
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String concatTitle = api.getBalServiceName().toLowerCase(Locale.ENGLISH);
-        String srcFile = concatTitle + "-service.bal";
+        String srcFile = concatTitle + "_service.bal";
 
         String mainContent = Formatter.format(BallerinaServiceGenerator.generateSyntaxTree(openAPI, serviceName,
                         filter)).toString();

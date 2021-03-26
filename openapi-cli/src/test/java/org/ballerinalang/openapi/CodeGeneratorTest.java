@@ -58,8 +58,8 @@ public class CodeGeneratorTest {
             String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generateSkeleton.bal");
             generator.generateService(definitionPath, definitionPath, definitionPath, serviceName,
                     resourcePath.toString(), filter);
-            if (Files.exists(resourcePath.resolve("openapipetstore-service.bal"))) {
-                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore-service.bal");
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
 
@@ -70,7 +70,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
-            deleteGeneratedFiles("openapipetstore-service.bal");
+            deleteGeneratedFiles("openapipetstore_service.bal");
         }
     }
 
@@ -83,8 +83,8 @@ public class CodeGeneratorTest {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generate_client.bal");
             generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(), filter);
 
-            if (Files.exists(resourcePath.resolve("openapipetstore-client.bal"))) {
-                String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore-client.bal");
+            if (Files.exists(resourcePath.resolve("openapipetstore_client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore_client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
                 expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedClient.contains(expectedClientContent));
@@ -94,7 +94,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
-            deleteGeneratedFiles("openapipetstore-client.bal");
+            deleteGeneratedFiles("openapipetstore_client.bal");
         }
     }
 
@@ -108,8 +108,8 @@ public class CodeGeneratorTest {
                     "generate_client_requestbody.bal");
             generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(), filter);
 
-            if (Files.exists(resourcePath.resolve("openapipetstore-client.bal"))) {
-                String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore-client.bal");
+            if (Files.exists(resourcePath.resolve("openapipetstore_client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore_client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
                 expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedClient.contains(expectedClientContent));
@@ -119,7 +119,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
-            deleteGeneratedFiles("openapipetstore-client.bal");
+            deleteGeneratedFiles("openapipetstore_client.bal");
         }
     }
 
@@ -133,8 +133,8 @@ public class CodeGeneratorTest {
             String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generatedRB.bal");
             generator.generateService(definitionPath, definitionPath, definitionPath, serviceName,
                     resourcePath.toString(), filter);
-            if (Files.exists(resourcePath.resolve("openapipetstore-service.bal"))) {
-                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore-service.bal");
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
 
@@ -145,7 +145,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
-            deleteGeneratedFiles("openapipetstore-service.bal");
+            deleteGeneratedFiles("openapipetstore_service.bal");
         }
     }
 
@@ -159,8 +159,8 @@ public class CodeGeneratorTest {
             String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generated_bal.bal");
             generator.generateService(definitionPath, definitionPath, definitionPath, serviceName,
                     resourcePath.toString(), filter);
-            if (Files.exists(resourcePath.resolve("openapipetstore-service.bal"))) {
-                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore-service.bal");
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
 
@@ -171,7 +171,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
-            deleteGeneratedFiles("openapipetstore-service.bal");
+            deleteGeneratedFiles("openapipetstore_service.bal");
         }
     }
 
@@ -208,8 +208,8 @@ public class CodeGeneratorTest {
             String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "multi_query_para.bal");
             generator.generateService(definitionPath, definitionPath, definitionPath, serviceName,
                     resourcePath.toString(), filter);
-            if (Files.exists(resourcePath.resolve("openapipetstore-service.bal"))) {
-                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore-service.bal");
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
 
@@ -220,7 +220,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
-            deleteGeneratedFiles("openapipetstore-service.bal");
+            deleteGeneratedFiles("openapipetstore_service.bal");
         }
     }
 
@@ -238,8 +238,8 @@ public class CodeGeneratorTest {
             String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "petstoreTag.bal");
             generator.generateService(definitionPath, definitionPath, definitionPath, serviceName,
                     resourcePath.toString(), filter01);
-            if (Files.exists(resourcePath.resolve("openapipetstore-service.bal"))) {
-                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore-service.bal");
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
 
@@ -250,7 +250,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
-            deleteGeneratedFiles("openapipetstore-service.bal");
+            deleteGeneratedFiles("openapipetstore_service.bal");
         }
     }
 
@@ -269,8 +269,8 @@ public class CodeGeneratorTest {
             String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "petstoreOperation.bal");
             generator.generateService(definitionPath, definitionPath, definitionPath, serviceName,
                     resourcePath.toString(), filter01);
-            if (Files.exists(resourcePath.resolve("openapipetstore-service.bal"))) {
-                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore-service.bal");
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
                 generatedService = (generatedService.trim()).replaceAll("\\s+", "");
                 expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
 
@@ -281,7 +281,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
-            deleteGeneratedFiles("openapipetstore-service.bal");
+            deleteGeneratedFiles("openapipetstore_service.bal");
         }
     }
 
