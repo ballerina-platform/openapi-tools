@@ -86,8 +86,8 @@ public class BallerinaSchemaGenerator {
                     //1.typeKeyWord
                     Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("type");
                     //2.typeName
-                    IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken("" +
-                            GeneratorUtils.escapeIdentifier(schema.getKey().trim()) + "");
+                    IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(
+                            GeneratorUtils.escapeIdentifier(schema.getKey().trim()));
                     //3.typeDescriptor - RecordTypeDescriptor
                     //3.1 recordKeyWord
                     Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record");
@@ -150,7 +150,7 @@ public class BallerinaSchemaGenerator {
                             Token openSBracketToken = AbstractNodeFactory.createIdentifierToken("[");
                             Token closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]");
                             IdentifierToken fieldName =
-                                    AbstractNodeFactory.createIdentifierToken("" + escapeIdentifier(
+                                    AbstractNodeFactory.createIdentifierToken(escapeIdentifier(
                                             schema.getKey().trim().toLowerCase(Locale.ENGLISH)) + "list");
                             Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
                             TypeDescriptorNode fieldTypeName;
@@ -206,7 +206,7 @@ public class BallerinaSchemaGenerator {
         RecordFieldNode recordFieldNode;
         //FiledName
         IdentifierToken fieldName =
-                AbstractNodeFactory.createIdentifierToken("" + escapeIdentifier(field.getKey().trim()));
+                AbstractNodeFactory.createIdentifierToken(escapeIdentifier(field.getKey().trim()));
 
         TypeDescriptorNode fieldTypeName = extractOpenApiSchema(field.getValue());
         Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
