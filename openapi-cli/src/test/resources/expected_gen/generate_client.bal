@@ -21,7 +21,7 @@ public client class openapipetstoreClient {
         http:Request request = new;
 
         // TODO: Update the request as needed
-        var response = listPetsEp->get("/pets");
+        var response = check listPetsEp->get("/pets");
 
         if (response is http:Response) {
             return response;
@@ -34,7 +34,7 @@ public client class openapipetstoreClient {
         http:Request request = new;
 
         // TODO: Update the request as needed
-        var response = resource1Ep->post("/pets", request);
+        var response = check resource1Ep->post("/pets", request);
 
         if (response is http:Response) {
             return response;
@@ -47,7 +47,7 @@ public client class openapipetstoreClient {
         http:Request request = new;
 
         // TODO: Update the request as needed
-        var response = showPetByIdEp->get(string `/pets/${petId}`);
+        var response = check showPetByIdEp->get(string `/pets/${petId}`);
 
         if (response is http:Response) {
             return response;
