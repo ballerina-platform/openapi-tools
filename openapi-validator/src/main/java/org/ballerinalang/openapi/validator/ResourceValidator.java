@@ -1,20 +1,38 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+
 package org.ballerinalang.openapi.validator;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ParameterSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.SymbolKind;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.VariableSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -22,173 +40,203 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
-import io.swagger.v3.oas.models.parameters.RequestBody;
 import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
-import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This util is checking the availability of services and the operations in contract and ballerina file.
  */
 public class ResourceValidator {
 
-    /**
-     * Validate the missing fields in openapi operation according to resource service.
-     * @param operation         openAPi operation
-     * @param resourceMethod    validate resourceMethods
-     * @return                  list of validationErrors
-     * @throws OpenApiValidatorException throws openApi validator exception
-     */
     public static List<ValidationError> validateResourceAgainstOperation(Operation operation,
-                                                                         ResourceMethod resourceMethod)
+                                                                         ResourceMethod resourceMethod,
+                                                                         SemanticModel semanticModel,
+                                                                         SyntaxTree syntaxTree)
             throws OpenApiValidatorException {
-        List<ValidationError> validationErrors = new ArrayList<>();
-        if (!resourceMethod.getParamNames().isEmpty()) {
-            for (ResourceParameter resourceParameter: resourceMethod.getParamNames()) {
-                Boolean isParameterExit = false;
-                //  Handle the requestBody parameter
-                if ((resourceMethod.getBody() != null) && (resourceMethod.getBody().equals(resourceParameter.getName()))
-                        && (operation.getRequestBody() != null)) {
-                        RequestBody requestBody = operation.getRequestBody();
-                    isParameterExit =
-                            validateRequestBodyResourceToOpenApi(operation, validationErrors, resourceParameter,
-                                    isParameterExit, requestBody);
 
-                    //  Handle Path parameter
-                } else if (operation.getParameters() != null) {
-                    for (Parameter parameter : operation.getParameters()) {
-                        if (resourceParameter.getName().equals(parameter.getName()) &&
-                                (parameter.getSchema() != null)) {
+        List<ValidationError> validationErrorList = new ArrayList<>();
+        if (!resourceMethod.getParameters().isEmpty()) {
+            for (Map.Entry<String, Node> resourceParameter : resourceMethod.getParameters().entrySet()) {
+                boolean isParameterExit = false;
+                String paramType = "";
+                RequiredParameterNode bodyNode = null;
+                if (resourceParameter.getValue() instanceof RequiredParameterNode) {
+                     bodyNode = (RequiredParameterNode) resourceParameter.getValue();
+                }
+                // Handle Path parameter
+                if (operation.getParameters() != null) {
+                    List<Parameter> parameters = operation.getParameters();
+                    for (Parameter parameter : parameters) {
+                        String resourceParam = resourceParameter.getKey().replaceFirst("'", "").trim();
+                        if (resourceParam.equals(parameter.getName()) && (parameter.getSchema() != null)) {
                             isParameterExit = true;
-                            List<ValidationError> validationErrorsResource =
-                                    BTypeToJsonValidatorUtil.validate(parameter.getSchema(),
-                                            resourceParameter.getParameter().symbol);
-                            if (!validationErrorsResource.isEmpty()) {
-                                validationErrors.addAll(validationErrorsResource);
+                            // Handle path parameter
+                            if (resourceParameter.getValue() instanceof ResourcePathParameterNode) {
+                                ResourcePathParameterNode paramNode =
+                                        (ResourcePathParameterNode) resourceParameter.getValue();
+                                paramType = paramNode.typeDescriptor().toString().trim();
+                                TypeDescriptorNode typeNode = (TypeDescriptorNode) paramNode.typeDescriptor();
+                                Token paramName = paramNode.paramName();
+                                if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
+                                    Optional<Symbol> symbol = semanticModel.symbol(paramName);
+                                    TypeSymbol typeSymbol = null;
+                                    if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
+                                        VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
+                                        typeSymbol = symbol1.typeDescriptor();
+                                    }
+
+                                    List<ValidationError> validationErrors =
+                                            TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
+                                                    typeSymbol, syntaxTree, semanticModel,
+                                                    resourceParameter.getKey(),
+                                                    resourceParameter.getValue().location());
+
+                                    if (!validationErrors.isEmpty()) {
+                                        validationErrorList.addAll(validationErrors);
+                                    }
+                                }
+                            }
+                            //Handle query parameter
+                            if (resourceParameter.getValue() instanceof RequiredParameterNode) {
+                                RequiredParameterNode queryParam = (RequiredParameterNode) resourceParameter.getValue();
+                                //equals or contains
+                                if (!queryParam.toString().equals("http:Payload")) {
+                                    paramType = queryParam.typeName().toString().trim();
+                                    TypeSymbol typeSymbol = getTypeSymbol(semanticModel, queryParam);
+
+                                    List<ValidationError> validationErrors =
+                                            TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
+                                                    typeSymbol, syntaxTree, semanticModel,
+                                                    resourceParameter.getKey(),
+                                                    resourceParameter.getValue().location());
+
+                                    if (!validationErrors.isEmpty()) {
+                                        validationErrorList.addAll(validationErrors);
+                                    }
+                                }
                             }
                             break;
+                        }
+                    }
+                }
+                // Handle Request Body
+                if (operation.getRequestBody() != null && bodyNode != null) {
+                    Map<String, Schema> requestBodyForOperation = getRequestBodyForOperation(operation);
+                    for (Map.Entry<String, Schema> requestBody: requestBodyForOperation.entrySet()) {
+                        if (resourceParameter.getKey().equals("payload")) {
+                            isParameterExit = true;
+                            Schema value = requestBody.getValue();
+                            TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
+
+                            List<ValidationError> validationErrors =
+                                    TypeSymbolToJsonValidatorUtil.validate(value, typeSymbol, syntaxTree, semanticModel,
+                                            bodyNode.typeName().toString().trim(),
+                                            resourceParameter.getValue().location());
+
+                            if (!validationErrors.isEmpty()) {
+                                validationErrorList.addAll(validationErrors);
+                            }
                         }
                     }
                 }
                 if (!isParameterExit) {
-                    ValidationError validationError = new ValidationError(resourceParameter.getName(),
-                            BTypeToJsonValidatorUtil.convertTypeToEnum(resourceParameter.getType()));
-                    validationErrors.add(validationError);
+
+                    ValidationError validationError = new ValidationError(resourceParameter.getKey(),
+                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(paramType),
+                            resourceParameter.getValue().location());
+
+                    validationErrorList.add(validationError);
                 }
             }
         }
-        return validationErrors;
+        return validationErrorList;
     }
 
-    /**
-     * Validate request Body parameters in resource against to openAPI.
-     * @param operation             validate openApi operation
-     * @param validationErrors      list of validationErrors
-     * @param resourceParameter     validate resource parameter
-     * @param isParameterExit       boolean tag for checking parameter is available
-     * @param requestBody           requestBody type  operation parameter
-     * @return  boolean value for indicating parameter is available
-     * @throws OpenApiValidatorException throws openApi validator exception
-     */
-    private static Boolean validateRequestBodyResourceToOpenApi(Operation operation,
-                                                                List<ValidationError> validationErrors,
-                                                                ResourceParameter resourceParameter,
-                                                                Boolean isParameterExit, RequestBody requestBody)
-            throws OpenApiValidatorException {
-        if ((requestBody.getContent() != null) && !getOperationRequestBody(operation).isEmpty()) {
-            Map<String, Schema> requestBodySchemas = getOperationRequestBody(operation);
-                for (Map.Entry<String, Schema> requestBodyOperation: requestBodySchemas.entrySet()) {
-                    List<ValidationError> requestBValidationError  =
-                            BTypeToJsonValidatorUtil.validate(requestBodyOperation.getValue(),
-                                    resourceParameter.getParameter().symbol);
-                    if (!requestBValidationError.isEmpty()) {
-                        for (ValidationError validationError : requestBValidationError) {
-                            if ((validationError instanceof TypeMismatch) ||
-                                    (validationError instanceof MissingFieldInJsonSchema) ||
-                                    (validationError instanceof OneOfTypeValidation)) {
-                                validationErrors.add(validationError);
-                            }
-                        }
-                    }
-                    isParameterExit = true;
-                    break;
-                }
-        }
-        return isParameterExit;
-    }
-
-    /**
-     * Get the requestBody parameter from operation.
-     * @param operation     openApi operation object
-     * @return Map with parameters
-     */
-    public static Map<String, Schema> getOperationRequestBody(Operation operation) {
-        Map<String, Schema> requestBodySchemas = new HashMap<>();
-        Content content = operation.getRequestBody().getContent();
-        for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
-            requestBodySchemas.put(mediaTypeEntry.getKey(), mediaTypeEntry.getValue().getSchema());
-        }
-        return requestBodySchemas;
-    }
-
-    /**
-     * Validate the missing fields in resource parameter according to given operation.
-     * @param operation         openApi operation
-     * @param resourceMethod    resource method object
-     * @return                  list of ValidationErrors
-     * @throws OpenApiValidatorException throws openApi validator exception
-     */
-    public static List<ValidationError> validateOperationAgainstResource(Operation operation,
-                                                                         ResourceMethod resourceMethod)
+    static List<ValidationError> validateOperationAgainstResource(Operation operation,
+                                                                  ResourceMethod resourceMethod,
+                                                                  SemanticModel semanticModel,
+                                                                  SyntaxTree syntaxTree,
+                                                                  Location location)
             throws OpenApiValidatorException {
         List<ValidationError> validationErrorList = new ArrayList<>();
-        // Handle path , query parameters
         if (operation.getParameters() != null) {
-            List<Parameter> operationParam = operation.getParameters();
-            for (Parameter param : operationParam) {
-                Boolean isOParamExit = false;
-                // Temporary solution for skipping the query parameter, this if condition can be removed when openApi
-                // tool available with query parameter
-                if (param instanceof QueryParameter) {
-                    isOParamExit = true;
-                }
-                if (!resourceMethod.getParamNames().isEmpty()) {
-                    for (ResourceParameter resourceParam: resourceMethod.getParamNames()) {
+            for (Parameter parameter: operation.getParameters()) {
+                boolean isOParameterExist = false;
+                if (!resourceMethod.getParameters().isEmpty()) {
+                    Map<String, Node> parameters = resourceMethod.getParameters();
+                    for (Map.Entry<String, Node> resourceParam: parameters.entrySet()) {
+                        Node paramNode = resourceParam.getValue();
+                        // Check query parameters
+                        if (parameter instanceof QueryParameter && (parameter.getName().equals(resourceParam.getKey()))
+                                && paramNode instanceof RequiredParameterNode) {
+                            RequiredParameterNode queryParam = (RequiredParameterNode) paramNode;
+                            //equals or contains
+                            if (!queryParam.toString().equals("http:Payload")) {
+                                isOParameterExist = true;
+                                TypeSymbol typeSymbol = getTypeSymbol(semanticModel, queryParam);
+                                List<ValidationError> validationErrors =
+                                        TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
+                                                typeSymbol, syntaxTree, semanticModel,
+                                                resourceParam.getKey(), location);
+                                if (!validationErrors.isEmpty()) {
+                                    validationErrorList.addAll(validationErrors);
+                                }
+                            }
+
+                        }
                         //  Check whether it is path parameter
-                        if ((param instanceof PathParameter) && (param.getName().equals(resourceParam.getName()))) {
-                            isOParamExit = true;
-                            List<ValidationError> validationErrors =
-                                    BTypeToJsonValidatorUtil.validate(param.getSchema(),
-                                            resourceParam.getParameter().symbol);
-                            if (!validationErrors.isEmpty()) {
-                                validationErrorList.addAll(validationErrors);
+                        if ((parameter instanceof PathParameter) && (parameter.getName().equals(resourceParam.getKey()))
+                                && paramNode instanceof ResourcePathParameterNode) {
+                            isOParameterExist = true;
+                            TypeDescriptorNode typeNode =
+                                    (TypeDescriptorNode) ((ResourcePathParameterNode) paramNode).typeDescriptor();
+                            Token paramName = ((ResourcePathParameterNode) paramNode).paramName();
+                            if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
+                                Optional<Symbol> symbol = semanticModel.symbol(paramName);
+                                TypeSymbol typeSymbol = null;
+                                if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
+                                    VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
+                                    typeSymbol = symbol1.typeDescriptor();
+                                }
+                                List<ValidationError> validationErrors =
+                                        TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
+                                                typeSymbol, syntaxTree, semanticModel,
+                                                resourceParam.getKey(), location);
+                                if (!validationErrors.isEmpty()) {
+                                    validationErrorList.addAll(validationErrors);
+                                }
                             }
                             break;
                         }
                     }
                 }
-                if (!isOParamExit) {
-                    ValidationError validationError = new ValidationError(param.getName(),
-                            BTypeToJsonValidatorUtil.convertTypeToEnum(param.getSchema().getType()));
+
+                if (!isOParameterExist) {
+                    ValidationError validationError = new ValidationError(parameter.getName(),
+                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(parameter.getSchema().getType()), location);
                     validationErrorList.add(validationError);
                 }
             }
         }
         //  Handle the requestBody
         if (operation.getRequestBody() != null) {
-            List<ResourceParameter> resourceParam = resourceMethod.getParamNames();
-            Map<String, Schema> requestBodySchemas = ResourceValidator.getOperationRequestBody(operation);
+            Map<String, Node> resourceParams = resourceMethod.getParameters();
+            Map<String, Schema> requestBodySchemas = getRequestBodyForOperation(operation);
             for (Map.Entry<String, Schema> operationRB: requestBodySchemas.entrySet()) {
-                Boolean isOParamExit = false;
-                isOParamExit = validateRequestBodyOpenApiToResource(resourceMethod, validationErrorList, resourceParam,
-                        operationRB, isOParamExit);
+                boolean isOParamExit = false;
+                if (resourceMethod.getBody()) {
+                    isOParamExit = validateRequestBodyOpenApiToResource(validationErrorList, resourceParams,
+                            operationRB, isOParamExit, semanticModel, syntaxTree, location);
+                }
                 if (!isOParamExit) {
                     String type = "";
                     if (operationRB.getValue().getType() == null && (operationRB.getValue().getProperties() != null)) {
@@ -197,7 +245,7 @@ public class ResourceValidator {
                         type = operationRB.getValue().getType();
                     }
                     ValidationError validationError = new ValidationError(operationRB.getKey(),
-                            BTypeToJsonValidatorUtil.convertTypeToEnum(type));
+                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(type), location);
                     validationErrorList.add(validationError);
                 }
             }
@@ -205,38 +253,72 @@ public class ResourceValidator {
         return validationErrorList;
     }
 
-    /**
-     * Validate the requestBody parameter openApi against resource.
-     * @param resourceMethod            validate resource Methods
-     * @param validationErrorList       list of ValidationErros
-     * @param resourceParam             validate resource parameter
-     * @param operationRB               request Body parameters in operations
-     * @param isOParamExit              boolean tag for checking the operation parameter available
-     * @return boolean value whether it is exit or not
-     * @throws OpenApiValidatorException throws openApi validator exception
-     */
-    private static Boolean validateRequestBodyOpenApiToResource(ResourceMethod resourceMethod,
-                                                                List<ValidationError> validationErrorList,
-                                                                List<ResourceParameter> resourceParam,
+    private static TypeSymbol getTypeSymbol(SemanticModel semanticModel, RequiredParameterNode bodyNode) {
+        Optional<Token> paramName = bodyNode.paramName();
+        Token token = paramName.orElseThrow();
+        Optional<Symbol> symbol = semanticModel.symbol(token);
+        TypeSymbol typeSymbol = null;
+        if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
+            VariableSymbol symbolVar = (VariableSymbol) symbol.orElseThrow();
+            typeSymbol = symbolVar.typeDescriptor();
+        } else if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.PARAMETER)) {
+            ParameterSymbol symbolParam = (ParameterSymbol) symbol.orElseThrow();
+            typeSymbol = symbolParam.typeDescriptor();
+        }
+
+        return typeSymbol;
+    }
+
+    private static Map<String, Schema> getRequestBodyForOperation(Operation operation) {
+        Map<String, Schema> requestBodySchemas = new HashMap<>();
+        if (operation.getRequestBody() != null) {
+            Content content = operation.getRequestBody().getContent();
+            for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
+                requestBodySchemas.put(mediaTypeEntry.getKey(), mediaTypeEntry.getValue().getSchema());
+            }
+        }
+        return requestBodySchemas;
+    }
+
+    private static Boolean validateRequestBodyOpenApiToResource(List<ValidationError> validationErrorList,
+                                                                Map<String, Node> resourceParam,
                                                                 Map.Entry<String, Schema> operationRB,
-                                                                Boolean isOParamExit) throws OpenApiValidatorException {
+                                                                Boolean isOParamExit,
+                                                                SemanticModel semanticModel,
+                                                                SyntaxTree syntaxTree,
+                                                                Location location) throws OpenApiValidatorException {
 
         if (!resourceParam.isEmpty()) {
-            for (ResourceParameter resourceParameter : resourceParam) {
-                if (resourceMethod.getBody().equals(resourceParameter.getName())) {
-                    List<ValidationError> validationErrors =
-                            BTypeToJsonValidatorUtil.validate(operationRB.getValue(),
-                                    resourceParameter.getParameter().symbol);
-                    if (validationErrors.isEmpty()) {
-                        isOParamExit = true;
-                    } else {
-                        for (ValidationError validEr: validationErrors) {
-                            if ((validEr instanceof MissingFieldInBallerinaType) ||
-                                    (validEr instanceof OneOfTypeValidation) ||
-                                    (validEr instanceof TypeMismatch)) {
-                                validationErrorList.add(validEr);
-                                isOParamExit = true;
-                                break;
+            for (Map.Entry<String, Node> resourceParameter : resourceParam.entrySet()) {
+                if (resourceParameter.getValue() instanceof RequiredParameterNode) {
+                    RequiredParameterNode bodyNode = (RequiredParameterNode) resourceParameter.getValue();
+                    Iterator<AnnotationNode> iterator = bodyNode.annotations().iterator();
+                    boolean isPayLoad = false;
+                    while (iterator.hasNext()) {
+                        AnnotationNode anno = iterator.next();
+                        Node node = anno.annotReference();
+                        if (node.toString().trim().equals("http:Payload")) {
+                            isPayLoad = true;
+                        }
+                    }
+
+                    if (isPayLoad) {
+                        Schema value = operationRB.getValue();
+                        TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
+                        List<ValidationError> validationErrors =
+                                TypeSymbolToJsonValidatorUtil.validate(value, typeSymbol, syntaxTree, semanticModel,
+                                        bodyNode.typeName().toString().trim(), location);
+                        if (validationErrors.isEmpty()) {
+                            isOParamExit = true;
+                        } else {
+                            for (ValidationError validEr: validationErrors) {
+                                if ((validEr instanceof MissingFieldInBallerinaType) ||
+                                        (validEr instanceof OneOfTypeValidation) ||
+                                        (validEr instanceof TypeMismatch)) {
+                                    validationErrorList.add(validEr);
+                                    isOParamExit = true;
+                                    break;
+                                }
                             }
                         }
                     }

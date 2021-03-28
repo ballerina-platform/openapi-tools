@@ -19,6 +19,7 @@ package org.ballerinalang.openapi.validator;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +38,14 @@ public class Filters {
         this.excludeTag = excludeTag;
         this.operation = operation;
         this.excludeOperation = excludeOperation;
+        this.kind = kind;
+    }
+
+    public Filters(DiagnosticSeverity kind) {
+        this.tag = new ArrayList<>();
+        this.excludeTag = new ArrayList<>();
+        this.operation = new ArrayList<>();
+        this.excludeOperation = new ArrayList<>();
         this.kind = kind;
     }
 

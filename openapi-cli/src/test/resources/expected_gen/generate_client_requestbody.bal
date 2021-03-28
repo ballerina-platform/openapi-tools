@@ -23,7 +23,7 @@ public client class openapipetstoreClient {
         request.setPayload(resource1JsonBody);
 
         // TODO: Update the request as needed
-        var response = resource1Ep->post("/requestBody", request);
+        var response = check resource1Ep->post("/requestBody", request);
 
         if (response is http:Response) {
             return response;
