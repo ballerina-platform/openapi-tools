@@ -127,7 +127,7 @@ shadowJar {
 
 test {
     dependsOn {
-        jBallerinaPack
+        copyStdlibs
     }
     systemProperty "ballerina.home", bDistribution
     useTestNG() {
