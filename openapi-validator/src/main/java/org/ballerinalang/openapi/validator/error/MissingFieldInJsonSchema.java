@@ -19,26 +19,39 @@
 
 package org.ballerinalang.openapi.validator.error;
 
+import io.ballerina.tools.diagnostics.Location;
 import org.ballerinalang.openapi.validator.Constants;
 
 /**
  * This for identify the missing field in json schema against to given bVarSymbol.
  */
 public class MissingFieldInJsonSchema extends ValidationError {
-    String fieldName;
-    Constants.Type type;
-    String recordName;
+    private String fieldName;
+    private Constants.Type type;
+    private String recordName;
+    private Location location;
 
-    public MissingFieldInJsonSchema(String fieldName, Constants.Type type) {
+    public MissingFieldInJsonSchema(String fieldName, Constants.Type type, Location location) {
         this.fieldName = fieldName;
         this.type = type;
         this.recordName = null;
+        this.location = location;
     }
-    public MissingFieldInJsonSchema(String fieldName, Constants.Type type, String recordName) {
+    public MissingFieldInJsonSchema(String fieldName, Constants.Type type, String recordName, Location location) {
         this.fieldName = fieldName;
         this.type = type;
         this.recordName = recordName;
+        this.location = location;
     }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
     }

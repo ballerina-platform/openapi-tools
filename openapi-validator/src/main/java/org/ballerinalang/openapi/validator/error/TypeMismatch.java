@@ -19,29 +19,42 @@
 
 package org.ballerinalang.openapi.validator.error;
 
+import io.ballerina.tools.diagnostics.Location;
 import org.ballerinalang.openapi.validator.Constants;
 
 /**
  * This for identify the fields that are same names with different data type in given json schema and bVarsymbol.
  */
 public class TypeMismatch extends ValidationError {
-    String recordName;
-    String fieldName;
-    Constants.Type typeJsonSchema;
-    Constants.Type typeBallerinaType;
+    private String recordName;
+    private String fieldName;
+    private Location location;
+    private Constants.Type typeJsonSchema;
+    private Constants.Type typeBallerinaType;
 
-    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType) {
+    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType,
+                        Location location) {
         this.fieldName = fieldName;
         this.typeJsonSchema = typeJsonSchema;
         this.typeBallerinaType = typeBallerinaType;
         this.recordName = null;
+        this.location = location;
     }
     public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType,
-                        String recordName) {
+                        String recordName, Location location) {
         this.fieldName = fieldName;
         this.typeJsonSchema = typeJsonSchema;
         this.typeBallerinaType = typeBallerinaType;
         this.recordName = recordName;
+        this.location = location;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public void setFieldName(String fieldName) {

@@ -43,6 +43,8 @@ dependencies {
     }
     implementation "org.ballerinalang:ballerina-lang"
     implementation "org.ballerinalang:ballerina-tools-api"
+    implementation "org.ballerinalang:ballerina-parser"
+    implementation "org.ballerinalang:ballerina-cli"
     testImplementation "org.testng:testng"
 
     balTools("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
@@ -61,6 +63,35 @@ task jBallerinaPack {
         }
     }
     outputs.dir bDistribution
+}
+
+task unpackStdLibs() {
+    dependsOn(jBallerinaPack)
+    doLast {
+        configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            copy {
+                from project.zipTree(artifact.getFile())
+                into new File("${project.buildDir}/extracted-distribution/" + artifact.name + "-zip")
+            }
+        }
+    }
+}
+
+task copyStdlibs(type: Copy) {
+    dependsOn(unpackStdLibs)
+    def ballerinaDist = "$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
+    into ballerinaDist
+
+    /* Standard Libraries */
+    configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        def artifactExtractedPath = "${project.buildDir}/extracted-distribution/" + artifact.name + "-zip"
+        into("repo/bala") {
+            from "${artifactExtractedPath}/bala/"
+        }
+        into("repo/cache") {
+            from "${artifactExtractedPath}/cache"
+        }
+    }
 }
 
 clean {
@@ -96,7 +127,7 @@ shadowJar {
 
 test {
     dependsOn {
-        jBallerinaPack
+        copyStdlibs
     }
     systemProperty "ballerina.home", bDistribution
     useTestNG() {
