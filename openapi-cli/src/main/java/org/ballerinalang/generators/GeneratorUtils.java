@@ -128,7 +128,7 @@ public class GeneratorUtils {
         Token openBrace = AbstractNodeFactory.createIdentifierToken("{");
 
         Token fieldName = AbstractNodeFactory.createIdentifierToken("host");
-        Token literalHostToken = AbstractNodeFactory.createIdentifierToken(host, leading, trailing);
+        Token literalHostToken = AbstractNodeFactory.createIdentifierToken('"' + host + '"', leading, trailing);
         BasicLiteralNode valueExpr = NodeFactory.createBasicLiteralNode(SyntaxKind.STRING_LITERAL,
                 literalHostToken);
         MappingFieldNode hostNode = NodeFactory.createSpecificFieldNode(null, fieldName, colon, valueExpr);
