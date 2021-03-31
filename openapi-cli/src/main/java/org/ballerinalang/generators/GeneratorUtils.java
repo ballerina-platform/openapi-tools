@@ -44,13 +44,19 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.ballerina.Constants;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.utils.GeneratorConstants;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -308,5 +314,25 @@ public class GeneratorUtils {
 
     public static boolean hasTags(List<String> tags, List<String> filterTags) {
         return !Collections.disjoint(filterTags, tags);
+    }
+
+    /**
+     * Util for take OpenApi spec from given yaml file.
+     */
+    public static OpenAPI getBallerinaOpenApiType(Path definitionPath)
+            throws IOException, BallerinaOpenApiException {
+
+        String openAPIFileContent = Files.readString(definitionPath);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
+
+        if (parseResult.getMessages().size() > 0) {
+            throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
+        }
+        OpenAPI api = parseResult.getOpenAPI();
+        if (api.getInfo() == null) {
+            throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
+                    definitionPath);
+        }
+        return api;
     }
 }
