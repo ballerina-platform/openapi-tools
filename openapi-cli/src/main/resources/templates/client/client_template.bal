@@ -1,19 +1,7 @@
-import ballerina/http;
-
-public type clientConfig record {
-    string serviceUrl;
-    http:ClientConfiguration httpClientConfig;
-};
-
-public client class 'client {
-    public http:Client clientEp;
-    public clientConfig config;
-
-    public function init(clientConfig config) {
-        http:Client httpEp = checkpanic new(config.serviceUrl, {auth: config.httpClientConfig.auth, cache:
-            config.httpClientConfig.cache});
-        self.clientEp = httpEp;
-        self.config = config;
-    }
-}
-
+public client class Client {
+   public http:Client clientEp;
+   public function init(string serviceUrl = "http://localhost:9090/v1", http:ClientConfiguration httpClientConfig = {}) returns error? {
+       http:Client httpEp = check new (serviceUrl, httpClientConfig);
+       self.clientEp = httpEp;
+   }
+   }
