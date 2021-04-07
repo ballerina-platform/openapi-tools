@@ -30,6 +30,7 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -81,7 +82,7 @@ public class ResourceValidator {
                         if (resourceParam.equals(parameter.getName()) && (parameter.getSchema() != null)) {
                             isParameterExit = true;
                             // Handle path parameter
-                            if (resourceParameter.getValue() instanceof ResourcePathParameterNode) {
+                            if (resourceParameter.getValue().kind().equals(SyntaxKind.RESOURCE_PATH_SEGMENT_PARAM)) {
                                 ResourcePathParameterNode paramNode =
                                         (ResourcePathParameterNode) resourceParameter.getValue();
                                 paramType = paramNode.typeDescriptor().toString().trim();
