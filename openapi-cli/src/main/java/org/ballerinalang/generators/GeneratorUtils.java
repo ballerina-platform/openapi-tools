@@ -48,6 +48,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.servers.ServerVariable;
+import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.ballerina.Constants;
@@ -334,5 +336,24 @@ public class GeneratorUtils {
                     definitionPath);
         }
         return api;
+    }
+
+    /**
+     * If there are template values in the {@code absUrl} derive resolved url using {@code variables}.
+     *
+     * @param absUrl abstract url with template values
+     * @param variables variable values to populate the url template
+     * @return resolved url
+     */
+    public static String buildUrl(String absUrl, ServerVariables variables) {
+        String url = absUrl;
+        if (variables != null) {
+            for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
+                // According to the oas spec, default value must be specified
+                String replaceKey = "\\{" + entry.getKey() + '}';
+                url = url.replaceAll(replaceKey, entry.getValue().getDefault());
+            }
+        }
+        return url;
     }
 }
