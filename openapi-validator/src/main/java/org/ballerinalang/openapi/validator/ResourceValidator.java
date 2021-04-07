@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
@@ -85,19 +86,17 @@ public class ResourceValidator {
                                         (ResourcePathParameterNode) resourceParameter.getValue();
                                 paramType = paramNode.typeDescriptor().toString().trim();
                                 TypeDescriptorNode typeNode = (TypeDescriptorNode) paramNode.typeDescriptor();
-                                Token paramName = paramNode.paramName();
                                 if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
-                                    Optional<Symbol> symbol = semanticModel.symbol(paramName);
+                                    Optional<Symbol> symbol = semanticModel.symbol(typeNode);
                                     TypeSymbol typeSymbol = null;
-                                    if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
-                                        VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
-                                        typeSymbol = symbol1.typeDescriptor();
+                                    if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.TYPE)) {
+                                         TypeReferenceTypeSymbol type = (TypeReferenceTypeSymbol) symbol.orElseThrow();
+                                         typeSymbol = type.typeDescriptor();
                                     }
 
                                     List<ValidationError> validationErrors =
                                             TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
-                                                    typeSymbol, syntaxTree, semanticModel,
-                                                    resourceParameter.getKey(),
+                                                    typeSymbol, syntaxTree, semanticModel, resourceParameter.getKey(),
                                                     resourceParameter.getValue().location());
 
                                     if (!validationErrors.isEmpty()) {
