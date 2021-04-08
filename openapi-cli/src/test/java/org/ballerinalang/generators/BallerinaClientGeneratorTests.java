@@ -49,6 +49,13 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_get.bal");
     }
 
+    @Test(description = "Generate Client for POST method")
+    public void generateClientForPOST() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/petstore_post.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_post.bal");
+    }
+
     //Get string as a content of ballerina file
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));

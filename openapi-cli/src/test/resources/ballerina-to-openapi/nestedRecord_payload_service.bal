@@ -1,30 +1,31 @@
-//import ballerina/http;
-//
-//listener http:Listener helloEp = new (9090);
-//
-//type Pet record {
-//    int id;
-//    string name;
-//    string tag?;
-// };
-//
-// type Dog record {
-//     Pet perant;
-//     boolean bark;
-//  };
-// service /payloadV on helloEp {
-//     resource function post hi(http:Caller caller, http:Request request, @http:Payload {} Dog payload) {
-//
-//     }}
+import ballerina/http;
 
-import  ballerina/http;
+listener http:Listener helloEp = new (9090);
 
-public client class Client {
-    public http:Client clientEp;
-    public function init(string serviceUrl = "https://petstore.swagger.io:443/v2", http:ClientConfiguration httpClientConfig= {})
-    returns error?{
-        http:Client httpEp = check new (serviceUrl, httpClientConfig);
-        self.clientEp = httpEp;
+type Pet record {
+    int id;
+    string name;
+    string tag?;
+ };
+
+ type Dog record {
+     Pet perant;
+     boolean bark;
+  };
+ service /payloadV on helloEp {
+     resource function post hi(http:Caller caller, http:Request request, @http:Payload {} Dog payload) {
+
+     }}
+
+//Use for getting syntax tree
+//import  ballerina/http;
+//
+//public client class Client {
+//    public http:Client clientEp;
+//    public function init(string serviceUrl = "https://petstore.swagger.io:443/v2", http:ClientConfiguration httpClientConfig= {})
+//    returns error?{
+//        http:Client httpEp = check new (serviceUrl, httpClientConfig);
+//        self.clientEp = httpEp;
     }
     ////normal
     //remote function getPets() returns string {
@@ -85,42 +86,43 @@ public client class Client {
     //    }
 
     //request body
-        remote function createPet(Pet createPetBody) returns http:Response | error{
-            string path = "/pets";
-            http:Request request = new;
-            json createPetJsonBody = check createPetBody.cloneWithType(json);
-            request.setPayload(createPetJsonBody);
+    //    remote function createPet(Pet createPetBody) returns http:Response | error{
+    //        string path = "/pets";
+    //        http:Request request = new;
+    //        json createPetJsonBody = check createPetBody.cloneWithType(json);
+    //        request.setPayload(createPetJsonBody);
+    //
+    //        // TODO: Update the request as needed
+    //        http:Response response = check self.clientEp->post(path, request);
+    //        return response;
+    //    }
+    //
+    //    //request body
+    //    remote function createPet(Pet createPetBody) returns http:Response | error{
+    //        string path = "/pets";
+    //        http:Request request = new;
+    //        json createPetJsonBody = check createPetBody.cloneWithType(json);
+    //        xml createPetXmlBody = check xmldata:fromJson(createPetJsonBody);
+    //        request.setPayload(createPetXmlBody);
+    //
+    //        // TODO: Update the request as needed
+    //        http:Response response = check self.clientEp->post(path, request);
+    //        return response;
+    //    }
+    //
+    //    //request body
+    //    remote function createPet(string body) returns http:Response | error{
+    //        string path = "/pets";
+    //        http:Request request = new;
+    //        request.setPayload(body);
+    //
+    //        // TODO: Update the request as needed
+    //        http:Response response = check self.clientEp->post(path, request);
+    //        return response;
+    //    }
 
-            // TODO: Update the request as needed
-            http:Response response = check self.clientEp->post(path, request);
-            return response;
-        }
+//}
 
-        //request body
-        remote function createPet(Pet createPetBody) returns http:Response | error{
-            string path = "/pets";
-            http:Request request = new;
-            json createPetJsonBody = check createPetBody.cloneWithType(json);
-            xml createPetXmlBody = check xmldata:fromJson(createPetJsonBody);
-            request.setPayload(createPetXmlBody);
-
-            // TODO: Update the request as needed
-            http:Response response = check self.clientEp->post(path, request);
-            return response;
-        }
-
-        //request body
-        remote function createPet(string body) returns http:Response | error{
-            string path = "/pets";
-            http:Request request = new;
-            request.setPayload(body);
-
-            // TODO: Update the request as needed
-            http:Response response = check self.clientEp->post(path, request);
-            return response;
-        }
-    
-}
 
 
 

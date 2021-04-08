@@ -73,7 +73,6 @@ import static org.ballerinalang.openapi.utils.GeneratorConstants.GenType.GEN_SER
  */
 public class CodeGenerator {
     private String srcPackage;
-    private String modelPackage;
 
     private static final PrintStream outStream = System.err;
 
@@ -432,22 +431,5 @@ public class CodeGenerator {
                 schemaContent));
 
         return sourceFiles;
-    }
-
-    /**
-     * Retrieve generated source content as a String value.
-     *
-     * @param object       context to be used by template engine
-     * @param templateDir  templates directory
-     * @param templateName name of the template to be used for this code generation
-     * @return String with populated template
-     * @throws IOException when template population fails
-     */
-    private String getContent(BallerinaOpenApi object, String templateDir, String templateName) throws IOException {
-        Template template = compileTemplate(templateDir, templateName);
-        Context context = Context.newBuilder(object)
-                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
-                .build();
-        return template.apply(context);
     }
 }

@@ -9,16 +9,15 @@ servers:
 paths:
   /pet:
     post:
-      description: Simple get function
+      description: Simple post function
       responses:
         '200':
           description: Expected response to a valid request
       requestBody:
         content:
-          application/json:
+          application/xml:
             schema:
               $ref: '#/components/schemas/Pet'
-
   /pets/{petId}:
     post:
       summary: Get funtion with path parameters

@@ -1,58 +1,28 @@
-import ballerina/http;
+import  ballerina/http;
 
-public type openapipetstoreClientConfig record {
-    string serviceUrl;
-    http:ClientConfiguration clientConfig;
-};
-
-public client class openapipetstoreClient {
+public client class Client {
     public http:Client clientEp;
-    public openapipetstoreClientConfig config;
-
-    public function init(openapipetstoreClientConfig config) {
-        http:Client httpEp = checkpanic new(config.serviceUrl, {auth: config.clientConfig.auth, cache:
-            config.clientConfig.cache});
+    public function init(string serviceUrl = "http://petstore.openapi.io/v1", http:ClientConfiguration httpClientConfig= {})
+    returns error?{
+        http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
-        self.config = config;
     }
-
-    remote function listPets() returns http:Response | error {
-        http:Client listPetsEp = self.clientEp;
-        http:Request request = new;
-
-        // TODO: Update the request as needed
-        var response = check listPetsEp->get("/pets");
-
-        if (response is http:Response) {
-            return response;
+    remote function listPets(int? 'limit) returns http:Response | error {
+        string  path = string `/pets`;
+        if ('limit is int) {
+            path = path + `?limit=${'limit}`;
         }
-        return <error>response;
+        http:Response response = check self.clientEp->get(path, targetType = http:Response);
+        return response;
     }
-
-    remote function resource1() returns http:Response | error {
-        http:Client resource1Ep = self.clientEp;
-        http:Request request = new;
-
-        // TODO: Update the request as needed
-        var response = check resource1Ep->post("/pets", request);
-
-        if (response is http:Response) {
-            return response;
-        }
-        return <error>response;
+    remote function  pets() returns http:Response | error {
+        string  path = string `/pets`;
+        http:Response response = check self.clientEp->post(path, targetType = http:Response);
+        return response;
     }
-
     remote function showPetById(string petId) returns http:Response | error {
-        http:Client showPetByIdEp = self.clientEp;
-        http:Request request = new;
-
-        // TODO: Update the request as needed
-        var response = check showPetByIdEp->get(string `/pets/${petId}`);
-
-        if (response is http:Response) {
-            return response;
-        }
-        return <error>response;
+        string  path = string `/pets/${petId}`;
+        http:Response response = check self.clientEp->get(path, targetType = http:Response);
+        return response;
     }
-    
 }

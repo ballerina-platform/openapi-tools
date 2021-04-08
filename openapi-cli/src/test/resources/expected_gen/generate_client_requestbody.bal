@@ -1,33 +1,17 @@
-import ballerina/http;
+import  ballerina/http;
 
-public type openapipetstoreClientConfig record {
-    string serviceUrl;
-    http:ClientConfiguration clientConfig;
-};
-
-public client class openapipetstoreClient {
+public client class Client {
     public http:Client clientEp;
-    public openapipetstoreClientConfig config;
-
-    public function init(openapipetstoreClientConfig config) {
-        http:Client httpEp = checkpanic new(config.serviceUrl, {auth: config.clientConfig.auth, cache:
-            config.clientConfig.cache});
+    public function init(string serviceUrl = "https", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
+        http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
-        self.config = config;
     }
-
-    remote function resource1(User resource1Body) returns http:Response | error {
-        http:Client resource1Ep = self.clientEp;
+    remote function  requestBody(User payload) returns http:Response | error {
+        string  path = string `/requestBody`;
         http:Request request = new;
-        json resource1JsonBody = check resource1Body.cloneWithType(json);
-        request.setPayload(resource1JsonBody);
-
-        // TODO: Update the request as needed
-        var response = check resource1Ep->post("/requestBody", request);
-
-        if (response is http:Response) {
-            return response;
-        }
-        return <error>response;
+        json jsonBody = check payload.cloneWithType(json);
+        request.setPayload(jsonBody);
+        http:Response response = check self.clientEp->post(path, request);
+        return response;
     }
 }

@@ -22,7 +22,6 @@ public client class Client {
         http:Response response = check self.clientEp->get(path, targetType = http:Response);
         return response;
     }
-    //if type is String offset should encode url before assign
     remote function  pets(int offset) returns http:Response | error {
         string  path = string `/pets?offset=${offset}`;
         http:Response response = check self.clientEp->get(path, targetType = http:Response);
@@ -36,7 +35,6 @@ public client class Client {
         http:Response response = check self.clientEp->get(path, targetType = http:Response);
         return response;
     }
-    //Add function to generate path
     remote function getImage(string? tag, int? 'limit) returns http:Response | error {
         string  path = string `/image`;
         if (tag is string) {
