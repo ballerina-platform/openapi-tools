@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * All the tests related to the BallerinaClientGenerator util.
+ */
 public class BallerinaClientGeneratorTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     SyntaxTree syntaxTree;

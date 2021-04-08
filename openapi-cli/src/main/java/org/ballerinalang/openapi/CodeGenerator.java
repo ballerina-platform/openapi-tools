@@ -30,6 +30,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.ballerinalang.generators.BallerinaClientGenerator;
 import org.ballerinalang.generators.BallerinaSchemaGenerator;
 import org.ballerinalang.generators.BallerinaServiceGenerator;
 import org.ballerinalang.generators.OpenApiException;
@@ -213,7 +214,7 @@ public class CodeGenerator {
                         .modelPackage(srcPackage);
                 definitionContext.setDefinitionPath(reldefinitionPath);
 
-                sourceFiles = generateClient(definitionContext, serviceName, Paths.get(definitionPath));
+                sourceFiles = generateClient(definitionContext, serviceName, Paths.get(definitionPath), filter);
                 break;
             case GEN_SERVICE:
 
@@ -387,7 +388,7 @@ public class CodeGenerator {
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private List<GenSrcFile> generateClient(BallerinaOpenApi context, String serviceName, Path openAPI)
+    private List<GenSrcFile> generateClient(BallerinaOpenApi context, String serviceName, Path openAPI, Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = GeneratorConstants.DEFAULT_CLIENT_PKG;
@@ -400,8 +401,7 @@ public class CodeGenerator {
         String srcFile = serviceName + "_client.bal";
 
         // Generate ballerina service and resources.
-        String mainContent = getContent(context, GeneratorConstants.DEFAULT_CLIENT_DIR,
-                GeneratorConstants.CLIENT_TEMPLATE_NAME);
+        String mainContent = Formatter.format(BallerinaClientGenerator.generateSyntaxTree(openAPI, filter)).toString();
         sourceFiles.add(new GenSrcFile(GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         // Generate ballerina records to represent schemas.
@@ -449,21 +449,5 @@ public class CodeGenerator {
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
                 .build();
         return template.apply(context);
-    }
-
-    public String getSrcPackage() {
-        return srcPackage;
-    }
-
-    public void setSrcPackage(String srcPackage) {
-        this.srcPackage = srcPackage;
-    }
-
-    public String getModelPackage() {
-        return modelPackage;
-    }
-
-    public void setModelPackage(String modelPackage) {
-        this.modelPackage = modelPackage;
     }
 }

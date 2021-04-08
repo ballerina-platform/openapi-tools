@@ -79,7 +79,6 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
-import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
@@ -156,7 +155,6 @@ public class BallerinaClientGenerator {
                 NodeFactory.createNodeList(classDefinitionNode), AbstractNodeFactory.createToken(EOF_TOKEN));
         TextDocument textDocument = TextDocuments.from("");
         syntaxTree = SyntaxTree.from(textDocument);
-        System.out.println(Formatter.format(syntaxTree.modifyWith(modulePartNode)));
         return syntaxTree.modifyWith(modulePartNode);
     }
 
@@ -231,7 +229,8 @@ public class BallerinaClientGenerator {
         parameters.add(comma);
 
         QualifiedNameReferenceNode typeName1 =
-                NodeFactory.createQualifiedNameReferenceNode(AbstractNodeFactory.createIdentifierToken(GeneratorConstants.HTTP),
+                NodeFactory.createQualifiedNameReferenceNode(
+                        AbstractNodeFactory.createIdentifierToken(GeneratorConstants.HTTP),
                         AbstractNodeFactory.createIdentifierToken(GeneratorConstants.COLON),
                         AbstractNodeFactory.createIdentifierToken("ClientConfiguration"));
         IdentifierToken paramName1 = AbstractNodeFactory.createIdentifierToken(" httpClientConfig");
@@ -320,10 +319,10 @@ public class BallerinaClientGenerator {
                 assignmentStatementNode);
 
         Token closeBraceFB = AbstractNodeFactory.createToken(CLOSE_BRACE_TOKEN);
-        FunctionBodyNode functionBodyNode = NodeFactory.createFunctionBodyBlockNode(openBraceFB, null,
-                statementList, closeBraceFB);
+        FunctionBodyNode functionBodyNode = NodeFactory.createFunctionBodyBlockNode(openBraceFB,
+                null, statementList, closeBraceFB);
         FunctionDefinitionNode initFunctionNode = NodeFactory.createFunctionDefinitionNode(null, null,
-                qualifierList,functionKeyWord, functionName, NodeFactory.createEmptyNodeList(), functionSignatureNode
+                qualifierList, functionKeyWord, functionName, NodeFactory.createEmptyNodeList(), functionSignatureNode
                 , functionBodyNode);
 
         memberNodeList.add(initFunctionNode);
@@ -473,7 +472,7 @@ public class BallerinaClientGenerator {
     private static String getOperationId(String[] split, String method) {
 
         String operationId;
-        String regEx="\\{([^}]*)\\}";
+        String regEx = "\\{([^}]*)\\}";
         Matcher matcher = Pattern.compile(regEx).matcher(split[split.length - 1]);
         if (matcher.matches()) {
             operationId = method + split[split.length - 2] + "By" + matcher.group(1);
@@ -514,7 +513,8 @@ public class BallerinaClientGenerator {
                         }
                     } else {
                         // function call
-                        FunctionDefinitionNode functionDefinitionNode = getFunctionDefinitionNode(path.getKey(), operation);
+                        FunctionDefinitionNode functionDefinitionNode = getFunctionDefinitionNode(path.getKey(),
+                                operation);
                         functionDefinitionNodeList.add(functionDefinitionNode);
                     }
                 }
@@ -537,9 +537,9 @@ public class BallerinaClientGenerator {
         // Create Function Body
         FunctionBodyNode functionBodyNode = getFunctionBodyNode(path, operation);
 
-        FunctionDefinitionNode functionDefinitionNode = NodeFactory.createFunctionDefinitionNode(null, null,
-                qualifierList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
-                functionBodyNode);
+        FunctionDefinitionNode functionDefinitionNode = NodeFactory.createFunctionDefinitionNode(null,
+                null, qualifierList, functionKeyWord, functionName, relativeResourcePath,
+                functionSignatureNode, functionBodyNode);
 
         return functionDefinitionNode;
     }
@@ -557,7 +557,7 @@ public class BallerinaClientGenerator {
         if (operation.getParameters() != null) {
             setFunctionParameters(operation, parameterList, comma);
             if (parameterList.size() >= 2) {
-                parameterList.remove(parameterList.size()-1);
+                parameterList.remove(parameterList.size() - 1);
             }
 
         }
@@ -600,7 +600,7 @@ public class BallerinaClientGenerator {
         }
     }
 
-    private static void setQueryParameters(List<Node> parameterList,Parameter parameter) {
+    private static void setQueryParameters(List<Node> parameterList, Parameter parameter) {
         NodeList<AnnotationNode> annotationNodes = NodeFactory.createEmptyNodeList();
         TypeDescriptorNode typeName;
         String paramType = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
@@ -719,7 +719,7 @@ public class BallerinaClientGenerator {
                 content, endBacktick);
         Token semicolon = AbstractNodeFactory.createToken(SEMICOLON_TOKEN);
 
-        VariableDeclarationNode pathInt = NodeFactory.createVariableDeclarationNode(annotationNodes,null,
+        VariableDeclarationNode pathInt = NodeFactory.createVariableDeclarationNode(annotationNodes, null,
                 typedBindingPatternNode, equalToken, initializer, semicolon);
 
         statementsList.add(pathInt);
@@ -757,8 +757,8 @@ public class BallerinaClientGenerator {
         Token openParen = AbstractNodeFactory.createToken(OPEN_PAREN_TOKEN);
         //Argument Nodes
         List<Node> argumentsNodes = new ArrayList<>();
-        PositionalArgumentNode positionalArgumentNode = NodeFactory.createPositionalArgumentNode(
-                        NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("path")));
+        PositionalArgumentNode positionalArgumentNode = NodeFactory.createPositionalArgumentNode(NodeFactory
+                .createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("path")));
 
         argumentsNodes.add(positionalArgumentNode);
         Token comma = AbstractNodeFactory.createToken(COMMA_TOKEN);
@@ -766,8 +766,8 @@ public class BallerinaClientGenerator {
 
         SimpleNameReferenceNode argumentNode =
                 NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("targetType"));
-        SimpleNameReferenceNode expression =
-                NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("http:Response"));
+        SimpleNameReferenceNode expression = NodeFactory.
+                createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("http:Response"));
         NamedArgumentNode targetTypeNode = NodeFactory.createNamedArgumentNode(argumentNode, equalToken, expression);
 
         argumentsNodes.add(targetTypeNode);
@@ -775,10 +775,10 @@ public class BallerinaClientGenerator {
         SeparatedNodeList<FunctionArgumentNode> argumentNodeList = NodeFactory.createSeparatedNodeList(argumentsNodes);
         Token closeParen = AbstractNodeFactory.createToken(CLOSE_PAREN_TOKEN);
         RemoteMethodCallActionNode actionNode = NodeFactory.createRemoteMethodCallActionNode(fieldExpr,
-                rightArrowToken,methodName, openParen, argumentNodeList, closeParen);
+                rightArrowToken, methodName, openParen, argumentNodeList, closeParen);
         CheckExpressionNode initRes = NodeFactory.createCheckExpressionNode(null, check, actionNode);
-        VariableDeclarationNode checkVariable = NodeFactory.createVariableDeclarationNode(annotationNodes, null,
-                resTypedBindingPatternNode, equalToken, initRes, semicolon);
+        VariableDeclarationNode checkVariable = NodeFactory.createVariableDeclarationNode(annotationNodes,
+                null, resTypedBindingPatternNode, equalToken, initRes, semicolon);
         statementsList.add(checkVariable);
         //Return Variable
 //        Token returnKeyWord = AbstractNodeFactory.createToken(RETURN_STATEMENT);
