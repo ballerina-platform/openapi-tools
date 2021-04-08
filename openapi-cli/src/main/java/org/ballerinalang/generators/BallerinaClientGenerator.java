@@ -71,8 +71,12 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import org.ballerinalang.formatter.core.Formatter;
@@ -110,7 +114,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PLUS_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_STATEMENT;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RIGHT_ARROW_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
@@ -118,6 +121,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static org.ballerinalang.generators.GeneratorUtils.buildUrl;
 import static org.ballerinalang.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static org.ballerinalang.generators.GeneratorUtils.escapeIdentifier;
+import static org.ballerinalang.generators.GeneratorUtils.extractReferenceType;
 import static org.ballerinalang.generators.GeneratorUtils.getBallerinaOpenApiType;
 
 /**
@@ -479,7 +483,8 @@ public class BallerinaClientGenerator {
         return operationId;
     }
 
-    private static List<FunctionDefinitionNode> createRemoteFunctions (Paths paths, Filter filter) {
+    private static List<FunctionDefinitionNode> createRemoteFunctions (Paths paths, Filter filter)
+            throws BallerinaOpenApiException {
         List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
         Set<Map.Entry<String, PathItem>> pathsItems = paths.entrySet();
         Iterator<Map.Entry<String, PathItem>> pathItr = pathsItems.iterator();
@@ -519,7 +524,7 @@ public class BallerinaClientGenerator {
     }
 
     private static FunctionDefinitionNode getFunctionDefinitionNode(String path, Map.Entry<PathItem.HttpMethod,
-            Operation> operation) {
+            Operation> operation) throws BallerinaOpenApiException {
         //Create qualifier list
         NodeList<Token> qualifierList =
                 AbstractNodeFactory.createNodeList(AbstractNodeFactory.createToken(REMOTE_KEYWORD));
@@ -539,7 +544,8 @@ public class BallerinaClientGenerator {
         return functionDefinitionNode;
     }
 
-    private static FunctionSignatureNode getFunctionSignatureNode(Operation operation) {
+    private static FunctionSignatureNode getFunctionSignatureNode(Operation operation)
+            throws BallerinaOpenApiException {
 
         // Create Function Signature
         Token openParen = AbstractNodeFactory.createToken(OPEN_PAREN_TOKEN);
@@ -549,7 +555,7 @@ public class BallerinaClientGenerator {
         NodeList<AnnotationNode> annotationNodes = NodeFactory.createEmptyNodeList();
         Token comma =  NodeFactory.createToken(COMMA_TOKEN);
         if (operation.getParameters() != null) {
-            setFunctionParameters(operation, parameterList, annotationNodes, comma);
+            setFunctionParameters(operation, parameterList, comma);
             if (parameterList.size() >= 2) {
                 parameterList.remove(parameterList.size()-1);
             }
@@ -563,14 +569,14 @@ public class BallerinaClientGenerator {
         // Default
         ReturnTypeDescriptorNode returnTypeDescriptorNode = NodeFactory.createReturnTypeDescriptorNode(returnsKeyWord,
                 annotationNodes, NodeFactory.createBuiltinSimpleNameReferenceNode(null,
-                        AbstractNodeFactory.createIdentifierToken("http:Response | error?")));
+                        AbstractNodeFactory.createIdentifierToken("http:Response | error")));
 
         return NodeFactory.createFunctionSignatureNode(openParen, parameters,
                 closeParen, returnTypeDescriptorNode);
     }
 
-    private static void setFunctionParameters(Operation operation, List<Node> parameterList,
-                                              NodeList<AnnotationNode> annotationNodes, Token comma) {
+    private static void setFunctionParameters(Operation operation, List<Node> parameterList, Token comma)
+            throws BallerinaOpenApiException {
 
         List<Parameter> parameters = operation.getParameters();
         for (Parameter parameter: parameters) {
@@ -582,7 +588,14 @@ public class BallerinaClientGenerator {
                 setQueryParameters(parameterList, parameter);
                 parameterList.add(comma);
             } else if (in.equals("header")) {
-
+            }
+        }
+        //Handle RequestBody
+        if (operation.getRequestBody() != null) {
+            RequestBody requestBody = operation.getRequestBody();
+            if (requestBody.getContent() != null) {
+                setRequestBodyParameters(parameterList, requestBody);
+                parameterList.add(comma);
             }
         }
     }
@@ -629,6 +642,34 @@ public class BallerinaClientGenerator {
         parameterList.add(pathParam);
     }
 
+    private static void setRequestBodyParameters(List<Node> parameterList, RequestBody requestBody)
+            throws BallerinaOpenApiException {
+
+        Content content = requestBody.getContent();
+        Iterator<Map.Entry<String, MediaType>> iterator = content.entrySet().iterator();
+        while (iterator.hasNext()) {
+            // This implementation currently for first content type
+            Map.Entry<String, MediaType> next = iterator.next();
+            Schema schema = next.getValue().getSchema();
+            String paramType;
+            //Take payload type
+            if (schema.get$ref() != null) {
+                paramType = escapeIdentifier(extractReferenceType(schema.get$ref()));
+            } else {
+                String typeOfPayload = schema.getType().trim();
+                paramType = convertOpenAPITypeToBallerina(typeOfPayload);
+            }
+            NodeList<AnnotationNode> annotationNodes = NodeFactory.createEmptyNodeList();
+            SimpleNameReferenceNode typeName =
+                    NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken(paramType));
+            IdentifierToken paramName = AbstractNodeFactory.createIdentifierToken("payload");
+            RequiredParameterNode payload = NodeFactory.createRequiredParameterNode(annotationNodes, typeName
+                    , paramName);
+            parameterList.add(payload);
+            break;
+        }
+    }
+
     private static FunctionBodyNode getFunctionBodyNode(String path,
                                                         Map.Entry<PathItem.HttpMethod, Operation> operation) {
         Token openBrace = AbstractNodeFactory.createToken(OPEN_BRACE_TOKEN);
@@ -670,6 +711,7 @@ public class BallerinaClientGenerator {
                 }
             }
         }
+        //String path generator
         NodeList<Node> content = NodeFactory.createNodeList(NodeFactory.createLiteralValueToken(null, path,
                 AbstractNodeFactory.createEmptyMinutiaeList(), AbstractNodeFactory.createEmptyMinutiaeList()));
         Token endBacktick = AbstractNodeFactory.createToken(BACKTICK_TOKEN);
@@ -683,8 +725,12 @@ public class BallerinaClientGenerator {
         statementsList.add(pathInt);
         statementsList.addAll(queryStatement);
 
+        //Statement Generator for requestBody-
+        if (operation.getValue().getRequestBody() != null) {
 
-        //create typeBind for return
+        }
+
+        //Create typeBind for return
         //default bind
         String responseType = "http:Response";
         SimpleNameReferenceNode resTypeBind =
@@ -711,17 +757,21 @@ public class BallerinaClientGenerator {
         Token openParen = AbstractNodeFactory.createToken(OPEN_PAREN_TOKEN);
         //Argument Nodes
         List<Node> argumentsNodes = new ArrayList<>();
-        PositionalArgumentNode positionalArgumentNode =
-                NodeFactory.createPositionalArgumentNode(NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("path")));
+        PositionalArgumentNode positionalArgumentNode = NodeFactory.createPositionalArgumentNode(
+                        NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("path")));
+
         argumentsNodes.add(positionalArgumentNode);
         Token comma = AbstractNodeFactory.createToken(COMMA_TOKEN);
         argumentsNodes.add(comma);
+
         SimpleNameReferenceNode argumentNode =
                 NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("targetType"));
         SimpleNameReferenceNode expression =
                 NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("http:Response"));
         NamedArgumentNode targetTypeNode = NodeFactory.createNamedArgumentNode(argumentNode, equalToken, expression);
+
         argumentsNodes.add(targetTypeNode);
+
         SeparatedNodeList<FunctionArgumentNode> argumentNodeList = NodeFactory.createSeparatedNodeList(argumentsNodes);
         Token closeParen = AbstractNodeFactory.createToken(CLOSE_PAREN_TOKEN);
         RemoteMethodCallActionNode actionNode = NodeFactory.createRemoteMethodCallActionNode(fieldExpr,
@@ -731,7 +781,9 @@ public class BallerinaClientGenerator {
                 resTypedBindingPatternNode, equalToken, initRes, semicolon);
         statementsList.add(checkVariable);
         //Return Variable
-        Token returnKeyWord = AbstractNodeFactory.createToken(RETURN_STATEMENT);
+//        Token returnKeyWord = AbstractNodeFactory.createToken(RETURN_STATEMENT);
+        Token returnKeyWord = AbstractNodeFactory.createIdentifierToken("return");
+
         SimpleNameReferenceNode returnType =
                 NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("response"));
 

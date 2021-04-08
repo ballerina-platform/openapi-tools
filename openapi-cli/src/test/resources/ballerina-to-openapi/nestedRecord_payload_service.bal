@@ -26,63 +26,100 @@ public client class Client {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
     }
-    //normal
-    remote function getPets() returns string {
-        string path = string `/pet`;
-        http:Response response = check self.clientEp->get(path, targetType = http:Response);
-        return response;
-    }
-    //Path param
-    remote function showPetById(string petId) returns http:Response | error {
-           string path = string `/pets/${petId}`
-           http:Response response = check self.clientEp->get(path, targetType = http:Response);
-           return response
-    }
-    //multi path param
-    remote function showPetById(int orgId, int memberId) returns http:Response | error {
-           string path = string `/pets/${orgId}/members/${memberId}`;
-           http:Response response = check self.clientEp->get(path, targetType = http:Response);
-           return response
-       }
+    ////normal
+    //remote function getPets() returns string {
+    //    string path = string `/pet`;
+    //    http:Response response = check self.clientEp->get(path, targetType = http:Response);
+    //    return response;
+    //}
+    ////Path param
+    //remote function showPetById(string petId) returns http:Response | error {
+    //       string path = string `/pets/${petId}`
+    //       http:Response response = check self.clientEp->get(path, targetType = http:Response);
+    //       return response
+    //}
+    ////multi path param
+    //remote function showPetById(int orgId, int memberId) returns http:Response | error {
+    //       string path = string `/pets/${orgId}/members/${memberId}`;
+    //       http:Response response = check self.clientEp->get(path, targetType = http:Response);
+    //       return response
+    //   }
+    //
+    ////Query param- required
+    //remote function listPets(int offset) returns http:Response | error {
+    //    string path = string `/pets?offset=${offset}`;
+    //    http:Response response = check self.clientEp->get(path, targetType = http:Response);
+    //    return response;
+    //   }
+    //
+    ////QueryParam - optional
+    //remote function listPets(int offset?) returns http:Response | error {
+    //    string path = string `/pets`;
+    //    if (offset is int) {
+    //        path = path + `?offset=${offset}`;
+    //    }
+    //    http:Response response = check self.clientEp->get(path, targetType = http:Response);
+    //    return response;
+    //   }
+    //}
+    //
+    ////QueryParam - multiple
+    //remote function listPets(string? tag, int? 'limit) returns http:Response | error {
+    //        string path = string `/pets?tag=${tags}&limit=${‘limit}`;
+    //        if (tag is string) {
+    //            path = path + `?tag=${tag}`;
+    //        }
+    //        if ('limit is string) {
+    //            path = path + `?limit=${'limit}`;
+    //        }
+    //        http:Response response = check self.clientEp->get(path, targetType = http:Response);
+    //        return response;
+    //    }
+    //
+    //// Header
+    //remote function sendHeader(string xClient) returns http:Response | error {
+    //        string path = "/acheader";
+    //        map<string|string[]> accHeaders = {"XClient": "headerPayload"};
+    //        http:Response response = check self.clientEp->get(path, accHeaders, targetType = http:Response);
+    //        return response;
+    //    }
 
-    //Query param- required
-    remote function listPets(int offset) returns http:Response | error {
-        string path = string `/pets?offset=${offset}`;
-        http:Response response = check self.clientEp->get(path, targetType = http:Response);
-        return response;
-       }
+    //request body
+        remote function createPet(Pet createPetBody) returns http:Response | error{
+            string path = "/pets";
+            http:Request request = new;
+            json createPetJsonBody = check createPetBody.cloneWithType(json);
+            request.setPayload(createPetJsonBody);
 
-    //QueryParam - optional
-    remote function listPets(int offset?) returns http:Response | error {
-        string path = string `/pets`;
-        if (offset is int) {
-            path = path + `?offset=${offset}`;
-        }
-        http:Response response = check self.clientEp->get(path, targetType = http:Response);
-        return response;
-       }
-    }
-
-    //QueryParam - multiple
-    remote function listPets(string? tag, int? 'limit) returns http:Response | error {
-            string path = string `/pets?tag=${tags}&limit=${‘limit}`;
-            if (tag is string) {
-                path = path + `?tag=${tag}`;
-            }
-            if ('limit is string) {
-                path = path + `?limit=${'limit}`;
-            }
-            http:Response response = check self.clientEp->get(path, targetType = http:Response);
+            // TODO: Update the request as needed
+            http:Response response = check self.clientEp->post(path, request);
             return response;
         }
 
-    // Header
-    remote function sendHeader(string xClient) returns http:Response | error {
-            string path = "/acheader";
-            map<string|string[]> accHeaders = {"XClient": "headerPayload"};
-            http:Response response = check self.clientEp->get(path, accHeaders, targetType = http:Response);
+        //request body
+        remote function createPet(Pet createPetBody) returns http:Response | error{
+            string path = "/pets";
+            http:Request request = new;
+            json createPetJsonBody = check createPetBody.cloneWithType(json);
+            xml createPetXmlBody = check xmldata:fromJson(createPetJsonBody);
+            request.setPayload(createPetXmlBody);
+
+            // TODO: Update the request as needed
+            http:Response response = check self.clientEp->post(path, request);
             return response;
         }
+
+        //request body
+        remote function createPet(string body) returns http:Response | error{
+            string path = "/pets";
+            http:Request request = new;
+            request.setPayload(body);
+
+            // TODO: Update the request as needed
+            http:Response response = check self.clientEp->post(path, request);
+            return response;
+        }
+    
 }
 
 

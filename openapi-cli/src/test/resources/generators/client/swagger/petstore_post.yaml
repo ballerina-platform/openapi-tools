@@ -8,13 +8,19 @@ servers:
   - url: http://localhost:9090/petstore/v1
 paths:
   /pet:
-    get:
+    post:
       description: Simple get function
       responses:
         '200':
           description: Expected response to a valid request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+
   /pets/{petId}:
-    get:
+    post:
       summary: Get funtion with path parameters
       operationId: getPetId
       tags:
@@ -29,6 +35,12 @@ paths:
       responses:
         '200':
           description: Expected response to a valid request
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+
   /pets/{petId}/Image/{imageId}:
     get:
       summary: Multiple path parameters
@@ -47,71 +59,6 @@ paths:
           required: true
           schema:
             type: string
-      responses:
-        '200':
-          description: An paged array of pets
-  /pets:
-    get:
-      summary: Query parameters
-      tags:
-        - pets
-      parameters:
-        - name: offset
-          in: query
-          description: ID of pet to delete
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: An paged array of pets
-  /users:
-    get:
-      summary: Query parameters optional
-      tags:
-        - pets
-      parameters:
-        - name: offset
-          in: query
-          description: offset count
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-      responses:
-        '200':
-          description: An paged array of user
-
-  /image:
-    get:
-      summary: Multiple path parameters
-      operationId: getImage
-      parameters:
-        - name: tag
-          in: query
-          description: ID of pet to delete
-          required: false
-          schema:
-            type: string
-        - name: limit
-          in: query
-          description: ID of pet to delete
-          required: false
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: An paged array of pets
-  /header:
-    get:
-      parameters:
-        - in: header
-          name: XClient
-          schema:
-            type: string
-            format: uuid
-          required: true
       responses:
         '200':
           description: An paged array of pets

@@ -43,7 +43,7 @@ public class BallerinaClientGeneratorTests {
     public void generateClientForGet() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_get.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_id.bal");
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_get.bal");
     }
 
     //Get string as a content of ballerina file
