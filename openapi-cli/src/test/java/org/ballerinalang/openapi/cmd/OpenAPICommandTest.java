@@ -49,7 +49,7 @@ public abstract class OpenAPICommandTest {
     public void setup() throws IOException {
         this.tmpDir = Files.createTempDirectory("openapi-cmd-test-out-" + System.nanoTime());
         this.console = new ByteArrayOutputStream();
-        this.printStream = new PrintStream(console);
+        this.printStream = new PrintStream(this.console);
     }
 
     @AfterClass
@@ -122,7 +122,7 @@ public abstract class OpenAPICommandTest {
         serviceLines.close();
         return generatedService;
     }
-    
+
     protected String readOutput(boolean slient) throws IOException {
         String output = "";
         output = this.console.toString();

@@ -320,10 +320,9 @@ public class BallerinaSchemaGenerator {
         }
         String openAPIFileContent = Files.readString(Paths.get(definitionURI));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
-        if (parseResult.getMessages().size() > 0) {
+        if (!parseResult.getMessages().isEmpty()) {
             throw new OpenApiException(ErrorMessages.parserException(definitionURI));
         }
-        OpenAPI api = parseResult.getOpenAPI();
-        return api;
+        return parseResult.getOpenAPI();
     }
 }

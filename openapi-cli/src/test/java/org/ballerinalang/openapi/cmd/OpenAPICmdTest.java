@@ -43,7 +43,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     @Test(description = "Test openapi command with help flag")
     public void testOpenAPICmdHelp() throws IOException {
         String[] args = {"-h"};
-        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir);
+        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
 
@@ -53,25 +53,20 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
 
     @Test(description = "Test openapi command without help flag")
     public void testOpenAPICmdHelpWithoutFlag() throws IOException {
-        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir);
+        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(openApiCommand);
         openApiCommand.execute();
-
         String output = readOutput(true);
         Assert.assertTrue(output.contains("NAME\n       The Ballerina OpenAPI Tool"));
     }
 
     @Test(description = "Test openapi gen-service without openapi contract file")
-    public void testWithoutOpenApiContract() {
+    public void testWithoutOpenApiContract() throws IOException {
         String[] args = {"--input"};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir);
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
-        String output = "";
-        try {
-            cmd.execute();
-        } catch (BLauncherException e) {
-            output = e.getDetailedMessages().get(0);
-        }
+        cmd.execute();
+        String output = readOutput(true);
         Assert.assertTrue(output.contains("An OpenAPI definition file is required to generate the service."));
     }
 
@@ -79,21 +74,10 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testSuccessfulServiceGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir);
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
-
-        String output = "";
-        try {
-            cmd.execute();
-        } catch (BLauncherException e) {
-            output = e.getDetailedMessages().get(0);
-        }
-        Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_gen.bal"));
+        cmd.execute();
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
-
-//        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
-//        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
-//        expectedServiceLines.close();
 
         Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
         String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
@@ -122,20 +106,17 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test openapi gen-service for successful service generation")
+    @Test(description = "Test openapi gen-service for .yml file service generation")
     public void testSuccessfulServiceGenerationForYML() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir);
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
 
-        String output = "";
         try {
             cmd.execute();
         } catch (BLauncherException e) {
-            output = e.getDetailedMessages().get(0);
         }
-        Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_gen.bal"));
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
 
         Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
@@ -169,7 +150,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testBallerinaToOpenAPIGeneration() {
         Path petstoreBal = resourceDir.resolve(Paths.get("bal-files/ballerinaFile.bal"));
         String[] args = {"--input", petstoreBal.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir);
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
 
         String output = "";

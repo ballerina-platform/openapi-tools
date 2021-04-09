@@ -55,6 +55,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private PrintStream outStream;
     private Path executionPath = Paths.get(System.getProperty(USER_DIR));
     private Path targetOutputPath;
+    private boolean exitWhenFinish;
 
     @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
     private boolean helpFlag;
@@ -92,13 +93,20 @@ public class OpenApiCmd implements BLauncherCmd {
     public OpenApiCmd() {
         this.outStream = System.err;
         this.executionPath = Paths.get(System.getProperty("user.dir"));
+        this.exitWhenFinish = true;
     }
 
     public OpenApiCmd(PrintStream outStream, Path executionDir) {
         this.outStream = outStream;
         this.executionPath = executionDir;
+        this.exitWhenFinish = true;
     }
 
+    public OpenApiCmd(PrintStream outStream, Path executionDir, boolean exitWhenFinish) {
+        this.outStream = outStream;
+        this.executionPath = executionDir;
+        this.exitWhenFinish = exitWhenFinish;
+    }
     @Override
     public void execute() {
         //User notification of using an experimental tool
@@ -106,7 +114,7 @@ public class OpenApiCmd implements BLauncherCmd {
         if (helpFlag) {
             String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName());
             outStream.println(commandUsageInfo);
-            exitWithCode(0);
+            exitError(this.exitWhenFinish);
             return;
         }
         //Check if cli input argument is present
@@ -114,7 +122,7 @@ public class OpenApiCmd implements BLauncherCmd {
             //Check if an OpenApi definition is provided
             if (argList == null) {
                 outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
-                exitWithCode(1);
+                exitError(this.exitWhenFinish);
                 return;
             }
             // If given input is yaml contract, it generates service file and client stub
@@ -133,29 +141,30 @@ public class OpenApiCmd implements BLauncherCmd {
                 Filter filter = new Filter(tag, operation);
                 try {
                     openApiToBallerina(fileName, filter);
-                    exitWithCode(0);
-                    return;
+                    exitError(this.exitWhenFinish);
                 } catch (IOException e) {
                     throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
                 }
             } else if (fileName.endsWith(".bal")) {
                 try {
                     ballerinaToOpenApi(fileName);
-                    exitWithCode(0);
-                    return;
+                    exitError(this.exitWhenFinish);
                 } catch (IOException e) {
                     throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
                 }
             } else {
                 outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
-                exitWithCode(1);
-                return;
+                exitError(this.exitWhenFinish);
             }
         } else {
             String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName());
             outStream.println(commandUsageInfo);
-            exitWithCode(1);
+            exitError(this.exitWhenFinish);
             return;
+        }
+
+        if (this.exitWhenFinish) {
+            Runtime.getRuntime().exit(0);
         }
     }
 
@@ -173,7 +182,8 @@ public class OpenApiCmd implements BLauncherCmd {
             OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName,
                     generatedFileType);
         } catch (IOException | OpenApiConverterException e) {
-            throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
+            outStream.println(e.getLocalizedMessage());
+            exitError(this.exitWhenFinish);
         }
     }
 
@@ -254,12 +264,10 @@ public class OpenApiCmd implements BLauncherCmd {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             if (e.getLocalizedMessage() != null) {
                 outStream.println(e.getLocalizedMessage());
-                exitWithCode(1);
-                return;
+                exitError(this.exitWhenFinish);
             } else {
                 outStream.println(OpenApiMesseges.OPENAPI_CLIENT_EXCEPTION);
-                exitWithCode(1);
-                return;
+                exitError(this.exitWhenFinish);
             }
         }
     }
@@ -280,8 +288,7 @@ public class OpenApiCmd implements BLauncherCmd {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
                     ". " + e.getMessage() + ".");
-            exitWithCode(1);
-            return;
+            exitError(this.exitWhenFinish);
         }
     }
 
@@ -301,8 +308,7 @@ public class OpenApiCmd implements BLauncherCmd {
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
                     " " + e.getMessage() + ".");
-            exitWithCode(1);
-            return;
+            exitError(this.exitWhenFinish);
         }
     }
 
@@ -323,7 +329,14 @@ public class OpenApiCmd implements BLauncherCmd {
     public void setParentCmdParser(CommandLine parentCmdParser) {
     }
 
-    public void exitWithCode(int exit) {
-        Runtime.getRuntime().exit(exit);
+    /**
+     * Exit with error code 1.
+     *
+     * @param exit Whether to exit or not.
+     */
+    private static void exitError(boolean exit) {
+        if (exit) {
+            Runtime.getRuntime().exit(1);
+        }
     }
 }
