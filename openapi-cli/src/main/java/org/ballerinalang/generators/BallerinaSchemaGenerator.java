@@ -315,7 +315,7 @@ public class BallerinaSchemaGenerator {
         if (!Files.exists(contractPath)) {
             throw new OpenApiException(ErrorMessages.invalidFilePath(definitionURI));
         }
-        if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json"))) {
+        if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json") || definitionURI.endsWith(".yml"))) {
             throw new OpenApiException(ErrorMessages.invalidFile());
         }
         String openAPIFileContent = Files.readString(Paths.get(definitionURI));

@@ -122,6 +122,49 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
+    @Test(description = "Test openapi gen-service for successful service generation")
+    public void testSuccessfulServiceGenerationForYML() throws IOException {
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yml"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir);
+        new CommandLine(cmd).parseArgs(args);
+
+        String output = "";
+        try {
+            cmd.execute();
+        } catch (BLauncherException e) {
+            output = e.getDetailedMessages().get(0);
+        }
+        Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_gen.bal"));
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
+
+        Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
+        String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
+        expectedSchemaLines.close();
+        if (Files.exists(this.tmpDir.resolve("petstore_client.bal")) &&
+                Files.exists(this.tmpDir.resolve("petstore_service.bal")) &&
+                Files.exists(this.tmpDir.resolve("schema.bal"))) {
+            //Compare schema contents
+            Stream<String> schemaLines = Files.lines(this.tmpDir.resolve("schema.bal"));
+            String generatedSchema = schemaLines.collect(Collectors.joining("\n"));
+            schemaLines.close();
+
+            generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
+            expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
+            if (expectedSchemaContent.equals(generatedSchema)) {
+                Assert.assertTrue(true);
+                deleteGeneratedFiles();
+
+            } else {
+                Assert.fail("Expected content and actual generated content is mismatched for: "
+                        + petstoreYaml.toString());
+                deleteGeneratedFiles();
+            }
+        } else {
+            Assert.fail("Service generation failed.");
+        }
+    }
+
     @Test(description = "Test ballerina to openapi")
     public void testBallerinaToOpenAPIGeneration() {
         Path petstoreBal = resourceDir.resolve(Paths.get("bal-files/ballerinaFile.bal"));
