@@ -39,8 +39,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
-
 /**
  * Main class to implement "openapi" command for ballerina. Commands for Client Stub, Service file and OpenApi contract
  * generation.
@@ -53,7 +51,7 @@ import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
 public class OpenApiCmd implements BLauncherCmd {
     private static final String CMD_NAME = "openapi";
     private PrintStream outStream;
-    private Path executionPath = Paths.get(System.getProperty(USER_DIR));
+    private Path executionPath = Paths.get(System.getProperty("user.dir"));
     private Path targetOutputPath;
     private boolean exitWhenFinish;
 
@@ -90,11 +88,11 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Parameters
     private List<String> argList;
 
-    public OpenApiCmd() {
-        this.outStream = System.err;
-        this.executionPath = Paths.get(System.getProperty("user.dir"));
-        this.exitWhenFinish = true;
-    }
+//    public OpenApiCmd() {
+//        this.outStream = System.err;
+//        this.executionPath = Paths.get(System.getProperty("user.dir"));
+//        this.exitWhenFinish = true;
+//    }
 
     public OpenApiCmd(PrintStream outStream, Path executionDir) {
         this.outStream = outStream;
