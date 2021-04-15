@@ -18,7 +18,6 @@
 package org.ballerinalang.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.cli.launcher.LauncherUtils;
 import org.ballerinalang.ballerina.OpenApiConverterException;
 import org.ballerinalang.ballerina.OpenApiConverterUtils;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -112,7 +111,6 @@ public class OpenApiCmd implements BLauncherCmd {
         if (helpFlag) {
             String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName());
             outStream.println(commandUsageInfo);
-            exitError(this.exitWhenFinish);
             return;
         }
         //Check if cli input argument is present
@@ -139,16 +137,16 @@ public class OpenApiCmd implements BLauncherCmd {
                 Filter filter = new Filter(tag, operation);
                 try {
                     openApiToBallerina(fileName, filter);
-                    exitError(this.exitWhenFinish);
                 } catch (IOException e) {
-                    throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
+                    outStream.println(e.getLocalizedMessage());
+                    exitError(this.exitWhenFinish);
                 }
             } else if (fileName.endsWith(".bal")) {
                 try {
                     ballerinaToOpenApi(fileName);
-                    exitError(this.exitWhenFinish);
                 } catch (IOException e) {
-                    throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
+                    outStream.println(e.getLocalizedMessage());
+                    exitError(this.exitWhenFinish);
                 }
             } else {
                 outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
