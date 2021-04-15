@@ -88,11 +88,11 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Parameters
     private List<String> argList;
 
-//    public OpenApiCmd() {
-//        this.outStream = System.err;
-//        this.executionPath = Paths.get(System.getProperty("user.dir"));
-//        this.exitWhenFinish = true;
-//    }
+    public OpenApiCmd() {
+        this.outStream = System.err;
+        this.executionPath = Paths.get(System.getProperty("user.dir"));
+        this.exitWhenFinish = true;
+    }
 
     public OpenApiCmd(PrintStream outStream, Path executionDir) {
         this.outStream = outStream;
