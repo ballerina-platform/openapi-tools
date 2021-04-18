@@ -30,10 +30,13 @@ import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.ElseBlockNode;
 import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
+import io.ballerina.compiler.syntax.tree.ForEachStatementNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
+import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
@@ -108,10 +111,13 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ELSE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EOF_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.FOREACH_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.IF_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.IN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.IS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
@@ -1050,6 +1056,103 @@ public class BallerinaClientGenerator {
         statementNodes.add(variable);
         ExpressionStatementNode assign = getSimpleExpressionStatementNode("param[param.length()] = \"?\"");
         statementNodes.add(assign);
+
+        // Create for each loop
+        Token forEachKeyWord = AbstractNodeFactory.createToken(FOREACH_KEYWORD);
+
+        BuiltinSimpleNameReferenceNode type = NodeFactory.createBuiltinSimpleNameReferenceNode(null,
+                AbstractNodeFactory.createIdentifierToken("var"));
+        CaptureBindingPatternNode bindingPattern = NodeFactory.createCaptureBindingPatternNode(
+                AbstractNodeFactory.createIdentifierToken( "[key, value]"));
+        TypedBindingPatternNode typedBindingPatternNode = NodeFactory.createTypedBindingPatternNode(type,
+                bindingPattern);
+
+        Token inKeyWord = AbstractNodeFactory.createToken(IN_KEYWORD);
+        ExpressionStatementNode exprNode = getSimpleExpressionStatementNode("queryParam.entries()");
+        // block statement
+        // if-else statements
+        Token ifKeyWord = AbstractNodeFactory.createToken(IF_KEYWORD);
+        SimpleNameReferenceNode expression =
+                NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("value"));
+        Token isKeyWord = AbstractNodeFactory.createToken(IS_KEYWORD);
+        BuiltinSimpleNameReferenceNode typeCondition =
+                NodeFactory.createBuiltinSimpleNameReferenceNode(null, NodeFactory.createIdentifierToken("()"));
+        TypeTestExpressionNode conditions = NodeFactory.createTypeTestExpressionNode(expression, isKeyWord,
+                typeCondition);
+        // If body
+//        Token openBrace = AbstractNodeFactory.createToken(OPEN_BRACE_TOKEN);
+        ExpressionStatementNode assignStatement = getSimpleExpressionStatementNode("_ = queryParam.remove(key)");
+        BlockStatementNode ifBlockStatement =
+                NodeFactory.createBlockStatementNode(AbstractNodeFactory.createToken(OPEN_BRACE_TOKEN),
+                        NodeFactory.createNodeList(assignStatement),
+                        AbstractNodeFactory.createToken(CLOSE_BRACE_TOKEN));
+        //else body
+        Token elseKeyWord = AbstractNodeFactory.createToken(ELSE_KEYWORD);
+        //body statements
+        FunctionCallExpressionNode condition =
+                NodeFactory.createFunctionCallExpressionNode(NodeFactory.createSimpleNameReferenceNode(
+                        AbstractNodeFactory.createIdentifierToken("string:startsWith")),
+                        AbstractNodeFactory.createToken(OPEN_PAREN_TOKEN),
+                        NodeFactory.createSeparatedNodeList(
+                                NodeFactory.createSimpleNameReferenceNode(
+                                        AbstractNodeFactory.createIdentifierToken("key")),
+                                AbstractNodeFactory.createToken(COMMA_TOKEN),
+                                NodeFactory.createSimpleNameReferenceNode(
+                                        AbstractNodeFactory.createIdentifierToken("\"'\""))),
+                        AbstractNodeFactory.createToken(CLOSE_PAREN_TOKEN));
+        List<StatementNode> statements = new ArrayList<>();
+        // if body-02
+        ExpressionStatementNode ifBody02Statement = getSimpleExpressionStatementNode("param[param.length()] = " +
+                "string:substring(key, 1, key.length())");
+
+        NodeList<StatementNode> statementNodesForIf02 = NodeFactory.createNodeList(ifBody02Statement);
+        BlockStatementNode ifBlock02 =
+                NodeFactory.createBlockStatementNode(AbstractNodeFactory.createToken(OPEN_BRACE_TOKEN),
+                        statementNodesForIf02, AbstractNodeFactory.createToken(CLOSE_BRACE_TOKEN));
+
+        // else block-02
+        // else body 02
+
+        ExpressionStatementNode elseBody02Statement = getSimpleExpressionStatementNode("param[param.length()] = key");
+        NodeList<StatementNode> statementNodesForElse02 = NodeFactory.createNodeList(elseBody02Statement);
+        BlockStatementNode elseBlockNode02 =
+                NodeFactory.createBlockStatementNode(AbstractNodeFactory.createToken(OPEN_BRACE_TOKEN),
+                        statementNodesForElse02, AbstractNodeFactory.createToken(CLOSE_BRACE_TOKEN));
+
+        ElseBlockNode elseBlock02 = NodeFactory.createElseBlockNode(AbstractNodeFactory.createToken(ELSE_KEYWORD),
+                elseBlockNode02);
+
+        IfElseStatementNode ifElseStatementNode02 = NodeFactory.createIfElseStatementNode(ifKeyWord, condition,
+                ifBlock02, elseBlock02);
+        statements.add(ifElseStatementNode02);
+
+        ExpressionStatementNode assignment = getSimpleExpressionStatementNode("param[param.length()] = \"=\";\n");
+        statements.add(assignment);
+
+        //If block 03
+        SimpleNameReferenceNode exprIf03 =
+                NodeFactory.createSimpleNameReferenceNode(AbstractNodeFactory.createIdentifierToken("value"));
+        BuiltinSimpleNameReferenceNode typeCondition03 =
+                NodeFactory.createBuiltinSimpleNameReferenceNode(null, NodeFactory.createIdentifierToken("string"));
+        TypeTestExpressionNode condition03 = NodeFactory.createTypeTestExpressionNode(expression, isKeyWord,
+                typeCondition);
+
+        ExpressionStatementNode variableIf03 = getSimpleExpressionStatementNode("string updateV =  checkpanic " +
+                "url:encode(value, \"UTF-8\")");
+        ExpressionStatementNode assignIf03 = getSimpleExpressionStatementNode("param[param.length()] = updateV");
+
+        BlockStatementNode ifBody03 = NodeFactory.createBlockStatementNode(
+                AbstractNodeFactory.createToken(OPEN_BRACE_TOKEN), NodeFactory.createNodeList(variableIf03,
+                        assignIf03), AbstractNodeFactory.createToken(CLOSE_BRACE_TOKEN));
+        BlockStatementNode elseBody03 = NodeFactory.createBlockStatementNode(
+                AbstractNodeFactory.createToken(OPEN_BRACE_TOKEN),
+                NodeFactory.createNodeList(getSimpleExpressionStatementNode("param[param.length()] = value.toString()")),
+                AbstractNodeFactory.createToken(CLOSE_BRACE_TOKEN));
+
+
+
+        ForEachStatementNode forEachStatementNode = NodeFactory.createForEachStatementNode();
+
 
 
     }
