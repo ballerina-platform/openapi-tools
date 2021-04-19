@@ -43,6 +43,7 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.IfElseStatementNode;
 import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -60,6 +61,7 @@ import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -109,6 +111,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.BACKTICK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CHECK_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ELSE_KEYWORD;
@@ -143,6 +146,7 @@ public class BallerinaClientGenerator {
     private static Paths paths;
     private static Filter filters;
     private static List<ImportDeclarationNode> imports = new ArrayList<>();
+    private static boolean isQuery = false;
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException {
@@ -165,9 +169,21 @@ public class BallerinaClientGenerator {
         imports.add(importForHttp);
         ClassDefinitionNode classDefinitionNode = getClassDefinitionNode();
         NodeList<ImportDeclarationNode> importsList = AbstractNodeFactory.createNodeList(imports);
-
-        ModulePartNode modulePartNode = NodeFactory.createModulePartNode(importsList,
-                NodeFactory.createNodeList(classDefinitionNode), AbstractNodeFactory.createToken(EOF_TOKEN));
+        ModulePartNode modulePartNode;
+        if (isQuery) {
+            ImportDeclarationNode url = GeneratorUtils.getImportDeclarationNode(
+                    GeneratorConstants.BALLERINA, "url");
+            ImportDeclarationNode string = GeneratorUtils.getImportDeclarationNode(
+                    GeneratorConstants.BALLERINA, "lang.'string");
+            imports.add(url);
+            imports.add(string);
+            modulePartNode = NodeFactory.createModulePartNode(importsList,
+                    NodeFactory.createNodeList(classDefinitionNode, getQueryParamPath()),
+                    AbstractNodeFactory.createToken(EOF_TOKEN));
+        } else {
+            modulePartNode = NodeFactory.createModulePartNode(importsList,
+                    NodeFactory.createNodeList(classDefinitionNode), AbstractNodeFactory.createToken(EOF_TOKEN));
+        }
         TextDocument textDocument = TextDocuments.from("");
         syntaxTree = SyntaxTree.from(textDocument);
         System.out.println(Formatter.format(syntaxTree.modifyWith(modulePartNode)));
@@ -751,23 +767,46 @@ public class BallerinaClientGenerator {
         if (path.contains("{")) {
             path = path.replaceAll("[{]", "\\${");
         }
+        //String path generator
+        NodeList<Node> content = NodeFactory.createNodeList(NodeFactory.createLiteralValueToken(null, path,
+                AbstractNodeFactory.createEmptyMinutiaeList(), AbstractNodeFactory.createEmptyMinutiaeList()));
+        Token endBacktick = AbstractNodeFactory.createToken(BACKTICK_TOKEN);
+        TemplateExpressionNode initializer = NodeFactory.createTemplateExpressionNode(null, type, startBacktick,
+                content, endBacktick);
+        Token semicolon = AbstractNodeFactory.createToken(SEMICOLON_TOKEN);
+
+        VariableDeclarationNode pathInt = NodeFactory.createVariableDeclarationNode(annotationNodes, null,
+                typedBindingPatternNode, equalToken, initializer, semicolon);
+
+        statementsList.add(pathInt);
+
         //Handel optional query parameter
         List<StatementNode> queryStatement = new ArrayList<>();
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
 //            int queryParamCount = 0;
+            BuiltinSimpleNameReferenceNode mapType = NodeFactory.createBuiltinSimpleNameReferenceNode(null,
+                    AbstractNodeFactory.createIdentifierToken("map<anydata>"));
+            CaptureBindingPatternNode bindingPattern = NodeFactory.createCaptureBindingPatternNode(
+                    AbstractNodeFactory.createIdentifierToken( "queryParam"));
+            TypedBindingPatternNode bindingPatternNode = NodeFactory.createTypedBindingPatternNode(mapType,
+                    bindingPattern);
+
             List<Node> queryParams = new ArrayList();
             for (Parameter parameter: parameters) {
-                BuiltinSimpleNameReferenceNode mapType = NodeFactory.createBuiltinSimpleNameReferenceNode(null,
-                        AbstractNodeFactory.createIdentifierToken("map<anydata>"));
-                CaptureBindingPatternNode bindingPattern = NodeFactory.createCaptureBindingPatternNode(
-                        AbstractNodeFactory.createIdentifierToken( "queryParam"));
-                TypedBindingPatternNode bindingPatternNode = NodeFactory.createTypedBindingPatternNode(mapType,
-                        bindingPattern);
                 if (parameter.getIn().trim().equals("query")) {
-
                     // Initializer
                     // Fill
+                    IdentifierToken fieldName =
+                            AbstractNodeFactory.createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+                    Token colon = AbstractNodeFactory.createToken(COLON_TOKEN);
+                    SimpleNameReferenceNode valueExpr = NodeFactory.createSimpleNameReferenceNode(
+                            AbstractNodeFactory.createIdentifierToken(escapeIdentifier(parameter.getName().trim())));
+                    SpecificFieldNode specificFieldNode = NodeFactory.createSpecificFieldNode(null,
+                            fieldName, colon, valueExpr);
+                    queryParams.add(specificFieldNode);
+                    queryParams.add(AbstractNodeFactory.createToken(COMMA_TOKEN));
+
 
 
 
@@ -781,20 +820,27 @@ public class BallerinaClientGenerator {
 //                    }
                 }
             }
+            if (!queryParams.isEmpty()) {
+                queryParams.remove(queryParams.size() - 1);
+                MappingConstructorExpressionNode initialize = NodeFactory.createMappingConstructorExpressionNode(
+                        AbstractNodeFactory.createToken(OPEN_BRACE_TOKEN),
+                        NodeFactory.createSeparatedNodeList(queryParams),
+                        AbstractNodeFactory.createToken(CLOSE_BRACE_TOKEN));
+                VariableDeclarationNode mapOfQueryParam =
+                        NodeFactory.createVariableDeclarationNode(AbstractNodeFactory.createEmptyNodeList(), null,
+                                bindingPatternNode, AbstractNodeFactory.createToken(EQUAL_TOKEN), initialize,
+                                AbstractNodeFactory.createToken(SEMICOLON_TOKEN));
+
+                statementsList.add(mapOfQueryParam);
+
+                // Add updated path
+                VariableDeclarationNode updatedPath = getSimpleStatement("", "path",
+                        "path + getPathForQueryParam(queryParam)");
+                statementsList.add(updatedPath);
+                isQuery = true;
+            }
         }
-        //String path generator
-        NodeList<Node> content = NodeFactory.createNodeList(NodeFactory.createLiteralValueToken(null, path,
-                AbstractNodeFactory.createEmptyMinutiaeList(), AbstractNodeFactory.createEmptyMinutiaeList()));
-        Token endBacktick = AbstractNodeFactory.createToken(BACKTICK_TOKEN);
-        TemplateExpressionNode initializer = NodeFactory.createTemplateExpressionNode(null, type, startBacktick,
-                content, endBacktick);
-        Token semicolon = AbstractNodeFactory.createToken(SEMICOLON_TOKEN);
-
-        VariableDeclarationNode pathInt = NodeFactory.createVariableDeclarationNode(annotationNodes, null,
-                typedBindingPatternNode, equalToken, initializer, semicolon);
-
-        statementsList.add(pathInt);
-        statementsList.addAll(queryStatement);
+//        statementsList.addAll(queryStatement);
 
         //Statement Generator for requestBody-
         if (operation.getValue().getRequestBody() != null) {
@@ -1047,13 +1093,13 @@ public class BallerinaClientGenerator {
     // Create queryPath param function
     private static FunctionDefinitionNode getQueryParamPath() {
         Token functionKeyWord = AbstractNodeFactory.createToken(FUNCTION_KEYWORD);
-        IdentifierToken functionName = AbstractNodeFactory.createIdentifierToken("getPathForQueryParam");
+        IdentifierToken functionName = AbstractNodeFactory.createIdentifierToken(" getPathForQueryParam");
         FunctionSignatureNode functionSignatureNode =
                 NodeFactory.createFunctionSignatureNode(AbstractNodeFactory.createToken(OPEN_PAREN_TOKEN),
                         NodeFactory.createSeparatedNodeList(NodeFactory.createRequiredParameterNode(
                                 NodeFactory.createEmptyNodeList(),
-                                AbstractNodeFactory.createIdentifierToken("string"),
-                                AbstractNodeFactory.createIdentifierToken("path, map<anydata> queryParam"))),
+                                AbstractNodeFactory.createIdentifierToken("map<anydata> "),
+                                AbstractNodeFactory.createIdentifierToken("queryParam"))),
                         AbstractNodeFactory.createToken(CLOSE_PAREN_TOKEN),
                         NodeFactory.createReturnTypeDescriptorNode(
                                 AbstractNodeFactory.createIdentifierToken("returns"),
@@ -1072,14 +1118,14 @@ public class BallerinaClientGenerator {
         Token forEachKeyWord = AbstractNodeFactory.createToken(FOREACH_KEYWORD);
 
         BuiltinSimpleNameReferenceNode type = NodeFactory.createBuiltinSimpleNameReferenceNode(null,
-                AbstractNodeFactory.createIdentifierToken("var"));
+                AbstractNodeFactory.createIdentifierToken("var "));
         CaptureBindingPatternNode bindingPattern = NodeFactory.createCaptureBindingPatternNode(
-                AbstractNodeFactory.createIdentifierToken( "[key, value]"));
+                AbstractNodeFactory.createIdentifierToken( " [key, value]"));
         TypedBindingPatternNode typedBindingPatternNode = NodeFactory.createTypedBindingPatternNode(type,
                 bindingPattern);
 
         Token inKeyWord = AbstractNodeFactory.createToken(IN_KEYWORD);
-        ExpressionStatementNode actionOrExpr = getSimpleExpressionStatementNode("queryParam.entries()");
+        ExpressionStatementNode actionOrExpr = getSimpleExpressionStatementNode(" queryParam.entries()");
         // block statement
         // if-else statements
         Token ifKeyWord = AbstractNodeFactory.createToken(IF_KEYWORD);
@@ -1101,18 +1147,18 @@ public class BallerinaClientGenerator {
         //body statements
         FunctionCallExpressionNode condition =
                 NodeFactory.createFunctionCallExpressionNode(NodeFactory.createSimpleNameReferenceNode(
-                        AbstractNodeFactory.createIdentifierToken("string:startsWith")),
+                        AbstractNodeFactory.createIdentifierToken(" string:startsWith")),
                         AbstractNodeFactory.createToken(OPEN_PAREN_TOKEN),
                         NodeFactory.createSeparatedNodeList(
                                 NodeFactory.createSimpleNameReferenceNode(
-                                        AbstractNodeFactory.createIdentifierToken("key")),
+                                        AbstractNodeFactory.createIdentifierToken(" key")),
                                 AbstractNodeFactory.createToken(COMMA_TOKEN),
                                 NodeFactory.createSimpleNameReferenceNode(
                                         AbstractNodeFactory.createIdentifierToken("\"'\""))),
                         AbstractNodeFactory.createToken(CLOSE_PAREN_TOKEN));
         List<StatementNode> statements = new ArrayList<>();
         // if body-02
-        ExpressionStatementNode ifBody02Statement = getSimpleExpressionStatementNode("param[param.length()] = " +
+        ExpressionStatementNode ifBody02Statement = getSimpleExpressionStatementNode(" param[param.length()] = " +
                 "string:substring(key, 1, key.length())");
 
         NodeList<StatementNode> statementNodesForIf02 = NodeFactory.createNodeList(ifBody02Statement);
