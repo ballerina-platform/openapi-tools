@@ -181,7 +181,7 @@ public class BallerinaClientGenerator {
         ModulePartNode modulePartNode;
         if (isQuery) {
             ImportDeclarationNode url = GeneratorUtils.getImportDeclarationNode(
-                    GeneratorConstants.BALLERINA, "url");
+                    GeneratorConstants.BALLERINA, " url");
             ImportDeclarationNode string = GeneratorUtils.getImportDeclarationNode(
                     GeneratorConstants.BALLERINA, "lang.'string");
             imports.add(url);
@@ -198,7 +198,8 @@ public class BallerinaClientGenerator {
         }
         TextDocument textDocument = TextDocuments.from("");
         syntaxTree = SyntaxTree.from(textDocument);
-        System.out.println(Formatter.format(syntaxTree.modifyWith(modulePartNode)));
+        syntaxTree = syntaxTree.modifyWith(modulePartNode);
+        System.out.println(Formatter.format(syntaxTree));
         return syntaxTree.modifyWith(modulePartNode);
     }
 

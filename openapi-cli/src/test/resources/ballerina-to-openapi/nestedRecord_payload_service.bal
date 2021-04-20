@@ -1,4 +1,6 @@
-import ballerina/http;
+import  ballerina/http;
+import ballerina/url;
+import ballerina/lang.'string;
 
 listener http:Listener helloEp = new (9090);
 
@@ -18,7 +20,6 @@ type Pet record {
      }}
 
 //Use for getting syntax tree
-import  ballerina/http;
 
 public client class Client {
     public http:Client clientEp;
