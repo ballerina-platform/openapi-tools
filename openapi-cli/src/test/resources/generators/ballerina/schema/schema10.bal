@@ -1,4 +1,4 @@
 
-type Pets record { 
+public type Pets record {
      any pet_type;
 };

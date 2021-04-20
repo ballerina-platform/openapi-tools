@@ -84,7 +84,7 @@ public class BallerinaSchemaGenerator {
                     List<String> required = schema.getValue().getRequired();
 
                     //1.typeKeyWord
-                    Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("type");
+                    Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("public type");
                     //2.typeName
                     IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(
                             GeneratorUtils.escapeIdentifier(schema.getKey().trim()));

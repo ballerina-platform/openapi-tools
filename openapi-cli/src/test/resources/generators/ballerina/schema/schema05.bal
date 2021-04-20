@@ -1,10 +1,10 @@
-type  Pet record  {
+public type Pet record  {
     int  id;
     string  name;
     string  tag?;
 };
 
-type  Dog record  {
+public type Dog record  {
     Pet  pets?;
     boolean  bark;
 };
