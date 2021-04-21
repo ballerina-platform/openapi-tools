@@ -21,9 +21,7 @@ package org.ballerinalang.generators;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
-import io.ballerina.compiler.syntax.tree.BinaryExpressionNode;
 import io.ballerina.compiler.syntax.tree.BlockStatementNode;
-import io.ballerina.compiler.syntax.tree.BracedExpressionNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
@@ -80,7 +78,6 @@ import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -113,9 +110,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSepara
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createAssignmentStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createBinaryExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBlockStatementNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createBracedExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCheckExpressionNode;
@@ -173,7 +168,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.IS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.PLUS_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
@@ -197,11 +191,12 @@ public class BallerinaClientGenerator {
     private static Paths paths;
     private static Filter filters;
     private static List<ImportDeclarationNode> imports = new ArrayList<>();
-    private static boolean isQuery = false;
+    private static boolean isQuery;
 
-    public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter)
-            throws IOException, BallerinaOpenApiException {
+    public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
+            BallerinaOpenApiException {
         imports.clear();
+        isQuery = false;
         // Summaries OpenAPI details
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
         //Filter serverUrl
@@ -970,73 +965,6 @@ public class BallerinaClientGenerator {
         NodeList<StatementNode> statements = createNodeList(statementsList);
         return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN), null, statements,
                 createToken(CLOSE_BRACE_TOKEN));
-    }
-
-    // Handle in the future purpose
-    private static IfElseStatementNode getIfElseStatementNode(int queryParamCount, Parameter parameter) {
-
-        //Create IfElse statement
-        Token ifKeyWord = createToken(IF_KEYWORD);
-        SimpleNameReferenceNode queryParam = createSimpleNameReferenceNode(
-                        createIdentifierToken(escapeIdentifier(parameter.getName())));
-
-        Token isKeyWord = createToken(IS_KEYWORD);
-        //Temporary assign to null while handlin other data
-        TypeTestExpressionNode conditionNode = null;
-        Schema paramSchema = parameter.getSchema();
-        if (paramSchema instanceof ArraySchema) {
-            ArraySchema schema = (ArraySchema) paramSchema;
-            String itemType = schema.getItems().getType();
-            if (itemType.equals("string") || itemType.equals("integer") || itemType.equals("boolean")
-                    || itemType.equals("float") || itemType.equals("decimal")) {
-                BuiltinSimpleNameReferenceNode queryParamType = createBuiltinSimpleNameReferenceNode(null,
-                                createIdentifierToken(convertOpenAPITypeToBallerina(itemType) + "[]"));
-                conditionNode = createTypeTestExpressionNode(queryParam, isKeyWord,
-                        queryParamType);
-            } else {
-
-            }
-        } else if (!(parameter.getSchema() instanceof ObjectSchema)) {
-            BuiltinSimpleNameReferenceNode queryParamType = createBuiltinSimpleNameReferenceNode(null,
-                    createIdentifierToken(convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim())));
-            conditionNode = createTypeTestExpressionNode(queryParam, isKeyWord, queryParamType);
-        }
-        BracedExpressionNode conditionStatement = createBracedExpressionNode(null, createToken(OPEN_PAREN_TOKEN),
-                conditionNode, createToken(CLOSE_PAREN_TOKEN));
-
-        //If Body handle
-        SimpleNameReferenceNode lhsExpr = createSimpleNameReferenceNode(createIdentifierToken("path"));
-        Token operator = createToken(PLUS_TOKEN);
-
-        String contentPath = getQueryParamBindingString(queryParamCount, parameter);
-        SimpleNameReferenceNode pathContent = createSimpleNameReferenceNode(createIdentifierToken(contentPath));
-
-        TemplateExpressionNode rhsExpr = createTemplateExpressionNode(null, null,
-                createToken(BACKTICK_TOKEN), createNodeList(pathContent), createToken(BACKTICK_TOKEN));
-
-        BinaryExpressionNode binaryExpr = createBinaryExpressionNode(null, lhsExpr, operator, rhsExpr);
-        AssignmentStatementNode ifBodyStatement = createAssignmentStatementNode(createSimpleNameReferenceNode(
-                createIdentifierToken("path")), createToken(EQUAL_TOKEN),
-                binaryExpr, createToken(SEMICOLON_TOKEN));
-
-        NodeList<StatementNode> ifBodyContent = createNodeList(ifBodyStatement);
-        BlockStatementNode ifBlock = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN), ifBodyContent,
-                createToken(CLOSE_BRACE_TOKEN));
-
-        return createIfElseStatementNode(ifKeyWord, conditionStatement, ifBlock, null);
-    }
-
-
-    private static String getQueryParamBindingString(int queryParamCount, Parameter parameter) {
-        String queryParam;
-        if (queryParamCount == 1) {
-            queryParam =
-                    "?" + parameter.getName().trim() + "=${" + escapeIdentifier(parameter.getName().trim()) + "}";
-        } else {
-            queryParam =
-                    "&" + parameter.getName().trim() + "=${" + escapeIdentifier(parameter.getName().trim()) + "}";
-        }
-        return queryParam;
     }
 
 /*
