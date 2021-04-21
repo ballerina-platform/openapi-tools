@@ -84,7 +84,7 @@ public class BallerinaSchemaGenerator {
                     List<String> required = schema.getValue().getRequired();
 
                     //1.typeKeyWord
-                    Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("type");
+                    Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("public type");
                     //2.typeName
                     IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(
                             GeneratorUtils.escapeIdentifier(schema.getKey().trim()));
@@ -315,15 +315,14 @@ public class BallerinaSchemaGenerator {
         if (!Files.exists(contractPath)) {
             throw new OpenApiException(ErrorMessages.invalidFilePath(definitionURI));
         }
-        if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json"))) {
+        if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json") || definitionURI.endsWith(".yml"))) {
             throw new OpenApiException(ErrorMessages.invalidFile());
         }
         String openAPIFileContent = Files.readString(Paths.get(definitionURI));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
-        if (parseResult.getMessages().size() > 0) {
+        if (!parseResult.getMessages().isEmpty()) {
             throw new OpenApiException(ErrorMessages.parserException(definitionURI));
         }
-        OpenAPI api = parseResult.getOpenAPI();
-        return api;
+        return parseResult.getOpenAPI();
     }
 }

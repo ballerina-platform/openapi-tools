@@ -31,7 +31,7 @@ public class OpenApiMesseges {
     public static final String EXPERIMENTAL_FEATURE = "Note: This is an experimental tool, which only" +
             " supports a limited set of functionality.";
     public static final String MESSAGE_FOR_MISSING_INPUT = "An OpenAPI definition file is required to generate the " +
-            "service. \ne.g: bal OpenAPI --input <OpenAPIContract> or <Ballerina file>";
+            "service. \ne.g: bal openapi --input <OpenAPIContract> or <Ballerina file>";
 
     //TODO Update keywords if Ballerina Grammer changes
     private static final String[] KEYWORDS = new String[]{"abort", "aborted", "abstract", "all", "annotation",

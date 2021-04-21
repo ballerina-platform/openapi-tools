@@ -18,7 +18,6 @@
 package org.ballerinalang.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.cli.launcher.LauncherUtils;
 import org.ballerinalang.ballerina.OpenApiConverterException;
 import org.ballerinalang.ballerina.OpenApiConverterUtils;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -39,22 +38,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
-
 /**
  * Main class to implement "openapi" command for ballerina. Commands for Client Stub, Service file and OpenApi contract
  * generation.
  */
 @CommandLine.Command(
         name = "openapi",
-        description = "Generates Ballerina service/client for OpenApi contract and OpenApi contract for Ballerina" +
+        description = "Generates Ballerina service/client for OpenAPI contract and OpenAPI contract for Ballerina" +
                 "Service."
 )
 public class OpenApiCmd implements BLauncherCmd {
     private static final String CMD_NAME = "openapi";
     private PrintStream outStream;
-    private Path executionPath = Paths.get(System.getProperty(USER_DIR));
+    private Path executionPath = Paths.get(System.getProperty("user.dir"));
     private Path targetOutputPath;
+    private boolean exitWhenFinish;
 
     @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
     private boolean helpFlag;
@@ -90,15 +88,18 @@ public class OpenApiCmd implements BLauncherCmd {
     private List<String> argList;
 
     public OpenApiCmd() {
-        this.outStream = System.err;
-        this.executionPath = Paths.get(System.getProperty("user.dir"));
+        new OpenApiCmd(System.err, Paths.get(System.getProperty("user.dir")), true);
     }
 
     public OpenApiCmd(PrintStream outStream, Path executionDir) {
-        this.outStream = outStream;
-        this.executionPath = executionDir;
+        new OpenApiCmd(outStream, executionDir, true);
     }
 
+    public OpenApiCmd(PrintStream outStream, Path executionDir, boolean exitWhenFinish) {
+        this.outStream = outStream;
+        this.executionPath = executionDir;
+        this.exitWhenFinish = exitWhenFinish;
+    }
     @Override
     public void execute() {
         //User notification of using an experimental tool
@@ -112,13 +113,15 @@ public class OpenApiCmd implements BLauncherCmd {
         if (inputPath) {
             //Check if an OpenApi definition is provided
             if (argList == null) {
-                throw LauncherUtils.createLauncherException(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
+                outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
+                exitError(this.exitWhenFinish);
+                return;
             }
             // If given input is yaml contract, it generates service file and client stub
             // else if given ballerina service file it generates openapi contract file
             // else it generates error message to enter correct input file
             String fileName = argList.get(0);
-            if (fileName.endsWith(".yaml") || fileName.endsWith(".json")) {
+            if (fileName.endsWith(".yaml") || fileName.endsWith(".json") || fileName.endsWith(".yml")) {
                 List<String> tag = new ArrayList<>();
                 List<String> operation = new ArrayList<>();
                 if (tags != null) {
@@ -131,21 +134,29 @@ public class OpenApiCmd implements BLauncherCmd {
                 try {
                     openApiToBallerina(fileName, filter);
                 } catch (IOException e) {
-                    throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
+                    outStream.println(e.getLocalizedMessage());
+                    exitError(this.exitWhenFinish);
                 }
             } else if (fileName.endsWith(".bal")) {
                 try {
                     ballerinaToOpenApi(fileName);
                 } catch (IOException e) {
-                    throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
+                    outStream.println(e.getLocalizedMessage());
+                    exitError(this.exitWhenFinish);
                 }
             } else {
-                throw LauncherUtils.createLauncherException(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
+                outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
+                exitError(this.exitWhenFinish);
             }
         } else {
             String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName());
             outStream.println(commandUsageInfo);
+            exitError(this.exitWhenFinish);
             return;
+        }
+
+        if (this.exitWhenFinish) {
+            Runtime.getRuntime().exit(0);
         }
     }
 
@@ -158,14 +169,13 @@ public class OpenApiCmd implements BLauncherCmd {
         Path balFilePath = Paths.get(balFile.getCanonicalPath());
         Optional<String> serviceName = Optional.ofNullable(service);
         getTargetOutputPath();
-//        Path resourcePath = getRelativePath(new File(balFilePath.toString()), this.targetOutputPath.toString());
-        //ballerina openapi -i service.bal --serviceName serviceName --module exampleModul -o ./
         // Check service name it is mandatory
         try {
             OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName,
                     generatedFileType);
         } catch (IOException | OpenApiConverterException e) {
-            throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
+            outStream.println(e.getLocalizedMessage());
+            exitError(this.exitWhenFinish);
         }
     }
 
@@ -245,9 +255,11 @@ public class OpenApiCmd implements BLauncherCmd {
                     targetOutputPath.toString(), filter);
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
             if (e.getLocalizedMessage() != null) {
-                throw LauncherUtils.createLauncherException(e.getLocalizedMessage());
+                outStream.println(e.getLocalizedMessage());
+                exitError(this.exitWhenFinish);
             } else {
-                throw LauncherUtils.createLauncherException(OpenApiMesseges.OPENAPI_CLIENT_EXCEPTION);
+                outStream.println(OpenApiMesseges.OPENAPI_CLIENT_EXCEPTION);
+                exitError(this.exitWhenFinish);
             }
         }
     }
@@ -266,8 +278,9 @@ public class OpenApiCmd implements BLauncherCmd {
             generator.generateService(executionPath.toString(), resourcePath.toString(),
                     relativePath.toString(), serviceName, targetOutputPath.toString(), filter);
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
-            throw LauncherUtils.createLauncherException("Error occurred when generating service for OpenAPI " +
-                    "contract at " + argList.get(0) + ". " + e.getMessage() + ".");
+            outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
+                    ". " + e.getMessage() + ".");
+            exitError(this.exitWhenFinish);
         }
     }
 
@@ -285,8 +298,9 @@ public class OpenApiCmd implements BLauncherCmd {
                     GeneratorConstants.GenType.GEN_BOTH, resourcePath.toString(), relativePath.toString(),
                     fileName, targetOutputPath.toString(), filter);
         } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
-            throw LauncherUtils.createLauncherException("Error occurred when generating service for openapi " +
-                    "contract at " + argList.get(0) + ". " + e.getMessage() + ".");
+            outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
+                    " " + e.getMessage() + ".");
+            exitError(this.exitWhenFinish);
         }
     }
 
@@ -305,5 +319,16 @@ public class OpenApiCmd implements BLauncherCmd {
 
     @Override
     public void setParentCmdParser(CommandLine parentCmdParser) {
+    }
+
+    /**
+     * Exit with error code 1.
+     *
+     * @param exit Whether to exit or not.
+     */
+    private static void exitError(boolean exit) {
+        if (exit) {
+            Runtime.getRuntime().exit(1);
+        }
     }
 }

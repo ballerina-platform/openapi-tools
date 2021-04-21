@@ -1,11 +1,10 @@
-
-type  Pet record  {
-    int  id;
-    string  name;
-    string  tag?;
-    string  'type?;
+public type Pet record {
+    int id;
+    string name;
+    string tag?;
+    string 'type?;
 };
 
-type  Pets record  {
-    Pet[]  petslist;
+public type Pets record {
+    Pet[] petslist;
 };
