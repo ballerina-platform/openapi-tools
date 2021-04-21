@@ -1,5 +1,5 @@
-import ballerina/http;
-import ballerina/xmldata;
+import  ballerina/http;
+import  ballerina/xmldata;
 
 public client class Client {
     public http:Client clientEp;
@@ -26,7 +26,7 @@ public client class Client {
     }
     remote function  ImageByimageId(int petId, string imageId) returns http:Response | error {
         string  path = string `/pets/${petId}/Image/${imageId}`;
-        http:Response response = check self.clientEp->get(path, targetType = http:Response);
+        http:Response  response = check self.clientEp->get(path, targetType = http:Response );
         return response;
     }
 }

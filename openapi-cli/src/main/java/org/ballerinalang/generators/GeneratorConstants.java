@@ -69,16 +69,7 @@ public class GeneratorConstants {
     public static final String CLASS = "class";
     public static final String OPEN_BRACE = "{";
     public static final String OPEN_PRAN = "(";
-    public static final String OPEN_SBRACKET = "[";
-    public static final String CLOSE_BRACE = "}";
-    public static final String CLOSE_PRAN = ")";
-    public static final String CLOSE_SBRACKET = "]";
-    public static final String SEMICOLON = ";";
     public static final String COLON = ":";
     public static final String FUNCTION = "function";
     public static final String RETURN = "returns";
-    public static final String ERROR = "error";
-    public static final String QUESTIONMARK = "?";
-
-
 }

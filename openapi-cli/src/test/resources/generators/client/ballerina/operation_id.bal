@@ -9,7 +9,7 @@ public client class Client {
     }
     remote function  pet() returns http:Response | error {
         string  path = string `/pet`;
-        http:Response response = check self.clientEp->get(path, targetType = http:Response);
+        http:Response  response = check self.clientEp->get(path, targetType = http:Response );
         return response;
     }
     remote function createPet(Pet payload) returns http:Response | error {
@@ -20,19 +20,19 @@ public client class Client {
         http:Response response = check self.clientEp->post(path, request);
         return response;
     }
-    remote function getpetsBypetId(string petId) returns http:Response | error {
+    remote function getpetsBypetId(string petId) returns Pet|error {
         string  path = string `/pets/${petId}`;
-        http:Response response = check self.clientEp->get(path, targetType = http:Response);
+        Pet response = check self.clientEp->get(path, targetType = Pet);
         return response;
     }
     remote function deletepetsBypetId(int petId) returns http:Response | error {
         string  path = string `/pets/${petId}`;
-        http:Response response = check self.clientEp->delete(path, targetType = http:Response);
+        http:Response  response = check self.clientEp->delete(path, targetType = http:Response );
         return response;
     }
     remote function  Image(int petId) returns http:Response | error {
         string  path = string `/pets/${petId}/Image`;
-        http:Response response = check self.clientEp->get(path, targetType = http:Response);
+        http:Response  response = check self.clientEp->get(path, targetType = http:Response );
         return response;
     }
 }

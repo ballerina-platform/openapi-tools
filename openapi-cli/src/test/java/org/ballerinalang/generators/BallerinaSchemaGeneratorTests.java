@@ -127,6 +127,14 @@ public class BallerinaSchemaGeneratorTests {
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema11.bal");
     }
 
+    @Test(description = "Scenario12-Generate record for openapi weather api")
+    public void generateOpenAPIWeatherAPI() throws IOException, BallerinaOpenApiException, FormatterException,
+            OpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/openapi_weather_api.yaml");
+        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/openapi_weather_api_schema.bal");
+    }
+
     //Get string as a content of ballerina file
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));

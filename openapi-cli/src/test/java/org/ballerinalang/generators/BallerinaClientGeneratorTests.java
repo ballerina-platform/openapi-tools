@@ -56,6 +56,13 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_post.bal");
     }
 
+    @Test(description = "Generate Client for openapi_weather_api method")
+    public void generateClientForWeatherAPI() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal");
+    }
+
     //Get string as a content of ballerina file
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
@@ -66,8 +73,7 @@ public class BallerinaClientGeneratorTests {
 
     private void compareGeneratedSyntaxTreeWithExpectedSyntaxTree(String s) throws IOException {
 
-        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("ballerina"),
-                s);
+        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("ballerina"), s);
         String generatedSyntaxTree = syntaxTree.toString();
 
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
