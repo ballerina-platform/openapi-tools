@@ -56,6 +56,13 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_post.bal");
     }
 
+    @Test(description = "Generate Client for header Parameter")
+    public void generateClientForHeader() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/header_parameter.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("header_parameter.bal");
+    }
+
     @Test(description = "Generate Client for openapi_weather_api method")
     public void generateClientForWeatherAPI() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");

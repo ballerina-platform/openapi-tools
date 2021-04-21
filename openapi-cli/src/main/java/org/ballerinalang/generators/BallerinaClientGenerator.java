@@ -370,8 +370,7 @@ public class BallerinaClientGenerator {
         AssignmentStatementNode assignmentStatementNode = createAssignmentStatementNode(varRef,
                 createToken(EQUAL_TOKEN), expr, createToken(SEMICOLON_TOKEN));
 
-        NodeList<StatementNode> statementList = createNodeList(variableDeclarationNode,
-                assignmentStatementNode);
+        NodeList<StatementNode> statementList = createNodeList(variableDeclarationNode, assignmentStatementNode);
 
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, statementList, createToken(CLOSE_BRACE_TOKEN));
@@ -413,6 +412,9 @@ public class BallerinaClientGenerator {
                 if (operation.getOperationId() == null) {
                     //simplify here with 1++
                     countMissId = countMissId + 1;
+                } else {
+                    String operationId = operation.getOperationId();
+                    operation.setOperationId(Character.toLowerCase(operationId.charAt(0)) + operationId.substring(1));
                 }
             }
 
@@ -641,10 +643,10 @@ public class BallerinaClientGenerator {
                 } else if (in.equals("query")) {
                     setQueryParameters(parameterList, parameter);
                     parameterList.add(comma);
+                } else if (in.equals("header")) {
+                    setHeaderParameter(parameterList, parameter);
+                    parameterList.add(comma);
                 }
-                //TODO: Handle header parameter
-//            else if (in.equals("header")) {
-//            }
             }
         }
         //Handle RequestBody
@@ -697,6 +699,38 @@ public class BallerinaClientGenerator {
         IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
         RequiredParameterNode pathParam = createRequiredParameterNode(annotationNodes, typeName, paramName);
         parameterList.add(pathParam);
+    }
+
+/*
+ * Create header parameter.
+ */
+    private static void setHeaderParameter(List<Node> parameterList, Parameter parameter)
+            throws BallerinaOpenApiException {
+        NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
+        if (parameter.getRequired()) {
+            String type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
+            Schema schema = parameter.getSchema();
+            if (schema instanceof ArraySchema) {
+                ArraySchema arraySchema = (ArraySchema) schema;
+                if (arraySchema.getItems().get$ref() != null) {
+                    type = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
+                } else {
+                    type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType().trim()) + "[]";
+                }
+            }
+            BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
+                    createIdentifierToken(type));
+            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            RequiredParameterNode pathParam = createRequiredParameterNode(annotationNodes, typeName, paramName);
+            parameterList.add(pathParam);
+        } else {
+            BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
+                    createIdentifierToken(convertOpenAPITypeToBallerina(
+                            parameter.getSchema().getType().trim()) + "?"));
+            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            RequiredParameterNode pathParam = createRequiredParameterNode(annotationNodes, typeName, paramName);
+            parameterList.add(pathParam);
+        }
     }
 
 /*
@@ -784,6 +818,7 @@ public class BallerinaClientGenerator {
                                                         Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
+        boolean isHeader = false;
         // Create statements
         List<StatementNode> statementsList =  new ArrayList<>();
         // -- create variable declaration
@@ -814,45 +849,31 @@ public class BallerinaClientGenerator {
         //Handel query parameter map
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
-            BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
-                    createIdentifierToken("map<anydata>"));
-            CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
-                    createIdentifierToken("queryParam"));
-            TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
+            List<Parameter> queryParameters = new ArrayList<>();
+            List<Parameter> headerParameters = new ArrayList<>();
 
-            List<Node> queryParams = new ArrayList();
             for (Parameter parameter: parameters) {
                 if (parameter.getIn().trim().equals("query")) {
-                    // Initializer
-                    IdentifierToken fieldName =
-                            createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
-                    Token colon = createToken(COLON_TOKEN);
-                    SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
-                            createIdentifierToken(escapeIdentifier(parameter.getName().trim())));
-                    SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
-                            fieldName, colon, valueExpr);
-                    queryParams.add(specificFieldNode);
-                    queryParams.add(createToken(COMMA_TOKEN));
+                    queryParameters.add(parameter);
+                } else if (parameter.getIn().trim().equals("header")) {
+                    headerParameters.add(parameter);
                 }
             }
-            if (!queryParams.isEmpty()) {
-                queryParams.remove(queryParams.size() - 1);
-                MappingConstructorExpressionNode initialize = createMappingConstructorExpressionNode(
-                        createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(queryParams),
-                        createToken(CLOSE_BRACE_TOKEN));
-                VariableDeclarationNode mapOfQueryParam = createVariableDeclarationNode(createEmptyNodeList(),
-                        null, bindingPatternNode, createToken(EQUAL_TOKEN), initialize,
-                        createToken(SEMICOLON_TOKEN));
-
-                statementsList.add(mapOfQueryParam);
+            if (!queryParameters.isEmpty()) {
+                statementsList.add(getMapForParameters(queryParameters, "map<anydata>", "queryParam"));
                 // Add updated path
                 ExpressionStatementNode updatedPath = getSimpleExpressionStatementNode("path = path + " +
                         "getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
                 isQuery = true;
             }
+            if (!headerParameters.isEmpty()) {
+                statementsList.add(getMapForParameters(headerParameters, "map<string|string[]>", "accHeader"));
+                isHeader = true;
+            }
         }
         //Statement Generator for requestBody-
+        String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
@@ -899,8 +920,19 @@ public class BallerinaClientGenerator {
                                 "TODO: Update the request as needed");
                         statementsList.add(expressionStatementNode);
                     }
+//                    POST, PUT, PATCH, DELETE, EXECUTE
                     VariableDeclarationNode requestStatement = getSimpleStatement("http:Response",
-                            "response",  "check self.clientEp->post(path, request)");
+                            "response", "check self.clientEp->" + method + "(path, request)");
+                    if (isHeader) {
+                        if (method.equals("post") || method.equals("put") || method.equals("patch") || method.equals(
+                                "delete") || method.equals("execute")) {
+                            requestStatement = getSimpleStatement("http:Response",
+                                    "response", "check self.clientEp->"
+                                            + method + "(path, request, headers = accHeaders)");
+
+                        }
+                    }
+
                     statementsList.add(requestStatement);
                     Token returnKeyWord = createIdentifierToken("return");
                     SimpleNameReferenceNode returnType = createSimpleNameReferenceNode(
@@ -922,12 +954,22 @@ public class BallerinaClientGenerator {
 
             Token rightArrowToken = createToken(RIGHT_ARROW_TOKEN);
             //Method name
-            SimpleNameReferenceNode methodName = createSimpleNameReferenceNode(createIdentifierToken(
-                            operation.getKey().name().trim().toLowerCase(Locale.ENGLISH)));
+            SimpleNameReferenceNode methodName = createSimpleNameReferenceNode(createIdentifierToken(method));
             //Argument Nodes
             List<Node> argNodes = new ArrayList<>();
             PositionalArgumentNode positionalArgumentNode = createPositionalArgumentNode(
                     createSimpleNameReferenceNode(createIdentifierToken("path")));
+
+            if (isHeader) {
+                if (method.equals("post") || method.equals("put") || method.equals("patch") || method.equals(
+                        "delete") || method.equals("execute")) {
+                    positionalArgumentNode = createPositionalArgumentNode(
+                            createSimpleNameReferenceNode(createIdentifierToken("path, headers = accHeaders")));
+                } else {
+                    positionalArgumentNode = createPositionalArgumentNode(
+                            createSimpleNameReferenceNode(createIdentifierToken("path, accHeaders")));
+                }
+            }
 
             argNodes.add(positionalArgumentNode);
             argNodes.add(createToken(COMMA_TOKEN));
@@ -979,6 +1021,36 @@ public class BallerinaClientGenerator {
 
         return createVariableDeclarationNode(createEmptyNodeList(), null, typedBindingPatternNode,
                 createToken(EQUAL_TOKEN), init, createToken(SEMICOLON_TOKEN));
+    }
+
+    private static VariableDeclarationNode getMapForParameters(List<Parameter> parameters, String mapDataType,
+                                                            String mapName) {
+        List<Node> filedOfMap = new ArrayList();
+        BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken(mapDataType));
+        CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
+                createIdentifierToken(mapName));
+        TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
+
+        for (Parameter parameter: parameters) {
+            // Initializer
+            IdentifierToken fieldName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            Token colon = createToken(COLON_TOKEN);
+            SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
+                    createIdentifierToken(escapeIdentifier(parameter.getName().trim())));
+            SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
+                    fieldName, colon, valueExpr);
+            filedOfMap.add(specificFieldNode);
+            filedOfMap.add(createToken(COMMA_TOKEN));
+        }
+
+        filedOfMap.remove(filedOfMap.size() - 1);
+        MappingConstructorExpressionNode initialize = createMappingConstructorExpressionNode(
+                createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(filedOfMap),
+                createToken(CLOSE_BRACE_TOKEN));
+        return createVariableDeclarationNode(createEmptyNodeList(),
+                null, bindingPatternNode, createToken(EQUAL_TOKEN), initialize,
+                createToken(SEMICOLON_TOKEN));
     }
 
 /*

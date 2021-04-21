@@ -42,6 +42,13 @@ public client class Client {
         }
     }
 
+    remote function sendHeader(string[] XClient, string X\-Request\-Client) returns http:Response | error {
+           string path = "/acheader";
+           map<string|string[]> accHeaders = {"XClient": XClient, "X-Request-Client": X\-Request\-Client};
+           http:Response response = check self.clientEp->get(path, accHeaders, targetType = http:Response);
+           return response;
+       }
+
     function getPathForQueryParam(map<anydata> queryParam) returns string {
         string[] param = [];
         param[param.length()] = "?";

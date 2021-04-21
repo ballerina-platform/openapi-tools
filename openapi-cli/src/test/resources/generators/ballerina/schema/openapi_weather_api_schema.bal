@@ -1,4 +1,4 @@
-type '200 record {
+public type '200 record {
     Coord coord?;
     Weather[] weather?;
     string base?;
@@ -15,19 +15,19 @@ type '200 record {
     int cod?;
 };
 
-type Coord record {
+public type Coord record {
     any lon?;
     any lat?;
 };
 
-type Weather record {
+public type Weather record {
     int id?;
     string main?;
     string description?;
     string icon?;
 };
 
-type Main record {
+public type Main record {
     any temp?;
     int pressure?;
     int humidity?;
@@ -37,24 +37,24 @@ type Main record {
     any grnd_level?;
 };
 
-type Wind record {
+public type Wind record {
     any speed?;
     int deg?;
 };
 
-type Clouds record {
+public type Clouds record {
     int 'all?;
 };
 
-type Rain record {
+public type Rain record {
     int '\3h?;
 };
 
-type Snow record {
+public type Snow record {
     any '\3h?;
 };
 
-type Sys record {
+public type Sys record {
     int 'type?;
     int id?;
     any message?;

@@ -45,9 +45,10 @@ public client class Client {
         http:Response  response = check self.clientEp->get(path, targetType = http:Response );
         return response;
     }
-    remote function  header() returns http:Response | error {
+    remote function  header(string XClient) returns http:Response | error {
         string  path = string `/header`;
-        http:Response  response = check self.clientEp->get(path, targetType = http:Response );
+        map<string|string[]> accHeader = {XClient: XClient};
+        http:Response  response = check self.clientEp->get(path, accHeaders, targetType = http:Response );
         return response;
     }
 }

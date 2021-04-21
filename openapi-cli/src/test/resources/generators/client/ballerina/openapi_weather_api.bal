@@ -9,7 +9,7 @@ public client class Client {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
     }
-    remote function CurrentWeatherData(string? q, string? id, string? lat, string? lon, string? zip, string? units,
+    remote function currentWeatherData(string? q, string? id, string? lat, string? lon, string? zip, string? units,
                                        string? lang, string? mode) returns '200|error {
         string path = string `/weather`;
         map<anydata> queryParam = {
