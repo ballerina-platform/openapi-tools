@@ -18,7 +18,9 @@ public client class Client {
     }
     remote function  pets() returns http:Response | error {
         string  path = string `/pets`;
-        http:Response  response = check self.clientEp->post(path, targetType = http:Response );
+        http:Request request = new;
+        //TODO: Update the request as needed;
+        http:Response  response = check self.clientEp->post(path, request, targetType = http:Response );
         return response;
     }
     remote function showPetById(string petId) returns Pets|error {
@@ -28,7 +30,7 @@ public client class Client {
     }
 }
 
-function  getPathForQueryParam(map<anydata>  queryParam)  returns  string {
+function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
     string[] param = [];
     param[param.length()] = "?";
     foreach  var [key, value] in  queryParam.entries() {
