@@ -971,8 +971,8 @@ public class BallerinaClientGenerator {
                             "//TODO: Update the request as needed");
                     statementsList.add(expressionStatementNode);
 
-                    positionalArgumentNode = createPositionalArgumentNode(
-                            createSimpleNameReferenceNode(createIdentifierToken("path, request, headers = accHeaders")));
+                    positionalArgumentNode = createPositionalArgumentNode(createSimpleNameReferenceNode(
+                            createIdentifierToken("path, request, headers = accHeaders")));
                 } else {
                     positionalArgumentNode = createPositionalArgumentNode(
                             createSimpleNameReferenceNode(createIdentifierToken("path, accHeaders")));
