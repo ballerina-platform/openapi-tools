@@ -36,7 +36,6 @@ import org.ballerinalang.generators.BallerinaServiceGenerator;
 import org.ballerinalang.generators.OpenApiException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
-import org.ballerinalang.openapi.model.BallerinaOpenApi;
 import org.ballerinalang.openapi.model.GenSrcFile;
 import org.ballerinalang.openapi.typemodel.BallerinaOpenApiType;
 import org.ballerinalang.openapi.utils.CodegenUtils;
@@ -209,11 +208,7 @@ public class CodeGenerator {
                 if (serviceName != null) {
                     api.getInfo().setTitle(serviceName.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1"));
                 }
-                BallerinaOpenApi definitionContext = new BallerinaOpenApi().buildContext(api).srcPackage(srcPackage)
-                        .modelPackage(srcPackage);
-                definitionContext.setDefinitionPath(reldefinitionPath);
-
-                sourceFiles = generateClient(definitionContext, serviceName, Paths.get(definitionPath), filter);
+                sourceFiles = generateClient(serviceName, Paths.get(definitionPath), filter);
                 break;
             case GEN_SERVICE:
 
@@ -383,18 +378,13 @@ public class CodeGenerator {
     /**
      * Generate code for ballerina client.
      *
-     * @param context model context to be used by the templates
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private List<GenSrcFile> generateClient(BallerinaOpenApi context, String serviceName, Path openAPI, Filter filter)
+    private List<GenSrcFile> generateClient(String serviceName, Path openAPI, Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = GeneratorConstants.DEFAULT_CLIENT_PKG;
-        }
-
-        if (serviceName == null) {
-            serviceName = context.getInfo().getTitle().toLowerCase(Locale.ENGLISH) + "-client.bal";
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String srcFile = serviceName + "_client.bal";
