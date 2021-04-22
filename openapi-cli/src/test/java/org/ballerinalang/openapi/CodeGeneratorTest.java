@@ -123,7 +123,7 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test Ballerina skeleton generation", enabled = false)
+    @Test(description = "Test Ballerina skeleton generation")
     public void generateSkeletonForRequestbody() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("requestBody.yaml").toString();

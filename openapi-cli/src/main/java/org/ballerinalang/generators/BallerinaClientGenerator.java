@@ -400,9 +400,9 @@ public class BallerinaClientGenerator {
                 qualifierList, typeName, fieldName, null, null, createToken(SEMICOLON_TOKEN));
     }
 
-/*
- * Generate remote function method name , when operation ID is not available for given operation.
- */
+    /*
+     * Generate remote function method name , when operation ID is not available for given operation.
+     */
     private static Paths setOperationId(Paths paths) {
         Set<Map.Entry<String, PathItem>> entries = paths.entrySet();
         for (Map.Entry<String, PathItem> entry: entries) {
@@ -538,9 +538,9 @@ public class BallerinaClientGenerator {
         return Character.toLowerCase(operationId.charAt(0)) + operationId.substring(1);
     }
 
-/*
- * Generate remote functions for OpenAPI operations.
- */
+    /*
+     * Generate remote functions for OpenAPI operations.
+     */
     private static List<FunctionDefinitionNode> createRemoteFunctions (Paths paths, Filter filter)
             throws BallerinaOpenApiException {
         List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
@@ -627,9 +627,10 @@ public class BallerinaClientGenerator {
         return createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN), parameters, createToken(CLOSE_PAREN_TOKEN),
                 returnTypeDescriptorNode);
     }
-/*
- * Generate function parameters
- */
+
+    /*
+     * Generate function parameters
+     */
     private static void setFunctionParameters(Operation operation, List<Node> parameterList, Token comma)
             throws BallerinaOpenApiException {
 
@@ -659,9 +660,9 @@ public class BallerinaClientGenerator {
         }
     }
 
-/*
- * Create query parameters.
- */
+    /*
+     * Create query parameters.
+     */
     private static void setQueryParameters(List<Node> parameterList, Parameter parameter) {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         TypeDescriptorNode typeName;
@@ -688,9 +689,9 @@ public class BallerinaClientGenerator {
         parameterList.add(queryParam);
     }
 
-/*
- * Create path parameters.
- */
+    /*
+     * Create path parameters.
+     */
     private static void setPathParameters(List<Node> parameterList, Parameter parameter) {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
 
@@ -701,9 +702,9 @@ public class BallerinaClientGenerator {
         parameterList.add(pathParam);
     }
 
-/*
- * Create header parameter.
- */
+    /*
+     * Create header parameter.
+     */
     private static void setHeaderParameter(List<Node> parameterList, Parameter parameter)
             throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
@@ -733,9 +734,9 @@ public class BallerinaClientGenerator {
         }
     }
 
-/*
- * Create request body parameter.
- */
+    /*
+     * Create request body parameter.
+     */
     private static void setRequestBodyParameters(List<Node> parameterList, RequestBody requestBody)
             throws BallerinaOpenApiException {
 
@@ -762,9 +763,9 @@ public class BallerinaClientGenerator {
         }
     }
 
-/*
- * Create return type parameter.
- */
+    /*
+     * Create request body parameter.
+     */
     private static String getReturnType(Operation operation) throws BallerinaOpenApiException {
         String returnType = "http:Response | error";
         if (operation.getResponses() != null) {

@@ -5,7 +5,7 @@ import  ballerina/lang.'string;
 public client class Client {
     public http:Client clientEp;
     public function init(string serviceUrl = "http://petstore.openapi.io/v1", http:ClientConfiguration httpClientConfig= {})
-    returns error?{
+    returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
     }
