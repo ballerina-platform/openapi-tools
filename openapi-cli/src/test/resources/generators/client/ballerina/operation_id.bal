@@ -27,7 +27,9 @@ public client class Client {
     }
     remote function deletepetsBypetId(int petId) returns http:Response | error {
         string  path = string `/pets/${petId}`;
-        http:Response  response = check self.clientEp->delete(path, targetType = http:Response );
+        http:Request request = new;
+        //TODO: Update the request as needed;
+        http:Response  response = check self.clientEp->delete(path, request, targetType = http:Response );
         return response;
     }
     remote function  Image(int petId) returns http:Response | error {

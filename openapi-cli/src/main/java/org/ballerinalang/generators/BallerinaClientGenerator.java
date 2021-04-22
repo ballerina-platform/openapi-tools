@@ -964,12 +964,30 @@ public class BallerinaClientGenerator {
             if (isHeader) {
                 if (method.equals("post") || method.equals("put") || method.equals("patch") || method.equals(
                         "delete") || method.equals("execute")) {
+                    ExpressionStatementNode requestStatementNode = getSimpleExpressionStatementNode(
+                            "http:Request request = new");
+                    statementsList.add(requestStatementNode);
+                    ExpressionStatementNode expressionStatementNode = getSimpleExpressionStatementNode(
+                            "//TODO: Update the request as needed");
+                    statementsList.add(expressionStatementNode);
+
                     positionalArgumentNode = createPositionalArgumentNode(
-                            createSimpleNameReferenceNode(createIdentifierToken("path, headers = accHeaders")));
+                            createSimpleNameReferenceNode(createIdentifierToken("path, request, headers = accHeaders")));
                 } else {
                     positionalArgumentNode = createPositionalArgumentNode(
                             createSimpleNameReferenceNode(createIdentifierToken("path, accHeaders")));
                 }
+            } else if (method.equals("post") || method.equals("put") || method.equals("patch") || method.equals(
+                    "delete") || method.equals("execute")) {
+                ExpressionStatementNode requestStatementNode = getSimpleExpressionStatementNode(
+                        "http:Request request = new");
+                statementsList.add(requestStatementNode);
+                ExpressionStatementNode expressionStatementNode = getSimpleExpressionStatementNode(
+                        "//TODO: Update the request as needed");
+                statementsList.add(expressionStatementNode);
+
+                positionalArgumentNode = createPositionalArgumentNode(
+                        createSimpleNameReferenceNode(createIdentifierToken("path, request")));
             }
 
             argNodes.add(positionalArgumentNode);
