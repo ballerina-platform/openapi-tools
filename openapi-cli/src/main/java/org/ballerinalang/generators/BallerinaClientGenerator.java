@@ -868,7 +868,8 @@ public class BallerinaClientGenerator {
                 isQuery = true;
             }
             if (!headerParameters.isEmpty()) {
-                statementsList.add(getMapForParameters(headerParameters, "map<string|string[]>", "accHeader"));
+                statementsList.add(getMapForParameters(headerParameters, "map<string|string[]>",
+                        "accHeaders"));
                 isHeader = true;
             }
         }

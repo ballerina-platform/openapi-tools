@@ -9,7 +9,7 @@ public client class Client {
     }
     remote function showPetById(string 'X\-Request\-ID, string[] 'X\-Request\-Client) returns http:Response | error {
         string  path = string `/pets`;
-        map<string|string[]> accHeader = {
+        map<string|string[]> accHeaders = {
             'X\-Request\-ID: 'X\-Request\-ID,
             'X\-Request\-Client: 'X\-Request\-Client
         };
