@@ -47,25 +47,15 @@ public class GeneratorConstants {
     }
 
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
-    public static final String MOCK_TEMPLATE_NAME = "mock";
-    public static final String IMPL_TEMPLATE_NAME = "impl";
-    public static final String SCHEMA_TEMPLATE_NAME = "schemas";
-
     public static final String SCHEMA_FILE_NAME = "schema.bal";
 
     public static final String TEMPLATES_SUFFIX = ".mustache";
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";
     public static final String DEFAULT_TEMPLATE_DIR = "/templates";
-    public static final String DEFAULT_MOCK_DIR = DEFAULT_TEMPLATE_DIR + "/mock";
     public static final String DEFAULT_CLIENT_DIR = DEFAULT_TEMPLATE_DIR + "/client";
-    public static final String DEFAULT_MODEL_DIR = DEFAULT_TEMPLATE_DIR + "/model";
-
-    public static final String GEN_SRC_DIR = "gen";
     public static final String DEFAULT_CLIENT_PKG = "client";
     public static final String DEFAULT_MOCK_PKG = "mock";
     public static final String OAS_PATH_SEPARATOR = "/";
-    public static final String MODULE_MD = "Module.md";
-
     public static final String USER_DIR = "user.dir";
     public static final String UNTITLED_SERVICE = "UntitledAPI";
     public static final List<String> RESERVED_KEYWORDS = Collections.unmodifiableList(

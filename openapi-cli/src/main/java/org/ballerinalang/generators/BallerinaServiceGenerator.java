@@ -75,10 +75,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
@@ -87,7 +84,6 @@ import org.ballerinalang.openapi.utils.GeneratorConstants;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -100,7 +96,9 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import static org.ballerinalang.generators.GeneratorUtils.buildUrl;
 import static org.ballerinalang.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static org.ballerinalang.generators.GeneratorUtils.getBallerinaOpenApiType;
 import static org.ballerinalang.generators.GeneratorUtils.getListenerDeclarationNode;
 import static org.ballerinalang.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static org.ballerinalang.generators.GeneratorUtils.getRelativeResourcePath;
@@ -135,7 +133,7 @@ public class BallerinaServiceGenerator {
         // Add multiple imports
         NodeList<ImportDeclarationNode> imports = AbstractNodeFactory.createNodeList(importForHttp);
         // Summaries OpenAPI details
-        OpenAPI openApi = getBallerinaOpenApiType(definitionPath, serviceName);
+        OpenAPI openApi = getBallerinaOpenApiType(definitionPath);
         // Assign host port value to listeners
         String host;
         int port;
@@ -832,31 +830,7 @@ public class BallerinaServiceGenerator {
                 closeSBracketToken);
     }
 
-    /**
-     * Util for take OpenApi spec from given yaml file.
-     */
-    private static OpenAPI getBallerinaOpenApiType(Path definitionPath, String serviceName)
-            throws IOException, BallerinaOpenApiException {
 
-        String openAPIFileContent = Files.readString(definitionPath);
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
-
-        if (parseResult.getMessages().size() > 0) {
-            throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
-        }
-        OpenAPI api = parseResult.getOpenAPI();
-        if (api.getInfo() == null) {
-            throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
-                    definitionPath);
-        }
-
-        if (api.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {
-            api.getInfo().setTitle(GeneratorConstants.UNTITLED_SERVICE);
-        } else {
-            api.getInfo().setTitle(serviceName);
-        }
-        return api;
-    }
 
     /**
      * This method will extract reference type by splitting the reference string.
@@ -874,25 +848,6 @@ public class BallerinaServiceGenerator {
             throw new BallerinaOpenApiException("Invalid reference value : " + referenceVariable
                     + "\nBallerina only supports local reference values.");
         }
-    }
-
-    /**
-     * If there are template values in the {@code absUrl} derive resolved url using {@code variables}.
-     *
-     * @param absUrl abstract url with template values
-     * @param variables variable values to populate the url template
-     * @return resolved url
-     */
-    private static String buildUrl(String absUrl, ServerVariables variables) {
-        String url = absUrl;
-        if (variables != null) {
-            for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
-                // According to the oas spec, default value must be specified
-                String replaceKey = "\\{" + entry.getKey() + '}';
-                url = url.replaceAll(replaceKey, entry.getValue().getDefault());
-            }
-        }
-        return url;
     }
 
     /**

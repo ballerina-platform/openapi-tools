@@ -30,12 +30,12 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.ballerinalang.generators.BallerinaClientGenerator;
 import org.ballerinalang.generators.BallerinaSchemaGenerator;
 import org.ballerinalang.generators.BallerinaServiceGenerator;
 import org.ballerinalang.generators.OpenApiException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
-import org.ballerinalang.openapi.model.BallerinaOpenApi;
 import org.ballerinalang.openapi.model.GenSrcFile;
 import org.ballerinalang.openapi.typemodel.BallerinaOpenApiType;
 import org.ballerinalang.openapi.utils.CodegenUtils;
@@ -72,7 +72,6 @@ import static org.ballerinalang.openapi.utils.GeneratorConstants.GenType.GEN_SER
  */
 public class CodeGenerator {
     private String srcPackage;
-    private String modelPackage;
 
     private static final PrintStream outStream = System.err;
 
@@ -209,11 +208,7 @@ public class CodeGenerator {
                 if (serviceName != null) {
                     api.getInfo().setTitle(serviceName.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1"));
                 }
-                BallerinaOpenApi definitionContext = new BallerinaOpenApi().buildContext(api).srcPackage(srcPackage)
-                        .modelPackage(srcPackage);
-                definitionContext.setDefinitionPath(reldefinitionPath);
-
-                sourceFiles = generateClient(definitionContext, serviceName, Paths.get(definitionPath));
+                sourceFiles = generateClient(serviceName, Paths.get(definitionPath), filter);
                 break;
             case GEN_SERVICE:
 
@@ -383,25 +378,19 @@ public class CodeGenerator {
     /**
      * Generate code for ballerina client.
      *
-     * @param context model context to be used by the templates
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private List<GenSrcFile> generateClient(BallerinaOpenApi context, String serviceName, Path openAPI)
+    private List<GenSrcFile> generateClient(String serviceName, Path openAPI, Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = GeneratorConstants.DEFAULT_CLIENT_PKG;
-        }
-
-        if (serviceName == null) {
-            serviceName = context.getInfo().getTitle().toLowerCase(Locale.ENGLISH) + "-client.bal";
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String srcFile = serviceName + "_client.bal";
 
         // Generate ballerina service and resources.
-        String mainContent = getContent(context, GeneratorConstants.DEFAULT_CLIENT_DIR,
-                GeneratorConstants.CLIENT_TEMPLATE_NAME);
+        String mainContent = Formatter.format(BallerinaClientGenerator.generateSyntaxTree(openAPI, filter)).toString();
         sourceFiles.add(new GenSrcFile(GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         // Generate ballerina records to represent schemas.
@@ -432,38 +421,5 @@ public class CodeGenerator {
                 schemaContent));
 
         return sourceFiles;
-    }
-
-    /**
-     * Retrieve generated source content as a String value.
-     *
-     * @param object       context to be used by template engine
-     * @param templateDir  templates directory
-     * @param templateName name of the template to be used for this code generation
-     * @return String with populated template
-     * @throws IOException when template population fails
-     */
-    private String getContent(BallerinaOpenApi object, String templateDir, String templateName) throws IOException {
-        Template template = compileTemplate(templateDir, templateName);
-        Context context = Context.newBuilder(object)
-                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
-                .build();
-        return template.apply(context);
-    }
-
-    public String getSrcPackage() {
-        return srcPackage;
-    }
-
-    public void setSrcPackage(String srcPackage) {
-        this.srcPackage = srcPackage;
-    }
-
-    public String getModelPackage() {
-        return modelPackage;
-    }
-
-    public void setModelPackage(String modelPackage) {
-        this.modelPackage = modelPackage;
     }
 }

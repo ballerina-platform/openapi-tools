@@ -44,13 +44,21 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.servers.ServerVariable;
+import io.swagger.v3.oas.models.servers.ServerVariables;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.ballerina.Constants;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.utils.GeneratorConstants;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -259,7 +267,11 @@ public class GeneratorUtils {
      * @return - escaped string
      */
     public static String escapeIdentifier(String identifier) {
-        if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") || BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
+
+        if (identifier.matches("\\b[0-9]*\\b")) {
+            return "'" + identifier;
+        } else if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b"
+            ) || BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
 
             // TODO: Remove this `if`. Refer - https://github.com/ballerina-platform/ballerina-lang/issues/23045
             if (identifier.equals("error")) {
@@ -308,5 +320,44 @@ public class GeneratorUtils {
 
     public static boolean hasTags(List<String> tags, List<String> filterTags) {
         return !Collections.disjoint(filterTags, tags);
+    }
+
+    /**
+     * Util for take OpenApi spec from given yaml file.
+     */
+    public static OpenAPI getBallerinaOpenApiType(Path definitionPath)
+            throws IOException, BallerinaOpenApiException {
+
+        String openAPIFileContent = Files.readString(definitionPath);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
+
+        if (parseResult.getMessages().size() > 0) {
+            throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
+        }
+        OpenAPI api = parseResult.getOpenAPI();
+        if (api.getInfo() == null) {
+            throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
+                    definitionPath);
+        }
+        return api;
+    }
+
+    /**
+     * If there are template values in the {@code absUrl} derive resolved url using {@code variables}.
+     *
+     * @param absUrl abstract url with template values
+     * @param variables variable values to populate the url template
+     * @return resolved url
+     */
+    public static String buildUrl(String absUrl, ServerVariables variables) {
+        String url = absUrl;
+        if (variables != null) {
+            for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
+                // According to the oas spec, default value must be specified
+                String replaceKey = "\\{" + entry.getKey() + '}';
+                url = url.replaceAll(replaceKey, entry.getValue().getDefault());
+            }
+        }
+        return url;
     }
 }
