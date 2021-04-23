@@ -1,5 +1,4 @@
-name: Timestamped Build
-
+name: Build master
 on:
   push:
     branches:
