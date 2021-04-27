@@ -16,8 +16,8 @@ public type '200 record {
 };
 
 public type Coord record {
-    any lon?;
-    any lat?;
+    decimal lon?;
+    decimal lat?;
 };
 
 public type Weather record {
@@ -28,17 +28,17 @@ public type Weather record {
 };
 
 public type Main record {
-    any temp?;
+    decimal temp?;
     int pressure?;
     int humidity?;
-    any temp_min?;
-    any temp_max?;
-    any sea_level?;
-    any grnd_level?;
+    decimal temp_min?;
+    decimal temp_max?;
+    decimal sea_level?;
+    decimal grnd_level?;
 };
 
 public type Wind record {
-    any speed?;
+    decimal speed?;
     int deg?;
 };
 
@@ -51,13 +51,13 @@ public type Rain record {
 };
 
 public type Snow record {
-    any '\3h?;
+    decimal '\3h?;
 };
 
 public type Sys record {
     int 'type?;
     int id?;
-    any message?;
+    decimal message?;
     string country?;
     int sunrise?;
     int sunset?;

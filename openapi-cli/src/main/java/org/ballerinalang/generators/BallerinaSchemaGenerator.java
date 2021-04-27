@@ -236,7 +236,12 @@ public class BallerinaSchemaGenerator {
             if (schema.getType() != null && ((schema.getType().equals("integer") || schema.getType().equals("number"))
                     || schema.getType().equals("string") || schema.getType().equals("boolean"))) {
                 String type = convertOpenAPITypeToBallerina(schema.getType().trim());
-                 Token typeName = AbstractNodeFactory.createIdentifierToken(type);
+                if (schema.getType().equals("number")) {
+                    if (schema.getFormat() != null) {
+                        type = convertOpenAPITypeToBallerina(schema.getFormat().trim());
+                    }
+                }
+                Token typeName = AbstractNodeFactory.createIdentifierToken(type);
                 return createBuiltinSimpleNameReferenceNode(null, typeName);
             } else if (schema.getType() != null && schema.getType().equals("array")) {
                 if (schema instanceof ArraySchema) {
