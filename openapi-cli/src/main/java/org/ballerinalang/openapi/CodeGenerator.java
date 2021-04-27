@@ -112,7 +112,7 @@ public class CodeGenerator {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles =  new ArrayList<>();
-        genFiles.addAll(generateBalSource( GEN_SERVICE,
+        genFiles.addAll(generateBalSource(GEN_SERVICE,
                 definitionPath, reldefinitionPath, serviceName, filter));
         genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, reldefinitionPath, serviceName, filter));
         List<GenSrcFile> newGenFiles = genFiles.stream().filter(distinctByKey(
