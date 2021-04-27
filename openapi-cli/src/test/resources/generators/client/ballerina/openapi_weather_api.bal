@@ -1,6 +1,6 @@
-import ballerina/http;
-import ballerina/url;
-import ballerina/lang.'string;
+import  ballerina/http;
+import  ballerina/url;
+import  ballerina/lang.'string;
 
 public client class Client {
     public http:Client clientEp;
@@ -57,4 +57,3 @@ function getPathForQueryParam(map<anydata> queryParam) returns string {
     string restOfPath = string:'join("", ...param);
     return restOfPath;
 }
-

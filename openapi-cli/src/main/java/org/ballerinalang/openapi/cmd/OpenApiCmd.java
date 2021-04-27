@@ -21,11 +21,11 @@ import io.ballerina.cli.BLauncherCmd;
 import org.ballerinalang.ballerina.OpenApiConverterException;
 import org.ballerinalang.ballerina.OpenApiConverterUtils;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.ballerinalang.generators.GeneratorConstants;
 import org.ballerinalang.generators.OpenApiException;
 import org.ballerinalang.openapi.CodeGenerator;
 import org.ballerinalang.openapi.OpenApiMesseges;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
-import org.ballerinalang.openapi.utils.GeneratorConstants;
 import picocli.CommandLine;
 
 import java.io.File;

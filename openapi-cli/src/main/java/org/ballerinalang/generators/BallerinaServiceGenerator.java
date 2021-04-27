@@ -79,7 +79,6 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
-import org.ballerinalang.openapi.utils.GeneratorConstants;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

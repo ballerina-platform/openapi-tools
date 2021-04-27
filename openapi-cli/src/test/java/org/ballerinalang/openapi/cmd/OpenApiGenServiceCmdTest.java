@@ -27,7 +27,7 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
+import static org.ballerinalang.generators.GeneratorConstants.USER_DIR;
 
 /**
  * This class contains tests necessary to test OpenApi Generate Service command.

@@ -16,12 +16,12 @@
 package org.ballerinalang.openapi;
 
 import org.ballerinalang.formatter.core.FormatterException;
+import org.ballerinalang.generators.GeneratorConstants;
+import org.ballerinalang.generators.GeneratorUtils;
 import org.ballerinalang.generators.OpenApiException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.model.GenSrcFile;
-import org.ballerinalang.openapi.utils.GeneratorConstants.GenType;
-import org.ballerinalang.openapi.utils.TypeExtractorUtil;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
+import static org.ballerinalang.generators.GeneratorConstants.USER_DIR;
 
 /**
  * Unit tests for {@link org.ballerinalang.openapi.CodeGenerator}.
@@ -184,7 +184,7 @@ public class CodeGeneratorTest {
         CodeGenerator generator = new CodeGenerator();
         try {
             String expectedContent = new String(Files.readAllBytes(expectedFilePath));
-            List<GenSrcFile> generatedFileList = generator.generateBalSource(GenType.GEN_SERVICE,
+            List<GenSrcFile> generatedFileList = generator.generateBalSource(GeneratorConstants.GenType.GEN_SERVICE,
                     definitionPath, "", "", filter);
             if (generatedFileList.size() > 0) {
                 GenSrcFile actualGeneratedContent = generatedFileList.get(0);
@@ -288,24 +288,24 @@ public class CodeGeneratorTest {
 
     @Test
     public void escapeIdentifierTest() {
-        Assert.assertEquals(TypeExtractorUtil.escapeIdentifier("abc"), "abc");
-        Assert.assertEquals(TypeExtractorUtil.escapeIdentifier("string"), "'string");
-        Assert.assertEquals(TypeExtractorUtil.escapeIdentifier("int"), "'int");
-        Assert.assertEquals(TypeExtractorUtil.escapeIdentifier("io.foo.bar"), "'io\\.foo\\.bar");
-        Assert.assertEquals(TypeExtractorUtil.escapeIdentifier("getV1CoreVersion"), "getV1CoreVersion");
-//        Assert.assertEquals(TypeExtractorUtil.escapeIdentifier
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("abc"), "abc");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("string"), "'string");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("int"), "'int");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("io.foo.bar"), "'io\\.foo\\.bar");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("getV1CoreVersion"), "getV1CoreVersion");
+//        Assert.assertEquals(GeneratorUtils.escapeIdentifier
 //        ("sample_service_\\ \\!\\:\\[\\;"), "'sample_service_\\ \\!\\:\\[\\;");
-//        Assert.assertEquals(TypeExtractorUtil.escapeIdentifier
+//        Assert.assertEquals(GeneratorUtils.escapeIdentifier
 //        ("listPets resource_!$:[;"), "'listPets\\ resource_\\!\\$\\:\\[\\;");
     }
 
     @Test
     public void escapeTypeTest() {
-        Assert.assertEquals(TypeExtractorUtil.escapeType("abc"), "abc");
-        Assert.assertEquals(TypeExtractorUtil.escapeType("string"), "string");
-        Assert.assertEquals(TypeExtractorUtil.escapeType("int"), "int");
-        Assert.assertEquals(TypeExtractorUtil.escapeType("io.foo.bar"), "'io\\.foo\\.bar");
-        Assert.assertEquals(TypeExtractorUtil.escapeType("getV1CoreVersion"), "getV1CoreVersion");
+        Assert.assertEquals(GeneratorUtils.escapeType("abc"), "abc");
+        Assert.assertEquals(GeneratorUtils.escapeType("string"), "string");
+        Assert.assertEquals(GeneratorUtils.escapeType("int"), "int");
+        Assert.assertEquals(GeneratorUtils.escapeType("io.foo.bar"), "'io\\.foo\\.bar");
+        Assert.assertEquals(GeneratorUtils.escapeType("getV1CoreVersion"), "getV1CoreVersion");
     }
 
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
