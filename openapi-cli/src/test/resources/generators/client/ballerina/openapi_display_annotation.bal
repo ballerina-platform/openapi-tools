@@ -1,6 +1,6 @@
-import ballerina/http;
-import ballerina/url;
-import ballerina/lang.'string;
+import  ballerina/http;
+import  ballerina/url;
+import  ballerina/lang.'string;
 
 public client class Client {
     @display {
@@ -8,12 +8,12 @@ public client class Client {
         iconPath: "Path"
     }
     public http:Client clientEp;
-    public function init(string serviceUrl = "http://api.openweathermap.org/data/2.5/", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
+    public isolated function init(string serviceUrl = "http://api.openweathermap.org/data/2.5/", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
     }
     @display {label: "Current weather"}
-    remote function currentWeatherData(@display {label: "City name"} string? q, string? id, string? lat, string? lon, string? zip, string? units, string? lang, string? mode) returns '200|error {
+    remote isolated function currentWeatherData(@display {label: "City name"} string? q, string? id, string? lat, string? lon, string? zip, string? units, string? lang, string? mode) returns '200|error {
         string  path = string `/weather`;
         map<anydata> queryParam = {
             q: q,
@@ -31,7 +31,7 @@ public client class Client {
     }
 }
 
-function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
+isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
     string[] param = [];
     param[param.length()] = "?";
     foreach  var [key, value] in  queryParam.entries() {

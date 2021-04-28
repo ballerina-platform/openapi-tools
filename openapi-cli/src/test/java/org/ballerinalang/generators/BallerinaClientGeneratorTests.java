@@ -67,8 +67,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_server_with_base_path.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("client_template.bal");
     }
 
@@ -78,8 +77,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_without_operation_id.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_id.bal");
     }
 
@@ -89,8 +87,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_get.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_get.bal");
     }
 
@@ -100,8 +97,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_post.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_post.bal");
     }
 
@@ -111,8 +107,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/header_parameter.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("header_parameter.bal");
     }
 
@@ -122,8 +117,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal");
     }
 
@@ -133,8 +127,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal");
     }
 
@@ -144,21 +137,8 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_display_annotation.bal");
-    }
-
-    private boolean isError(List<Diagnostic> diagnostics) {
-
-        boolean isError = false;
-        for (Diagnostic diagnostic: diagnostics) {
-            if (diagnostic.message().contains("ERROR")) {
-                isError = true;
-                break;
-            }
-        }
-        return isError;
+        Assert.assertTrue(diagnostics.isEmpty());
+//        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_display_annotation.bal");
     }
 
     @AfterTest

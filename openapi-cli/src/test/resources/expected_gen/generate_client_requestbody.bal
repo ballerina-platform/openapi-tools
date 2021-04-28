@@ -2,11 +2,12 @@ import  ballerina/http;
 
 public client class Client {
     public http:Client clientEp;
-    public function init(string serviceUrl = "https", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
+    public isolated function init(string serviceUrl = "https", http:ClientConfiguration  httpClientConfig =  {})
+    returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
     }
-    remote function  requestBody(User payload) returns http:Response | error {
+    remote isolated function  requestBody(User payload) returns http:Response | error {
         string  path = string `/requestBody`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);

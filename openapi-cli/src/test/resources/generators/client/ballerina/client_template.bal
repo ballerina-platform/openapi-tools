@@ -4,26 +4,27 @@ import  ballerina/lang.'string;
 
 public client class Client {
     public http:Client clientEp;
-    public function init(string serviceUrl = "https://petstore.swagger.io:443/v2", http:ClientConfiguration httpClientConfig= {})
+    public isolated function init(string serviceUrl = "https://petstore.swagger.io:443/v2", http:ClientConfiguration
+    httpClientConfig= {})
     returns error?{
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
     }
-    remote function listPets(int? 'limit) returns Pets|error {
+    remote isolated function listPets(int? 'limit) returns Pets|error {
         string  path = string `/pets`;
         map<anydata> queryParam = {'limit: 'limit};
         path = path + getPathForQueryParam(queryParam);
         Pets response = check self.clientEp->get(path, targetType = Pets);
         return response;
     }
-    remote function showPetById(string petId) returns Pets|error {
+    remote isolated function showPetById(string petId) returns Pets|error {
         string  path = string `/pets/${petId}`;
         Pets response = check self.clientEp->get(path, targetType = Pets);
         return response;
     }
 }
 
-function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
+isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
     string[] param = [];
     param[param.length()] = "?";
     foreach  var [key, value] in  queryParam.entries() {

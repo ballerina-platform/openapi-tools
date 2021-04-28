@@ -87,8 +87,6 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
-import org.ballerinalang.formatter.core.Formatter;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 
@@ -176,7 +174,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RIGHT_ARROW_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -202,7 +199,7 @@ public class BallerinaClientGenerator {
     private static Info info;
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
-            BallerinaOpenApiException, FormatterException {
+            BallerinaOpenApiException {
         imports.clear();
         isQuery = false;
         // Summaries OpenAPI details
@@ -242,7 +239,6 @@ public class BallerinaClientGenerator {
         }
         TextDocument textDocument = TextDocuments.from("");
         syntaxTree = SyntaxTree.from(textDocument);
-        System.out.println(Formatter.format(syntaxTree.modifyWith(modulePartNode)));
         return syntaxTree.modifyWith(modulePartNode);
     }
 
@@ -294,7 +290,7 @@ public class BallerinaClientGenerator {
         memberNodeList.add(fieldNode);
         //Create init function definition
         //Common Used
-        NodeList<Token> qualifierList = createNodeList(createIdentifierToken(GeneratorConstants.PUBLIC));
+        NodeList<Token> qualifierList = createNodeList(createIdentifierToken(GeneratorConstants.PUBLIC_ISOLATED));
         IdentifierToken functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION);
         IdentifierToken functionName = createIdentifierToken("init");
         //Create function signature
@@ -621,7 +617,7 @@ public class BallerinaClientGenerator {
                                                                     Map.Entry<PathItem.HttpMethod,
             Operation> operation) throws BallerinaOpenApiException {
         //Create qualifier list
-        NodeList<Token> qualifierList = createNodeList(createToken(REMOTE_KEYWORD));
+        NodeList<Token> qualifierList = createNodeList(createIdentifierToken("remote isolated"));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         NodeList<Node> relativeResourcePath = createEmptyNodeList();
@@ -971,7 +967,7 @@ public class BallerinaClientGenerator {
                             VariableDeclarationNode jsonVariable = getSimpleStatement("json",
                                     "jsonBody", "check payload.cloneWithType(json)");
                             statementsList.add(jsonVariable);
-                            VariableDeclarationNode xmlBody = getSimpleStatement("xml", "xmlBody",
+                            VariableDeclarationNode xmlBody = getSimpleStatement("xml?", "xmlBody",
                                     "check xmldata:fromJson(jsonBody)");
                             statementsList.add(xmlBody);
                             ExpressionStatementNode expressionStatementNode = getSimpleExpressionStatementNode(
@@ -1170,7 +1166,7 @@ public class BallerinaClientGenerator {
 
     // Create queryPath param function
     private static FunctionDefinitionNode getQueryParamPath() {
-        Token functionKeyWord = createToken(FUNCTION_KEYWORD);
+        Token functionKeyWord = createIdentifierToken("isolated function");
         IdentifierToken functionName = createIdentifierToken(" getPathForQueryParam");
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
                         createSeparatedNodeList(createRequiredParameterNode(createEmptyNodeList(),
