@@ -88,6 +88,12 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal");
     }
 
+    @Test(description = "Generate Client for openapi spec have display annotation method")
+    public void generateClientForDisplayAnnotation() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_display_annotation.bal");
+    }
     //Get string as a content of ballerina file
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));

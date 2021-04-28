@@ -85,6 +85,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
+import org.ballerinalang.formatter.core.Formatter;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 
@@ -194,7 +196,7 @@ public class BallerinaClientGenerator {
     private static boolean isQuery;
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
-            BallerinaOpenApiException {
+            BallerinaOpenApiException, FormatterException {
         imports.clear();
         isQuery = false;
         // Summaries OpenAPI details
@@ -233,6 +235,7 @@ public class BallerinaClientGenerator {
         }
         TextDocument textDocument = TextDocuments.from("");
         syntaxTree = SyntaxTree.from(textDocument);
+        System.out.println(Formatter.format(syntaxTree.modifyWith(modulePartNode)));
         return syntaxTree.modifyWith(modulePartNode);
     }
 
@@ -558,6 +561,30 @@ public class BallerinaClientGenerator {
                     List<String> filterTags = filter.getTags();
                     List<String> operationTags = operation.getValue().getTags();
                     List<String> filterOperations  = filter.getOperations();
+                    // Handle the display annotations
+                    List<AnnotationNode> annotationNodes = new ArrayList<>();
+                    Map<String, Object> extensions = operation.getValue().getExtensions();
+                    if (!extensions.isEmpty()) {
+                        for (Map.Entry<String, Object> extension: extensions.entrySet()) {
+                            if (extension.getKey().trim().equals("x-display")) {
+//                                ....
+                                // Create node
+                                // Create valueExpr
+                                BasicLiteralNode valueExpr = createBasicLiteralNode(STRING_LITERAL,
+                                        createLiteralValueToken(SyntaxKind.STRING_LITERAL_TOKEN,
+                                                extension.getValue().toString().trim(), createEmptyMinutiaeList(),
+                                                createEmptyMinutiaeList()));
+
+                                SpecificFieldNode fields = createSpecificFieldNode(null, createIdentifierToken("lable"), createToken(
+                                        COLON_TOKEN), valueExpr);
+
+                                MappingConstructorExpressionNode annotValue = createMappingConstructorExpressionNode(
+                                        createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(fields),
+                                        createToken(CLOSE_BRACE_TOKEN));
+                            }
+                        }
+                    }
+
                     if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
                         if (operationTags != null || ((!filterOperations.isEmpty())
                                 && (operation.getValue().getOperationId() != null))) {
