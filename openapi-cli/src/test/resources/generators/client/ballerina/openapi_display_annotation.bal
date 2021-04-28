@@ -3,15 +3,18 @@ import ballerina/url;
 import ballerina/lang.'string;
 
 public client class Client {
+    @display {
+        label: "Current Weather Details",
+        iconPath: "Path"
+    }
     public http:Client clientEp;
-    public function init(string serviceUrl = "http://api.openweathermap.org/data/2.5/", http:ClientConfiguration httpClientConfig =
-                         {}) returns error? {
+    public function init(string serviceUrl = "http://api.openweathermap.org/data/2.5/", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
     }
-    remote function currentWeatherData(string? q, string? id, string? lat, string? lon, string? zip, string? units,
-                                       string? lang, string? mode) returns '200|error {
-        string path = string `/weather`;
+    @display {label: "Current weather"}
+    remote function currentWeatherData(@display {label: "City name"} string? q, string? id, string? lat, string? lon, string? zip, string? units, string? lang, string? mode) returns '200|error {
+        string  path = string `/weather`;
         map<anydata> queryParam = {
             q: q,
             id: id,
@@ -28,21 +31,21 @@ public client class Client {
     }
 }
 
-function getPathForQueryParam(map<anydata> queryParam) returns string {
+function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
     string[] param = [];
     param[param.length()] = "?";
-    foreach var [key, value] in queryParam.entries() {
-        if value is () {
+    foreach  var [key, value] in  queryParam.entries() {
+        if  value  is  () {
             _ = queryParam.remove(key);
         } else {
-            if string:startsWith(key, "'") {
-                param[param.length()] = string:substring(key, 1, key.length());
+            if  string:startsWith( key, "'") {
+                 param[param.length()] = string:substring(key, 1, key.length());
             } else {
                 param[param.length()] = key;
             }
             param[param.length()] = "=";
-            if value is string {
-                string updateV = checkpanic url:encode(value, "UTF-8");
+            if  value  is  string {
+                string updateV =  checkpanic url:encode(value, "UTF-8");
                 param[param.length()] = updateV;
             } else {
                 param[param.length()] = value.toString();
@@ -50,11 +53,10 @@ function getPathForQueryParam(map<anydata> queryParam) returns string {
             param[param.length()] = "&";
         }
     }
-    _ = param.remove(param.length() - 1);
-    if param.length() == 1 {
+    _ = param.remove(param.length()-1);
+    if  param.length() ==  1 {
         _ = param.remove(0);
     }
     string restOfPath = string:'join("", ...param);
     return restOfPath;
 }
-

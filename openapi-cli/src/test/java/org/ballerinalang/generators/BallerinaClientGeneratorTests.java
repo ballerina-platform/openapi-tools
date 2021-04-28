@@ -138,6 +138,17 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal");
     }
 
+    @Test(description = "Generate Client for openapi spec have display annotation method")
+    public void generateClientForDisplayAnnotation()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        boolean isError = isError(diagnostics);
+        Assert.assertFalse(isError);
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_display_annotation.bal");
+    }
+
     private boolean isError(List<Diagnostic> diagnostics) {
 
         boolean isError = false;
@@ -170,12 +181,6 @@ public class BallerinaClientGeneratorTests {
         return semanticModel.diagnostics();
     }
 
-    @Test(description = "Generate Client for openapi spec have display annotation method")
-    public void generateClientForDisplayAnnotation() throws IOException, BallerinaOpenApiException, FormatterException {
-        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_display_annotation.bal");
-    }
     //Get string as a content of ballerina file
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
@@ -193,7 +198,6 @@ public class BallerinaClientGeneratorTests {
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
     }
-
 
     /*
      * Write the generated syntax tree to file
