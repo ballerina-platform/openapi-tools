@@ -33,15 +33,12 @@ import org.ballerinalang.formatter.core.FormatterException;
 import org.ballerinalang.generators.BallerinaClientGenerator;
 import org.ballerinalang.generators.BallerinaSchemaGenerator;
 import org.ballerinalang.generators.BallerinaServiceGenerator;
+import org.ballerinalang.generators.GeneratorConstants;
 import org.ballerinalang.generators.OpenApiException;
 import org.ballerinalang.openapi.cmd.Filter;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.openapi.model.GenSrcFile;
-import org.ballerinalang.openapi.typemodel.BallerinaOpenApiType;
 import org.ballerinalang.openapi.utils.CodegenUtils;
-import org.ballerinalang.openapi.utils.GeneratorConstants;
-import org.ballerinalang.openapi.utils.GeneratorConstants.GenType;
-import org.ballerinalang.openapi.utils.TypeExtractorUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,13 +56,18 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.ballerinalang.generators.GeneratorConstants.DEFAULT_CLIENT_PKG;
+import static org.ballerinalang.generators.GeneratorConstants.DEFAULT_MOCK_PKG;
+import static org.ballerinalang.generators.GeneratorConstants.ESCAPE_PATTERN;
+import static org.ballerinalang.generators.GeneratorConstants.GenType.GEN_CLIENT;
+import static org.ballerinalang.generators.GeneratorConstants.GenType.GEN_SERVICE;
+import static org.ballerinalang.generators.GeneratorConstants.SCHEMA_FILE_NAME;
+import static org.ballerinalang.generators.GeneratorConstants.TEMPLATES_DIR_PATH_KEY;
+import static org.ballerinalang.generators.GeneratorConstants.TEMPLATES_SUFFIX;
+import static org.ballerinalang.generators.GeneratorConstants.UNTITLED_SERVICE;
 import static org.ballerinalang.openapi.model.GenSrcFile.GenFileType;
-import static org.ballerinalang.openapi.utils.GeneratorConstants.GenType.GEN_CLIENT;
-import static org.ballerinalang.openapi.utils.GeneratorConstants.GenType.GEN_SERVICE;
 
 /**
  * This class generates Ballerina Services/Clients for a provided OAS definition.
@@ -93,7 +95,8 @@ public class CodeGenerator {
      * @throws IOException               when file operations fail
      * @throws BallerinaOpenApiException when code generator fails
      */
-    private void generate(GenType type, String executionPath, String definitionPath,
+    private void generate(GeneratorConstants.GenType type, String executionPath,
+                          String definitionPath,
                           String reldefinitionPath , String serviceName, String outPath, Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
 
@@ -103,13 +106,14 @@ public class CodeGenerator {
         writeGeneratedSources(genFiles, srcPath, implPath, type);
     }
 
-    public void generateBothFiles(GenType type, String definitionPath,
-                          String reldefinitionPath , String serviceName, String outPath , Filter filter)
+    public void generateBothFiles(GeneratorConstants.GenType type, String definitionPath,
+                                  String reldefinitionPath , String serviceName, String outPath , Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles =  new ArrayList<>();
-        genFiles.addAll(generateBalSource(GEN_SERVICE, definitionPath, reldefinitionPath, serviceName, filter));
+        genFiles.addAll(generateBalSource(GEN_SERVICE,
+                definitionPath, reldefinitionPath, serviceName, filter));
         genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, reldefinitionPath, serviceName, filter));
         List<GenSrcFile> newGenFiles = genFiles.stream().filter(distinctByKey(
                 GenSrcFile::getFileName)).collect(Collectors.toList());
@@ -137,7 +141,7 @@ public class CodeGenerator {
     public void generateClient(String executionPath, String definitionPath, String serviceName, String outPath,
                                Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        generate(GenType.GEN_CLIENT, executionPath, definitionPath, null, serviceName, outPath, filter);
+        generate(GEN_CLIENT, executionPath, definitionPath, null, serviceName, outPath, filter);
     }
 
     /**
@@ -157,7 +161,8 @@ public class CodeGenerator {
     public void generateService(String executionPath, String definitionPath,
                                 String reldefinitionPath, String serviceName, String outPath, Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        generate(GEN_SERVICE, executionPath, definitionPath, reldefinitionPath, serviceName, outPath, filter);
+        generate(GEN_SERVICE, executionPath, definitionPath,
+                reldefinitionPath, serviceName, outPath, filter);
     }
 
     /**
@@ -177,7 +182,8 @@ public class CodeGenerator {
      * @throws IOException               when file operations fail
      * @throws BallerinaOpenApiException when open api context building fail
      */
-    public List<GenSrcFile> generateBalSource(GenType type, String definitionPath,
+    public List<GenSrcFile> generateBalSource(GeneratorConstants.GenType type,
+                                              String definitionPath,
                                               String reldefinitionPath, String serviceName, Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         String openAPIFileContent = Files.readString(Paths.get(definitionPath));
@@ -193,7 +199,7 @@ public class CodeGenerator {
         }
 
         if (api.getInfo().getTitle().isBlank() && (serviceName == null || serviceName.isBlank())) {
-            api.getInfo().setTitle(GeneratorConstants.UNTITLED_SERVICE);
+            api.getInfo().setTitle(UNTITLED_SERVICE);
         } else {
             api.getInfo().setTitle(serviceName);
         }
@@ -206,27 +212,12 @@ public class CodeGenerator {
                 // as other src files.
                 // Therefore value set to modelPackage is ignored here
                 if (serviceName != null) {
-                    api.getInfo().setTitle(serviceName.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1"));
+                    api.getInfo().setTitle(serviceName.replaceAll(ESCAPE_PATTERN, "\\\\$1"));
                 }
                 sourceFiles = generateClient(serviceName, Paths.get(definitionPath), filter);
                 break;
             case GEN_SERVICE:
-
-                final BallerinaOpenApiType openApi = TypeExtractorUtil.extractOpenApiObject(api, filter);
-                openApi.setBalServiceName(serviceName);
-                openApi.setBalModule(srcPackage);
-                openApi.setServers(api);
-                openApi.setTags(api.getTags());
-
-                if (reldefinitionPath == null) {
-                    openApi.setDefPath(definitionPath.replaceAll(Pattern.quote("\\"),
-                            Matcher.quoteReplacement("\\\\")));
-                } else {
-                    openApi.setDefPath(reldefinitionPath.replaceAll(Pattern.quote("\\"),
-                            Matcher.quoteReplacement("\\\\")));
-                }
-
-                sourceFiles = generateBallerinaService(openApi, Paths.get(definitionPath), serviceName, filter);
+                sourceFiles = generateBallerinaService(Paths.get(definitionPath), serviceName, filter);
                 break;
             default:
                 return null;
@@ -272,11 +263,11 @@ public class CodeGenerator {
 
     private Template compileTemplate(String defaultTemplateDir, String templateName) throws IOException {
         defaultTemplateDir = defaultTemplateDir.replaceAll("\\\\", "/");
-        String templatesDirPath = System.getProperty(GeneratorConstants.TEMPLATES_DIR_PATH_KEY, defaultTemplateDir);
+        String templatesDirPath = System.getProperty(TEMPLATES_DIR_PATH_KEY, defaultTemplateDir);
         ClassPathTemplateLoader cpTemplateLoader = new ClassPathTemplateLoader((templatesDirPath));
         FileTemplateLoader fileTemplateLoader = new FileTemplateLoader(templatesDirPath);
-        cpTemplateLoader.setSuffix(GeneratorConstants.TEMPLATES_SUFFIX);
-        fileTemplateLoader.setSuffix(GeneratorConstants.TEMPLATES_SUFFIX);
+        cpTemplateLoader.setSuffix(TEMPLATES_SUFFIX);
+        fileTemplateLoader.setSuffix(TEMPLATES_SUFFIX);
 
         Handlebars handlebars = new Handlebars().with(cpTemplateLoader, fileTemplateLoader).with(EscapingStrategy.NOOP);
         handlebars.setInfiniteLoops(true); //This will allow templates to call themselves with recursion.
@@ -304,7 +295,8 @@ public class CodeGenerator {
         return handlebars.compile(templateName);
     }
 
-    private void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, Path implPath, GenType type)
+    private void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, Path implPath,
+                                        GeneratorConstants.GenType type)
             throws IOException {
         //  Remove old generated file with same name
         if (Files.exists(srcPath)) {
@@ -384,7 +376,7 @@ public class CodeGenerator {
     private List<GenSrcFile> generateClient(String serviceName, Path openAPI, Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
-            srcPackage = GeneratorConstants.DEFAULT_CLIENT_PKG;
+            srcPackage =  DEFAULT_CLIENT_PKG;
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String srcFile = serviceName + "_client.bal";
@@ -395,21 +387,21 @@ public class CodeGenerator {
 
         // Generate ballerina records to represent schemas.
         String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
-        sourceFiles.add(new GenSrcFile(GenFileType.MODEL_SRC, srcPackage, GeneratorConstants.SCHEMA_FILE_NAME,
+        sourceFiles.add(new GenSrcFile(GenFileType.MODEL_SRC, srcPackage,  SCHEMA_FILE_NAME,
                 schemaContent));
 
         return sourceFiles;
     }
 
-    private List<GenSrcFile> generateBallerinaService(BallerinaOpenApiType api, Path openAPI, String serviceName,
+    private List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
                                                       Filter filter)
             throws IOException, FormatterException, BallerinaOpenApiException, OpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
-            srcPackage = GeneratorConstants.DEFAULT_MOCK_PKG;
+            srcPackage =  DEFAULT_MOCK_PKG;
         }
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String concatTitle = api.getBalServiceName().toLowerCase(Locale.ENGLISH);
+        String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
 
         String mainContent = Formatter.format(BallerinaServiceGenerator.generateSyntaxTree(openAPI, serviceName,
@@ -417,7 +409,7 @@ public class CodeGenerator {
         sourceFiles.add(new GenSrcFile(GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
-        sourceFiles.add(new GenSrcFile(GenFileType.GEN_SRC, srcPackage, GeneratorConstants.SCHEMA_FILE_NAME,
+        sourceFiles.add(new GenSrcFile(GenFileType.GEN_SRC, srcPackage,  SCHEMA_FILE_NAME,
                 schemaContent));
 
         return sourceFiles;

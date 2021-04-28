@@ -43,7 +43,6 @@ module io.ballerina.ballerina.openapi {
     exports org.ballerinalang.openapi.cmd;
     exports org.ballerinalang.openapi.exception;
     exports org.ballerinalang.openapi.model;
-    exports org.ballerinalang.openapi.typemodel;
     exports org.ballerinalang.openapi.utils;
 }
 

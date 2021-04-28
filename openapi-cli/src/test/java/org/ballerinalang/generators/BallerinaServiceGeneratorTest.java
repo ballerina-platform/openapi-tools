@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.ballerinalang.openapi.utils.GeneratorConstants.USER_DIR;
+import static org.ballerinalang.generators.GeneratorConstants.USER_DIR;
 
 /**
  * All the tests related to the BallerinaServiceGenerator util.

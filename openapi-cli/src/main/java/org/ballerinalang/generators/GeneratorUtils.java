@@ -54,7 +54,6 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.ballerina.Constants;
 import org.ballerinalang.openapi.exception.BallerinaOpenApiException;
-import org.ballerinalang.openapi.utils.GeneratorConstants;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -66,6 +65,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.ballerinalang.openapi.OpenApiMesseges.BAL_KEYWORDS;
+import static org.ballerinalang.openapi.OpenApiMesseges.BAL_TYPES;
 
 /**
  * This class util for store all the common scenarios.
@@ -251,10 +251,15 @@ public class GeneratorUtils {
                 convertedType = "record";
                 break;
             case Constants.DECIMAL:
+            case Constants.NUMBER:
+            case Constants.DOUBLE:
                 convertedType = "decimal";
                 break;
+            case Constants.FLOAT:
+                convertedType = "float";
+                break;
             default:
-                convertedType = "any";
+                convertedType = "anydata";
         }
         return convertedType;
     }
@@ -359,5 +364,25 @@ public class GeneratorUtils {
             }
         }
         return url;
+    }
+
+    /**
+     * This method will escape special characters used in method names and identifiers.
+     *
+     * @param type - type or method name
+     * @return - escaped string
+     */
+    public static String escapeType(String type) {
+        if (!type.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") ||
+                (BAL_KEYWORDS.stream().anyMatch(type::equals) && BAL_TYPES.stream().noneMatch(type::equals))) {
+            // TODO: Temporary fix(es) as identifier literals only support alphanumerics when writing this.
+            //  Refer - https://github.com/ballerina-platform/ballerina-lang/issues/18720
+            type = type.replace("-", "");
+            type = type.replace("$", "");
+
+            type = type.replaceAll("([\\\\?!<>*\\-=^+()_{}|.$])", "\\\\$1");
+            type = "'" + type;
+        }
+        return type;
     }
 }
