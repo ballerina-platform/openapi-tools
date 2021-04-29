@@ -141,6 +141,25 @@ public class BallerinaClientGeneratorTests {
 //        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_display_annotation.bal");
     }
 
+    @Test(description = "Generate Client for openapi spec UBER")
+    public void generateClientForUberAPI()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/uber_openapi.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("uber_openapi.bal");
+    }
+
+    @Test(description = "Generate Client for openapi spec COVID19")
+    public void generateClientForCovid19API()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/covid19_openapi.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("covid19_openapi.bal");
+    }
     @AfterTest
     private void deleteGeneratedFiles() {
         try {

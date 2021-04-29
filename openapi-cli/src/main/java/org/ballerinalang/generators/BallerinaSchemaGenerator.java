@@ -254,18 +254,24 @@ public class BallerinaSchemaGenerator {
                         String type;
                         Token typeName;
                         TypeDescriptorNode memberTypeDesc;
-                        if (arraySchema.getItems().get$ref() != null) {
+                        Schema schemaItem = arraySchema.getItems();
+                        if (schemaItem.get$ref() != null) {
                             type = extractReferenceType(arraySchema.getItems().get$ref());
                             typeName = AbstractNodeFactory.createIdentifierToken(type);
                             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
                             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                                     null, closeSBracketToken);
-                        } else if (arraySchema.getItems() instanceof ArraySchema) {
+                        } else if (schemaItem instanceof ArraySchema) {
                             memberTypeDesc = extractOpenApiSchema(arraySchema.getItems());
                             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                                     null, closeSBracketToken);
+                        } else if (schemaItem instanceof ObjectSchema) {
+                            ObjectSchema inlineSchema = (ObjectSchema) schemaItem;
+                            memberTypeDesc = extractOpenApiSchema(inlineSchema);
+                            return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
+                                    null, closeSBracketToken);
                         } else {
-                            type = arraySchema.getItems().getType();
+                            type = schemaItem.getType();
                             typeName = AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(type));
                             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
                             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
@@ -290,8 +296,8 @@ public class BallerinaSchemaGenerator {
                         , bodyEndDelimiter);
 
             } else {
-                outStream.println("Encountered an unsupported type. Type `any` would be used for the field.");
-                Token typeName = AbstractNodeFactory.createIdentifierToken("any");
+                outStream.println("Encountered an unsupported type. Type `anydata` would be used for the field.");
+                Token typeName = AbstractNodeFactory.createIdentifierToken("anydata");
                 return createBuiltinSimpleNameReferenceNode(null, typeName);
             }
         } else if (schema.get$ref() != null) {
@@ -300,11 +306,11 @@ public class BallerinaSchemaGenerator {
         } else {
             //This contains a fallback to Ballerina common type `any` if the OpenApi specification type is not defined
             // or not compatible with any of the current Ballerina types.
-            outStream.println("Encountered an unsupported type. Type `any` would be used for the field.");
-            Token typeName = AbstractNodeFactory.createIdentifierToken("any");
+            outStream.println("Encountered an unsupported type. Type `anydata` would be used for the field.");
+            Token typeName = AbstractNodeFactory.createIdentifierToken("anydata");
             return createBuiltinSimpleNameReferenceNode(null, typeName);
         }
-        Token typeName = AbstractNodeFactory.createIdentifierToken("any");
+        Token typeName = AbstractNodeFactory.createIdentifierToken("anydata");
         return createBuiltinSimpleNameReferenceNode(null, typeName);
     }
 

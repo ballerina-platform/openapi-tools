@@ -1,0 +1,146 @@
+openapi: 3.0.0
+info:
+  version: 1.1.0
+  title: COVID-19 APIs
+  description: Here you can find documentation for COVID-19 REST API.
+servers:
+  - description: Covid-19 statistic serverless API
+    url: https://api-cov19.now.sh/
+paths:
+  /api:
+    get:
+      tags: ["Data for all countries"]
+      description: Returns information about all countries
+      operationId: getCovidinAllCountries
+      responses:
+        '200':
+          description: A list of countries with all informtion included.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {
+                  "$ref": "#/components/schemas/Countries"
+                }
+  /api/v1/countries/list/:
+    get:
+      tags: ["Countries list"]
+      description: List of all countries with COVID-19 cases
+      operationId: getCountryList
+      responses:
+        '200':
+          description: Default response with array of strings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {
+                  "$ref": "#/components/schemas/CountryInfo"
+                }
+        '500':
+          description: Error message.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+  /api/countries/{country}:
+    get:
+      tags: ["Data for country"]
+      summary: Get a country by name
+      operationId: getCountryByName
+      parameters:
+        - in: path
+          name: country
+          schema:
+            type: string
+          required: true
+          description: String Name of the country to get
+      description: Returns information about country. Pass country name as a parameter. Country name is case insensitive. For example – https://api-cov19.now.sh/api/countries/netherlands
+      responses:
+        '200':
+          description: A list of countries with all informtion included.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Country"
+        '500':
+          description: Error message.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+components:
+  schemas:
+    CountryInfo:
+      type: object
+      properties:
+        name:
+          type: string
+    Countries:
+      type: object
+      properties:
+        confirmed:
+          type: array
+          items:
+            type: object
+            properties:
+              "Province/State":
+                type: string
+              Lat:
+                type: string
+              Long:
+                type: string
+              "d/mm/yy":
+                type: string
+        death:
+          type: array
+          items:
+            type: object
+            properties:
+              "Province/State":
+                type: string
+              Lat:
+                type: string
+              Long:
+                type: string
+              "d/mm/yy":
+                type: string
+        recovered:
+          type: array
+          items:
+            type: object
+            properties:
+              "Province/State":
+                type: string
+              Lat:
+                type: string
+              Long:
+                type: string
+              "d/mm/yy":
+                type: string
+    Country:
+      type: object
+      properties:
+        country:
+          type: string
+        dates:
+          type: array
+          items:
+            type: string
+        confirmed:
+          type: array
+          items:
+            type: integer
+        deaths:
+          type: array
+          items:
+            type: integer
+        recovered:
+          type: array
+          items:
+            type: integer
+    Error:
+      type: object
+      properties:
+        name:
+          type: string

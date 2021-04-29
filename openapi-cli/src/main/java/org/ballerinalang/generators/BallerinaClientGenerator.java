@@ -44,6 +44,7 @@ import io.ballerina.compiler.syntax.tree.ListBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.MethodCallExpressionNode;
+import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -66,6 +67,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeTestExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
@@ -150,6 +152,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDesc
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTemplateExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeTestExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
@@ -197,10 +200,12 @@ public class BallerinaClientGenerator {
     private static List<ImportDeclarationNode> imports = new ArrayList<>();
     private static boolean isQuery;
     private static Info info;
+    private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
             BallerinaOpenApiException {
         imports.clear();
+        typeDefinitionNodeList.clear();
         isQuery = false;
         // Summaries OpenAPI details
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -221,6 +226,9 @@ public class BallerinaClientGenerator {
         imports.add(importForHttp);
         ClassDefinitionNode classDefinitionNode = getClassDefinitionNode();
         ModulePartNode modulePartNode;
+        List<ModuleMemberDeclarationNode> nodes =  new ArrayList<>();
+        nodes.addAll(typeDefinitionNodeList);
+        nodes.add(classDefinitionNode);
         if (isQuery) {
             ImportDeclarationNode url = GeneratorUtils.getImportDeclarationNode(
                     GeneratorConstants.BALLERINA, "url");
@@ -230,11 +238,15 @@ public class BallerinaClientGenerator {
             imports.add(string);
             NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
             FunctionDefinitionNode queryParamFunction = getQueryParamPath();
-            modulePartNode = createModulePartNode(importsList, createNodeList(classDefinitionNode,
-                    queryParamFunction), createToken(EOF_TOKEN));
+
+            nodes.add(queryParamFunction);
+            modulePartNode = createModulePartNode(importsList,
+                    createNodeList(nodes),
+                    createToken(EOF_TOKEN));
+
         } else {
             NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
-            modulePartNode = createModulePartNode(importsList, createNodeList(classDefinitionNode),
+            modulePartNode = createModulePartNode(importsList, createNodeList(nodes),
                     createToken(EOF_TOKEN));
         }
         TextDocument textDocument = TextDocuments.from("");
@@ -848,6 +860,57 @@ public class BallerinaClientGenerator {
                             Schema schema = media.getValue().getSchema();
                             if (schema.get$ref() != null) {
                                 type = extractReferenceType(schema.get$ref());
+                            } else if (schema instanceof ArraySchema) {
+                                ArraySchema arraySchema = (ArraySchema) schema;
+                                // TODO: Nested array when response has
+                                if (arraySchema.getItems().get$ref() != null) {
+                                    type = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
+                                    String typeName = extractReferenceType(arraySchema.getItems().get$ref()) + "Arr";
+                                    TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
+                                            createIdentifierToken("type"),
+                                            createIdentifierToken(typeName),
+                                            createSimpleNameReferenceNode(createIdentifierToken(type)),
+                                            createToken(SEMICOLON_TOKEN));
+                                    // need to check already typedecripor has same name
+                                    if (!typeDefinitionNodeList.isEmpty()) {
+                                        boolean isExit = false;
+                                        for (TypeDefinitionNode typeNode: typeDefinitionNodeList) {
+                                            if (typeNode.typeName().toString().trim().equals(typeName)) {
+                                                isExit = true;
+                                            }
+                                        }
+                                        if (!isExit) {
+                                            typeDefinitionNodeList.add(typeDefNode);
+                                        }
+                                    } else {
+                                        typeDefinitionNodeList.add(typeDefNode);
+                                    }
+                                    type = typeName;
+                                } else {
+                                    String typeName = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) +
+                                            "Arr";
+                                    type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
+                                    TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null,
+                                            null, createIdentifierToken("type"),
+                                            createIdentifierToken(typeName),
+                                            createSimpleNameReferenceNode(createIdentifierToken(type)),
+                                            createToken(SEMICOLON_TOKEN));
+                                    typeDefinitionNodeList.add(typeDefNode);
+                                    if (!typeDefinitionNodeList.isEmpty()) {
+                                        boolean isExit = false;
+                                        for (TypeDefinitionNode typeNode: typeDefinitionNodeList) {
+                                            if (typeNode.typeName().toString().trim().equals(typeName)) {
+                                                isExit = true;
+                                            }
+                                        }
+                                        if (!isExit) {
+                                            typeDefinitionNodeList.add(typeDefNode);
+                                        }
+                                    } else {
+                                        typeDefinitionNodeList.add(typeDefNode);
+                                    }
+                                    type = typeName;
+                                }
                             } else {
                                 type = convertOpenAPITypeToBallerina(schema.getType());
                             }
