@@ -165,17 +165,6 @@ task initializeVariables {
 
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
-    dependsOn(":openapi-cli:build")
-    dependsOn(":openapi-validator:build")
-    dependsOn(unpackJballerinaTools)
-    dependsOn(unpackStdLibs)
-    dependsOn(copyStdlibs)
-    dependsOn(updateTomlFile)
-    dependsOn(updateCompilerTomlFile)
-    dependsOn(test)
-//    dependsOn(ballerinaTest)
-    finalizedBy(revertTomlFile)
-
     doLast {
         // Build and populate caches
         exec {
@@ -269,45 +258,6 @@ task ballerinaBuild {
     outputs.dir artifactLibParent
 }
 
-task ballerinaTest {
-    dependsOn(":openapi-cli:build")
-    dependsOn(":openapi-validator:build")
-    dependsOn(unpackJballerinaTools)
-    dependsOn(unpackStdLibs)
-    dependsOn(copyStdlibs)
-    dependsOn(updateTomlFile)
-    dependsOn(updateCompilerTomlFile)
-    finalizedBy(revertTomlFile)
-
-    def debugParams = ""
-    if (project.hasProperty("debug")) {
-        debugParams = "--debug ${project.findProperty("debug")}"
-    }
-
-    doLast {
-        exec {
-            workingDir project.projectDir
-            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-            environment "STDLIB_VERSION", tomlVersion
-//            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-//                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test --code-coverage --all ${debugParams} && exit %%ERRORLEVEL%%"
-//            } else {
-//                commandLine 'sh', '-c', "$distributionBinPath/ballerina test  --code-coverage --all ${debugParams}"
-//            }
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test  ${debugParams} && exit %%ERRORLEVEL%%"
-            } else {
-                commandLine 'sh', '-c', "$distributionBinPath/bal test  ${debugParams}"
-            }
-        }
-    }
-}
-
-test {
-    dependsOn(ballerinaTest)
-//    dependsOn(ballerinaIntegrationTests)
-}
-
 task createArtifactZip(type: Zip) {
     destinationDirectory = file("${buildDir}/distributions")
     from ballerinaBuild
@@ -331,27 +281,18 @@ publishing {
         }
     }
 }
-// Commented due to disabling ballerina integration tests
-//
-//task extractBallerinaClassFiles(type: Copy) {
-//    def jars = fileTree(artifactTestableJar).findAll {
-//        it.name.endsWith("-testable.jar")
-//    }
-//
-//    jars.forEach { file ->
-//        from zipTree(file).matching {
-//            exclude '**/tests/*'
-//            include '**/*.class'
-//        }
-//        into "${project.rootDir.absolutePath}/build/classes"
-//    }
-//}
 
-ballerinaBuild.dependsOn ":openapi-cli:build"
-ballerinaBuild.dependsOn ":openapi-validator:build"
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
 updateTomlFile.dependsOn copyStdlibs
 updateCompilerTomlFile.dependsOn updateTomlFile
+
+ballerinaBuild.dependsOn ":${packageName}-cli:build"
+ballerinaBuild.dependsOn ":${packageName}-validator:build"
 ballerinaBuild.dependsOn updateCompilerTomlFile
-build.dependsOn(ballerinaBuild)
+ballerinaBuild.dependsOn initializeVariables
+ballerinaBuild.finalizedBy revertTomlFile
+build.dependsOn ballerinaBuild
+
+publishToMavenLocal.dependsOn build
+publish.dependsOn build
