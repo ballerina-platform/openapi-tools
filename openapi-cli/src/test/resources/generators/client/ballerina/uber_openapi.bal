@@ -12,7 +12,7 @@ public client class Client {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
     }
-    remote isolated function  products(decimal latitude, decimal longitude) returns ProductArr|error {
+    remote isolated function products(decimal latitude, decimal longitude) returns ProductArr|error {
         string  path = string `/products`;
         map<anydata> queryParam = {
             latitude: latitude,
@@ -22,7 +22,7 @@ public client class Client {
         ProductArr response = check self.clientEp->get(path, targetType = ProductArr);
         return response;
     }
-    remote isolated function  price(decimal start_latitude, decimal start_longitude, decimal end_latitude, decimal end_longitude) returns PriceEstimateArr|error {
+    remote isolated function price(decimal start_latitude, decimal start_longitude, decimal end_latitude, decimal end_longitude) returns PriceEstimateArr|error {
         string  path = string `/estimates/price`;
         map<anydata> queryParam = {
             start_latitude: start_latitude,
@@ -34,7 +34,7 @@ public client class Client {
         PriceEstimateArr response = check self.clientEp->get(path, targetType = PriceEstimateArr);
         return response;
     }
-    remote isolated function  time(decimal start_latitude, decimal start_longitude, string? customer_uuid, string? product_id) returns ProductArr|error {
+    remote isolated function time(decimal start_latitude, decimal start_longitude, string? customer_uuid, string? product_id) returns ProductArr|error {
         string  path = string `/estimates/time`;
         map<anydata> queryParam = {
             start_latitude: start_latitude,
@@ -46,12 +46,12 @@ public client class Client {
         ProductArr response = check self.clientEp->get(path, targetType = ProductArr);
         return response;
     }
-    remote isolated function  me() returns Profile|error {
+    remote isolated function me() returns Profile|error {
         string  path = string `/me`;
         Profile response = check self.clientEp->get(path, targetType = Profile);
         return response;
     }
-    remote isolated function  history(int? offset, int? 'limit) returns Activities|error {
+    remote isolated function history(int? offset, int? 'limit) returns Activities|error {
         string  path = string `/history`;
         map<anydata> queryParam = {offset: offset, 'limit: 'limit};
         path = path + getPathForQueryParam(queryParam);
@@ -60,7 +60,7 @@ public client class Client {
     }
 }
 
-isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
+isolated function getPathForQueryParam(map<anydata> queryParam) returns string {
     string[] param = [];
     param[param.length()] = "?";
     foreach  var [key, value] in  queryParam.entries() {
