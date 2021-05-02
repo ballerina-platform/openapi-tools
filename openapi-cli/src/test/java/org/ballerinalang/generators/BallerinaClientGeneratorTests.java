@@ -160,6 +160,17 @@ public class BallerinaClientGeneratorTests {
         Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("covid19_openapi.bal");
     }
+
+    @Test(description = "Generate Client for openapi spec JIRA", enabled = false)
+    public void generateClientForJIRA()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/jira_openapi.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("jira_openapi.bal");
+    }
+
     @AfterTest
     private void deleteGeneratedFiles() {
         try {

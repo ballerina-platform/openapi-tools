@@ -188,6 +188,7 @@ import static org.ballerinalang.generators.GeneratorUtils.buildUrl;
 import static org.ballerinalang.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static org.ballerinalang.generators.GeneratorUtils.escapeIdentifier;
 import static org.ballerinalang.generators.GeneratorUtils.extractReferenceType;
+import static org.ballerinalang.generators.GeneratorUtils.getBallerinaMeidaType;
 import static org.ballerinalang.generators.GeneratorUtils.getBallerinaOpenApiType;
 
 /**
@@ -398,8 +399,18 @@ public class BallerinaClientGenerator {
 
         memberNodeList.add(initFunctionNode);
         memberNodeList.addAll(createRemoteFunctions(paths, filters));
-
-        return createClassDefinitionNode(null, visibilityQualifier, classTypeQualifiers,
+        MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
+        if (info.getExtensions() != null) {
+            Map<String, Object> extensions = info.getExtensions();
+            if (!extensions.isEmpty()) {
+                for (Map.Entry<String, Object> extension: extensions.entrySet()) {
+                    if (extension.getKey().trim().equals("x-display")) {
+                        metadataNode = getMetadataNodeForDisplayAnnotation(extension);
+                    }
+                }
+            }
+        }
+        return createClassDefinitionNode(metadataNode, visibilityQualifier, classTypeQualifiers,
                 classKeyWord, className, openBrace, createNodeList(memberNodeList),
                 createToken(CLOSE_BRACE_TOKEN));
     }
@@ -414,16 +425,16 @@ public class BallerinaClientGenerator {
                         createToken(COLON_TOKEN), createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
         IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.CLIENT_EP);
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
-        if (info.getExtensions() != null) {
-            Map<String, Object> extensions = info.getExtensions();
-            if (!extensions.isEmpty()) {
-                for (Map.Entry<String, Object> extension: extensions.entrySet()) {
-                    if (extension.getKey().trim().equals("x-display")) {
-                        metadataNode = getMetadataNodeForDisplayAnnotation(extension);
-                    }
-                }
-            }
-        }
+//        if (info.getExtensions() != null) {
+//            Map<String, Object> extensions = info.getExtensions();
+//            if (!extensions.isEmpty()) {
+//                for (Map.Entry<String, Object> extension: extensions.entrySet()) {
+//                    if (extension.getKey().trim().equals("x-display")) {
+//                        metadataNode = getMetadataNodeForDisplayAnnotation(extension);
+//                    }
+//                }
+//            }
+//        }
         return createObjectFieldNode(metadataNode, visibilityQualifierAttribute,
                 qualifierList, typeName, fieldName, null, null, createToken(SEMICOLON_TOKEN));
     }
@@ -705,7 +716,8 @@ public class BallerinaClientGenerator {
     /*
      * Create query parameters.
      */
-    private static void setQueryParameters(List<Node> parameterList, Parameter parameter) {
+    private static void setQueryParameters(List<Node> parameterList, Parameter parameter)
+            throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         TypeDescriptorNode typeName;
         if (parameter.getExtensions() != null) {
@@ -722,10 +734,14 @@ public class BallerinaClientGenerator {
 
         if (parameterSchema instanceof ArraySchema) {
             ArraySchema arraySchema = (ArraySchema) parameterSchema;
-            String itemType = arraySchema.getItems().getType();
-            if (itemType.equals("string") || itemType.equals("integer") || itemType.equals("boolean")
-                    || itemType.equals("float") || itemType.equals("decimal")) {
-                paramType = convertOpenAPITypeToBallerina(itemType) + "[]";
+            if (arraySchema.getItems().getType() != null) {
+                String itemType = arraySchema.getItems().getType();
+                if (itemType.equals("string") || itemType.equals("integer") || itemType.equals("boolean")
+                        || itemType.equals("float") || itemType.equals("decimal")) {
+                    paramType = convertOpenAPITypeToBallerina(itemType) + "[]";
+                }
+            } else if (arraySchema.getItems().get$ref() != null) {
+                paramType = extractReferenceType(arraySchema.getItems().get$ref().trim()) + "[]";
             }
         }
         if (parameter.getRequired()) {
@@ -816,10 +832,22 @@ public class BallerinaClientGenerator {
             String paramType;
             //Take payload type
             if (schema.get$ref() != null) {
-                paramType = escapeIdentifier(extractReferenceType(schema.get$ref()));
-            } else {
+                paramType = extractReferenceType(schema.get$ref().trim());
+            } else if (schema.getType() != null) {
                 String typeOfPayload = schema.getType().trim();
                 paramType = convertOpenAPITypeToBallerina(typeOfPayload);
+            } else if (schema instanceof ArraySchema) {
+                //ToDo: handle nested array
+                ArraySchema arraySchema = (ArraySchema) schema;
+                if (arraySchema.getItems().getType() != null) {
+                    paramType = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
+                } else if (arraySchema.getItems().get$ref() != null) {
+                    paramType = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
+                } else {
+                    paramType = getBallerinaMeidaType(next.getKey().trim()) + "[]";
+                }
+            } else {
+                paramType = getBallerinaMeidaType(next.getKey());
             }
             NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
             if (requestBody.getExtensions() != null) {
@@ -911,8 +939,10 @@ public class BallerinaClientGenerator {
                                     }
                                     type = typeName;
                                 }
-                            } else {
+                            } else if (schema.getType() != null) {
                                 type = convertOpenAPITypeToBallerina(schema.getType());
+                            } else {
+                                type = getBallerinaMeidaType(media.getKey().trim());
                             }
                         } else {
                             type = getMediaType(media.getKey().trim());
@@ -1048,9 +1078,13 @@ public class BallerinaClientGenerator {
                                 "TODO: Update the request as needed");
                         statementsList.add(expressionStatementNode);
                     }
-                    // POST, PUT, PATCH, DELETE, EXECUTE
-                    VariableDeclarationNode requestStatement = getSimpleStatement("http:Response",
-                            "response", "check self.clientEp->" + method + "(path, request)");
+//                    if (operation.getValue().getResponses() != null) {
+                        // POST, PUT, PATCH, DELETE, EXECUTE
+                        VariableDeclarationNode requestStatement =
+                                getSimpleStatement(getReturnType(operation.getValue()).split("\\|")[0],
+                                "response", "check self.clientEp->" + method + "(path, request)");
+//                    }
+
                     if (isHeader) {
                         if (method.equals("post") || method.equals("put") || method.equals("patch") || method.equals(
                                 "delete") || method.equals("execute")) {

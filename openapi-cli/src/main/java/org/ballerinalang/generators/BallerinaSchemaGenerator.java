@@ -130,20 +130,23 @@ public class BallerinaSchemaGenerator {
                                     null, typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
                             typeDefinitionNodeList.add(typeDefinitionNode);
                         }
-                    } else if (schema.getValue().getProperties() != null || schema.getValue() instanceof ObjectSchema) {
+                    } else if (schema.getValue().getProperties() != null || (schema.getValue() instanceof ObjectSchema
+                            && schema.getValue().getProperties() != null)) {
                         Map<String, Schema> fields = schema.getValue().getProperties();
-                        for (Map.Entry<String, Schema> field : fields.entrySet()) {
-                            addRecordFields(required, recordFieldList, field);
+                        if (fields != null) {
+                            for (Map.Entry<String, Schema> field : fields.entrySet()) {
+                                addRecordFields(required, recordFieldList, field);
+                            }
+                            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
+                            Token bodyEndDelimiter = AbstractNodeFactory.createIdentifierToken("}");
+                            RecordTypeDescriptorNode recordTypeDescriptorNode =
+                                    NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
+                                            fieldNodes, null, bodyEndDelimiter);
+                            Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
+                            TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null,
+                                    null, typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
+                            typeDefinitionNodeList.add(typeDefinitionNode);
                         }
-                        NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
-                        Token bodyEndDelimiter = AbstractNodeFactory.createIdentifierToken("}");
-                        RecordTypeDescriptorNode recordTypeDescriptorNode =
-                                NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
-                                        fieldNodes, null, bodyEndDelimiter);
-                        Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
-                        TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null,
-                                null, typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
-                        typeDefinitionNodeList.add(typeDefinitionNode);
                     } else if (schema.getValue().getType().equals("array")) {
                         if (schemaValue instanceof ArraySchema) {
                             ArraySchema arraySchema = (ArraySchema) schemaValue;
@@ -270,9 +273,14 @@ public class BallerinaSchemaGenerator {
                             memberTypeDesc = extractOpenApiSchema(inlineSchema);
                             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                                     null, closeSBracketToken);
-                        } else {
+                        } else if (schemaItem.getType() != null) {
                             type = schemaItem.getType();
                             typeName = AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(type));
+                            memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
+                            return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
+                                    null, closeSBracketToken);
+                        } else {
+                            typeName = AbstractNodeFactory.createIdentifierToken("anydata");
                             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
                             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                                     null, closeSBracketToken);

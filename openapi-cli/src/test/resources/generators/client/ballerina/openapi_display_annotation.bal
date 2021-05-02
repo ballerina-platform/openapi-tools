@@ -2,11 +2,11 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
+@display {
+    label: "Current Weather Details",
+    iconPath: "Path"
+}
 public client class Client {
-    @display {
-        label: "Current Weather Details",
-        iconPath: "Path"
-    }
     public http:Client clientEp;
     public isolated function init(string serviceUrl = "http://api.openweathermap.org/data/2.5/", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
