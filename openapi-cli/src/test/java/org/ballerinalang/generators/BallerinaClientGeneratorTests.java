@@ -171,6 +171,16 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("jira_openapi.bal");
     }
 
+    @Test(description = "Generate Client for openapi spec world bank")
+    public void generateClientForWorldBank()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/world_bank_openapi.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("world_bank_openapi.bal");
+    }
+
     @AfterTest
     private void deleteGeneratedFiles() {
         try {
