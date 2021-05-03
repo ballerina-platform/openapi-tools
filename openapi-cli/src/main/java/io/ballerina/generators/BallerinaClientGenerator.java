@@ -177,22 +177,19 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RIGHT_ARROW_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
-import static org.ballerinalang.generators.GeneratorConstants.HTTP;
-import static org.ballerinalang.generators.GeneratorConstants.OPEN_PRAN;
-import static org.ballerinalang.generators.GeneratorUtils.buildUrl;
-import static org.ballerinalang.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
-import static org.ballerinalang.generators.GeneratorUtils.escapeIdentifier;
-import static org.ballerinalang.generators.GeneratorUtils.extractReferenceType;
-import static org.ballerinalang.generators.GeneratorUtils.getBallerinaMeidaType;
-import static org.ballerinalang.generators.GeneratorUtils.getBallerinaOpenApiType;
 import static io.ballerina.generators.GeneratorConstants.HTTP;
 import static io.ballerina.generators.GeneratorConstants.OPEN_PRAN;
+import static io.ballerina.generators.GeneratorUtils.buildUrl;
+import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
+import static io.ballerina.generators.GeneratorUtils.getBallerinaMeidaType;
+import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 
 /**
  * This Util class use for generating ballerina client file according to given yaml file.

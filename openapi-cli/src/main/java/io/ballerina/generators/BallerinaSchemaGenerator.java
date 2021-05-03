@@ -34,6 +34,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.Components;
@@ -58,6 +59,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
+import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 
 /**
  *This class wraps the {@link Schema} from openapi models inorder to overcome complications
@@ -67,7 +71,8 @@ public class BallerinaSchemaGenerator {
     private static final PrintStream outStream = System.err;
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath)
-            throws OpenApiException, FormatterException, IOException, BallerinaOpenApiException {
+            throws OpenApiException, FormatterException, IOException, BallerinaOpenApiException,
+            BallerinaOpenApiException {
         OpenAPI openApi = parseOpenAPIFile(definitionPath.toString());
         // TypeDefinitionNodes their
         List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
@@ -83,7 +88,7 @@ public class BallerinaSchemaGenerator {
                     Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("public type");
                     //2.typeName
                     IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(
-                            GeneratorUtils.escapeIdentifier(schema.getKey().trim()));
+                            escapeIdentifier(schema.getKey().trim()));
                     //3.typeDescriptor - RecordTypeDescriptor
                     //3.1 recordKeyWord
                     Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record");
