@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-module io.ballerina.openapi.validator {
-    requires io.ballerina.lang;
-    requires io.ballerina.parser;
-    requires io.ballerina.tools.api;
-    requires io.swagger.v3.oas.models;
-    requires swagger.parser.v3;
-    requires swagger.parser.core;
-    exports io.ballerina.openapi.validator;
-    exports io.ballerina.openapi.validator.error;
-}
+package io.ballerina.openapi.exception;
 
+/**
+ * Exception type definition for OpenAPI to Ballerina parsing related errors.
+ */
+public class BallerinaOpenApiException extends Exception {
+    public BallerinaOpenApiException(String message, Throwable e) {
+        super(message, e);
+    }
+
+    public BallerinaOpenApiException(String message) {
+        super(message);
+    }
+}
