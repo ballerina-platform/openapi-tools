@@ -67,8 +67,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_server_with_base_path.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("client_template.bal");
     }
 
@@ -78,8 +77,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_without_operation_id.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_id.bal");
     }
 
@@ -89,8 +87,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_get.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_get.bal");
     }
 
@@ -100,8 +97,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_post.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_post.bal");
     }
 
@@ -111,8 +107,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/header_parameter.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("header_parameter.bal");
     }
 
@@ -122,8 +117,7 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal");
     }
 
@@ -133,21 +127,58 @@ public class BallerinaClientGeneratorTests {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        boolean isError = isError(diagnostics);
-        Assert.assertFalse(isError);
+        Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal");
     }
 
-    private boolean isError(List<Diagnostic> diagnostics) {
+    @Test(description = "Generate Client for openapi spec have display annotation method")
+    public void generateClientForDisplayAnnotation()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        Assert.assertTrue(diagnostics.isEmpty());
+//        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_display_annotation.bal");
+    }
 
-        boolean isError = false;
-        for (Diagnostic diagnostic: diagnostics) {
-            if (diagnostic.message().contains("ERROR")) {
-                isError = true;
-                break;
-            }
-        }
-        return isError;
+    @Test(description = "Generate Client for openapi spec UBER")
+    public void generateClientForUberAPI()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/uber_openapi.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("uber_openapi.bal");
+    }
+
+    @Test(description = "Generate Client for openapi spec COVID19")
+    public void generateClientForCovid19API()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/covid19_openapi.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("covid19_openapi.bal");
+    }
+
+    @Test(description = "Generate Client for openapi spec JIRA", enabled = false)
+    public void generateClientForJIRA()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/jira_openapi.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("jira_openapi.bal");
+    }
+
+    @Test(description = "Generate Client for openapi spec world bank")
+    public void generateClientForWorldBank()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/world_bank_openapi.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("world_bank_openapi.bal");
     }
 
     @AfterTest
@@ -187,7 +218,6 @@ public class BallerinaClientGeneratorTests {
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
     }
-
 
     /*
      * Write the generated syntax tree to file

@@ -2,31 +2,31 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
+@display {
+    label: "Current Weather Details",
+    iconPath: "Path"
+}
 public client class Client {
     public http:Client clientEp;
-    public isolated function init(string serviceUrl = "http://petstore.openapi.io/v1", http:ClientConfiguration
-    httpClientConfig= {})
-    returns error? {
+    public isolated function init(string serviceUrl = "http://api.openweathermap.org/data/2.5/", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
     }
-    remote isolated function listPets(int? 'limit) returns Pets|error {
-        string  path = string `/pets`;
-        map<anydata> queryParam = {'limit: 'limit};
+    @display {label: "Current weather"}
+    remote isolated function currentWeatherData(@display {label: "City name"} string? q, string? id, string? lat, string? lon, string? zip, string? units, string? lang, string? mode) returns '200|error {
+        string  path = string `/weather`;
+        map<anydata> queryParam = {
+            q: q,
+            id: id,
+            lat: lat,
+            lon: lon,
+            zip: zip,
+            units: units,
+            lang: lang,
+            mode: mode
+        };
         path = path + getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp->get(path, targetType = Pets);
-        return response;
-    }
-    remote isolated function  pets() returns http:Response | error {
-        string  path = string `/pets`;
-        http:Request request = new;
-        //TODO: Update the request as needed;
-        http:Response  response = check self.clientEp->post(path, request, targetType = http:Response );
-        return response;
-    }
-    remote isolated function showPetById(string petId) returns Pets|error {
-        string  path = string `/pets/${petId}`;
-        Pets response = check self.clientEp->get(path, targetType = Pets);
+        '200 response = check self.clientEp->get(path, targetType = '200);
         return response;
     }
 }

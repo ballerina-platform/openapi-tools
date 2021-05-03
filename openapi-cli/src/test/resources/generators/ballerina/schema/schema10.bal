@@ -1,3 +1,3 @@
 public type Pets record {
-     any pet_type;
+     anydata pet_type;
 };
