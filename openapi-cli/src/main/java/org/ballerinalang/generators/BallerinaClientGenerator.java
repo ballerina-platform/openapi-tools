@@ -425,16 +425,6 @@ public class BallerinaClientGenerator {
                         createToken(COLON_TOKEN), createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
         IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.CLIENT_EP);
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
-//        if (info.getExtensions() != null) {
-//            Map<String, Object> extensions = info.getExtensions();
-//            if (!extensions.isEmpty()) {
-//                for (Map.Entry<String, Object> extension: extensions.entrySet()) {
-//                    if (extension.getKey().trim().equals("x-display")) {
-//                        metadataNode = getMetadataNodeForDisplayAnnotation(extension);
-//                    }
-//                }
-//            }
-//        }
         return createObjectFieldNode(metadataNode, visibilityQualifierAttribute,
                 qualifierList, typeName, fieldName, null, null, createToken(SEMICOLON_TOKEN));
     }
