@@ -310,6 +310,14 @@ public class BallerinaServiceGeneratorTest {
         syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
     }
 
+    @Test(description = "Default response handling")
+    public void generateResponseDefault() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/petstore_default.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("petstore_default.bal");
+    }
+
     //Get string as a content of ballerina file
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
