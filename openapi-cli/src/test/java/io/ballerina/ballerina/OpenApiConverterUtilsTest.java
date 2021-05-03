@@ -60,7 +60,7 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec by filtering non existing service",
           expectedExceptions = OpenApiConverterException.class,
           expectedExceptionsMessageRegExp = "No Ballerina services found with name '/abc' to generate an OpenAPI " +
-                                            "specification.")
+                  "specification. These services are available in ballerina file. \\[/hello, /hello02]")
     public void testBasicServicesWithInvalidServiceName() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("basic_service.bal");
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.of("/abc"),

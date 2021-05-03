@@ -91,6 +91,7 @@ public class OpenApiConverterUtils {
             , Boolean needJson)
             throws IOException, OpenApiConverterException {
         endpoints.clear();
+        List<String> availableService = new ArrayList<>();
 
         // Load project instance for single ballerina file
         try {
@@ -134,7 +135,9 @@ public class OpenApiConverterUtils {
                 ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
                 if (serviceName.isPresent()) {
                     // Filtering by service name
-                    if (serviceName.get().equals(getServiceBasePath(serviceNode))) {
+                    String service = getServiceBasePath(serviceNode);
+                    availableService.add(service);
+                    if (serviceName.get().equals(service)) {
                         servicesToGenerate.add(serviceNode);
                     }
                 } else {
@@ -147,7 +150,8 @@ public class OpenApiConverterUtils {
         // If there are no services found for a given service name.
         if (serviceName.isPresent() && servicesToGenerate.isEmpty()) {
             throw new OpenApiConverterException("No Ballerina services found with name '" + serviceName.get() +
-                                                "' to generate an OpenAPI specification.");
+                                                "' to generate an OpenAPI specification. These services are " +
+                    "available in ballerina file. " + availableService.toString());
         }
 
         // Generating for the services

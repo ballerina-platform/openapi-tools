@@ -385,4 +385,22 @@ public class GeneratorUtils {
         }
         return type;
     }
+
+    /**
+     * Generate BallerinaMediaType for all the mediaTypes.
+     */
+    public static String getBallerinaMeidaType(String mediaType) {
+        switch (mediaType) {
+            case "application/json":
+                return "json";
+            case "application/xml":
+                return "xml";
+            case "text/plain":
+                return "string";
+            case "application/octet-stream":
+                return "byte[]";
+            default:
+                return "json";
+        }
+    }
 }

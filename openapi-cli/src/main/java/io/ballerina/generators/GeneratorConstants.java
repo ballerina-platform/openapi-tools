@@ -80,6 +80,7 @@ public class GeneratorConstants {
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
     public static final String PUBLIC = "public";
+    public static final String PUBLIC_ISOLATED = "public isolated";
     public static final String CLIENT = "client";
     public static final String CLIENT_CLASS = "Client";
     public static final String CLIENT_EP = "clientEp";

@@ -427,6 +427,11 @@ public class BallerinaServiceGenerator {
                                 }
                             }
 
+                        } else if (response.getKey().trim().equals("default")) {
+                               BuiltinSimpleNameReferenceNode type  = createBuiltinSimpleNameReferenceNode(null,
+                                        createIdentifierToken("http:Response"));
+                            returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), type);
+
                         } else {
                             String code = getHttpStatusCode(response.getKey().trim());
                             Content content = response.getValue().getContent();
@@ -789,10 +794,9 @@ public class BallerinaServiceGenerator {
                             ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                             // create Optional type descriptor
                             OptionalTypeDescriptorNode optionalTypeDescriptorNode =
-                                    NodeFactory.createOptionalTypeDescriptorNode(arrayTypeName, questionMark);
-                            RequiredParameterNode arrayRparam = NodeFactory
-                                    .createRequiredParameterNode(annotations, optionalTypeDescriptorNode,
-                                            parameterName);
+                                    createOptionalTypeDescriptorNode(arrayTypeName, questionMark);
+                            RequiredParameterNode arrayRparam = createRequiredParameterNode(annotations,
+                                    optionalTypeDescriptorNode, parameterName);
                             params.add(arrayRparam);
                             params.add(comma);
 
@@ -802,14 +806,14 @@ public class BallerinaServiceGenerator {
                         }
                     } else {
                         Token name =
-                                AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(
+                                createIdentifierToken(convertOpenAPITypeToBallerina(
                                         schema.getType().toLowerCase(Locale.ENGLISH).trim()));
                         BuiltinSimpleNameReferenceNode rTypeName =
-                                NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
+                                createBuiltinSimpleNameReferenceNode(null, name);
                         OptionalTypeDescriptorNode optionalTypeDescriptorNode =
-                                NodeFactory.createOptionalTypeDescriptorNode(rTypeName, questionMark);
+                                createOptionalTypeDescriptorNode(rTypeName, questionMark);
                         RequiredParameterNode param1 =
-                                NodeFactory.createRequiredParameterNode(annotations, optionalTypeDescriptorNode,
+                                createRequiredParameterNode(annotations, optionalTypeDescriptorNode,
                                         parameterName);
                         params.add(param1);
                         params.add(comma);
@@ -822,10 +826,10 @@ public class BallerinaServiceGenerator {
     // Create ArrayTypeDescriptorNode using Schema
     private static ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) {
 
-        Token arrayName = AbstractNodeFactory.createIdentifierToken(items.getType().trim());
+        Token arrayName = createIdentifierToken(items.getType().trim());
         BuiltinSimpleNameReferenceNode memberTypeDesc =
-                NodeFactory.createBuiltinSimpleNameReferenceNode(null, arrayName);
-        return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken, null,
+                createBuiltinSimpleNameReferenceNode(null, arrayName);
+        return createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken, null,
                 closeSBracketToken);
     }
 
@@ -895,7 +899,7 @@ public class BallerinaServiceGenerator {
     private static UnionTypeDescriptorNode getUnionNode(Iterator<Map.Entry<String, ApiResponse>> responseIter)
             throws BallerinaOpenApiException {
         List<TypeDescriptorNode> qualifiedNodes = new ArrayList<>();
-        Token pipeToken = AbstractNodeFactory.createIdentifierToken("|");
+        Token pipeToken = createIdentifierToken("|");
 
         while (responseIter.hasNext()) {
             Map.Entry<String, ApiResponse> response = responseIter.next();
@@ -907,8 +911,12 @@ public class BallerinaServiceGenerator {
             } else if (response.getValue().getContent() != null) {
                 TypeDescriptorNode record =
                         getIdentifierToken(response.getValue().getContent().entrySet().iterator().next());
-                if (response.getKey().trim().equals("200") || response.getKey().trim().equals("default")) {
+                if (response.getKey().trim().equals("200"))  {
                     qualifiedNodes.add(record);
+                } else if (response.getKey().trim().equals("default")) {
+                     record = createSimpleNameReferenceNode(
+                             createIdentifierToken("http:Response"));
+                     qualifiedNodes.add(record);
                 } else {
                     RecordTypeDescriptorNode node = createRecordTypeDescriptorNode(code, record);
                     qualifiedNodes.add(node);
@@ -917,11 +925,11 @@ public class BallerinaServiceGenerator {
         }
         TypeDescriptorNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
         TypeDescriptorNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
-        UnionTypeDescriptorNode traversUnion = NodeFactory.createUnionTypeDescriptorNode(traversRight, pipeToken,
+        UnionTypeDescriptorNode traversUnion = createUnionTypeDescriptorNode(traversRight, pipeToken,
                 right);
         if (qualifiedNodes.size() >= 3) {
             for (int i = qualifiedNodes.size() - 3; i >= 0; i--) {
-                traversUnion = NodeFactory.createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken,
+                traversUnion = createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken,
                         traversUnion);
             }
         }
@@ -934,7 +942,7 @@ public class BallerinaServiceGenerator {
     private static UnionTypeDescriptorNode getUnionNodeForContent (Iterator<Map.Entry<String, MediaType>> iterator)
             throws BallerinaOpenApiException {
         List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
-        Token pipeToken = AbstractNodeFactory.createIdentifierToken("|");
+        Token pipeToken = createIdentifierToken("|");
 
         while (iterator.hasNext()) {
             Map.Entry<String, MediaType> contentType = iterator.next();
@@ -944,11 +952,11 @@ public class BallerinaServiceGenerator {
         }
         SimpleNameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
         SimpleNameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
-        UnionTypeDescriptorNode traversUnion = NodeFactory.createUnionTypeDescriptorNode(traversRight, pipeToken,
+        UnionTypeDescriptorNode traversUnion = createUnionTypeDescriptorNode(traversRight, pipeToken,
                 right);
         if (qualifiedNodes.size() >= 3) {
             for (int i = qualifiedNodes.size() - 3; i >= 0; i--) {
-                traversUnion = NodeFactory.createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken,
+                traversUnion = createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken,
                         traversUnion);
             }
         }
@@ -959,7 +967,7 @@ public class BallerinaServiceGenerator {
             throws BallerinaOpenApiException {
 
         List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
-        Token pipeToken = AbstractNodeFactory.createIdentifierToken("|");
+        Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
             Schema contentType = iterator.next();
             TypeDescriptorNode node = getIdentifierTokenForJsonSchema(contentType);
@@ -968,11 +976,11 @@ public class BallerinaServiceGenerator {
         }
         SimpleNameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
         SimpleNameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
-        UnionTypeDescriptorNode traversUnion = NodeFactory.createUnionTypeDescriptorNode(traversRight, pipeToken,
+        UnionTypeDescriptorNode traversUnion = createUnionTypeDescriptorNode(traversRight, pipeToken,
                 right);
         if (qualifiedNodes.size() >= 3) {
             for (int i = qualifiedNodes.size() - 3; i >= 0; i--) {
-                traversUnion = NodeFactory.createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken,
+                traversUnion = createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken,
                         traversUnion);
             }
         }
@@ -981,9 +989,9 @@ public class BallerinaServiceGenerator {
 
     private static AnnotationNode getAnnotationNode(String identifier, MappingConstructorExpressionNode annotValue) {
         // Create annotation
-        Token atToken = AbstractNodeFactory.createIdentifierToken("@");
+        Token atToken = createIdentifierToken("@");
         QualifiedNameReferenceNode annotReference = getQualifiedNameReferenceNode("http", identifier);
-        return NodeFactory.createAnnotationNode(atToken, annotReference, annotValue);
+        return createAnnotationNode(atToken, annotReference, annotValue);
     }
 
     /**
