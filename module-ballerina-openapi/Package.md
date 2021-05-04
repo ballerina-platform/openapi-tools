@@ -17,7 +17,6 @@ This plugin ensures that the implementation of a service does not deviate from i
 
 ```bash
 bal openapi -i <openapi-contract-path> 
-               [--service-name: generated files name]
                [--tags: tags list]
                [--operations: operationsID list]
                [--mode service|client ]
@@ -27,8 +26,6 @@ Generates both the Ballerina service and Ballerina client stub for a given OpenA
 
 This `-i <openapi-contract-path>` parameter of the command is mandatory. It will get the path to the
  OpenAPI contract file (i.e., `my-api.yaml` or `my-api.json`) as an input.
-
-The `--service-name`  is an optional parameter, which allows you to change the generated service name.
 
 You can give the specific tags and operations that you need to document as services without documenting all the operations using these optional `--tags` and `--operations` commands.
 

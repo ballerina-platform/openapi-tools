@@ -45,7 +45,7 @@ ext.stdlibHttpVersion = project.stdlibHttpVersion
 ext.puppycrawlCheckstyleVersion = "8.18"
 
 allprojects {
-    group = 'org.ballerinalang'
+    group = 'io.ballerina'
     version = project.version
     apply plugin: 'checkstyle'
     apply plugin: 'maven-publish'

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module io.ballerina.ballerina.openapi {
+module io.ballerina.openapi {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires handlebars;
@@ -38,11 +38,11 @@ module io.ballerina.ballerina.openapi {
     requires swagger.parser.v2.converter;
     requires swagger.parser.v3;
     requires org.apache.commons.lang3;
-    exports org.ballerinalang.ballerina;
-    exports org.ballerinalang.openapi;
-    exports org.ballerinalang.openapi.cmd;
-    exports org.ballerinalang.openapi.exception;
-    exports org.ballerinalang.openapi.model;
-    exports org.ballerinalang.openapi.utils;
+    exports io.ballerina.ballerina;
+    exports io.ballerina.openapi;
+    exports io.ballerina.openapi.cmd;
+    exports io.ballerina.openapi.exception;
+    exports io.ballerina.openapi.model;
+    exports io.ballerina.openapi.utils;
 }
 
