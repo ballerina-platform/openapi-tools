@@ -433,6 +433,7 @@ public class BallerinaClientGenerator {
         List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
         Set<Map.Entry<String, PathItem>> pathsItems = paths.entrySet();
         Iterator<Map.Entry<String, PathItem>> pathItr = pathsItems.iterator();
+        BallerinaTestGenerator.remoteFunctionNameList.clear();
         while (pathItr.hasNext()) {
             Map.Entry<String, PathItem> path = pathItr.next();
             if (!path.getValue().readOperationsMap().isEmpty()) {

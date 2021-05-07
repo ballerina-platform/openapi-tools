@@ -124,6 +124,7 @@ public class BallerinaTestGenerator {
                         functionSignatureNode, functionBodyNode);
                 functions.add(functionDefinitionNode);
             }
+            remoteFunctionNameList.clear();
         }
     }
 
