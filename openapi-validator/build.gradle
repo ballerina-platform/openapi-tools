@@ -118,7 +118,6 @@ shadowJar {
         include(dependency('io.swagger.parser.v3:swagger-parser-core'))
         include(dependency('io.swagger.parser.v3:swagger-parser-v2-converter'))
         include(dependency('io.swagger.parser.v3:swagger-parser-v3'))
-        include(dependency('com.google.code.gson:gson'))
         exclude('META-INF/*.SF')
         exclude('META-INF/*.DSA')
         exclude('META-INF/*.RSA')
