@@ -504,7 +504,7 @@ public class BallerinaClientGenerator {
                 functionSignatureNode, functionBodyNode);
 
         // Each function name is stored to use when generating test.bal
-        BallerinaTestGenerator.remoteFunctionNameList.add(functionNameStr);
+        GeneratorUtils.addRemoteFunctionNameList(functionNameStr);
 
         return functionDefinitionNode;
     }

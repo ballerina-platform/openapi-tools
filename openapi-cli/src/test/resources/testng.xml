@@ -31,6 +31,7 @@ under the License.
             <class name="io.ballerina.generators.BallerinaServiceGeneratorTest"></class>
             <class name="io.ballerina.generators.BallerinaSchemaGeneratorTests"></class>
             <class name="io.ballerina.generators.BallerinaClientGeneratorTests"></class>
+            <class name="io.ballerina.generators.BallerinaTestGeneratorTests"></class>
         </classes>
     </test>
 </suite>

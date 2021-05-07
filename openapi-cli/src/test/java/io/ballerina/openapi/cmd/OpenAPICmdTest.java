@@ -18,6 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.launcher.BLauncherException;
+import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -163,14 +164,18 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     }
 
     // Delete the generated files
-    private void deleteGeneratedFiles() {
+    private void deleteGeneratedFiles() throws IOException {
         File serviceFile = new File(this.tmpDir.resolve("petstore_service.bal").toString());
         File clientFile = new File(this.tmpDir.resolve("petstore_client.bal").toString());
         File schemaFile = new File(this.tmpDir.resolve("schema.bal").toString());
+        File testFile = new File(this.tmpDir.resolve("tests/test.bal").toString());
+        File testDir = new File(this.tmpDir.resolve("tests").toString());
 
         serviceFile.delete();
         clientFile.delete();
         schemaFile.delete();
+        testFile.delete();
+        FileUtils.deleteDirectory(testDir);
     }
 
     @Test(description = "getRelative path")

@@ -58,7 +58,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
  * This class use for generating boilerplate codes for test cases.
  */
 public class BallerinaTestGenerator {
-    static List<String> remoteFunctionNameList = new ArrayList<>();
+    static List<String> remoteFunctionNameList = GeneratorUtils.getRemoteFunctionNameList();
 
     @Nonnull
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter)

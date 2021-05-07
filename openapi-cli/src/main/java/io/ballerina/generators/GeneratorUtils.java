@@ -75,6 +75,15 @@ import static io.ballerina.openapi.OpenApiMesseges.BAL_TYPES;
  * This class util for store all the common scenarios.
  */
 public class GeneratorUtils {
+    private static List<String> remoteFunctionNameList = new ArrayList<>();
+
+    public static List<String> getRemoteFunctionNameList () {
+        return remoteFunctionNameList;
+    }
+
+    public static void addRemoteFunctionNameList (String remotefunctionName) {
+        remoteFunctionNameList.add(remotefunctionName);
+    }
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
         Token importKeyword = AbstractNodeFactory.createIdentifierToken("import ");
@@ -545,5 +554,4 @@ public class GeneratorUtils {
         }
         return Character.toLowerCase(operationId.charAt(0)) + operationId.substring(1);
     }
-
 }
