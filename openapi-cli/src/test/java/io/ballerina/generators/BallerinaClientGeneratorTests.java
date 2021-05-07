@@ -30,12 +30,14 @@ import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -54,6 +56,8 @@ public class BallerinaClientGeneratorTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/schema.bal");
+    private static final Path testPath = RES_DIR.resolve("ballerina_project/tests/test.bal");
+
     SyntaxTree syntaxTree;
 
     List<String> list1 = new ArrayList<>();
@@ -186,6 +190,8 @@ public class BallerinaClientGeneratorTests {
         try {
             Files.deleteIfExists(clientPath);
             Files.deleteIfExists(schemaPath);
+            Files.deleteIfExists(testPath);
+            FileUtils.deleteDirectory(new File("ballerina_project/tests"));
         } catch (IOException e) {
             //Ignore the exception
         }
