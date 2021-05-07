@@ -50,6 +50,7 @@ public class GeneratorConstants {
 
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
     public static final String SCHEMA_FILE_NAME = "schema.bal";
+    public static final String TEST_FILE_NAME = "test.bal";
 
     public static final String TEMPLATES_SUFFIX = ".mustache";
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";
@@ -57,7 +58,7 @@ public class GeneratorConstants {
     public static final String DEFAULT_CLIENT_DIR = DEFAULT_TEMPLATE_DIR + "/client";
     public static final String DEFAULT_CLIENT_PKG = "client";
     public static final String DEFAULT_MOCK_PKG = "mock";
-    public static final String OAS_PATH_SEPARATOR = "/";
+    public static final String PATH_SEPARATOR = "/";
     public static final String USER_DIR = "user.dir";
     public static final String UNTITLED_SERVICE = "UntitledAPI";
     public static final List<String> RESERVED_KEYWORDS = Collections.unmodifiableList(
@@ -78,6 +79,7 @@ public class GeneratorConstants {
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*-=^+();:\\_{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
+    public static final String MODULE_TEST  = "test";
     public static final String BALLERINA = "ballerina";
     public static final String PUBLIC = "public";
     public static final String PUBLIC_ISOLATED = "public isolated";
@@ -90,4 +92,7 @@ public class GeneratorConstants {
     public static final String COLON = ":";
     public static final String FUNCTION = "function";
     public static final String RETURN = "returns";
+    public static final String PREFIX_TEST = " test";
+    public static final String ANNOT_TEST = "test:Config";
+    public static final String TEST_DIR = "tests";
 }

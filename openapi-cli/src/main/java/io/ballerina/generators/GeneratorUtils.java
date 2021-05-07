@@ -49,6 +49,7 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -63,6 +64,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.ballerina.openapi.OpenApiMesseges.BAL_KEYWORDS;
 import static io.ballerina.openapi.OpenApiMesseges.BAL_TYPES;
@@ -403,4 +407,143 @@ public class GeneratorUtils {
                 return "json";
         }
     }
+
+    /*
+     * Generate remote function method name , when operation ID is not available for given operation.
+     */
+    public static Paths setOperationId(Paths paths) {
+        Set<Map.Entry<String, PathItem>> entries = paths.entrySet();
+        for (Map.Entry<String, PathItem> entry: entries) {
+            PathItem pathItem = entry.getValue();
+            int countMissId = 0;
+            for (Operation operation : entry.getValue().readOperations()) {
+                if (operation.getOperationId() == null) {
+                    //simplify here with 1++
+                    countMissId = countMissId + 1;
+                } else {
+                    String operationId = operation.getOperationId();
+                    operation.setOperationId(Character.toLowerCase(operationId.charAt(0)) + operationId.substring(1));
+                }
+            }
+
+            if (pathItem.getGet() != null) {
+                Operation getOp = pathItem.getGet();
+                if (getOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, "get");
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    getOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getPut() != null) {
+                Operation putOp = pathItem.getPut();
+                if (putOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, "put");
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    putOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getPost() != null) {
+                Operation postOp = pathItem.getPost();
+                if (postOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, "post");
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    postOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getDelete() != null) {
+                Operation deleteOp = pathItem.getDelete();
+                if (deleteOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, "delete");
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    deleteOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getOptions() != null) {
+                Operation optionOp = pathItem.getOptions();
+                if (optionOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, "options");
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    optionOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getHead() != null) {
+                Operation headOp = pathItem.getHead();
+                if (headOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, "head");
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    headOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getPatch() != null) {
+                Operation patchOp = pathItem.getPatch();
+                if (patchOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, "patch");
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    patchOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getTrace() != null) {
+                Operation traceOp = pathItem.getTrace();
+                if (traceOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, "trace");
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    traceOp.setOperationId(operationId);
+                }
+            }
+        }
+        return paths;
+    }
+
+    private static String getOperationId(String[] split, String method) {
+        String operationId;
+        String regEx = "\\{([^}]*)\\}";
+        Matcher matcher = Pattern.compile(regEx).matcher(split[split.length - 1]);
+        if (matcher.matches()) {
+            operationId = method + split[split.length - 2] + "By" + matcher.group(1);
+        } else {
+            operationId = method + split[split.length - 1];
+        }
+        return Character.toLowerCase(operationId.charAt(0)) + operationId.substring(1);
+    }
+
 }
