@@ -63,9 +63,9 @@ import static io.ballerina.generators.GeneratorConstants.DEFAULT_MOCK_PKG;
 import static io.ballerina.generators.GeneratorConstants.ESCAPE_PATTERN;
 import static io.ballerina.generators.GeneratorConstants.GenType.GEN_CLIENT;
 import static io.ballerina.generators.GeneratorConstants.GenType.GEN_SERVICE;
-import static io.ballerina.generators.GeneratorConstants.SCHEMA_FILE_NAME;
 import static io.ballerina.generators.GeneratorConstants.TEMPLATES_DIR_PATH_KEY;
 import static io.ballerina.generators.GeneratorConstants.TEMPLATES_SUFFIX;
+import static io.ballerina.generators.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.generators.GeneratorConstants.UNTITLED_SERVICE;
 
 /**
@@ -378,7 +378,7 @@ public class CodeGenerator {
             srcPackage =  DEFAULT_CLIENT_PKG;
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String srcFile = serviceName + "_client.bal";
+        String srcFile = "client.bal";
 
         // Generate ballerina service and resources.
         String mainContent = Formatter.format(BallerinaClientGenerator.generateSyntaxTree(openAPI, filter)).toString();
@@ -386,7 +386,7 @@ public class CodeGenerator {
 
         // Generate ballerina records to represent schemas.
         String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  SCHEMA_FILE_NAME,
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
                 schemaContent));
 
         return sourceFiles;
@@ -408,7 +408,7 @@ public class CodeGenerator {
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  SCHEMA_FILE_NAME,
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  TYPE_FILE_NAME,
                 schemaContent));
 
         return sourceFiles;
