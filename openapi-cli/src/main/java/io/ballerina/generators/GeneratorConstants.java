@@ -49,7 +49,7 @@ public class GeneratorConstants {
     }
 
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
-    public static final String SCHEMA_FILE_NAME = "schema.bal";
+    public static final String TYPE_FILE_NAME = "types.bal";
 
     public static final String TEMPLATES_SUFFIX = ".mustache";
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";

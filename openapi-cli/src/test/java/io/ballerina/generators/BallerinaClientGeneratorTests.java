@@ -53,7 +53,7 @@ import java.util.stream.Stream;
 public class BallerinaClientGeneratorTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
-    private static final Path schemaPath = RES_DIR.resolve("ballerina_project/schema.bal");
+    private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     SyntaxTree syntaxTree;
 
     List<String> list1 = new ArrayList<>();
