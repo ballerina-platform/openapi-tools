@@ -1193,8 +1193,7 @@ public class BallerinaClientGenerator {
                 String replaceVariable = escapeIdentifier(d);
                 refinedPath = refinedPath.replace(d, replaceVariable);
             }
-            path = refinedPath;
-            path = path.replaceAll("[{]", "\\${");
+            path = refinedPath.replaceAll("[{]", "\\${");
         }
         return path;
     }
