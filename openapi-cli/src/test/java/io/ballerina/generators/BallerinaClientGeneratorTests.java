@@ -193,7 +193,7 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("multiple_pathparam.bal");
     }
 
-    @Test(description = "Generate Client for path parameter has parameter name as key word")
+    @Test(description = "Generate Client for path parameter has parameter name as key word - unit tests for method")
     public void generatePathWithPathParameterTests() {
         Assert.assertEquals(generatePathWithPathParameter("/v1/v2"), "/v1/v2");
         Assert.assertEquals(generatePathWithPathParameter("/v1/{version}/v2/{name}"),

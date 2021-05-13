@@ -1180,10 +1180,9 @@ public class BallerinaClientGenerator {
 
     /**
      * This method is to used for generating path when it has path parameters.
-     * @param path - yaml contarct path
+     * @param path - yaml contract path
      * @return string of path
      */
-
     public static String generatePathWithPathParameter(String path) {
         if (path.contains("{")) {
             String refinedPath = path;
