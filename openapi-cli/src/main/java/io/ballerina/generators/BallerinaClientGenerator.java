@@ -979,9 +979,8 @@ public class BallerinaClientGenerator {
         Token type = createToken(STRING_KEYWORD);
         Token startBacktick = createToken(BACKTICK_TOKEN);
         //content  should decide with /pet and /pet/{pet}
-        if (path.contains("{")) {
-            path = path.replaceAll("[{]", "\\${");
-        }
+        path = generatePathWithPathParameter(path);
+
         //String path generator
         NodeList<Node> content = createNodeList(createLiteralValueToken(null, path, createEmptyMinutiaeList(),
                 createEmptyMinutiaeList()));
@@ -999,7 +998,6 @@ public class BallerinaClientGenerator {
             List<Parameter> parameters = operation.getValue().getParameters();
             List<Parameter> queryParameters = new ArrayList<>();
             List<Parameter> headerParameters = new ArrayList<>();
-
             for (Parameter parameter: parameters) {
                 if (parameter.getIn().trim().equals("query")) {
                     queryParameters.add(parameter);
@@ -1180,9 +1178,31 @@ public class BallerinaClientGenerator {
                 createToken(CLOSE_BRACE_TOKEN));
     }
 
-/*
- * Generate variableDeclarationNode.
- */
+    /**
+     * This method is to used for generating path when it has path parameters.
+     * @param path - yaml contarct path
+     * @return string of path
+     */
+
+    public static String generatePathWithPathParameter(String path) {
+        if (path.contains("{")) {
+            String refinedPath = path;
+        Pattern p = Pattern.compile("\\{[^\\}]*\\}");
+            Matcher m = p.matcher(path);
+            while (m.find()) {
+                String d = path.substring(m.start() + 1, m.end() - 1);
+                String replaceVariable = escapeIdentifier(d);
+                refinedPath = refinedPath.replace(d, replaceVariable);
+            }
+            path = refinedPath;
+            path = path.replaceAll("[{]", "\\${");
+        }
+        return path;
+    }
+
+    /*
+    * Generate variableDeclarationNode.
+    */
     private static  VariableDeclarationNode getSimpleStatement(String responseType, String variable,
                                                                String initializer) {
         SimpleNameReferenceNode resTypeBind = createSimpleNameReferenceNode(createIdentifierToken(responseType));
