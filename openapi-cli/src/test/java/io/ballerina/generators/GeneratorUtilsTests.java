@@ -20,12 +20,14 @@ package io.ballerina.generators;
 
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 
 /**
@@ -48,6 +50,19 @@ public class GeneratorUtilsTests {
     public static void testForInfoNull() throws IOException, BallerinaOpenApiException {
         Path path = RES_DIR.resolve("swagger/invalid/petstore_without_info.yaml");
         OpenAPI ballerinaOpenApiType = getBallerinaOpenApiType(path);
+    }
+
+    @Test(description = "Functionality negative tests for extractReferenceType",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Invalid reference value : .*")
+    public static void testForReferenceLinkInvalid() throws BallerinaOpenApiException {
+        String recordName = extractReferenceType("/components/schemas/Error");
+    }
+
+    @Test(description = "Add valid reference path for extract")
+    public static void testForReferenceLinkValid() throws BallerinaOpenApiException {
+        Assert.assertEquals(extractReferenceType("#/components/schemas/Error"), "Error");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/Pet."), "'Pet\\.");
     }
 
 }
