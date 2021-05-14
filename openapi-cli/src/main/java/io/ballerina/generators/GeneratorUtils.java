@@ -332,19 +332,12 @@ public class GeneratorUtils {
      */
     public static OpenAPI getBallerinaOpenApiType(Path definitionPath)
             throws IOException, BallerinaOpenApiException {
-
         String openAPIFileContent = Files.readString(definitionPath);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
-
-        if (parseResult.getMessages().size() > 0) {
+        if (!parseResult.getMessages().isEmpty()) {
             throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
         }
-        OpenAPI api = parseResult.getOpenAPI();
-        if (api.getInfo() == null) {
-            throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
-                    definitionPath);
-        }
-        return api;
+        return parseResult.getOpenAPI();
     }
 
     /**
