@@ -48,9 +48,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/*
-* This util class for keeping all the common functions that use to tests
-*/
+/**
+ * This util class for keeping all the common functions that use to tests.
+ */
 public class TestUtils {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
@@ -79,7 +79,8 @@ public class TestUtils {
         return expectedServiceContent;
     }
 
-    public static void compareGeneratedSyntaxTreeWithExpectedSyntaxTree(String s, SyntaxTree syntaxTree) throws IOException {
+    public static void compareGeneratedSyntaxTreeWithExpectedSyntaxTree(String s, SyntaxTree syntaxTree)
+            throws IOException {
 
         String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("ballerina"), s);
         String generatedSyntaxTree = syntaxTree.toString();
@@ -90,7 +91,7 @@ public class TestUtils {
     }
 
     /*
-     * Write the generated syntax tree to file
+     * Write the generated syntax tree to file.
      */
     public static void writeFile(Path filePath, String content) throws IOException {
         PrintWriter writer = null;

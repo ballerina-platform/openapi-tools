@@ -907,16 +907,16 @@ public class BallerinaClientGenerator {
                                     }
                                     type = typeName;
                                 } else if (arraySchema.getItems().getType() == null) {
-                                    if (media.getKey().trim(). equals("application/xml")) {
+                                    if (media.getKey().trim().equals("application/xml")) {
                                         type = generateCustomTypeDefine("xml[]", "XMLArr");
-                                    } else if (media.getKey().trim(). equals("application/pdf") ||
-                                            media.getKey().trim(). equals("image/png") ||
-                                            media.getKey().trim(). equals("application/octet-stream")) {
-                                        String typeName = getBallerinaMeidaType(media.getKey().trim()) +"Arr";
+                                    } else if (media.getKey().trim().equals("application/pdf") ||
+                                            media.getKey().trim().equals("image/png") ||
+                                            media.getKey().trim().equals("application/octet-stream")) {
+                                        String typeName = getBallerinaMeidaType(media.getKey().trim()) + "Arr";
                                         type = getBallerinaMeidaType(media.getKey().trim());
                                         type = generateCustomTypeDefine(type, typeName);
                                     } else {
-                                        String typeName = getBallerinaMeidaType(media.getKey().trim()) +"Arr";
+                                        String typeName = getBallerinaMeidaType(media.getKey().trim()) + "Arr";
                                         type = getBallerinaMeidaType(media.getKey().trim()) + "[]";
                                         type = generateCustomTypeDefine(type, typeName);
                                     }
@@ -928,7 +928,7 @@ public class BallerinaClientGenerator {
                                 }
                             } else if (schema.getType() != null) {
                                 type = convertOpenAPITypeToBallerina(schema.getType());
-                            } else if (media.getKey().trim(). equals("application/xml")) {
+                            } else if (media.getKey().trim().equals("application/xml")) {
                                 type = generateCustomTypeDefine("xml", "XML");
                             } else {
                                 type = getBallerinaMeidaType(media.getKey().trim());
@@ -1100,15 +1100,16 @@ public class BallerinaClientGenerator {
 //                    if (operation.getValue().getResponses() != null) {
                         // POST, PUT, PATCH, DELETE, EXECUTE
                         VariableDeclarationNode requestStatement =
-                                getSimpleStatement(returnType, "response", "check self.clientEp->" + method + "(path," +
-                                        " request, targetType=" + returnType + ")");
+                                getSimpleStatement(returnType, "response", "check self.clientEp->"
+                                        + method + "(path," + " request, targetType=" + returnType + ")");
 //                    }
 
                     if (isHeader) {
                         if (method.equals("post") || method.equals("put") || method.equals("patch") || method.equals(
                                 "delete") || method.equals("execute")) {
-                            requestStatement = getSimpleStatement("http:Response", "response", "check self.clientEp->"
-                                            + method + "(path, request, headers = accHeaders,  targetType=" + returnType + ")");
+                            requestStatement = getSimpleStatement("http:Response", "response",
+                                    "check self.clientEp->" + method + "(path, request, headers = accHeaders,  " +
+                                            "targetType=" + returnType + ")");
 
                         }
                     }
@@ -1124,7 +1125,7 @@ public class BallerinaClientGenerator {
                 }
             }
         } else {
-            String clientCallStatement = "check self.clientEp-> " + method + "(path, targetType = " + returnType +")";
+            String clientCallStatement = "check self.clientEp-> " + method + "(path, targetType = " + returnType + ")";
             if (isHeader) {
                 if (method.equals("post") || method.equals("put") || method.equals("patch") || method.equals(
                         "delete") || method.equals("execute")) {
@@ -1134,10 +1135,11 @@ public class BallerinaClientGenerator {
                     ExpressionStatementNode expressionStatementNode = getSimpleExpressionStatementNode(
                             "//TODO: Update the request as needed");
                     statementsList.add(expressionStatementNode);
-                    clientCallStatement = "check self.clientEp-> " + method + "(path, request, headers = accHeaders, targetType = " + returnType + ")";
+                    clientCallStatement = "check self.clientEp-> " + method + "(path, request, headers = accHeaders," +
+                            " targetType = " + returnType + ")";
                 } else {
                     clientCallStatement =
-                            "check self.clientEp-> " + method + "(path, accHeaders, targetType = " + returnType +")";
+                            "check self.clientEp-> " + method + "(path, accHeaders, targetType = " + returnType + ")";
                 }
             } else if (method.equals("post") || method.equals("put") || method.equals("patch") || method.equals(
                     "delete") || method.equals("execute")) {
@@ -1148,7 +1150,7 @@ public class BallerinaClientGenerator {
                         "//TODO: Update the request as needed");
                 statementsList.add(expressionStatementNode);
                 clientCallStatement =
-                        "check self.clientEp-> " + method + "(path, request, targetType = " + returnType +")";
+                        "check self.clientEp-> " + method + "(path, request, targetType = " + returnType + ")";
             }
             VariableDeclarationNode clientCall = getSimpleStatement(returnType, "response", clientCallStatement);
             statementsList.add(clientCall);

@@ -31,8 +31,12 @@ import java.util.List;
 
 import static io.ballerina.generators.GeneratorUtils.getImportDeclarationNode;
 
+/**
+ * This tests class for the negative tests scenarios for client generations.
+ */
 public class BallerinaClientGeneratorNegativeTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/negative").toAbsolutePath();
+    private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/negative")
+            .toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     SyntaxTree syntaxTree;
@@ -42,15 +46,17 @@ public class BallerinaClientGeneratorNegativeTests {
     Filter filter = new Filter(list1, list2);
     @Test(description = "Generate imports")
     public void generateImports() {
-        ImportDeclarationNode importDeclarationNode= getImportDeclarationNode("ballerina", "http");
-        Assert.assertEquals(importDeclarationNode.orgName().get().orgName().text(),"ballerina");
+        ImportDeclarationNode importDeclarationNode = getImportDeclarationNode("ballerina",
+                "http");
+        Assert.assertEquals(importDeclarationNode.orgName().get().orgName().text(), "ballerina");
         Assert.assertEquals(importDeclarationNode.moduleName().get(0).text(), "http");
     }
 
     @Test(description = "Generate remoteFunctions")
     public void generateRemoteFunctions() {
-        ImportDeclarationNode importDeclarationNode= getImportDeclarationNode("ballerina", "http");
-        Assert.assertEquals(importDeclarationNode.orgName().get().orgName().text(),"ballerina");
+        ImportDeclarationNode importDeclarationNode = getImportDeclarationNode("ballerina",
+                "http");
+        Assert.assertEquals(importDeclarationNode.orgName().get().orgName().text(), "ballerina");
         Assert.assertEquals(importDeclarationNode.moduleName().get(0).text(), "http");
     }
 

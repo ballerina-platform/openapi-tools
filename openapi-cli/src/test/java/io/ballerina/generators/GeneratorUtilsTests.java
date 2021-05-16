@@ -31,7 +31,7 @@ import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 
 /**
- * This util class for testing functionality for {@GeneratorUtils.java}
+ * This util class for testing functionality for {@GeneratorUtils.java}.
  */
 public class GeneratorUtilsTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators").toAbsolutePath();
