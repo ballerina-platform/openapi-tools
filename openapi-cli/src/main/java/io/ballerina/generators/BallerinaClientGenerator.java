@@ -825,7 +825,7 @@ public class BallerinaClientGenerator {
             //Take payload type
             if (schema.get$ref() != null) {
                 paramType = extractReferenceType(schema.get$ref().trim());
-            } else if (schema.getType() != null) {
+            } else if (schema.getType() != null && !schema.getType().equals("array")) {
                 String typeOfPayload = schema.getType().trim();
                 paramType = convertOpenAPITypeToBallerina(typeOfPayload);
             } else if (schema instanceof ArraySchema) {
