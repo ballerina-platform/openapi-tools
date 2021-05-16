@@ -18,10 +18,16 @@
 
 package io.ballerina.generators;
 
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -35,8 +41,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.ballerina.generators.BallerinaClientGenerator.generatePathWithPathParameter;
+import static io.ballerina.generators.BallerinaClientGenerator.getFunctionSignatureNode;
+import static io.ballerina.generators.BallerinaClientGenerator.getReturnType;
 import static io.ballerina.generators.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 import static io.ballerina.generators.TestUtils.getDiagnostics;
+import static io.ballerina.generators.TestUtils.getOpenAPI;
 
 /**
  * All the tests related to the BallerinaClientGenerator util.
@@ -152,7 +161,7 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("covid19_openapi.bal", syntaxTree);
     }
 
-    @Test(description = "Generate Client for openapi spec JIRA", enabled = false)
+    @Test(description = "Generate Client for openapi spec JIRA", enabled = true)
     public void generateClientForJIRA()
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/jira_openapi.yaml");
@@ -197,6 +206,40 @@ public class BallerinaClientGeneratorTests {
 
 
     }
+
+    @Test(description = "Test for generate function signature for given operations")
+    public void getFunctionSignatureNodeTests() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RES_DIR.resolve("swagger/valid_operation.yaml"));
+        FunctionSignatureNode signature = getFunctionSignatureNode(openAPI.getPaths().get("/products/{country}").getGet());
+        SeparatedNodeList<ParameterNode> parameters = signature.parameters();
+        Assert.assertFalse(parameters.isEmpty());
+        RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
+        RequiredParameterNode param02 = (RequiredParameterNode) parameters.get(1);
+        RequiredParameterNode param03 = (RequiredParameterNode) parameters.get(2);
+
+        Assert.assertEquals(param01.paramName().orElseThrow().text(), "latitude");
+        Assert.assertEquals(param01.typeName().toString(), "float");
+
+        Assert.assertEquals(param02.paramName().orElseThrow().text(), "longitude");
+        Assert.assertEquals(param02.typeName().toString(), "float");
+
+        Assert.assertEquals(param03.paramName().orElseThrow().text(), "country");
+        Assert.assertEquals(param03.typeName().toString(), "string");
+
+        ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(returnTypeNode.type().toString(), "ProductArr|error");
+    }
+
+    @Test(description = "Tests for returnType")
+    public void getReturnTypeTests() throws IOException, BallerinaOpenApiException {
+        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/all_return_type_operation.yaml"));
+        Assert.assertEquals(getReturnType(array.getPaths().get("/jsonproducts").getGet()), "json|error");
+        Assert.assertEquals(getReturnType(array.getPaths().get("/stringproducts/record").getGet()), "ProductArr|error");
+//        getReturnType(array.getPaths().get("/xmlproducts").getGet());
+        Assert.assertEquals(getReturnType(array.getPaths().get("/xmlproducts").getGet()), "XML|error");
+        Assert.assertEquals(getReturnType(array.getPaths().get("/xmlarrayproducts").getGet()), "XMLArr|error");
+    }
+
 
     @AfterTest
     private void deleteGeneratedFiles() {
