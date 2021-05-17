@@ -67,6 +67,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019;
+import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0020;
+
 /**
  * This model used to filter and validate all the operations according to the given filter and filter the service
  * resource in the resource file.
@@ -120,6 +123,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         MetadataNode openApi  = metadata.orElseThrow();
         if (!openApi.annotations().isEmpty()) {
             NodeList<AnnotationNode> annotations = openApi.annotations();
+            boolean isAnnotationExist = false;
             for (AnnotationNode annotationNode: annotations) {
                 Node annotationRefNode = annotationNode.annotReference();
                 if (annotationRefNode.toString().trim().equals("openapi:ServiceInfo")) {
@@ -129,81 +133,93 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                     SeparatedNodeList<MappingFieldNode> fields = exprNode.fields();
                     //Filter annotation attributes
                     if (!fields.isEmpty()) {
+                        isAnnotationExist = true;
                         try {
                             kind = extractOpenAPIAnnotation(kind, filters, annotationNode, ballerinaFilePath);
+                            if (!validations.isEmpty()) {
+                                // when the contract has empty string
+                                for (Diagnostic diagnostic: validations) {
+                                    if (diagnostic.diagnosticInfo().code().equals(BAL_OPENAPI_VALIDATOR_0019) ||
+                                            diagnostic.diagnosticInfo().code().equals(BAL_OPENAPI_VALIDATOR_0020)) {
+                                        isAnnotationExist = false;
+                                    }
+                                }
+                            }
                         } catch (IOException e) {
-                            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                                    ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019, e.getMessage(),
-                                    DiagnosticSeverity.ERROR);
-                            Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
-                                    , location);
+                            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(BAL_OPENAPI_VALIDATOR_0019,
+                                    e.getMessage(), DiagnosticSeverity.ERROR);
+                            Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location);
                             validations.add(diagnostic);
                         }
                     }
                 }
             }
-            // Summaries functions
-            NodeList<Node> members = serviceDeclarationNode.members();
-            Iterator<Node> iterator = members.iterator();
-            while (iterator.hasNext()) {
-                Node next = iterator.next();
-                if (next instanceof FunctionDefinitionNode) {
-                    functions.add((FunctionDefinitionNode) next);
-                }
-            }
-            // Make resourcePath summary
-            Map<String, ResourcePathSummary> resourcePathMap = ResourceWithOperation.summarizeResources(functions);
-            //  Filter openApi operation according to given filters
-            List<OpenAPIPathSummary> openAPIPathSummaries = ResourceWithOperation.filterOpenapi(openAPI, filters);
-
-            //  Check all the filtered operations are available at the service file
-            List<OpenapiServiceValidationError> openApiMissingServiceMethod =
-                    ResourceWithOperation.checkOperationsHasFunctions(openAPIPathSummaries, resourcePathMap);
-
-            //  Generate errors for missing resource in service file
-            if (!openApiMissingServiceMethod.isEmpty()) {
-                for (OpenapiServiceValidationError openApiMissingError: openApiMissingServiceMethod) {
-                    if (openApiMissingError.getServiceOperation() == null) {
-                        String[] error = ErrorMessages.unimplementedOpenAPIPath(openApiMissingError.getServicePath());
-                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
-                        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                                serviceDeclarationNode.location());
-                        validations.add(diagnostic);
-                    } else {
-                        String[] error = ErrorMessages.unimplementedOpenAPIOperationsForPath(openApiMissingError.
-                                getServiceOperation(), openApiMissingError.getServicePath());
-                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
-                        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                                serviceDeclarationNode.location());
-                        validations.add(diagnostic);
+            if (isAnnotationExist) {
+                // Summaries functions
+                NodeList<Node> members = serviceDeclarationNode.members();
+                Iterator<Node> iterator = members.iterator();
+                while (iterator.hasNext()) {
+                    Node next = iterator.next();
+                    if (next instanceof FunctionDefinitionNode) {
+                        functions.add((FunctionDefinitionNode) next);
                     }
                 }
+                // Make resourcePath summary
+                Map<String, ResourcePathSummary> resourcePathMap = ResourceWithOperation.summarizeResources(functions);
+                //  Filter openApi operation according to given filters
+                List<OpenAPIPathSummary> openAPIPathSummaries = ResourceWithOperation.filterOpenapi(openAPI, filters);
 
-                // Clean the undocumented openapi contract functions
-                openAPIPathSummaries = ResourceWithOperation.removeUndocumentedPath(openAPIPathSummaries,
-                        openApiMissingServiceMethod);
-            }
-            // Check all the documented resource functions are in openapi contract
-            List<ResourceValidationError> resourceValidationErrors =
-                    ResourceWithOperation.checkResourceHasOperation(openAPIPathSummaries, resourcePathMap);
-            // Clean the undocumented resources from the list
-            if (!resourcePathMap.isEmpty()) {
-                createListResourcePathSummary(resourceValidationErrors, resourcePathMap);
-            }
-            createListOperations(openAPIPathSummaries, resourcePathMap);
+                //  Check all the filtered operations are available at the service file
+                List<OpenapiServiceValidationError> openApiMissingServiceMethod =
+                        ResourceWithOperation.checkOperationsHasFunctions(openAPIPathSummaries, resourcePathMap);
 
-            // Resource against to operation
-            resourcePathAgainstToOpenAPIPath(kind, resourcePathMap, openAPIPathSummaries, semanticModel, syntaxTree);
-            // Validate openApi operations against service resource in ballerina file
-            try {
-                openAPIPathAgainstToBallerinaServicePath(kind, serviceDeclarationNode, resourcePathMap,
-                        openAPIPathSummaries, semanticModel, syntaxTree);
-            } catch (OpenApiValidatorException e) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019,
-                        e.getMessage(), DiagnosticSeverity.ERROR);
-                Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
-                        , location);
-                validations.add(diagnostic);
+                //  Generate errors for missing resource in service file
+                if (!openApiMissingServiceMethod.isEmpty()) {
+                    for (OpenapiServiceValidationError openApiMissingError: openApiMissingServiceMethod) {
+                        if (openApiMissingError.getServiceOperation() == null) {
+                            String[] error = ErrorMessages.unimplementedOpenAPIPath(openApiMissingError.
+                                    getServicePath());
+                            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
+                            Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                                    serviceDeclarationNode.location());
+                            validations.add(diagnostic);
+                        } else {
+                            String[] error = ErrorMessages.unimplementedOpenAPIOperationsForPath(openApiMissingError.
+                                    getServiceOperation(), openApiMissingError.getServicePath());
+                            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
+                            Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                                    serviceDeclarationNode.location());
+                            validations.add(diagnostic);
+                        }
+                    }
+
+                    // Clean the undocumented openapi contract functions
+                    openAPIPathSummaries = ResourceWithOperation.removeUndocumentedPath(openAPIPathSummaries,
+                            openApiMissingServiceMethod);
+                }
+                // Check all the documented resource functions are in openapi contract
+                List<ResourceValidationError> resourceValidationErrors =
+                        ResourceWithOperation.checkResourceHasOperation(openAPIPathSummaries, resourcePathMap);
+                // Clean the undocumented resources from the list
+                if (!resourcePathMap.isEmpty()) {
+                    createListResourcePathSummary(resourceValidationErrors, resourcePathMap);
+                }
+                createListOperations(openAPIPathSummaries, resourcePathMap);
+
+                // Resource against to operation
+                resourcePathAgainstToOpenAPIPath(kind, resourcePathMap, openAPIPathSummaries, semanticModel,
+                        syntaxTree);
+                // Validate openApi operations against service resource in ballerina file
+                try {
+                    openAPIPathAgainstToBallerinaServicePath(kind, serviceDeclarationNode, resourcePathMap,
+                            openAPIPathSummaries, semanticModel, syntaxTree);
+                } catch (OpenApiValidatorException e) {
+                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(BAL_OPENAPI_VALIDATOR_0019,
+                            e.getMessage(), DiagnosticSeverity.ERROR);
+                    Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
+                            , location);
+                    validations.add(diagnostic);
+                }
             }
         }
         return kind;
@@ -230,7 +246,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                             operation.getValue(), method.getValue(), semanticModel, syntaxTree);
                                 } catch (OpenApiValidatorException e) {
                                     DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                                            ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019, e.getMessage(),
+                                            BAL_OPENAPI_VALIDATOR_0019, e.getMessage(),
                                             DiagnosticSeverity.ERROR);
                                     Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
                                             , location);
@@ -314,8 +330,16 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 ExpressionNode openAPIAnnotation = expressionNode.orElseThrow();
                 if (specificFieldNode.fieldName().toString().trim().equals("contract")) {
                     Path openapiPath = Paths.get(openAPIAnnotation.toString().replaceAll("\"", "").trim());
-                    Path relativePath;
-                    if (Paths.get(openapiPath.toString()).isAbsolute()) {
+                    Path relativePath = null;
+                    if (openapiPath.toString().isBlank()) {
+                        String[] error = ErrorMessages.contractPathEmpty();
+                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1],
+                                DiagnosticSeverity.WARNING);
+                        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                                fieldNode.location());
+                        validations.add(diagnostic);
+                        break;
+                    } else if (Paths.get(openapiPath.toString()).isAbsolute()) {
                         relativePath = Paths.get(openapiPath.toString());
                     } else {
                         File file = new File(ballerinaFilePath.toString());
@@ -323,12 +347,12 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                         File openapiContract = new File(parentFolder, openapiPath.toString());
                         relativePath = Paths.get(openapiContract.getCanonicalPath());
                     }
-                    if (Files.exists(relativePath)) {
+                    if (relativePath != null && Files.exists(relativePath)) {
                         try {
                             openAPI = ServiceValidator.parseOpenAPIFile(relativePath.toString());
                         } catch (OpenApiValidatorException e) {
                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                                    ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019, e.getMessage(),
+                                    BAL_OPENAPI_VALIDATOR_0019, e.getMessage(),
                                     DiagnosticSeverity.ERROR);
                             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
                                     , annotationNode.location());
