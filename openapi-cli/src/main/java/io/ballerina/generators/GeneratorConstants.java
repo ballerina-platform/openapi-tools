@@ -48,6 +48,24 @@ public class GeneratorConstants {
         }
     }
 
+    public enum BallerinaAuthMap {
+        BASIC("http:CredentialsConfig"),
+        BEARER("http:BearerTokenConfig"),
+        CLIENT_CREDENTIAL("http:OAuth2ClientCredentialsGrantConfig"),
+        REFRESH_TOKEN("http:OAuth2RefreshTokenGrantConfig"),
+        PASSWORD("http:OAuth2PasswordGrantConfig");
+
+        private final String authType;
+
+        BallerinaAuthMap(String authType) {
+            this.authType = authType;
+        }
+
+        public String getValue() {
+            return authType;
+        }
+    }
+
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
     public static final String SCHEMA_FILE_NAME = "schema.bal";
 
@@ -80,14 +98,26 @@ public class GeneratorConstants {
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
     public static final String PUBLIC = "public";
+    public static final String TYPE = "type";
     public static final String PUBLIC_ISOLATED = "public isolated";
     public static final String CLIENT = "client";
     public static final String CLIENT_CLASS = "Client";
     public static final String CLIENT_EP = "clientEp";
     public static final String CLASS = "class";
     public static final String OPEN_BRACE = "{";
+    public static final String CLOSE_BRACE = "}";
+    public static final String EQUAL = "=";
     public static final String OPEN_PRAN = "(";
     public static final String COLON = ":";
+    public static final String PERIOD = ".";
+    public static final String CONFIG = "config";
+    public static final String SEMICOLON = ";";
     public static final String FUNCTION = "function";
     public static final String RETURN = "returns";
+    public static final String STRING = "string";
+    public static final String SERVICE_URL = "serviceUrl";
+    public static final String RECORD = "record";
+
+
+
 }

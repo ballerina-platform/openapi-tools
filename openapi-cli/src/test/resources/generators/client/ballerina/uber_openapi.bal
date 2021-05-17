@@ -8,9 +8,8 @@ type PriceEstimateArr PriceEstimate[];
 
 public client class Client {
     public http:Client clientEp;
-    public isolated function init(string serviceUrl = "https://api.uber.com/v1", http:ClientConfiguration httpClientConfig =
-                                  {}) returns error? {
-        http:Client httpEp = check new (serviceUrl, httpClientConfig);
+    public isolated function init(http:ClientConfiguration clientConfig = {}, string serviceUrl = "https://api.uber.com/v1") returns error? {
+        http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
     remote isolated function products(decimal latitude, decimal longitude) returns ProductArr|error {

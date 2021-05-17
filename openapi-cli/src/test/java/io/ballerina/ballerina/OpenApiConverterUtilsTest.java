@@ -105,6 +105,14 @@ public class OpenApiConverterUtilsTest {
         Assert.assertTrue(Files.exists(this.tempDir.resolve("no_base_path_service_openapi.yaml")));
     }
 
+    @Test(description = "Generate OpenAPI spec with openWeatherMap")
+    public void testClientforOPenWeather() throws IOException, OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("openweathermap.bal");
+        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
+                false);
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("no_base_path_service_openapi.yaml")));
+    }
+
     @Test(description = "Generate OpenAPI spec with no base path")
     public void testServicesWithNoBasePathWithFilterina() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("no_base_path_service.bal");

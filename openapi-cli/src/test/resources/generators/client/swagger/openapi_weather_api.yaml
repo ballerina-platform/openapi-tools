@@ -78,7 +78,7 @@ components:
 
     lat:
       name: lat
-      in: query
+      in: header
       description: "**Latitude**. *Example: 35*. The latitude cordinate of the location of your interest. Must use with `lon`."
       schema:
         type: string
@@ -319,3 +319,8 @@ components:
       description: API key to authorize requests. If you don't have an OpenWeatherMap API key, use `fd4698c940c6d1da602a70ac34f0b147`.
       name: appid
       in: query
+    app_id3:
+      type: apiKey
+      description: API key to authorize requests. If you don't have an OpenWeatherMap API key, use `fd4698c940c6d1da602a70ac34f0b147`.
+      name: appid3
+      in: header
