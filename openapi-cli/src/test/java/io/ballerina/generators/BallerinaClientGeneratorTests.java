@@ -18,7 +18,9 @@
 
 package io.ballerina.generators;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
@@ -39,7 +41,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import static io.ballerina.generators.BallerinaClientGenerator.extractDisplayAnnotation;
 import static io.ballerina.generators.BallerinaClientGenerator.generatePathWithPathParameter;
 import static io.ballerina.generators.BallerinaClientGenerator.getFunctionSignatureNode;
 import static io.ballerina.generators.BallerinaClientGenerator.getReturnType;
@@ -61,7 +65,7 @@ public class BallerinaClientGeneratorTests {
     Filter filter = new Filter(list1, list2);
 
 
-    @Test(description = "Generate Server URL")
+    @Test(description = "Tests for generating default Server URL")
     public void generateServerURL() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_server_with_base_path.yaml");
@@ -71,7 +75,7 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("client_template.bal", syntaxTree);
     }
 
-    @Test(description = "Generate Operation Id")
+    @Test(description = "tests for generating Operation Id for operations which hasn't operationIDs")
     public void generateOperationId()
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_without_operation_id.yaml");
@@ -111,17 +115,7 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("header_parameter.bal", syntaxTree);
     }
 
-    @Test(description = "Generate Client for openapi_weather_api method")
-    public void generateClientForResponse()
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal", syntaxTree);
-    }
-
-    @Test(description = "Generate Client for openapi_weather_api method")
+    @Test(description = "Generate Client for openapi_weather_api yaml")
     public void generateClientForWeatherAPI()
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
@@ -141,7 +135,7 @@ public class BallerinaClientGeneratorTests {
 //        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_display_annotation.bal");
     }
 
-    @Test(description = "Generate Client for openapi spec UBER")
+    @Test(description = "Generate Client for openapi spec UBER yaml")
     public void generateClientForUberAPI()
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/uber_openapi.yaml");
@@ -191,6 +185,16 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("multiple_pathparam.bal", syntaxTree);
     }
 
+    @Test(description = "Generate Client for salesforce yaml", enabled = false)
+    public void generateClientForSalesForce()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/salesforce.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("salesforce.bal", syntaxTree);
+    }
+
     @Test(description = "Generate Client for path parameter has parameter name as key word - unit tests for method")
     public void generatePathWithPathParameterTests() {
         Assert.assertEquals(generatePathWithPathParameter("/v1/v2"), "/v1/v2");
@@ -229,11 +233,26 @@ public class BallerinaClientGeneratorTests {
     public void getReturnTypeTests() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/all_return_type_operation.yaml"));
         Assert.assertEquals(getReturnType(array.getPaths().get("/jsonproducts").getGet()), "json|error");
-        Assert.assertEquals(getReturnType(array.getPaths().get("/stringproducts/record").getGet()), "ProductArr|error");
+        Assert.assertEquals(getReturnType(array.getPaths().get("/stringproducts/record").getGet()),
+                "ProductArr|error");
         Assert.assertEquals(getReturnType(array.getPaths().get("/xmlproducts").getGet()), "XML|error");
         Assert.assertEquals(getReturnType(array.getPaths().get("/xmlarrayproducts").getGet()), "XMLArr|error");
     }
 
+    @Test(description = "Display Annotation tests for parameters")
+    public void extractDisplayAnnotationTests() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
+        OpenAPI display = getOpenAPI(definitionPath);
+        Map<String, Object> param01 =
+                display.getPaths().get("/weather").getGet().getParameters().get(0).getExtensions();
+        Map<String, Object> param02 =
+                display.getPaths().get("/weather").getGet().getParameters().get(1).getExtensions();
+        NodeList<AnnotationNode> annotationNodes01 = extractDisplayAnnotation(param01);
+        NodeList<AnnotationNode> annotationNodes02 = extractDisplayAnnotation(param02);
+        Assert.assertEquals(annotationNodes01.get(0).annotValue().orElseThrow().toString().trim(),
+                "{label:\"City name\"}");
+        Assert.assertTrue(annotationNodes02.isEmpty());
+    }
 
     @AfterTest
     private void deleteGeneratedFiles() {

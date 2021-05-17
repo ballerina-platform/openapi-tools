@@ -59,7 +59,4 @@ public class BallerinaClientGeneratorNegativeTests {
         Assert.assertEquals(importDeclarationNode.orgName().get().orgName().text(), "ballerina");
         Assert.assertEquals(importDeclarationNode.moduleName().get(0).text(), "http");
     }
-
-
-
 }
