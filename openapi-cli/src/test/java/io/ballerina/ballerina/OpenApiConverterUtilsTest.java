@@ -306,7 +306,7 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "rs_scenario04.yaml");
     }
 
-    @Test(description = "Response scenario 05 - Error response with a schema")
+    @Test(description = "Response scenario 05 - Error response with a schema", enabled = false)
     public void testResponse05() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("rs_scenario05.bal");
         compareWithGeneratedFile(ballerinaFilePath, "rs_scenario05.yaml");

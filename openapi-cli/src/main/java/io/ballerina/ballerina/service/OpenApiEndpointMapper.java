@@ -184,7 +184,10 @@ public class OpenApiEndpointMapper {
 
             }
         }
-        return host.replaceAll("\"","");
+        if (host != null) {
+           host = host.replaceAll("\"", "");
+        }
+        return host;
     }
 
     /**
