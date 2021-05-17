@@ -177,4 +177,10 @@ class ErrorMessages {
         return error;
     }
 
+    static String[] contactPathEmpty() {
+        String[] error = new String[2];
+        error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0020;
+        error[1] = "Contract file can not be empty.";
+        return error;
+    }
 }

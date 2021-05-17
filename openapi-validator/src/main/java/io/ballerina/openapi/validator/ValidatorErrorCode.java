@@ -41,6 +41,7 @@ public class ValidatorErrorCode {
     public static final String BAL_OPENAPI_VALIDATOR_0017 = "BAL_OPENAPI_VALIDATOR_0017";
     public static final String BAL_OPENAPI_VALIDATOR_0018 = "BAL_OPENAPI_VALIDATOR_0018";
     public static final String BAL_OPENAPI_VALIDATOR_0019 = "BAL_OPENAPI_VALIDATOR_0019";
+    public static final String BAL_OPENAPI_VALIDATOR_0020 = "BAL_OPENAPI_VALIDATOR_0020";
 
 
 }
