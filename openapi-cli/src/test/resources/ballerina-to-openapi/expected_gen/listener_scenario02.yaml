@@ -10,7 +10,7 @@ paths:
       operationId: operation1_get_/pets
       responses:
         "200":
-          description: Ok
+          description: Successful
           content:
             text/plain:
               schema:

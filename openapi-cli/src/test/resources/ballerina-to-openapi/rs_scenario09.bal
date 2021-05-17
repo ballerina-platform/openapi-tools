@@ -15,7 +15,7 @@ service /payloadV on helloEp {
         res.setPayload("Hello World!");
         var result = caller->respond(res);
         if (result is error) {
-           log:printError("Error when responding", err = result);
+           log:printError("Error when responding", err = result.toBalString());
         }
     }
 
@@ -24,7 +24,7 @@ service /payloadV on helloEp {
         res.setPayload("Hello World!");
         var result = caller->respond(res);
         if (result is error) {
-           log:printError("Error when responding", err = result);
+           log:printError("Error when responding", err = result.toBalString());
         }
     }
     resource function put hi(http:Caller caller, http:Request request) returns http:Ok {
@@ -32,22 +32,32 @@ service /payloadV on helloEp {
         res.setPayload("Hello World!");
         var result = caller->respond(res);
         if (result is error) {
-           log:printError("Error when responding", err = result);
+           log:printError("Error when responding", err = result.toBalString());
         }
+        http:Ok ok = {body: ()};
+        return ok;
     }
 
-    resource function get hi/[int id](int offset) returns error? {
+    resource function get hi/[int id](http:Caller caller, int offset) returns error? {
         http:Response res = new;
         res.setPayload("Hello World!");
-        var result = caller->respond(res);
+        var result =  caller->respond(res);
         if (result is error) {
-           log:printError("Error when responding", err = result);
+           log:printError("Error when responding", err = result.toBalString());
         }
+
     }
 
     resource function post hi(http:Caller caller, http:Request request) returns Pet {
+        Pet pet = {
+            id: 1,
+            name: "abc"
+        };
+        return pet;
     }
 
     resource function post v1(@http:Payload{} Pet payload) returns http:NotFound {
+        http:NotFound nf = {body: ()};
+        return nf;
     }
 }
