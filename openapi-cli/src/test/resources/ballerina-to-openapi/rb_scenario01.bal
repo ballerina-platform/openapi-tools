@@ -4,7 +4,8 @@
 
  service /payloadV on helloEp {
      resource function post v1(@http:Payload{} json payload) returns http:Ok {
-
+         http:Ok ok = {body: ()};
+         return ok;
      }
  }
 

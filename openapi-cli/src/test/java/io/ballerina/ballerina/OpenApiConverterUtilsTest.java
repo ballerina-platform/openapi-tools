@@ -306,7 +306,7 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "rs_scenario04.yaml");
     }
 
-    @Test(description = "Response scenario 05 - Error response with a schema")
+    @Test(description = "Response scenario 05 - Error response with a schema", enabled = false)
     public void testResponse05() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("rs_scenario05.bal");
         compareWithGeneratedFile(ballerinaFilePath, "rs_scenario05.yaml");
@@ -358,23 +358,42 @@ public class OpenApiConverterUtilsTest {
 
     //Listeners
     @Test(description = "Generate OpenAPI spec for single listener")
-    public void testListners01() throws OpenApiConverterException {
+    public void testListeners01() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("listener_scenario01.bal");
         compareWithGeneratedFile(ballerinaFilePath, "listener_scenario01.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for listner only have port")
-    public void testListners02() throws OpenApiConverterException {
+    public void testListeners02() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("listener_scenario02.bal");
         compareWithGeneratedFile(ballerinaFilePath, "listener_scenario02.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for multiple listners")
-    public void testListners03() throws OpenApiConverterException {
+    public void testListeners03() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("listener_scenario03.bal");
         compareWithGeneratedFile(ballerinaFilePath, "listener_scenario03.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for ExplicitNewExpressionNode listeners")
+    public void testListeners04() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("listener_scenario04.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "listener_scenario04.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for multiple listeners")
+    public void testListeners05() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("listener_scenario05.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "listener_scenario05.yaml");
+    }
+
+    @Test(description = "When given ballerina file contain some compilation issue.",
+            expectedExceptions = OpenApiConverterException.class,
+            expectedExceptionsMessageRegExp = "Given ballerina file has syntax/compilation error.")
+    public void testListeners06() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("listener_scenario06.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "listener_scenario06.yaml");
+    }
     @Test(description = "Generate OpenAPI spec for multiple records")
     public void testMultipleRecords() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("rb_scenario11.bal");

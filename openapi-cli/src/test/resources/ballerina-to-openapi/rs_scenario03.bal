@@ -6,6 +6,11 @@ type User record {
     string name;
 };
 service /payloadV on helloEp {
-    resource function get pets () returns User {
+    resource function get pets() returns User {
+        User user = {
+            id: 1,
+            name: "abc"
+        };
+        return user;
     }
 }
