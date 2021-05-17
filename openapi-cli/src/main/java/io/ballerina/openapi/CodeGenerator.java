@@ -63,9 +63,9 @@ import static io.ballerina.generators.GeneratorConstants.DEFAULT_MOCK_PKG;
 import static io.ballerina.generators.GeneratorConstants.ESCAPE_PATTERN;
 import static io.ballerina.generators.GeneratorConstants.GenType.GEN_CLIENT;
 import static io.ballerina.generators.GeneratorConstants.GenType.GEN_SERVICE;
-import static io.ballerina.generators.GeneratorConstants.SCHEMA_FILE_NAME;
 import static io.ballerina.generators.GeneratorConstants.TEMPLATES_DIR_PATH_KEY;
 import static io.ballerina.generators.GeneratorConstants.TEMPLATES_SUFFIX;
+import static io.ballerina.generators.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.generators.GeneratorConstants.UNTITLED_SERVICE;
 
 /**
@@ -304,11 +304,13 @@ public class CodeGenerator {
                 for (File file : listFiles) {
                     for (GenSrcFile gFile : sources) {
                         if (file.getName().equals(gFile.getFileName())) {
-                            String userInput = System.console().readLine("There is already a/an " + file.getName() +
-                                    " in the location. Do you want to override the file? [y/N] ");
-                            if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
-                                int duplicateCount = 0;
-                                setGeneratedFileName(listFiles, gFile, duplicateCount);
+                            if (System.console() != null) {
+                                String userInput = System.console().readLine("There is already a/an " + file.getName() +
+                                        " in the location. Do you want to override the file? [y/N] ");
+                                if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
+                                    int duplicateCount = 0;
+                                    setGeneratedFileName(listFiles, gFile, duplicateCount);
+                                }
                             }
                         }
                     }
@@ -378,7 +380,7 @@ public class CodeGenerator {
             srcPackage =  DEFAULT_CLIENT_PKG;
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String srcFile = serviceName + "_client.bal";
+        String srcFile = "client.bal";
 
         // Generate ballerina service and resources.
         String mainContent = Formatter.format(BallerinaClientGenerator.generateSyntaxTree(openAPI, filter)).toString();
@@ -386,7 +388,7 @@ public class CodeGenerator {
 
         // Generate ballerina records to represent schemas.
         String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  SCHEMA_FILE_NAME,
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
                 schemaContent));
 
         return sourceFiles;
@@ -408,7 +410,7 @@ public class CodeGenerator {
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  SCHEMA_FILE_NAME,
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  TYPE_FILE_NAME,
                 schemaContent));
 
         return sourceFiles;
