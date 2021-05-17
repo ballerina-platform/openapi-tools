@@ -20,6 +20,7 @@
 package io.ballerina.ballerina.service;
 
 import io.ballerina.ballerina.Constants;
+import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
@@ -33,6 +34,7 @@ import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
 
@@ -55,9 +57,6 @@ public class OpenApiEndpointMapper {
      */
     public OpenAPI convertListenerEndPointToOpenAPI (OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
                                                      ServiceDeclarationNode service) {
-        if (openAPI == null) {
-            return new OpenAPI();
-        }
         List<Server> servers = new ArrayList<>();
         for (ListenerDeclarationNode ep : endpoints) {
             SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
@@ -69,25 +68,87 @@ public class OpenApiEndpointMapper {
                 }
             }
         }
-        openAPI.setServers(servers);
+        if (openAPI == null) {
+            OpenAPI openapi = new OpenAPI();
+            openapi.setServers(servers);
+            return openapi;
+        }
+        if (!openAPI.getServers().isEmpty()) {
+            List<Server> oldServers = openAPI.getServers();
+            List<Server> filterServer = new ArrayList<>();
+            for (Server newS: servers) {
+                boolean isExit = false;
+                for (Server old: oldServers) {
+                    if (old.getUrl().trim().equals(newS.getUrl().trim())) {
+                        isExit = true;
+                        break;
+                    }
+                }
+                if (!isExit) {
+                    filterServer.add(newS);
+                }
+            }
+            oldServers.addAll(filterServer);
+            openAPI.setServers(oldServers);
+        } else {
+            openAPI.setServers(servers);
+        }
         return openAPI;
     }
 
     private static Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
+        Optional<ParenthesizedArgList> list;
+        if (ep.initializer().kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
+           ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) ep.initializer();
+            list = Optional.ofNullable(bTypeExplicit.parenthesizedArgList());
+        } else {
+            ImplicitNewExpressionNode  bTypeInit = (ImplicitNewExpressionNode) ep.initializer();
+            list = bTypeInit.parenthesizedArgList();
+        }
 
-        ImplicitNewExpressionNode  bTypeInit = (ImplicitNewExpressionNode) ep.initializer();
-        Optional<ParenthesizedArgList> list = bTypeInit.parenthesizedArgList();
+        return getServer(serviceBasePath, list);
+    }
+
+    //Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
+    public static OpenAPI extractServerForExpressionNode(OpenAPI openAPI,
+                                                                    SeparatedNodeList<ExpressionNode> bTypeExplicit,
+                                                                    ServiceDeclarationNode service) {
+        if (openAPI == null) {
+            return new OpenAPI();
+        }
+        String serviceBasePath = getServiceBasePath(service);
+        Optional<ParenthesizedArgList> list = null;
+        List<Server> servers = new ArrayList<>();
+        for (ExpressionNode expressionNode: bTypeExplicit) {
+            if (expressionNode.kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
+                ExplicitNewExpressionNode explicit = (ExplicitNewExpressionNode) expressionNode;
+                list = Optional.ofNullable(explicit.parenthesizedArgList());
+                Server server = getServer(serviceBasePath, list);
+                servers.add(server);
+            } else if (expressionNode.kind().equals(SyntaxKind.IMPLICIT_NEW_EXPRESSION)) {
+                ImplicitNewExpressionNode implicit = (ImplicitNewExpressionNode) expressionNode;
+                list = implicit.parenthesizedArgList();
+                Server server = getServer(serviceBasePath, list);
+                servers.add(server);
+            }
+        }
+        openAPI.setServers(servers);
+        return openAPI;
+    }
+
+    //Assign host and port values
+    private static Server getServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
+
         String port = null;
         String host = null;
-
         if (list != null && list.isPresent()) {
             SeparatedNodeList<FunctionArgumentNode> arg = (list.get()).arguments();
             port = arg.get(0).toString();
             if (arg.size() > 1) {
-              ExpressionNode bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
-              if (bLangRecordLiteral instanceof MappingConstructorExpressionNode) {
-                  host = extractHost((MappingConstructorExpressionNode) bLangRecordLiteral);
-              }
+                ExpressionNode bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
+                if (bLangRecordLiteral instanceof MappingConstructorExpressionNode) {
+                    host = extractHost((MappingConstructorExpressionNode) bLangRecordLiteral);
+                }
             }
         }
         // Set default values to host and port if values are not defined
@@ -102,9 +163,10 @@ public class OpenApiEndpointMapper {
         }
         Server server = new Server();
         server.setUrl(host);
-        return  server;
+        return server;
     }
 
+    // Extract host value for creating URL.
     private static String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
         String host = null;
         MappingConstructorExpressionNode recordConfig = bLangRecordLiteral;
@@ -122,7 +184,7 @@ public class OpenApiEndpointMapper {
 
             }
         }
-        return host;
+        return host.replaceAll("\"","");
     }
 
     /**

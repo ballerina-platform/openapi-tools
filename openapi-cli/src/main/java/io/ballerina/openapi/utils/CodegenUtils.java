@@ -45,7 +45,7 @@ public class CodegenUtils {
      */
     public static void writeFile(Path filePath, String content) throws IOException {
         PrintWriter writer = null;
-
+        System.out.println(content);
         try {
             writer = new PrintWriter(filePath.toString(), "UTF-8");
             writer.print(content);
