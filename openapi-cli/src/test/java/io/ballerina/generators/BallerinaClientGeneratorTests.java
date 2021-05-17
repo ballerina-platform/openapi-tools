@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.ballerina.generators.BallerinaClientGenerator.generatePathWithPathParameter;
+
 /**
  * All the tests related to the BallerinaClientGenerator util.
  */
@@ -179,6 +181,26 @@ public class BallerinaClientGeneratorTests {
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
         Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("world_bank_openapi.bal");
+    }
+
+    @Test(description = "Generate Client for path parameter has parameter name as key word")
+    public void generateClientForPathParameter()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/multiple_pathparam.yaml");
+        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("multiple_pathparam.bal");
+    }
+
+    @Test(description = "Generate Client for path parameter has parameter name as key word - unit tests for method")
+    public void generatePathWithPathParameterTests() {
+        Assert.assertEquals(generatePathWithPathParameter("/v1/v2"), "/v1/v2");
+        Assert.assertEquals(generatePathWithPathParameter("/v1/{version}/v2/{name}"),
+                "/v1/${'version}/v2/${name}");
+        Assert.assertEquals(generatePathWithPathParameter("/v1/{version}/v2/{limit}"),
+                "/v1/${'version}/v2/${'limit}");
+        Assert.assertEquals(generatePathWithPathParameter("/v1/{age}/v2/{name}"), "/v1/${age}/v2/${name}");
     }
 
     @AfterTest

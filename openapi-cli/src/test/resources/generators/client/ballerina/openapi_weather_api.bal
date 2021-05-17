@@ -30,15 +30,15 @@ public client class Client {
     }
 }
 
-isolated function getPathForQueryParam(map<anydata> queryParam) returns string {
+isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
     string[] param = [];
     param[param.length()] = "?";
-    foreach var [key, value] in queryParam.entries() {
-        if value is () {
+    foreach  var [key, value] in  queryParam.entries() {
+        if  value  is  () {
             _ = queryParam.remove(key);
         } else {
-            if string:startsWith(key, "'") {
-                param[param.length()] = string:substring(key, 1, key.length());
+            if  string:startsWith( key, "'") {
+                 param[param.length()] = string:substring(key, 1, key.length());
             } else {
                 param[param.length()] = key;
             }

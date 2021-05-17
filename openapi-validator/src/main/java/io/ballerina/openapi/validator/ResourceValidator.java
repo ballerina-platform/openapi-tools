@@ -22,7 +22,6 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
-import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
@@ -91,8 +90,7 @@ public class ResourceValidator {
                                     Optional<Symbol> symbol = semanticModel.symbol(typeNode);
                                     TypeSymbol typeSymbol = null;
                                     if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.TYPE)) {
-                                         TypeReferenceTypeSymbol type = (TypeReferenceTypeSymbol) symbol.orElseThrow();
-                                         typeSymbol = type.typeDescriptor();
+                                        typeSymbol = (TypeSymbol) symbol.orElseThrow();
                                     }
 
                                     List<ValidationError> validationErrors =
