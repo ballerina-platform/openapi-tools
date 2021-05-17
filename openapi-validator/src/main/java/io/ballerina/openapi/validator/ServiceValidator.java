@@ -332,7 +332,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                     Path openapiPath = Paths.get(openAPIAnnotation.toString().replaceAll("\"", "").trim());
                     Path relativePath = null;
                     if (openapiPath.toString().isBlank()) {
-                        String[] error = ErrorMessages.contactPathEmpty();
+                        String[] error = ErrorMessages.contractPathEmpty();
                         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1],
                                 DiagnosticSeverity.WARNING);
                         Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
