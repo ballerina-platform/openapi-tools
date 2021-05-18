@@ -47,7 +47,9 @@ public class GeneratorConstants {
             return this.name;
         }
     }
-
+    /**
+     * Enum to select the relavant ballerina http auth record.
+     */
     public enum BallerinaAuthMap {
         BASIC("http:CredentialsConfig"),
         BEARER("http:BearerTokenConfig"),
@@ -117,7 +119,18 @@ public class GeneratorConstants {
     public static final String STRING = "string";
     public static final String SERVICE_URL = "serviceUrl";
     public static final String RECORD = "record";
-
-
+    // auth related constants
+    public static final String API_KEY = "apikey";
+    public static final String API_KEY_CONFIG = "ApiKeysConfig";
+    public static final String API_KEY_CONFIG_PARAM = "apiKeyConfig";
+    public static final String API_KEY_CONFIG_RECORD_FIELD = "apiKeys";
+    public static final String API_KEY_MAP = "map<string|string[]>";
+    public static final String AUTH_CONFIG_FILED_NAME = "authConfig";
+    public static final String BASIC = "basic";
+    public static final String BEARER = "bearer";
+    public static final String CONFIG_RECORD_ARG = "clientConfig";
+    public static final String CONFIG_RECORD_NAME = "ClientConfig";
+    public static final String OAUTH2 = "oauth2";
+    public static final String SSL_FIELD_NAME = "secureSocketConfig";
 
 }

@@ -70,7 +70,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
         Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("client_template.bal");
     }
 
     @Test(description = "Generate Operation Id")
@@ -80,7 +79,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
         Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_id.bal");
     }
 
     @Test(description = "Generate Client for GET method")
@@ -90,7 +88,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
         Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_get.bal");
     }
 
     @Test(description = "Generate Client for POST method")
@@ -100,7 +97,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
         Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_post.bal");
     }
 
     @Test(description = "Generate Client for header Parameter")
@@ -110,17 +106,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
         Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("header_parameter.bal");
-    }
-
-    @Test(description = "Generate Client for openapi_weather_api method")
-    public void generateClientForResponse()
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
-        Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal");
     }
 
     @Test(description = "Generate Client for openapi_weather_api method")
@@ -140,7 +125,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
         Assert.assertTrue(diagnostics.isEmpty());
-//        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_display_annotation.bal");
     }
 
     @Test(description = "Generate Client for openapi spec UBER")
@@ -163,7 +147,7 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("covid19_openapi.bal");
     }
 
-    @Test(description = "Generate Client for openapi spec JIRA", enabled = true)
+    @Test(description = "Generate Client for openapi spec JIRA", enabled = false)
     public void generateClientForJIRA()
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/jira_openapi.yaml");
@@ -200,7 +184,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath);
         Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("multiple_pathparam.bal");
     }
 
     @Test(description = "Generate Client for path parameter has parameter name as key word - unit tests for method")
