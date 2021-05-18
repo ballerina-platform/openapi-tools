@@ -47,7 +47,9 @@ public class GeneratorConstants {
             return this.name;
         }
     }
-
+    /**
+     * Enum to select the relavant ballerina http auth record.
+     */
     public enum BallerinaAuthMap {
         BASIC("http:CredentialsConfig"),
         BEARER("http:BearerTokenConfig"),

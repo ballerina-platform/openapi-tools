@@ -18,6 +18,11 @@
 
 package io.ballerina.generators;
 
+
+
+
+
+
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
@@ -204,10 +209,10 @@ public class BallerinaClientGenerator {
     private static Server server;
     private static Paths paths;
     private static Filter filters;
-    private static List<ImportDeclarationNode> imports = new ArrayList<>();
+    private static final List<ImportDeclarationNode> imports = new ArrayList<>();
     private static boolean isQuery;
     private static Info info;
-    private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+    private static final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
             BallerinaOpenApiException, FormatterException {
@@ -234,7 +239,7 @@ public class BallerinaClientGenerator {
         addConfigRecordToTypeDefnitionNodeList(openAPI);
         ClassDefinitionNode classDefinitionNode = getClassDefinitionNode();
         ModulePartNode modulePartNode;
-        List<ModuleMemberDeclarationNode> nodes =  new ArrayList<>();
+        List<ModuleMemberDeclarationNode> nodes = new ArrayList<>();
         nodes.addAll(typeDefinitionNodeList);
         nodes.add(classDefinitionNode);
         if (isQuery) {
@@ -289,7 +294,7 @@ public class BallerinaClientGenerator {
         } else {
             serverURL = "http://localhost:9090/v1";
         }
-        return  serverURL;
+        return serverURL;
     }
 
     /**
@@ -306,7 +311,7 @@ public class BallerinaClientGenerator {
         IdentifierToken className = createIdentifierToken(GeneratorConstants.CLIENT_CLASS);
         Token openBrace = createIdentifierToken(GeneratorConstants.OPEN_BRACE);
         //Fill the members for class definition node
-        List<Node> memberNodeList =  new ArrayList<>();
+        List<Node> memberNodeList = new ArrayList<>();
         //Create class field
         List<ObjectFieldNode> fieldNodeList = getClassField();
         memberNodeList.addAll(fieldNodeList);
@@ -317,7 +322,7 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken("init");
         //Create function signature
         //Add parameters
-        List<Node> parameters  = new ArrayList<>();
+        List<Node> parameters = new ArrayList<>();
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         //get config parameters relavant to the auth meachnism used
         parameters.addAll(BallerinaHTTPAuthGenerator.getConfigParamForClassInit());
@@ -338,28 +343,31 @@ public class BallerinaClientGenerator {
         //Create return type node for inti function
         IdentifierToken returnsKeyWord = createIdentifierToken(GeneratorConstants.RETURN);
         OptionalTypeDescriptorNode type = createOptionalTypeDescriptorNode(createErrorTypeDescriptorNode(
-                        createIdentifierToken("error"), null), createIdentifierToken("?"));
+                createIdentifierToken("error"), null), createIdentifierToken("?"));
         ReturnTypeDescriptorNode returnNode = createReturnTypeDescriptorNode(returnsKeyWord, annotationNodes, type);
 
         //Create function signature
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
                 createToken(OPEN_PAREN_TOKEN), parameterList, createToken(CLOSE_PAREN_TOKEN), returnNode);
 
+        VariableDeclarationNode sslDeclarationNode = BallerinaHTTPAuthGenerator.getSecureSocketInitNode();
         //Create function body node
-        VariableDeclarationNode variableDeclarationNode = BallerinaHTTPAuthGenerator.getClientInitializationNode();
+        VariableDeclarationNode clientInitializationNode = BallerinaHTTPAuthGenerator.getClientInitializationNode();
 
         //Assigment for client
         FieldAccessExpressionNode varRef = createFieldAccessExpressionNode(
                 createSimpleNameReferenceNode(createIdentifierToken("self")), createToken(DOT_TOKEN),
-                        createSimpleNameReferenceNode(createIdentifierToken("clientEp")));
+                createSimpleNameReferenceNode(createIdentifierToken("clientEp")));
 
         SimpleNameReferenceNode expr = createSimpleNameReferenceNode(createIdentifierToken("httpEp"));
         AssignmentStatementNode httpClientAssignmentStatementNode = createAssignmentStatementNode(varRef,
                 createToken(EQUAL_TOKEN), expr, createToken(SEMICOLON_TOKEN));
-        List<AssignmentStatementNode> assignmentStatementNodeApiKey = BallerinaHTTPAuthGenerator.getApiKeyAssignemntNodes();
+        List<AssignmentStatementNode> assignmentStatementNodeApiKey = BallerinaHTTPAuthGenerator.
+                getApiKeyAssignemntNodes();
 
         List<StatementNode> assignmentNodes = new ArrayList<>();
-        assignmentNodes.add(variableDeclarationNode);
+        assignmentNodes.add(sslDeclarationNode);
+        assignmentNodes.add(clientInitializationNode);
         assignmentNodes.add(httpClientAssignmentStatementNode);
         assignmentNodes.addAll(assignmentStatementNodeApiKey);
 
@@ -379,7 +387,7 @@ public class BallerinaClientGenerator {
         if (info.getExtensions() != null) {
             Map<String, Object> extensions = info.getExtensions();
             if (!extensions.isEmpty()) {
-                for (Map.Entry<String, Object> extension: extensions.entrySet()) {
+                for (Map.Entry<String, Object> extension : extensions.entrySet()) {
                     if (extension.getKey().trim().equals("x-display")) {
                         metadataNode = getMetadataNodeForDisplayAnnotation(extension);
                     }
@@ -399,15 +407,15 @@ public class BallerinaClientGenerator {
         Token visibilityQualifierAttribute = createIdentifierToken(GeneratorConstants.PUBLIC);
         NodeList<Token> qualifierList = createEmptyNodeList();
         QualifiedNameReferenceNode typeName = createQualifiedNameReferenceNode(createIdentifierToken(HTTP),
-                        createToken(COLON_TOKEN), createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
+                createToken(COLON_TOKEN), createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
         IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.CLIENT_EP);
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
-        ObjectFieldNode httpClientField =  createObjectFieldNode(metadataNode, visibilityQualifierAttribute,
+        ObjectFieldNode httpClientField = createObjectFieldNode(metadataNode, visibilityQualifierAttribute,
                 qualifierList, typeName, fieldName, null, null, createToken(SEMICOLON_TOKEN));
         fieldNodeList.add(httpClientField);
         // add apiKey instance variable when API key security schema is given
         List<ObjectFieldNode> apiKeyFieldNodeList = BallerinaHTTPAuthGenerator.getApiKeyMapInstanceVariable();
-        if (!apiKeyFieldNodeList.isEmpty()){
+        if (!apiKeyFieldNodeList.isEmpty()) {
             fieldNodeList.addAll(apiKeyFieldNodeList);
         }
         return fieldNodeList;
@@ -418,7 +426,7 @@ public class BallerinaClientGenerator {
      */
     private static Paths setOperationId(Paths paths) {
         Set<Map.Entry<String, PathItem>> entries = paths.entrySet();
-        for (Map.Entry<String, PathItem> entry: entries) {
+        for (Map.Entry<String, PathItem> entry : entries) {
             PathItem pathItem = entry.getValue();
             int countMissId = 0;
             for (Operation operation : entry.getValue().readOperations()) {
@@ -554,7 +562,7 @@ public class BallerinaClientGenerator {
     /*
      * Generate remote functions for OpenAPI operations.
      */
-    private static List<FunctionDefinitionNode> createRemoteFunctions (Paths paths, Filter filter)
+    private static List<FunctionDefinitionNode> createRemoteFunctions(Paths paths, Filter filter)
             throws BallerinaOpenApiException {
         List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
         Set<Map.Entry<String, PathItem>> pathsItems = paths.entrySet();
@@ -570,12 +578,12 @@ public class BallerinaClientGenerator {
                     //3.Both tag and operation filter
                     List<String> filterTags = filter.getTags();
                     List<String> operationTags = operation.getValue().getTags();
-                    List<String> filterOperations  = filter.getOperations();
+                    List<String> filterOperations = filter.getOperations();
                     // Handle the display annotations
                     MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
                     Map<String, Object> extensions = operation.getValue().getExtensions();
                     if (extensions != null) {
-                        for (Map.Entry<String, Object> extension: extensions.entrySet()) {
+                        for (Map.Entry<String, Object> extension : extensions.entrySet()) {
                             if (extension.getKey().trim().equals("x-display")) {
                                 metadataNode = getMetadataNodeForDisplayAnnotation(extension);
                             }
@@ -591,7 +599,7 @@ public class BallerinaClientGenerator {
                                 // function call for generate function definition node.
                                 FunctionDefinitionNode functionDefinitionNode =
                                         getFunctionDefinitionNode(metadataNode, path.getKey()
-                                        , operation);
+                                                , operation);
                                 functionDefinitionNodeList.add(functionDefinitionNode);
                             }
                         }
@@ -611,8 +619,8 @@ public class BallerinaClientGenerator {
      * Generate function definition node.
      */
     private static FunctionDefinitionNode getFunctionDefinitionNode(MetadataNode metadataNode, String path,
-                                                                    Map.Entry<PathItem.HttpMethod,
-            Operation> operation) throws BallerinaOpenApiException {
+                                                                    Map.Entry<PathItem.HttpMethod, Operation> operation)
+            throws BallerinaOpenApiException {
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createIdentifierToken("remote isolated"));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
@@ -635,9 +643,9 @@ public class BallerinaClientGenerator {
             throws BallerinaOpenApiException {
         // Create Parameters - function with parameters
         // Function RequestBody
-        List<Node> parameterList =  new ArrayList<>();
+        List<Node> parameterList = new ArrayList<>();
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        Token comma =  createToken(COMMA_TOKEN);
+        Token comma = createToken(COMMA_TOKEN);
         setFunctionParameters(operation, parameterList, comma);
         if (parameterList.size() >= 2) {
             parameterList.remove(parameterList.size() - 1);
@@ -663,7 +671,7 @@ public class BallerinaClientGenerator {
 
         List<Parameter> parameters = operation.getParameters();
         if (parameters != null) {
-            for (Parameter parameter: parameters) {
+            for (Parameter parameter : parameters) {
                 String in = parameter.getIn();
                 if (in.equals("path")) {
                     setPathParameters(parameterList, parameter);
@@ -695,7 +703,7 @@ public class BallerinaClientGenerator {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         TypeDescriptorNode typeName;
         if (parameter.getExtensions() != null) {
-            for (Map.Entry<String, Object> extension: parameter.getExtensions().entrySet()) {
+            for (Map.Entry<String, Object> extension : parameter.getExtensions().entrySet()) {
                 if (extension.getKey().trim().equals("x-display")) {
                     AnnotationNode annotationNode = getAnnotationNode(extension);
                     annotationNodes = createNodeList(annotationNode);
@@ -719,10 +727,10 @@ public class BallerinaClientGenerator {
             }
         }
         if (parameter.getRequired()) {
-             typeName = createBuiltinSimpleNameReferenceNode(null,
+            typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(paramType));
         } else {
-             typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
+            typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(paramType)), createToken(QUESTION_MARK_TOKEN));
         }
         IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
@@ -736,7 +744,7 @@ public class BallerinaClientGenerator {
     private static void setPathParameters(List<Node> parameterList, Parameter parameter) {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         if (parameter.getExtensions() != null) {
-            for (Map.Entry<String, Object> extension: parameter.getExtensions().entrySet()) {
+            for (Map.Entry<String, Object> extension : parameter.getExtensions().entrySet()) {
                 if (extension.getKey().trim().equals("x-display")) {
                     AnnotationNode annotationNode = getAnnotationNode(extension);
                     annotationNodes = createNodeList(annotationNode);
@@ -758,7 +766,7 @@ public class BallerinaClientGenerator {
             throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         if (parameter.getExtensions() != null) {
-            for (Map.Entry<String, Object> extension: parameter.getExtensions().entrySet()) {
+            for (Map.Entry<String, Object> extension : parameter.getExtensions().entrySet()) {
                 if (extension.getKey().trim().equals("x-display")) {
                     AnnotationNode annotationNode = getAnnotationNode(extension);
                     annotationNodes = createNodeList(annotationNode);
@@ -825,7 +833,7 @@ public class BallerinaClientGenerator {
             }
             NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
             if (requestBody.getExtensions() != null) {
-                for (Map.Entry<String, Object> extension: requestBody.getExtensions().entrySet()) {
+                for (Map.Entry<String, Object> extension : requestBody.getExtensions().entrySet()) {
                     if (extension.getKey().trim().equals("x-display")) {
                         AnnotationNode annotationNode = getAnnotationNode(extension);
                         annotationNodes = createNodeList(annotationNode);
@@ -868,7 +876,8 @@ public class BallerinaClientGenerator {
                                 if (arraySchema.getItems().get$ref() != null) {
                                     type = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
                                     String typeName = extractReferenceType(arraySchema.getItems().get$ref()) + "Arr";
-                                    TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
+                                    TypeDefinitionNode typeDefNode = createTypeDefinitionNode(
+                                            null, null,
                                             createIdentifierToken("type"),
                                             createIdentifierToken(typeName),
                                             createSimpleNameReferenceNode(createIdentifierToken(type)),
@@ -876,7 +885,7 @@ public class BallerinaClientGenerator {
                                     // need to check already typedecripor has same name
                                     if (!typeDefinitionNodeList.isEmpty()) {
                                         boolean isExit = false;
-                                        for (TypeDefinitionNode typeNode: typeDefinitionNodeList) {
+                                        for (TypeDefinitionNode typeNode : typeDefinitionNodeList) {
                                             if (typeNode.typeName().toString().trim().equals(typeName)) {
                                                 isExit = true;
                                             }
@@ -900,7 +909,7 @@ public class BallerinaClientGenerator {
                                     typeDefinitionNodeList.add(typeDefNode);
                                     if (!typeDefinitionNodeList.isEmpty()) {
                                         boolean isExit = false;
-                                        for (TypeDefinitionNode typeNode: typeDefinitionNodeList) {
+                                        for (TypeDefinitionNode typeNode : typeDefinitionNodeList) {
                                             if (typeNode.typeName().toString().trim().equals(typeName)) {
                                                 isExit = true;
                                             }
@@ -940,7 +949,8 @@ public class BallerinaClientGenerator {
 
     /**
      * Generate function body node.
-     * @param path - remote function path
+     *
+     * @param path      - remote function path
      * @param operation - opneapi operation
      * @return - function body node
      * @throws BallerinaOpenApiException
@@ -951,12 +961,12 @@ public class BallerinaClientGenerator {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         boolean isHeader = false;
         // Create statements
-        List<StatementNode> statementsList =  new ArrayList<>();
+        List<StatementNode> statementsList = new ArrayList<>();
         // -- create variable declaration
         //string path - common for every remote functions
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(createSimpleNameReferenceNode(
-                        createIdentifierToken("string ")), createCaptureBindingPatternNode(
-                                createIdentifierToken("path")));
+                createIdentifierToken("string ")), createCaptureBindingPatternNode(
+                createIdentifierToken("path")));
         Token equalToken = createToken(EQUAL_TOKEN);
         // Create initializer
         Token type = createToken(STRING_KEYWORD);
@@ -981,28 +991,29 @@ public class BallerinaClientGenerator {
             List<Parameter> parameters = operation.getValue().getParameters();
             List<Parameter> queryParameters = new ArrayList<>();
             List<Parameter> headerParameters = new ArrayList<>();
-            for (Parameter parameter: parameters) {
+            for (Parameter parameter : parameters) {
                 if (parameter.getIn().trim().equals("query")) {
                     queryParameters.add(parameter);
                 } else if (parameter.getIn().trim().equals("header")) {
                     headerParameters.add(parameter);
                 }
             }
-            //List<Parameter> apiKeyHeaders = (List<Parameter>) BallerinaHTTPAuthGenerator.getHeaderApiKeyNameList();
-//            if (!apiKeyHeaders.isEmpty()){
-//                headerParameters.addAll(apiKeyHeaders);
-//            }
-            if (!queryParameters.isEmpty()) {
-                statementsList.add(getMapForParameters(queryParameters, "map<anydata>", "queryParam", true));
+
+            List<String> queryApiKeyNameList = BallerinaHTTPAuthGenerator.getQueryApiKeyNameList();
+            List<String> headerApiKeyNameList = BallerinaHTTPAuthGenerator.getHeaderApiKeyNameList();
+
+            if (!queryParameters.isEmpty() || !queryApiKeyNameList.isEmpty()) {
+                statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
+                        "queryParam", queryApiKeyNameList));
                 // Add updated path
                 ExpressionStatementNode updatedPath = getSimpleExpressionStatementNode("path = path + " +
                         "getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
                 isQuery = true;
             }
-            if (!headerParameters.isEmpty()) {
+            if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<string|string[]>",
-                        "accHeaders", false));
+                        "accHeaders", headerApiKeyNameList));
                 isHeader = true;
             }
         }
@@ -1055,10 +1066,10 @@ public class BallerinaClientGenerator {
                         statementsList.add(expressionStatementNode);
                     }
 //                    if (operation.getValue().getResponses() != null) {
-                        // POST, PUT, PATCH, DELETE, EXECUTE
-                        VariableDeclarationNode requestStatement =
-                                getSimpleStatement(getReturnType(operation.getValue()).split("\\|")[0],
-                                "response", "check self.clientEp->" + method + "(path, request)");
+                    // POST, PUT, PATCH, DELETE, EXECUTE
+                    VariableDeclarationNode requestStatement =
+                            getSimpleStatement(getReturnType(operation.getValue()).split("\\|")[0],
+                                    "response", "check self.clientEp->" + method + "(path, request)");
 //                    }
 
                     if (isHeader) {
@@ -1167,13 +1178,14 @@ public class BallerinaClientGenerator {
 
     /**
      * This method is to used for generating path when it has path parameters.
+     *
      * @param path - yaml contract path
      * @return string of path
      */
     public static String generatePathWithPathParameter(String path) {
         if (path.contains("{")) {
             String refinedPath = path;
-        Pattern p = Pattern.compile("\\{[^\\}]*\\}");
+            Pattern p = Pattern.compile("\\{[^\\}]*\\}");
             Matcher m = p.matcher(path);
             while (m.find()) {
                 String d = path.substring(m.start() + 1, m.end() - 1);
@@ -1186,10 +1198,10 @@ public class BallerinaClientGenerator {
     }
 
     /*
-    * Generate variableDeclarationNode.
-    */
-    private static  VariableDeclarationNode getSimpleStatement(String responseType, String variable,
-                                                               String initializer) {
+     * Generate variableDeclarationNode.
+     */
+    private static VariableDeclarationNode getSimpleStatement(String responseType, String variable,
+                                                              String initializer) {
         SimpleNameReferenceNode resTypeBind = createSimpleNameReferenceNode(createIdentifierToken(responseType));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(createIdentifierToken(variable));
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(resTypeBind, bindingPattern);
@@ -1200,7 +1212,7 @@ public class BallerinaClientGenerator {
     }
 
     private static VariableDeclarationNode getMapForParameters(List<Parameter> parameters, String mapDataType,
-                                                            String mapName, boolean isQuery) {
+                                                               String mapName, List<String> apiKeyNames) {
         List<Node> filedOfMap = new ArrayList();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(mapDataType));
@@ -1208,7 +1220,7 @@ public class BallerinaClientGenerator {
                 createIdentifierToken(mapName));
         TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
 
-        for (Parameter parameter: parameters) {
+        for (Parameter parameter : parameters) {
             // Initializer
             IdentifierToken fieldName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
             Token colon = createToken(COLON_TOKEN);
@@ -1220,13 +1232,6 @@ public class BallerinaClientGenerator {
             filedOfMap.add(createToken(COMMA_TOKEN));
         }
 
-        List<String> apiKeyNames;
-        if (isQuery) {
-            apiKeyNames = BallerinaHTTPAuthGenerator.getQueryApiKeyNameList();
-        } else {
-            apiKeyNames = BallerinaHTTPAuthGenerator.getHeaderApiKeyNameList();
-        }
-
         if (!apiKeyNames.isEmpty()) {
             for (String apiKey : apiKeyNames) {
                 IdentifierToken fieldName = createIdentifierToken(escapeIdentifier(apiKey.trim()));
@@ -1236,9 +1241,9 @@ public class BallerinaClientGenerator {
                         createSimpleNameReferenceNode(createIdentifierToken("apiKeys")));
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
                         createIdentifierToken("\"" + escapeIdentifier(apiKey) + "\""));
-                SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(valueExpr);
-                IndexedExpressionNode apiKeyExpr = createIndexedExpressionNode(fieldExpr, createToken(OPEN_BRACKET_TOKEN), expressions
-                        , createToken(CLOSE_BRACKET_TOKEN));
+                SeparatedNodeList<FunctionArgumentNode> apiKeyNameArg = createSeparatedNodeList(valueExpr);
+                MethodCallExpressionNode apiKeyExpr = createMethodCallExpressionNode(fieldExpr, createToken(DOT_TOKEN),
+                        createSimpleNameReferenceNode(createIdentifierToken("get")), createToken(OPEN_PAREN_TOKEN), apiKeyNameArg, createToken(CLOSE_PAREN_TOKEN));
 
                 SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
                         fieldName, colon, apiKeyExpr);
@@ -1256,18 +1261,18 @@ public class BallerinaClientGenerator {
                 createToken(SEMICOLON_TOKEN));
     }
 
-/*
- * Generate expressionStatementNode.
- */
+    /*
+     * Generate expressionStatementNode.
+     */
     private static ExpressionStatementNode getSimpleExpressionStatementNode(String expression) {
         SimpleNameReferenceNode expressionNode = createSimpleNameReferenceNode(
                 createIdentifierToken(expression));
         return createExpressionStatementNode(null, expressionNode, createToken(SEMICOLON_TOKEN));
     }
 
-/*
- * Filter the mediaType.
- */
+    /*
+     * Filter the mediaType.
+     */
     private static String getMediaType(String media) {
         switch (media) {
             case "application/json":
@@ -1289,13 +1294,13 @@ public class BallerinaClientGenerator {
         Token functionKeyWord = createIdentifierToken("isolated function");
         IdentifierToken functionName = createIdentifierToken(" getPathForQueryParam");
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
-                        createSeparatedNodeList(createRequiredParameterNode(createEmptyNodeList(),
-                                createIdentifierToken("map<anydata> "),
-                                createIdentifierToken(" queryParam"))),
-                        createToken(CLOSE_PAREN_TOKEN),
-                        createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
-                                createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(
-                                        null, createIdentifierToken("string"))));
+                createSeparatedNodeList(createRequiredParameterNode(createEmptyNodeList(),
+                        createIdentifierToken("map<anydata> "),
+                        createIdentifierToken(" queryParam"))),
+                createToken(CLOSE_PAREN_TOKEN),
+                createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
+                        createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(
+                                null, createIdentifierToken("string"))));
 
         // FunctionBody
         List<StatementNode> statementNodes = new ArrayList<>();
@@ -1311,9 +1316,9 @@ public class BallerinaClientGenerator {
                 createIdentifierToken(" var"));
         ListBindingPatternNode bindingPattern =
                 createListBindingPatternNode(createToken(OPEN_BRACKET_TOKEN),
-                createSeparatedNodeList(createCaptureBindingPatternNode(
-                        createIdentifierToken("key")), createToken(COMMA_TOKEN),
-                        createCaptureBindingPatternNode(createIdentifierToken("value"))),
+                        createSeparatedNodeList(createCaptureBindingPatternNode(
+                                createIdentifierToken("key")), createToken(COMMA_TOKEN),
+                                createCaptureBindingPatternNode(createIdentifierToken("value"))),
                         createToken(CLOSE_BRACKET_TOKEN));
 
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(type,
@@ -1338,16 +1343,16 @@ public class BallerinaClientGenerator {
         // If body
         ExpressionStatementNode assignStatement = getSimpleExpressionStatementNode("_ = queryParam.remove(key)");
         BlockStatementNode ifBlockStatementMain = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
-                        createNodeList(assignStatement), createToken(CLOSE_BRACE_TOKEN));
+                createNodeList(assignStatement), createToken(CLOSE_BRACE_TOKEN));
         //else body
         Token elseKeyWord = createToken(ELSE_KEYWORD);
         //body statements
         FunctionCallExpressionNode condition = createFunctionCallExpressionNode(createSimpleNameReferenceNode(
-                        createIdentifierToken(" string:startsWith")), createToken(OPEN_PAREN_TOKEN),
-                        createSeparatedNodeList(
-                                createSimpleNameReferenceNode(createIdentifierToken(" key")),
-                                createToken(COMMA_TOKEN), createSimpleNameReferenceNode(
-                                        createIdentifierToken("\"'\""))), createToken(CLOSE_PAREN_TOKEN));
+                createIdentifierToken(" string:startsWith")), createToken(OPEN_PAREN_TOKEN),
+                createSeparatedNodeList(
+                        createSimpleNameReferenceNode(createIdentifierToken(" key")),
+                        createToken(COMMA_TOKEN), createSimpleNameReferenceNode(
+                                createIdentifierToken("\"'\""))), createToken(CLOSE_PAREN_TOKEN));
         List<StatementNode> statements = new ArrayList<>();
         // if body-02
         ExpressionStatementNode ifBody02Statement = getSimpleExpressionStatementNode(" param[param.length()] = " +
@@ -1355,7 +1360,7 @@ public class BallerinaClientGenerator {
 
         NodeList<StatementNode> statementNodesForIf02 = createNodeList(ifBody02Statement);
         BlockStatementNode ifBlock02 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
-                        statementNodesForIf02, createToken(CLOSE_BRACE_TOKEN));
+                statementNodesForIf02, createToken(CLOSE_BRACE_TOKEN));
 
         // else block-02
         // else body 02
@@ -1363,7 +1368,7 @@ public class BallerinaClientGenerator {
         ExpressionStatementNode elseBody02Statement = getSimpleExpressionStatementNode("param[param.length()] = key");
         NodeList<StatementNode> statementNodesForElse02 = createNodeList(elseBody02Statement);
         BlockStatementNode elseBlockNode02 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
-                        statementNodesForElse02, createToken(CLOSE_BRACE_TOKEN));
+                statementNodesForElse02, createToken(CLOSE_BRACE_TOKEN));
 
         ElseBlockNode elseBlock02 = createElseBlockNode(createToken(ELSE_KEYWORD), elseBlockNode02);
         IfElseStatementNode ifElseStatementNode02 = createIfElseStatementNode(ifKeyWord, condition, ifBlock02,
@@ -1376,7 +1381,7 @@ public class BallerinaClientGenerator {
         //If block 03
         SimpleNameReferenceNode exprIf03 = createSimpleNameReferenceNode(createIdentifierToken(" value "));
         BuiltinSimpleNameReferenceNode typeCondition03 = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(" string"));
+                createIdentifierToken(" string"));
         TypeTestExpressionNode condition03 = createTypeTestExpressionNode(exprIf03, isKeyWord, typeCondition03);
 
         ExpressionStatementNode variableIf03 = getSimpleExpressionStatementNode("string updateV =  checkpanic " +
@@ -1386,7 +1391,7 @@ public class BallerinaClientGenerator {
         BlockStatementNode ifBody03 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 createNodeList(variableIf03, assignIf03), createToken(CLOSE_BRACE_TOKEN));
         BlockStatementNode elseBodyBlock03 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN), createNodeList(
-                        getSimpleExpressionStatementNode("param[param.length()] = value.toString()")),
+                getSimpleExpressionStatementNode("param[param.length()] = value.toString()")),
                 createToken(CLOSE_BRACE_TOKEN));
         ElseBlockNode elseBody03 = createElseBlockNode(elseKeyWord, elseBodyBlock03);
         IfElseStatementNode ifElse03 = createIfElseStatementNode(ifKeyWord, condition03, ifBody03, elseBody03);
@@ -1408,7 +1413,7 @@ public class BallerinaClientGenerator {
 
         //For each block statement
         BlockStatementNode forEachBlockStatement = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
-                        createNodeList(mainIfElse), createToken(CLOSE_BRACE_TOKEN));
+                createNodeList(mainIfElse), createToken(CLOSE_BRACE_TOKEN));
 
         ForEachStatementNode forEachStatementNode = createForEachStatementNode(forEachKeyWord,
                 typedBindingPatternNode, inKeyWord, actionOrExpr, forEachBlockStatement, null);
@@ -1423,13 +1428,13 @@ public class BallerinaClientGenerator {
         SimpleNameReferenceNode lhs = createSimpleNameReferenceNode(createIdentifierToken(" param.length()"));
         Token equalToken = createIdentifierToken("==");
         BuiltinSimpleNameReferenceNode rhs = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(" 1"));
+                createIdentifierToken(" 1"));
         TypeTestExpressionNode conditionForIfElse = createTypeTestExpressionNode(lhs, equalToken, rhs);
         //if body block
 
         ExpressionStatementNode newAssign = getSimpleExpressionStatementNode("_ = param.remove(0)");
         BlockStatementNode ifBlock = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
-                        createNodeList(newAssign), createToken(CLOSE_BRACE_TOKEN));
+                createNodeList(newAssign), createToken(CLOSE_BRACE_TOKEN));
         IfElseStatementNode ifElseStatementNode = createIfElseStatementNode(ifKeyWord, conditionForIfElse, ifBlock,
                 null);
         statementNodes.add(ifElseStatementNode);
@@ -1460,7 +1465,7 @@ public class BallerinaClientGenerator {
         LinkedHashMap<String, String> extFields = (LinkedHashMap<String, String>) extension.getValue();
         List<Node> annotFields = new ArrayList<>();
         if (!extFields.isEmpty()) {
-            for (Map.Entry<String, String> field: extFields.entrySet()) {
+            for (Map.Entry<String, String> field : extFields.entrySet()) {
 
                 BasicLiteralNode valueExpr = createBasicLiteralNode(STRING_LITERAL,
                         createLiteralValueToken(SyntaxKind.STRING_LITERAL_TOKEN,
@@ -1489,97 +1494,10 @@ public class BallerinaClientGenerator {
                 , annotateReference, annotValue);
     }
 
-    private static void addConfigRecordToTypeDefnitionNodeList(OpenAPI openAPI){
+    private static void addConfigRecordToTypeDefnitionNodeList(OpenAPI openAPI) {
         TypeDefinitionNode configRecord = BallerinaHTTPAuthGenerator.getConfigRecord(openAPI);
-        if (configRecord != null){
+        if (configRecord != null) {
             typeDefinitionNodeList.add(configRecord);
         }
-    }
-
-    private static void createConfigSchema(OpenAPI openAPI){
-        if (openAPI.getComponents().getSecuritySchemes() != null){
-            Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("public type");
-            Token typeName = AbstractNodeFactory.createIdentifierToken("Config");
-            Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record");
-            Token bodyStartDelimiter = AbstractNodeFactory.createIdentifierToken("{");
-            List<Node> recordFieldList = new ArrayList<>();
-            boolean isApiKey = false;
-            List<String> fieldTypeList = new ArrayList<>();
-            Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
-            //need to create a union type
-            for (Map.Entry<String, SecurityScheme> securitySchemeEntry : securitySchemeMap.entrySet()){
-                SecurityScheme schemaValue = securitySchemeEntry.getValue();
-                if (schemaValue != null && schemaValue.getType() != null) {
-                    String schemaType = schemaValue.getType().name().toLowerCase(Locale.getDefault());
-                    if (schemaType.equals("http")){
-                        String scheme = schemaValue.getScheme();
-                        if (scheme.equals("basic")) {
-                            fieldTypeList.add("http:CredentialsConfig");
-                        } else if (scheme.equals("bearer")) {
-                            fieldTypeList.add("http:BearerTokenConfig");
-                        }
-                    } else if (schemaType.equals("oauth2")) {
-                        if (schemaValue.getFlows().getClientCredentials() != null) {
-                            fieldTypeList.add("http:OAuth2ClientCredentialsGrantConfig");
-                        } if (schemaValue.getFlows().getPassword() != null) {
-                            fieldTypeList.add("http:OAuth2PasswordGrantConfig");
-                        }
-                    }
-                    else if (schemaType.equals("apikey")) {
-                        isApiKey = true;
-                        Token fieldTypeName = AbstractNodeFactory.createIdentifierToken("string");
-                        IdentifierToken fieldName =
-                                AbstractNodeFactory.createIdentifierToken(escapeIdentifier(schemaValue.getName()));
-                        TypeDescriptorNode fieldTypeNameNode = createBuiltinSimpleNameReferenceNode(null, fieldTypeName);
-                        Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
-                        RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
-                                fieldTypeNameNode, fieldName, null, semicolonToken);
-                        recordFieldList.add(recordFieldNode);
-                    }
-                }
-            }
-            if (isApiKey) {
-                NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
-                Token bodyEndDelimiter = AbstractNodeFactory.createIdentifierToken("}");
-                RecordTypeDescriptorNode recordTypeDescriptorNode =
-                        NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
-                                fieldNodes, null, bodyEndDelimiter);
-                Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
-                TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null,
-                        null, typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
-                typeDefinitionNodeList.add(typeDefinitionNode);
-            } else {
-                Token fieldTypeName = AbstractNodeFactory.createIdentifierToken(getConfigFieldTypeList(fieldTypeList).toString());
-                IdentifierToken fieldName =
-                        AbstractNodeFactory.createIdentifierToken(escapeIdentifier("clientConfig"));
-                TypeDescriptorNode fieldTypeNameNode = createBuiltinSimpleNameReferenceNode(null, fieldTypeName);
-                Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
-                RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
-                        fieldTypeNameNode, fieldName, null, semicolonToken);
-                recordFieldList.add(recordFieldNode);
-                NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
-                Token bodyEndDelimiter = AbstractNodeFactory.createIdentifierToken("}");
-                RecordTypeDescriptorNode recordTypeDescriptorNode =
-                        NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
-                                fieldNodes, null, bodyEndDelimiter);
-                Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
-                TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null,
-                        null, typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
-                typeDefinitionNodeList.add(typeDefinitionNode);
-            }
-        }
-    }
-    private static StringBuilder getConfigFieldTypeList (List<String> fieldTypeList) {
-        StringBuilder httpAuthFieldTypes = new StringBuilder();
-        if (!fieldTypeList.isEmpty()) {
-            for (String fieldType: fieldTypeList) {
-                if (httpAuthFieldTypes.length() != 0){
-                    httpAuthFieldTypes.append("|").append(fieldType);
-                } else {
-                    httpAuthFieldTypes.append(fieldType);
-                }
-            }
-        }
-        return httpAuthFieldTypes;
     }
 }
