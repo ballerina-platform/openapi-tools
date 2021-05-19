@@ -69,6 +69,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
+import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 
 /**
  *This class wraps the {@link Schema} from openapi models inorder to overcome complications
@@ -243,36 +244,6 @@ public class BallerinaSchemaGenerator {
                     null, typeKeyWord, typeName, recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
         }
         return typeDefinitionNode;
-    }
-
-    /**
-     * This function for creating the UnionType string for handle oneOf data binding.
-     * @param oneOf - OneOf schema
-     * @return - UnionString
-     * @throws BallerinaOpenApiException
-     */
-    public static String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
-
-        StringBuilder unionType = new StringBuilder();
-        for (Schema oneOfSchema: oneOf) {
-            if (oneOfSchema.getType() != null) {
-                String type = convertOpenAPITypeToBallerina(oneOfSchema.getType());
-                if (!type.equals("record")) {
-                    unionType.append("|");
-                    unionType.append(type);
-                }
-            }
-            if (oneOfSchema.get$ref() != null) {
-                String type = extractReferenceType(oneOfSchema.get$ref());
-                unionType.append("|");
-                unionType.append(type);
-            }
-        }
-        String unionTypeCont = unionType.toString();
-        if (!unionTypeCont.isBlank() && unionTypeCont.startsWith("|")) {
-            unionTypeCont = unionTypeCont.replaceFirst("\\|", "");
-        }
-        return unionTypeCont;
     }
 
     /**
