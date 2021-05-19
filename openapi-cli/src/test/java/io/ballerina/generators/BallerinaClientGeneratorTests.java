@@ -19,6 +19,7 @@
 package io.ballerina.generators;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
@@ -30,6 +31,8 @@ import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -40,11 +43,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.ballerina.generators.BallerinaClientGenerator.extractDisplayAnnotation;
 import static io.ballerina.generators.BallerinaClientGenerator.generatePathWithPathParameter;
+import static io.ballerina.generators.BallerinaClientGenerator.getFunctionBodyNode;
 import static io.ballerina.generators.BallerinaClientGenerator.getFunctionSignatureNode;
 import static io.ballerina.generators.BallerinaClientGenerator.getReturnType;
 import static io.ballerina.generators.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
@@ -72,7 +78,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
-//        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("client_template.bal", syntaxTree);
     }
 
     @Test(description = "tests for generating Operation Id for operations which hasn't operationIDs")
@@ -82,7 +87,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
-//        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_id.bal", syntaxTree);
     }
 
     @Test(description = "Generate Client for GET method")
@@ -92,7 +96,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
-//        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_get.bal", syntaxTree);
     }
 
     @Test(description = "Generate Client for POST method")
@@ -102,7 +105,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
-//        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("operation_post.bal", syntaxTree);
     }
 
     @Test(description = "Generate Client for header Parameter")
@@ -112,7 +114,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
-//        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("header_parameter.bal", syntaxTree);
     }
 
     @Test(description = "Generate Client for openapi_weather_api yaml")
@@ -255,10 +256,15 @@ public class BallerinaClientGeneratorTests {
 
     @Test(description = "Test for header parameters")
     public void getHeaderParameterTests() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
+        Path definitionPath = RES_DIR.resolve("swagger/header_parameter.yaml");
         OpenAPI display = getOpenAPI(definitionPath);
-
-
+        Set<Map.Entry<PathItem.HttpMethod, Operation>> operation =
+                display.getPaths().get("/pets").readOperationsMap().entrySet();
+        Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
+        FunctionBodyNode bodyNode = getFunctionBodyNode("/pets", iterator.next());
+        Assert.assertEquals(bodyNode.toString(), "{string path=string`/pets`;map<string|string[]>accHeaders={" +
+                "'X\\-Request\\-ID:'X\\-Request\\-ID,'X\\-Request\\-Client:'X\\-Request\\-Client};http:Response " +
+                "response=check self.clientEp-> get(path, accHeaders, targetType = http:Response );returnresponse;}");
     }
 
 

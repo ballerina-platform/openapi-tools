@@ -41,8 +41,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.ballerina.generators.BallerinaSchemaGenerator.getOneOfUnionType;
 import static io.ballerina.generators.BallerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema;
+import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 
 /**
  * Tests for BallerinaSchemaGenerators.

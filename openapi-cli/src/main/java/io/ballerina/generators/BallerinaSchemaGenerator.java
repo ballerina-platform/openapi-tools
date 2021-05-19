@@ -148,7 +148,8 @@ public class BallerinaSchemaGenerator {
                                     createToken(SEMICOLON_TOKEN));
                             typeDefinitionNodeList.add(typeDefNode);
                         }
-                    } else if (schema.getValue().getProperties() != null || (schema.getValue() instanceof ObjectSchema)) {
+                    } else if (schema.getValue().getProperties() != null
+                            || (schema.getValue() instanceof ObjectSchema)) {
                         Map<String, Schema> fields = schema.getValue().getProperties();
                         TypeDefinitionNode typeDefinitionNode = getTypeDefinitionNodeForObjectSchema(required,
                                 typeKeyWord, typeName, recordFieldList, fields);
