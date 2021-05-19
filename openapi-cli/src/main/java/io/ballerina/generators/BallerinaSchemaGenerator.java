@@ -29,6 +29,7 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
@@ -45,7 +46,6 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import org.ballerinalang.formatter.core.FormatterException;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -58,7 +58,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
@@ -70,8 +77,7 @@ import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 public class BallerinaSchemaGenerator {
     private static final PrintStream outStream = System.err;
 
-    public static SyntaxTree generateSyntaxTree(Path definitionPath)
-            throws OpenApiException, FormatterException, IOException, BallerinaOpenApiException,
+    public static SyntaxTree generateSyntaxTree(Path definitionPath) throws OpenApiException, IOException,
             BallerinaOpenApiException {
         OpenAPI openApi = parseOpenAPIFile(definitionPath.toString());
         // TypeDefinitionNodes their
@@ -130,24 +136,22 @@ public class BallerinaSchemaGenerator {
                             TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null,
                                     null, typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
                             typeDefinitionNodeList.add(typeDefinitionNode);
+                        } else if (composedSchema.getOneOf() != null) {
+                            List<Schema> oneOf = composedSchema.getOneOf();
+                            String unionTypeCont = getOneOfUnionType(oneOf);
+                            String type  = escapeIdentifier(schema.getKey().trim());
+                            TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
+                                    createIdentifierToken("public type "),
+                                    createIdentifierToken(type),
+                                    createSimpleNameReferenceNode(createIdentifierToken(unionTypeCont)),
+                                    createToken(SEMICOLON_TOKEN));
+                            typeDefinitionNodeList.add(typeDefNode);
                         }
-                    } else if (schema.getValue().getProperties() != null || (schema.getValue() instanceof ObjectSchema
-                            && schema.getValue().getProperties() != null)) {
+                    } else if (schema.getValue().getProperties() != null || (schema.getValue() instanceof ObjectSchema)) {
                         Map<String, Schema> fields = schema.getValue().getProperties();
-                        if (fields != null) {
-                            for (Map.Entry<String, Schema> field : fields.entrySet()) {
-                                addRecordFields(required, recordFieldList, field);
-                            }
-                            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
-                            Token bodyEndDelimiter = AbstractNodeFactory.createIdentifierToken("}");
-                            RecordTypeDescriptorNode recordTypeDescriptorNode =
-                                    NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
-                                            fieldNodes, null, bodyEndDelimiter);
-                            Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
-                            TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null,
-                                    null, typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
-                            typeDefinitionNodeList.add(typeDefinitionNode);
-                        }
+                        TypeDefinitionNode typeDefinitionNode = getTypeDefinitionNodeForObjectSchema(required,
+                                typeKeyWord, typeName, recordFieldList, fields);
+                        typeDefinitionNodeList.add(typeDefinitionNode);
                     } else if (schema.getValue().getType().equals("array")) {
                         if (schemaValue instanceof ArraySchema) {
                             ArraySchema arraySchema = (ArraySchema) schemaValue;
@@ -199,6 +203,76 @@ public class BallerinaSchemaGenerator {
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         return syntaxTree.modifyWith(modulePartNode);
+    }
+
+    /**
+     * This function use to create typeDefinitionNode for objectSchema.
+     * @param required - This string list include required fields in properties.
+     * @param typeKeyWord   - Type keyword for record.
+     * @param typeName      - Record Name
+     * @param recordFieldList - RecordFieldList
+     * @param fields          - schema properties map
+     * @return This return record TypeDefinitionNode
+     * @throws BallerinaOpenApiException
+     */
+
+    public static TypeDefinitionNode getTypeDefinitionNodeForObjectSchema(List<String> required, Token typeKeyWord,
+                                                                           IdentifierToken typeName,
+                                                                           List<Node> recordFieldList,
+                                                                           Map<String, Schema> fields)
+            throws BallerinaOpenApiException {
+
+        TypeDefinitionNode typeDefinitionNode;
+        if (fields != null) {
+            for (Map.Entry<String, Schema> field : fields.entrySet()) {
+                addRecordFields(required, recordFieldList, field);
+            }
+            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
+            RecordTypeDescriptorNode recordTypeDescriptorNode =
+                    NodeFactory.createRecordTypeDescriptorNode(createToken(SyntaxKind.RECORD_KEYWORD),
+                            createToken(OPEN_BRACE_TOKEN), fieldNodes, null,
+                            createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+            typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null,
+                    null, typeKeyWord, typeName, recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+        } else {
+            RecordTypeDescriptorNode recordTypeDescriptorNode =
+                    NodeFactory.createRecordTypeDescriptorNode(createToken(SyntaxKind.RECORD_KEYWORD),
+                            createToken(OPEN_BRACE_TOKEN), createEmptyNodeList(), null,
+                            createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+            typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null,
+                    null, typeKeyWord, typeName, recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+        }
+        return typeDefinitionNode;
+    }
+
+    /**
+     * This function for creating the UnionType string for handle oneOf data binding.
+     * @param oneOf - OneOf schema
+     * @return - UnionString
+     * @throws BallerinaOpenApiException
+     */
+    public static String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
+
+        StringBuilder unionType = new StringBuilder();
+        for (Schema oneOfSchema: oneOf) {
+            if (oneOfSchema.getType() != null) {
+                String type = convertOpenAPITypeToBallerina(oneOfSchema.getType());
+                if (!type.equals("record")) {
+                    unionType.append("|");
+                    unionType.append(type);
+                }
+            }
+            if (oneOfSchema.get$ref() != null) {
+                String type = extractReferenceType(oneOfSchema.get$ref());
+                unionType.append("|");
+                unionType.append(type);
+            }
+        }
+        String unionTypeCont = unionType.toString();
+        if (!unionTypeCont.isBlank() && unionTypeCont.startsWith("|")) {
+            unionTypeCont = unionTypeCont.replaceFirst("\\|", "");
+        }
+        return unionTypeCont;
     }
 
     /**
