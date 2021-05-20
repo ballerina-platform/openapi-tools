@@ -1,6 +1,6 @@
 ## Module overview
 
-This module provides the Ballerina OpenAPI tooling which will make it easy for you to start the development of 
+This module provides the Ballerina OpenAPI tooling, which will make it easy for you to start the development of 
 a service documented in an OpenAPI contract in Ballerina by generating the Ballerina service and client skeletons. 
 
 The OpenAPI tools provide the following capabilities. 
@@ -25,7 +25,7 @@ bal openapi -i <openapi-contract-path>
                [--mode service|client ]
                [(-o|--output): output file path]
 ```
-Generates both the Ballerina service and Ballerina client stub for a given OpenAPI file.
+Generates both the Ballerina service and Ballerina client stubs for a given OpenAPI file.
 
 This `-i <openapi-contract-path>` parameter of the command is mandatory. It will get the path to the
  OpenAPI contract file (i.e., `my-api.yaml` or `my-api.json`) as an input.
@@ -146,4 +146,3 @@ The `Tag` feature can store with `excludeOperations`. Then, all the tag operatio
  
 - **FailOnErrors** (Optional) : **boolean value**   :
 If you need to turn off the validation, add this to the annotation with the value as `false`.
-
