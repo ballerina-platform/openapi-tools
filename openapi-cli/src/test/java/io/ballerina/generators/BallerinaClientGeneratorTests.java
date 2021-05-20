@@ -110,36 +110,7 @@ public class BallerinaClientGeneratorTests {
         Assert.assertTrue(diagnostics.isEmpty());
     }
 
-    @Test(description = "Generate Client for openapi_weather_api yaml")
-    public void generateClientForWeatherAPI()
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal", syntaxTree);
-    }
-
-    @Test(description = "Generate Client for openapi spec have display annotation method")
-    public void generateClientForDisplayAnnotation()
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
-    }
-
-    @Test(description = "Generate Client for openapi spec UBER yaml")
-    public void generateClientForUberAPI()
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/uber_openapi.yaml");
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("uber_openapi.bal", syntaxTree);
-    }
-
-    @Test(description = "Generate Client for openapi spec COVID19")
+    @Test(description = "Generate Client for openapi spec COVID19", enabled = true)
     public void generateClientForCovid19API()
             throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/covid19_openapi.yaml");
@@ -166,7 +137,6 @@ public class BallerinaClientGeneratorTests {
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("world_bank_openapi.bal", syntaxTree);
     }
 
     @Test(description = "Generate Client for path parameter has parameter name as key word")
@@ -177,15 +147,6 @@ public class BallerinaClientGeneratorTests {
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree("multiple_pathparam.bal", syntaxTree);
-    }
-
-    @Test(description = "Generate Client for salesforce yaml", enabled = false)
-    public void generateClientForSalesForce()
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/salesforce.yaml");
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
     }
 
     @Test(description = "Generate Client for path parameter has parameter name as key word - unit tests for method")

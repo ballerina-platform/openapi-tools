@@ -24,7 +24,6 @@ import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BlockStatementNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
-import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ElseBlockNode;
@@ -52,8 +51,6 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ObjectFieldNode;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
-import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
@@ -91,6 +88,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
+import org.ballerinalang.formatter.core.FormatterException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -119,7 +117,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNo
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBlockStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createCheckExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createClassDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createElseBlockNode;
@@ -141,8 +138,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createMethodCallExpr
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createObjectFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesizedArgList;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createPositionalArgumentNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createQualifiedNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatementNode;
@@ -155,7 +150,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeTestExpres
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.BACKTICK_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CHECK_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
@@ -180,7 +174,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.generators.GeneratorConstants.HTTP;
-import static io.ballerina.generators.GeneratorConstants.OPEN_PRAN;
 import static io.ballerina.generators.GeneratorUtils.buildUrl;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
@@ -201,7 +194,7 @@ public class BallerinaClientGenerator {
     private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
-            BallerinaOpenApiException {
+            BallerinaOpenApiException, FormatterException {
         imports.clear();
         typeDefinitionNodeList.clear();
         isQuery = false;
@@ -318,19 +311,6 @@ public class BallerinaClientGenerator {
         DefaultableParameterNode serviceUrl = createDefaultableParameterNode(annotationNodes, typeName,
                 paramName, equalToken, expression);
         parameters.add(serviceUrl);
-        parameters.add(createToken(COMMA_TOKEN));
-
-        QualifiedNameReferenceNode typeName1 = createQualifiedNameReferenceNode(
-                        createIdentifierToken(GeneratorConstants.HTTP), createIdentifierToken(GeneratorConstants.COLON),
-                        createIdentifierToken("ClientConfiguration"));
-
-        IdentifierToken httpClientConfig = createIdentifierToken(" httpClientConfig");
-
-        BasicLiteralNode expression1 = createBasicLiteralNode(null, createIdentifierToken(" {}"));
-
-        DefaultableParameterNode clientConfig = createDefaultableParameterNode(annotationNodes, typeName1,
-                httpClientConfig, equalToken, expression1);
-        parameters.add(clientConfig);
 
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 
@@ -1017,7 +997,7 @@ public class BallerinaClientGenerator {
 
             if (!queryParameters.isEmpty() || !queryApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
-                        "queryParam", queryApiKeyNameList));
+                        "queryParam", queryApiKeyNameList, false));
                 // Add updated path
                 ExpressionStatementNode updatedPath = getSimpleExpressionStatementNode("path = path + " +
                         "getPathForQueryParam(queryParam)");
@@ -1026,7 +1006,7 @@ public class BallerinaClientGenerator {
             }
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<string|string[]>",
-                        "accHeaders", headerApiKeyNameList));
+                        "accHeaders", headerApiKeyNameList, true));
                 isHeader = true;
             }
         }
@@ -1184,7 +1164,8 @@ public class BallerinaClientGenerator {
     }
 
     private static VariableDeclarationNode getMapForParameters(List<Parameter> parameters, String mapDataType,
-                                                            String mapName, List<String> apiKeyNames) {
+                                                               String mapName, List<String> apiKeyNames,
+                                                               boolean isHeader) {
         List<Node> filedOfMap = new ArrayList();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(mapDataType));
@@ -1213,12 +1194,19 @@ public class BallerinaClientGenerator {
                         createSimpleNameReferenceNode(createIdentifierToken("apiKeys")));
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
                         createIdentifierToken("\"" + apiKey + "\""));
-                SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(valueExpr);
-                IndexedExpressionNode apiKeyExpr = createIndexedExpressionNode(fieldExpr,
-                        createToken(OPEN_BRACKET_TOKEN), expressions
-                        , createToken(CLOSE_BRACKET_TOKEN));
-                SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
-                        fieldName, colon, apiKeyExpr);
+                SpecificFieldNode specificFieldNode;
+                if (isHeader) {
+                    SeparatedNodeList<FunctionArgumentNode> apiKeyNameArg = createSeparatedNodeList(valueExpr);
+                    MethodCallExpressionNode apiKeyExpr = createMethodCallExpressionNode(fieldExpr,
+                            createToken(DOT_TOKEN), createSimpleNameReferenceNode(createIdentifierToken("get")),
+                            createToken(OPEN_PAREN_TOKEN), apiKeyNameArg, createToken(CLOSE_PAREN_TOKEN));
+                    specificFieldNode = createSpecificFieldNode(null, fieldName, colon, apiKeyExpr);
+                } else {
+                    SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(valueExpr);
+                    IndexedExpressionNode apiKeyExpr = createIndexedExpressionNode(fieldExpr,
+                            createToken(OPEN_BRACKET_TOKEN), expressions, createToken(CLOSE_BRACKET_TOKEN));
+                    specificFieldNode = createSpecificFieldNode(null, fieldName, colon, apiKeyExpr);
+                }
                 filedOfMap.add(specificFieldNode);
                 filedOfMap.add(createToken(COMMA_TOKEN));
             }

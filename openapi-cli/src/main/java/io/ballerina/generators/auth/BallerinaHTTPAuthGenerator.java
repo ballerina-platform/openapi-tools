@@ -139,14 +139,14 @@ public class BallerinaHTTPAuthGenerator {
      * @return {@link TypeDefinitionNode}   Synatx tree node of config record
      */
     public static TypeDefinitionNode getConfigRecord (OpenAPI openAPI) {
-        if (openAPI.getComponents().getSecuritySchemes() != null) {
+        if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
             List<Node> recordFieldList = addItemstoRecordFieldList(openAPI);
             if (recordFieldList != null) {
                 Token typeName;
-                if (isAPIKey) {
-                    typeName = AbstractNodeFactory.createIdentifierToken(API_KEY_CONFIG);
-                } else {
+                if (isHttpOROAuth) {
                     typeName = AbstractNodeFactory.createIdentifierToken(CONFIG_RECORD_NAME);
+                } else {
+                    typeName = AbstractNodeFactory.createIdentifierToken(API_KEY_CONFIG);
                 }
                 Token visibilityQualifierNode = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.PUBLIC);
                 Token typeKeyWord = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.TYPE);
@@ -171,7 +171,6 @@ public class BallerinaHTTPAuthGenerator {
      * @return {@link List<ObjectFieldNode>}    syntax tree object field node list
      */
     public static ObjectFieldNode getApiKeyMapClassVariable() { // return ObjectFieldNode
-        List<ObjectFieldNode> apiKeyFieldNodeList = new ArrayList<>();
         if (isAPIKey) {
             NodeList<Token> qualifierList = createEmptyNodeList();
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
@@ -459,6 +458,8 @@ public class BallerinaHTTPAuthGenerator {
                                 break;
                             case "header":
                                 headerApiKeyNameList.add(schemaValue.getName());
+                                break;
+                            default:
                                 break;
                         }
                 }

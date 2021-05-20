@@ -19,25 +19,36 @@
 package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.generators.BallerinaClientGenerator;
+import io.ballerina.generators.OpenApiException;
+import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
+import static io.ballerina.generators.TestUtils.getDiagnostics;
 
 /**
  * All the tests related to the auth related code snippet generation for http or oauth 2.0 mechanisms.
  */
 public class HttpOrOAuthTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/auth").toAbsolutePath();
+    List<String> list1 = new ArrayList<>();
+    List<String> list2 = new ArrayList<>();
+    Filter filter = new Filter(list1, list2);
 
     @Test(description = "Generate config record for OAuth 2.0 authorization code flow", enabled = true)
     public void testgetConfigRecordAuthorizationCode() throws IOException, BallerinaOpenApiException {
@@ -164,5 +175,14 @@ public class HttpOrOAuthTests {
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
+    }
+
+    @Test(description = "Generate Client for salesforce yaml", enabled = false)
+    public void generateClientForSalesForce()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/salesforce.yaml");
+        SyntaxTree syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
+        Assert.assertTrue(diagnostics.isEmpty());
     }
 }

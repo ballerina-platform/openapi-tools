@@ -19,29 +19,43 @@
 package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.BallerinaClientGenerator;
+import io.ballerina.generators.OpenApiException;
+import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
+import static io.ballerina.generators.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
+import static io.ballerina.generators.TestUtils.getDiagnostics;
 
 /**
  * All the tests related to the auth related code snippet generation for api key auth mechanism.
  */
 public class ApiKeyAuthTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/auth").toAbsolutePath();
+    private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/").toAbsolutePath();
+    List<String> list1 = new ArrayList<>();
+    List<String> list2 = new ArrayList<>();
+    Filter filter = new Filter(list1, list2);
 
     @Test(description = "Generate config record for openweathermap api", enabled = true)
+    @BeforeClass ()
     public void testgetConfigRecord() throws IOException, BallerinaOpenApiException {
         // generate ApiKeysConfig record
-        Path definitionPath = RES_DIR.resolve("scenarios/openweathermap_original.yaml");
+        Path definitionPath = RES_DIR.resolve("auth/scenarios/openweathermap_original.yaml");
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
         String expectedConfigRecord = "public type ApiKeysConfig record {map<string|string[]> apiKeys;};";
         String generatedConfigRecord = Objects.requireNonNull(
@@ -85,4 +99,33 @@ public class ApiKeyAuthTests {
         expectedAssignmentNode = (expectedAssignmentNode.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedAssignmentNode, generatedAssignmentNode);
     }
+    @Test(description = "Generate Client for openapi_weather_api yaml", enabled = true)
+    public void generateClientForWeatherAPI()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
+        SyntaxTree syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal", syntaxTree);
+    }
+
+    @Test(description = "Generate Client for openapi spec have display annotation method", enabled = true)
+    public void generateClientForDisplayAnnotation()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
+        SyntaxTree syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
+        Assert.assertTrue(diagnostics.isEmpty());
+    }
+
+    @Test(description = "Generate Client for openapi spec UBER yaml", enabled = true)
+    public void generateClientForUberAPI()
+            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/uber_openapi.yaml");
+        SyntaxTree syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
+        Assert.assertTrue(diagnostics.isEmpty());
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("uber_openapi.bal", syntaxTree);
+    }
+
 }

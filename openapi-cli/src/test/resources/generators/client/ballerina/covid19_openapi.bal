@@ -6,7 +6,7 @@ type CountryInfoArr CountryInfo[];
 
 public client class Client {
     public http:Client clientEp;
-    public isolated function init(http:ClientConfiguration  clientConfig =  {}, string serviceUrl = "https://api-cov19.now.sh/") returns error? {
+    public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://api-cov19.now.sh/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
