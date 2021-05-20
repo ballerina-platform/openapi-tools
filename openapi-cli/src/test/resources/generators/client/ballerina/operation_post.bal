@@ -1,5 +1,5 @@
-import ballerina/http;
-import ballerina/xmldata;
+import  ballerina/http;
+import  ballerina/xmldata;
 
 public client class Client {
     public http:Client clientEp;
@@ -13,19 +13,19 @@ public client class Client {
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp->post(path, request);
+        http:Response  response = check self.clientEp->post(path, request, targetType=http:Response );
         return response;
     }
     remote isolated function getPetId(string petId, string payload) returns http:Response | error {
         string  path = string `/pets/${petId}`;
         http:Request request = new;
         request.setPayload(payload);
-        http:Response response = check self.clientEp->post(path, request);
+        http:Response  response = check self.clientEp->post(path, request, targetType=http:Response );
         return response;
     }
     remote isolated function  ImageByimageId(int petId, string imageId) returns http:Response | error {
         string  path = string `/pets/${petId}/Image/${imageId}`;
-        http:Response  response = check self.clientEp->get(path, targetType = http:Response );
+        http:Response  response = check self.clientEp-> get(path, targetType = http:Response );
         return response;
     }
 }
