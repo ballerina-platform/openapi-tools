@@ -2,6 +2,7 @@
 
 This package is for the Ballerina OpenAPI tooling which will make it easy for you to start the development of 
 a service documented in an OpenAPI contract in Ballerina by generating the Ballerina service and client skeletons. 
+
 The OpenAPI tools provide the following capabilities. 
 
  1. Generate the Ballerina service or client code for a given OpenAPI definition. 
@@ -145,4 +146,3 @@ The `Tag` feature can store with `excludeOperations`. Then, all the tag operatio
  
 - **FailOnErrors** (Optional) : **boolean value**   :
 If you need to turn off the validation, add this to the annotation with the value as `false`.
-
