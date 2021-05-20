@@ -207,7 +207,7 @@ public class BallerinaClientGenerator {
     private static List<ImportDeclarationNode> imports = new ArrayList<>();
     private static boolean isQuery;
     private static Info info;
-    private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+    private static Set<TypeDefinitionNode> typeDefinitionNodeList = new HashSet<>();
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
             BallerinaOpenApiException {
@@ -871,8 +871,12 @@ public class BallerinaClientGenerator {
         return annotationNodes;
     }
 
-    /*
-     * Create request body parameter.
+    /**
+     * Get return type of the remote function.
+     *
+     * @param operation     swagger operation.
+     * @return              string with return type.
+     * @throws BallerinaOpenApiException - throws exception if creating return type fails.
      */
     public static String getReturnType(Operation operation) throws BallerinaOpenApiException {
         String returnType = "http:Response | error";
@@ -886,19 +890,25 @@ public class BallerinaClientGenerator {
                     Content content = response.getContent();
                     Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
                     for (Map.Entry<String, MediaType> media : mediaTypes) {
-                        String type;
+                        String type = "";
                         if (media.getValue().getSchema() != null) {
                             Schema schema = media.getValue().getSchema();
                             if (schema instanceof ComposedSchema) {
                                 ComposedSchema composedSchema = (ComposedSchema) schema;
                                 if (composedSchema.getOneOf() != null) {
                                     List<Schema> oneOf = composedSchema.getOneOf();
-                                    String oneOfUnionType = getOneOfUnionType(oneOf);
+                                    type = getOneOfUnionType(oneOf);
                                     //Get oneOfUnionType name
-
-
+                                    String typeName = type.replaceAll("\\|","");
+                                    TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
+                                            createIdentifierToken("type"),
+                                            createIdentifierToken(typeName),
+                                            createSimpleNameReferenceNode(createIdentifierToken(type)),
+                                            createToken(SEMICOLON_TOKEN));
+                                    type = generateTypeDefinitionNodeType(typeName, typeDefNode);
+                                    return type + "|error";
                                 }
-                            } else if (schema.get$ref() != null) {
+                            } else  if (schema.get$ref() != null) {
                                 type = extractReferenceType(schema.get$ref());
                             } else if (schema instanceof ArraySchema) {
                                 ArraySchema arraySchema = (ArraySchema) schema;
@@ -962,8 +972,8 @@ public class BallerinaClientGenerator {
 
     /**
      * Generate Type for datatype that can not bind to the targetType.
-     * @param type - data Type
-     * @param typeName - Created datType name
+     * @param type - data Type.
+     * @param typeName - Created datType name.
      * @return return dataType
      */
     private static String generateCustomTypeDefine(String type, String typeName) {
@@ -999,10 +1009,11 @@ public class BallerinaClientGenerator {
 
     /**
      * Generate function body node.
-     * @param path - remote function path
+     *
+     * @param path      - remote function path
      * @param operation - opneapi operation
      * @return - function body node
-     * @throws BallerinaOpenApiException
+     * @throws BallerinaOpenApiException - throws exception if generating FunctionBodyNode fails.
      */
     public static FunctionBodyNode getFunctionBodyNode(String path, Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
@@ -1060,9 +1071,15 @@ public class BallerinaClientGenerator {
                 isHeader = true;
             }
         }
-        //Statement Generator for requestBody
+
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
-        String returnType = getReturnType(operation.getValue()).split("\\|")[0];
+        String rType = getReturnType(operation.getValue());
+        int index = rType.lastIndexOf("|");
+        String returnType = rType.substring(0, index);
+        if (returnType.contains("|")) {
+            returnType = returnType.replaceAll("\\|", "");
+        }
+        //Statement Generator for requestBody
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
