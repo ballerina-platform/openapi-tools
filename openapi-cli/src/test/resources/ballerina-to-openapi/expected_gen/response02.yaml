@@ -3,7 +3,7 @@ info:
   title: ' payloadV'
   version: 1.0.0
 servers:
-  - url: petstore.openapi.io:80/payloadV
+  - url: http://petstore.openapi.io:80/payloadV
 paths:
   /user:
     post:

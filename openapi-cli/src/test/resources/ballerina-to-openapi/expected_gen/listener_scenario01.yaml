@@ -3,14 +3,14 @@ info:
   title: ' payloadV'
   version: 1.0.0
 servers:
-  - url: petstore.openapi.io:80/payloadV
+  - url: http://petstore.openapi.io:80/payloadV
 paths:
   /pets:
     get:
       operationId: operation1_get_/pets
       responses:
         "200":
-          description: Ok
+          description: Successful
           content:
             text/plain:
               schema:
