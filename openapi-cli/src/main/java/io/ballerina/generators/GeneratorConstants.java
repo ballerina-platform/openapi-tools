@@ -50,7 +50,7 @@ public class GeneratorConstants {
     /**
      * Enum to select the relavant ballerina http auth record.
      */
-    public enum BallerinaAuthMap {
+    public enum AuthConfigTypes {
         BASIC("http:CredentialsConfig"),
         BEARER("http:BearerTokenConfig"),
         CLIENT_CREDENTIAL("http:OAuth2ClientCredentialsGrantConfig"),
@@ -59,7 +59,7 @@ public class GeneratorConstants {
 
         private final String authType;
 
-        BallerinaAuthMap(String authType) {
+        AuthConfigTypes(String authType) {
             this.authType = authType;
         }
 

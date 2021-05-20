@@ -19,14 +19,9 @@
 package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.generators.BallerinaClientGenerator;
-import io.ballerina.generators.OpenApiException;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -39,8 +34,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
-import static io.ballerina.generators.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
-import static io.ballerina.generators.TestUtils.getDiagnostics;
 
 /**
  * All the tests related to the auth related code snippet generation for api key auth mechanism.
@@ -51,7 +44,7 @@ public class ApiKeyAuthTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    @Test(description = "Generate config record for openweathermap api", enabled = true)
+    @Test(description = "Generate config record for openweathermap api")
     @BeforeClass ()
     public void testgetConfigRecord() throws IOException, BallerinaOpenApiException {
         // generate ApiKeysConfig record
@@ -59,28 +52,28 @@ public class ApiKeyAuthTests {
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
         String expectedConfigRecord = "public type ApiKeysConfig record {map<string|string[]> apiKeys;};";
         String generatedConfigRecord = Objects.requireNonNull(
-                BallerinaHTTPAuthGenerator.getConfigRecord(openAPI)).toString();
+                BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
     }
 
     @Test(description = "Test the generation of ApiKey map local variable",
-            dependsOnMethods = {"testgetConfigRecord"}, enabled = true)
+            dependsOnMethods = {"testgetConfigRecord"})
     public void testgetApiKeyMapClassVariable () {
         String expectedClassVariable = "map<string|string[]> apiKeys;";
-        String generatedClassVariable = BallerinaHTTPAuthGenerator.getApiKeyMapClassVariable().toString();
+        String generatedClassVariable = BallerinaAuthConfigGenerator.getApiKeyMapClassVariable().toString();
         generatedClassVariable = (generatedClassVariable.trim()).replaceAll("\\s+", "");
         expectedClassVariable = (expectedClassVariable.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedClassVariable, generatedClassVariable);
     }
 
     @Test(description = "Test the generation of api key related parameters in class init function signature",
-            dependsOnMethods = {"testgetApiKeyMapClassVariable"}, enabled = true)
+            dependsOnMethods = {"testgetApiKeyMapClassVariable"})
     public void testgetApiKeyAssignmentNode() {
         String expectedParams = "ApiKeysConfig apiKeyConfig,http:ClientConfiguration clientConfig =  {}";
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = BallerinaHTTPAuthGenerator.getConfigParamForClassInit();
+        List<Node> generatedInitParamNodes = BallerinaAuthConfigGenerator.getConfigParamForClassInit();
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }
@@ -90,42 +83,13 @@ public class ApiKeyAuthTests {
     }
 
     @Test(description = "Test the generation of api key assignment node",
-            dependsOnMethods = {"testgetConfigRecord"}, enabled = true)
+            dependsOnMethods = {"testgetConfigRecord"})
     public void testgetConfigParamForClassInit () {
         String expectedAssignmentNode = "self.apiKeys = apiKeyConfig.apiKeys;";
         String generatedAssignmentNode = Objects.requireNonNull
-                (BallerinaHTTPAuthGenerator.getApiKeyAssignmentNode()).toString();
+                (BallerinaAuthConfigGenerator.getApiKeyAssignmentNode()).toString();
         generatedAssignmentNode = (generatedAssignmentNode.trim()).replaceAll("\\s+", "");
         expectedAssignmentNode = (expectedAssignmentNode.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedAssignmentNode, generatedAssignmentNode);
     }
-    @Test(description = "Generate Client for openapi_weather_api yaml", enabled = true)
-    public void generateClientForWeatherAPI()
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
-        SyntaxTree syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("openapi_weather_api.bal", syntaxTree);
-    }
-
-    @Test(description = "Generate Client for openapi spec have display annotation method", enabled = true)
-    public void generateClientForDisplayAnnotation()
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
-        SyntaxTree syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
-    }
-
-    @Test(description = "Generate Client for openapi spec UBER yaml", enabled = true)
-    public void generateClientForUberAPI()
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/uber_openapi.yaml");
-        SyntaxTree syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree("uber_openapi.bal", syntaxTree);
-    }
-
 }

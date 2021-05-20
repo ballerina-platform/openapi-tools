@@ -18,10 +18,6 @@
 
 package io.ballerina.generators.auth;
 
-
-
-
-
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
@@ -98,9 +94,9 @@ import static io.ballerina.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.generators.GeneratorConstants.API_KEY_CONFIG_RECORD_FIELD;
 import static io.ballerina.generators.GeneratorConstants.API_KEY_MAP;
 import static io.ballerina.generators.GeneratorConstants.AUTH_CONFIG_FILED_NAME;
+import static io.ballerina.generators.GeneratorConstants.AuthConfigTypes;
 import static io.ballerina.generators.GeneratorConstants.BASIC;
 import static io.ballerina.generators.GeneratorConstants.BEARER;
-import static io.ballerina.generators.GeneratorConstants.BallerinaAuthMap;
 import static io.ballerina.generators.GeneratorConstants.CONFIG_RECORD_ARG;
 import static io.ballerina.generators.GeneratorConstants.CONFIG_RECORD_NAME;
 import static io.ballerina.generators.GeneratorConstants.HTTP;
@@ -109,11 +105,9 @@ import static io.ballerina.generators.GeneratorConstants.SSL_FIELD_NAME;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 
 /**
- *
  * This class is used to generate authentication related nodes of the ballerina connector client syntax tree.
  */
-
-public class BallerinaHTTPAuthGenerator {
+public class BallerinaAuthConfigGenerator {
     private static final List<String> headerApiKeyNameList = new ArrayList<>();
     private static final List<String> queryApiKeyNameList = new ArrayList<>();
     private static boolean isAPIKey = false;
@@ -139,6 +133,7 @@ public class BallerinaHTTPAuthGenerator {
      * @return {@link TypeDefinitionNode}   Synatx tree node of config record
      */
     public static TypeDefinitionNode getConfigRecord (OpenAPI openAPI) {
+        clearStaticVariables();
         if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
             List<Node> recordFieldList = addItemstoRecordFieldList(openAPI);
             if (recordFieldList != null) {
@@ -417,8 +412,6 @@ public class BallerinaHTTPAuthGenerator {
      */
     private static String getConfigRecordFieldTypeNames(Map<String, SecurityScheme> securitySchemeMap) {
         Set<String> httpFieldTypeNames = new HashSet<String>();
-        queryApiKeyNameList.clear();
-        headerApiKeyNameList.clear();
         for (Map.Entry<String, SecurityScheme> securitySchemeEntry : securitySchemeMap.entrySet()) {
             SecurityScheme schemaValue = securitySchemeEntry.getValue();
             if (schemaValue != null && schemaValue.getType() != null) {
@@ -428,25 +421,25 @@ public class BallerinaHTTPAuthGenerator {
                         isHttpOROAuth = true;
                         String scheme = schemaValue.getScheme();
                         if (scheme.equals(BASIC)) {
-                            httpFieldTypeNames.add(BallerinaAuthMap.BASIC.getValue());
+                            httpFieldTypeNames.add(AuthConfigTypes.BASIC.getValue());
                         } else if (scheme.equals(BEARER)) {
-                            httpFieldTypeNames.add(BallerinaAuthMap.BEARER.getValue());
+                            httpFieldTypeNames.add(AuthConfigTypes.BEARER.getValue());
                         }
                         break;
                     case OAUTH2:
                         isHttpOROAuth = true;
                         if (schemaValue.getFlows().getClientCredentials() != null) {
-                            httpFieldTypeNames.add(BallerinaAuthMap.CLIENT_CREDENTIAL.getValue());
+                            httpFieldTypeNames.add(AuthConfigTypes.CLIENT_CREDENTIAL.getValue());
                         }
                         if (schemaValue.getFlows().getPassword() != null) {
-                            httpFieldTypeNames.add(BallerinaAuthMap.PASSWORD.getValue());
+                            httpFieldTypeNames.add(AuthConfigTypes.PASSWORD.getValue());
                         }
                         if (schemaValue.getFlows().getAuthorizationCode() != null) {
-                            httpFieldTypeNames.add(BallerinaAuthMap.BEARER.getValue());
-                            httpFieldTypeNames.add(BallerinaAuthMap.REFRESH_TOKEN.getValue());
+                            httpFieldTypeNames.add(AuthConfigTypes.BEARER.getValue());
+                            httpFieldTypeNames.add(AuthConfigTypes.REFRESH_TOKEN.getValue());
                         }
                         if (schemaValue.getFlows().getImplicit() != null) {
-                            httpFieldTypeNames.add(BallerinaAuthMap.BEARER.getValue());
+                            httpFieldTypeNames.add(AuthConfigTypes.BEARER.getValue());
                         }
                         break;
                     case API_KEY:
@@ -467,6 +460,7 @@ public class BallerinaHTTPAuthGenerator {
         }
         return buildConfigRecordFieldTypes(httpFieldTypeNames).toString();
     }
+
     /**
      * This static method is used concat the config record authConfig field type.
      *
@@ -485,5 +479,15 @@ public class BallerinaHTTPAuthGenerator {
             }
         }
         return httpAuthFieldTypes;
+    }
+
+    /**
+     * Clear class static variable at the beginning of execution
+     */
+    private static void clearStaticVariables() {
+        isHttpOROAuth = false;
+        isAPIKey = false;
+        queryApiKeyNameList.clear();
+        headerApiKeyNameList.clear();
     }
 }

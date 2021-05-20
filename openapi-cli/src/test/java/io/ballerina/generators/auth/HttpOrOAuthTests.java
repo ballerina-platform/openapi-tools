@@ -19,15 +19,10 @@
 package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.generators.BallerinaClientGenerator;
-import io.ballerina.generators.OpenApiException;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -39,7 +34,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
-import static io.ballerina.generators.TestUtils.getDiagnostics;
 
 /**
  * All the tests related to the auth related code snippet generation for http or oauth 2.0 mechanisms.
@@ -50,7 +44,7 @@ public class HttpOrOAuthTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    @Test(description = "Generate config record for OAuth 2.0 authorization code flow", enabled = true)
+    @Test(description = "Generate config record for OAuth 2.0 authorization code flow")
     public void testgetConfigRecordAuthorizationCode() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2_authrization_code.yaml");
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -59,7 +53,7 @@ public class HttpOrOAuthTests {
                 "    http:ClientSecureSocket secureSocketConfig?;\n" +
                 "};";
         String generatedConfigRecord = Objects.requireNonNull(
-                BallerinaHTTPAuthGenerator.getConfigRecord(openAPI)).toString();
+                BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
@@ -67,11 +61,11 @@ public class HttpOrOAuthTests {
 
 
     @Test(description = "Test the generation of Config params in class init function signature",
-            dependsOnMethods = {"testgetConfigRecordAuthorizationCode"}, enabled = true)
+            dependsOnMethods = {"testgetConfigRecordAuthorizationCode"})
     public void testgetConfigParamForClassInit() {
         String expectedParams = "ClientConfig clientConfig";
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = BallerinaHTTPAuthGenerator.getConfigParamForClassInit();
+        List<Node> generatedInitParamNodes = BallerinaAuthConfigGenerator.getConfigParamForClassInit();
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }
@@ -81,28 +75,28 @@ public class HttpOrOAuthTests {
     }
 
     @Test(description = "Test the generation of SSL init node",
-            dependsOnMethods = {"testgetConfigRecordAuthorizationCode"}, enabled = true)
+            dependsOnMethods = {"testgetConfigRecordAuthorizationCode"})
     public void testgetSecureSocketInitNode() {
         String expectedParam = "http:ClientSecureSocket? secureSocketConfig = clientConfig?.secureSocketConfig;";
-        VariableDeclarationNode generatedInitParamNode = BallerinaHTTPAuthGenerator.getSecureSocketInitNode();
+        VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getSecureSocketInitNode();
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
         String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedParam, generatedParamsStr);
     }
 
     @Test(description = "Test the generation of http:Client init node",
-            dependsOnMethods = {"testgetConfigRecordAuthorizationCode"}, enabled = true)
+            dependsOnMethods = {"testgetConfigRecordAuthorizationCode"})
     public void testgetClientInitializationNode() {
         String expectedParam = "http:Client httpEp = check new (serviceUrl, { " +
                 "auth: clientConfig.authConfig, " +
                 "secureSocket: secureSocketConfig });";
-        VariableDeclarationNode generatedInitParamNode = BallerinaHTTPAuthGenerator.getClientInitializationNode();
+        VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getClientInitializationNode();
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
         String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedParam, generatedParamsStr);
     }
 
-    @Test(description = "Generate config record for http basic auth", enabled = true)
+    @Test(description = "Generate config record for http basic auth")
     public void testgetConfigRecordBasicAuth() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/basic_auth.yaml");
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -111,13 +105,13 @@ public class HttpOrOAuthTests {
                 "    http:ClientSecureSocket secureSocketConfig?;\n" +
                 "};";
         String generatedConfigRecord = Objects.requireNonNull(
-                BallerinaHTTPAuthGenerator.getConfigRecord(openAPI)).toString();
+                BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
     }
 
-    @Test(description = "Generate config record for http bearer auth", enabled = true)
+    @Test(description = "Generate config record for http bearer auth")
     public void testgetConfigRecordBearerAuth() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/http_bearer.yaml");
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -126,13 +120,13 @@ public class HttpOrOAuthTests {
                 "    http:ClientSecureSocket secureSocketConfig?;\n" +
                 "};";
         String generatedConfigRecord = Objects.requireNonNull(
-                BallerinaHTTPAuthGenerator.getConfigRecord(openAPI)).toString();
+                BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
     }
 
-    @Test(description = "Generate config record for oauth 2.0 client credentials flow", enabled = true)
+    @Test(description = "Generate config record for oauth 2.0 client credentials flow")
     public void testgetConfigRecordClientCredentialAuth() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2_client_credential.yaml");
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -141,13 +135,13 @@ public class HttpOrOAuthTests {
                 "    http:ClientSecureSocket secureSocketConfig?;\n" +
                 "};";
         String generatedConfigRecord = Objects.requireNonNull(
-                BallerinaHTTPAuthGenerator.getConfigRecord(openAPI)).toString();
+                BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
     }
 
-    @Test(description = "Generate config record for oauth 2.0 password flow", enabled = true)
+    @Test(description = "Generate config record for oauth 2.0 password flow")
     public void testgetConfigRecordPasswordAuth() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2_password.yaml");
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -156,13 +150,13 @@ public class HttpOrOAuthTests {
                 "    http:ClientSecureSocket secureSocketConfig?;\n" +
                 "};";
         String generatedConfigRecord = Objects.requireNonNull(
-                BallerinaHTTPAuthGenerator.getConfigRecord(openAPI)).toString();
+                BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
     }
 
-    @Test(description = "Generate config record for oauth 2.0 multiple flows configured", enabled = true)
+    @Test(description = "Generate config record for oauth 2.0 multiple flows configured")
     public void testgetConfigRecordMultipleFlows() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2_multipleflows.yaml");
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -171,18 +165,9 @@ public class HttpOrOAuthTests {
                 "    http:ClientSecureSocket secureSocketConfig?;\n" +
                 "};";
         String generatedConfigRecord = Objects.requireNonNull(
-                BallerinaHTTPAuthGenerator.getConfigRecord(openAPI)).toString();
+                BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
-    }
-
-    @Test(description = "Generate Client for salesforce yaml", enabled = false)
-    public void generateClientForSalesForce()
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/salesforce.yaml");
-        SyntaxTree syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
     }
 }

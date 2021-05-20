@@ -68,7 +68,7 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeTestExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.generators.auth.BallerinaHTTPAuthGenerator;
+import io.ballerina.generators.auth.BallerinaAuthConfigGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.text.TextDocument;
@@ -88,7 +88,6 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
-import org.ballerinalang.formatter.core.FormatterException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -194,7 +193,7 @@ public class BallerinaClientGenerator {
     private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
-            BallerinaOpenApiException, FormatterException {
+            BallerinaOpenApiException {
         imports.clear();
         typeDefinitionNodeList.clear();
         isQuery = false;
@@ -299,7 +298,7 @@ public class BallerinaClientGenerator {
         List<Node> parameters  = new ArrayList<>();
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         //get config parameters relavant to the auth meachnism used
-        parameters.addAll(BallerinaHTTPAuthGenerator.getConfigParamForClassInit());
+        parameters.addAll(BallerinaAuthConfigGenerator.getConfigParamForClassInit());
         parameters.add(createToken(COMMA_TOKEN));
         BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken("string"));
@@ -324,9 +323,9 @@ public class BallerinaClientGenerator {
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
                 createToken(OPEN_PAREN_TOKEN), parameterList, createToken(CLOSE_PAREN_TOKEN), returnNode);
 
-        VariableDeclarationNode sslDeclarationNode = BallerinaHTTPAuthGenerator.getSecureSocketInitNode();
+        VariableDeclarationNode sslDeclarationNode = BallerinaAuthConfigGenerator.getSecureSocketInitNode();
         //Create function body node
-        VariableDeclarationNode clientInitializationNode = BallerinaHTTPAuthGenerator.getClientInitializationNode();
+        VariableDeclarationNode clientInitializationNode = BallerinaAuthConfigGenerator.getClientInitializationNode();
 
         //Assigment for client
         FieldAccessExpressionNode varRef = createFieldAccessExpressionNode(
@@ -336,7 +335,7 @@ public class BallerinaClientGenerator {
         SimpleNameReferenceNode expr = createSimpleNameReferenceNode(createIdentifierToken("httpEp"));
         AssignmentStatementNode httpClientAssignmentStatementNode = createAssignmentStatementNode(varRef,
                 createToken(EQUAL_TOKEN), expr, createToken(SEMICOLON_TOKEN));
-        AssignmentStatementNode assignmentStatementNodeApiKey = BallerinaHTTPAuthGenerator.
+        AssignmentStatementNode assignmentStatementNodeApiKey = BallerinaAuthConfigGenerator.
                 getApiKeyAssignmentNode();
 
         List<StatementNode> assignmentNodes = new ArrayList<>();
@@ -391,7 +390,7 @@ public class BallerinaClientGenerator {
                 qualifierList, typeName, fieldName, null, null, createToken(SEMICOLON_TOKEN));
         fieldNodeList.add(httpClientField);
         // add apiKey instance variable when API key security schema is given
-        ObjectFieldNode apiKeyFieldNode = BallerinaHTTPAuthGenerator.getApiKeyMapClassVariable();
+        ObjectFieldNode apiKeyFieldNode = BallerinaAuthConfigGenerator.getApiKeyMapClassVariable();
         if (apiKeyFieldNode != null) {
             fieldNodeList.add(apiKeyFieldNode);
         }
@@ -992,8 +991,8 @@ public class BallerinaClientGenerator {
                 }
             }
 
-            List<String> queryApiKeyNameList = BallerinaHTTPAuthGenerator.getQueryApiKeyNameList();
-            List<String> headerApiKeyNameList = BallerinaHTTPAuthGenerator.getHeaderApiKeyNameList();
+            List<String> queryApiKeyNameList = BallerinaAuthConfigGenerator.getQueryApiKeyNameList();
+            List<String> headerApiKeyNameList = BallerinaAuthConfigGenerator.getHeaderApiKeyNameList();
 
             if (!queryParameters.isEmpty() || !queryApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
@@ -1436,7 +1435,7 @@ public class BallerinaClientGenerator {
     }
 
     private static void addConfigRecordToTypeDefnitionNodeList(OpenAPI openAPI) {
-        TypeDefinitionNode configRecord = BallerinaHTTPAuthGenerator.getConfigRecord(openAPI);
+        TypeDefinitionNode configRecord = BallerinaAuthConfigGenerator.getConfigRecord(openAPI);
         if (configRecord != null) {
             typeDefinitionNodeList.add(configRecord);
         }
