@@ -1,6 +1,6 @@
 ## Package Overview
 
-The `openapi`  package is one of the command-line tools of the [Ballerina](https://ballerina.io/) language.
+The `openapi` package is one of the command-line tools of the [Ballerina](https://ballerina.io/) language.
 
 This package provides support for the Ballerina OpenAPI tooling. The OpenAPI commands will make it easy for you to 
 start the development of a service documented in an OpenAPI contract in Ballerina by generating the Ballerina service 
