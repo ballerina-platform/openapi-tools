@@ -482,7 +482,7 @@ public class BallerinaAuthConfigGenerator {
     }
 
     /**
-     * Clear class static variable at the beginning of execution
+     * Clear class static variable at the beginning of execution.
      */
     private static void clearStaticVariables() {
         isHttpOROAuth = false;
