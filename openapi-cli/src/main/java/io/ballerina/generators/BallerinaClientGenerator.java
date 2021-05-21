@@ -97,6 +97,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -423,18 +424,20 @@ public class BallerinaClientGenerator {
      * Generate Client class attributes.
      */
     private static ObjectFieldNode getClassField() {
-        Token visibilityQualifierAttribute = createIdentifierToken(GeneratorConstants.PUBLIC);
         NodeList<Token> qualifierList = createEmptyNodeList();
         QualifiedNameReferenceNode typeName = createQualifiedNameReferenceNode(createIdentifierToken(HTTP),
                         createToken(COLON_TOKEN), createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
         IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.CLIENT_EP);
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
-        return createObjectFieldNode(metadataNode, visibilityQualifierAttribute,
+        return createObjectFieldNode(metadataNode, null,
                 qualifierList, typeName, fieldName, null, null, createToken(SEMICOLON_TOKEN));
     }
 
-    /*
+    /**
      * Generate remote function method name , when operation ID is not available for given operation.
+     *
+     * @param paths - swagger paths object
+     * @return {@link io.swagger.v3.oas.models.Paths }
      */
     private static Paths setOperationId(Paths paths) {
         Set<Map.Entry<String, PathItem>> entries = paths.entrySet();
@@ -573,10 +576,11 @@ public class BallerinaClientGenerator {
 
     /**
      * Generate remote functions for OpenAPI operations.
+     *
      * @param paths  openAPI Paths
      * @param filter user given tags and operations
-     * @return FunctionsNode list
-     * @throws BallerinaOpenApiException
+     * @return FunctionDefinitionNodes list
+     * @throws BallerinaOpenApiException - throws when creating remote functions fails
      */
     private static List<FunctionDefinitionNode> createRemoteFunctions(Paths paths, Filter filter)
             throws BallerinaOpenApiException {
@@ -655,9 +659,10 @@ public class BallerinaClientGenerator {
 
     /**
      * This function for generate function signatures.
+     *
      * @param operation openapi operation
-     * @return functionSignatureNode
-     * @throws BallerinaOpenApiException
+     * @return {@link io.ballerina.compiler.syntax.tree.FunctionSignatureNode}
+     * @throws BallerinaOpenApiException - throws exception when node creation fails.
      */
     public static FunctionSignatureNode getFunctionSignatureNode(Operation operation) throws BallerinaOpenApiException {
         // Create Parameters - function with parameters
@@ -899,13 +904,13 @@ public class BallerinaClientGenerator {
                                     List<Schema> oneOf = composedSchema.getOneOf();
                                     type = getOneOfUnionType(oneOf);
                                     //Get oneOfUnionType name
-                                    String typeName = type.replaceAll("\\|","");
+                                    String typeName = type.replaceAll("\\|", "");
                                     TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
                                             createIdentifierToken("type"),
                                             createIdentifierToken(typeName),
                                             createSimpleNameReferenceNode(createIdentifierToken(type)),
                                             createToken(SEMICOLON_TOKEN));
-                                    type = generateTypeDefinitionNodeType(typeName, typeDefNode);
+                                    generateTypeDefinitionNodeType(typeName, typeDefNode);
                                     return type + "|error";
                                 }
                             } else  if (schema.get$ref() != null) {

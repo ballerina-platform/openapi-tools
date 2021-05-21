@@ -3,7 +3,7 @@ import  ballerina/url;
 import  ballerina/lang.'string;
 
 public client class Client {
-    public http:Client clientEp;
+    http:Client clientEp;
     public isolated function init(string serviceUrl = "http://api.openweathermap.org/data/2.5/", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;

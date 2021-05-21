@@ -3,10 +3,8 @@ import  ballerina/url;
 import  ballerina/lang.'string;
 
 public client class Client {
-    public http:Client clientEp;
-    public isolated function init(string serviceUrl = "http://petstore.openapi.io/v1", http:ClientConfiguration
-    httpClientConfig= {})
-    returns error? {
+    http:Client clientEp;
+    public isolated function init(string serviceUrl = "http://petstore.openapi.io/v1", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
     }
@@ -14,19 +12,19 @@ public client class Client {
         string  path = string `/pets`;
         map<anydata> queryParam = {'limit: 'limit};
         path = path + getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp->get(path, targetType = Pets);
+        Pets response = check self.clientEp-> get(path, targetType = Pets);
         return response;
     }
     remote isolated function  pets() returns http:Response | error {
         string  path = string `/pets`;
         http:Request request = new;
         //TODO: Update the request as needed;
-        http:Response  response = check self.clientEp->post(path, request, targetType = http:Response );
+        http:Response  response = check self.clientEp-> post(path, request, targetType = http:Response );
         return response;
     }
     remote isolated function showPetById(string petId) returns Pets|error {
         string  path = string `/pets/${petId}`;
-        Pets response = check self.clientEp->get(path, targetType = Pets);
+        Pets response = check self.clientEp-> get(path, targetType = Pets);
         return response;
     }
 }
