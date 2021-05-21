@@ -152,7 +152,7 @@ public class BallerinaClientGeneratorTests {
     }
 
     @Test(description = "Test for header that comes under the parameter section.")
-    public void getHeaderParameterTests() throws IOException, BallerinaOpenApiException {
+    public void getHeaderTests() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/header_parameter.yaml");
         OpenAPI display = getOpenAPI(definitionPath);
         Set<Map.Entry<PathItem.HttpMethod, Operation>> operation =
@@ -164,8 +164,23 @@ public class BallerinaClientGeneratorTests {
                 "response=check self.clientEp-> get(path, accHeaders, targetType = http:Response );returnresponse;}");
     }
 
+    @Test(description = "Tests functionBodyNodes including statements according to the different scenarios",
+            dataProvider = "dataProviderForFunctionBody")
+    public void getFunctionBodyNodes(String yamlFile, String path, String content) throws IOException,
+            BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve(yamlFile);
+        OpenAPI display = getOpenAPI(definitionPath);
+        Set<Map.Entry<PathItem.HttpMethod, Operation>> operation =
+                display.getPaths().get(path).readOperationsMap().entrySet();
+        Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
+        FunctionBodyNode bodyNode = getFunctionBodyNode(path, iterator.next());
+        content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
+        String bodyNodeContent = bodyNode.toString().trim().replaceAll("\n", "").replaceAll("\\s+", "");
+        Assert.assertEquals(bodyNodeContent, content);
+    }
+
     @Test(description = "Test openAPI definition to ballerina client source code generation with diagnostic issue",
-            dataProvider = "singleFileProvider")
+            dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
             FormatterException, OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/" + yamlFile);
@@ -175,7 +190,7 @@ public class BallerinaClientGeneratorTests {
     }
 
     @Test(description = "Test openAPI definition to ballerina client source code generation",
-            dataProvider = "fileProvider")
+            dataProvider = "fileProviderForFilesComparison")
     public void  openApiToBallerinaCodeGenTestForClient(String yamlFile, String expectedFile) throws IOException,
             BallerinaOpenApiException, FormatterException, OpenApiException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/" + yamlFile);
@@ -186,20 +201,18 @@ public class BallerinaClientGeneratorTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
-    @DataProvider(name = "fileProvider")
-    public Object[][] fileProvider() {
+    @DataProvider(name = "fileProviderForFilesComparison")
+    public Object[][] fileProviderForFilesComparison() {
         return new Object[][]{
                 {"openapi_weather_api.yaml", "openapi_weather_api.bal"},
                 {"uber_openapi.yaml", "uber_openapi.bal"},
-//                {"jira_openapi.yaml", "jira_openapi.bal"}, comment since it need to handle anyOf data type
-//                {"world_bank_openapi.yaml", "world_bank_openapi.bal"},
                 {"multiple_pathparam.yaml", "multiple_pathparam.bal"},
                 {"covid19_openapi.yaml", "covid19_openapi.bal"}
         };
     }
 
-    @DataProvider(name = "singleFileProvider")
-    public Object[][] singleFileProvider() {
+    @DataProvider(name = "singleFileProviderForDiagnosticCheck")
+    public Object[][] singleFileProviderForDiagnosticCheck() {
         return new Object[][] {
                 {"petstore_server_with_base_path.yaml"},
                 {"petstore_without_operation_id.yaml"},
@@ -208,6 +221,22 @@ public class BallerinaClientGeneratorTests {
                 {"header_parameter.yaml"},
                 {"petstore_post.yaml"},
                 {"petstore_with_oneOf_response.yaml"}
+        };
+    }
+
+    @DataProvider(name = "dataProviderForFunctionBody")
+    public Object[][] dataProviderForFunctionBody() {
+        return new Object[][]{
+                {"swagger/header_parameter.yaml", "/pets", "{string path=string`/pets`;" +
+                        "map<string|string[]>accHeaders=" +
+                        "{'X\\-Request\\-ID:'X\\-Request\\-ID,'X\\-Request\\-Client:'X\\-Request\\-Client};" +
+                        "http:Response response=check self.clientEp-> get(path, accHeaders, targetType = " +
+                        "http:Response);returnresponse;}"},
+                {"file_provider/swagger/uber_openapi.yaml", "/history", "{string  path = string `/history`;\n" +
+                        "        map<anydata> queryParam = {offset: offset, 'limit: 'limit};\n" +
+                        "        path = path + getPathForQueryParam(queryParam);\n" +
+                        "        Activities response = check self.clientEp-> get(path, targetType = Activities);\n" +
+                        "        return response;}"},
         };
     }
 
