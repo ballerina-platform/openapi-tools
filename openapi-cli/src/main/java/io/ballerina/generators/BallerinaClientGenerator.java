@@ -735,7 +735,7 @@ public class BallerinaClientGenerator {
              typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(paramType)), createToken(QUESTION_MARK_TOKEN));
         }
-        IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+        IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()) + "=()");
         RequiredParameterNode queryParam = createRequiredParameterNode(annotationNodes, typeName, paramName);
         parameterList.add(queryParam);
     }
@@ -829,6 +829,7 @@ public class BallerinaClientGenerator {
 
     /**
      * Extract extension for find the display annotation.
+     *
      * @param extensions openapi extension.
      * @return Annotation node list.
      * */
