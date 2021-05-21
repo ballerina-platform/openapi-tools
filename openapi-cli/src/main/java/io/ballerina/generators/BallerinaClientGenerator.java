@@ -97,7 +97,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -208,7 +207,7 @@ public class BallerinaClientGenerator {
     private static List<ImportDeclarationNode> imports = new ArrayList<>();
     private static boolean isQuery;
     private static Info info;
-    private static Set<TypeDefinitionNode> typeDefinitionNodeList = new HashSet<>();
+    private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
             BallerinaOpenApiException {
@@ -776,7 +775,7 @@ public class BallerinaClientGenerator {
     }
 
     /*
-     * Create header parameter.
+     * Create header when it comes under the parameter section in swagger.
      */
     private static RequiredParameterNode getHeaderParameter(Parameter parameter)
             throws BallerinaOpenApiException {
@@ -1093,7 +1092,7 @@ public class BallerinaClientGenerator {
                 Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
                 //currently align with first content of the requestBody
                 while (iterator.hasNext()) {
-                    createRequestBodyStatements(isHeader, statementsList, semicolon, method, returnType, iterator);
+                    createRequestBodyStatements(isHeader, statementsList, method, returnType, iterator);
                     break;
                 }
             }
@@ -1141,9 +1140,22 @@ public class BallerinaClientGenerator {
 
     /**
      * This function for creating requestBody statements.
+     * -- ex: Request body with json payload.
+     * <pre>
+     *    http:Request request = new;
+     *    json jsonBody = check payload.cloneWithType(json);
+     *    request.setPayload(jsonBody);
+     *    json response = check self.clientEp->put(path, request, targetType=json);
+     * </pre>
+     *
+     * @param isHeader -boolean value for header availability.
+     * @param statementsList - StatementNode list in body node
+     * @param method         - Operation method name.
+     * @param returnType     - Response type
+     * @param iterator       - RequestBody media type
      */
     private static void createRequestBodyStatements(boolean isHeader, List<StatementNode> statementsList,
-                                                    Token semicolon, String method, String returnType,
+                                                    String method, String returnType,
                                                     Iterator<Map.Entry<String, MediaType>> iterator) {
 
         //Create Request statement
@@ -1203,7 +1215,7 @@ public class BallerinaClientGenerator {
         SimpleNameReferenceNode returnVariable = createSimpleNameReferenceNode(createIdentifierToken(
                 RESPONSE));
         ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returnVariable,
-                semicolon);
+                createToken(SEMICOLON_TOKEN));
         statementsList.add(returnStatementNode);
     }
 
