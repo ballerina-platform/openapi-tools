@@ -209,6 +209,7 @@ public class BallerinaSchemaGenerator {
 
     /**
      * This function use to create typeDefinitionNode for objectSchema.
+     *
      * @param required - This string list include required fields in properties.
      * @param typeKeyWord   - Type keyword for record.
      * @param typeName      - Record Name
@@ -278,6 +279,7 @@ public class BallerinaSchemaGenerator {
 
     /**
      * Common method to extract OpenApi Schema type objects in to Ballerina type compatible schema objects.
+     *
      * @param schema - OpenApi Schema
      */
     private static TypeDescriptorNode extractOpenApiSchema(Schema schema) throws BallerinaOpenApiException {

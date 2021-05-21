@@ -231,6 +231,7 @@ public class GeneratorUtils {
 
     /**
      * Method for convert openApi type to ballerina type.
+     *
      * @param type  OpenApi parameter types
      * @return ballerina type
      */
@@ -406,6 +407,7 @@ public class GeneratorUtils {
 
     /**
      * This function for creating the UnionType string for handle oneOf data binding.
+     *
      * @param oneOf - OneOf schema
      * @return - UnionString
      * @throws BallerinaOpenApiException
