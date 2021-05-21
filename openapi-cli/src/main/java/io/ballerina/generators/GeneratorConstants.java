@@ -85,9 +85,19 @@ public class GeneratorConstants {
     public static final String CLIENT_CLASS = "Client";
     public static final String CLIENT_EP = "clientEp";
     public static final String CLASS = "class";
-    public static final String OPEN_BRACE = "{";
-    public static final String OPEN_PRAN = "(";
-    public static final String COLON = ":";
     public static final String FUNCTION = "function";
     public static final String RETURN = "returns";
+    public static final String RESPONSE = "response";
+
+    //Http Methods
+    public static final String POST = "post";
+    public static final String GET = "get";
+    public static final String PUT = "put";
+    public static final String DELETE = "delete";
+    public static final String PATCH = "patch";
+    public static final String EXECUTE = "execute";
+    public static final String HEAD = "head";
+    public static final String CONNECT = "connect";
+    public static final String OPTIONS = "options";
+    public static final String TRACE = "trace";
 }

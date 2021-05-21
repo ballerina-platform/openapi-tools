@@ -1,7 +1,7 @@
 import  ballerina/http;
 
 public client class Client {
-    public http:Client clientEp;
+    http:Client clientEp;
     public isolated function init(string serviceUrl = "https", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
