@@ -49,7 +49,7 @@ public class GeneratorConstants {
     }
 
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
-    public static final String SCHEMA_FILE_NAME = "schema.bal";
+    public static final String TYPE_FILE_NAME = "types.bal";
     public static final String TEST_FILE_NAME = "test.bal";
 
     public static final String TEMPLATES_SUFFIX = ".mustache";
@@ -58,7 +58,7 @@ public class GeneratorConstants {
     public static final String DEFAULT_CLIENT_DIR = DEFAULT_TEMPLATE_DIR + "/client";
     public static final String DEFAULT_CLIENT_PKG = "client";
     public static final String DEFAULT_MOCK_PKG = "mock";
-    public static final String PATH_SEPARATOR = "/";
+    public static final String OAS_PATH_SEPARATOR = "/";
     public static final String USER_DIR = "user.dir";
     public static final String UNTITLED_SERVICE = "UntitledAPI";
     public static final List<String> RESERVED_KEYWORDS = Collections.unmodifiableList(

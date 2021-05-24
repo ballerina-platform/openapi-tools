@@ -22,9 +22,11 @@ import io.ballerina.ballerina.service.ConverterConstants;
 import io.ballerina.ballerina.service.OpenApiEndpointMapper;
 import io.ballerina.ballerina.service.OpenApiServiceMapper;
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -64,6 +66,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.ballerina.service.OpenApiEndpointMapper.extractServerForExpressionNode;
 import static io.ballerina.ballerina.service.OpenApiEndpointMapper.getServiceBasePath;
 import static io.ballerina.openapi.utils.CodegenUtils.writeFile;
 
@@ -121,47 +124,50 @@ public class OpenApiConverterUtils {
         }
         syntaxTree = doc.syntaxTree();
         semanticModel =  project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
-
-        ModulePartNode modulePartNode = syntaxTree.rootNode();
-        for (Node node : modulePartNode.members()) {
-            SyntaxKind syntaxKind = node.kind();
-            // Load a listen_declaration for the server part in the yaml spec
-            if (syntaxKind.equals(SyntaxKind.LISTENER_DECLARATION)) {
-                ListenerDeclarationNode listener = (ListenerDeclarationNode) node;
-                endpoints.add(listener);
-            }
-            // Load a service Node
-            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
-                if (serviceName.isPresent()) {
-                    // Filtering by service name
-                    String service = getServiceBasePath(serviceNode);
-                    availableService.add(service);
-                    if (serviceName.get().equals(service)) {
+        if (!semanticModel.diagnostics().isEmpty()) {
+            throw new OpenApiConverterException("Given ballerina file has syntax/compilation error.");
+        } else {
+            ModulePartNode modulePartNode = syntaxTree.rootNode();
+            for (Node node : modulePartNode.members()) {
+                SyntaxKind syntaxKind = node.kind();
+                // Load a listen_declaration for the server part in the yaml spec
+                if (syntaxKind.equals(SyntaxKind.LISTENER_DECLARATION)) {
+                    ListenerDeclarationNode listener = (ListenerDeclarationNode) node;
+                    endpoints.add(listener);
+                }
+                // Load a service Node
+                if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
+                    ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
+                    if (serviceName.isPresent()) {
+                        // Filtering by service name
+                        String service = getServiceBasePath(serviceNode);
+                        availableService.add(service);
+                        if (serviceName.get().equals(service)) {
+                            servicesToGenerate.add(serviceNode);
+                        }
+                    } else {
+                        // To generate for all services
                         servicesToGenerate.add(serviceNode);
                     }
-                } else {
-                    // To generate for all services
-                    servicesToGenerate.add(serviceNode);
                 }
             }
-        }
 
-        // If there are no services found for a given service name.
-        if (serviceName.isPresent() && servicesToGenerate.isEmpty()) {
-            throw new OpenApiConverterException("No Ballerina services found with name '" + serviceName.get() +
-                                                "' to generate an OpenAPI specification. These services are " +
-                    "available in ballerina file. " + availableService.toString());
-        }
+            // If there are no services found for a given service name.
+            if (serviceName.isPresent() && servicesToGenerate.isEmpty()) {
+                throw new OpenApiConverterException("No Ballerina services found with name '" + serviceName.get() +
+                        "' to generate an OpenAPI specification. These services are " +
+                        "available in ballerina file. " + availableService.toString());
+            }
 
-        // Generating for the services
-        for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
-            String serviceNodeName = getServiceBasePath(serviceNode);
-            String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
-            String openApiSource = generateOAS3Definitions(syntaxTree, serviceNodeName, needJson);
-            //  Checked old generated file with same name
-            openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
-            writeFile(outPath.resolve(openApiName), openApiSource);
+            // Generating for the services
+            for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
+                String serviceNodeName = getServiceBasePath(serviceNode);
+                String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
+                String openApiSource = generateOAS3Definitions(syntaxTree, serviceNodeName, needJson);
+                //  Checked old generated file with same name
+                openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
+                writeFile(outPath.resolve(openApiName), openApiSource);
+            }
         }
     }
 
@@ -222,8 +228,13 @@ public class OpenApiConverterUtils {
                 String currentServiceName = getServiceBasePath(serviceDefinition);
                 if (openapi.getServers() == null) {
                     OpenApiEndpointMapper openApiEndpointMapper = new OpenApiEndpointMapper();
-                    openapi = openApiEndpointMapper.convertListenerEndPointToOpenAPI(openapi, endpoints,
-                            serviceDefinition);
+                    SeparatedNodeList<ExpressionNode> expressions = ((ServiceDeclarationNode) node).expressions();
+                    openapi = extractServerForExpressionNode(openapi, expressions, serviceDefinition);
+                    if (!endpoints.isEmpty()) {
+                        openapi = openApiEndpointMapper.convertListenerEndPointToOpenAPI(openapi, endpoints,
+                                serviceDefinition);
+                    }
+
                     if (openapi.getServers().isEmpty()) {
                         List<Server> servers = new ArrayList<>();
                         Server server = new Server().url(currentServiceName);

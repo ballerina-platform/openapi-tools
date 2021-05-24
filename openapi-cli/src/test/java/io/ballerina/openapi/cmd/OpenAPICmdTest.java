@@ -83,11 +83,11 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
         String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
         expectedSchemaLines.close();
-        if (Files.exists(this.tmpDir.resolve("petstore_client.bal")) &&
+        if (Files.exists(this.tmpDir.resolve("client.bal")) &&
                 Files.exists(this.tmpDir.resolve("petstore_service.bal")) &&
-                Files.exists(this.tmpDir.resolve("schema.bal"))) {
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
             //Compare schema contents
-            Stream<String> schemaLines = Files.lines(this.tmpDir.resolve("schema.bal"));
+            Stream<String> schemaLines = Files.lines(this.tmpDir.resolve("types.bal"));
             String generatedSchema = schemaLines.collect(Collectors.joining("\n"));
             schemaLines.close();
 
@@ -123,11 +123,11 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
         String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
         expectedSchemaLines.close();
-        if (Files.exists(this.tmpDir.resolve("petstore_client.bal")) &&
+        if (Files.exists(this.tmpDir.resolve("client.bal")) &&
                 Files.exists(this.tmpDir.resolve("petstore_service.bal")) &&
-                Files.exists(this.tmpDir.resolve("schema.bal"))) {
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
             //Compare schema contents
-            Stream<String> schemaLines = Files.lines(this.tmpDir.resolve("schema.bal"));
+            Stream<String> schemaLines = Files.lines(this.tmpDir.resolve("types.bal"));
             String generatedSchema = schemaLines.collect(Collectors.joining("\n"));
             schemaLines.close();
 
@@ -166,8 +166,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     // Delete the generated files
     private void deleteGeneratedFiles() throws IOException {
         File serviceFile = new File(this.tmpDir.resolve("petstore_service.bal").toString());
-        File clientFile = new File(this.tmpDir.resolve("petstore_client.bal").toString());
-        File schemaFile = new File(this.tmpDir.resolve("schema.bal").toString());
+        File clientFile = new File(this.tmpDir.resolve("client.bal").toString());
+        File schemaFile = new File(this.tmpDir.resolve("types.bal").toString());
         File testFile = new File(this.tmpDir.resolve("tests/test.bal").toString());
         File testDir = new File(this.tmpDir.resolve("tests").toString());
 

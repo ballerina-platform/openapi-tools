@@ -6,8 +6,8 @@ type Pet record {
     string name;
 };
 service /payloadV on helloEp {
-    resource function post ping(@http:Payload {} byte[] payload) returns http:Ok
-    {
-
+    resource function post ping(@http:Payload {} byte[] payload) returns http:Ok {
+        http:Ok ok = {body: ()};
+        return ok;
     }
 }

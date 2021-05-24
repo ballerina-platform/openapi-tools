@@ -321,7 +321,8 @@ public class CodeGeneratorTest {
     private void deleteGeneratedFiles(String filename) {
         try {
             Files.deleteIfExists(resourcePath.resolve(filename));
-            Files.deleteIfExists(resourcePath.resolve("schema.bal"));
+            Files.deleteIfExists(resourcePath.resolve("client.bal"));
+            Files.deleteIfExists(resourcePath.resolve("types.bal"));
             Files.deleteIfExists(resourcePath.resolve("test.bal"));
             FileUtils.deleteDirectory(new File(resourcePath + "/tests"));
         } catch (IOException e) {

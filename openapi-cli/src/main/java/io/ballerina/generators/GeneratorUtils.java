@@ -68,6 +68,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.OpenApiMesseges.BAL_KEYWORDS;
 import static io.ballerina.openapi.OpenApiMesseges.BAL_TYPES;
 
@@ -264,10 +265,10 @@ public class GeneratorUtils {
                 convertedType = "record";
                 break;
             case Constants.DECIMAL:
-            case Constants.NUMBER:
-            case Constants.DOUBLE:
                 convertedType = "decimal";
                 break;
+            case Constants.NUMBER:
+            case Constants.DOUBLE:
             case Constants.FLOAT:
                 convertedType = "float";
                 break;
@@ -345,19 +346,12 @@ public class GeneratorUtils {
      */
     public static OpenAPI getBallerinaOpenApiType(Path definitionPath)
             throws IOException, BallerinaOpenApiException {
-
         String openAPIFileContent = Files.readString(definitionPath);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
-
-        if (parseResult.getMessages().size() > 0) {
+        if (!parseResult.getMessages().isEmpty()) {
             throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
         }
-        OpenAPI api = parseResult.getOpenAPI();
-        if (api.getInfo() == null) {
-            throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
-                    definitionPath);
-        }
-        return api;
+        return parseResult.getOpenAPI();
     }
 
     /**
@@ -405,15 +399,20 @@ public class GeneratorUtils {
     public static String getBallerinaMeidaType(String mediaType) {
         switch (mediaType) {
             case "application/json":
-                return "json";
+                return SyntaxKind.JSON_KEYWORD.stringValue();
             case "application/xml":
-                return "xml";
+                return SyntaxKind.XML_KEYWORD.stringValue();
+            case "application/x-www-form-urlencoded":
+            case "text/html":
             case "text/plain":
-                return "string";
+                return STRING_KEYWORD.stringValue();
+            case "image/png":
             case "application/octet-stream":
-                return "byte[]";
+            case "application/pdf":
+                return SyntaxKind.BYTE_ARRAY_LITERAL.stringValue() + "[]";
             default:
-                return "json";
+                return SyntaxKind.JSON_KEYWORD.stringValue();
+            // TODO: fill other types
         }
     }
 

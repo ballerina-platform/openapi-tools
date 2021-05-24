@@ -12,7 +12,8 @@ type Pet record {
 };
 service /payloadV on helloEp {
     resource function post pets(@http:Payload{} Pet payload) returns  http:Ok {
-
+        http:Ok ok = {body: ()};
+        return ok;
     }
 }
 
