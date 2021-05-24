@@ -136,12 +136,13 @@ public class BallerinaAuthConfigGenerator {
         clearStaticVariables();
         if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
             List<Node> recordFieldList = addItemstoRecordFieldList(openAPI);
-            if (recordFieldList != null) {
+            if (!recordFieldList.isEmpty()) {
                 Token typeName;
-                if (isHttpOROAuth) {
-                    typeName = AbstractNodeFactory.createIdentifierToken(CONFIG_RECORD_NAME);
-                } else {
+                if (isAPIKey) {
                     typeName = AbstractNodeFactory.createIdentifierToken(API_KEY_CONFIG);
+                } else {
+                    typeName = AbstractNodeFactory.createIdentifierToken(CONFIG_RECORD_NAME);
+
                 }
                 Token visibilityQualifierNode = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.PUBLIC);
                 Token typeKeyWord = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.TYPE);
@@ -363,8 +364,7 @@ public class BallerinaAuthConfigGenerator {
      * @return  {@link List<Node>}  syntax tree node list of record fields
      */
     private static List<Node> addItemstoRecordFieldList (OpenAPI openAPI) {
-        List<Node> httpRecordFieldNodes = new ArrayList<>();
-        List<Node> apiKeyRecordFieldNodes = new ArrayList<>();
+        List<Node> recordFieldNodes = new ArrayList<>();
 
         Token semicolonToken = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.SEMICOLON);
         Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
@@ -377,16 +377,14 @@ public class BallerinaAuthConfigGenerator {
             TypeDescriptorNode fieldTypeNode = createBuiltinSimpleNameReferenceNode(null, authFieldType);
             RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
                     fieldTypeNode, authFieldName, null, semicolonToken);
-            httpRecordFieldNodes.add(recordFieldNode);
+            recordFieldNodes.add(recordFieldNode);
             // add socket config
             IdentifierToken sslFieldNameNode = AbstractNodeFactory.createIdentifierToken(SSL_FIELD_NAME);
             TypeDescriptorNode sslfieldTypeNode = createBuiltinSimpleNameReferenceNode(null,
                     AbstractNodeFactory.createIdentifierToken("http:ClientSecureSocket"));
             RecordFieldNode sslRecordFieldNode = NodeFactory.createRecordFieldNode(null, null,
                     sslfieldTypeNode, sslFieldNameNode, createToken(QUESTION_MARK_TOKEN), semicolonToken);
-            httpRecordFieldNodes.add(sslRecordFieldNode);
-            return httpRecordFieldNodes;
-
+            recordFieldNodes.add(sslRecordFieldNode);
         } else if (isAPIKey) {
 
             Token apiKeyMap = AbstractNodeFactory.createIdentifierToken(API_KEY_MAP);
@@ -394,13 +392,9 @@ public class BallerinaAuthConfigGenerator {
             TypeDescriptorNode fieldTypeNode = createBuiltinSimpleNameReferenceNode(null, apiKeyMap);
             RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
                     fieldTypeNode, apiKeyMapFieldName, null, semicolonToken);
-            apiKeyRecordFieldNodes.add(recordFieldNode);
-            return apiKeyRecordFieldNodes;
-
-        } else {
-            // todo OpenIDConnect, Cookie
-            return null;
+            recordFieldNodes.add(recordFieldNode);
         }
+        return recordFieldNodes;
     }
 
     /**

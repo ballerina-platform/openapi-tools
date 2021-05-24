@@ -19,6 +19,7 @@
 package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.generators.TestConstants;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -37,20 +38,21 @@ import java.util.Objects;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 
 /**
- * All the tests related to the auth related code snippet generation for api key auth mechanism.
+ * All the tests related to the auth related code snippet generation for http or oauth 2.0 mechanisms.
  */
-public class ApiKeyAuthTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/").toAbsolutePath();
+public class HttpAuthTests {
+    private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/auth").toAbsolutePath();
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    @Test(description = "Generate config record for openweathermap api", dataProvider = "apiKeyAuthIOProvider")
-    public void testgetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
-        // generate ApiKeysConfig record
-        Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/" + yamlFile);
+
+    @Test(description = "Generate config record for http basic auth", dataProvider = "httpAuthIOProvider")
+    public void testgetConfigRecord(String yamlFile, String configRecord) throws IOException,
+            BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("scenarios/http/" + yamlFile);
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
-        String expectedConfigRecord = TestConstants.API_KEY_CONFIG_REC;
+        String expectedConfigRecord = configRecord;
         String generatedConfigRecord = Objects.requireNonNull(
                 BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
@@ -58,20 +60,10 @@ public class ApiKeyAuthTests {
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
     }
 
-    @Test(description = "Test the generation of ApiKey map local variable",
+    @Test(description = "Test the generation of Config params in class init function signature",
             dependsOnMethods = {"testgetConfigRecord"})
-    public void testgetApiKeyMapClassVariable () {
-        String expectedClassVariable = TestConstants.API_KEY_MAP_VAR;
-        String generatedClassVariable = BallerinaAuthConfigGenerator.getApiKeyMapClassVariable().toString();
-        generatedClassVariable = (generatedClassVariable.trim()).replaceAll("\\s+", "");
-        expectedClassVariable = (expectedClassVariable.trim()).replaceAll("\\s+", "");
-        Assert.assertEquals(expectedClassVariable, generatedClassVariable);
-    }
-
-    @Test(description = "Test the generation of api key related parameters in class init function signature",
-            dependsOnMethods = {"testgetApiKeyMapClassVariable"})
     public void testgetConfigParamForClassInit() {
-        String expectedParams = TestConstants.API_KEY_CONFIG_PARAM;
+        String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
         List<Node> generatedInitParamNodes = BallerinaAuthConfigGenerator.getConfigParamForClassInit();
         for (Node param: generatedInitParamNodes) {
@@ -82,23 +74,33 @@ public class ApiKeyAuthTests {
         Assert.assertEquals(expectedParams, generatedParamsStr);
     }
 
-    @Test(description = "Test the generation of api key assignment node",
+    @Test(description = "Test the generation of SSL init node",
             dependsOnMethods = {"testgetConfigRecord"})
-    public void testgetApiKeyAssignmentNode () {
-        String expectedAssignmentNode = TestConstants.API_KEY_ASSIGNMENT;
-        String generatedAssignmentNode = Objects.requireNonNull
-                (BallerinaAuthConfigGenerator.getApiKeyAssignmentNode()).toString();
-        generatedAssignmentNode = (generatedAssignmentNode.trim()).replaceAll("\\s+", "");
-        expectedAssignmentNode = (expectedAssignmentNode.trim()).replaceAll("\\s+", "");
-        Assert.assertEquals(expectedAssignmentNode, generatedAssignmentNode);
+    public void testgetSecureSocketInitNode() {
+        String expectedParam = TestConstants.SSL_ASSIGNMENT;
+        VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getSecureSocketInitNode();
+        expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
+        String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
+        Assert.assertEquals(expectedParam, generatedParamsStr);
     }
 
-    @DataProvider(name = "apiKeyAuthIOProvider")
-    public Object[] dataProvider() {
-        return new Object[]{
-                "header_api_key.yaml",
-                "query_api_key.yaml",
-                "multiple_api_keys.yaml",
+    @Test(description = "Test the generation of http:Client init node",
+            dependsOnMethods = {"testgetConfigRecord"})
+    public void testgetClientInitializationNode() {
+        String expectedParam = TestConstants.HTTP_CLIENT_DECLARATION;
+        VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getClientInitializationNode();
+        expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
+        String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
+        Assert.assertEquals(expectedParam, generatedParamsStr);
+    }
+
+
+    @DataProvider(name = "httpAuthIOProvider")
+    public Object[][] dataProvider() {
+        return new Object[][]{
+                {"basic_auth.yaml", TestConstants.HTTP_BASIC_AUTH_CONFIG_REC},
+                {"bearer_auth.yaml", TestConstants.HTTP_BEARER_AUTH_CONFIG_REC},
+                {"multiple_auth.yaml", TestConstants.HTTP_MULTI_AUTH_CONFIG_REC}
         };
     }
 }
