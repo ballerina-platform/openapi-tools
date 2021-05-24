@@ -15,12 +15,12 @@
 // under the License.
 
 # Service validation code
-# + contract - OpenAPI Contract link
-# + tags - OpenAPI Tags
-# + operations - OpenAPI Operations
-# + excludeTags - OpenAPI Validator Off for these tags
-# + excludeOperations - OpenAPI Validator Off for these operations
-# + failOnErrors - OpenAPI Validator Enable
+# + contract - OpenAPI contract link
+# + tags - OpenAPI tags
+# + operations - OpenAPI operations
+# + excludeTags - Disable the OpenAPI validator for these tags
+# + excludeOperations - Disable the OpenAPI validator for these operations
+# + failOnErrors - Enable the OpenAPI validator
 public type ServiceInformation record {|
     string contract = "";
     string[]? tags = [];
