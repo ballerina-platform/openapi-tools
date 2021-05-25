@@ -1148,7 +1148,7 @@ public class BallerinaClientGenerator {
             if (!rType.equals("error?")) {
                 clientCallStatement = "check self.clientEp-> " + method + "(path, targetType = " + returnType + ")";
             } else {
-                clientCallStatement = "check self.clientEp-> " + method + "(path, targetType=byte[])";
+                clientCallStatement = "check self.clientEp-> " + method + "(path, targetType=http:Response)";
             }
             if (isHeader) {
                 if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(
@@ -1164,7 +1164,7 @@ public class BallerinaClientGenerator {
                                 "accHeaders, targetType = " + returnType + ")";
                     } else {
                         clientCallStatement = "check self.clientEp-> " + method + "(path, request, headers = " +
-                                "accHeaders, targetType=byte[])";
+                                "accHeaders, targetType=http:Response)";
                     }
                 } else {
                     if (!rType.equals("error?")) {
@@ -1172,7 +1172,7 @@ public class BallerinaClientGenerator {
                                         + returnType + ")";
                     } else {
                         clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders, " +
-                                "targetType=byte[])";
+                                "targetType=http:Response)";
                     }
                 }
             } else if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
@@ -1188,7 +1188,7 @@ public class BallerinaClientGenerator {
                             "check self.clientEp-> " + method + "(path, request, targetType = " + returnType + ")";
                 } else {
                     clientCallStatement = "check self.clientEp-> " + method + "(path, request, targetType " +
-                            "=byte[])";
+                            "=http:Response)";
                 }
             }
             //Return Variable
@@ -1281,7 +1281,7 @@ public class BallerinaClientGenerator {
                 } else {
                     requestStatement = getSimpleStatement("", "_",
                             "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
-                                    "targetType=byte[])");
+                                    "targetType=http:Response)");
                 }
             }
         } else {
@@ -1294,7 +1294,7 @@ public class BallerinaClientGenerator {
                 statementsList.add(returnStatementNode);
             } else {
                 String clientCallStatement = "check self.clientEp-> " + method + "(path, request, targetType"
-                        + "=byte[])";
+                        + "=http:Response)";
                 statementsList.add(getSimpleStatement("", "_", clientCallStatement));
             }
         }
