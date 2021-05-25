@@ -1148,7 +1148,7 @@ public class BallerinaClientGenerator {
             if (!rType.equals("error?")) {
                 clientCallStatement = "check self.clientEp-> " + method + "(path, targetType = " + returnType + ")";
             } else {
-                clientCallStatement = "check self.clientEp-> " + method + "(path)";
+                clientCallStatement = "check self.clientEp-> " + method + "(path, targetType=byte[])";
             }
             if (isHeader) {
                 if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(
@@ -1164,14 +1164,15 @@ public class BallerinaClientGenerator {
                                 "accHeaders, targetType = " + returnType + ")";
                     } else {
                         clientCallStatement = "check self.clientEp-> " + method + "(path, request, headers = " +
-                                "accHeaders)";
+                                "accHeaders, targetType=byte[])";
                     }
                 } else {
                     if (!rType.equals("error?")) {
                         clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders, targetType = "
                                         + returnType + ")";
                     } else {
-                        clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders)";
+                        clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders, " +
+                                "targetType=byte[])";
                     }
                 }
             } else if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
@@ -1186,7 +1187,8 @@ public class BallerinaClientGenerator {
                     clientCallStatement =
                             "check self.clientEp-> " + method + "(path, request, targetType = " + returnType + ")";
                 } else {
-                    clientCallStatement = "check self.clientEp-> " + method + "(path, request)";
+                    clientCallStatement = "check self.clientEp-> " + method + "(path, request, targetType " +
+                            "=byte[])";
                 }
             }
             //Return Variable
@@ -1278,18 +1280,23 @@ public class BallerinaClientGenerator {
                                     "targetType=" + returnType + ")");
                 } else {
                     requestStatement = getSimpleStatement("", "_",
-                            "check self.clientEp->" + method + "(path, request, headers = accHeaders)");
+                            "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
+                                    "targetType=byte[])");
                 }
             }
-        }
-
-        if (!returnType.equals("error?")) {
-            statementsList.add(requestStatement);
-            Token returnKeyWord = createIdentifierToken("return");
-            SimpleNameReferenceNode returnVariable = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
-            ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returnVariable,
-                    createToken(SEMICOLON_TOKEN));
-            statementsList.add(returnStatementNode);
+        } else {
+            if (!returnType.equals("error?")) {
+                statementsList.add(requestStatement);
+                Token returnKeyWord = createIdentifierToken("return");
+                SimpleNameReferenceNode returnVariable = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+                ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returnVariable,
+                        createToken(SEMICOLON_TOKEN));
+                statementsList.add(returnStatementNode);
+            } else {
+                String clientCallStatement = "check self.clientEp-> " + method + "(path, request, targetType"
+                        + "=byte[])";
+                statementsList.add(getSimpleStatement("", "_", clientCallStatement));
+            }
         }
     }
 

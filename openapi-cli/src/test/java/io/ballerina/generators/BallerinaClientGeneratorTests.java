@@ -70,10 +70,19 @@ public class BallerinaClientGeneratorTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
+//
+//    {"petstore_server_with_base_path.yaml"},
+//    {"petstore_without_operation_id.yaml"},
+//    {"petstore_get.yaml"},
+//    {"openapi_display_annotation.yaml"},
+//    {"header_parameter.yaml"},
+//    {"petstore_post.yaml"},
+//    {"petstore_with_oneOf_response.yaml"}
     @Test(description = "Generate Client for path parameter has parameter name as key word", enabled = true)
     public void generateClientForJira() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("file_provider/swagger/jira_openapi.yaml");
+//        Path definitionPath = RES_DIR.resolve("file_provider/swagger/jira_openapi.yaml");
+        Path definitionPath = RES_DIR.resolve("swagger/petstore_without_operation_id.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/jira_openapi.bal");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
@@ -85,7 +94,7 @@ public class BallerinaClientGeneratorTests {
     public void generateClientForSalesForce() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/salesforce.yaml");
-        Path expectedPath = RES_DIR.resolve("/ballerina/salesforce.bal.bal");
+        Path expectedPath = RES_DIR.resolve("/ballerina/salesforce.bal");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
