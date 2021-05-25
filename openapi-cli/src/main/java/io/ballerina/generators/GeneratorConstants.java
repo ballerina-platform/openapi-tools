@@ -47,6 +47,26 @@ public class GeneratorConstants {
             return this.name;
         }
     }
+    /**
+     * Enum to select the relavant ballerina http auth record.
+     */
+    public enum AuthConfigTypes {
+        BASIC("http:CredentialsConfig"),
+        BEARER("http:BearerTokenConfig"),
+        CLIENT_CREDENTIAL("http:OAuth2ClientCredentialsGrantConfig"),
+        REFRESH_TOKEN("http:OAuth2RefreshTokenGrantConfig"),
+        PASSWORD("http:OAuth2PasswordGrantConfig");
+
+        private final String authType;
+
+        AuthConfigTypes(String authType) {
+            this.authType = authType;
+        }
+
+        public String getValue() {
+            return authType;
+        }
+    }
 
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
     public static final String TYPE_FILE_NAME = "types.bal";
@@ -80,14 +100,37 @@ public class GeneratorConstants {
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
     public static final String PUBLIC = "public";
+    public static final String TYPE = "type";
     public static final String PUBLIC_ISOLATED = "public isolated";
     public static final String CLIENT = "client";
     public static final String CLIENT_CLASS = "Client";
     public static final String CLIENT_EP = "clientEp";
     public static final String CLASS = "class";
     public static final String OPEN_BRACE = "{";
+    public static final String CLOSE_BRACE = "}";
+    public static final String EQUAL = "=";
     public static final String OPEN_PRAN = "(";
     public static final String COLON = ":";
+    public static final String PERIOD = ".";
+    public static final String CONFIG = "config";
+    public static final String SEMICOLON = ";";
     public static final String FUNCTION = "function";
     public static final String RETURN = "returns";
+    public static final String STRING = "string";
+    public static final String SERVICE_URL = "serviceUrl";
+    public static final String RECORD = "record";
+    // auth related constants
+    public static final String API_KEY = "apikey";
+    public static final String API_KEY_CONFIG = "ApiKeysConfig";
+    public static final String API_KEY_CONFIG_PARAM = "apiKeyConfig";
+    public static final String API_KEY_CONFIG_RECORD_FIELD = "apiKeys";
+    public static final String API_KEY_MAP = "map<string|string[]>";
+    public static final String AUTH_CONFIG_FILED_NAME = "authConfig";
+    public static final String BASIC = "basic";
+    public static final String BEARER = "bearer";
+    public static final String CONFIG_RECORD_ARG = "clientConfig";
+    public static final String CONFIG_RECORD_NAME = "ClientConfig";
+    public static final String OAUTH2 = "oauth2";
+    public static final String SSL_FIELD_NAME = "secureSocketConfig";
+
 }

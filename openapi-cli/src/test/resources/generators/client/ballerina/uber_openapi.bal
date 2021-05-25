@@ -2,33 +2,41 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
+public type ApiKeysConfigrecord {
+    map<string|string[]> apiKeys;
+};
+
 type ProductArr Product[];
 
 type PriceEstimateArr PriceEstimate[];
 
 public client class Client {
     public http:Client clientEp;
-    public isolated function init(string serviceUrl = "https://api.uber.com/v1", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
-        http:Client httpEp = check new (serviceUrl, httpClientConfig);
+    map<string|string[]> apiKeys;
+    public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig = {},
+                                  string serviceUrl = "https://api.uber.com/v1") returns error? {
+
+        http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
+        self.apiKeys = apiKeyConfig.apiKeys;
     }
     remote isolated function  products(float latitude, float longitude) returns ProductArr|error {
         string  path = string `/products`;
-        map<anydata> queryParam = {latitude: latitude, longitude: longitude};
+        map<anydata> queryParam = {latitude: latitude, longitude: longitude, server_token: self.apiKeys["server_token"]};
         path = path + getPathForQueryParam(queryParam);
         ProductArr response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
     }
     remote isolated function  price(float start_latitude, float start_longitude, float end_latitude, float end_longitude) returns PriceEstimateArr|error {
         string  path = string `/estimates/price`;
-        map<anydata> queryParam = {start_latitude: start_latitude, start_longitude: start_longitude, end_latitude: end_latitude, end_longitude: end_longitude};
+        map<anydata> queryParam = {start_latitude: start_latitude, start_longitude: start_longitude, end_latitude: end_latitude, end_longitude: end_longitude, server_token: self.apiKeys["server_token"]};
         path = path + getPathForQueryParam(queryParam);
         PriceEstimateArr response = check self.clientEp-> get(path, targetType = PriceEstimateArr);
         return response;
     }
     remote isolated function  time(float start_latitude, float start_longitude, string? customer_uuid, string? product_id) returns ProductArr|error {
         string  path = string `/estimates/time`;
-        map<anydata> queryParam = {start_latitude: start_latitude, start_longitude: start_longitude, customer_uuid: customer_uuid, product_id: product_id};
+        map<anydata> queryParam = {start_latitude: start_latitude, start_longitude: start_longitude, customer_uuid: customer_uuid, product_id: product_id, server_token: self.apiKeys["server_token"]};
         path = path + getPathForQueryParam(queryParam);
         ProductArr response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
@@ -40,7 +48,7 @@ public client class Client {
     }
     remote isolated function  history(int? offset, int? 'limit) returns Activities|error {
         string  path = string `/history`;
-        map<anydata> queryParam = {offset: offset, 'limit: 'limit};
+        map<anydata> queryParam = {offset: offset, 'limit: 'limit, server_token: self.apiKeys["server_token"]};
         path = path + getPathForQueryParam(queryParam);
         Activities response = check self.clientEp-> get(path, targetType = Activities);
         return response;
