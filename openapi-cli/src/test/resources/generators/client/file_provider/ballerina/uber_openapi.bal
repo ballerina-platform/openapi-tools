@@ -11,7 +11,7 @@ type ProductArr Product[];
 type PriceEstimateArr PriceEstimate[];
 
 public client class Client {
-    public http:Client clientEp;
+    http:Client clientEp;
     map<string|string[]> apiKeys;
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig = {},
                                   string serviceUrl = "https://api.uber.com/v1") returns error? {

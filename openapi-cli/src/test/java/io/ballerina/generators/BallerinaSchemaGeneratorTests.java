@@ -18,8 +18,17 @@
 
 package io.ballerina.generators;
 
+import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -28,8 +37,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.ballerina.generators.BallerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema;
+import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 
 /**
  * Tests for BallerinaSchemaGenerators.
@@ -127,7 +140,7 @@ public class BallerinaSchemaGeneratorTests {
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema11.bal");
     }
 
-    @Test(description = "Scenario12-Generate record for openapi weather api")
+    @Test(description = "Generate record for openapi weather api")
     public void generateOpenAPIWeatherAPI() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/swagger/schema/openapi_weather_api.yaml");
@@ -135,6 +148,40 @@ public class BallerinaSchemaGeneratorTests {
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/openapi_weather_api_schema.bal");
     }
 
+    @Test(description = "Scenario12-Generate record for schema has oneOF")
+    public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException, FormatterException,
+            OpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario12.yaml");
+        OpenAPI openAPI = getOpenAPI(definitionPath);
+        Schema schema = openAPI.getComponents().getSchemas().get("Error");
+        ComposedSchema composedSchema = (ComposedSchema) schema;
+        List<Schema> oneOf = composedSchema.getOneOf();
+        String oneOfUnionType = getOneOfUnionType(oneOf);
+        Assert.assertEquals(oneOfUnionType, "Activity|Profile");
+    }
+
+    @Test(description = "Scenario12-Generate record for schema has oneOF object type for schema has o")
+    public void generateForSchemaHasOneOf02() throws IOException, BallerinaOpenApiException {
+        Path definitionPath02 = RES_DIR.resolve("generators/swagger/schema/scenario13.yaml");
+        OpenAPI openAPI02 = getOpenAPI(definitionPath02);
+        Schema schema = openAPI02.getComponents().getSchemas().get("Error");
+        ComposedSchema composedSchema = (ComposedSchema) schema;
+        List<Schema> oneOf = composedSchema.getOneOf();
+        String oneOfUnionType = getOneOfUnionType(oneOf);
+        Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
+    }
+    @Test(description = "Scenario12-Generate record for schema has object type only")
+    public void generateForSchemaHasObjectTypeOnly() throws IOException, BallerinaOpenApiException, OpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario14.yaml");
+        OpenAPI openAPI = getOpenAPI(definitionPath);
+        Schema schema = openAPI.getComponents().getSchemas().get("Error");
+        ObjectSchema objectSchema = (ObjectSchema) schema;
+        TypeDefinitionNode recordNode = getTypeDefinitionNodeForObjectSchema(null,
+                        AbstractNodeFactory.createIdentifierToken("public type"),
+                        AbstractNodeFactory.createIdentifierToken("Error"),
+                        null, objectSchema.getProperties());
+        Assert.assertTrue(((RecordTypeDescriptorNode) recordNode.typeDescriptor()).fields().isEmpty());
+    }
     //Get string as a content of ballerina file
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
@@ -151,6 +198,13 @@ public class BallerinaSchemaGeneratorTests {
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
+    }
+
+    public static OpenAPI getOpenAPI(Path definitionPath) throws IOException, BallerinaOpenApiException {
+        String openAPIFileContent = Files.readString(definitionPath);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
+        OpenAPI api = parseResult.getOpenAPI();
+        return api;
     }
 
 }

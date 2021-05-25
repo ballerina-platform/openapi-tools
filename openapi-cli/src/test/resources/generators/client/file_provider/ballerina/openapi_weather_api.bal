@@ -7,7 +7,7 @@ public type ApiKeysConfig record {
 };
 
 public client class Client {
-    public http:Client clientEp;
+    http:Client clientEp;
     map<string|string[]> apiKeys;
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig = {},
                                   string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {

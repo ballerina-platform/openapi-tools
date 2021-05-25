@@ -72,22 +72,22 @@ public class TestUtils {
     }
 
     //Get string as a content of ballerina file
-    public static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
-        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
+    public static String getStringFromGivenBalFile(Path expectedServiceFile) throws IOException {
+        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
         expectedServiceLines.close();
-        return expectedServiceContent;
+        return expectedServiceContent.replaceAll("\n", "");
     }
 
-    public static void compareGeneratedSyntaxTreeWithExpectedSyntaxTree(String s, SyntaxTree syntaxTree)
+    public static void compareGeneratedSyntaxTreeWithExpectedSyntaxTree(Path path, SyntaxTree syntaxTree)
             throws IOException {
 
-        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("ballerina"), s);
+        String expectedBallerinaContent = getStringFromGivenBalFile(path);
         String generatedSyntaxTree = syntaxTree.toString();
-
+        generatedSyntaxTree = generatedSyntaxTree.replaceAll("\n", "");
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
-        Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
+        Assert.assertTrue(generatedSyntaxTree.equals(expectedBallerinaContent));
     }
 
     /*
