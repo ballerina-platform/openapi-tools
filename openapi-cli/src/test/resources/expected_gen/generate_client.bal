@@ -4,8 +4,9 @@ import  ballerina/lang.'string;
 
 public client class Client {
     http:Client clientEp;
-    public isolated function init(string serviceUrl = "http://petstore.openapi.io/v1", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
-        http:Client httpEp = check new (serviceUrl, httpClientConfig);
+    public isolated function init(http:ClientConfiguration clientConfig = {}, string serviceUrl = "http://petstore.openapi.io/v1")
+    returns error? {
+        http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
     remote isolated function listPets(int? 'limit = ()) returns Pets|error {

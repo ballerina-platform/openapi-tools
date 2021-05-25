@@ -2,8 +2,8 @@ import  ballerina/http;
 
 public client class Client {
     http:Client clientEp;
-    public isolated function init(string serviceUrl = "https", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
-        http:Client httpEp = check new (serviceUrl, httpClientConfig);
+    public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https") returns error? {
+        http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
     remote isolated function  requestBody(User payload) returns http:Response | error {
