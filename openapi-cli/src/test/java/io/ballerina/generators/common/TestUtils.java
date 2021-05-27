@@ -16,10 +16,12 @@
  * under the License.
  */
 
-package io.ballerina.generators;
+package io.ballerina.generators.common;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.OpenApiException;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.projects.DocumentId;

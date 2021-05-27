@@ -20,7 +20,6 @@ package io.ballerina.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.OpenApiException;
-import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -31,7 +30,6 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import static io.ballerina.generators.BallerinaSchemaGenerator.generateSyntaxTree;
@@ -42,13 +40,8 @@ import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 /**
  * All the tests related to AnyDataType handling the {@link io.ballerina.generators.BallerinaClientGenerator} util.
  */
-public class AnyOfDataType {
-    private final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    private final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
-    private final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
-    List<String> list1 = new ArrayList<>();
-    List<String> list2 = new ArrayList<>();
-    Filter filter = new Filter(list1, list2);
+public class AnyOfDataTypeTests {
+    private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
 
     @Test(description = "Test for the schema has anyOf dataType")
     public void testAnyOfInSchema() throws IOException, BallerinaOpenApiException {

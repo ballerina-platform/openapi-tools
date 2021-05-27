@@ -36,11 +36,11 @@ import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 /**
  * All the tests related to AnyDataType handling the {@link io.ballerina.generators.BallerinaSchemaGenerator} util.
  */
-public class OneOfDataType {
+public class OneOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
 
     @Test(description = "Generate record for schema has oneOF")
-    public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException{
+    public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
         OpenAPI openAPI = getOpenAPI(definitionPath);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
