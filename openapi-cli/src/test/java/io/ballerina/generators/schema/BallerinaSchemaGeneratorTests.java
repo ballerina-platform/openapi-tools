@@ -16,19 +16,18 @@
  * under the License.
  */
 
-package io.ballerina.generators;
+package io.ballerina.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.OpenApiException;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -37,12 +36,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.ballerina.generators.BallerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema;
-import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
+import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
  * Tests for BallerinaSchemaGenerators.
@@ -55,7 +53,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario01-Generate single record")
     public void generateScenario01() throws FormatterException, OpenApiException, IOException,
             BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario01.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario01.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema01.bal");
     }
@@ -63,7 +61,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario02- Generate multiple record")
     public void generateScenario02() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario02.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario02.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema02.bal");
     }
@@ -71,7 +69,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario03-Generate record with array filed record")
     public void generateScenario03() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario03.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario03.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema03.bal");
     }
@@ -79,7 +77,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario04-Generate record with nested array filed record")
     public void generateScenario04() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario04.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario04.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema04.bal");
     }
@@ -87,7 +85,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario05-Generate record with record type filed record")
     public void generateScenario05() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario05.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario05.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema05.bal");
     }
@@ -95,7 +93,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario06 - Generate record with record type array filed record")
     public void generateScenario06() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario06.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario06.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema06.bal");
     }
@@ -103,7 +101,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario07-Generate record with nested record type filed record")
     public void generateScenario07() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario07.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario07.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema07.bal");
     }
@@ -111,7 +109,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario08-Generate record for schema has array reference")
     public void generateScenario08() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario08.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario08.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema08.bal");
     }
@@ -119,7 +117,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario09-Generate record for schema has allOf reference")
     public void generateScenario09() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario09.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario09.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema09.bal");
     }
@@ -127,7 +125,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario10-Generate record for schema has not type")
     public void generateScenario10() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario10.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario10.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema10.bal");
     }
@@ -135,7 +133,7 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Scenario11-Generate record for schema has inline record in fields reference")
     public void generateScenario11() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario11.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario11.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/schema11.bal");
     }
@@ -143,36 +141,14 @@ public class BallerinaSchemaGeneratorTests {
     @Test(description = "Generate record for openapi weather api")
     public void generateOpenAPIWeatherAPI() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/openapi_weather_api.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/openapi_weather_api.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/openapi_weather_api_schema.bal");
     }
 
-    @Test(description = "Scenario12-Generate record for schema has oneOF")
-    public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario12.yaml");
-        OpenAPI openAPI = getOpenAPI(definitionPath);
-        Schema schema = openAPI.getComponents().getSchemas().get("Error");
-        ComposedSchema composedSchema = (ComposedSchema) schema;
-        List<Schema> oneOf = composedSchema.getOneOf();
-        String oneOfUnionType = getOneOfUnionType(oneOf);
-        Assert.assertEquals(oneOfUnionType, "Activity|Profile");
-    }
-
-    @Test(description = "Scenario12-Generate record for schema has oneOF object type for schema has o")
-    public void generateForSchemaHasOneOf02() throws IOException, BallerinaOpenApiException {
-        Path definitionPath02 = RES_DIR.resolve("generators/swagger/schema/scenario13.yaml");
-        OpenAPI openAPI02 = getOpenAPI(definitionPath02);
-        Schema schema = openAPI02.getComponents().getSchemas().get("Error");
-        ComposedSchema composedSchema = (ComposedSchema) schema;
-        List<Schema> oneOf = composedSchema.getOneOf();
-        String oneOfUnionType = getOneOfUnionType(oneOf);
-        Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
-    }
     @Test(description = "Scenario12-Generate record for schema has object type only")
     public void generateForSchemaHasObjectTypeOnly() throws IOException, BallerinaOpenApiException, OpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/schema/scenario14.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario14.yaml");
         OpenAPI openAPI = getOpenAPI(definitionPath);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ObjectSchema objectSchema = (ObjectSchema) schema;
@@ -199,12 +175,4 @@ public class BallerinaSchemaGeneratorTests {
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
     }
-
-    public static OpenAPI getOpenAPI(Path definitionPath) throws IOException, BallerinaOpenApiException {
-        String openAPIFileContent = Files.readString(definitionPath);
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
-        OpenAPI api = parseResult.getOpenAPI();
-        return api;
-    }
-
 }
