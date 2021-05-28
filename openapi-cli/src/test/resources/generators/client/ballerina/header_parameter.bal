@@ -2,8 +2,8 @@ import  ballerina/http;
 
 public client class Client {
     public http:Client clientEp;
-    public isolated function init(string serviceUrl = "http://petstore.openapi.io/v1", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
-        http:Client httpEp = check new (serviceUrl, httpClientConfig);
+    public isolated function init(http:ClientConfiguration  clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
+        http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
     remote isolated function showPetById(string 'X\-Request\-ID, string[] 'X\-Request\-Client) returns http:Response | error {
