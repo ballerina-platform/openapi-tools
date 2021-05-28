@@ -1,6 +1,7 @@
 ## Module Overview
 
 This module provides the Ballerina OpenAPI tooling, which will make it easy to start the development of a service documented in an OpenAPI contract in Ballerina by generating the Ballerina service and client skeletons.
+
 The OpenAPI tools provide the following capabilities. 
 
  1. Generate the Ballerina service or client code for a given OpenAPI definition. 
