@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Service validation code
+# Service validation code.
 # + contract - OpenAPI contract link
 # + tags - OpenAPI tags
 # + operations - OpenAPI operations
