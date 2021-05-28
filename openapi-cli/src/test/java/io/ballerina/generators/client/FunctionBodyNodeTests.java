@@ -42,7 +42,8 @@ import static io.ballerina.generators.BallerinaClientGenerator.getFunctionBodyNo
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to the {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * All the tests related to the FunctionBodyNode generation in {@link io.ballerina.generators.BallerinaClientGenerator}
+ * util.
  */
 public class FunctionBodyNodeTests {
     private static final Path RESDIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
@@ -71,8 +72,8 @@ public class FunctionBodyNodeTests {
                 {"diagnostic_files/header_parameter.yaml", "/pets", "{string path=string`/pets`;" +
                         "map<string|string[]>accHeaders=" +
                         "{'X\\-Request\\-ID:'X\\-Request\\-ID,'X\\-Request\\-Client:'X\\-Request\\-Client};" +
-                        "http:Response response=check self.clientEp-> get(path, accHeaders, targetType = " +
-                        "http:Response);returnresponse;}"},
+                        "_=check self.clientEp-> get(path, accHeaders, targetType = " +
+                        "http:Response);}"},
                 {"file_provider/swagger/uber_openapi.yaml", "/history", "{string  path = string `/history`;\n" +
                         "        map<anydata> queryParam = {offset: offset, 'limit: 'limit};\n" +
                         "        path = path + getPathForQueryParam(queryParam);\n" +

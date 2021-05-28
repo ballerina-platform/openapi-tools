@@ -42,7 +42,7 @@ import static io.ballerina.generators.BallerinaClientGenerator.getFunctionSignat
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to the {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * All the tests related to the functionSignatureNode in {@link io.ballerina.generators.BallerinaClientGenerator} util.
  */
 public class FunctionSignatureNodeTests {
     private static final Path RESDIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();

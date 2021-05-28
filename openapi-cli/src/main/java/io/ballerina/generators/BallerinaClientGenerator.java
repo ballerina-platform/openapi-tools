@@ -1256,7 +1256,7 @@ public class BallerinaClientGenerator {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
                 if (!returnType.equals("error?")) {
-                    requestStatement = getSimpleStatement("http:Response", RESPONSE,
+                    requestStatement = getSimpleStatement(returnType, RESPONSE,
                             "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
                                     "targetType=" + returnType + ")");
                 } else {
@@ -1265,6 +1265,7 @@ public class BallerinaClientGenerator {
                                     "targetType=http:Response)");
                 }
             }
+            statementsList.add(requestStatement);
         } else {
             if (!returnType.equals("error?")) {
                 statementsList.add(requestStatement);

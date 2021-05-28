@@ -4,8 +4,7 @@ import  ballerina/lang.'string;
 
 public client class Client {
     http:Client clientEp;
-    public isolated function init(http:ClientConfiguration clientConfig = {}, string serviceUrl = "http://petstore.openapi.io/v1")
-    returns error? {
+    public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
@@ -20,7 +19,7 @@ public client class Client {
         string  path = string `/pets`;
         http:Request request = new;
         //TODO: Update the request as needed;
-         _ = check self.clientEp-> post(path, request);
+         _ = check self.clientEp-> post(path, request, targetType =http:Response);
     }
     remote isolated function showPetById(string petId) returns Pets|error {
         string  path = string `/pets/${petId}`;

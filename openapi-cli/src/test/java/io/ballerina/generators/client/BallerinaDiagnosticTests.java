@@ -38,7 +38,8 @@ import java.util.List;
 import static io.ballerina.generators.common.TestUtils.getDiagnostics;
 
 /**
- * All the tests related to the {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * All the tests related to the check diagnostic issue in code generators
+ * {@link io.ballerina.generators.BallerinaClientGenerator} util.
  */
 public class BallerinaDiagnosticTests {
     private static final Path RESDIR =
