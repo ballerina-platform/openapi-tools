@@ -14,13 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Service validation codee
-# + contract - OpenApi Contract link
-# + tags - OpenApi Tags
-# + operations - OpenApi Operations
-# + excludeTags - Openapi Validator Off for these tags
-# + excludeOperations - Openapi Validator Off for these operations
-# + failOnErrors - OpenApi Validator Enable
+# Service validation code.
+# + contract - OpenAPI contract link
+# + tags - OpenAPI tags
+# + operations - OpenAPI operations
+# + excludeTags - Disable the OpenAPI validator for these tags
+# + excludeOperations - Disable the OpenAPI validator for these operations
+# + failOnErrors - Enable the OpenAPI validator
 public type ServiceInformation record {|
     string contract = "";
     string[]? tags = [];

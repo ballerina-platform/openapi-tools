@@ -20,7 +20,7 @@ package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.generators.TestConstants;
+import io.ballerina.generators.common.TestConstants;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -48,7 +48,7 @@ public class HttpAuthTests {
 
 
     @Test(description = "Generate config record for http basic auth", dataProvider = "httpAuthIOProvider")
-    public void testgetConfigRecord(String yamlFile, String configRecord) throws IOException,
+    public void testGetConfigRecord(String yamlFile, String configRecord) throws IOException,
             BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/http/" + yamlFile);
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -61,7 +61,7 @@ public class HttpAuthTests {
     }
 
     @Test(description = "Test the generation of Config params in class init function signature",
-            dependsOnMethods = {"testgetConfigRecord"})
+            dependsOnMethods = {"testGetConfigRecord"})
     public void testgetConfigParamForClassInit() {
         String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
@@ -75,7 +75,7 @@ public class HttpAuthTests {
     }
 
     @Test(description = "Test the generation of SSL init node",
-            dependsOnMethods = {"testgetConfigRecord"})
+            dependsOnMethods = {"testGetConfigRecord"})
     public void testgetSecureSocketInitNode() {
         String expectedParam = TestConstants.SSL_ASSIGNMENT;
         VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getSecureSocketInitNode();
@@ -85,7 +85,7 @@ public class HttpAuthTests {
     }
 
     @Test(description = "Test the generation of http:Client init node",
-            dependsOnMethods = {"testgetConfigRecord"})
+            dependsOnMethods = {"testGetConfigRecord"})
     public void testgetClientInitializationNode() {
         String expectedParam = TestConstants.HTTP_CLIENT_DECLARATION;
         VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getClientInitializationNode();

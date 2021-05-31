@@ -133,4 +133,17 @@ public class GeneratorConstants {
     public static final String OAUTH2 = "oauth2";
     public static final String SSL_FIELD_NAME = "secureSocketConfig";
 
+    public static final String RESPONSE = "response";
+
+    //Http Methods
+    public static final String POST = "post";
+    public static final String GET = "get";
+    public static final String PUT = "put";
+    public static final String DELETE = "delete";
+    public static final String PATCH = "patch";
+    public static final String EXECUTE = "execute";
+    public static final String HEAD = "head";
+    public static final String CONNECT = "connect";
+    public static final String OPTIONS = "options";
+    public static final String TRACE = "trace";
 }

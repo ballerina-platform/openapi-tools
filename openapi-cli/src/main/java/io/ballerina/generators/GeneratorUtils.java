@@ -49,6 +49,7 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -230,6 +231,7 @@ public class GeneratorUtils {
 
     /**
      * Method for convert openApi type to ballerina type.
+     *
      * @param type  OpenApi parameter types
      * @return ballerina type
      */
@@ -401,5 +403,36 @@ public class GeneratorUtils {
                 return SyntaxKind.JSON_KEYWORD.stringValue();
             // TODO: fill other types
         }
+    }
+
+    /**
+     * This function for creating the UnionType string for handle oneOf data binding.
+     *
+     * @param oneOf - OneOf schema
+     * @return - UnionString
+     * @throws BallerinaOpenApiException
+     */
+    public static String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
+
+        StringBuilder unionType = new StringBuilder();
+        for (Schema oneOfSchema: oneOf) {
+            if (oneOfSchema.getType() != null) {
+                String type = convertOpenAPITypeToBallerina(oneOfSchema.getType());
+                if (!type.equals("record")) {
+                    unionType.append("|");
+                    unionType.append(type);
+                }
+            }
+            if (oneOfSchema.get$ref() != null) {
+                String type = extractReferenceType(oneOfSchema.get$ref());
+                unionType.append("|");
+                unionType.append(type);
+            }
+        }
+        String unionTypeCont = unionType.toString();
+        if (!unionTypeCont.isBlank() && unionTypeCont.startsWith("|")) {
+            unionTypeCont = unionTypeCont.replaceFirst("\\|", "");
+        }
+        return unionTypeCont;
     }
 }
