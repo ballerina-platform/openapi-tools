@@ -2,15 +2,21 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
+public type ApiKeysConfig record {
+    map<string|string[]> apiKeys;
+};
+
 public client class Client {
-    public http:Client clientEp;
-    public isolated function init(string serviceUrl = "http://api.openweathermap.org/data/2.5/", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
-        http:Client httpEp = check new (serviceUrl, httpClientConfig);
+    http:Client clientEp;
+    map<string|string[]> apiKeys;
+    public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
+        http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
+        self.apiKeys = apiKeyConfig.apiKeys;
     }
-    remote isolated function currentWeatherData(string? q, string? id, string? lat, string? lon, string? zip, string? units, string? lang, string? mode) returns '200|error {
+    remote isolated function currentWeatherData(string? q = (), string? id = (), string? lat = (), string? lon = (), string? zip = (), string? units = (), string? lang = (), string? mode = ()) returns '200|error {
         string  path = string `/weather`;
-        map<anydata> queryParam = {q: q, id: id, lat: lat, lon: lon, zip: zip, units: units, lang: lang, mode: mode};
+        map<anydata> queryParam = {q: q, id: id, lat: lat, lon: lon, zip: zip, units: units, lang: lang, mode: mode, appid: self.apiKeys["appid"]};
         path = path + getPathForQueryParam(queryParam);
         '200 response = check self.clientEp-> get(path, targetType = '200);
         return response;
