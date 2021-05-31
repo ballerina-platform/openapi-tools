@@ -2,7 +2,7 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
-public type ApiKeysConfigrecord {
+public type ApiKeysConfig record {
     map<string|string[]> apiKeys;
 };
 
@@ -13,9 +13,7 @@ type PriceEstimateArr PriceEstimate[];
 public client class Client {
     http:Client clientEp;
     map<string|string[]> apiKeys;
-    public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig = {},
-                                  string serviceUrl = "https://api.uber.com/v1") returns error? {
-
+    public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://api.uber.com/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
         self.apiKeys = apiKeyConfig.apiKeys;
@@ -34,7 +32,7 @@ public client class Client {
         PriceEstimateArr response = check self.clientEp-> get(path, targetType = PriceEstimateArr);
         return response;
     }
-    remote isolated function  time(float start_latitude, float start_longitude, string? customer_uuid, string? product_id) returns ProductArr|error {
+    remote isolated function  time(float start_latitude, float start_longitude, string? customer_uuid = (), string? product_id = ()) returns ProductArr|error {
         string  path = string `/estimates/time`;
         map<anydata> queryParam = {start_latitude: start_latitude, start_longitude: start_longitude, customer_uuid: customer_uuid, product_id: product_id, server_token: self.apiKeys["server_token"]};
         path = path + getPathForQueryParam(queryParam);
@@ -46,7 +44,7 @@ public client class Client {
         Profile response = check self.clientEp-> get(path, targetType = Profile);
         return response;
     }
-    remote isolated function  history(int? offset, int? 'limit) returns Activities|error {
+    remote isolated function  history(int? offset = (), int? 'limit = ()) returns Activities|error {
         string  path = string `/history`;
         map<anydata> queryParam = {offset: offset, 'limit: 'limit, server_token: self.apiKeys["server_token"]};
         path = path + getPathForQueryParam(queryParam);

@@ -147,6 +147,16 @@ public class BallerinaSchemaGenerator {
                                     createSimpleNameReferenceNode(createIdentifierToken(unionTypeCont)),
                                     createToken(SEMICOLON_TOKEN));
                             typeDefinitionNodeList.add(typeDefNode);
+                        } else if (composedSchema.getAnyOf() != null) {
+                            List<Schema> anyOf = composedSchema.getAnyOf();
+                            String unionTypeCont = getOneOfUnionType(anyOf);
+                            String type  = escapeIdentifier(schema.getKey().trim());
+                            TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
+                                    createIdentifierToken("public type "),
+                                    createIdentifierToken(type),
+                                    createSimpleNameReferenceNode(createIdentifierToken(unionTypeCont)),
+                                    createToken(SEMICOLON_TOKEN));
+                            typeDefinitionNodeList.add(typeDefNode);
                         }
                     } else if (schema.getValue().getProperties() != null
                             || (schema.getValue() instanceof ObjectSchema)) {

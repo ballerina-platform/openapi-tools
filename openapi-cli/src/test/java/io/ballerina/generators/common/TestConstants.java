@@ -1,4 +1,4 @@
-package io.ballerina.generators;
+package io.ballerina.generators.common;
 
 /**
  * Constants for openapi code generator unit test cases.
