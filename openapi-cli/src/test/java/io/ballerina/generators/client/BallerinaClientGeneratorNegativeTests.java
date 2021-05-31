@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.generators;
+package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;

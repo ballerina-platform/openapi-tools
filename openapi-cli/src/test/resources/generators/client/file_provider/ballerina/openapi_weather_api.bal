@@ -2,28 +2,23 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
+public type ApiKeysConfig record {
+    map<string|string[]> apiKeys;
+};
+
 public client class Client {
     http:Client clientEp;
-    public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
+    map<string|string[]> apiKeys;
+    public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
+        self.apiKeys = apiKeyConfig.apiKeys;
     }
-    remote isolated function listPets(int? 'limit = ()) returns Pets|error {
-        string  path = string `/pets`;
-        map<anydata> queryParam = {'limit: 'limit};
+    remote isolated function currentWeatherData(string? q = (), string? id = (), string? lat = (), string? lon = (), string? zip = (), string? units = (), string? lang = (), string? mode = ()) returns '200|error {
+        string  path = string `/weather`;
+        map<anydata> queryParam = {q: q, id: id, lat: lat, lon: lon, zip: zip, units: units, lang: lang, mode: mode, appid: self.apiKeys["appid"]};
         path = path + getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp-> get(path, targetType = Pets);
-        return response;
-    }
-    remote isolated function  pets() returns error? {
-        string  path = string `/pets`;
-        http:Request request = new;
-        //TODO: Update the request as needed;
-         _ = check self.clientEp-> post(path, request, targetType =http:Response);
-    }
-    remote isolated function showPetById(string petId) returns Pets|error {
-        string  path = string `/pets/${petId}`;
-        Pets response = check self.clientEp-> get(path, targetType = Pets);
+        '200 response = check self.clientEp-> get(path, targetType = '200);
         return response;
     }
 }

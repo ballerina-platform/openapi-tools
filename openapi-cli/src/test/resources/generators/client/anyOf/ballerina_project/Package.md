@@ -1,9 +1,7 @@
-## Module Overview
+## Module overview
 
-This module provides the Ballerina OpenAPI tooling, which will make it easy to start the development of a service documented in an OpenAPI contract in Ballerina by generating the Ballerina service and client skeletons.
-
-The OpenAPI tools provide the following capabilities. 
-
+The OpenAPI tools provide the following capabilities.
+ 
  1. Generate the Ballerina service or client code for a given OpenAPI definition. 
  2. Export the OpenAPI definition of a Ballerina service.
  3. Validate the service implementation of a given OpenAPI contract.
@@ -19,15 +17,18 @@ This plugin ensures that the implementation of a service does not deviate from i
 
 ```bash
 bal openapi -i <openapi-contract-path> 
+               [--service-name: generated files name]
                [--tags: tags list]
                [--operations: operationsID list]
                [--mode service|client ]
                [(-o|--output): output file path]
 ```
-Generates both the Ballerina service and Ballerina client stubs for a given OpenAPI file.
+Generates both the Ballerina service and Ballerina client stub for a given OpenAPI file.
 
 This `-i <openapi-contract-path>` parameter of the command is mandatory. It will get the path to the
  OpenAPI contract file (i.e., `my-api.yaml` or `my-api.json`) as an input.
+
+The `--service-name`  is an optional parameter, which allows you to change the generated service name.
 
 You can give the specific tags and operations that you need to document as services without documenting all the operations using these optional `--tags` and `--operations` commands.
 
@@ -38,20 +39,21 @@ If not, it will take the execution path as the output path.
 If you want to generate a service only, you can set the mode as `service` in the OpenAPI tool.
 
 ```bash
-    bal openapi -i <openapi-contract-path> --mode service [(-o|--output) output file path]
+bal openapi -i <openapi-contract-path> --mode service [(-o|--output) output file path]
 ```
 
 If you want to generate a client only, you can set the mode as  `client` in the OpenAPI tool. 
 This client can be used in client applications to call the service defined in the OpenAPI file.
 
 ```bash
-    bal openapi -i <openapi-contract-path> --mode client [(-o|--output) output file path]
+bal openapi -i <openapi-contract-path> --mode client
+               [(-o|--output) output file path]
 ```
 
 ### Ballerina to OpenAPI
 #### Service to OpenAPI Export
 ```bash
-    bal openapi -i <ballerina-file-path> 
+bal openapi -i <ballerina-file-path> 
                [(-o|--output) output openapi file path]
 ```
 Export the Ballerina service to an  OpenAPI Specification 3.0 definition. For the export to work properly, 
@@ -75,8 +77,8 @@ Output:
 ```bash
 The service generation process is complete. The following files were created.
 -- hello-service.bal
--- client.bal
--- types.bal
+-- hello-client.bal
+-- schema.bal
 ```
 #### Generate an OpenAPI Contract from a Service
 
@@ -89,11 +91,6 @@ This will generate the OpenAPI contracts for the Ballerina services, which are i
   ```
 This command will generate the `helloworld-openapi.yaml` file that is related to the `helloworld` service inside the
  `helloService.bal` file.
- ```bash
-    bal openapi -i modules/helloworld/helloService.bal --json
-  ```
-This `--json` option can be used with the Ballerina to OpenAPI command to generate the `helloworld-openapi.json` file 
-instead of generating the YAML file.
 
 ## OpenAPI Validator Compiler Plugin
 
@@ -145,3 +142,4 @@ The `Tag` feature can store with `excludeOperations`. Then, all the tag operatio
  
 - **FailOnErrors** (Optional) : **boolean value**   :
 If you need to turn off the validation, add this to the annotation with the value as `false`.
+

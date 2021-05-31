@@ -19,7 +19,7 @@
 package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.generators.TestConstants;
+import io.ballerina.generators.common.TestConstants;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
