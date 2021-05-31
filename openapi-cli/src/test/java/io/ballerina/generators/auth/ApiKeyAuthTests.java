@@ -69,7 +69,7 @@ public class ApiKeyAuthTests {
     }
 
     @Test(description = "Test the generation of api key related parameters in class init function signature",
-            dependsOnMethods = {"testgetApiKeyMapClassVariable"})
+            dependsOnMethods = {"testGetApiKeyMapClassVariable"})
     public void testGetConfigParamForClassInit() {
         String expectedParams = TestConstants.API_KEY_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
