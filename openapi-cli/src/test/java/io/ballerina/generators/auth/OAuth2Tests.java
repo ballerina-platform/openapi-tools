@@ -48,7 +48,7 @@ public class OAuth2Tests {
 
     @Test(description = "Generate config record for OAuth 2.0 authorization code flow",
             dataProvider = "oAuth2IOProvider")
-    public void testgetConfigRecordAuthorizationCode(String yamlFile, String configRecord) throws IOException,
+    public void testgetConfigRecord(String yamlFile, String configRecord) throws IOException,
             BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2/" + yamlFile);
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -62,7 +62,7 @@ public class OAuth2Tests {
 
 
     @Test(description = "Test the generation of Config params in class init function signature",
-            dependsOnMethods = {"testgetConfigRecordAuthorizationCode"})
+            dependsOnMethods = {"testgetConfigRecord"})
     public void testgetConfigParamForClassInit() {
         String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
@@ -76,7 +76,7 @@ public class OAuth2Tests {
     }
 
     @Test(description = "Test the generation of SSL init node",
-            dependsOnMethods = {"testgetConfigRecordAuthorizationCode"})
+            dependsOnMethods = {"testgetConfigRecord"})
     public void testgetSecureSocketInitNode() {
         String expectedParam = TestConstants.SSL_ASSIGNMENT;
         VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getSecureSocketInitNode();
@@ -86,7 +86,7 @@ public class OAuth2Tests {
     }
 
     @Test(description = "Test the generation of http:Client init node",
-            dependsOnMethods = {"testgetConfigRecordAuthorizationCode"})
+            dependsOnMethods = {"testgetConfigRecord"})
     public void testgetClientInitializationNode() {
         String expectedParam = TestConstants.HTTP_CLIENT_DECLARATION;
         VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getClientInitializationNode();
