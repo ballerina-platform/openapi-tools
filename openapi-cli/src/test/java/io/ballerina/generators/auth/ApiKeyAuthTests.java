@@ -46,7 +46,7 @@ public class ApiKeyAuthTests {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Generate config record for openweathermap api", dataProvider = "apiKeyAuthIOProvider")
-    public void testgetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
+    public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
         // generate ApiKeysConfig record
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/" + yamlFile);
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -59,8 +59,8 @@ public class ApiKeyAuthTests {
     }
 
     @Test(description = "Test the generation of ApiKey map local variable",
-            dependsOnMethods = {"testgetConfigRecord"})
-    public void testgetApiKeyMapClassVariable () {
+            dependsOnMethods = {"testGetConfigRecord"})
+    public void testGetApiKeyMapClassVariable () {
         String expectedClassVariable = TestConstants.API_KEY_MAP_VAR;
         String generatedClassVariable = BallerinaAuthConfigGenerator.getApiKeyMapClassVariable().toString();
         generatedClassVariable = (generatedClassVariable.trim()).replaceAll("\\s+", "");
@@ -69,8 +69,8 @@ public class ApiKeyAuthTests {
     }
 
     @Test(description = "Test the generation of api key related parameters in class init function signature",
-            dependsOnMethods = {"testgetApiKeyMapClassVariable"})
-    public void testgetConfigParamForClassInit() {
+            dependsOnMethods = {"testGetApiKeyMapClassVariable"})
+    public void testGetConfigParamForClassInit() {
         String expectedParams = TestConstants.API_KEY_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
         List<Node> generatedInitParamNodes = BallerinaAuthConfigGenerator.getConfigParamForClassInit();
@@ -83,8 +83,8 @@ public class ApiKeyAuthTests {
     }
 
     @Test(description = "Test the generation of api key assignment node",
-            dependsOnMethods = {"testgetConfigRecord"})
-    public void testgetApiKeyAssignmentNode () {
+            dependsOnMethods = {"testGetConfigRecord"})
+    public void testGetApiKeyAssignmentNode () {
         String expectedAssignmentNode = TestConstants.API_KEY_ASSIGNMENT;
         String generatedAssignmentNode = Objects.requireNonNull
                 (BallerinaAuthConfigGenerator.getApiKeyAssignmentNode()).toString();

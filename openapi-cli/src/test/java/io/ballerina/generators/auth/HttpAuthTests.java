@@ -48,7 +48,7 @@ public class HttpAuthTests {
 
 
     @Test(description = "Generate config record for http basic auth", dataProvider = "httpAuthIOProvider")
-    public void testgetConfigRecord(String yamlFile, String configRecord) throws IOException,
+    public void testGetConfigRecord(String yamlFile, String configRecord) throws IOException,
             BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/http/" + yamlFile);
         OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
@@ -61,8 +61,8 @@ public class HttpAuthTests {
     }
 
     @Test(description = "Test the generation of Config params in class init function signature",
-            dependsOnMethods = {"testgetConfigRecord"})
-    public void testgetConfigParamForClassInit() {
+            dependsOnMethods = {"testGetConfigRecord"})
+    public void testGetConfigParamForClassInit() {
         String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
         List<Node> generatedInitParamNodes = BallerinaAuthConfigGenerator.getConfigParamForClassInit();
@@ -75,8 +75,8 @@ public class HttpAuthTests {
     }
 
     @Test(description = "Test the generation of SSL init node",
-            dependsOnMethods = {"testgetConfigRecord"})
-    public void testgetSecureSocketInitNode() {
+            dependsOnMethods = {"testGetConfigRecord"})
+    public void testGetSecureSocketInitNode() {
         String expectedParam = TestConstants.SSL_ASSIGNMENT;
         VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getSecureSocketInitNode();
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
@@ -85,8 +85,8 @@ public class HttpAuthTests {
     }
 
     @Test(description = "Test the generation of http:Client init node",
-            dependsOnMethods = {"testgetConfigRecord"})
-    public void testgetClientInitializationNode() {
+            dependsOnMethods = {"testGetConfigRecord"})
+    public void testGetClientInitializationNode() {
         String expectedParam = TestConstants.HTTP_CLIENT_DECLARATION;
         VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getClientInitializationNode();
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
