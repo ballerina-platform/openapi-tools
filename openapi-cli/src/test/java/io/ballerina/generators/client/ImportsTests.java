@@ -31,7 +31,7 @@ import java.util.List;
 import static io.ballerina.generators.GeneratorUtils.getImportDeclarationNode;
 
 /**
- * This tests class for the negative tests scenarios for client generations.
+ * This tests class for the tests imports in the generation.
  */
 public class ImportsTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/negative")

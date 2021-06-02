@@ -69,7 +69,8 @@ components:
         name:
           type: string
         tag:
-          type: string
+          type: number
+          format: decimal
         type:
           type: string
 

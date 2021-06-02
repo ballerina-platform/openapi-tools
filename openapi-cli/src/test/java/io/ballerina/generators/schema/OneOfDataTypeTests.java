@@ -34,7 +34,8 @@ import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to AnyDataType handling the {@link io.ballerina.generators.BallerinaSchemaGenerator} util.
+ * All the tests related to OneOF data binding handling the {@link io.ballerina.generators.BallerinaSchemaGenerator}
+ * util.
  */
 public class OneOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();

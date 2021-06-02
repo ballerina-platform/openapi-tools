@@ -28,20 +28,29 @@ under the License.
             <class name="io.ballerina.ballerina.OpenApiConverterUtilsTest"/>
             <class name="io.ballerina.openapi.cmd.OpenApiGenServiceCmdTest"/>
             <class name="io.ballerina.openapi.CodeGeneratorTest"/>
-            <class name="io.ballerina.generators.service.BallerinaServiceGeneratorTest"></class>
-            <class name="io.ballerina.generators.schema.BallerinaSchemaGeneratorTests"></class>
-            <class name="io.ballerina.generators.client.ComparedGeneratedFileTests"></class>
-            <class name="io.ballerina.generators.auth.HttpAuthTests"></class>
-            <class name="io.ballerina.generators.auth.OAuth2Tests"></class>
-            <class name="io.ballerina.generators.auth.ApiKeyAuthTests"></class>
-            <class name="io.ballerina.generators.client.ImportsTests"></class>
-            <class name="io.ballerina.generators.common.GeneratorUtilsTests"></class>
-            <class name="io.ballerina.generators.client.AnyOfDataTypeTests"></class>
-            <class name="io.ballerina.generators.schema.AnyOfDataTypeTests"></class>
-            <class name="io.ballerina.generators.schema.OneOfDataTypeTests"></class>
-            <class name="io.ballerina.generators.client.BallerinaDiagnosticTests"></class>
-            <class name="io.ballerina.generators.client.FunctionBodyNodeTests"></class>
-            <class name="io.ballerina.generators.client.FunctionSignatureNodeTests"></class>
+            <class name="io.ballerina.generators.service.BallerinaServiceGeneratorTest"/>
+            <class name="io.ballerina.generators.schema.AdvanceRecordTypeTests"/>
+            <class name="io.ballerina.generators.client.ComparedGeneratedFileTests"/>
+            <class name="io.ballerina.generators.auth.HttpAuthTests"/>
+            <class name="io.ballerina.generators.auth.OAuth2Tests"/>
+            <class name="io.ballerina.generators.auth.ApiKeyAuthTests"/>
+            <class name="io.ballerina.generators.client.ImportsTests"/>
+            <class name="io.ballerina.generators.common.GeneratorUtilsTests"/>
+            <class name="io.ballerina.generators.schema.AnyOfDataTypeTests"/>
+            <class name="io.ballerina.generators.schema.OneOfDataTypeTests"/>
+            <class name="io.ballerina.generators.schema.AllOfDataTypeTests"/>
+            <class name="io.ballerina.generators.schema.PrimitiveDataTypeTests"/>
+            <class name="io.ballerina.generators.schema.RecordDataTypeTests"/>
+            <class name="io.ballerina.generators.schema.AdvanceRecordTypeTests"/>
+            <class name="io.ballerina.generators.client.BallerinaDiagnosticTests"/>
+            <class name="io.ballerina.generators.client.FunctionBodyNodeTests"/>
+            <class name="io.ballerina.generators.client.FunctionSignatureNodeTests"/>
+            <class name="io.ballerina.generators.client.FunctionSignatureReturnTypeTests"/>
+            <class name="io.ballerina.generators.client.HeadersTests"/>
+            <class name="io.ballerina.generators.client.ComparedGeneratedFileTests"/>
+            <class name="io.ballerina.generators.client.PathParameterTests"/>
+
+
         </classes>
     </test>
 </suite>

@@ -15,23 +15,23 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.generators;
+package io.ballerina.error;
 
 /**
  * Container for error messages of the OpenAPI validator plugin.
  */
-class ErrorMessages {
+public class ErrorMessages {
 
-    static String invalidFilePath(String path) {
+    public static String invalidFilePath(String path) {
         return String.format("OpenAPI contract doesn't exist in the given location:%n%s", path);
     }
 
-    static String invalidFile() {
+    public static String invalidFile() {
         return "Invalid file type. Provide either a .yaml or .json file.";
     }
 
-    static String parserException(String path) {
-        return String.format("Couldn't read the OpenAPI contract from the given file: %s", path);
+    public static String invalidPathParamType(String parameterName) {
+        return String.format("Invalid path parameter data type for the parameter: '%s'", parameterName);
     }
 
     static String undocumentedResourcePath(String path) {

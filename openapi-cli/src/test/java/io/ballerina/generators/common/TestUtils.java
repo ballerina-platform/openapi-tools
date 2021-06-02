@@ -21,7 +21,6 @@ package io.ballerina.generators.common;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
-import io.ballerina.generators.OpenApiException;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.projects.DocumentId;
@@ -54,7 +53,7 @@ import java.util.stream.Stream;
  * This util class for keeping all the common functions that use to tests.
  */
 public class TestUtils {
-    private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
+    private static final Path RES_DIR = Paths.get("src/test/resources/generators/").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
 
@@ -64,7 +63,7 @@ public class TestUtils {
 
     // Get diagnostics
     public static List<Diagnostic> getDiagnostics(Path definitionPath, SyntaxTree syntaxTree)
-            throws OpenApiException, FormatterException, IOException, BallerinaOpenApiException {
+            throws FormatterException, IOException, BallerinaOpenApiException {
 
         SyntaxTree schemaSyntax = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         writeFile(clientPath, Formatter.format(syntaxTree).toString());
@@ -137,16 +136,17 @@ public class TestUtils {
         return api;
     }
 
-    public String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
+    public static String  getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
         expectedServiceLines.close();
         return expectedServiceContent;
     }
 
-    public static void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String s, SyntaxTree syntaxTree) throws IOException {
+    public static void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String s, SyntaxTree syntaxTree)
+            throws IOException {
 
-        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("ballerina/"), s);
+        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve(s));
         String generatedSyntaxTree = syntaxTree.toString();
 
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
