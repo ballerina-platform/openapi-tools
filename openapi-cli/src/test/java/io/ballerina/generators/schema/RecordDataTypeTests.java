@@ -35,7 +35,6 @@ public class RecordDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
 
-
     @Test(description = "Scenario05-Generate record with record type filed record")
     public void generateScenario05() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario05.yaml");
