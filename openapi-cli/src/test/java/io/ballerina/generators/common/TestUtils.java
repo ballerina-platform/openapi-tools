@@ -137,4 +137,21 @@ public class TestUtils {
         return api;
     }
 
+    public String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
+        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
+        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
+        expectedServiceLines.close();
+        return expectedServiceContent;
+    }
+
+    public static void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String s, SyntaxTree syntaxTree) throws IOException {
+
+        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("ballerina/"), s);
+        String generatedSyntaxTree = syntaxTree.toString();
+
+        generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
+        expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
+        Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
+    }
+
 }
