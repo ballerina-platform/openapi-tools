@@ -18,6 +18,8 @@
 
 package io.ballerina.generators.schema;
 
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.common.TestUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -30,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static io.ballerina.generators.BallerinaSchemaGenerator.generateSyntaxTree;
 import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
@@ -60,6 +63,13 @@ public class OneOfDataTypeTests {
         List<Schema> oneOf = composedSchema.getOneOf();
         String oneOfUnionType = getOneOfUnionType(oneOf);
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
+    }
+
+    @Test(description = "Tests full schema genrations with oneOf type")
+    public void generateOneOFTests() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/oneOf.yaml");
+        SyntaxTree syntaxTree = generateSyntaxTree(definitionPath);
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/oneOf.bal", syntaxTree);
     }
 
 }

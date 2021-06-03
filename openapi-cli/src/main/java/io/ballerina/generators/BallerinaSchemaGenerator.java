@@ -269,7 +269,6 @@ public class BallerinaSchemaGenerator {
         //FiledName
         IdentifierToken fieldName =
                 AbstractNodeFactory.createIdentifierToken(escapeIdentifier(field.getKey().trim()));
-
         TypeDescriptorNode fieldTypeName = extractOpenApiSchema(field.getValue());
         Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
         Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
@@ -371,6 +370,13 @@ public class BallerinaSchemaGenerator {
         } else if (schema.get$ref() != null) {
             Token typeName = AbstractNodeFactory.createIdentifierToken(extractReferenceType(schema.get$ref()));
             return createBuiltinSimpleNameReferenceNode(null, typeName);
+        } else if (schema instanceof ComposedSchema) {
+            ComposedSchema composedSchema = (ComposedSchema) schema;
+            if (composedSchema.getOneOf() != null) {
+                List<Schema> oneOf = composedSchema.getOneOf();
+                Token typeName = AbstractNodeFactory.createIdentifierToken(getOneOfUnionType(oneOf));
+                return createBuiltinSimpleNameReferenceNode(null, typeName);
+            }
         } else {
             //This contains a fallback to Ballerina common type `any` if the OpenApi specification type is not defined
             // or not compatible with any of the current Ballerina types.
