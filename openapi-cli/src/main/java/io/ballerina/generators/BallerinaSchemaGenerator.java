@@ -395,12 +395,12 @@ public class BallerinaSchemaGenerator {
             throw new BallerinaOpenApiException(ErrorMessages.invalidFilePath(definitionURI));
         }
         if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json") || definitionURI.endsWith(".yml"))) {
-            throw new BallerinaOpenApiException(ErrorMessages.invalidFile());
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFileType());
         }
         String openAPIFileContent = Files.readString(Paths.get(definitionURI));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
         if (!parseResult.getMessages().isEmpty()) {
-            throw new BallerinaOpenApiException(ErrorMessages.invalidFilePath(definitionURI));
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFile(definitionURI));
         }
         return parseResult.getOpenAPI();
     }

@@ -26,8 +26,12 @@ public class ErrorMessages {
         return String.format("OpenAPI contract doesn't exist in the given location:%n%s", path);
     }
 
-    public static String invalidFile() {
+    public static String invalidFileType() {
         return "Invalid file type. Provide either a .yaml or .json file.";
+    }
+
+    public static String invalidFile(String path) {
+        return String.format("Invalid swagger file in the given location:%n%s", path);
     }
 
     public static String invalidPathParamType(String parameterName) {
