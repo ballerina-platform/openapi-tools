@@ -16,7 +16,5 @@ public type Activities record {
 public type Subject record {
     int id?;
     string name?;
-    Activity|Profile01 subject_type?;
+    Activity subject_type?;
 };
-
-public type Error Activity|Profile01;

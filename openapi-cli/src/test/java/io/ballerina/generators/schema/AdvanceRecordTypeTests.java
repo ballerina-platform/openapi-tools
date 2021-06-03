@@ -46,15 +46,15 @@ public class AdvanceRecordTypeTests {
     SyntaxTree syntaxTree;
 
 //check nested array -test
-    @Test(description = "Scenario10-Generate record for schema has not type")
-    public void generateScenario10() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Generate record for schema has not type")
+    public void generateSchemaHasNotType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario10.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema10.bal", syntaxTree);
     }
 
-    @Test(description = "Scenario11-Generate record for schema has inline record in fields reference")
-    public void generateScenario11() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Generate record for schema has inline record in fields reference")
+    public void generateSchemaHasInlineRecord() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario11.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema11.bal", syntaxTree);
@@ -67,7 +67,7 @@ public class AdvanceRecordTypeTests {
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/openapi_weather_api_schema.bal", syntaxTree);
     }
 
-    @Test(description = "Scenario12-Generate record for schema has object type only")
+    @Test(description = "Generate record for schema has object type only")
     public void generateForSchemaHasObjectTypeOnly() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario14.yaml");
         OpenAPI openAPI = getOpenAPI(definitionPath);

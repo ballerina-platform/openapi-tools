@@ -376,6 +376,10 @@ public class BallerinaSchemaGenerator {
                 List<Schema> oneOf = composedSchema.getOneOf();
                 Token typeName = AbstractNodeFactory.createIdentifierToken(getOneOfUnionType(oneOf));
                 return createBuiltinSimpleNameReferenceNode(null, typeName);
+            } else if (composedSchema.getAllOf() != null) {
+                List<Schema> allOf = composedSchema.getAllOf();
+                Token typeName = AbstractNodeFactory.createIdentifierToken(getOneOfUnionType(allOf));
+                return createBuiltinSimpleNameReferenceNode(null, typeName);
             }
         } else {
             //This contains a fallback to Ballerina common type `any` if the OpenApi specification type is not defined

@@ -42,7 +42,6 @@ import static io.ballerina.generators.common.TestUtils.getOpenAPI;
  */
 public class OneOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
-
     @Test(description = "Generate record for schema has oneOF")
     public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
@@ -71,5 +70,4 @@ public class OneOfDataTypeTests {
         SyntaxTree syntaxTree = generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/oneOf.bal", syntaxTree);
     }
-
 }

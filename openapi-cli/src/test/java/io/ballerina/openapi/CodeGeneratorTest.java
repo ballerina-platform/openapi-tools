@@ -22,6 +22,7 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.model.GenSrcFile;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -335,5 +336,11 @@ public class CodeGeneratorTest {
                 {"nonEmptyPath.yaml", "nonEmptyPath.bal"},
                 {"petstore.yaml", "petstore.bal"},
         };
+    }
+
+    @AfterTest
+    public void clean() {
+        System.setErr(null);
+        System.setOut(null);
     }
 }

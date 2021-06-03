@@ -34,16 +34,15 @@ import java.nio.file.Paths;
 public class RecordDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-
-    @Test(description = "Scenario05-Generate record with record type filed record")
-    public void generateScenario05() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Generate record with record type filed record")
+    public void generateRecordWithRecordField() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario05.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema05.bal", syntaxTree);
     }
 
-    @Test(description = "Scenario07-Generate record with nested record type filed record")
-    public void generateScenario07() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Generate record with nested record type filed record")
+    public void generateNestedRecord() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario07.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema07.bal", syntaxTree);

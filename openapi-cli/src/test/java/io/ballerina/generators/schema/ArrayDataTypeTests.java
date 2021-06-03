@@ -21,9 +21,13 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.generators.common.TestUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -33,9 +37,15 @@ import java.nio.file.Paths;
 public class ArrayDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
-    @Test(description = "Scenario03-Generate record with array filed record")
-    public void generateScenario03() throws IOException, BallerinaOpenApiException {
+    @BeforeTest
+    public void setUp() {
+        System.setErr(new PrintStream(outContent));
+    }
+
+    @Test(description = "Generate record with array filed record")
+    public void generateRecordWithArrayField() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario03.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema03.bal", syntaxTree);
@@ -48,18 +58,23 @@ public class ArrayDataTypeTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema04.bal", syntaxTree);
     }
 
-    @Test(description = "Scenario06 - Generate record with record type array filed record")
-    public void generateScenario06() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Generate record with record type array filed record")
+    public void generateRecordWithRecordArrayField() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario06.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema06.bal", syntaxTree);
     }
 
 
-    @Test(description = "Scenario08-Generate record for schema has array reference")
-    public void generateScenario08() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Generate record for schema has array reference")
+    public void generateSchemaHasArrayReference() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario08.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema08.bal", syntaxTree);
+    }
+
+    @AfterTest
+    public void tearDown() {
+        System.setErr(null);
     }
 }

@@ -22,9 +22,14 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.generators.common.TestUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -34,18 +39,39 @@ import java.nio.file.Paths;
 public class PrimitiveDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
+    private ByteArrayOutputStream outContent;
 
-    @Test(description = "Scenario01-Generate single record")
+    @BeforeTest
+    public void setUp() {
+        outContent = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(outContent));
+    }
+
+    @Test(description = "Generate single record")
     public void generateScenario01() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario01.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema01.bal", syntaxTree);
     }
 
-    @Test(description = "Scenario02- Generate multiple record")
+    @Test(description = "Generate multiple record")
     public void generateScenario02() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario02.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema02.bal", syntaxTree);
+    }
+
+    @Test(description = "Scenario for missing DataType")
+    public void generateMissingDatatype() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/missDataType.yaml");
+        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        String expected = "Encountered an unsupported type. Type `anydata` would be used for the field." +
+                System.getProperty("line.separator");
+        Assert.assertTrue(outContent.toString().contains(expected));
+    }
+
+    @AfterTest
+    public void clean() {
+        System.setErr(null);
     }
 }

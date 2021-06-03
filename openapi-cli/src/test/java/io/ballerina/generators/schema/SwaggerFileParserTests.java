@@ -53,5 +53,6 @@ public class SwaggerFileParserTests {
             expectedExceptionsMessageRegExp = "Invalid swagger file in the given .*")
     public void testInvalidFile() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = parseOpenAPIFile(RES_DIR.resolve("swagger/invalid.yaml").toString());
+
     }
 }
