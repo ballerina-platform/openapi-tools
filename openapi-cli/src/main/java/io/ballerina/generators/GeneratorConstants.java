@@ -134,6 +134,8 @@ public class GeneratorConstants {
     public static final String AUTH_CONFIG_FILED_NAME = "authConfig";
     public static final String BASIC = "basic";
     public static final String BEARER = "bearer";
+    public static final String CLIENT_CRED = "client_cred";
+    public static final String PASSWORD = "password";
     public static final String CONFIG_RECORD_ARG = "clientConfig";
     public static final String CONFIG_RECORD_NAME = "ClientConfig";
     public static final String OAUTH2 = "oauth2";

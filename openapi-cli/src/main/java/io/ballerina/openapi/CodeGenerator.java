@@ -404,8 +404,10 @@ public class CodeGenerator {
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
 
         String configContent = BallerinaTestGenerator.getConfigTomlFile();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, GeneratorConstants.CONFIG_FILE_NAME,
-                configContent));
+        if (!configContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
+                    GeneratorConstants.CONFIG_FILE_NAME, configContent));
+        }
 
         // Generate ballerina records to represent schemas.
         String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();

@@ -1,2 +1,2 @@
-[clientConfig.authConfig]
+[authConfig]
 token = "<Enter your token here>"

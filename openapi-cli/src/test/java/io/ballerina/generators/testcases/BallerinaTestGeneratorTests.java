@@ -13,6 +13,7 @@ import io.ballerina.tools.diagnostics.Diagnostic;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -32,7 +33,6 @@ public class BallerinaTestGeneratorTests {
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     private static final Path testPath = RES_DIR.resolve("ballerina_project/tests/test.bal");
     private static final Path configPath = RES_DIR.resolve("ballerina_project/tests/Config.toml");
-
 
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
@@ -59,8 +59,19 @@ public class BallerinaTestGeneratorTests {
         TestUtils.writeFile(testPath, Formatter.format(testSyntaxTree).toString());
         TestUtils.writeFile(configPath, configContent);
         SemanticModel semanticModel = TestUtils.getSemanticModel(clientPath);
-        restAfterTest();
         return semanticModel.diagnostics();
+    }
+
+    @AfterMethod
+    public void afterTest(){
+        try {
+            Files.deleteIfExists(clientPath);
+            Files.deleteIfExists(schemaPath);
+            Files.deleteIfExists(testPath);
+            Files.deleteIfExists(configPath);
+        } catch (IOException e) {
+            //Ignore the exception
+        }
     }
 
     @DataProvider(name = "httpAuthIOProvider")
@@ -73,18 +84,8 @@ public class BallerinaTestGeneratorTests {
                 "oauth2_implicit.yaml",
                 "oauth2_password.yaml",
                 "oauth2_multipleflows.yaml",
-                "query_api_key.yaml"
+                "query_api_key.yaml",
+                "no_auth.yaml"
         };
     }
-
-    private void restAfterTest() {
-        try {
-            Files.deleteIfExists(clientPath);
-            Files.deleteIfExists(schemaPath);
-            Files.deleteIfExists(testPath);
-            Files.deleteIfExists(configPath);
-        } catch (IOException e) {
-            //Ignore the exception
-        }
-   }
 }
