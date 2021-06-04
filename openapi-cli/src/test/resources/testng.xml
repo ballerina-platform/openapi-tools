@@ -29,10 +29,6 @@ under the License.
             <class name="io.ballerina.openapi.cmd.OpenApiGenServiceCmdTest"/>
             <class name="io.ballerina.openapi.CodeGeneratorTest"/>
             <class name="io.ballerina.generators.BallerinaServiceGeneratorTest"></class>
-            <class name="io.ballerina.generators.BallerinaSchemaGeneratorTests"></class>
-            <class name="io.ballerina.generators.BallerinaClientGeneratorTests"></class>
-            <class name="io.ballerina.generators.BallerinaTestGeneratorTests"></class>
-            <class name="io.ballerina.generators.BallerinaClientGeneratorNegativeTests"></class>
             <class name="io.ballerina.generators.GeneratorUtilsTests"></class>
             <class name="io.ballerina.generators.client.AnyOfDataTypeTests"></class>
             <class name="io.ballerina.generators.schema.AnyOfDataTypeTests"></class>
@@ -40,6 +36,10 @@ under the License.
             <class name="io.ballerina.generators.client.BallerinaDiagnosticTests"></class>
             <class name="io.ballerina.generators.client.FunctionBodyNodeTests"></class>
             <class name="io.ballerina.generators.client.FunctionSignatureNodeTests"></class>
+            <class name="io.ballerina.generators.auth.ApiKeyAuthTests"></class>
+            <class name="io.ballerina.generators.auth.HttpAuthTests"></class>
+            <class name="io.ballerina.generators.auth.OAuth2Tests"></class>
+            <class name="io.ballerina.generators.testcases.BallerinaTestGeneratorTests"></class>
         </classes>
     </test>
 </suite>

@@ -53,8 +53,8 @@ public class TestConstants {
             "  http:OAuth2PasswordGrantConfig|http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig authConfig;\n" +
             "  http:ClientSecureSocket secureSocketConfig?;\n" +
             "};";
-    public static final String API_KEY_CONFIG_REC = "public type ApiKeysConfig record {map<string|string[]> apiKeys;};";
-    public static final String API_KEY_MAP_VAR  = "map<string|string[]> apiKeys;";
+    public static final String API_KEY_CONFIG_REC = "public type ApiKeysConfig record {map<string> apiKeys;};";
+    public static final String API_KEY_MAP_VAR  = "map<string> apiKeys;";
     public static final String API_KEY_CONFIG_PARAM = "" +
             "ApiKeysConfig apiKeyConfig,http:ClientConfiguration clientConfig =  {}";
     public static final String API_KEY_ASSIGNMENT = "self.apiKeys = apiKeyConfig.apiKeys;";

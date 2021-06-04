@@ -49,7 +49,6 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -65,9 +64,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.OpenApiMesseges.BAL_KEYWORDS;
@@ -77,15 +73,6 @@ import static io.ballerina.openapi.OpenApiMesseges.BAL_TYPES;
  * This class util for store all the common scenarios.
  */
 public class GeneratorUtils {
-    private static List<String> remoteFunctionNameList = new ArrayList<>();
-
-    public static List<String> getRemoteFunctionNameList () {
-        return remoteFunctionNameList;
-    }
-
-    public static void addRemoteFunctionNameList (String remotefunctionName) {
-        remoteFunctionNameList.add(remotefunctionName);
-    }
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
         Token importKeyword = AbstractNodeFactory.createIdentifierToken("import ");

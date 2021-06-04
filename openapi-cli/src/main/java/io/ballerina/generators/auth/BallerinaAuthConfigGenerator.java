@@ -49,6 +49,7 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.generators.GeneratorConstants;
+import io.ballerina.generators.auth.AuthTypeMap.Flags;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
@@ -110,8 +111,6 @@ import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 public class BallerinaAuthConfigGenerator {
     private static final List<String> headerApiKeyNameList = new ArrayList<>();
     private static final List<String> queryApiKeyNameList = new ArrayList<>();
-    private static boolean isAPIKey = false;
-    private static boolean isHttpOROAuth = false;
 
     /**
      * Generate the Config record for the relevant authentication type.
@@ -138,7 +137,7 @@ public class BallerinaAuthConfigGenerator {
             List<Node> recordFieldList = addItemstoRecordFieldList(openAPI);
             if (!recordFieldList.isEmpty()) {
                 Token typeName;
-                if (isAPIKey) {
+                if (AuthTypeMap.getFlag(Flags.API_KEY)) {
                     typeName = AbstractNodeFactory.createIdentifierToken(API_KEY_CONFIG);
                 } else {
                     typeName = AbstractNodeFactory.createIdentifierToken(CONFIG_RECORD_NAME);
@@ -167,7 +166,7 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link List<ObjectFieldNode>}    syntax tree object field node list
      */
     public static ObjectFieldNode getApiKeyMapClassVariable() { // return ObjectFieldNode
-        if (isAPIKey) {
+        if (AuthTypeMap.getFlag(Flags.API_KEY)) {
             NodeList<Token> qualifierList = createEmptyNodeList();
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(API_KEY_MAP));
@@ -194,14 +193,14 @@ public class BallerinaAuthConfigGenerator {
         List<Node> parameters  = new ArrayList<>();
         IdentifierToken equalToken = createIdentifierToken(GeneratorConstants.EQUAL);
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        if (isHttpOROAuth) {
+        if (AuthTypeMap.getFlag(Flags.HTTP_OR_OAUTH)) {
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(CONFIG_RECORD_NAME));
             IdentifierToken paramName = createIdentifierToken(CONFIG_RECORD_ARG);
             RequiredParameterNode authConfig = createRequiredParameterNode(annotationNodes, typeName, paramName);
             parameters.add(authConfig);
         } else {
-            if (isAPIKey) {
+            if (AuthTypeMap.getFlag(Flags.API_KEY)) {
                 BuiltinSimpleNameReferenceNode apiKeyConfigTypeName = createBuiltinSimpleNameReferenceNode(null,
                         createIdentifierToken(API_KEY_CONFIG));
                 IdentifierToken apiKeyConfigParamName = createIdentifierToken(API_KEY_CONFIG_PARAM);
@@ -228,7 +227,7 @@ public class BallerinaAuthConfigGenerator {
      * @return  {@link VariableDeclarationNode} syntax tree variable declaration node.
      */
     public static VariableDeclarationNode getSecureSocketInitNode () {
-        if (isHttpOROAuth) {
+        if (AuthTypeMap.getFlag(Flags.HTTP_OR_OAUTH)) {
             NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
             TypeDescriptorNode typeName = createOptionalTypeDescriptorNode(
                     createBuiltinSimpleNameReferenceNode(null,
@@ -286,7 +285,7 @@ public class BallerinaAuthConfigGenerator {
         argumentsList.add(positionalArgumentNode01);
         Token comma1 = createIdentifierToken(",");
         PositionalArgumentNode positionalArgumentNode02;
-        if (isHttpOROAuth) {
+        if (AuthTypeMap.getFlag(Flags.HTTP_OR_OAUTH)) {
             // try to create specific node
             positionalArgumentNode02 = createPositionalArgumentNode(createSimpleNameReferenceNode(
                     createIdentifierToken(String.format("{ auth: %s.%s, secureSocket: %s }", CONFIG_RECORD_ARG,
@@ -318,7 +317,7 @@ public class BallerinaAuthConfigGenerator {
      * @return  {@link AssignmentStatementNode} syntax tree assignment statement node.
      */
     public static AssignmentStatementNode getApiKeyAssignmentNode() {
-        if (isAPIKey) {
+        if (AuthTypeMap.getFlag(Flags.API_KEY)) {
             FieldAccessExpressionNode varRefApiKey = createFieldAccessExpressionNode(
                     createSimpleNameReferenceNode(createIdentifierToken("self")), createToken(DOT_TOKEN),
                     createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_RECORD_FIELD)));
@@ -365,7 +364,6 @@ public class BallerinaAuthConfigGenerator {
      */
     private static List<Node> addItemstoRecordFieldList (OpenAPI openAPI) {
         List<Node> recordFieldNodes = new ArrayList<>();
-
         Token semicolonToken = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.SEMICOLON);
         Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
         String httpFieldTypeNames = getConfigRecordFieldTypeNames (securitySchemeMap);
@@ -385,8 +383,7 @@ public class BallerinaAuthConfigGenerator {
             RecordFieldNode sslRecordFieldNode = NodeFactory.createRecordFieldNode(null, null,
                     sslfieldTypeNode, sslFieldNameNode, createToken(QUESTION_MARK_TOKEN), semicolonToken);
             recordFieldNodes.add(sslRecordFieldNode);
-        } else if (isAPIKey) {
-
+        } else if (AuthTypeMap.getFlag(Flags.API_KEY)) {
             Token apiKeyMap = AbstractNodeFactory.createIdentifierToken(API_KEY_MAP);
             IdentifierToken apiKeyMapFieldName = AbstractNodeFactory.createIdentifierToken(API_KEY_CONFIG_RECORD_FIELD);
             TypeDescriptorNode fieldTypeNode = createBuiltinSimpleNameReferenceNode(null, apiKeyMap);
@@ -405,39 +402,45 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link String}       Type name of the authConfig field in ClientConfig record
      */
     private static String getConfigRecordFieldTypeNames(Map<String, SecurityScheme> securitySchemeMap) {
-        Set<String> httpFieldTypeNames = new HashSet<String>();
+        Set<String> httpFieldTypeNames = new HashSet<>();
         for (Map.Entry<String, SecurityScheme> securitySchemeEntry : securitySchemeMap.entrySet()) {
             SecurityScheme schemaValue = securitySchemeEntry.getValue();
             if (schemaValue != null && schemaValue.getType() != null) {
                 String schemaType = schemaValue.getType().name().toLowerCase(Locale.getDefault());
                 switch (schemaType) {
                     case HTTP:
-                        isHttpOROAuth = true;
+                        AuthTypeMap.setFlag(Flags.HTTP_OR_OAUTH, true);
                         String scheme = schemaValue.getScheme();
                         if (scheme.equals(BASIC)) {
                             httpFieldTypeNames.add(AuthConfigTypes.BASIC.getValue());
+                            AuthTypeMap.setFlag(Flags.BASIC, true);
                         } else if (scheme.equals(BEARER)) {
                             httpFieldTypeNames.add(AuthConfigTypes.BEARER.getValue());
+                            AuthTypeMap.setFlag(Flags.BEARER, true);
                         }
                         break;
                     case OAUTH2:
-                        isHttpOROAuth = true;
+                        AuthTypeMap.setFlag(Flags.HTTP_OR_OAUTH, true);
                         if (schemaValue.getFlows().getClientCredentials() != null) {
                             httpFieldTypeNames.add(AuthConfigTypes.CLIENT_CREDENTIAL.getValue());
+                            AuthTypeMap.setFlag(Flags.CLIENT_CREDENTIAL, true);
                         }
                         if (schemaValue.getFlows().getPassword() != null) {
                             httpFieldTypeNames.add(AuthConfigTypes.PASSWORD.getValue());
+                            AuthTypeMap.setFlag(Flags.PASSWORD, true);
                         }
                         if (schemaValue.getFlows().getAuthorizationCode() != null) {
                             httpFieldTypeNames.add(AuthConfigTypes.BEARER.getValue());
                             httpFieldTypeNames.add(AuthConfigTypes.REFRESH_TOKEN.getValue());
+                            AuthTypeMap.setFlag(Flags.BEARER, true);
                         }
                         if (schemaValue.getFlows().getImplicit() != null) {
                             httpFieldTypeNames.add(AuthConfigTypes.BEARER.getValue());
+                            AuthTypeMap.setFlag(Flags.BEARER, true);
                         }
                         break;
                     case API_KEY:
-                        isAPIKey = true;
+                        AuthTypeMap.setFlag(Flags.API_KEY, true);
                         String apiKeyType = schemaValue.getIn().name().toLowerCase(Locale.getDefault());
                         switch (apiKeyType) {
                             case "query":
@@ -479,9 +482,8 @@ public class BallerinaAuthConfigGenerator {
      * Clear class static variable at the beginning of execution.
      */
     private static void clearStaticVariables() {
-        isHttpOROAuth = false;
-        isAPIKey = false;
         queryApiKeyNameList.clear();
         headerApiKeyNameList.clear();
+        AuthTypeMap.resetFlags();
     }
 }

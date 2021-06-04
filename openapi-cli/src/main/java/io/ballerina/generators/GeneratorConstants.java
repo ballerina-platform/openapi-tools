@@ -71,6 +71,7 @@ public class GeneratorConstants {
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
     public static final String TYPE_FILE_NAME = "types.bal";
     public static final String TEST_FILE_NAME = "test.bal";
+    public static final String CONFIG_FILE_NAME = "Config.toml";
 
     public static final String TEMPLATES_SUFFIX = ".mustache";
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";
@@ -129,7 +130,7 @@ public class GeneratorConstants {
     public static final String API_KEY_CONFIG = "ApiKeysConfig";
     public static final String API_KEY_CONFIG_PARAM = "apiKeyConfig";
     public static final String API_KEY_CONFIG_RECORD_FIELD = "apiKeys";
-    public static final String API_KEY_MAP = "map<string|string[]>";
+    public static final String API_KEY_MAP = "map<string>";
     public static final String AUTH_CONFIG_FILED_NAME = "authConfig";
     public static final String BASIC = "basic";
     public static final String BEARER = "bearer";

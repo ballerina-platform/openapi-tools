@@ -205,6 +205,8 @@ public class BallerinaClientGenerator {
     private static boolean isQuery;
     private static Info info;
     private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+    private static List<String> remoteFunctionNameList = new ArrayList<>();
+    private static String serverURL;
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
             BallerinaOpenApiException {
@@ -318,8 +320,9 @@ public class BallerinaClientGenerator {
                 createIdentifierToken("string"));
         IdentifierToken paramName = createIdentifierToken(GeneratorConstants.SERVICE_URL);
         IdentifierToken equalToken = createIdentifierToken("=");
+        serverURL = getServerURL(server);
         BasicLiteralNode expression = createBasicLiteralNode(STRING_LITERAL,
-                createIdentifierToken('"' + getServerURL(server) + '"'));
+                createIdentifierToken('"' + serverURL + '"'));
 
         DefaultableParameterNode serviceUrl = createDefaultableParameterNode(annotationNodes, typeName,
                 paramName, equalToken, expression);
@@ -563,6 +566,7 @@ public class BallerinaClientGenerator {
             throws BallerinaOpenApiException {
         List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
         Set<Map.Entry<String, PathItem>> pathsItems = paths.entrySet();
+        remoteFunctionNameList.clear();
         for (Map.Entry<String, PathItem> path : pathsItems) {
             if (!path.getValue().readOperationsMap().isEmpty()) {
                 Map<PathItem.HttpMethod, Operation> operationMap = path.getValue().readOperationsMap();
@@ -623,6 +627,7 @@ public class BallerinaClientGenerator {
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         NodeList<Node> relativeResourcePath = createEmptyNodeList();
+        remoteFunctionNameList.add(operation.getValue().getOperationId());
 
         FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue());
 
@@ -1594,5 +1599,13 @@ public class BallerinaClientGenerator {
         if (configRecord != null) {
             typeDefinitionNodeList.add(configRecord);
         }
+    }
+
+    public static List<String> getRemoteFunctionNameList () {
+        return remoteFunctionNameList;
+    }
+
+    public static String getServerUrl () {
+        return serverURL;
     }
 }
