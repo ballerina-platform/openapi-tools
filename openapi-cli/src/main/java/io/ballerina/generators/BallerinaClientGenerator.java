@@ -175,6 +175,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
+import static io.ballerina.error.ErrorMessages.invalidPathParamType;
 import static io.ballerina.generators.GeneratorConstants.DELETE;
 import static io.ballerina.generators.GeneratorConstants.EXECUTE;
 import static io.ballerina.generators.GeneratorConstants.GET;
@@ -646,8 +647,7 @@ public class BallerinaClientGenerator {
         // Function RequestBody
         List<Node> parameterList =  new ArrayList<>();
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        Token comma =  createToken(COMMA_TOKEN);
-        setFunctionParameters(operation, parameterList, comma);
+        setFunctionParameters(operation, parameterList);
         if (parameterList.size() >= 2) {
             parameterList.remove(parameterList.size() - 1);
         }
@@ -667,9 +667,9 @@ public class BallerinaClientGenerator {
     /*
      * Generate function parameters.
      */
-    private static void setFunctionParameters(Operation operation, List<Node> parameterList, Token comma)
+    private static void setFunctionParameters(Operation operation, List<Node> parameterList)
             throws BallerinaOpenApiException {
-
+        Token comma =  createToken(COMMA_TOKEN);
         List<Parameter> parameters = operation.getParameters();
         List<Node> defaultable = new ArrayList<>();
         if (parameters != null) {
@@ -771,18 +771,22 @@ public class BallerinaClientGenerator {
     /*
      * Create path parameters.
      */
-    private static Node getPathParameters(Parameter parameter) {
+    public static Node getPathParameters(Parameter parameter) throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = extractDisplayAnnotation(parameter.getExtensions());
-        BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim())));
         IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+        String type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
+        if (type.equals("anydata") || type.equals("[]") || type.equals("record")) {
+            throw new BallerinaOpenApiException(invalidPathParamType(parameter.getName().trim()));
+        }
+        BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken(type));
         return createRequiredParameterNode(annotationNodes, typeName, paramName);
     }
 
     /*
      * Create header when it comes under the parameter section in swagger.
      */
-    private static Node getHeaderParameter(Parameter parameter)
+    public static Node getHeaderParameter(Parameter parameter)
             throws BallerinaOpenApiException {
 
         NodeList<AnnotationNode> annotationNodes = extractDisplayAnnotation(parameter.getExtensions());
