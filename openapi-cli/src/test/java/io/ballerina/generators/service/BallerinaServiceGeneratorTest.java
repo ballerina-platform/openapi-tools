@@ -16,9 +16,11 @@
  * under the License.
  */
 
-package io.ballerina.generators;
+package io.ballerina.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.BallerinaServiceGenerator;
+import io.ballerina.generators.GeneratorConstants;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.formatter.core.FormatterException;

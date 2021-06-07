@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.generators;
+package io.ballerina.generators.common;
 
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;

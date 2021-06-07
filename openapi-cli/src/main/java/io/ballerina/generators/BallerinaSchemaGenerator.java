@@ -35,6 +35,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.error.ErrorMessages;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -78,7 +79,7 @@ import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 public class BallerinaSchemaGenerator {
     private static final PrintStream outStream = System.err;
 
-    public static SyntaxTree generateSyntaxTree(Path definitionPath) throws OpenApiException, IOException,
+    public static SyntaxTree generateSyntaxTree(Path definitionPath) throws IOException,
             BallerinaOpenApiException {
         OpenAPI openApi = parseOpenAPIFile(definitionPath.toString());
         // TypeDefinitionNodes their
@@ -268,7 +269,6 @@ public class BallerinaSchemaGenerator {
         //FiledName
         IdentifierToken fieldName =
                 AbstractNodeFactory.createIdentifierToken(escapeIdentifier(field.getKey().trim()));
-
         TypeDescriptorNode fieldTypeName = extractOpenApiSchema(field.getValue());
         Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
         Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
@@ -370,6 +370,17 @@ public class BallerinaSchemaGenerator {
         } else if (schema.get$ref() != null) {
             Token typeName = AbstractNodeFactory.createIdentifierToken(extractReferenceType(schema.get$ref()));
             return createBuiltinSimpleNameReferenceNode(null, typeName);
+        } else if (schema instanceof ComposedSchema) {
+            ComposedSchema composedSchema = (ComposedSchema) schema;
+            if (composedSchema.getOneOf() != null) {
+                List<Schema> oneOf = composedSchema.getOneOf();
+                Token typeName = AbstractNodeFactory.createIdentifierToken(getOneOfUnionType(oneOf));
+                return createBuiltinSimpleNameReferenceNode(null, typeName);
+            } else if (composedSchema.getAllOf() != null) {
+                List<Schema> allOf = composedSchema.getAllOf();
+                Token typeName = AbstractNodeFactory.createIdentifierToken(getOneOfUnionType(allOf));
+                return createBuiltinSimpleNameReferenceNode(null, typeName);
+            }
         } else {
             //This contains a fallback to Ballerina common type `any` if the OpenApi specification type is not defined
             // or not compatible with any of the current Ballerina types.
@@ -386,20 +397,20 @@ public class BallerinaSchemaGenerator {
      *
      * @param definitionURI     URI for the OpenAPI contract
      * @return {@link OpenAPI}  OpenAPI model
-     * @throws OpenApiException in case of exception
+     * @throws BallerinaOpenApiException in case of exception
      */
-    public static OpenAPI parseOpenAPIFile(String definitionURI) throws OpenApiException, IOException {
+    public static OpenAPI parseOpenAPIFile(String definitionURI) throws IOException, BallerinaOpenApiException {
         Path contractPath = Paths.get(definitionURI);
         if (!Files.exists(contractPath)) {
-            throw new OpenApiException(ErrorMessages.invalidFilePath(definitionURI));
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFilePath(definitionURI));
         }
         if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json") || definitionURI.endsWith(".yml"))) {
-            throw new OpenApiException(ErrorMessages.invalidFile());
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFileType());
         }
         String openAPIFileContent = Files.readString(Paths.get(definitionURI));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
         if (!parseResult.getMessages().isEmpty()) {
-            throw new OpenApiException(ErrorMessages.parserException(definitionURI));
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFile(definitionURI));
         }
         return parseResult.getOpenAPI();
     }

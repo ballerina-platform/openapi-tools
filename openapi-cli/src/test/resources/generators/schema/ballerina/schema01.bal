@@ -1,6 +1,6 @@
 public type Pet record {
     int id;
     string name;
-    string tag?;
+    decimal tag?;
     string 'type?;
 };

@@ -19,7 +19,6 @@
 package io.ballerina.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.generators.OpenApiException;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -55,7 +54,7 @@ public class AnyOfDataTypeTests {
     }
 
     @Test(description = "Test for the schema generations")
-    public void testAnyOfSchema() throws BallerinaOpenApiException, IOException, OpenApiException {
+    public void testAnyOfSchema() throws BallerinaOpenApiException, IOException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/schema15.bal");
         SyntaxTree syntaxTree = generateSyntaxTree(definitionPath);

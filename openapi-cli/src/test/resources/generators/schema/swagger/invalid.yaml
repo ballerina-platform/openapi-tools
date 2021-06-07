@@ -1,0 +1,47 @@
+openapi: 3.0.0
+info:
+  title: Uber API
+  description: Move your app forward with the Uber API
+  version: 1.0.0
+servers:
+  - url: https://api.uber.com/v1
+paths:
+  /xmlarrayproducts:
+    get:
+      summary: Product Types
+      description: The Products endpoint returns information about the Uber products
+        offered at a given location. The response includes the display name and
+        other details about each product, and lists the products in the proper
+        display order.
+      tags:
+        - Products
+      responses:
+components:
+  schemas:
+    User:
+      properties:
+        first_name:
+          type: string
+          description: First name of the Uber user.
+        last_name:
+          type: string
+          description: Last name of the Uber user.
+    Activity:
+      properties:
+        uuid:
+          type: string
+          description: Unique identifier for the activity
+    Activities:
+      properties:
+        offset:
+          type: integer
+          format: int32
+          description: Position in pagination.
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
+    AnyOF:
+      anyOf:
+        - $ref: '#/components/schemas/User'
+        - $ref: '#/components/schemas/Activity'
