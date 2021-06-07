@@ -85,8 +85,8 @@ public class CodeGeneratorTest {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generate_client.bal");
             generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(), filter);
 
-            if (Files.exists(resourcePath.resolve("openapipetstore_client.bal"))) {
-                String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore_client.bal");
+            if (Files.exists(resourcePath.resolve("client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
                 expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedClient.contains(expectedClientContent));
@@ -110,8 +110,8 @@ public class CodeGeneratorTest {
                     "generate_client_requestbody.bal");
             generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(), filter);
 
-            if (Files.exists(resourcePath.resolve("openapipetstore_client.bal"))) {
-                String generatedClient = getStringFromGivenBalFile(resourcePath, "openapipetstore_client.bal");
+            if (Files.exists(resourcePath.resolve("client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
                 expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedClient.contains(expectedClientContent));

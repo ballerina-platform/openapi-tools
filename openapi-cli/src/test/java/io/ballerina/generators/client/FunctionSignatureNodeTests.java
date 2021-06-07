@@ -38,11 +38,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.generators.BallerinaClientGenerator.getFunctionSignatureNode;
+import static io.ballerina.generators.client.BallerinaClientGenerator.getFunctionSignatureNode;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to the functionSignatureNode in {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * All the tests related to the functionSignatureNode in {@link BallerinaClientGenerator} util.
  */
 public class FunctionSignatureNodeTests {
     private static final Path RESDIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();

@@ -19,7 +19,7 @@
 package io.ballerina.generators.client;
 
 /**
- * All the tests related to AnyDataType handling the {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * All the tests related to AnyDataType handling the {@link BallerinaClientGenerator} util.
  */
 public class AnyOfDataTypeTests {
 }

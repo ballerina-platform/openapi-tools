@@ -38,11 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static io.ballerina.generators.BallerinaClientGenerator.getFunctionBodyNode;
+import static io.ballerina.generators.client.BallerinaClientGenerator.getFunctionBodyNode;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to the FunctionBodyNode generation in {@link io.ballerina.generators.BallerinaClientGenerator}
+ * All the tests related to the FunctionBodyNode generation in {@link BallerinaClientGenerator}
  * util.
  */
 public class FunctionBodyNodeTests {

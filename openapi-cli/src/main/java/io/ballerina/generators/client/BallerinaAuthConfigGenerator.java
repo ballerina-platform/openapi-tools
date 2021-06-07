@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.generators.auth;
+package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
@@ -115,7 +115,7 @@ public class BallerinaAuthConfigGenerator {
     private static final List<String> queryApiKeyNameList = new ArrayList<>();
     private static boolean isAPIKey = false;
     private static boolean isHttpOROAuth = false;
-    private static Set<String> authTypes = new LinkedHashSet<>();
+    private static final Set<String> authTypes = new LinkedHashSet<>();
     /**
      * Generate the Config record for the relevant authentication type.
      * -- ex: Config record for Http and OAuth 2.0 Authentication mechanisms.
@@ -352,6 +352,11 @@ public class BallerinaAuthConfigGenerator {
         return headerApiKeyNameList;
     }
 
+    /**
+     * Return auth type to generate test file.
+     *
+     * @return {@link Set<String>}
+     */
     public static Set<String> getAuthType () {
         return authTypes;
     }

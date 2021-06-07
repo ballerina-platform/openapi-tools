@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.generators;
+package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
@@ -69,7 +69,8 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeTestExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.generators.auth.BallerinaAuthConfigGenerator;
+import io.ballerina.generators.GeneratorConstants;
+import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.text.TextDocument;

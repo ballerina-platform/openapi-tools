@@ -22,7 +22,6 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.generators.BallerinaClientGenerator;
 import io.ballerina.generators.OpenApiException;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -46,16 +45,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static io.ballerina.generators.BallerinaClientGenerator.extractDisplayAnnotation;
-import static io.ballerina.generators.BallerinaClientGenerator.generatePathWithPathParameter;
-import static io.ballerina.generators.BallerinaClientGenerator.getFunctionBodyNode;
-import static io.ballerina.generators.BallerinaClientGenerator.getReturnType;
+import static io.ballerina.generators.client.BallerinaClientGenerator.extractDisplayAnnotation;
+import static io.ballerina.generators.client.BallerinaClientGenerator.generatePathWithPathParameter;
+import static io.ballerina.generators.client.BallerinaClientGenerator.getFunctionBodyNode;
+import static io.ballerina.generators.client.BallerinaClientGenerator.getReturnType;
 import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 import static io.ballerina.generators.common.TestUtils.getDiagnostics;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to the {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * All the tests related to the {@link BallerinaClientGenerator} util.
  */
 public class BallerinaClientGeneratorTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
