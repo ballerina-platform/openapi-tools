@@ -43,7 +43,7 @@ ext.stdlibTaskVersion = project.stdlibTaskVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
 ext.stdlibUrlVersion = project.stdlibUrlVersion
-ext.stdlibXmlDataVersion = project.stdlibXmlDataVersion
+ext.stdlibXmldataVersion = project.stdlibXmldataVersion
 ext.puppycrawlCheckstyleVersion = "8.18"
 
 allprojects {
@@ -252,7 +252,7 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:oauth2-ballerina:${stdlibOAuth2Version}"
         ballerinaStdLibs "org.ballerinalang:uuid-ballerina:${stdlibUuidVersion}"
         ballerinaStdLibs "org.ballerinalang:url-ballerina:${stdlibUrlVersion}"
-        ballerinaStdLibs "org.ballerinalang:xmldata-ballerina:${stdlibXmlDataVersion}"
+        ballerinaStdLibs "org.ballerinalang:xmldata-ballerina:${stdlibXmldataVersion}"
 
     }
 }
