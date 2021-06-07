@@ -56,7 +56,7 @@ public class AnyOfDataTypeTests {
     }
 
     @Test(description = "Test for the schema generations")
-    public void testAnyOfSchema() throws BallerinaOpenApiException, IOException, OpenApiException {
+    public void testAnyOfSchema() throws BallerinaOpenApiException, IOException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/schema15.bal");
         SyntaxTree syntaxTree = generateSyntaxTree(definitionPath);

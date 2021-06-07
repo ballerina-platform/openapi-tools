@@ -25,6 +25,7 @@ import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
+import io.ballerina.generators.BallerinaClientGenerator;
 import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.generators.BallerinaServiceGenerator;
 import io.ballerina.generators.GeneratorConstants;
@@ -102,7 +103,7 @@ public class CodeGenerator {
     private void generate(GeneratorConstants.GenType type, String executionPath,
                           String definitionPath,
                           String reldefinitionPath , String serviceName, String outPath, Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
 
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
@@ -112,7 +113,7 @@ public class CodeGenerator {
 
     public void generateBothFiles(GeneratorConstants.GenType type, String definitionPath,
                                   String reldefinitionPath , String serviceName, String outPath , Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles =  new ArrayList<>();
@@ -144,7 +145,7 @@ public class CodeGenerator {
      */
     public void generateClient(String executionPath, String definitionPath, String serviceName, String outPath,
                                Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         generate(GEN_CLIENT, executionPath, definitionPath, null, serviceName, outPath, filter);
     }
 
@@ -164,7 +165,7 @@ public class CodeGenerator {
      */
     public void generateService(String executionPath, String definitionPath,
                                 String reldefinitionPath, String serviceName, String outPath, Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         generate(GEN_SERVICE, executionPath, definitionPath,
                 reldefinitionPath, serviceName, outPath, filter);
     }
@@ -189,7 +190,7 @@ public class CodeGenerator {
     public List<GenSrcFile> generateBalSource(GeneratorConstants.GenType type,
                                               String definitionPath,
                                               String reldefinitionPath, String serviceName, Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         String openAPIFileContent = Files.readString(Paths.get(definitionPath));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
         if (parseResult.getMessages().size() > 0) {
@@ -388,7 +389,7 @@ public class CodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private List<GenSrcFile> generateClient(String serviceName, Path openAPI, Filter filter)
-            throws IOException, BallerinaOpenApiException, FormatterException, OpenApiException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage =  DEFAULT_CLIENT_PKG;
         }
@@ -419,7 +420,7 @@ public class CodeGenerator {
 
     private List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
                                                       Filter filter)
-            throws IOException, FormatterException, BallerinaOpenApiException, OpenApiException {
+            throws IOException, FormatterException, BallerinaOpenApiException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage =  DEFAULT_MOCK_PKG;
         }

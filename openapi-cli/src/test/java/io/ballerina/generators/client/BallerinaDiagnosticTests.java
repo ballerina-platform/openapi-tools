@@ -20,6 +20,7 @@ package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.OpenApiException;
+import io.ballerina.generators.BallerinaClientGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -51,7 +52,7 @@ public class BallerinaDiagnosticTests {
     @Test(description = "Test openAPI definition to ballerina client source code generation with diagnostic issue",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException, OpenApiException {
+            FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
