@@ -62,30 +62,30 @@ public class BallerinaTestGeneratorTests {
         return semanticModel.diagnostics();
     }
 
-//    @AfterMethod
-//    public void afterTest() {
-//        try {
-//            Files.deleteIfExists(clientPath);
-//            Files.deleteIfExists(schemaPath);
-//            Files.deleteIfExists(testPath);
-//            Files.deleteIfExists(configPath);
-//        } catch (IOException e) {
-//            //Ignore the exception
-//        }
-//    }
+    @AfterMethod
+    public void afterTest() {
+        try {
+            Files.deleteIfExists(clientPath);
+            Files.deleteIfExists(schemaPath);
+            Files.deleteIfExists(testPath);
+            Files.deleteIfExists(configPath);
+        } catch (IOException e) {
+            //Ignore the exception
+        }
+    }
 
     @DataProvider(name = "httpAuthIOProvider")
     public Object[] dataProvider() {
         return new Object[]{
-                "basic_auth.yaml"
-//                "bearer_auth.yaml",
-//                "oauth2_authrization_code.yaml",
-//                "oauth2_client_credential.yaml",
-//                "oauth2_implicit.yaml",
-//                "oauth2_password.yaml",
-//                "oauth2_multipleflows.yaml",
-//                "query_api_key.yaml",
-//                "no_auth.yaml"
+                "basic_auth.yaml",
+                "bearer_auth.yaml",
+                "oauth2_authrization_code.yaml",
+                "oauth2_client_credential.yaml",
+                "oauth2_implicit.yaml",
+                "oauth2_password.yaml",
+                "oauth2_multipleflows.yaml",
+                "query_api_key.yaml",
+                "no_auth.yaml"
         };
     }
 }
