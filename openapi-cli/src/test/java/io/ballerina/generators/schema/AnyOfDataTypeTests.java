@@ -19,7 +19,7 @@
 package io.ballerina.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.generators.OpenApiException;
+import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;

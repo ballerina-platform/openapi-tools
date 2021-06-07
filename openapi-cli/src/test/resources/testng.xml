@@ -51,9 +51,6 @@ under the License.
             <class name="io.ballerina.generators.schema.PrimitiveDataTypeTests"/>
             <class name="io.ballerina.generators.schema.RecordDataTypeTests"/>
             <class name="io.ballerina.generators.schema.SwaggerFileParserTests"/>
-            <class name="io.ballerina.generators.BallerinaServiceGeneratorTest"></class>
-            <class name="io.ballerina.generators.GeneratorUtilsTests"></class>
-            <class name="io.ballerina.generators.client.AnyOfDataTypeTests"></class>
             <class name="io.ballerina.generators.schema.AnyOfDataTypeTests"></class>
             <class name="io.ballerina.generators.schema.OneOfDataTypeTests"></class>
             <class name="io.ballerina.generators.client.BallerinaDiagnosticTests"></class>

@@ -30,12 +30,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import static io.ballerina.generators.BallerinaClientGenerator.extractDisplayAnnotation;
+import static io.ballerina.generators.client.BallerinaClientGenerator.extractDisplayAnnotation;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
  * All the tests related to the Display Annotation in the generated code related to the
- * {@link io.ballerina.generators.BallerinaClientGenerator}
+ * {@link io.ballerina.generators.client.BallerinaClientGenerator}
  * util.
  */
 public class DisplayAnnotationTests {

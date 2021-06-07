@@ -19,10 +19,8 @@
 package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.generators.OpenApiException;
-import io.ballerina.generators.BallerinaClientGenerator;
-import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
@@ -37,10 +35,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.generators.client.BallerinaClientGenerator.extractDisplayAnnotation;
-import static io.ballerina.generators.client.BallerinaClientGenerator.generatePathWithPathParameter;
-import static io.ballerina.generators.client.BallerinaClientGenerator.getFunctionBodyNode;
-import static io.ballerina.generators.client.BallerinaClientGenerator.getReturnType;
 import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 import static io.ballerina.generators.common.TestUtils.getDiagnostics;
 

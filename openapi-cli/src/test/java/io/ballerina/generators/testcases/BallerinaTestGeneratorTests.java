@@ -3,7 +3,7 @@ package io.ballerina.generators.testcases;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
-import io.ballerina.generators.OpenApiException;
+import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.generators.client.BallerinaClientGenerator;
 import io.ballerina.generators.client.BallerinaTestGenerator;
 import io.ballerina.generators.common.TestUtils;
@@ -40,8 +40,7 @@ public class BallerinaTestGeneratorTests {
 
     @Test(description = "Generate Client with test skelotins", dataProvider = "httpAuthIOProvider")
     public void generateclientWithTestSkel(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException,
-            OpenApiException {
+            FormatterException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
         SyntaxTree syntaxTreeClient = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         SyntaxTree syntaxTreeTest = BallerinaTestGenerator.generateSyntaxTree();

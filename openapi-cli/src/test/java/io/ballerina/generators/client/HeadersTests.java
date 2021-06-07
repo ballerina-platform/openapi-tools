@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import static io.ballerina.generators.BallerinaClientGenerator.getFunctionBodyNode;
+import static io.ballerina.generators.client.BallerinaClientGenerator.getFunctionBodyNode;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
