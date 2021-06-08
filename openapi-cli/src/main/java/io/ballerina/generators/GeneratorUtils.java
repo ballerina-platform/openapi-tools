@@ -312,32 +312,39 @@ public class GeneratorUtils {
     /**
      * Generate operationId by removing special characters.
      *
-     * @param operationId input function name, record name or operation Id
+     * @param identifier input function name, record name or operation Id
      * @return string with new generated name
      */
-    public static String generateReadableName(String operationId) {
-        if (!operationId.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b")) {
-            String[] split = operationId.split(GeneratorConstants.ESCAPE_PATTERN);
+    public static String getValidName(String identifier, boolean isSchemaName) {
+        if (!identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") && !identifier.matches("\\b[0-9]*\\b")) {
+            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
             StringBuilder operationName = new StringBuilder();
-            if (split.length >= 1) {
-                for (String part: split) {
-                    if (!part.isBlank()) {
-                        if (split.length > 1) {
-                            part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-                                    part.substring(1).toLowerCase(Locale.ENGLISH);
-                        }
-                        operationName.append(part);
+            for (String part: split) {
+                if (!part.isBlank()) {
+                    if (split.length > 1) {
+                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+                                part.substring(1).toLowerCase(Locale.ENGLISH);
                     }
+                    operationName.append(part);
                 }
-                operationId = operationName.toString();
-
             }
-            if (operationId.matches("\\b[0-9]*\\b")) {
-                return "'" + operationId + "Record";
-            }
+            identifier = operationName.toString();
         }
-        operationId = operationId.substring(0, 1).toUpperCase(Locale.ENGLISH) + operationId.substring(1);
-        return operationId;
+        if (isSchemaName) {
+            return identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1);
+        } else {
+            return identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1);
+        }
+    }
+
+    /**
+     * Check the given recordName is valid name.
+     *
+     * @param recordName - String record name
+     * @return           - boolean value
+     */
+    public static boolean isValidRecordName(String recordName) {
+        return !recordName.matches("\\b[0-9]*\\b");
     }
 
     /**
@@ -351,7 +358,7 @@ public class GeneratorUtils {
     public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
         if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
             String[] refArray = referenceVariable.split("/");
-            return generateReadableName(refArray[refArray.length - 1]);
+            return getValidName(refArray[refArray.length - 1], true);
         } else {
             throw new BallerinaOpenApiException("Invalid reference value : " + referenceVariable
                     + "\nBallerina only supports local reference values.");

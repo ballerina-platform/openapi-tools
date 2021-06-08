@@ -1,20 +1,3 @@
-public type '200Record record {
-    Coord coord?;
-    Weather[] weather?;
-    string base?;
-    Main main?;
-    int visibility?;
-    Wind wind?;
-    Clouds clouds?;
-    Rain rain?;
-    Snow snow?;
-    int dt?;
-    Sys sys?;
-    int id?;
-    string name?;
-    int cod?;
-};
-
 public type Coord record {
     float lon?;
     float lat?;

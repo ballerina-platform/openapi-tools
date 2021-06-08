@@ -176,6 +176,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.error.ErrorMessages.invalidPathParamType;
+import static io.ballerina.generators.BallerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema;
 import static io.ballerina.generators.GeneratorConstants.DELETE;
 import static io.ballerina.generators.GeneratorConstants.EXECUTE;
 import static io.ballerina.generators.GeneratorConstants.GET;
@@ -191,10 +192,11 @@ import static io.ballerina.generators.GeneratorUtils.buildUrl;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
-import static io.ballerina.generators.GeneratorUtils.generateReadableName;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaMeidaType;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
+import static io.ballerina.generators.GeneratorUtils.getValidName;
+import static io.ballerina.generators.GeneratorUtils.isValidRecordName;
 
 /**
  * This Util class use for generating ballerina client file according to given yaml file.
@@ -207,6 +209,7 @@ public class BallerinaClientGenerator {
     private static boolean isQuery;
     private static Info info;
     private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+    private static OpenAPI openAPI;
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
             BallerinaOpenApiException {
@@ -214,7 +217,7 @@ public class BallerinaClientGenerator {
         typeDefinitionNodeList.clear();
         isQuery = false;
         // Summaries OpenAPI details
-        OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
+        openAPI = getBallerinaOpenApiType(definitionPath);
         info = openAPI.getInfo();
         //Filter serverUrl
         List<Server> servers = openAPI.getServers();
@@ -428,8 +431,8 @@ public class BallerinaClientGenerator {
                     //simplify here with 1++
                     countMissId = countMissId + 1;
                 } else {
-                    String operationId = generateReadableName(operation.getOperationId());
-                    operation.setOperationId(Character.toLowerCase(operationId.charAt(0)) + operationId.substring(1));
+                    String operationId = getValidName(operation.getOperationId(), false);
+                    operation.setOperationId(operationId);
                 }
             }
 
@@ -928,6 +931,20 @@ public class BallerinaClientGenerator {
                                 }
                             } else  if (schema.get$ref() != null) {
                                 type = extractReferenceType(schema.get$ref());
+                                Schema componentSchema = openAPI.getComponents().getSchemas().get(type);
+                                if (!isValidRecordName(type)) {
+                                    String operationId = operation.getOperationId();
+                                    type = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1) +
+                                            "Response";
+                                    List<String> required = componentSchema.getRequired();
+                                    Token typeKeyWord = createIdentifierToken("type");
+                                    List<Node> recordFieldList = new ArrayList<>();
+                                    Map<String, Schema> properties = componentSchema.getProperties();
+                                    TypeDefinitionNode typeDefinitionNode = getTypeDefinitionNodeForObjectSchema(
+                                            required, typeKeyWord, createIdentifierToken(type), recordFieldList,
+                                            properties);
+                                    generateTypeDefinitionNodeType(type, typeDefinitionNode);
+                                }
                             } else if (schema instanceof ArraySchema) {
                                 ArraySchema arraySchema = (ArraySchema) schema;
                                 // TODO: Nested array when response has
@@ -941,7 +958,8 @@ public class BallerinaClientGenerator {
                                             createSimpleNameReferenceNode(createIdentifierToken(type)),
                                             createToken(SEMICOLON_TOKEN));
                                     // Check already typeDescriptor has same name
-                                    type = generateTypeDefinitionNodeType(typeName, typeDefNode);
+                                    generateTypeDefinitionNodeType(typeName, typeDefNode);
+                                    type = typeName;
                                 } else if (arraySchema.getItems().getType() == null) {
                                     if (media.getKey().trim().equals("application/xml")) {
                                         type = generateCustomTypeDefine("xml[]", "XMLArr");
@@ -1012,14 +1030,13 @@ public class BallerinaClientGenerator {
                 createSimpleNameReferenceNode(createIdentifierToken(type)),
                 createToken(SEMICOLON_TOKEN));
         typeDefinitionNodeList.add(typeDefNode);
-        type = generateTypeDefinitionNodeType(typeName, typeDefNode);
-        return type;
+        generateTypeDefinitionNodeType(typeName, typeDefNode);
+        return typeName;
     }
 
-    private static String generateTypeDefinitionNodeType(String typeName, TypeDefinitionNode typeDefNode) {
-        String type;
+    private static void generateTypeDefinitionNodeType(String typeName, TypeDefinitionNode typeDefNode) {
+        boolean isExit = false;
         if (!typeDefinitionNodeList.isEmpty()) {
-            boolean isExit = false;
             for (TypeDefinitionNode typeNode: typeDefinitionNodeList) {
                 if (typeNode.typeName().toString().trim().equals(typeName)) {
                     isExit = true;
@@ -1031,8 +1048,6 @@ public class BallerinaClientGenerator {
         } else {
             typeDefinitionNodeList.add(typeDefNode);
         }
-        type = typeName;
-        return type;
     }
 
     /**

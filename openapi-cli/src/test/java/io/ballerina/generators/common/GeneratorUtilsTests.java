@@ -30,8 +30,8 @@ import java.nio.file.Paths;
 
 import static io.ballerina.generators.BallerinaSchemaGenerator.generateSyntaxTree;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
-import static io.ballerina.generators.GeneratorUtils.generateReadableName;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
+import static io.ballerina.generators.GeneratorUtils.getValidName;
 import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
@@ -68,13 +68,14 @@ public class GeneratorUtilsTests {
         Assert.assertEquals(extractReferenceType("#/components/schemas/Error"), "Error");
         Assert.assertEquals(extractReferenceType("#/components/schemas/Pet.-id"), "PetId");
         Assert.assertEquals(extractReferenceType("#/components/schemas/Pet."), "Pet");
-        Assert.assertEquals(extractReferenceType("#/components/schemas/200"), "'200Record");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/200"), "200");
         Assert.assertEquals(extractReferenceType("#/components/schemas/worker"), "Worker");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/worker abc"), "WorkerAbc");
     }
 
     @Test(description = "Generate the readable function, record name removing special characters")
     public static void testGenerateReadableName() {
-        Assert.assertEquals(generateReadableName("endpoint-remove-shows-user"), "EndpointRemoveShowsUser");
+        Assert.assertEquals(getValidName("endpoint-remove-shows-user", true), "EndpointRemoveShowsUser");
     }
 
     @Test(description = "Set record name with removing special Characters")
