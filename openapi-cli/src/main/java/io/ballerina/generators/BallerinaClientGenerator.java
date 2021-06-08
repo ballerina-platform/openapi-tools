@@ -191,6 +191,7 @@ import static io.ballerina.generators.GeneratorUtils.buildUrl;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
+import static io.ballerina.generators.GeneratorUtils.generateReadableName;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaMeidaType;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
@@ -427,7 +428,7 @@ public class BallerinaClientGenerator {
                     //simplify here with 1++
                     countMissId = countMissId + 1;
                 } else {
-                    String operationId = escapeIdentifier(operation.getOperationId());
+                    String operationId = generateReadableName(operation.getOperationId());
                     operation.setOperationId(Character.toLowerCase(operationId.charAt(0)) + operationId.substring(1));
                 }
             }
@@ -931,8 +932,9 @@ public class BallerinaClientGenerator {
                                 ArraySchema arraySchema = (ArraySchema) schema;
                                 // TODO: Nested array when response has
                                 if (arraySchema.getItems().get$ref() != null) {
-                                    type = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
-                                    String typeName = extractReferenceType(arraySchema.getItems().get$ref()) + "Arr";
+                                    String name = extractReferenceType(arraySchema.getItems().get$ref());
+                                    type = name + "[]";
+                                    String typeName = name + "Arr";
                                     TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
                                             createIdentifierToken("type"),
                                             createIdentifierToken(typeName),

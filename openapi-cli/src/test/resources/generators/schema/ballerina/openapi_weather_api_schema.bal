@@ -1,4 +1,4 @@
-public type '200 record {
+public type '200Record record {
     Coord coord?;
     Weather[] weather?;
     string base?;

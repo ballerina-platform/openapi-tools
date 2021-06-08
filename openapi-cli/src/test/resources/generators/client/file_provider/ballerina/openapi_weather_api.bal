@@ -14,11 +14,12 @@ public client class Client {
         self.clientEp = httpEp;
         self.apiKeys = apiKeyConfig.apiKeys;
     }
-    remote isolated function currentWeatherData(string? q = (), string? id = (), string? lat = (), string? lon = (), string? zip = (), string? units = (), string? lang = (), string? mode = ()) returns '200|error {
+    remote isolated function currentWeatherData(string? q = (), string? id = (), string? lat = (), string? lon = (),
+    string? zip = (), string? units = (), string? lang = (), string? mode = ()) returns '200Record|error {
         string  path = string `/weather`;
         map<anydata> queryParam = {q: q, id: id, lat: lat, lon: lon, zip: zip, units: units, lang: lang, mode: mode, appid: self.apiKeys["appid"]};
         path = path + getPathForQueryParam(queryParam);
-        '200 response = check self.clientEp-> get(path, targetType = '200);
+        '200Record response = check self.clientEp-> get(path, targetType = '200Record);
         return response;
     }
 }

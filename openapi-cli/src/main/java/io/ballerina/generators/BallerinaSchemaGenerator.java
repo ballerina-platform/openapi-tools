@@ -70,6 +70,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
+import static io.ballerina.generators.GeneratorUtils.generateReadableName;
 import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 
 /**
@@ -79,8 +80,7 @@ import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 public class BallerinaSchemaGenerator {
     private static final PrintStream outStream = System.err;
 
-    public static SyntaxTree generateSyntaxTree(Path definitionPath) throws IOException,
-            BallerinaOpenApiException {
+    public static SyntaxTree generateSyntaxTree(Path definitionPath) throws IOException, BallerinaOpenApiException {
         OpenAPI openApi = parseOpenAPIFile(definitionPath.toString());
         // TypeDefinitionNodes their
         List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
@@ -96,7 +96,7 @@ public class BallerinaSchemaGenerator {
                     Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("public type");
                     //2.typeName
                     IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(
-                            escapeIdentifier(schema.getKey().trim()));
+                            generateReadableName(schema.getKey().trim()));
                     //3.typeDescriptor - RecordTypeDescriptor
                     //3.1 recordKeyWord
                     Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record");
@@ -114,7 +114,7 @@ public class BallerinaSchemaGenerator {
                                 if (allOfschema.getType() == null && allOfschema.get$ref() != null) {
                                     //Generate typeReferenceNode
                                     Token typeRef =
-                                            AbstractNodeFactory.createIdentifierToken(escapeIdentifier(
+                                            AbstractNodeFactory.createIdentifierToken(generateReadableName(
                                                     extractReferenceType(allOfschema.get$ref())));
                                     Token asterisk = AbstractNodeFactory.createIdentifierToken("*");
                                     Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
@@ -319,7 +319,7 @@ public class BallerinaSchemaGenerator {
                         Schema schemaItem = arraySchema.getItems();
                         if (schemaItem.get$ref() != null) {
                             type = extractReferenceType(arraySchema.getItems().get$ref());
-                            typeName = AbstractNodeFactory.createIdentifierToken(type);
+                            typeName = AbstractNodeFactory.createIdentifierToken(generateReadableName(type));
                             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
                             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                                     null, closeSBracketToken);
