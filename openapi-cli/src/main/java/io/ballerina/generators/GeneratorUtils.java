@@ -251,7 +251,7 @@ public class GeneratorUtils {
                 convertedType = "[]";
                 break;
             case Constants.OBJECT:
-                convertedType = "record";
+                convertedType = "record{}";
                 break;
             case Constants.DECIMAL:
                 convertedType = "decimal";

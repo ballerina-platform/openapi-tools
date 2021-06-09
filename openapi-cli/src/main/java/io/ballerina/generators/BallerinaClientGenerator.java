@@ -1115,14 +1115,14 @@ public class BallerinaClientGenerator {
         } else {
             returnType = rType;
         }
-        //Statement Generator for requestBody
+        // Statement Generator for requestBody
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
                 Content rbContent = requestBody.getContent();
                 Set<Map.Entry<String, MediaType>> entries = rbContent.entrySet();
                 Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
-                //currently align with first content of the requestBody
+                //Currently align with first content of the requestBody
                 while (iterator.hasNext()) {
                     createRequestBodyStatements(isHeader, statementsList, method, returnType, iterator);
                     break;
@@ -1263,13 +1263,20 @@ public class BallerinaClientGenerator {
                     requestStatement = getSimpleStatement(returnType, RESPONSE,
                             "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
                                     "targetType=" + returnType + ")");
+                    statementsList.add(requestStatement);
+                    Token returnKeyWord = createIdentifierToken("return");
+                    SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+                    ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
+                            createToken(SEMICOLON_TOKEN));
+                    statementsList.add(returnStatementNode);
                 } else {
                     requestStatement = getSimpleStatement("", "_",
                             "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
                                     "targetType=http:Response)");
+                    statementsList.add(requestStatement);
                 }
             }
-            statementsList.add(requestStatement);
+
         } else {
             if (!returnType.equals("error?")) {
                 statementsList.add(requestStatement);
