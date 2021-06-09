@@ -1028,13 +1028,13 @@ public class BallerinaClientGenerator {
     }
 
     private static String handleInLineRecordInResponse(Operation operation, Map.Entry<String, MediaType> media,
-                                                       String $ref, Map<String, Schema> properties2,
+                                                       String ref, Map<String, Schema> properties2,
                                                        List<String> required2) throws BallerinaOpenApiException {
 
         String type;
         type = getValidName(operation.getOperationId(), true) + "Response";
-        if ($ref != null) {
-            type = extractReferenceType($ref.trim());
+        if (ref != null) {
+            type = extractReferenceType(ref.trim());
         } else if (properties2 != null) {
             Map<String, Schema> properties = properties2;
             if (properties.isEmpty()) {
