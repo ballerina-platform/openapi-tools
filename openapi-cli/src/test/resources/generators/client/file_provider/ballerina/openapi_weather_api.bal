@@ -6,6 +6,23 @@ public type ApiKeysConfig record {
     map<string|string[]> apiKeys;
 };
 
+type CurrentWeatherDataResponse record {
+    Coord coord?;
+    Weather[] weather?;
+    string base?;
+    Main main?;
+    int visibility?;
+    Wind wind?;
+    Clouds clouds?;
+    Rain rain?;
+    Snow snow?;
+    int dt?;
+    Sys sys?;
+    int id?;
+    string name?;
+    int cod?;
+};
+
 public client class Client {
     http:Client clientEp;
     map<string|string[]> apiKeys;
@@ -14,12 +31,11 @@ public client class Client {
         self.clientEp = httpEp;
         self.apiKeys = apiKeyConfig.apiKeys;
     }
-    remote isolated function currentWeatherData(string? q = (), string? id = (), string? lat = (), string? lon = (),
-    string? zip = (), string? units = (), string? lang = (), string? mode = ()) returns '200Record|error {
+    remote isolated function currentWeatherData(string? q = (), string? id = (), string? lat = (), string? lon = (), string? zip = (), string? units = (), string? lang = (), string? mode = ()) returns CurrentWeatherDataResponse|error {
         string  path = string `/weather`;
         map<anydata> queryParam = {q: q, id: id, lat: lat, lon: lon, zip: zip, units: units, lang: lang, mode: mode, appid: self.apiKeys["appid"]};
         path = path + getPathForQueryParam(queryParam);
-        '200Record response = check self.clientEp-> get(path, targetType = '200Record);
+        CurrentWeatherDataResponse response = check self.clientEp-> get(path, targetType = CurrentWeatherDataResponse);
         return response;
     }
 }

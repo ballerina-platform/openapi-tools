@@ -316,31 +316,35 @@ public class GeneratorUtils {
      * @return string with new generated name
      */
     public static String getValidName(String identifier, boolean isSchemaName) {
-
-        if (!identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b")) {
+        if (!identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") && !identifier.matches("\\b[0-9]*\\b")) {
             String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
             StringBuilder operationName = new StringBuilder();
-//            if (split.length >= 1) {
-            // Profile-.Id = Profile , "", id
-                for (String part: split) {
-                    if (!part.isBlank()) {
-                        if (split.length > 1) {
-                            part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-                                    part.substring(1).toLowerCase(Locale.ENGLISH);
-                        }
-                        operationName.append(part);
+            for (String part: split) {
+                if (!part.isBlank()) {
+                    if (split.length > 1) {
+                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+                                part.substring(1).toLowerCase(Locale.ENGLISH);
                     }
+                    operationName.append(part);
                 }
-                identifier = operationName.toString();
-
-//            }
-            if (identifier.matches("\\b[0-9]*\\b")) {
-                return "'" + identifier + "Record";
             }
+            identifier = operationName.toString();
         }
-        //
-        identifier = identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1);
-        return identifier;
+        if (isSchemaName) {
+            return identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1);
+        } else {
+            return identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1);
+        }
+    }
+
+    /**
+     * Check the given recordName is valid name.
+     *
+     * @param recordName - String record name
+     * @return           - boolean value
+     */
+    public static boolean isValidRecordName(String recordName) {
+        return !recordName.matches("\\b[0-9]*\\b");
     }
 
     /**
@@ -354,7 +358,7 @@ public class GeneratorUtils {
     public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
         if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
             String[] refArray = referenceVariable.split("/");
-            return getValidName(refArray[refArray.length - 1]);
+            return getValidName(refArray[refArray.length - 1], true);
         } else {
             throw new BallerinaOpenApiException("Invalid reference value : " + referenceVariable
                     + "\nBallerina only supports local reference values.");
