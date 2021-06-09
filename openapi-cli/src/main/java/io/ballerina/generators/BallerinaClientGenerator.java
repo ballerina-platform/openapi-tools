@@ -82,7 +82,9 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -176,6 +178,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.error.ErrorMessages.invalidPathParamType;
+import static io.ballerina.generators.BallerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema;
 import static io.ballerina.generators.GeneratorConstants.DELETE;
 import static io.ballerina.generators.GeneratorConstants.EXECUTE;
 import static io.ballerina.generators.GeneratorConstants.GET;
@@ -191,7 +194,6 @@ import static io.ballerina.generators.GeneratorUtils.buildUrl;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
-import static io.ballerina.generators.GeneratorUtils.getValidName;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaMeidaType;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
@@ -931,19 +933,13 @@ public class BallerinaClientGenerator {
                                 }
                             } else if (schema instanceof ObjectSchema) {
                                 ObjectSchema objectSchema = (ObjectSchema) schema;
-                                if (objectSchema.get$ref() != null) {
-                                    type = extractReferenceType(objectSchema.get$ref().trim());
-                                } else if (objectSchema.getProperties() != null) {
-                                    Map<String, Schema> properties = objectSchema.getProperties();
-                                    List<String> required = objectSchema.getRequired();
-                                    List<Node> recordFieldList =  new ArrayList<>();
-//                                    recordFieldList = addRecordFields(required, recordFieldList, )
-                                    type = Character.toLowerCase(operation.getOperationId().charAt(0)) +
-                                            operation.getOperationId().substring(1);
-                                } else {
-
-                                }
-
+                                type = handleInLineRecordInResponse(operation, media, objectSchema.get$ref(),
+                                        objectSchema.getProperties(), objectSchema.getRequired());
+                            } else if (schema instanceof MapSchema) {
+                                MapSchema mapSchema = (MapSchema) schema;
+                                type = handleInLineRecordInResponse(operation, media, mapSchema.get$ref(),
+                                        mapSchema.getProperties(),
+                                        mapSchema.getRequired());
                             } else if (schema.get$ref() != null) {
                                 type = extractReferenceType(schema.get$ref());
                                 Schema componentSchema = openAPI.getComponents().getSchemas().get(type);
@@ -1029,6 +1025,32 @@ public class BallerinaClientGenerator {
             }
         }
         return returnType;
+    }
+
+    private static String handleInLineRecordInResponse(Operation operation, Map.Entry<String, MediaType> media,
+                                                       String $ref, Map<String, Schema> properties2,
+                                                       List<String> required2) throws BallerinaOpenApiException {
+
+        String type;
+        type = getValidName(operation.getOperationId(), true) + "Response";
+        if ($ref != null) {
+            type = extractReferenceType($ref.trim());
+        } else if (properties2 != null) {
+            Map<String, Schema> properties = properties2;
+            if (properties.isEmpty()) {
+                type = getBallerinaMeidaType(media.getKey().trim());
+            } else {
+                List<String> required = required2;
+                List<Node> recordFieldList = new ArrayList<>();
+                TypeDefinitionNode recordNode = getTypeDefinitionNodeForObjectSchema(required,
+                        createIdentifierToken("type"),
+                        createIdentifierToken(type), recordFieldList, properties);
+                generateTypeDefinitionNodeType(type, recordNode);
+            }
+        } else {
+            type = getBallerinaMeidaType(media.getKey().trim());
+        }
+        return type;
     }
 
     /**

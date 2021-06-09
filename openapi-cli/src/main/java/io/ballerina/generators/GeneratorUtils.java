@@ -426,6 +426,7 @@ public class GeneratorUtils {
      */
     public static String getBallerinaMeidaType(String mediaType) {
         switch (mediaType) {
+            case "*/*":
             case "application/json":
                 return SyntaxKind.JSON_KEYWORD.stringValue();
             case "application/xml":
