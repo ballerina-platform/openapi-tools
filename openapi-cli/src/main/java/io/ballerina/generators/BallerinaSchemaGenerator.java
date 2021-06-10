@@ -78,7 +78,7 @@ import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
  */
 public class BallerinaSchemaGenerator {
     private final PrintStream outStream = System.err;
-    private OpenAPI openApi;
+    private OpenAPI openApi = null;
 
     public SyntaxTree generateSyntaxTree(Path definitionPath) throws IOException,
             BallerinaOpenApiException {
@@ -89,6 +89,7 @@ public class BallerinaSchemaGenerator {
             //Create typeDefinitionNode
             Components components = openApi.getComponents();
             if (components.getSchemas() != null) {
+                // TODO Reset Component Name with valid Name
                 Map<String, Schema> schemas = components.getSchemas();
                 for (Map.Entry<String, Schema> schema: schemas.entrySet()) {
                     List<String> required = schema.getValue().getRequired();
@@ -316,8 +317,10 @@ public class BallerinaSchemaGenerator {
                         Schema schemaItem = arraySchema.getItems();
                         if (schemaItem.get$ref() != null) {
                             type = extractReferenceType(arraySchema.getItems().get$ref());
-                            if (arraySchema.getNullable()) {
-                                closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
+                            if (arraySchema.getNullable() != null) {
+                                if (arraySchema.getNullable()) {
+                                    closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
+                                }
                             }
                             typeName = AbstractNodeFactory.createIdentifierToken(type);
                             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
@@ -335,8 +338,10 @@ public class BallerinaSchemaGenerator {
                                     null, closeSBracketToken);
                         } else if (schemaItem.getType() != null) {
                             type = schemaItem.getType();
-                            if (arraySchema.getNullable()) {
-                                type = type + "?";
+                            if (arraySchema.getNullable() != null) {
+                                if (arraySchema.getNullable()) {
+                                    closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
+                                }
                             }
                             typeName = AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(type));
                             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
@@ -344,8 +349,10 @@ public class BallerinaSchemaGenerator {
                                     null, closeSBracketToken);
                         } else {
                             type = "anydata";
-                            if (arraySchema.getNullable()) {
-                                type = type + "?";
+                            if (arraySchema.getNullable() != null) {
+                                if (arraySchema.getNullable()) {
+                                    closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
+                                }
                             }
                             typeName = AbstractNodeFactory.createIdentifierToken(type);
                             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
@@ -371,8 +378,9 @@ public class BallerinaSchemaGenerator {
                             null, bodyEndDelimiter);
                 } else if (schema.get$ref() != null) {
                     String type = extractReferenceType(schema.get$ref());
-                    if (schema.getNullable() != null) {
-                        if (schema.getNullable()) {
+                    Schema refSchema = openApi.getComponents().getSchemas().get(type);
+                    if (refSchema.getNullable() != null) {
+                        if (refSchema.getNullable()) {
                             type = type + "?";
                         }
                     }
@@ -390,8 +398,9 @@ public class BallerinaSchemaGenerator {
             }
         } else if (schema.get$ref() != null) {
             String type = extractReferenceType(schema.get$ref());
-            if (schema.getNullable() != null) {
-                if (schema.getNullable()) {
+            Schema refSchema = openApi.getComponents().getSchemas().get(type);
+            if (refSchema.getNullable() != null) {
+                if (refSchema.getNullable()) {
                     type = type + "?";
                 }
             }

@@ -38,13 +38,13 @@ import java.nio.file.Paths;
  */
 public class PrimitiveDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    SyntaxTree syntaxTree;
+    private SyntaxTree syntaxTree;
     private ByteArrayOutputStream outContent;
-    BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
-
+    private BallerinaSchemaGenerator ballerinaSchemaGenerator;
     @BeforeTest
     public void setUp() {
         outContent = new ByteArrayOutputStream();
+        ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
         System.setErr(new PrintStream(outContent));
     }
 
@@ -66,9 +66,9 @@ public class PrimitiveDataTypeTests {
     public void generateMissingDatatype() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/missDataType.yaml");
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
-        String expected = "Encountered an unsupported type. Type `anydata` would be used for the field." +
-                System.getProperty("line.separator");
-        Assert.assertTrue(outContent.toString().contains(expected));
+        String expected = "public type Pet record { anydata id; string name; decimal tag?; string 'type?;};";
+        Assert.assertTrue(syntaxTree.toString().trim().replaceAll("\\s+", "").
+                contains(expected.trim().replaceAll("\\s+", "")));
     }
 
     @AfterTest

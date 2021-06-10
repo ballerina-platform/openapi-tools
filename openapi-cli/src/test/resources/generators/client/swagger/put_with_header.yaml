@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: Uber API
+  description: Move your app forward with the Uber API
+  version: 1.0.0
+servers:
+  - url: https://api.uber.com/v1
+paths:
+  /me/albums:
+    put:
+      description: Remove one or more albums from the current user's 'Your Music' library.
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-remove-albums-user
+      operationId: endpoint-remove-albums-user
+      parameters:
+        - description: |-
+            A valid access token from the Spotify Accounts service: see the [Web API Authorization Guide](https://developer.spotify.com/documentation/general/guides/authorization-guide/) for details.
+            Modification of the current user's "Your Music" collection requires authorization of the `user-library-modify` [scope](https://developer.spotify.com/documentation/general/guides/authorization-guide/#list-of-scopes).
+          in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+        - description: "*Required if the IDs are passed in the request body, otherwise ignored.* The content type of the request body: `application/json`"
+          in: header
+          name: Content-Type
+          required: false
+          schema:
+            type: string
+        - description: "A comma-separated list of the [Spotify IDs](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids). For example: `ids=4iV5W9uYEdYUVa79Axb7Rh,1301WleyT98MSxVHPZCA6M`. Maximum: 50 IDs."
+          in: query
+          name: ids
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                ids:
+                  description: |-
+                  items:
+                    type: string
+                  type: array
+              type: object
+        required: false
+      responses:
+        "201":
+          description: On success, the HTTP status code in the response header is `200` Success. On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes) and the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema). Trying to remove an album when you do not have the user's authorization returns error `403` Forbidden.
+        default:
+          $ref: "#/components/schemas/Error"
+      security:
+        - spotify_auth:
+            - user-library-modify
+      summary: Remove Albums for Current User
+      tags:
+        - category-library
+components:
+  securitySchemes:
+    apikey:
+      type: apiKey
+      name: server_token
+      in: query
+  schemas:
+    Error:
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        fields:
+          type: string
