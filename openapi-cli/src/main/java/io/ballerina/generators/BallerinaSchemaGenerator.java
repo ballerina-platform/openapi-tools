@@ -77,11 +77,12 @@ import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
  *while populating syntax tree.
  */
 public class BallerinaSchemaGenerator {
-    private static final PrintStream outStream = System.err;
+    private final PrintStream outStream = System.err;
+    private OpenAPI openApi;
 
-    public static SyntaxTree generateSyntaxTree(Path definitionPath) throws IOException,
+    public SyntaxTree generateSyntaxTree(Path definitionPath) throws IOException,
             BallerinaOpenApiException {
-        OpenAPI openApi = parseOpenAPIFile(definitionPath.toString());
+        openApi = parseOpenAPIFile(definitionPath.toString());
         // TypeDefinitionNodes their
         List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
         if (openApi.getComponents() != null) {
@@ -222,7 +223,7 @@ public class BallerinaSchemaGenerator {
      * @throws BallerinaOpenApiException
      */
 
-    public static TypeDefinitionNode getTypeDefinitionNodeForObjectSchema(List<String> required, Token typeKeyWord,
+    public TypeDefinitionNode getTypeDefinitionNodeForObjectSchema(List<String> required, Token typeKeyWord,
                                                                            IdentifierToken typeName,
                                                                            List<Node> recordFieldList,
                                                                            Map<String, Schema> fields)
@@ -254,7 +255,7 @@ public class BallerinaSchemaGenerator {
     /**
      * This util for generate record field with given schema properties.
      */
-    private static void addRecordFields(List<String> required, List<Node> recordFieldList,
+    private void addRecordFields(List<String> required, List<Node> recordFieldList,
                                         Map.Entry<String, Schema> field) throws BallerinaOpenApiException {
 
         RecordFieldNode recordFieldNode;
@@ -284,7 +285,7 @@ public class BallerinaSchemaGenerator {
      *
      * @param schema - OpenApi Schema
      */
-    private static TypeDescriptorNode extractOpenApiSchema(Schema schema) throws BallerinaOpenApiException {
+    private  TypeDescriptorNode extractOpenApiSchema(Schema schema) throws BallerinaOpenApiException {
 
         if (schema.getType() != null || schema.getProperties() != null) {
             if (schema.getType() != null && ((schema.getType().equals("integer") || schema.getType().equals("number"))
@@ -366,8 +367,8 @@ public class BallerinaSchemaGenerator {
                     }
                     NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
 
-                    return NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter, fieldNodes, null
-                            , bodyEndDelimiter);
+                    return NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter, fieldNodes,
+                            null, bodyEndDelimiter);
                 } else if (schema.get$ref() != null) {
                     String type = extractReferenceType(schema.get$ref());
                     if (schema.getNullable() != null) {
@@ -437,7 +438,7 @@ public class BallerinaSchemaGenerator {
      * @return {@link OpenAPI}  OpenAPI model
      * @throws BallerinaOpenApiException in case of exception
      */
-    public static OpenAPI parseOpenAPIFile(String definitionURI) throws IOException, BallerinaOpenApiException {
+    public   OpenAPI parseOpenAPIFile(String definitionURI) throws IOException, BallerinaOpenApiException {
         Path contractPath = Paths.get(definitionURI);
         if (!Files.exists(contractPath)) {
             throw new BallerinaOpenApiException(ErrorMessages.invalidFilePath(definitionURI));

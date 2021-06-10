@@ -19,28 +19,42 @@
 package io.ballerina.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.common.TestUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.swagger.v3.oas.models.OpenAPI;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static io.ballerina.generators.BallerinaSchemaGenerator.generateSyntaxTree;
-import static io.ballerina.generators.BallerinaSchemaGenerator.parseOpenAPIFile;
-
 /**
  * Tests for SwaggerParser.
  */
 public class NullableFieldTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
+    BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+    @Test(description = "Test for nullable primitive fields")
+    public void testNullablePrimitive() throws IOException, BallerinaOpenApiException {
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(RES_DIR.resolve("swagger" +
+                "/nullable_primitive_schema.yaml"));
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nullable_primitive.bal",
+                syntaxTree);
+    }
 
-    @Test(description = "Test for nullable field")
-    public void testInvalidFilePath() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = parseOpenAPIFile(RES_DIR.resolve("swagger/nullable_schema.yaml").toString());
-        SyntaxTree syntaxTree = generateSyntaxTree(RES_DIR.resolve("swagger/nullable_schema.yaml"));
-        Assert.assertTrue(true);
+    @Test(description = "Test for nullable array fields")
+    public void testNullableArray() throws IOException, BallerinaOpenApiException {
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(RES_DIR.resolve("swagger" +
+                "/nullable_array_schema.yaml"));
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nullable_array.bal",
+                syntaxTree);
+    }
+
+    @Test(description = "Test for nullable record fields")
+    public void testNullableRecord() throws IOException, BallerinaOpenApiException {
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(RES_DIR.resolve("swagger" +
+                "/nullable_record_schema.yaml"));
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nullable_record.bal",
+                syntaxTree);
     }
 }
