@@ -70,6 +70,11 @@ public class PrimitiveDataTypeTests {
         Assert.assertTrue(outContent.toString().contains(expected));
     }
 
+    @Test(description = "When the component schema has primitive data type instead of object schema")
+    public void generateSchemaForPrimitiveData() {
+
+    }
+
     @AfterTest
     public void clean() {
         System.setErr(null);
