@@ -73,6 +73,21 @@ public class ArrayDataTypeTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema08.bal", syntaxTree);
     }
 
+    @Test(description = "Generate Array for schema has array reference")
+    public void generateSchemaArrayReference() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/schema_with_array.yaml");
+        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema_with_array.bal",
+                syntaxTree);
+    }
+
+    @Test(description = "Generate Array for schema has array reference")
+    public void generateSchemaNestedArrayReference() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/schema_with_nested_array.yaml");
+        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema_with_nested_array.bal",
+                syntaxTree);
+    }
     @AfterTest
     public void tearDown() {
         System.setErr(null);

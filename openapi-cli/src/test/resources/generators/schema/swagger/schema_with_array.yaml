@@ -59,6 +59,18 @@ paths:
 components:
   schemas:
     Pet:
-     type: string
-    UserId:
-     type: integer
+      items:
+       type: string
+    Address:
+     properties:
+       streetNo:
+         type: integer
+       mainStreet:
+         type: string
+       country:
+         type: string
+    UserAddress:
+      items:
+        $ref: '#/components/schemas/Address'
+
+
