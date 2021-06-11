@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.DocumentationNode;
 import io.ballerina.compiler.syntax.tree.ElseBlockNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
@@ -42,6 +43,9 @@ import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.IndexedExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationLineNode;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
+import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.MethodCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
@@ -134,6 +138,9 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createIndexedExpress
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createListBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createLiteralValueToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationLineNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownParameterDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMethodCallExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
@@ -366,6 +373,23 @@ public class BallerinaClientGenerator {
 
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, statementList, createToken(CLOSE_BRACE_TOKEN));
+        // Create client init api doc
+        List<DocumentationNode> docs = new ArrayList<>();
+        String init;
+        if (info.getTitle() != null) {
+            init = "Initializes the" + info.getTitle() + "connector client endpoint";
+        } else {
+            init =  "Initializes the connector client endpoint";
+        }
+        MarkdownDocumentationLineNode clientDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createLiteralValueToken(null, init, null, null)));
+        docs.add(clientDescription);
+        MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
+                createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+        docs.add(hashNewLine);
+
+
         FunctionDefinitionNode initFunctionNode = createFunctionDefinitionNode(null, null,
                 qualifierList, functionKeyWord, functionName, createEmptyNodeList(), functionSignatureNode
                 , functionBodyNode);
@@ -373,7 +397,24 @@ public class BallerinaClientGenerator {
         memberNodeList.add(initFunctionNode);
         // Generate remote function Nodes
         memberNodeList.addAll(createRemoteFunctions(paths, filters));
-        MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
+        // Generate api doc
+        List<Node> documentationLines = new ArrayList<>();
+        if (info.getDescription() != null) {
+            MarkdownDocumentationLineNode clientDescription =
+                    createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                            createNodeList(createLiteralValueToken(null, info.getDescription(), null, null)));
+            documentationLines.add(clientDescription);
+            MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
+                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+            documentationLines.add(hashNewLine);
+        }
+        MarkdownParameterDocumentationLineNode httpClientParam = createParamAPIDoc("httpClient",
+                "Connector http endpoint");
+        documentationLines.add(httpClientParam);
+//         createDocumentationS()
+        MarkdownDocumentationNode apiDoc = createMarkdownDocumentationNode(createNodeList(documentationLines));
+        MetadataNode metadataNode = createMetadataNode(apiDoc, createEmptyNodeList());
+
         if (info.getExtensions() != null) {
             Map<String, Object> extensions = info.getExtensions();
             if (!extensions.isEmpty()) {
@@ -387,6 +428,14 @@ public class BallerinaClientGenerator {
         return createClassDefinitionNode(metadataNode, visibilityQualifier, classTypeQualifiers,
                 classKeyWord, className, openBrace, createNodeList(memberNodeList),
                 createToken(CLOSE_BRACE_TOKEN));
+    }
+
+    private static MarkdownParameterDocumentationLineNode createParamAPIDoc(String paramName, String description) {
+
+        return createMarkdownParameterDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                createToken(SyntaxKind.PLUS_TOKEN), createIdentifierToken(paramName),
+                createToken(SyntaxKind.MINUS_TOKEN), createNodeList(createLiteralValueToken(null
+                        , description, null, null)));
     }
 
     /**
