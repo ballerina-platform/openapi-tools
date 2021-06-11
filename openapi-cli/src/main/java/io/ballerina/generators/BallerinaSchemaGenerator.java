@@ -359,13 +359,10 @@ public class BallerinaSchemaGenerator {
                 }
                 NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
 
-                return NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter, fieldNodes, null
-                        , bodyEndDelimiter);
-
+                return NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter, fieldNodes,
+                        null, bodyEndDelimiter);
             } else {
-                outStream.println("Encountered an unsupported type. Type `anydata` would be used for the field.");
-                Token typeName = AbstractNodeFactory.createIdentifierToken("anydata");
-                return createBuiltinSimpleNameReferenceNode(null, typeName);
+                throw new BallerinaOpenApiException("Unsupported OAS data type `" + schema.getType() + "`.");
             }
         } else if (schema.get$ref() != null) {
             Token typeName = AbstractNodeFactory.createIdentifierToken(extractReferenceType(schema.get$ref()));
@@ -373,9 +370,7 @@ public class BallerinaSchemaGenerator {
         } else {
             //This contains a fallback to Ballerina common type `any` if the OpenApi specification type is not defined
             // or not compatible with any of the current Ballerina types.
-            outStream.println("Encountered an unsupported type. Type `anydata` would be used for the field.");
-            Token typeName = AbstractNodeFactory.createIdentifierToken("anydata");
-            return createBuiltinSimpleNameReferenceNode(null, typeName);
+            throw new BallerinaOpenApiException("Unsupported OAS data type.");
         }
         Token typeName = AbstractNodeFactory.createIdentifierToken("anydata");
         return createBuiltinSimpleNameReferenceNode(null, typeName);

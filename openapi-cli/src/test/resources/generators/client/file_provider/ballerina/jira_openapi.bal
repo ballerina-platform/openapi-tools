@@ -2,21 +2,21 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
-type ApplicationPropertyArr ApplicationProperty[];
+public type ApplicationPropertyArr ApplicationProperty[];
 
-type ApplicationRoleArr ApplicationRole[];
+public type ApplicationRoleArr ApplicationRole[];
 
-type TimeTrackingProviderArr TimeTrackingProvider[];
+public type TimeTrackingProviderArr TimeTrackingProvider[];
 
-type FieldDetailsArr FieldDetails[];
+public type FieldDetailsArr FieldDetails[];
 
-type FilterArr Filter[];
+public type FilterArr Filter[];
 
-type ColumnItemArr ColumnItem[];
+public type ColumnItemArr ColumnItem[];
 
-type SharePermissionArr SharePermission[];
+public type SharePermissionArr SharePermission[];
 
-type AttachmentArr Attachment[];
+public type AttachmentArr Attachment[];
 
 type IssueTypeDetailsArr IssueTypeDetails[];
 
@@ -24,39 +24,39 @@ type PriorityArr Priority[];
 
 type ProjectArr Project[];
 
-type ProjectTypeArr ProjectType[];
+public type ProjectTypeArr ProjectType[];
 
-type ComponentArr Component[];
+public type ComponentArr Component[];
 
-type ProjectRoleDetailsArr ProjectRoleDetails[];
+public type ProjectRoleDetailsArr ProjectRoleDetails[];
 
-type IssueTypeWithStatusArr IssueTypeWithStatus[];
+public type IssueTypeWithStatusArr IssueTypeWithStatus[];
 
-type VersionArr Version[];
+public type VersionArr Version[];
 
-type ProjectCategoryArr ProjectCategory[];
+public type ProjectCategoryArr ProjectCategory[];
 
-type ResolutionArr Resolution[];
+public type ResolutionArr Resolution[];
 
-type ProjectRoleArr ProjectRole[];
+public type ProjectRoleArr ProjectRole[];
 
-type ScreenableFieldArr ScreenableField[];
+public type ScreenableFieldArr ScreenableField[];
 
-type ScreenableTabArr ScreenableTab[];
+public type ScreenableTabArr ScreenableTab[];
 
-type StatusDetailsArr StatusDetails[];
+public type StatusDetailsArr StatusDetails[];
 
-type StatusCategoryArr StatusCategory[];
+public type StatusCategoryArr StatusCategory[];
 
-type UserArr User[];
+public type UserArr User[];
 
-type UserMigrationBeanArr UserMigrationBean[];
+public type UserMigrationBeanArr UserMigrationBean[];
 
-type GroupNameArr GroupName[];
+public type GroupNameArr GroupName[];
 
-type DeprecatedWorkflowArr DeprecatedWorkflow[];
+public type DeprecatedWorkflowArr DeprecatedWorkflow[];
 
-type WorklogArr Worklog[];
+public type WorklogArr Worklog[];
 
 public client class Client {
     http:Client clientEp;

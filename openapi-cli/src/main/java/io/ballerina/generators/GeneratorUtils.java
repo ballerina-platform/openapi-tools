@@ -167,7 +167,8 @@ public class GeneratorUtils {
     }
 
     public static List<Node> getRelativeResourcePath(Map.Entry<String, PathItem> path,
-                                                     Map.Entry<PathItem.HttpMethod, Operation> operation) {
+                                                     Map.Entry<PathItem.HttpMethod, Operation> operation)
+            throws BallerinaOpenApiException {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
         String[] pathNodes = path.getKey().trim().split("/");
@@ -235,7 +236,7 @@ public class GeneratorUtils {
      * @param type  OpenApi parameter types
      * @return ballerina type
      */
-    public static String convertOpenAPITypeToBallerina(String type) {
+    public static String convertOpenAPITypeToBallerina(String type) throws BallerinaOpenApiException {
         String convertedType;
         switch (type) {
             case Constants.INTEGER:
@@ -251,18 +252,20 @@ public class GeneratorUtils {
                 convertedType = "[]";
                 break;
             case Constants.OBJECT:
-                convertedType = "record";
+                convertedType = "record {}";
                 break;
             case Constants.DECIMAL:
                 convertedType = "decimal";
                 break;
             case Constants.NUMBER:
+                convertedType = "decimal";
+                break;
             case Constants.DOUBLE:
             case Constants.FLOAT:
                 convertedType = "float";
                 break;
             default:
-                convertedType = "anydata";
+                throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
         }
         return convertedType;
     }
