@@ -27,12 +27,14 @@ paths:
         - pets
       parameters:
         - in: header
+          description: Tests header
           name: X-Request-ID
           schema:
             type: string
             format: uuid
           required: true
         - in: header
+          description: Tests header
           name: X-Request-Client
           schema:
             type: array
