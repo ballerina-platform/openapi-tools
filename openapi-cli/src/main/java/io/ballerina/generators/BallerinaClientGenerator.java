@@ -121,7 +121,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBinding
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createClassDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createElseBlockNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createErrorTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createExpressionStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createForEachStatementNode;
@@ -334,8 +333,8 @@ public class BallerinaClientGenerator {
 
         //Create return type node for inti function
         IdentifierToken returnsKeyWord = createIdentifierToken(GeneratorConstants.RETURN);
-        OptionalTypeDescriptorNode type = createOptionalTypeDescriptorNode(createErrorTypeDescriptorNode(
-                        createIdentifierToken("error"), null), createIdentifierToken("?"));
+        OptionalTypeDescriptorNode type = createOptionalTypeDescriptorNode(createIdentifierToken("error"),
+                createIdentifierToken("?"));
         ReturnTypeDescriptorNode returnNode = createReturnTypeDescriptorNode(returnsKeyWord, annotationNodes, type);
 
         //Create function signature
