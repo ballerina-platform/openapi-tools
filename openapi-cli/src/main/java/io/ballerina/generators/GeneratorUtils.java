@@ -265,7 +265,7 @@ public class GeneratorUtils {
                 convertedType = "float";
                 break;
             default:
-                throw new BallerinaOpenApiException("Encountered an unsupported swagger data type `" + type + "`");
+                throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
         }
         return convertedType;
     }

@@ -42,7 +42,7 @@ public class SwaggerParserTests {
 
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Encountered an unsupported swagger data type .*")
+            expectedExceptionsMessageRegExp = "Unsupported OAS data type .*")
     public void generateHandleUnsupportedData() throws FormatterException, OpenApiException, IOException,
             BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid.yaml");
