@@ -6,9 +6,9 @@ public type ApiKeysConfig record {
     map<string|string[]> apiKeys;
 };
 
-type ProductArr Product[];
+public type ProductArr Product[];
 
-type PriceEstimateArr PriceEstimate[];
+public type PriceEstimateArr PriceEstimate[];
 
 public client class Client {
     http:Client clientEp;

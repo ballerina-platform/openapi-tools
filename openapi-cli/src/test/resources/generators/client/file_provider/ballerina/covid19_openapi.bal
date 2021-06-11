@@ -1,8 +1,8 @@
 import  ballerina/http;
 
-type CountriesArr Countries[];
+public type CountriesArr Countries[];
 
-type CountryInfoArr CountryInfo[];
+public type CountryInfoArr CountryInfo[];
 
 public client class Client {
     http:Client clientEp;

@@ -122,7 +122,7 @@ public class BallerinaSchemaGeneratorTests {
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema09.bal");
     }
 
-    @Test(description = "Scenario10-Generate record for schema has not type")
+    @Test(description = "Scenario10-Generate record for schema has not type", enabled = false)
     public void generateScenario10() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario10.yaml");

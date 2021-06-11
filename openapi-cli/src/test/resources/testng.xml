@@ -42,6 +42,7 @@ under the License.
             <class name="io.ballerina.generators.client.BallerinaDiagnosticTests"></class>
             <class name="io.ballerina.generators.client.FunctionBodyNodeTests"></class>
             <class name="io.ballerina.generators.client.FunctionSignatureNodeTests"></class>
+            <class name="io.ballerina.generators.common.SwaggerParserTests"/>
         </classes>
     </test>
 </suite>

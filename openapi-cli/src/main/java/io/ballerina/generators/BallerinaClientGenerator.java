@@ -738,7 +738,13 @@ public class BallerinaClientGenerator {
         }
 
         Schema parameterSchema = parameter.getSchema();
+
         String paramType = convertOpenAPITypeToBallerina(parameterSchema.getType().trim());
+        if (parameterSchema.getType().equals("number")) {
+            if (parameterSchema.getFormat() != null) {
+                paramType = convertOpenAPITypeToBallerina(parameterSchema.getFormat().trim());
+            }
+        }
 
         if (parameterSchema instanceof ArraySchema) {
             ArraySchema arraySchema = (ArraySchema) parameterSchema;
@@ -771,7 +777,7 @@ public class BallerinaClientGenerator {
     /*
      * Create path parameters.
      */
-    private static Node getPathParameters(Parameter parameter) {
+    private static Node getPathParameters(Parameter parameter) throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = extractDisplayAnnotation(parameter.getExtensions());
         BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim())));
@@ -782,8 +788,7 @@ public class BallerinaClientGenerator {
     /*
      * Create header when it comes under the parameter section in swagger.
      */
-    private static Node getHeaderParameter(Parameter parameter)
-            throws BallerinaOpenApiException {
+    private static Node getHeaderParameter(Parameter parameter) throws BallerinaOpenApiException {
 
         NodeList<AnnotationNode> annotationNodes = extractDisplayAnnotation(parameter.getExtensions());
         if (parameter.getRequired()) {
@@ -914,7 +919,7 @@ public class BallerinaClientGenerator {
                                     //Get oneOfUnionType name
                                     String typeName = type.replaceAll("\\|", "");
                                     TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
-                                            createIdentifierToken("type"),
+                                            createIdentifierToken("public type"),
                                             createIdentifierToken(typeName),
                                             createSimpleNameReferenceNode(createIdentifierToken(type)),
                                             createToken(SEMICOLON_TOKEN));
@@ -930,7 +935,7 @@ public class BallerinaClientGenerator {
                                     type = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
                                     String typeName = extractReferenceType(arraySchema.getItems().get$ref()) + "Arr";
                                     TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
-                                            createIdentifierToken("type"),
+                                            createIdentifierToken("public type"),
                                             createIdentifierToken(typeName),
                                             createSimpleNameReferenceNode(createIdentifierToken(type)),
                                             createToken(SEMICOLON_TOKEN));
@@ -1001,7 +1006,7 @@ public class BallerinaClientGenerator {
     private static String generateCustomTypeDefine(String type, String typeName) {
 
         TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null,
-                null, createIdentifierToken("type"),
+                null, createIdentifierToken("public type"),
                 createIdentifierToken(typeName),
                 createSimpleNameReferenceNode(createIdentifierToken(type)),
                 createToken(SEMICOLON_TOKEN));
@@ -1259,13 +1264,19 @@ public class BallerinaClientGenerator {
                     requestStatement = getSimpleStatement(returnType, RESPONSE,
                             "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
                                     "targetType=" + returnType + ")");
+                    statementsList.add(requestStatement);
+                    Token returnKeyWord = createIdentifierToken("return");
+                    SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+                    ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
+                            createToken(SEMICOLON_TOKEN));
+                    statementsList.add(returnStatementNode);
                 } else {
                     requestStatement = getSimpleStatement("", "_",
                             "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
                                     "targetType=http:Response)");
+                    statementsList.add(requestStatement);
                 }
             }
-            statementsList.add(requestStatement);
         } else {
             if (!returnType.equals("error?")) {
                 statementsList.add(requestStatement);
