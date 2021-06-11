@@ -196,7 +196,7 @@ import static io.ballerina.generators.GeneratorUtils.getBallerinaMeidaType;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
-import static io.ballerina.generators.GeneratorUtils.isValidRecordName;
+import static io.ballerina.generators.GeneratorUtils.isValidSchemaName;
 
 /**
  * This Util class use for generating ballerina client file according to given yaml file.
@@ -932,7 +932,7 @@ public class BallerinaClientGenerator {
                             } else  if (schema.get$ref() != null) {
                                 type = extractReferenceType(schema.get$ref());
                                 Schema componentSchema = openAPI.getComponents().getSchemas().get(type);
-                                if (!isValidRecordName(type)) {
+                                if (!isValidSchemaName(type)) {
                                     String operationId = operation.getOperationId();
                                     type = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1) +
                                             "Response";

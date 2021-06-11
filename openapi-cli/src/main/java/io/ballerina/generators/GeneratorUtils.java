@@ -315,22 +315,22 @@ public class GeneratorUtils {
      * @param identifier input function name, record name or operation Id
      * @return string with new generated name
      */
-    public static String getValidName(String identifier, boolean isSchemaName) {
+    public static String getValidName(String identifier, boolean isSchema) {
         if (!identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") && !identifier.matches("\\b[0-9]*\\b")) {
             String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
-            StringBuilder operationName = new StringBuilder();
+            StringBuilder validName = new StringBuilder();
             for (String part: split) {
                 if (!part.isBlank()) {
                     if (split.length > 1) {
                         part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
                                 part.substring(1).toLowerCase(Locale.ENGLISH);
                     }
-                    operationName.append(part);
+                    validName.append(part);
                 }
             }
-            identifier = operationName.toString();
+            identifier = validName.toString();
         }
-        if (isSchemaName) {
+        if (isSchema) {
             return identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1);
         } else {
             return identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1);
@@ -343,7 +343,7 @@ public class GeneratorUtils {
      * @param recordName - String record name
      * @return           - boolean value
      */
-    public static boolean isValidRecordName(String recordName) {
+    public static boolean isValidSchemaName(String recordName) {
         return !recordName.matches("\\b[0-9]*\\b");
     }
 

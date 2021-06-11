@@ -72,7 +72,7 @@ import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
-import static io.ballerina.generators.GeneratorUtils.isValidRecordName;
+import static io.ballerina.generators.GeneratorUtils.isValidSchemaName;
 
 /**
  *This class wraps the {@link Schema} from openapi models inorder to overcome complications
@@ -93,7 +93,7 @@ public class BallerinaSchemaGenerator {
                 for (Map.Entry<String, Schema> schema: schemas.entrySet()) {
                     List<String> required = schema.getValue().getRequired();
                     String recordName = getValidName(schema.getKey().trim(), true);
-                    if (isValidRecordName(recordName)) {
+                    if (isValidSchemaName(recordName)) {
                         IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(recordName);
                         Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("public type");
                         Token recordKeyWord = AbstractNodeFactory.createIdentifierToken("record");
