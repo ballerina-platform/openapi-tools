@@ -10,6 +10,8 @@ public client class Client {
         self.clientEp = httpEp;
     }
     #
+    # + 'version - test
+    # + name - test
     # + return - Ok
     remote isolated function pathParameter(int 'version, string name) returns string|error {
         string  path = string `/v1/${'version}/v2/${name}`;
