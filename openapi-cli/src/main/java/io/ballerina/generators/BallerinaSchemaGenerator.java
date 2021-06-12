@@ -367,6 +367,26 @@ public class BallerinaSchemaGenerator {
         } else if (schema.get$ref() != null) {
             Token typeName = AbstractNodeFactory.createIdentifierToken(extractReferenceType(schema.get$ref()));
             return createBuiltinSimpleNameReferenceNode(null, typeName);
+        }  else if (schema instanceof ComposedSchema) {
+            ComposedSchema composedSchema = (ComposedSchema) schema;
+            if (composedSchema.getOneOf() != null) {
+                String  oneOf = getOneOfUnionType(composedSchema.getOneOf());
+                return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(oneOf));
+            } else if (composedSchema.getAnyOf() != null) {
+                String  anyOf = getOneOfUnionType(composedSchema.getAnyOf());
+                return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(anyOf));
+            } else if (composedSchema.getAllOf() != null) {
+                String  allOf = getOneOfUnionType(composedSchema.getAllOf());
+                return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(allOf));
+            } else if (composedSchema.getType() != null) {
+                return createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(convertOpenAPITypeToBallerina(composedSchema.getType().trim())));
+            } else if (composedSchema.get$ref() != null) {
+                return createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(extractReferenceType(composedSchema.get$ref().trim())));
+            } else {
+                throw new BallerinaOpenApiException("Unsupported OAS data type.");
+            }
         } else {
             //This contains a fallback to Ballerina common type `any` if the OpenApi specification type is not defined
             // or not compatible with any of the current Ballerina types.
