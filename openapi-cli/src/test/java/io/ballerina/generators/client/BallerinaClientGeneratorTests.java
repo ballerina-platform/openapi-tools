@@ -66,12 +66,11 @@ public class BallerinaClientGeneratorTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    @Test(description = "Generate Client for path parameter has parameter name as key word", enabled = true)
+    @Test(description = "Generate Client for path parameter has parameter name as key word", enabled = false)
     public void generateClientForJira() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-//        Path definitionPath = RES_DIR.resolve("file_provider/swagger/covid19_openapi.yaml");
 //        Path definitionPath = RES_DIR.resolve("file_provider/swagger/jira_openapi.yaml");
-        Path definitionPath = RES_DIR.resolve("file_provider/swagger/tests.yaml");
+        Path definitionPath = RES_DIR.resolve("file_provider/swagger/jira_openapi.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/jira_openapi.bal");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
@@ -155,8 +154,7 @@ public class BallerinaClientGeneratorTests {
         return new Object[][]{
                 {"openapi_weather_api.yaml", "openapi_weather_api.bal"},
                 {"uber_openapi.yaml", "uber_openapi.bal"},
-                {"multiple_pathparam.yaml", "multiple_pathparam.bal"},
-                {"covid19_openapi.yaml", "covid19_openapi.bal"}
+                {"multiple_pathparam.yaml", "multiple_pathparam.bal"}
         };
     }
 

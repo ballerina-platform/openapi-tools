@@ -13,23 +13,36 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-public type Pet record  {
-    int  id;
-    string  name;
-    string  tag?;
-    string  'type?;
+
+#
+# + id - Field Description
+# + name - Field Description
+# + tag - Field Description
+# + 'type - Field Description
+public type Pet record {
+    int id;
+    string name;
+    string tag?;
+    string 'type?;
 };
 
-public type Dog record  {
+#
+# + bark - Field Description
+public type Dog record {
     *Pet;
-    boolean  bark?;
+    boolean bark?;
 };
 
-public type Pets record  {
-    Pet[]  petslist;
+#
+# + petslist - Field Description
+public type Pets record {
+    Pet[] petslist;
 };
 
-public type Error record  {
-    int  code;
-    string  message;
+#
+# + code - Field Description
+# + message - Field Description
+public type Error record {
+    int code;
+    string message;
 };

@@ -235,7 +235,19 @@ public class BallerinaSchemaGenerator {
                                     NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
                                             fieldNodes, null, bodyEndDelimiter);
                             Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
-                            TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(null,
+                            if (schemaValue.getDescription() != null) {
+                                MarkdownParameterDocumentationLineNode paramAPIDoc = createParamAPIDoc(
+                                        fieldName.toString(), schemaValue.getDescription());
+                                schemaDoc.add(paramAPIDoc);
+                            } else {
+                                MarkdownParameterDocumentationLineNode paramAPIDoc = createParamAPIDoc(
+                                        fieldName.toString(), "Field Description");
+                                schemaDoc.add(paramAPIDoc);
+                            }
+                            MarkdownDocumentationNode documentationNode =
+                                    createMarkdownDocumentationNode(createNodeList(schemaDoc));
+                            MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+                            TypeDefinitionNode typeDefinitionNode = NodeFactory.createTypeDefinitionNode(metadataNode,
                                     null, typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
                             typeDefinitionNodeList.add(typeDefinitionNode);
                         }
