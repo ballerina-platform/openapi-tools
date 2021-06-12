@@ -70,6 +70,7 @@ public class BallerinaClientGeneratorTests {
     public void generateClientForJira() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
 //        Path definitionPath = RES_DIR.resolve("file_provider/swagger/covid19_openapi.yaml");
+//        Path definitionPath = RES_DIR.resolve("file_provider/swagger/jira_openapi.yaml");
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/tests.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/jira_openapi.bal");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);

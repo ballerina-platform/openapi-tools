@@ -146,6 +146,14 @@ public class BallerinaSchemaGeneratorTests {
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("openapi_weather_api_schema.bal");
     }
 
+    @Test(description = "Generate record field has oneof allof scenarios")
+    public void generateRecordField() throws IOException, BallerinaOpenApiException, FormatterException,
+            OpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/openapi.yaml");
+        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("openapi.bal");
+    }
+
     @Test(description = "Scenario12-Generate record for schema has object type only")
     public void generateForSchemaHasObjectTypeOnly() throws IOException, BallerinaOpenApiException, OpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario14.yaml");
