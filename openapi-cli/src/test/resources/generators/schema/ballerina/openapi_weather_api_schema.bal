@@ -1,109 +1,94 @@
-#
-#+coord-Field Description
-#+weather-(more info Weather condition codes)
-#+base-Internal parameter
-#+main-Field Description
-#+visibility-Visibility, meter
-#+wind-Field Description
-#+clouds-Field Description
-#+rain-Field Description
-#+snow-Field Description
-#+dt-Time of data calculation, unix, UTC
-#+sys-Field Description
-#+id-City ID
-#+name-Field Description
-#+cod-Internal parameter
 public type '200 record {
     Coord coord?;
+    # (more info Weather condition codes)
     Weather[] weather?;
+    # Internal parameter
     string base?;
     Main main?;
+    # Visibility, meter
     int visibility?;
     Wind wind?;
     Clouds clouds?;
     Rain rain?;
     Snow snow?;
+    # Time of data calculation, unix, UTC
     int dt?;
     Sys sys?;
+    # City ID
     int id?;
     string name?;
+    # Internal parameter
     int cod?;
 };
 
-#
-#+lon-City geo location, longitude
-#+lat-City geo location, latitude
 public type Coord record {
+    # City geo location, longitude
     decimal lon?;
+    # City geo location, latitude
     decimal lat?;
 };
 
-#
-#+id-Weather condition id
-#+main-Group of weather parameters (Rain, Snow, Extreme etc.)
-#+description-Weather condition within the group
-#+icon-Weather icon id
 public type Weather record {
+    # Weather condition id
     int id?;
+    # Group of weather parameters (Rain, Snow, Extreme etc.)
     string main?;
+    # Weather condition within the group
     string description?;
+    # Weather icon id
     string icon?;
 };
 
-#
-#+temp-Temperature. Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
-#+pressure-Atmospheric pressure (on the sea level, if there is no sea_level or grnd_level data), hPa
-#+humidity-Humidity, %
-#+temp_min-Minimum temperature at the moment. This is deviation from current temp that is possible for large cities and megalopolises geographically expanded (use these parameter optionally). Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
-#+temp_max-Maximum temperature at the moment. This is deviation from current temp that is possible for large cities and megalopolises geographically expanded (use these parameter optionally). Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.#+sea_level-Atmospheric pressure on the sea level, hPa
-#+grnd_level-Atmospheric pressure on the ground level, hPa
 public type Main record {
+    # Temperature. Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
     decimal temp?;
+    # Atmospheric pressure (on the sea level, if there is no sea_level or grnd_level data), hPa
     int pressure?;
+    # Humidity, %
     int humidity?;
+    # Minimum temperature at the moment. This is deviation from current temp that is possible for large cities and megalopolises geographically expanded (use these parameter optionally). Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
     decimal temp_min?;
+    # Maximum temperature at the moment. This is deviation from current temp that is possible for large cities and megalopolises geographically expanded (use these parameter optionally). Unit Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
     decimal temp_max?;
+    # Atmospheric pressure on the sea level, hPa
     decimal sea_level?;
+    # Atmospheric pressure on the ground level, hPa
     decimal grnd_level?;
 };
 
-#
-#+speed-Wind speed. Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour.
-#+deg-Wind direction, degrees (meteorological)
 public type Wind record {
+    # Wind speed. Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour.
     decimal speed?;
+    # Wind direction, degrees (meteorological)
     int deg?;
 };
-#
-#+'all-Cloudiness, %
+
 public type Clouds record {
+    # Cloudiness, %
     int 'all?;
 };
 
-#
-#+'\3h-Rain volume for the last 3 hours
 public type Rain record {
+    # Rain volume for the last 3 hours
     int '\3h?;
 };
 
-#
-#+'\3h-Snow volume for the last 3 hours
 public type Snow record {
+    # Snow volume for the last 3 hours
     decimal '\3h?;
 };
 
-#
-#+'type-Internal parameter
-#+id-Internal parameter
-#+message-Internal parameter
-#+country-Country code (GB, JP etc.)
-#+sunrise-Sunrise time, unix, UTC
-#+sunset-Sunset time, unix, UTC
 public type Sys record {
+    # Internal parameter
     int 'type?;
+    # Internal parameter
     int id?;
+    # Internal parameter
     decimal message?;
+    # Country code (GB, JP etc.)
     string country?;
+    # Sunrise time, unix, UTC
     int sunrise?;
+    # Sunset time, unix, UTC
     int sunset?;
 };

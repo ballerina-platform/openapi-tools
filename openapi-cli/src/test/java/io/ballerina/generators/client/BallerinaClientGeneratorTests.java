@@ -69,8 +69,8 @@ public class BallerinaClientGeneratorTests {
     @Test(description = "Generate Client for path parameter has parameter name as key word", enabled = false)
     public void generateClientForJira() throws IOException, BallerinaOpenApiException, FormatterException,
             OpenApiException {
-//        Path definitionPath = RES_DIR.resolve("file_provider/swagger/jira_openapi.yaml");
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/jira_openapi.yaml");
+//        Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/jira_openapi.bal");
         syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);

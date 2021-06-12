@@ -67,6 +67,7 @@ components:
         country:
           type: string
         timeline:
+          description: "One of"
           oneOf:
             - $ref: '#/components/schemas/SimpleVaccineTimeline'
             - $ref: '#/components/schemas/FullVaccineTimeline'

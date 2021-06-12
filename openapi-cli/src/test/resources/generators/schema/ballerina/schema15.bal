@@ -1,24 +1,19 @@
-#
-# + first_name - First name of the Uber user.
-# + last_name - Last name of the Uber user.
 public type User record {
+    # First name of the Uber user.
     string first_name?;
+    # Last name of the Uber user.
     string last_name?;
 };
 
-#
-# + uuid - Unique identifier for the activity
 public type Activity record {
+    # Unique identifier for the activity
     string uuid?;
 };
 
-#
-# + offset - Position in pagination.
-# + history - Field Description
 public type Activities record {
+    # Position in pagination.
     int offset?;
     Activity[] history?;
 };
 
-#
 public type  AnyOF User|Activity;

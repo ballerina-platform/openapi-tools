@@ -76,6 +76,7 @@ components:
       properties:
         pets:
           type: array
+          description: Pet array
           items:
             $ref: "#/components/schemas/Pet"
         bark:

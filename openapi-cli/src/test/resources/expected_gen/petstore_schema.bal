@@ -14,11 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#
-# + id - Field Description
-# + name - Field Description
-# + tag - Field Description
-# + 'type - Field Description
 public type Pet record {
     int id;
     string name;
@@ -26,22 +21,16 @@ public type Pet record {
     string 'type?;
 };
 
-#
-# + bark - Field Description
 public type Dog record {
     *Pet;
     boolean bark?;
 };
 
-#
-# + petslist - Field Description
 public type Pets record {
     Pet[] petslist;
 };
 
-#
-# + code - Field Description
-# + message - Field Description
+
 public type Error record {
     int code;
     string message;
