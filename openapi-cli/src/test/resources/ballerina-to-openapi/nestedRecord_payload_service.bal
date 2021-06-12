@@ -16,3 +16,4 @@ type Pet record {
      resource function post hi(http:Caller caller, http:Request request, @http:Payload {} Dog payload) {
      }
  }
+

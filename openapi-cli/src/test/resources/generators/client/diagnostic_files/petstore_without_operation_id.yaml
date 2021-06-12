@@ -15,6 +15,7 @@ paths:
         '200':
           description: Expected response to a valid request
       requestBody:
+        description: test
         content:
           application/json:
             schema:

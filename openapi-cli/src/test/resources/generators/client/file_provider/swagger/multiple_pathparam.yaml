@@ -13,12 +13,14 @@ paths:
         - name: version
           in: path
           required: true
+          description: test
           schema:
             type: integer
             format: int32
         - name: name
           in: path
           required: true
+          description: test
           schema:
             type: string
       responses:
