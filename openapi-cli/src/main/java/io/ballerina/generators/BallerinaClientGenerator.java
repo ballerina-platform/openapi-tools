@@ -42,6 +42,9 @@ import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.IndexedExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationLineNode;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
+import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.MethodCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
@@ -134,6 +137,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createIndexedExpress
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createListBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createLiteralValueToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationLineNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMethodCallExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
@@ -188,6 +193,7 @@ import static io.ballerina.generators.GeneratorConstants.RESPONSE;
 import static io.ballerina.generators.GeneratorConstants.TRACE;
 import static io.ballerina.generators.GeneratorUtils.buildUrl;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.generators.GeneratorUtils.createParamAPIDoc;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaMeidaType;
@@ -366,6 +372,7 @@ public class BallerinaClientGenerator {
 
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, statementList, createToken(CLOSE_BRACE_TOKEN));
+
         FunctionDefinitionNode initFunctionNode = createFunctionDefinitionNode(null, null,
                 qualifierList, functionKeyWord, functionName, createEmptyNodeList(), functionSignatureNode
                 , functionBodyNode);
@@ -384,6 +391,23 @@ public class BallerinaClientGenerator {
                 }
             }
         }
+        // Generate api doc
+        List<Node> documentationLines = new ArrayList<>();
+        if (info.getDescription() != null) {
+            MarkdownDocumentationLineNode clientDescription =
+                    createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                            createNodeList(createLiteralValueToken(null, info.getDescription(),
+                                    createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+            documentationLines.add(clientDescription);
+            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
+                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+            documentationLines.add(newLine);
+        }
+        MarkdownParameterDocumentationLineNode httpClientParam = createParamAPIDoc("clientEp",
+                "Connector http endpoint");
+        documentationLines.add(httpClientParam);
+        MarkdownDocumentationNode apiDoc = createMarkdownDocumentationNode(createNodeList(documentationLines));
+        metadataNode = metadataNode.modify(apiDoc, metadataNode.annotations());
         return createClassDefinitionNode(metadataNode, visibilityQualifier, classTypeQualifiers,
                 classKeyWord, className, openBrace, createNodeList(memberNodeList),
                 createToken(CLOSE_BRACE_TOKEN));
@@ -618,13 +642,34 @@ public class BallerinaClientGenerator {
     private static FunctionDefinitionNode getFunctionDefinitionNode(MetadataNode metadataNode, String path,
                                                                     Map.Entry<PathItem.HttpMethod,
             Operation> operation) throws BallerinaOpenApiException {
+        // Create api doc for function
+        List<Node> remoteFunctionDocs = new ArrayList<>();
+        if (operation.getValue().getDescription() != null) {
+            MarkdownDocumentationLineNode clientDescription =
+                    createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                            createNodeList(createLiteralValueToken(null, operation.getValue().getDescription(),
+                                    createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+            remoteFunctionDocs.add(clientDescription);
+            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
+                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+            remoteFunctionDocs.add(newLine);
+        } else {
+            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
+                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+            remoteFunctionDocs.add(newLine);
+        }
+
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createIdentifierToken("remote isolated"));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         NodeList<Node> relativeResourcePath = createEmptyNodeList();
 
-        FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue());
+        FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue(),
+                remoteFunctionDocs);
+        // Create metadataNode add documentation string
+        metadataNode = metadataNode.modify(createMarkdownDocumentationNode(createNodeList(remoteFunctionDocs)),
+                metadataNode.annotations());
 
         // Create Function Body
         FunctionBodyNode functionBodyNode = getFunctionBodyNode(path, operation);
@@ -641,13 +686,14 @@ public class BallerinaClientGenerator {
      * @return {@link io.ballerina.compiler.syntax.tree.FunctionSignatureNode}
      * @throws BallerinaOpenApiException - throws exception when node creation fails.
      */
-    public static FunctionSignatureNode getFunctionSignatureNode(Operation operation) throws BallerinaOpenApiException {
+    public static FunctionSignatureNode getFunctionSignatureNode(Operation operation, List<Node> remoteFunctionDoc)
+            throws BallerinaOpenApiException {
         // Create Parameters - function with parameters
         // Function RequestBody
         List<Node> parameterList =  new ArrayList<>();
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         Token comma =  createToken(COMMA_TOKEN);
-        setFunctionParameters(operation, parameterList, comma);
+        setFunctionParameters(operation, parameterList, comma, remoteFunctionDoc);
         if (parameterList.size() >= 2) {
             parameterList.remove(parameterList.size() - 1);
         }
@@ -656,6 +702,15 @@ public class BallerinaClientGenerator {
         Token returnsKeyWord = createToken(RETURNS_KEYWORD);
         //Type Always Union
         String returnType = getReturnType(operation);
+        ApiResponses responses = operation.getResponses();
+        Collection<ApiResponse> values = responses.values();
+        Iterator<ApiResponse> iteratorRes = values.iterator();
+        ApiResponse next = iteratorRes.next();
+        if (next.getDescription() != null) {
+            MarkdownParameterDocumentationLineNode returnDoc = createParamAPIDoc("return", next.getDescription());
+            remoteFunctionDoc.add(returnDoc);
+        }
+
         // Default
         ReturnTypeDescriptorNode returnTypeDescriptorNode = createReturnTypeDescriptorNode(returnsKeyWord,
                 annotationNodes, createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(returnType)));
@@ -667,10 +722,11 @@ public class BallerinaClientGenerator {
     /*
      * Generate function parameters.
      */
-    private static void setFunctionParameters(Operation operation, List<Node> parameterList, Token comma)
-            throws BallerinaOpenApiException {
+    private static void setFunctionParameters(Operation operation, List<Node> parameterList, Token comma,
+                                              List<Node> remoteFunctionDoc) throws BallerinaOpenApiException {
 
         List<Parameter> parameters = operation.getParameters();
+        List<MarkdownParameterDocumentationLineNode> defaultParam = new ArrayList<>();
         List<Node> defaultable = new ArrayList<>();
         if (parameters != null) {
             for (Parameter parameter: parameters) {
@@ -681,9 +737,21 @@ public class BallerinaClientGenerator {
                         if (param instanceof RequiredParameterNode) {
                             parameterList.add(param);
                             parameterList.add(comma);
+                            if (parameter.getDescription() != null) {
+                                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                                parameter.getDescription());
+                                remoteFunctionDoc.add(paramAPIDoc);
+                            }
                         } else {
                             defaultable.add(param);
                             defaultable.add(comma);
+                            if (parameter.getDescription() != null) {
+                                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                                parameter.getDescription());
+                                defaultParam.add(paramAPIDoc);
+                            }
                         }
                         break;
                     case "query":
@@ -691,9 +759,21 @@ public class BallerinaClientGenerator {
                         if (paramq instanceof RequiredParameterNode) {
                             parameterList.add(paramq);
                             parameterList.add(comma);
+                            if (parameter.getDescription() != null) {
+                                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                                parameter.getDescription());
+                                remoteFunctionDoc.add(paramAPIDoc);
+                            }
                         } else {
                             defaultable.add(paramq);
                             defaultable.add(comma);
+                            if (parameter.getDescription() != null) {
+                                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                                parameter.getDescription());
+                                defaultParam.add(paramAPIDoc);
+                            }
                         }
                         break;
                     case "header":
@@ -701,9 +781,21 @@ public class BallerinaClientGenerator {
                         if (paramh instanceof RequiredParameterNode) {
                             parameterList.add(paramh);
                             parameterList.add(comma);
+                            if (parameter.getDescription() != null) {
+                                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                                parameter.getDescription());
+                                remoteFunctionDoc.add(paramAPIDoc);
+                            }
                         } else {
                             defaultable.add(paramh);
                             defaultable.add(comma);
+                            if (parameter.getDescription() != null) {
+                                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                                parameter.getDescription());
+                                defaultParam.add(paramAPIDoc);
+                            }
                         }
                         break;
                     default:
@@ -716,7 +808,7 @@ public class BallerinaClientGenerator {
         if (operation.getRequestBody() != null) {
             RequestBody requestBody = operation.getRequestBody();
             if (requestBody.getContent() != null) {
-                List<Node> requestBodyparam = setRequestBodyParameters(requestBody);
+                List<Node> requestBodyparam = setRequestBodyParameters(requestBody, remoteFunctionDoc);
                 parameterList.addAll(requestBodyparam);
                 parameterList.add(comma);
             }
@@ -724,6 +816,7 @@ public class BallerinaClientGenerator {
         //Filter defaultable parameters
         if (!defaultable.isEmpty()) {
             parameterList.addAll(defaultable);
+            remoteFunctionDoc.addAll(defaultParam);
         }
     }
 
@@ -821,7 +914,7 @@ public class BallerinaClientGenerator {
     /*
      * Create request body parameter.
      */
-    private static List<Node> setRequestBodyParameters(RequestBody requestBody)
+    private static List<Node> setRequestBodyParameters(RequestBody requestBody, List<Node> requestBodyDoc)
             throws BallerinaOpenApiException {
         List<Node> parameterList = new ArrayList<>();
         Content content = requestBody.getContent();
@@ -863,6 +956,12 @@ public class BallerinaClientGenerator {
                 SimpleNameReferenceNode typeName = createSimpleNameReferenceNode(createIdentifierToken(paramType));
                 IdentifierToken paramName = createIdentifierToken("payload");
                 RequiredParameterNode payload = createRequiredParameterNode(annotationNodes, typeName, paramName);
+                if (requestBody.getDescription() != null) {
+                    MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                createParamAPIDoc(escapeIdentifier("payload"),
+                                        requestBody.getDescription());
+                        requestBodyDoc.add(paramAPIDoc);
+                }
                 parameterList.add(payload);
             }
             break;
@@ -1397,6 +1496,27 @@ public class BallerinaClientGenerator {
 
     // Create queryPath param function
     private static FunctionDefinitionNode getQueryParamPath() {
+        //Create API doc
+        List<Node> docs = new ArrayList<>();
+        MarkdownDocumentationLineNode functionDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createLiteralValueToken(null,
+                                "Generate query path with query parameter.",
+                                createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+        docs.add(functionDescription);
+        MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
+                createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+        docs.add(hashNewLine);
+        // Create client init description
+        MarkdownParameterDocumentationLineNode queryParam = createParamAPIDoc("queryParam",
+                "Query parameter map");
+        docs.add(queryParam);
+        MarkdownParameterDocumentationLineNode returnDoc = createParamAPIDoc("return",
+                "Returns generated Path or error at failure of client initialization");
+        docs.add(returnDoc);
+
+        MarkdownDocumentationNode functionDoc = createMarkdownDocumentationNode(createNodeList(docs));
+        MetadataNode metadataNode = createMetadataNode(functionDoc, createEmptyNodeList());
         Token functionKeyWord = createIdentifierToken("isolated function");
         IdentifierToken functionName = createIdentifierToken(" getPathForQueryParam");
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
@@ -1550,7 +1670,7 @@ public class BallerinaClientGenerator {
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, createNodeList(statementNodes), createToken(CLOSE_BRACE_TOKEN));
 
-        return createFunctionDefinitionNode(FUNCTION_DEFINITION, null,
+        return createFunctionDefinitionNode(FUNCTION_DEFINITION, metadataNode,
                 createEmptyNodeList(), functionKeyWord, functionName, createEmptyNodeList(),
                 functionSignatureNode, functionBodyNode);
     }

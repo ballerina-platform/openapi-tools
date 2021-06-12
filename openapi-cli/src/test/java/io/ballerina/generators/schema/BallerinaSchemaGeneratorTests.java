@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,7 +49,6 @@ import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 public class BallerinaSchemaGeneratorTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-
 
     @Test(description = "Scenario01-Generate single record")
     public void generateScenario01() throws FormatterException, OpenApiException, IOException,
@@ -155,7 +155,7 @@ public class BallerinaSchemaGeneratorTests {
         TypeDefinitionNode recordNode = getTypeDefinitionNodeForObjectSchema(null,
                         AbstractNodeFactory.createIdentifierToken("public type"),
                         AbstractNodeFactory.createIdentifierToken("Error"),
-                        null, objectSchema.getProperties());
+                        null, objectSchema.getProperties(), new ArrayList<>());
         Assert.assertTrue(((RecordTypeDescriptorNode) recordNode.typeDescriptor()).fields().isEmpty());
     }
     //Get string as a content of ballerina file

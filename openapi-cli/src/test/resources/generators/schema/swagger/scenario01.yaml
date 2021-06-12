@@ -59,17 +59,22 @@ paths:
 components:
   schemas:
     Pet:
+      description: Test description
       required:
         - id
         - name
       properties:
         id:
+          description: tests
           type: integer
           format: int64
         name:
+          description: tests
           type: string
         tag:
+          description: tests
           type: string
         type:
+          description: tests
           type: string
 

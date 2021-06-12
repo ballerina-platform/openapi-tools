@@ -68,7 +68,7 @@ components:
         type:
           type: object
           properties:
-            id:
+            typeId:
               type: string
             tagType:
               type: string
