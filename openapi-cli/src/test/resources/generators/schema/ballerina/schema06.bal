@@ -5,6 +5,7 @@ public type Pet record {
 };
 
 public type Dog record {
+    # Pet array
     Pet[] pets?;
     boolean bark;
 };

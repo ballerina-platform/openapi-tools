@@ -1,3 +1,4 @@
+# Pet details
 public type Pet record {
     int id;
     string name;
@@ -5,6 +6,7 @@ public type Pet record {
 };
 
 public type Dog record {
+    # Pet details
     Pet pets?;
     boolean bark;
 };

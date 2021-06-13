@@ -31,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
@@ -65,6 +66,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLiteralValueToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownParameterDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.OpenApiMesseges.BAL_KEYWORDS;
 import static io.ballerina.openapi.OpenApiMesseges.BAL_TYPES;
@@ -437,5 +444,13 @@ public class GeneratorUtils {
             unionTypeCont = unionTypeCont.replaceFirst("\\|", "");
         }
         return unionTypeCont;
+    }
+
+    public static MarkdownParameterDocumentationLineNode createParamAPIDoc(String paramName, String description) {
+
+        return createMarkdownParameterDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                createToken(SyntaxKind.PLUS_TOKEN), createIdentifierToken(paramName),
+                createToken(SyntaxKind.MINUS_TOKEN), createNodeList(createLiteralValueToken(null
+                        , description,  createEmptyMinutiaeList(), createEmptyMinutiaeList())));
     }
 }

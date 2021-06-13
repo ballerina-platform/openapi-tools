@@ -59,6 +59,7 @@ paths:
 components:
   schemas:
     Pet:
+      description: "Pet details"
       required:
         - id
         - name
@@ -76,5 +77,6 @@ components:
       properties:
         pets:
           $ref: "#/components/schemas/Pet"
+          description: "Pet details"
         bark:
           type: boolean

@@ -49,7 +49,6 @@ public class BallerinaSchemaGeneratorTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
 
-
     @Test(description = "Scenario01-Generate single record")
     public void generateScenario01() throws FormatterException, OpenApiException, IOException,
             BallerinaOpenApiException {
@@ -163,7 +162,7 @@ public class BallerinaSchemaGeneratorTests {
         TypeDefinitionNode recordNode = getTypeDefinitionNodeForObjectSchema(null,
                         AbstractNodeFactory.createIdentifierToken("public type"),
                         AbstractNodeFactory.createIdentifierToken("Error"),
-                        null, objectSchema.getProperties());
+                        null, objectSchema.getProperties(), "");
         Assert.assertTrue(((RecordTypeDescriptorNode) recordNode.typeDescriptor()).fields().isEmpty());
     }
     //Get string as a content of ballerina file

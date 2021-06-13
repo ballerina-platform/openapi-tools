@@ -139,7 +139,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createLiteralValueTo
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownParameterDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMethodCallExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
@@ -194,6 +193,7 @@ import static io.ballerina.generators.GeneratorConstants.RESPONSE;
 import static io.ballerina.generators.GeneratorConstants.TRACE;
 import static io.ballerina.generators.GeneratorUtils.buildUrl;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.generators.GeneratorUtils.createParamAPIDoc;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaMeidaType;
@@ -411,14 +411,6 @@ public class BallerinaClientGenerator {
         return createClassDefinitionNode(metadataNode, visibilityQualifier, classTypeQualifiers,
                 classKeyWord, className, openBrace, createNodeList(memberNodeList),
                 createToken(CLOSE_BRACE_TOKEN));
-    }
-
-    private static MarkdownParameterDocumentationLineNode createParamAPIDoc(String paramName, String description) {
-
-        return createMarkdownParameterDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                createToken(SyntaxKind.PLUS_TOKEN), createIdentifierToken(paramName),
-                createToken(SyntaxKind.MINUS_TOKEN), createNodeList(createLiteralValueToken(null
-                        , description,  createEmptyMinutiaeList(), createEmptyMinutiaeList())));
     }
 
     /**

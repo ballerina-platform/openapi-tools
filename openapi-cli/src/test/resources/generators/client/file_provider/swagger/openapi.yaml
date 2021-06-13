@@ -1,0 +1,849 @@
+openapi: 3.0.0
+servers:
+  - url: https://disease.sh
+info:
+  version: 3.0.0
+  title: Novel Covid19 API - Disease.sh - An open API for disease-related statistics
+  description: Third Party API for reliable global disease information
+  license:
+    name: GNU V3
+    url: 'https://github.com/disease-sh/API/blob/master/LICENSE'
+tags:
+  - name: 'COVID-19: Worldometers'
+    description: '(COVID-19 data sourced from Worldometers, updated every 10 minutes)'
+  - name: 'COVID-19: Vaccine'
+    description: '(COVID-19 vaccine trial data from raps.org, updated every 24 hours)'
+
+paths:
+  /v3/covid-19/all:
+    get:
+      tags:
+        - 'COVID-19: Worldometers'
+      operationId: getGlobalStatus
+      parameters:
+        - name: yesterday
+          description: Queries data reported a day ago
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            type: string
+        - name: twoDaysAgo
+          description: Queries data reported two days ago
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            type: string
+        - name: allowNull
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            type: string
+          description: 'By default, if a value is missing, it is returned as 0. This allows nulls to be returned'
+      description: 'Get global COVID-19 totals for today, yesterday and two days ago'
+      responses:
+        '200':
+          description: Status OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CovidAll'
+  '/v3/covid-19/states/{states}':
+    get:
+      tags:
+        - 'COVID-19: Worldometers'
+      operationId: getUSAStatusByState
+      parameters:
+        - name: states
+          in: path
+          required: true
+          description: State name or comma separated names spelled correctly
+          schema:
+            type: string
+        - name: yesterday
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            description: Queries data reported a day ago
+            type: string
+        - name: allowNull
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            description: 'By default, if a value is missing, it is returned as 0. This allows nulls to be returned'
+            type: string
+      description: Get COVID-19 totals for specific US State(s)
+      responses:
+        '200':
+          description: Status OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CovidState'
+  '/v3/covid-19/continents/{continent}':
+    get:
+      tags:
+        - 'COVID-19: Worldometers'
+      operationId: getStatusByContinent
+      parameters:
+        - name: continent
+          in: path
+          required: true
+          description: Continent name
+          schema:
+            type: string
+        - name: yesterday
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            description: Queries data reported a day ago
+            type: string
+        - name: twoDaysAgo
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            description: Queries data reported two days ago
+            type: string
+        - name: strict
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+            default: 'true'
+            description: Setting to false gives you the ability to fuzzy search continents (i.e. Oman vs. rOMANia)
+            type: string
+        - name: allowNull
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            description: 'By default, if a value is missing, it is returned as 0. This allows nulls to be returned'
+            type: string
+      description: Get COVID-19 totals for a specific continent
+      responses:
+        '200':
+          description: Status OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CovidContinent'
+  '/v3/covid-19/countries/{country}':
+    get:
+      tags:
+        - 'COVID-19: Worldometers'
+      operationId: getStatusByCountry
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: 'A country name, iso2, iso3, or country ID code'
+          schema:
+            type: string
+        - name: yesterday
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            description: Queries data reported a day ago
+            type: string
+        - name: twoDaysAgo
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            description: Queries data reported two days ago
+            type: string
+        - name: strict
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+            default: 'true'
+            description: Setting to false gives you the ability to fuzzy search countries (i.e. Oman vs. rOMANia)
+            type: string
+        - name: allowNull
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            description: 'By default, if a value is missing, it is returned as 0. This allows nulls to be returned'
+            type: string
+      description: Get COVID-19 totals for a specific country
+      responses:
+        '200':
+          description: Status OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CovidCountry'
+  /v3/covid-19/historical/all:
+    get:
+      tags:
+        - 'COVID-19: JHUCSSE'
+      operationId: getGlobalStatusInTimeSeries
+      parameters:
+        - name: lastdays
+          in: query
+          description: 'Number of days to return. Use ''all'' for the full data set (e.g. 15, all, 24)'
+          schema:
+            type: string
+      description: Get global accumulated COVID-19 time series data
+      responses:
+        '200':
+          description: Status Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CovidHistoricalAll'
+  '/v3/covid-19/historical/{country}':
+    get:
+      tags:
+        - 'COVID-19: JHUCSSE'
+      operationId: getTimeSeriesbycountry
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: 'A country name, iso2, iso3, or country ID code'
+          schema:
+            type: string
+        - name: lastdays
+          in: query
+          description: 'Number of days to return. Use ''all'' for the full data set (e.g. 15, all, 24)'
+          schema:
+            type: string
+            default: 30
+      description: Get COVID-19 time series data for a specific country
+      responses:
+        '200':
+          description: Status Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CovidHistoricalCountry'
+  '/v3/covid-19/historical/{country}/{province}':
+    get:
+      tags:
+        - 'COVID-19: JHUCSSE'
+      operationId: getTimeSeriesByProvince
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: 'A country name, iso2, iso3, or country ID code'
+          schema:
+            type: string
+        - name: province
+          in: path
+          required: true
+          description: 'Province name. All available names can be found in the /v3/covid-19/historical/{query} endpoint'
+          schema:
+            type: string
+        - name: lastdays
+          in: query
+          description: 'Number of days to return. Use ''all'' for the full data set (e.g. 15, all, 24)'
+          schema:
+            type: string
+            default: 30
+      description: Get COVID-19 time series data for a specific province in a country
+      responses:
+        '200':
+          description: Status Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CovidHistoricalProvince'
+  /v3/covid-19/vaccine:
+    get:
+      tags:
+        - 'COVID-19: Vaccine'
+      operationId: getVaccineTrialData
+      description: 'Get vaccine trial data from RAPS (Regulatory Affairs Professional Society).'
+      responses:
+        '200':
+          description: Status Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vaccines'
+  /v3/covid-19/vaccine/coverage:
+    get:
+      tags:
+        - 'COVID-19: Vaccine'
+      operationId: getTotalGlobalVaccineDosesAdministered
+      parameters:
+        - name: lastdays
+          in: query
+          description: 'Number of days to return. Use ''all'' for the full data set (e.g. 15, all, 24)'
+          schema:
+            type: string
+            default: 30
+        - name: fullData
+          in: query
+          description: Flag indicating whether to return data type as SimpleVaccineTimeline (false) or FullVaccineTimeline (true).
+          schema:
+            type: string
+            default: 'false'
+      description: 'Get total global COVID-19 Vaccine doses administered.'
+      responses:
+        '200':
+          description: Status Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VaccineCoverage'
+              examples:
+                simpleTimeline:
+                  $ref: '#/components/examples/SimpleVaccineTimeline'
+                fullTimeline:
+                  $ref: '#/components/examples/FullVaccineTimeline'
+  '/v3/covid-19/vaccine/coverage/countries/{country}':
+    get:
+      tags:
+        - 'COVID-19: Vaccine'
+      operationId: getVaccineCoverageByCountry
+      parameters:
+        - name: country
+          in: path
+          required: true
+          description: 'A valid country name, iso2, iso3'
+          schema:
+            type: string
+        - name: lastdays
+          in: query
+          description: 'Number of days to return. Use ''all'' for the full data set (e.g. 15, all, 24)'
+          schema:
+            type: string
+            default: 30
+        - name: fullData
+          in: query
+          description: Flag indicating whether to return timeline data type as SimpleVaccineTimeline (false) or FullVaccineTimeline (true).
+          schema:
+            type: string
+            default: 'false'
+      description: 'Get COVID-19 vaccine doses administered for a country that has reported vaccination rollout.'
+      responses:
+        '200':
+          description: Status Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VaccineCountryCoverage'
+              examples:
+                simpleTimeline:
+                  $ref: '#/components/examples/countrySimpleVaccineTimeline'
+                fullTimeline:
+                  $ref: '#/components/examples/countryFullVaccineTimeline'
+components:
+  schemas:
+    CovidAll:
+      properties:
+        updated:
+          type: number
+          description: Last updated timestamp
+        cases:
+          type: number
+          description: Total cases
+        todayCases:
+          type: number
+          description: Today cases
+        deaths:
+          type: number
+          description: Total deaths
+        todayDeaths:
+          type: number
+          description: Today deaths
+        recovered:
+          type: number
+          description: Total recovered
+        todayRecovered:
+          type: number
+          description: Today recovered
+        active:
+          type: number
+          description: Active cases
+        critical:
+          type: number
+          description: Critical cases
+        casesPerOneMillion:
+          type: number
+          description: Cases per one million
+        deathsPerOneMillion:
+          type: number
+          description: Deaths per one million
+        tests:
+          type: number
+          description: Total number of Covid-19 tests administered
+        testsPerOneMillion:
+          type: number
+          description: Covid-19 tests for one million
+        population:
+          type: number
+          description: World population
+        oneCasePerPeople:
+          type: number
+          description: One case per people
+        oneDeathPerPeople:
+          type: number
+          description: One deaths per people
+        oneTestPerPeople:
+          type: number
+          description: One tests per people
+        activePerOneMillion:
+          type: number
+          description: Active cases per one million
+        recoveredPerOneMillion:
+          type: number
+          description: Recovered cases per one million
+        criticalPerOneMillion:
+          type: number
+          description: Critical cases per one million
+        affectedCountries:
+          type: number
+          description: Affected countries
+      description: Covid-19 global status
+    CovidState:
+      properties:
+        state:
+          type: string
+          description: State name
+        updated:
+          type: number
+          description: Updated time stamp
+        cases:
+          type: number
+          description: Total cases
+        todayCases:
+          type: number
+          description: Today cases
+        deaths:
+          type: number
+          description: Total deaths
+        todayDeaths:
+          type: number
+          description: Today deaths
+        active:
+          type: number
+          description: Active cases
+        casesPerOneMillion:
+          type: number
+          description: Cases per one million
+        deathsPerOneMillion:
+          type: number
+          description: Deaths per one million
+        tests:
+          type: number
+          description: Total number of Covid-19 tests administered
+        testsPerOneMillion:
+          type: number
+          description: Covid-19 tests for one million
+        population:
+          type: number
+          description: Population of the state
+      description: Covid-19 status in the given USA state
+    CovidContinent:
+      properties:
+        updated:
+          type: number
+          description: Last updated timestamp
+        cases:
+          type: number
+          description: Total cases
+        todayCases:
+          type: number
+          description: Today cases
+        deaths:
+          type: number
+          description: Total deaths
+        todayDeaths:
+          type: number
+          description: Today deaths
+        recovered:
+          type: number
+          description: Total recovered
+        todayRecovered:
+          type: number
+          description: Today recovered
+        active:
+          type: number
+          description: Active cases
+        critical:
+          type: number
+          description: Critical cases
+        casesPerOneMillion:
+          type: number
+          description: Cases per one million
+        deathsPerOneMillion:
+          type: number
+          description: Deaths per one million
+        tests:
+          type: number
+          description: Total number of Covid-19 tests administered
+        testsPerOneMillion:
+          type: number
+          description: Tests per one milliom
+        population:
+          type: number
+          description: Population of the continent
+        continent:
+          type: string
+          description: Continent name
+        activePerOneMillion:
+          type: number
+          description: Active cases per one million
+        recoveredPerOneMillion:
+          type: number
+          description: Recovered cases per one million
+        criticalPerOneMillion:
+          type: number
+          description: Critical cases per one million
+        continentInfo:
+          description: Continent information
+          type: object
+          properties:
+            lat:
+              type: number
+              description: Latitude
+            long:
+              type: number
+              description: Longtitude
+        countries:
+          description: List of countries in the continent
+          type: array
+          items:
+            type: string
+      description: Covid-19 status of the given continent
+    CovidCountry:
+      properties:
+        updated:
+          type: number
+        country:
+          type: string
+        countryInfo:
+          type: object
+          properties:
+            _id:
+              type: number
+              uniqueItems: true
+            iso2:
+              type: string
+              uniqueItems: true
+            iso3:
+              type: string
+              uniqueItems: true
+            lat:
+              type: number
+            long:
+              type: number
+            flag:
+              type: string
+        cases:
+          type: number
+        todayCases:
+          type: number
+        deaths:
+          type: number
+        todayDeaths:
+          type: number
+        recovered:
+          type: number
+        todayRecovered:
+          type: number
+        active:
+          type: number
+        critical:
+          type: number
+        casesPerOneMillion:
+          type: number
+        deathsPerOneMillion:
+          type: number
+        tests:
+          type: number
+        testsPerOneMillion:
+          type: number
+        population:
+          type: number
+        continent:
+          type: string
+        oneCasePerPeople:
+          type: number
+        oneDeathPerPeople:
+          type: number
+        oneTestPerPeople:
+          type: number
+        activePerOneMillion:
+          type: number
+        recoveredPerOneMillion:
+          type: number
+        criticalPerOneMillion:
+          type: number
+      description: Covid-19 status of the given country
+    CovidHistoricalAll:
+      description: 'The amount of key-value pairs in ''cases'', ''deaths'' and ''recovered'' is dependent on the ''lastdays'' query'
+      properties:
+        cases:
+          type: object
+          properties:
+            date:
+              type: number
+        deaths:
+          type: object
+          properties:
+            date:
+              type: number
+        recovered:
+          type: object
+          properties:
+            date:
+              type: number
+    CovidHistoricalCountry:
+      properties:
+        country:
+          type: string
+        province:
+          type: array
+          items:
+            type: string
+        timeline:
+          type: object
+          description: 'The amount of key-value pairs in ''cases'', ''deaths'' and ''recovered'' is dependent on the ''lastdays'' query'
+          properties:
+            cases:
+              type: object
+              properties:
+                date:
+                  type: number
+            deaths:
+              type: object
+              properties:
+                date:
+                  type: number
+            recovered:
+              type: object
+              properties:
+                date:
+                  type: number
+      description: Covid-19 historical data of the given country
+    CovidHistoricalProvince:
+      properties:
+        country:
+          type: string
+        province:
+          type: string
+        timeline:
+          type: object
+          description: 'The amount of key-value pairs in ''cases'', ''deaths'' and ''recovered'' is dependent on the ''lastdays'' query'
+          properties:
+            cases:
+              type: object
+              properties:
+                date:
+                  type: number
+            deaths:
+              type: object
+              properties:
+                date:
+                  type: number
+            recovered:
+              type: object
+              properties:
+                date:
+                  type: number
+      description: Covid-19 historical data of the given province
+    Vaccines:
+      properties:
+        source:
+          type: string
+        totalCandidates:
+          type: string
+        phases:
+          type: array
+          items:
+            $ref: '#/components/schemas/Phases'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vaccine'
+      description: Covid19-19 vaccine trial data
+    Vaccine:
+      properties:
+        candidate:
+          type: string
+        mechanism:
+          type: string
+        sponsors:
+          type: array
+          items:
+            type: string
+        details:
+          type: string
+        trialPhase:
+          type: string
+        institutions:
+          type: array
+          items:
+            type: string
+      description: Covid-19 vaccine related data
+    Phases:
+      properties:
+        phase:
+          type: string
+        candidates:
+          type: string
+    VaccineCoverage:
+      oneOf:
+        - $ref: '#/components/schemas/SimpleVaccineTimeline'
+        - $ref: '#/components/schemas/FullVaccineTimeline'
+      description: Covid-19 vaccine coverage related data
+    VaccineCountryCoverage:
+      type: object
+      properties:
+        country:
+          type: string
+        timeline:
+          oneOf:
+            - $ref: '#/components/schemas/SimpleVaccineTimeline'
+            - $ref: '#/components/schemas/FullVaccineTimeline'
+    SimpleVaccineTimeline:
+      type: object
+      properties:
+        date:
+          type: number
+      description: Covid-19 Vaccine timeline briefly
+    FullVaccineTimeline:
+      type: array
+      items:
+        type: object
+        properties:
+          total:
+            type: number
+          daily:
+            type: number
+          totalPerHundred:
+            type: number
+          dailyPerMillion:
+            type: number
+          date:
+            type: string
+      description: Descriptive Covid-19 vaccine timeline
+  examples:
+    countriesSimpleVaccineTimeline:
+      value:
+        - country: USA
+          timeline:
+            4/25/2021: 1000
+      summary: Simple Vaccine Timeline
+    countriesFullVaccineTimeline:
+      value:
+        - country: USA
+          timeline:
+            - total: 1000
+              daily: 1000
+              totalPerHundred: 1000
+              dailyPerMillion: 1000
+              date: 4/25/2021
+      summary: Full Vaccine Timeline
+    countrySimpleVaccineTimeline:
+      value:
+        country: USA
+        timeline:
+          4/25/2021: 1000
+      summary: Simple Vaccine Timeline
+    countryFullVaccineTimeline:
+      value:
+        country: USA
+        timeline:
+          - total: 1000
+            daily: 1000
+            totalPerHundred: 1000
+            dailyPerMillion: 1000
+            date: 4/25/2021
+      summary: Full Vaccine Timeline
+    statesSimpleVaccineTimeline:
+      value:
+        - state: California
+          timeline:
+            4/25/2021: 1000
+      summary: Simple Vaccine Timeline
+    statesFullVaccineTimeline:
+      value:
+        - state: California
+          timeline:
+            - total: 1000
+              daily: 1000
+              totalPerHundred: 1000
+              dailyPerMillion: 1000
+              date: 4/25/2021
+      summary: Full Vaccine Timeline
+    stateSimpleVaccineTimeline:
+      value:
+        state: California
+        timeline:
+          4/25/2021: 1000
+      summary: Simple Vaccine Timeline
+    stateFullVaccineTimeline:
+      value:
+        state: California
+        timeline:
+          - total: 1000
+            daily: 1000
+            totalPerHundred: 1000
+            dailyPerMillion: 1000
+            date: 4/25/2021
+      summary: Full Vaccine Timeline
+    SimpleVaccineTimeline:
+      value:
+        4/25/2021: 1000
+      summary: Simple Vaccine Timeline
+    FullVaccineTimeline:
+      value:
+        - total: 1000
+          daily: 1000
+          totalPerHundred: 1000
+          dailyPerMillion: 1000
+          date: 4/25/2021
+      summary: Full Vaccine Timeline
+externalDocs:
+  description: Find out more about this API
+  url: 'https://github.com/disease-sh/API'
