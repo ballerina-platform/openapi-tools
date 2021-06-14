@@ -45,4 +45,37 @@ public class FunctionSignatureReturnTypeTests {
         Assert.assertEquals(getReturnType(array.getPaths().get("/xmlproducts").getGet()), "XML|error");
         Assert.assertEquals(getReturnType(array.getPaths().get("/xmlarrayproducts").getGet()), "XMLArr|error");
     }
+
+    @Test(description = "Tests for the object response without property")
+    public void getReturnTypeForObjectSchema() throws IOException, BallerinaOpenApiException {
+        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_without_properties_with_additional" +
+                ".yaml"));
+        String returnType = getReturnType(array.getPaths().get("/products").getGet());
+        Assert.assertEquals(returnType, "json|error");
+    }
+
+    @Test(description = "Tests for the object response without property")
+    public void getReturnTypeForMapSchema() throws IOException, BallerinaOpenApiException {
+        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_properties_with_additional" +
+                ".yaml"));
+        String returnType = getReturnType(array.getPaths().get("/products").getGet());
+        Assert.assertEquals(returnType, "TestsProductsResponse|error");
+    }
+
+    @Test(description = "Tests for the object response without property and without additional properties")
+    public void getReturnTypeForObjectSchemaWithOutAdditional() throws IOException, BallerinaOpenApiException {
+        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type" +
+                "/response_without_properties_without_additional" +
+                ".yaml"));
+        String returnType = getReturnType(array.getPaths().get("/products").getGet());
+        Assert.assertEquals(returnType, "json|error");
+    }
+
+    @Test(description = "Tests for the map response with property without additional properties")
+    public void getReturnTypeForMapSchemaWithOutAdditionalProperties() throws IOException, BallerinaOpenApiException {
+        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_properties_without_additional" +
+                ".yaml"));
+        String returnType = getReturnType(array.getPaths().get("/products").getGet());
+        Assert.assertEquals(returnType, "TestsProductsResponse|error");
+    }
 }

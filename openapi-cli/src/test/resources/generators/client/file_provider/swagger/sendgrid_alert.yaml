@@ -1,0 +1,435 @@
+openapi: 3.0.0
+servers:
+  - url: http://api.sendgrid.com/v3
+  - url: https://api.sendgrid.com/v3
+info:
+  description: |-
+    # The SendGrid Web API V3 Documentation
+
+    This is the entirety of the documented v3 endpoints. We have updated all the descriptions, parameters, requests, and responses.
+
+    ## Authentication
+
+    Every endpoint requires Authentication in the form of an Authorization Header:
+
+    Authorization: Bearer API_KEY
+  title: SendGrid v3 API Documentation
+  version: "3.0"
+  x-apisguru-categories:
+    - email
+    - marketing
+  x-logo:
+    url: https://user-images.githubusercontent.com/21603/27865240-b4c0da22-6189-11e7-9f2c-f35f4c6fa57c.png
+  x-origin:
+    - format: openapi
+      url: https://raw.githubusercontent.com/sendgrid/sendgrid-oai/main/oai.json
+      version: "3.0"
+  x-providerName: sendgrid.com
+externalDocs:
+  url: https://sendgrid.com/docs/API_Reference/Web_API_v3/index.html
+paths:
+  /alerts:
+    get:
+      description: |-
+        **This endpoint allows you to retieve all of your alerts.**
+
+        Alerts allow you to specify an email address to receive notifications regarding your email usage or statistics.
+        * Usage alerts allow you to set the threshold at which an alert will be sent.
+        * Stats notifications allow you to set how frequently you would like to receive email statistics reports. For example, "daily", "weekly", or "monthly".
+
+        For more information about alerts, please see our [User Guide](https://sendgrid.com/docs/User_Guide/Settings/alerts.html).
+      operationId: getAlerts
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    - created_at: 1451498784
+                      email_to: example1@example.com
+                      id: 46
+                      percentage: 90
+                      type: usage_limit
+                      updated_at: 1451498784
+                    - created_at: 1451498812
+                      email_to: example2@example.com
+                      frequency: monthly
+                      id: 47
+                      type: stats_notification
+                      updated_at: 1451498812
+                    - created_at: 1451520930
+                      email_to: example3@example.com
+                      frequency: daily
+                      id: 48
+                      type: stats_notification
+                      updated_at: 1451520930
+              schema:
+                description: The list of alerts.
+                items:
+                  $ref: "#/components/schemas/GetAlertsResponse"
+                type: array
+          description: ""
+      security:
+        - Authorization: []
+      summary: Retrieve all alerts
+      tags:
+        - Alerts
+    post:
+      description: |-
+        **This endpoint allows you to create a new alert.**
+
+        Alerts allow you to specify an email address to receive notifications regarding your email usage or statistics. There are two types of alerts that can be created with this endpoint:
+
+        * `usage_limit` allows you to set the threshold at which an alert will be sent.
+        * `stats_notification` allows you to set how frequently you would like to receive email statistics reports. For example, "daily", "weekly", or "monthly".
+
+        For more information about alerts, please see our [User Guide](https://sendgrid.com/docs/User_Guide/Settings/alerts.html).
+      operationId: postAlerts
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      requestBody:
+        $ref: "#/components/requestBodies/postAlertBody"
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    created_at: 1451520930
+                    email_to: test@example.com
+                    frequency: daily
+                    id: 48
+                    type: stats_notification
+                    updated_at: 1451520930
+              schema:
+                $ref: "#/components/schemas/PostAlertsResponse"
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+                type: object
+          description: ""
+      security:
+        - Authorization: []
+      summary: Create a new Alert
+      tags:
+        - Alerts
+  "/alerts/{alert_id}":
+    delete:
+      description: |-
+        **This endpoint allows you to delete an alert.**
+
+        Alerts allow you to specify an email address to receive notifications regarding your email usage or statistics.
+        * Usage alerts allow you to set the threshold at which an alert will be sent.
+        * Stats notifications allow you to set how frequently you would like to receive email statistics reports. For example, "daily", "weekly", or "monthly".
+
+        For more information about alerts, please see our [User Guide](https://sendgrid.com/docs/User_Guide/Settings/alerts.html).
+      operationId: deleteAlertsById
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      responses:
+        "204":
+          content:
+            "*/*":
+              schema:
+                properties: {}
+                type: object
+          description: ""
+      security:
+        - Authorization: []
+      summary: Delete an alert
+      tags:
+        - Alerts
+    get:
+      description: |-
+        **This endpoint allows you to retrieve a specific alert.**
+
+        Alerts allow you to specify an email address to receive notifications regarding your email usage or statistics.
+        * Usage alerts allow you to set the threshold at which an alert will be sent.
+        * Stats notifications allow you to set how frequently you would like to receive email statistics reports. For example, "daily", "weekly", or "monthly".
+
+        For more information about alerts, please see our [User Guide](https://sendgrid.com/docs/User_Guide/Settings/alerts.html).
+      operationId: getAlertsById
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    created_at: 1451520930
+                    email_to: example@example.com
+                    frequency: daily
+                    id: 48
+                    type: stats_notification
+                    updated_at: 1451520930
+              schema:
+                $ref: "#/components/schemas/GetAlertByIdResponse"
+          description: ""
+      security:
+        - Authorization: []
+      summary: Retrieve a specific alert
+      tags:
+        - Alerts
+    parameters:
+      - description: The ID of the alert you would like to retrieve.
+        in: path
+        name: alert_id
+        required: true
+        schema:
+          type: integer
+    patch:
+      description: |-
+        **This endpoint allows you to update an alert.**
+
+        Alerts allow you to specify an email address to receive notifications regarding your email usage or statistics.
+        * Usage alerts allow you to set the threshold at which an alert will be sent.
+        * Stats notifications allow you to set how frequently you would like to receive email statistics reports. For example, "daily", "weekly", or "monthly".
+
+        For more information about alerts, please see our [User Guide](https://sendgrid.com/docs/User_Guide/Settings/alerts.html).
+      operationId: patchAlertById
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      requestBody:
+        $ref: "#/components/requestBodies/patchAlertBody"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    created_at: 1451520930
+                    email_to: example@example.com
+                    frequency: daily
+                    id: 48
+                    type: stats_notification
+                    updated_at: 1451522691
+              schema:
+                $ref: "#/components/schemas/PatchAlertsResponse"
+          description: ""
+      security:
+        - Authorization: []
+      summary: Update an alert
+      tags:
+        - Alerts
+components:
+  parameters:
+    traitOnBehalfOfSubUser:
+      in: header
+      name: on-behalf-of
+      schema:
+        default: subuser_<user_name>
+        type: string
+  requestBodies:
+    getAlertsBody:
+      content:
+        application/json:
+          schema:
+            nullable: true
+    postAlertBody:
+      content:
+        application/json:
+          schema:
+            example:
+              email_to: example@example.com
+              frequency: daily
+              type: stats_notification
+            properties:
+              email_to:
+                description: |-
+                  The email address the alert will be sent to.
+                  Example: test@example.com
+                nullable: true
+                type: string
+              frequency:
+                description: |-
+                  Required for stats_notification. How frequently the alert will be sent.
+                  Example: daily
+                type: string
+              percentage:
+                description: |-
+                  Required for usage_alert. When this usage threshold is reached, the alert will be sent.
+                  Example: 90
+                type: integer
+              type:
+                description: |-
+                  The type of alert you want to create. Can be either usage_limit or stats_notification.
+                  Example: usage_limit
+                enum:
+                  - stats_notification
+                  - usage_limit
+                type: string
+            required:
+              - type
+              - email_to
+            type: object
+    patchAlertBody:
+      content:
+        application/json:
+          schema:
+            example:
+              email_to: example@example.com
+            properties:
+              email_to:
+                description: |-
+                  The new email address you want your alert to be sent to.
+                  Example: test@example.com
+                type: string
+              frequency:
+                description: |-
+                  The new frequency at which to send the stats_notification alert.
+                  Example: monthly
+                type: string
+              percentage:
+                description: |-
+                  The new percentage threshold at which the usage_limit alert will be sent.
+                  Example: 90
+                type: integer
+            type: object
+  schemas:
+    GetAlertsResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          description: If the alert is of type stats_notification, this indicates how frequently the stats notifications will be sent. For example, "daily", "weekly", or "monthly".
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          description: If the alert is of type usage_limit, this indicates the percentage of email usage that must be reached before the alert will be sent.
+          type: integer
+        type:
+          description: The type of alert.
+          enum:
+            - usage_limit
+            - stats_notification
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+      type: object
+    PostAlertsResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          description: If the alert is of type stats_notification, this indicates how frequently the stats notifications will be sent. For example, "daily", "weekly", or "monthly".
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          description: '"If the alert is of type usage_limit, this indicates the percentage of email usage that must be reached before the alert will be sent.'
+          type: integer
+        type:
+          description: The type of alert.
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+        - updated_at
+      type: object
+    GetAlertByIdResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          description: 'If the alert is of type stats_notification, this indicates how frequently the stats notifications will be sent. For example: "daily", "weekly", or "monthly".'
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          description: If the alert is of type usage_limit, this indicates the percentage of email usage that must be reached before the alert will be sent.
+          type: integer
+        type:
+          description: The type of alert.
+          enum:
+            - usage_alert
+            - stats_notification
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+        - updated_at
+      type: object
+    PatchAlertsResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          description: 'If the alert is of type stats_notification, this indicates how frequently the stats notifications will be sent. For example: "daily", "weekly", or "monthly".'
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          description: If the alert is of type usage_limit, this indicates the percentage of email usage that must be reached before the alert will be sent.
+          type: integer
+        type:
+          description: The type of alert.
+          enum:
+            - usage_alert
+            - stats_notification
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+        - updated_at
+      type: object
+  securitySchemes:
+    Authorization:
+      in: header
+      name: Authorization
+      type: apiKey

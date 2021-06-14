@@ -85,6 +85,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -377,7 +378,6 @@ public class BallerinaClientGenerator {
 
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, statementList, createToken(CLOSE_BRACE_TOKEN));
-
         FunctionDefinitionNode initFunctionNode = createFunctionDefinitionNode(null, null,
                 qualifierList, functionKeyWord, functionName, createEmptyNodeList(), functionSignatureNode
                 , functionBodyNode);
@@ -670,11 +670,7 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         NodeList<Node> relativeResourcePath = createEmptyNodeList();
 
-        FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue(),
-                remoteFunctionDocs);
-        // Create metadataNode add documentation string
-        metadataNode = metadataNode.modify(createMarkdownDocumentationNode(createNodeList(remoteFunctionDocs)),
-                metadataNode.annotations());
+        FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue());
 
         // Create Function Body
         FunctionBodyNode functionBodyNode = getFunctionBodyNode(path, operation);
@@ -1077,6 +1073,15 @@ public class BallerinaClientGenerator {
                                     generateTypeDefinitionNodeType(typeName, typeDefNode);
                                     return type + "|error";
                                 }
+                            } else if (schema instanceof ObjectSchema) {
+                                ObjectSchema objectSchema = (ObjectSchema) schema;
+                                type = handleInLineRecordInResponse(operation, media, objectSchema.get$ref(),
+                                        objectSchema.getProperties(), objectSchema.getRequired());
+                            } else if (schema instanceof MapSchema) {
+                                MapSchema mapSchema = (MapSchema) schema;
+                                type = handleInLineRecordInResponse(operation, media, mapSchema.get$ref(),
+                                        mapSchema.getProperties(),
+                                        mapSchema.getRequired());
                             } else  if (schema.get$ref() != null) {
                                 type = getValidName(extractReferenceType(schema.get$ref()), true);
                                 Schema componentSchema = openAPI.getComponents().getSchemas().get(type);
@@ -1166,6 +1171,32 @@ public class BallerinaClientGenerator {
             }
         }
         return returnType;
+    }
+
+    private static String handleInLineRecordInResponse(Operation operation, Map.Entry<String, MediaType> media,
+                                                       String ref, Map<String, Schema> properties2,
+                                                       List<String> required2) throws BallerinaOpenApiException {
+
+        String type;
+        type = getValidName(operation.getOperationId(), true) + "Response";
+        if (ref != null) {
+            type = extractReferenceType(ref.trim());
+        } else if (properties2 != null) {
+            Map<String, Schema> properties = properties2;
+            if (properties.isEmpty()) {
+                type = getBallerinaMeidaType(media.getKey().trim());
+            } else {
+                List<String> required = required2;
+                List<Node> recordFieldList = new ArrayList<>();
+                TypeDefinitionNode recordNode = getTypeDefinitionNodeForObjectSchema(required,
+                        createIdentifierToken("type"),
+                        createIdentifierToken(type), recordFieldList, properties);
+                generateTypeDefinitionNodeType(type, recordNode);
+            }
+        } else {
+            type = getBallerinaMeidaType(media.getKey().trim());
+        }
+        return type;
     }
 
     /**
