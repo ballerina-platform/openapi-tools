@@ -19,6 +19,7 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.launcher.BLauncherException;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import picocli.CommandLine;
@@ -189,5 +190,11 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Assert.assertTrue((cmd.getRelativePath(resource03, target03).toString()).
                 equals("../../dir2/dir3/dir4/test.txt") || (cmd.getRelativePath(resource03, target03).toString()).
                 equals("..\\..\\dir2\\dir3\\dir4\\test.txt"));
+    }
+
+    @AfterTest
+    public void clean() {
+        System.setErr(null);
+        System.setOut(null);
     }
 }

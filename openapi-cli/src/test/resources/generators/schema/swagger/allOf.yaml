@@ -16,9 +16,16 @@ paths:
       tags:
         - Products
       responses:
+        "200":
+          description: An array of products
+          content:
+            application/xml:
+              schema:
+                type: array
+                items: {}
 components:
   schemas:
-    User:
+    Profile01:
       properties:
         first_name:
           type: string
@@ -41,7 +48,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Activity"
-    AnyOF:
-      anyOf:
-        - $ref: '#/components/schemas/User'
-        - $ref: '#/components/schemas/Activity'
+    Subject:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        subject_type:
+          allOf:
+           - $ref: '#/components/schemas/Activity'

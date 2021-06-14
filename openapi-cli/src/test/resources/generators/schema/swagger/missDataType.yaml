@@ -29,6 +29,12 @@ tags:
     description: Pets Tag
   - name: list
     description: List Tag
+security:
+- petstore_auth:
+  - write:pets
+  - read:pets
+- user_auth:
+  - read:user
 
 paths:
   /pets:
@@ -58,11 +64,12 @@ components:
         - name
       properties:
         id:
-          type: integer
-          format: int64
+          description: "this is missing dataType"
         name:
           type: string
         tag:
-          type: array
-          items:
-            type: string
+          type: number
+          format: decimal
+        type:
+          type: string
+

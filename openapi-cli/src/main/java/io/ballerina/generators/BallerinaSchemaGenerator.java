@@ -39,6 +39,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.error.ErrorMessages;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -91,7 +92,7 @@ public class BallerinaSchemaGenerator {
     private static final PrintStream outStream = System.err;
     private static OpenAPI openApi;
 
-    public static SyntaxTree generateSyntaxTree(Path definitionPath) throws OpenApiException, IOException,
+    public static SyntaxTree generateSyntaxTree(Path definitionPath) throws IOException,
             BallerinaOpenApiException {
         openApi = parseOpenAPIFile(definitionPath.toString());
         // TypeDefinitionNodes their
@@ -210,7 +211,7 @@ public class BallerinaSchemaGenerator {
                             description = "";
                         }
                         TypeDefinitionNode typeDefinitionNode = getTypeDefinitionNodeForObjectSchema(required,
-                                typeKeyWord, typeName, recordFieldList, fields, description);
+                                typeKeyWord, typeName, recordFieldList, fields);
                         typeDefinitionNodeList.add(typeDefinitionNode);
                     } else if (schema.getValue().getType().equals("array")) {
                         if (schemaValue instanceof ArraySchema) {
@@ -499,22 +500,22 @@ public class BallerinaSchemaGenerator {
      *
      * @param definitionURI     URI for the OpenAPI contract
      * @return {@link OpenAPI}  OpenAPI model
-     * @throws OpenApiException in case of exception
+     * @throws BallerinaOpenApiException in case of exception
      */
-    public static OpenAPI parseOpenAPIFile(String definitionURI) throws OpenApiException, IOException {
+    public static OpenAPI parseOpenAPIFile(String definitionURI) throws IOException, BallerinaOpenApiException {
         Path contractPath = Paths.get(definitionURI);
         if (!Files.exists(contractPath)) {
-            throw new OpenApiException(ErrorMessages.invalidFilePath(definitionURI));
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFilePath(definitionURI));
         }
         if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json") || definitionURI.endsWith(".yml"))) {
-            throw new OpenApiException(ErrorMessages.invalidFile());
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFileType());
         }
         String openAPIFileContent = Files.readString(Paths.get(definitionURI));
         ParseOptions parseOptions = new ParseOptions();
 //        parseOptions.setFlatten(true);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
-            throw new OpenApiException(ErrorMessages.parserException(definitionURI));
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFile(definitionURI));
         }
         return parseResult.getOpenAPI();
     }

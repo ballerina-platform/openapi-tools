@@ -5,7 +5,7 @@ public type Pet record {
     # tests
     string name;
     # tests
-    string tag?;
+    decimal tag?;
     # tests
     string 'type?;
 };

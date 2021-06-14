@@ -16,6 +16,13 @@ paths:
       tags:
         - Products
       responses:
+        "200":
+          description: An array of products
+          content:
+            application/xml:
+              schema:
+                type: array
+                items: {}
 components:
   schemas:
     User:

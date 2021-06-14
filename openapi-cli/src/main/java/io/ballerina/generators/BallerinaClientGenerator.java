@@ -125,7 +125,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBinding
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createClassDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createElseBlockNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createErrorTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createExpressionStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createForEachStatementNode;
@@ -181,6 +180,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
+import static io.ballerina.error.ErrorMessages.invalidPathParamType;
 import static io.ballerina.generators.GeneratorConstants.DELETE;
 import static io.ballerina.generators.GeneratorConstants.EXECUTE;
 import static io.ballerina.generators.GeneratorConstants.GET;
@@ -337,8 +337,8 @@ public class BallerinaClientGenerator {
 
         //Create return type node for inti function
         IdentifierToken returnsKeyWord = createIdentifierToken(GeneratorConstants.RETURN);
-        OptionalTypeDescriptorNode type = createOptionalTypeDescriptorNode(createErrorTypeDescriptorNode(
-                        createIdentifierToken("error"), null), createIdentifierToken("?"));
+        OptionalTypeDescriptorNode type = createOptionalTypeDescriptorNode(createIdentifierToken("error"),
+                createIdentifierToken("?"));
         ReturnTypeDescriptorNode returnNode = createReturnTypeDescriptorNode(returnsKeyWord, annotationNodes, type);
 
         //Create function signature
@@ -880,11 +880,15 @@ public class BallerinaClientGenerator {
     /*
      * Create path parameters.
      */
-    private static Node getPathParameters(Parameter parameter) throws BallerinaOpenApiException {
+    public static Node getPathParameters(Parameter parameter) throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = extractDisplayAnnotation(parameter.getExtensions());
-        BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim())));
         IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+        String type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
+        if (type.equals("anydata") || type.equals("[]") || type.equals("record")) {
+            throw new BallerinaOpenApiException(invalidPathParamType(parameter.getName().trim()));
+        }
+        BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken(type));
         return createRequiredParameterNode(annotationNodes, typeName, paramName);
     }
 

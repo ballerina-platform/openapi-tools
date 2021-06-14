@@ -19,7 +19,6 @@
 package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.Filter;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -32,14 +31,11 @@ import java.util.List;
 import static io.ballerina.generators.GeneratorUtils.getImportDeclarationNode;
 
 /**
- * This tests class for the negative tests scenarios for client generations.
+ * This tests class for the tests imports in the generation.
  */
-public class BallerinaClientGeneratorNegativeTests {
+public class ImportsTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/negative")
             .toAbsolutePath();
-    private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
-    private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
-    SyntaxTree syntaxTree;
 
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
