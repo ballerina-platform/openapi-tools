@@ -216,7 +216,6 @@ public class BallerinaClientGenerator {
     private static boolean isQuery;
     private static Info info;
     private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
-    private static OpenAPI openAPI;
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
             BallerinaOpenApiException {
@@ -670,7 +669,7 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         NodeList<Node> relativeResourcePath = createEmptyNodeList();
 
-        FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue(), remoteFunctionDocs);
+        FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue());
 
         // Create Function Body
         FunctionBodyNode functionBodyNode = getFunctionBodyNode(path, operation);
@@ -1319,14 +1318,14 @@ public class BallerinaClientGenerator {
         } else {
             returnType = rType;
         }
-        //Statement Generator for requestBody
+        // Statement Generator for requestBody
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
                 Content rbContent = requestBody.getContent();
                 Set<Map.Entry<String, MediaType>> entries = rbContent.entrySet();
                 Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
-                //currently align with first content of the requestBody
+                //Currently align with first content of the requestBody
                 while (iterator.hasNext()) {
                     createRequestBodyStatements(isHeader, statementsList, method, returnType, iterator);
                     break;

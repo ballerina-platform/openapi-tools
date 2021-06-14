@@ -19,6 +19,7 @@
 package io.ballerina.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -31,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static io.ballerina.generators.BallerinaSchemaGenerator.generateSyntaxTree;
 import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
@@ -41,6 +41,7 @@ import static io.ballerina.generators.common.TestUtils.getOpenAPI;
  */
 public class AnyOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
+    BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
 
     @Test(description = "Test for the schema has anyOf dataType")
     public void testAnyOfInSchema() throws IOException, BallerinaOpenApiException {
@@ -57,7 +58,7 @@ public class AnyOfDataTypeTests {
     public void testAnyOfSchema() throws BallerinaOpenApiException, IOException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/schema15.bal");
-        SyntaxTree syntaxTree = generateSyntaxTree(definitionPath);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 }

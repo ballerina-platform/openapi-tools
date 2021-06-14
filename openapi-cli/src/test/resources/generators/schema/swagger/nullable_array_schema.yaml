@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Title
+  description: Title
+  version: 1.0.0
+servers:
+  - url: 'https'
+paths:
+  /:
+    get:
+      summary: List all songs
+      operationId: listSong
+      tags:
+        - list
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: An paged array of song
+components:
+  schemas:
+    UserPlayListDetails:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-pagingobject
+      properties:
+        href:
+          description: A link to the Web API endpoint returning the full result of the request
+          type: string
+        items:
+          description: The requested data.
+          items:
+            $ref: "#/components/schemas/ListObject"
+          nullable: true
+        limit:
+          description: The maximum number of items in the response (as set in the query or by default).
+          items:
+           format: int32
+           type: integer
+          nullable: true
+        next:
+          description: URL to the next page of items. ( `null` if none)
+          type: string
+        offset:
+          description: The offset of the items returned (as set in the query or by default)
+          format: int32
+          type: integer
+        previous:
+          description: URL to the previous page of items. ( `null` if none) //anydata
+          items: {}
+          nullable: true
+        total:
+          $ref: "#/components/schemas/ListObject"
+      type: object
+    ListObject:
+      type: object

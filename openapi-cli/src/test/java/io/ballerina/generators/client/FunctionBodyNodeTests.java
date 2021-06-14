@@ -79,6 +79,16 @@ public class FunctionBodyNodeTests {
                         "        path = path + getPathForQueryParam(queryParam);\n" +
                         "        Activities response = check self.clientEp-> get(path, targetType = Activities);\n" +
                         "        return response;}"},
+                {"swagger/put_with_header.yaml", "/me/albums", "{string  path = string `/me/albums`;\n" +
+                        "        map<anydata> queryParam = {ids: ids};\n" +
+                        "        path = path + getPathForQueryParam(queryParam);\n" +
+                        "        map<string|string[]> accHeaders = {Authorization: Authorization, 'Content\\-Type:" +
+                        " 'Content\\-Type};\n" +
+                        "        http:Request request = new;\n" +
+                        "        json jsonBody = check payload.cloneWithType(json);\n" +
+                        "        request.setPayload(jsonBody);\n" +
+                        "         _ = check self.clientEp->put(path, request, headers = accHeaders, " +
+                        "targetType=http:Response);}"},
         };
     }
 

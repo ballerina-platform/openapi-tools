@@ -1,0 +1,307 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: World Bank Indicator API
+  description: Here you can find documentation for COVID-19 REST API.
+servers:
+  - description: Indicators represent data like total population, gross national income, energy use, and many more
+    url: http://api.worldbank.org/v2/
+paths:
+  /country/all/indicator/SP.POP.TOTL:
+    get:
+      tags: ["Population", "Total"]
+      description: "Total population is based on the de facto definition of population, which counts all residents regardless of legal status or citizenship.
+                    The values shown are midyear estimates."
+      operationId: getWorldPopulation
+      parameters:
+        - name: date
+          in: query
+          description: Date-range by year, month or quarter that scopes the result-set.
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format of the response.
+          required: false
+          schema:
+            type: string
+            default: json
+      responses:
+        '200':
+          description: A list of population across world
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {
+                  "$ref": "#/components/schemas/CountryPolutation"
+                }
+
+  /country/{country_name}/indicator/NY.GDP.MKTP.CD:
+    get:
+      tags: ["GDP data of a given country"]
+      description: "GDP at purchaser's prices is the sum of gross value added by all resident producers in the economy plus any product taxes and minus any subsidies
+                    not included in the value of the products. It is calculated without making deductions for depreciation of fabricated assets or for depletion and
+                    degradation of natural resources. Data are in current U.S. dollars. Dollar figures for GDP are converted from domestic currencies using single year
+                    official exchange rates. For a few countries where the official exchange rate does not reflect the rate effectively applied to actual foreign exchange
+                    transactions, an alternative conversion factor is used."
+      operationId: getGDPBycountry
+      parameters:
+        - name: date
+          in: query
+          description: Date-range by year, month or quarter that scopes the result-set.
+          required: false
+          schema:
+            type: string
+        - name: country_name
+          in: path
+          description: Date-range by year, month or quarter that scopes the result-set.
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format of the response.
+          required: false
+          schema:
+            type: string
+            default: json
+      responses:
+        '200':
+          description: List GDP information of each year
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {
+                  "$ref": "#/components/schemas/GrossDomesticProduct"
+                }
+
+  /country/{country_name}/indicator/1.1_ACCESS.ELECTRICITY.TOT:
+    get:
+      tags: ["Access to electricity (% of total population) of the given country"]
+      description: Access to electricity is the percentage of population with access to electricity.
+      operationId: getAccessToElectricityPercentage
+      parameters:
+        - name: country_name
+          in: path
+          description: Date-range by year, month or quarter that scopes the result-set.
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format of the response.
+          required: false
+          schema:
+            type: string
+            default: json
+      responses:
+        '200':
+          description: List Access to electricity (% of total population) of the given country of each year
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {
+                  "$ref": "#/components/schemas/AccessToElectricity"
+                }
+
+  /country/{country_name}/indicator/1.1_YOUTH.LITERACY.RATE:
+    get:
+      tags: ["Literacy rate, youth total (% of people ages 15-24)"]
+      description: "The number of persons aged 15 to 24 years who can both read and write with understanding a short simple statement on their everyday life,
+                    divided by the population in that age group. Generally, ‘literacy’ also encompasses ‘numeracy’, the ability to make simple arithmetic calculations.
+                    For further country-specific definition details please refer to the source of information, the UNESCO Institute for Statistics (UIS): www.uis.unesco.org"
+      operationId: getYouthLiteracyRate
+      parameters:
+        - name: country_name
+          in: path
+          description: Country id (Example- AFG, ALB)
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          description:  Date-range by year, month or quarter that scopes the result-set.
+          required: false
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format of the response.
+          required: false
+          schema:
+            type: string
+            default: json
+      responses:
+        '200':
+          description: List Literacy rate, youth total (% of people ages 15-24) of the given country
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {
+                  "$ref": "#/components/schemas/YouthLiteracyRate"
+                }
+
+  /country/{country_name}/indicator/UIS.X.PPP.1.FSGOV:
+    get:
+      tags: ["Government expenditure on primary education, PPP$ (millions)"]
+      description: "Total general (local, regional and central) government expenditure on primary education (current, capital, and transfers),
+                    in millions PPP$ (at purchasing power parity), in nominal value. It includes expenditure funded by transfers from international sources to government.
+                    Total government expenditure for a given level of education (e.g. primary, secondary, or all levels combined) in national currency is converted to PPP$.
+                    Limitations: In some instances data on total government expenditure on education refers only to the Ministry of Education, excluding other ministries
+                    which may also spend a part of their budget on educational activities. For more information, consult the UNESCO Institute of Statistics
+                    website: http://www.uis.unesco.org/Education/"
+      operationId: getGovernmentExpenditureOnPrimaryEducation
+      parameters:
+        - name: country_name
+          in: path
+          description: Country id (Example- AFG, ALB)
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          description:  Date-range by year, month or quarter that scopes the result-set.
+          required: false
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format of the response.
+          required: false
+          schema:
+            type: string
+            default: json
+      responses:
+        '200':
+          description: List Government expenditure on primary education, PPP$ (millions) of the given country
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {
+                  "$ref": "#/components/schemas/PrimaryEducationExpenditure"
+                }
+
+components:
+  schemas:
+    Indicator:
+      type: object
+      properties:
+        id:
+          type: string
+          example: SP.POP.TOTL
+        value:
+          type: string
+          example: Population, total
+
+    Country:
+      type: object
+      properties:
+        id:
+          type: string
+          example: CHL
+        value:
+          type: string
+          example: Chilie
+
+    AccessToElectricity:
+      type: object
+      properties:
+        indicator:
+          "$ref": "#/components/schemas/Indicator"
+        country:
+          type: Country
+          "$ref": "#/components/schemas/Country"
+        date:
+          type: string
+          example: "2016"
+        value:
+          type: integer
+          example: 100
+        decimal:
+          type: integer
+          example: 2
+
+    YouthLiteracyRate:
+      type: object
+      properties:
+        indicator:
+          $ref: "#/components/schemas/Indicator"
+        country:
+          $ref: "#/components/schemas/Country"
+        date:
+          type: string
+          example: "2016"
+        value:
+          type: integer
+          example: 100
+        decimal:
+          type: integer
+          example: 2
+
+    GrossDomesticProduct:
+      type: object
+      properties:
+        indicator:
+          type: object
+          "$ref": "#/components/schemas/Indicator"
+        country:
+          type: Country
+          "$ref": "#/components/schemas/Country"
+        date:
+          type: string
+          example: "2016"
+        value:
+          type: integer
+          example: 100
+        decimal:
+          type: integer
+          example: 2
+
+    PrimaryEducationExpenditure:
+      type: object
+      properties:
+        indicator:
+          type: object
+          "$ref": "#/components/schemas/Indicator"
+        country:
+          type: Country
+          "$ref": "#/components/schemas/Country"
+        date:
+          type: string
+          example: "2016"
+        value:
+          type: integer
+          example: 100
+        decimal:
+          type: integer
+          example: 2
+
+    CountryPolutation:
+      type: object
+      properties:
+        indicator:
+          type: object
+          "$ref": "#/components/schemas/Indicator"
+        country:
+          type: Country
+          "$ref": "#/components/schemas/Country"
+        date:
+          type: string
+          example: "2016"
+        value:
+          type: integer
+          example: 100
+        decimal:
+          type: integer
+          example: 2
+    Error:
+      type: object
+      properties:
+        name:
+          type: string

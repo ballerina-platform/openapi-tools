@@ -29,23 +29,23 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Tests related to the record data structure.
+ * Tests for Schema Reference resolve.
  */
-public class RecordDataTypeTests {
+public class ReferenceResolveTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    SyntaxTree syntaxTree;
     BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
-    @Test(description = "Generate record with record type filed record")
-    public void generateRecordWithRecordField() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/scenario05.yaml");
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema05.bal", syntaxTree);
+
+    @Test(description = "Tests with object type include reference")
+    public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException {
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(RES_DIR.resolve("swagger/world_bank.yaml"));
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/world_bank.bal", syntaxTree);
     }
 
-    @Test(description = "Generate record with nested record type filed record")
-    public void generateNestedRecord() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/scenario07.yaml");
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema07.bal", syntaxTree);
+    @Test(description = "Test for object data type when absent reference and properties fields")
+    public void testWorldBank() throws IOException, BallerinaOpenApiException {
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(RES_DIR.resolve("swagger" +
+                "/object_without_fields_reference.yaml"));
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/object_without_fields_reference.bal", syntaxTree);
     }
 }
