@@ -25,7 +25,7 @@ public client class Client {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
-    # Show a list of pets in the system
+    # List all pets
     #
     # + 'limit - How many items to return at one time (max 100)
     # + return - An paged array of pets
@@ -36,6 +36,7 @@ public client class Client {
         Pets response = check self.clientEp-> get(path, targetType = Pets);
         return response;
     }
+    # Create a pet
     #
     # + return - Null response
     remote isolated function  pets() returns error? {
@@ -44,6 +45,7 @@ public client class Client {
         //TODO: Update the request as needed;
          _ = check self.clientEp-> post(path, request, targetType =http:Response);
     }
+    # Info for a specific pet
     #
     # + petId - The id of the pet to retrieve
     # + return - Expected response to a valid request

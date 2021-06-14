@@ -25,6 +25,7 @@ public client class Client {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
+    # Creates a new user.
     #
     # + return - OK
     remote isolated function  requestBody(User payload) returns error? {

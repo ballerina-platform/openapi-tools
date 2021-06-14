@@ -86,6 +86,7 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -211,6 +212,7 @@ public class BallerinaClientGenerator {
     private static boolean isQuery;
     private static Info info;
     private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+    private static OpenAPI openAPI;
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
             BallerinaOpenApiException {
@@ -218,7 +220,7 @@ public class BallerinaClientGenerator {
         typeDefinitionNodeList.clear();
         isQuery = false;
         // Summaries OpenAPI details
-        OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
+        openAPI = getBallerinaOpenApiType(definitionPath);
         info = openAPI.getInfo();
         //Filter serverUrl
         List<Server> servers = openAPI.getServers();
@@ -644,10 +646,10 @@ public class BallerinaClientGenerator {
             Operation> operation) throws BallerinaOpenApiException {
         // Create api doc for function
         List<Node> remoteFunctionDocs = new ArrayList<>();
-        if (operation.getValue().getDescription() != null) {
+        if (operation.getValue().getSummary() != null) {
             MarkdownDocumentationLineNode clientDescription =
                     createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                            createNodeList(createLiteralValueToken(null, operation.getValue().getDescription(),
+                            createNodeList(createLiteralValueToken(null, operation.getValue().getSummary(),
                                     createEmptyMinutiaeList(), createEmptyMinutiaeList())));
             remoteFunctionDocs.add(clientDescription);
             MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
@@ -808,7 +810,15 @@ public class BallerinaClientGenerator {
         if (operation.getRequestBody() != null) {
             RequestBody requestBody = operation.getRequestBody();
             if (requestBody.getContent() != null) {
-                List<Node> requestBodyparam = setRequestBodyParameters(requestBody, remoteFunctionDoc);
+                List<Node> requestBodyparam = setRequestBodyParameters(operation.getOperationId(), requestBody,
+                        remoteFunctionDoc);
+                parameterList.addAll(requestBodyparam);
+                parameterList.add(comma);
+            } else if (requestBody.get$ref() != null) {
+                String requestBodyName = extractReferenceType(requestBody.get$ref());
+                RequestBody requestBodySchema = openAPI.getComponents().getRequestBodies().get(requestBodyName.trim());
+                List<Node> requestBodyparam = setRequestBodyParameters(operation.getOperationId(), requestBodySchema,
+                        remoteFunctionDoc);
                 parameterList.addAll(requestBodyparam);
                 parameterList.add(comma);
             }
@@ -914,7 +924,8 @@ public class BallerinaClientGenerator {
     /*
      * Create request body parameter.
      */
-    private static List<Node> setRequestBodyParameters(RequestBody requestBody, List<Node> requestBodyDoc)
+    private static List<Node> setRequestBodyParameters(String operationId, RequestBody requestBody,
+                                                       List<Node> requestBodyDoc)
             throws BallerinaOpenApiException {
         List<Node> parameterList = new ArrayList<>();
         Content content = requestBody.getContent();
@@ -927,7 +938,8 @@ public class BallerinaClientGenerator {
             //Take payload type
             if (schema.get$ref() != null) {
                 paramType = extractReferenceType(schema.get$ref().trim());
-            } else if (schema.getType() != null && !schema.getType().equals("array")) {
+            } else if (schema.getType() != null && !schema.getType().equals("array") && !schema.getType().equals(
+                    "object")) {
                 String typeOfPayload = schema.getType().trim();
                 paramType = convertOpenAPITypeToBallerina(typeOfPayload);
             } else if (schema instanceof ArraySchema) {
@@ -948,6 +960,17 @@ public class BallerinaClientGenerator {
                 } else if (composedSchema.getAnyOf() != null) {
                     paramType = getOneOfUnionType(composedSchema.getAnyOf());
                 }
+            } else if (schema instanceof ObjectSchema) {
+                ObjectSchema objectSchema = (ObjectSchema) schema;
+                if (objectSchema.getProperties() != null) {
+                    // Generate properties
+                    // TODO replace this name generation after merge old PR
+                    paramType = generateRecordForInlineRequestBody(operationId, requestBody,
+                            objectSchema.getProperties(), objectSchema.getRequired());
+                }
+            } else if (schema.getProperties() != null) {
+                 paramType = generateRecordForInlineRequestBody(operationId, requestBody, schema.getProperties(),
+                                schema.getRequired());
             } else {
                 paramType = getBallerinaMeidaType(next.getKey());
             }
@@ -967,6 +990,28 @@ public class BallerinaClientGenerator {
             break;
         }
         return parameterList;
+    }
+
+    private static String generateRecordForInlineRequestBody(String operationId, RequestBody requestBody,
+                                                             Map<String, Schema> properties2, List<String> required2)
+            throws BallerinaOpenApiException {
+
+        String paramType;
+        Map<String, Schema> properties = properties2;
+        operationId = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1);
+        String typeName = operationId + "Request";
+        List<String> required = required2;
+        List<Node> fields = new ArrayList<>();
+        String description = "";
+        if (requestBody.getDescription() != null) {
+            description = requestBody.getDescription();
+        }
+        TypeDefinitionNode recordNode = BallerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
+                createIdentifierToken("public type"), createIdentifierToken(typeName), fields,
+                properties, description);
+        generateTypeDefinitionNodeType(typeName, recordNode);
+        paramType = typeName;
+        return paramType;
     }
 
     /**
@@ -1220,6 +1265,17 @@ public class BallerinaClientGenerator {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
                 Content rbContent = requestBody.getContent();
+                Set<Map.Entry<String, MediaType>> entries = rbContent.entrySet();
+                Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
+                //currently align with first content of the requestBody
+                while (iterator.hasNext()) {
+                    createRequestBodyStatements(isHeader, statementsList, method, returnType, iterator);
+                    break;
+                }
+            } else if (requestBody.get$ref() != null) {
+                RequestBody requestBodySchema =
+                        openAPI.getComponents().getRequestBodies().get(extractReferenceType(requestBody.get$ref()));
+                Content rbContent = requestBodySchema.getContent();
                 Set<Map.Entry<String, MediaType>> entries = rbContent.entrySet();
                 Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
                 //currently align with first content of the requestBody

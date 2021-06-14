@@ -49,6 +49,7 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 import java.io.IOException;
@@ -454,6 +455,10 @@ public class BallerinaSchemaGenerator {
                 NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
                 return NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter, fieldNodes,
                         null, bodyEndDelimiter);
+            } else if (schema.getType().equals("object")) {
+                String type = convertOpenAPITypeToBallerina(schema.getType().trim());
+                Token typeName = AbstractNodeFactory.createIdentifierToken(type);
+                return createBuiltinSimpleNameReferenceNode(null, typeName);
             } else {
                 throw new BallerinaOpenApiException("Unsupported OAS data type `" + schema.getType() + "`.");
             }
@@ -505,7 +510,9 @@ public class BallerinaSchemaGenerator {
             throw new OpenApiException(ErrorMessages.invalidFile());
         }
         String openAPIFileContent = Files.readString(Paths.get(definitionURI));
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
+        ParseOptions parseOptions = new ParseOptions();
+//        parseOptions.setFlatten(true);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             throw new OpenApiException(ErrorMessages.parserException(definitionURI));
         }

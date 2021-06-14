@@ -55,6 +55,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 import java.io.IOException;
@@ -346,7 +347,11 @@ public class GeneratorUtils {
     public static OpenAPI getBallerinaOpenApiType(Path definitionPath)
             throws IOException, BallerinaOpenApiException {
         String openAPIFileContent = Files.readString(definitionPath);
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+//        parseOptions.setFlatten(true);
+//        parseOptions.setResolveFully(true);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
         }
