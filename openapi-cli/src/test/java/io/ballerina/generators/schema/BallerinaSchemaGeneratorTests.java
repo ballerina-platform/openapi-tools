@@ -23,7 +23,6 @@ import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.generators.BallerinaSchemaGenerator;
-import io.ballerina.generators.OpenApiException;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -50,7 +49,7 @@ public class BallerinaSchemaGeneratorTests {
     SyntaxTree syntaxTree;
 
     @Test(description = "Scenario01-Generate single record")
-    public void generateScenario01() throws FormatterException, OpenApiException, IOException,
+    public void generateScenario01() throws FormatterException, IOException,
             BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario01.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
@@ -58,103 +57,91 @@ public class BallerinaSchemaGeneratorTests {
     }
 
     @Test(description = "Scenario02- Generate multiple record")
-    public void generateScenario02() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateScenario02() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario02.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema02.bal");
     }
 
     @Test(description = "Scenario03-Generate record with array filed record")
-    public void generateScenario03() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateScenario03() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario03.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema03.bal");
     }
 
     @Test(description = "Scenario04-Generate record with nested array filed record")
-    public void generateScenario04() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateScenario04() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario04.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema04.bal");
     }
 
     @Test(description = "Scenario05-Generate record with record type filed record")
-    public void generateScenario05() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateScenario05() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario05.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema05.bal");
     }
 
     @Test(description = "Scenario06 - Generate record with record type array filed record")
-    public void generateScenario06() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateScenario06() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario06.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema06.bal");
     }
 
     @Test(description = "Scenario07-Generate record with nested record type filed record")
-    public void generateScenario07() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateScenario07() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario07.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema07.bal");
     }
 
     @Test(description = "Scenario08-Generate record for schema has array reference")
-    public void generateScenario08() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateScenario08() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario08.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema08.bal");
     }
 //check nested array -test
     @Test(description = "Scenario09-Generate record for schema has allOf reference")
-    public void generateScenario09() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateScenario09() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario09.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema09.bal");
     }
 
     @Test(description = "Scenario10-Generate record for schema has not type", enabled = false)
-    public void generateScenario10() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateScenario10() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario10.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema10.bal");
     }
 
     @Test(description = "Scenario11-Generate record for schema has inline record in fields reference")
-    public void generateScenario11() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateScenario11() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario11.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema11.bal");
     }
 
     @Test(description = "Generate record for openapi weather api")
-    public void generateOpenAPIWeatherAPI() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateOpenAPIWeatherAPI() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("openapi_weather_api_schema.bal");
     }
 
     @Test(description = "Generate record field has oneof allof scenarios")
-    public void generateRecordField() throws IOException, BallerinaOpenApiException, FormatterException,
-            OpenApiException {
+    public void generateRecordField() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/openapi.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("openapi.bal");
     }
 
     @Test(description = "Scenario12-Generate record for schema has object type only")
-    public void generateForSchemaHasObjectTypeOnly() throws IOException, BallerinaOpenApiException, OpenApiException {
+    public void generateForSchemaHasObjectTypeOnly() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario14.yaml");
         OpenAPI openAPI = getOpenAPI(definitionPath);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");

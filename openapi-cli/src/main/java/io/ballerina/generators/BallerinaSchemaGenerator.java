@@ -211,7 +211,7 @@ public class BallerinaSchemaGenerator {
                             description = "";
                         }
                         TypeDefinitionNode typeDefinitionNode = getTypeDefinitionNodeForObjectSchema(required,
-                                typeKeyWord, typeName, recordFieldList, fields);
+                                typeKeyWord, typeName, recordFieldList, fields, description);
                         typeDefinitionNodeList.add(typeDefinitionNode);
                     } else if (schema.getValue().getType().equals("array")) {
                         if (schemaValue instanceof ArraySchema) {

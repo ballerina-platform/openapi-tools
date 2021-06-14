@@ -20,9 +20,7 @@ package io.ballerina.generators.common;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
-import io.ballerina.generators.OpenApiException;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -43,8 +41,7 @@ public class SwaggerParserTests {
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Unsupported OAS data type .*")
-    public void generateHandleUnsupportedData() throws FormatterException, OpenApiException, IOException,
-            BallerinaOpenApiException {
+    public void generateHandleUnsupportedData() throws  IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
     }

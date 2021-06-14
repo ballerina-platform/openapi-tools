@@ -61,12 +61,11 @@ public class PrimitiveDataTypeTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema02.bal", syntaxTree);
     }
 
-    @Test(description = "Scenario for missing DataType")
+    @Test(description = "Scenario for missing DataType", enabled = false)
     public void generateMissingDatatype() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/missDataType.yaml");
         syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
-        String expected = "Encountered an unsupported type. Type `anydata` would be used for the field." +
-                System.getProperty("line.separator");
+        String expected = "Unsupported OAS data type." + System.getProperty("line.separator");
         Assert.assertTrue(outContent.toString().contains(expected));
     }
 
