@@ -64,6 +64,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -289,8 +290,8 @@ public class GeneratorUtils {
 
         if (identifier.matches("\\b[0-9]*\\b")) {
             return "'" + identifier;
-        } else if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b"
-            ) || BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
+        } else if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b")
+                || BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
 
             // TODO: Remove this `if`. Refer - https://github.com/ballerina-platform/ballerina-lang/issues/23045
             if (identifier.equals("error")) {
@@ -320,6 +321,44 @@ public class GeneratorUtils {
     }
 
     /**
+     * Generate operationId by removing special characters.
+     *
+     * @param identifier input function name, record name or operation Id
+     * @return string with new generated name
+     */
+    public static String getValidName(String identifier, boolean isSchema) {
+        if (!identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") && !identifier.matches("\\b[0-9]*\\b")) {
+            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
+            StringBuilder validName = new StringBuilder();
+            for (String part: split) {
+                if (!part.isBlank()) {
+                    if (split.length > 1) {
+                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+                                part.substring(1).toLowerCase(Locale.ENGLISH);
+                    }
+                    validName.append(part);
+                }
+            }
+            identifier = validName.toString();
+        }
+        if (isSchema) {
+            return identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1);
+        } else {
+            return identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1);
+        }
+    }
+
+    /**
+     * Check the given recordName is valid name.
+     *
+     * @param recordName - String record name
+     * @return           - boolean value
+     */
+    public static boolean isValidSchemaName(String recordName) {
+        return !recordName.matches("\\b[0-9]*\\b");
+    }
+
+    /**
      * This method will extract reference type by splitting the reference string.
      *
      * @param referenceVariable - Reference String
@@ -330,7 +369,7 @@ public class GeneratorUtils {
     public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
         if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
             String[] refArray = referenceVariable.split("/");
-            return escapeIdentifier(refArray[refArray.length - 1]);
+            return getValidName(refArray[refArray.length - 1], true);
         } else {
             throw new BallerinaOpenApiException("Invalid reference value : " + referenceVariable
                     + "\nBallerina only supports local reference values.");

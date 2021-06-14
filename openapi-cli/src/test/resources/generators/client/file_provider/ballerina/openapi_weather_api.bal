@@ -6,6 +6,23 @@ public type ApiKeysConfig record {
     map<string|string[]> apiKeys;
 };
 
+type CurrentWeatherDataResponse record {
+    Coord coord?;
+    Weather[] weather?;
+    string base?;
+    Main main?;
+    int visibility?;
+    Wind wind?;
+    Clouds clouds?;
+    Rain rain?;
+    Snow snow?;
+    int dt?;
+    Sys sys?;
+    int id?;
+    string name?;
+    int cod?;
+};
+
 # Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city. Helpful stats, graphics, and this day in history charts are available for your reference. Interactive maps show precipitation, clouds, pressure, wind around your location stations. Data is available in JSON, XML, or HTML format. **Note**: All parameters are optional, but you must select at least one parameter. Calling the API by city ID (using the `id` parameter) will provide the most precise location results.
 #
 # + clientEp - Connector http endpoint
@@ -34,6 +51,7 @@ public client class Client {
         string  path = string `/weather`;
         map<anydata> queryParam = {q: q, id: id, lat: lat, lon: lon, zip: zip, units: units, lang: lang, mode: mode, appid: self.apiKeys["appid"]};
         path = path + getPathForQueryParam(queryParam);
+        CurrentWeatherDataResponse response = check self.clientEp-> get(path, targetType = CurrentWeatherDataResponse);
         CurrentWeatherData response = check self.clientEp-> get(path, targetType = CurrentWeatherData);
         return response;
     }
