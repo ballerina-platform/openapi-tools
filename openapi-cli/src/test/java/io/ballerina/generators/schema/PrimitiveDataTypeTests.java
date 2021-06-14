@@ -71,6 +71,14 @@ public class PrimitiveDataTypeTests {
                 contains(expected.trim().replaceAll("\\s+", "")));
     }
 
+    @Test(description = "When the component schema has primitive data type instead of object schema")
+    public void generateSchemaForPrimitiveData() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/schema_with_primitive.yaml");
+        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema_with_primitive.bal",
+                syntaxTree);
+    }
+
     @AfterTest
     public void clean() {
         System.setErr(null);

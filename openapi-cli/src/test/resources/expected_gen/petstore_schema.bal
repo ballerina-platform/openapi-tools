@@ -26,9 +26,7 @@ public type Dog record {
     boolean bark?;
 };
 
-public type Pets record {
-    Pet[] petslist;
-};
+public type Pets Pet[];
 
 
 public type Error record {

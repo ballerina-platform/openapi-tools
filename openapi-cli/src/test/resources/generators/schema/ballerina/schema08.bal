@@ -6,6 +6,4 @@ public type Pet record {
     string 'type?;
 };
 
-public type Pets record {
-    Pet[] petslist;
-};
+public type Pets Pet[];

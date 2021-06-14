@@ -45,6 +45,7 @@ under the License.
             <class name="io.ballerina.generators.auth.ApiKeyAuthTests"/>
             <class name="io.ballerina.generators.schema.AdvanceRecordTypeTests"/>
             <class name="io.ballerina.generators.schema.AnyOfDataTypeTests"/>
+            <class name="io.ballerina.generators.schema.ArrayDataTypeTests"/>
             <class name="io.ballerina.generators.schema.OneOfDataTypeTests"/>
             <class name="io.ballerina.generators.schema.AllOfDataTypeTests"/>
             <class name="io.ballerina.generators.schema.AdvanceRecordTypeTests"/>
