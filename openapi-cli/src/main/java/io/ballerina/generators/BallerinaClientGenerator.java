@@ -182,7 +182,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.error.ErrorMessages.invalidPathParamType;
-import static io.ballerina.generators.BallerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema;
 import static io.ballerina.generators.GeneratorConstants.DELETE;
 import static io.ballerina.generators.GeneratorConstants.EXECUTE;
 import static io.ballerina.generators.GeneratorConstants.GET;
@@ -216,6 +215,8 @@ public class BallerinaClientGenerator {
     private static boolean isQuery;
     private static Info info;
     private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+    private static OpenAPI openAPI;
+    private static BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
             BallerinaOpenApiException {
@@ -669,7 +670,7 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         NodeList<Node> relativeResourcePath = createEmptyNodeList();
 
-        FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue());
+        FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue(), remoteFunctionDocs);
 
         // Create Function Body
         FunctionBodyNode functionBodyNode = getFunctionBodyNode(path, operation);
@@ -1008,7 +1009,7 @@ public class BallerinaClientGenerator {
         if (requestBody.getDescription() != null) {
             description = requestBody.getDescription();
         }
-        TypeDefinitionNode recordNode = BallerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
+        TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
                 createIdentifierToken("public type"), createIdentifierToken(typeName), fields,
                 properties, description);
         generateTypeDefinitionNodeType(typeName, recordNode);
@@ -1096,7 +1097,8 @@ public class BallerinaClientGenerator {
                                     if (response.getDescription() != null) {
                                         description = response.getDescription();
                                     }
-                                    TypeDefinitionNode typeDefinitionNode = getTypeDefinitionNodeForObjectSchema(
+                                    TypeDefinitionNode typeDefinitionNode =
+                                            ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(
                                             required, typeKeyWord, createIdentifierToken(type), recordFieldList,
                                             properties, description);
                                     generateTypeDefinitionNodeType(type, typeDefinitionNode);
@@ -1191,7 +1193,7 @@ public class BallerinaClientGenerator {
                 if (operation.getResponses().entrySet().iterator().next().getValue().getDescription() != null) {
                     description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
                 }
-                TypeDefinitionNode recordNode = getTypeDefinitionNodeForObjectSchema(required,
+                TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
                         createIdentifierToken("type"),
                         createIdentifierToken(type), recordFieldList, properties, description);
                 generateTypeDefinitionNodeType(type, recordNode);
