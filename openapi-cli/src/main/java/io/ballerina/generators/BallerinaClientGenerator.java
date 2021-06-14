@@ -670,7 +670,7 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         NodeList<Node> relativeResourcePath = createEmptyNodeList();
 
-        FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue());
+        FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue(), remoteFunctionDocs);
 
         // Create Function Body
         FunctionBodyNode functionBodyNode = getFunctionBodyNode(path, operation);
@@ -1188,9 +1188,13 @@ public class BallerinaClientGenerator {
             } else {
                 List<String> required = required2;
                 List<Node> recordFieldList = new ArrayList<>();
+                String description = "";
+                if (operation.getResponses().entrySet().iterator().next().getValue().getDescription() != null) {
+                    description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
+                }
                 TypeDefinitionNode recordNode = getTypeDefinitionNodeForObjectSchema(required,
                         createIdentifierToken("type"),
-                        createIdentifierToken(type), recordFieldList, properties);
+                        createIdentifierToken(type), recordFieldList, properties, description);
                 generateTypeDefinitionNodeType(type, recordNode);
             }
         } else {
