@@ -1078,7 +1078,7 @@ public class BallerinaClientGenerator {
                                     return type + "|error";
                                 }
                             } else  if (schema.get$ref() != null) {
-                                type = extractReferenceType(schema.get$ref());
+                                type = getValidName(extractReferenceType(schema.get$ref()), true);
                                 Schema componentSchema = openAPI.getComponents().getSchemas().get(type);
                                 if (!isValidSchemaName(type)) {
                                     String operationId = operation.getOperationId();
@@ -1088,9 +1088,13 @@ public class BallerinaClientGenerator {
                                     Token typeKeyWord = createIdentifierToken("type");
                                     List<Node> recordFieldList = new ArrayList<>();
                                     Map<String, Schema> properties = componentSchema.getProperties();
+                                    String description = "";
+                                    if (response.getDescription() != null) {
+                                        description = response.getDescription();
+                                    }
                                     TypeDefinitionNode typeDefinitionNode = getTypeDefinitionNodeForObjectSchema(
                                             required, typeKeyWord, createIdentifierToken(type), recordFieldList,
-                                            properties);
+                                            properties, description);
                                     generateTypeDefinitionNodeType(type, typeDefinitionNode);
                                 }
                             } else if (schema instanceof ArraySchema) {

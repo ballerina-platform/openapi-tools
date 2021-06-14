@@ -59,6 +59,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -83,6 +84,8 @@ import static io.ballerina.generators.GeneratorUtils.createParamAPIDoc;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
+import static io.ballerina.generators.GeneratorUtils.getValidName;
+import static io.ballerina.generators.GeneratorUtils.isValidSchemaName;
 
 /**
  *This class wraps the {@link Schema} from openapi models inorder to overcome complications
@@ -98,6 +101,16 @@ public class BallerinaSchemaGenerator {
         // TypeDefinitionNodes their
         List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
         if (openApi.getComponents() != null) {
+            // Refactor schema name with valid name
+            Map<String, Schema> allSchemas = openApi.getComponents().getSchemas();
+            if (allSchemas != null) {
+                Map<String, Schema> refacSchema = new HashMap<>();
+                for (Map.Entry<String, Schema> schemaEntry: allSchemas.entrySet()) {
+                    String name = getValidName(schemaEntry.getKey(), true);
+                    refacSchema.put(name, schemaEntry.getValue());
+                }
+                openApi.getComponents().setSchemas(refacSchema);
+            }
             //Create typeDefinitionNode
             Components components = openApi.getComponents();
             if (components.getSchemas() != null) {
@@ -411,7 +424,7 @@ public class BallerinaSchemaGenerator {
                         TypeDescriptorNode memberTypeDesc;
                         Schema schemaItem = arraySchema.getItems();
                         if (schemaItem.get$ref() != null) {
-                            type = extractReferenceType(arraySchema.getItems().get$ref());
+                            type = getValidName(extractReferenceType(arraySchema.getItems().get$ref()), true);
                             typeName = AbstractNodeFactory.createIdentifierToken(type);
                             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
                             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
@@ -479,7 +492,8 @@ public class BallerinaSchemaGenerator {
                         createIdentifierToken(convertOpenAPITypeToBallerina(composedSchema.getType().trim())));
             } else if (composedSchema.get$ref() != null) {
                 return createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(extractReferenceType(composedSchema.get$ref().trim())));
+                        createIdentifierToken(getValidName(extractReferenceType(composedSchema.get$ref().trim()),
+                                true)));
             } else {
                 throw new BallerinaOpenApiException("Unsupported OAS data type.");
             }
