@@ -66,7 +66,8 @@ public class PrimitiveDataTypeTests {
     public void generateMissingDatatype() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/missDataType.yaml");
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
-        String expected = "public type Pet record { anydata id; string name; decimal tag?; string 'type?;};";
+        String expected = "public type Pet record { #this is missing dataType anydata id; string name; decimal tag?; " +
+                "string 'type?;};";
         Assert.assertTrue(syntaxTree.toString().trim().replaceAll("\\s+", "").
                 contains(expected.trim().replaceAll("\\s+", "")));
     }
@@ -74,7 +75,7 @@ public class PrimitiveDataTypeTests {
     @Test(description = "When the component schema has primitive data type instead of object schema")
     public void generateSchemaForPrimitiveData() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/schema_with_primitive.yaml");
-        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema_with_primitive.bal",
                 syntaxTree);
     }

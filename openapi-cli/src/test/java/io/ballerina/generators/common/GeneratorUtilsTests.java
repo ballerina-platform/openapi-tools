@@ -19,6 +19,7 @@
 package io.ballerina.generators.common;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
@@ -28,7 +29,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static io.ballerina.generators.BallerinaSchemaGenerator.generateSyntaxTree;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
@@ -39,6 +39,7 @@ import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTre
  */
 public class GeneratorUtilsTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators").toAbsolutePath();
+    private  static BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
 
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class,
@@ -80,7 +81,8 @@ public class GeneratorUtilsTests {
 
     @Test(description = "Set record name with removing special Characters")
     public static void testRecordName() throws IOException, BallerinaOpenApiException {
-        SyntaxTree syntaxTree = generateSyntaxTree(RES_DIR.resolve("schema/swagger/recordName.yaml"));
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(RES_DIR.resolve("schema/swagger" +
+                "/recordName.yaml"));
         Path expectedPath = RES_DIR.resolve("schema/ballerina/recordName.bal");
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }

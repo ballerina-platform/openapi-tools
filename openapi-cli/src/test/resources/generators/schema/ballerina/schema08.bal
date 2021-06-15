@@ -1,3 +1,4 @@
+public type Pets Pet[];
 
 public type Pet record {
     int id;
@@ -5,5 +6,3 @@ public type Pet record {
     string tag?;
     string 'type?;
 };
-
-public type Pets Pet[];

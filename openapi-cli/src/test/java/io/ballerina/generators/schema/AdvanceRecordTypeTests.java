@@ -46,8 +46,8 @@ public class AdvanceRecordTypeTests {
     BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
 
 
-    //check nested array -test
-    @Test(description = "Generate record for schema has not type")
+    // Enable after adding `not` data bind support
+    @Test(description = "Generate record for schema has not type", enabled = false)
     public void generateSchemaHasNotType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario10.yaml");
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
@@ -77,7 +77,7 @@ public class AdvanceRecordTypeTests {
         TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(null,
                         AbstractNodeFactory.createIdentifierToken("public type"),
                         AbstractNodeFactory.createIdentifierToken("Error"),
-                        null, objectSchema.getProperties(), "");
+                        null, objectSchema.getProperties(), "", openAPI);
         Assert.assertTrue(((RecordTypeDescriptorNode) recordNode.typeDescriptor()).fields().isEmpty());
     }
 }

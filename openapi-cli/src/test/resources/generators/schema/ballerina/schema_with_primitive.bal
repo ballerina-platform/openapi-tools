@@ -1,2 +1,2 @@
-public type Pet string;
 public type UserId int;
+public type Pet string;
