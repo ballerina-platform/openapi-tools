@@ -712,7 +712,8 @@ public class BallerinaClientGenerator {
         Iterator<ApiResponse> iteratorRes = values.iterator();
         ApiResponse next = iteratorRes.next();
         if (next.getDescription() != null) {
-            MarkdownParameterDocumentationLineNode returnDoc = createParamAPIDoc("return", next.getDescription());
+            MarkdownParameterDocumentationLineNode returnDoc = createParamAPIDoc("return",
+                    next.getDescription().split("\n")[0]);
             remoteFunctionDoc.add(returnDoc);
         }
 
@@ -745,7 +746,7 @@ public class BallerinaClientGenerator {
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
                                         createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription());
+                                                parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
@@ -754,7 +755,7 @@ public class BallerinaClientGenerator {
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
                                         createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription());
+                                                parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
                         }
@@ -767,7 +768,7 @@ public class BallerinaClientGenerator {
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
                                         createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription());
+                                                parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
@@ -776,7 +777,7 @@ public class BallerinaClientGenerator {
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
                                         createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription());
+                                                parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
                         }
@@ -789,7 +790,7 @@ public class BallerinaClientGenerator {
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
                                         createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription());
+                                                parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
@@ -798,7 +799,7 @@ public class BallerinaClientGenerator {
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
                                         createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription());
+                                                parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
                         }
@@ -966,6 +967,14 @@ public class BallerinaClientGenerator {
                     paramType = getOneOfUnionType(composedSchema.getOneOf());
                 } else if (composedSchema.getAnyOf() != null) {
                     paramType = getOneOfUnionType(composedSchema.getAnyOf());
+                } else if (composedSchema.getAllOf() != null) {
+                    paramType = getValidName(operationId, true) + "AllOfRequest";
+                    List<Schema> allOf = composedSchema.getAllOf();
+                    List<String> required = composedSchema.getRequired();
+                    TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
+                            .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
+                                    createIdentifierToken(paramType), new ArrayList<>(), allOf);
+                    generateTypeDefinitionNodeType(paramType, allOfTypeDefinitionNode);
                 }
             } else if (schema instanceof ObjectSchema) {
                 ObjectSchema objectSchema = (ObjectSchema) schema;
@@ -989,7 +998,7 @@ public class BallerinaClientGenerator {
                 if (requestBody.getDescription() != null) {
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
                                 createParamAPIDoc(escapeIdentifier("payload"),
-                                        requestBody.getDescription());
+                                        requestBody.getDescription().split("\n")[0]);
                         requestBodyDoc.add(paramAPIDoc);
                 }
                 parameterList.add(payload);
@@ -1011,7 +1020,7 @@ public class BallerinaClientGenerator {
         List<Node> fields = new ArrayList<>();
         String description = "";
         if (requestBody.getDescription() != null) {
-            description = requestBody.getDescription();
+            description = requestBody.getDescription().split("\n")[0];
         }
         TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
                 createIdentifierToken("public type"), createIdentifierToken(typeName), fields,
@@ -1076,6 +1085,16 @@ public class BallerinaClientGenerator {
                                             createToken(SEMICOLON_TOKEN));
                                     generateTypeDefinitionNodeType(typeName, typeDefNode);
                                     return type + "|error";
+                                } else if (composedSchema.getAllOf() != null) {
+                                    List<Schema> allOf = composedSchema.getAllOf();
+                                    String recordName = getValidName(operation.getOperationId(), true) +
+                                            "AllOfResponse";
+                                    List<String> required = composedSchema.getRequired();
+                                    TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
+                                            .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
+                                                    createIdentifierToken(recordName), new ArrayList<>(), allOf);
+                                    generateTypeDefinitionNodeType(recordName, allOfTypeDefinitionNode);
+                                    return recordName + "|error";
                                 }
                             } else if (schema instanceof ObjectSchema) {
                                 ObjectSchema objectSchema = (ObjectSchema) schema;
@@ -1099,7 +1118,7 @@ public class BallerinaClientGenerator {
                                     Map<String, Schema> properties = componentSchema.getProperties();
                                     String description = "";
                                     if (response.getDescription() != null) {
-                                        description = response.getDescription();
+                                        description = response.getDescription().split("\n")[0];
                                     }
                                     TypeDefinitionNode typeDefinitionNode =
                                             ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(
