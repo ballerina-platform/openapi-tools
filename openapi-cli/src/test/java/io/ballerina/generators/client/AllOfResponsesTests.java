@@ -39,16 +39,14 @@ public class AllOfResponsesTests {
     @Test(description = "Tests for returnType")
     public void getReturnTypeTests() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_allof_reference.yaml"));
-        String returnType = getReturnType(array.getPaths().get("/products").getGet());
-
-//        Assert.assertEquals(getReturnType(array.getPaths().get("/jsonproducts").getGet()), "json|error");
+        Assert.assertEquals(getReturnType(array.getPaths().get("/products").getGet()),
+                "TestsProductsAllOfResponse|error");
     }
     @Test(description = "Tests for returnType")
     public void getReturnTypeForAllOf() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_all_of_response.yaml"));
-        String returnType = getReturnType(array.getPaths().get("/users/{userId}/meetings").getPost());
-
-        Assert.assertEquals(getReturnType(array.getPaths().get("/jsonproducts").getGet()), "json|error");
+        Assert.assertEquals(getReturnType(array.getPaths().get("/users/{userId}/meetings").getPost()),
+                "CreateMeetingAllOfResponse|error");
     }
     @Test(description = "Tests for the object response without property")
     public void getReturnTypeForObjectSchema() throws IOException, BallerinaOpenApiException {

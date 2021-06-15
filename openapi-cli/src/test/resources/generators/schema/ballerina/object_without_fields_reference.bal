@@ -1,9 +1,4 @@
-public type Countryrecord {
-    string id?;
-    string value?;
-};
-
-public type YouthLiteracyRaterecord {
+public type YouthLiteracyRate record {
     record {} indicator?;
     Country country?;
     string date?;
@@ -11,6 +6,11 @@ public type YouthLiteracyRaterecord {
     int 'decimal?;
 };
 
-public type Errorrecord {
+public type Country record {
+    string id?;
+    string value?;
+};
+
+public type Error record {
     string name?;
 };

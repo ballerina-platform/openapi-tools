@@ -1,9 +1,7 @@
 
-public type Pet record {
-    int id;
-    string name;
-    string tag?;
-    Tag 'type?;
+public type Tag record {
+    int id?;
+    string tagType?;
 };
 
 public type Dog record {
@@ -11,7 +9,9 @@ public type Dog record {
     boolean bark;
 };
 
-public type Tag record {
-    int id?;
-    string tagType?;
+public type Pet record {
+    int id;
+    string name;
+    string tag?;
+    Tag 'type?;
 };
