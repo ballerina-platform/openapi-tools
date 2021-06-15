@@ -41,6 +41,7 @@ under the License.
             <class name="io.ballerina.generators.client.HeadersTests"/>
             <class name="io.ballerina.generators.client.PathParameterTests"/>
             <class name="io.ballerina.generators.client.AllOfResponsesTests"/>
+            <class name="io.ballerina.generators.client.QueryParameterTests"/>
             <class name="io.ballerina.generators.auth.HttpAuthTests"/>
             <class name="io.ballerina.generators.auth.OAuth2Tests"/>
             <class name="io.ballerina.generators.auth.ApiKeyAuthTests"/>

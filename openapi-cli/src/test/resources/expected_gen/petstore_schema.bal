@@ -14,11 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-public type Pet record {
-    int id;
-    string name;
-    string tag?;
-    string 'type?;
+public type Pets Pet[];
+
+public type Error record {
+    int code;
+    string message;
 };
 
 public type Dog record {
@@ -26,10 +26,9 @@ public type Dog record {
     boolean bark?;
 };
 
-public type Pets Pet[];
-
-
-public type Error record {
-    int code;
-    string message;
+public type Pet record {
+    int id;
+    string name;
+    string tag?;
+    string 'type?;
 };
