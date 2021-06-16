@@ -41,6 +41,7 @@ import io.ballerina.compiler.syntax.tree.IfElseStatementNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.IndexedExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListBindingPatternNode;
+import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
@@ -870,14 +871,34 @@ public class BallerinaClientGenerator {
             IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
             return createRequiredParameterNode(annotationNodes, typeName, paramName);
         } else {
-            // TODO: for optional change to defaultable
-             typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
+            // TODO: for optional change to defaultable with there values
+            typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(paramType)), createToken(QUESTION_MARK_TOKEN));
-             IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
-             NilLiteralNode nilLiteralNode =
-                    createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
-            return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
-                    nilLiteralNode);
+            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+
+            if (parameterSchema.getDefault() != null) {
+                LiteralValueToken literalValueToken;
+                if (parameterSchema.getType().equals("string")) {
+                    literalValueToken =
+                            createLiteralValueToken(null, '"' + parameterSchema.getDefault().toString() + '"',
+                                    createEmptyMinutiaeList(),
+                                    createEmptyMinutiaeList());
+
+                } else {
+                    literalValueToken =
+                            createLiteralValueToken(null, parameterSchema.getDefault().toString(),
+                                    createEmptyMinutiaeList(),
+                                    createEmptyMinutiaeList());
+
+                }
+                return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
+                        literalValueToken);
+            } else {
+                NilLiteralNode nilLiteralNode =
+                        createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
+                return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
+                        nilLiteralNode);
+            }
         }
     }
 
