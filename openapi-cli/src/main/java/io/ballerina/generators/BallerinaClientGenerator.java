@@ -968,7 +968,7 @@ public class BallerinaClientGenerator {
                 } else if (composedSchema.getAnyOf() != null) {
                     paramType = getOneOfUnionType(composedSchema.getAnyOf());
                 } else if (composedSchema.getAllOf() != null) {
-                    paramType = getValidName(operationId, true) + "AllOfRequest";
+                    paramType = "Compound" + getValidName(operationId, true) + "Request";
                     List<Schema> allOf = composedSchema.getAllOf();
                     List<String> required = composedSchema.getRequired();
                     TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
@@ -1087,8 +1087,8 @@ public class BallerinaClientGenerator {
                                     return type + "|error";
                                 } else if (composedSchema.getAllOf() != null) {
                                     List<Schema> allOf = composedSchema.getAllOf();
-                                    String recordName = getValidName(operation.getOperationId(), true) +
-                                            "AllOfResponse";
+                                    String recordName = "Compound" + getValidName(operation.getOperationId(), true) +
+                                            "Response";
                                     List<String> required = composedSchema.getRequired();
                                     TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
                                             .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
@@ -1113,7 +1113,7 @@ public class BallerinaClientGenerator {
                                     type = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1) +
                                             "Response";
                                     List<String> required = componentSchema.getRequired();
-                                    Token typeKeyWord = createIdentifierToken("type");
+                                    Token typeKeyWord = createIdentifierToken("public type");
                                     List<Node> recordFieldList = new ArrayList<>();
                                     Map<String, Schema> properties = componentSchema.getProperties();
                                     String description = "";
