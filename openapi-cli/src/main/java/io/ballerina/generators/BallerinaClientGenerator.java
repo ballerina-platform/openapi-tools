@@ -1217,7 +1217,7 @@ public class BallerinaClientGenerator {
                     description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
-                        createIdentifierToken("type"),
+                        createIdentifierToken("public type"),
                         createIdentifierToken(type), recordFieldList, properties, description, openAPI);
                 generateTypeDefinitionNodeType(type, recordNode);
             }
