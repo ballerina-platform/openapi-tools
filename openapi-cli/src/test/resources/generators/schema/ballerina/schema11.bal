@@ -1,6 +1,11 @@
 public type Pet record {
     int id;
+    # name field
     string name;
     string tag?;
-    record { string id?; string tagType?;} 'type?;
+    record  {
+        # type id
+        string typeId?;
+        string tagType?;
+    } 'type?;
 };

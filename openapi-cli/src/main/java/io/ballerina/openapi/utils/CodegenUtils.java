@@ -44,6 +44,22 @@ public class CodegenUtils {
      * @throws IOException when a file operation fails
      */
     public static void writeFile(Path filePath, String content) throws IOException {
+        String license = "// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.\n" +
+                "//\n" +
+                "// WSO2 Inc. licenses this file to you under the Apache License,\n" +
+                "// Version 2.0 (the \"License\"); you may not use this file except\n" +
+                "// in compliance with the License.\n" +
+                "// You may obtain a copy of the License at\n" +
+                "//\n" +
+                "// http://www.apache.org/licenses/LICENSE-2.0\n" +
+                "//\n" +
+                "// Unless required by applicable law or agreed to in writing,\n" +
+                "// software distributed under the License is distributed on an\n" +
+                "// \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n" +
+                "// KIND, either express or implied.  See the License for the\n" +
+                "// specific language governing permissions and limitations\n" +
+                "// under the License.\n\n";
+        content = license + content;
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(filePath.toString(), "UTF-8");

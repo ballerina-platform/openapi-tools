@@ -40,17 +40,22 @@ under the License.
             <class name="io.ballerina.generators.client.FilterTests"/>
             <class name="io.ballerina.generators.client.HeadersTests"/>
             <class name="io.ballerina.generators.client.PathParameterTests"/>
+            <class name="io.ballerina.generators.client.AllOfResponsesTests"/>
             <class name="io.ballerina.generators.auth.HttpAuthTests"/>
             <class name="io.ballerina.generators.auth.OAuth2Tests"/>
             <class name="io.ballerina.generators.auth.ApiKeyAuthTests"/>
             <class name="io.ballerina.generators.schema.AdvanceRecordTypeTests"/>
             <class name="io.ballerina.generators.schema.AnyOfDataTypeTests"/>
+            <class name="io.ballerina.generators.schema.ArrayDataTypeTests"/>
             <class name="io.ballerina.generators.schema.OneOfDataTypeTests"/>
             <class name="io.ballerina.generators.schema.AllOfDataTypeTests"/>
             <class name="io.ballerina.generators.schema.AdvanceRecordTypeTests"/>
+            <class name="io.ballerina.generators.schema.NullableFieldTests"/>
             <class name="io.ballerina.generators.schema.PrimitiveDataTypeTests"/>
             <class name="io.ballerina.generators.schema.RecordDataTypeTests"/>
+            <class name="io.ballerina.generators.schema.ReferenceResolveTests"/>
             <class name="io.ballerina.generators.schema.SwaggerFileParserTests"/>
+<!--            <class name="io.ballerina.generators.schema.SwaggerParserTests"/>-->
         </classes>
     </test>
 </suite>

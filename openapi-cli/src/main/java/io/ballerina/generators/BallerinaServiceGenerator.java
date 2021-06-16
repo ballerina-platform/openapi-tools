@@ -342,7 +342,8 @@ public class BallerinaServiceGenerator {
         functions.add(functionDefinitionNode);
     }
 
-    private static void createNodeForHeaderParameter(List<Node> params, Token comma, Parameter parameter) {
+    private static void createNodeForHeaderParameter(List<Node> params, Token comma, Parameter parameter)
+            throws BallerinaOpenApiException {
 
         Schema schema = parameter.getSchema();
         String type = "string";
@@ -370,9 +371,8 @@ public class BallerinaServiceGenerator {
                 headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName, openSBracketToken, null,
                                 closeSBracketToken);
             } else {
-                headerTypeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(convertOpenAPITypeToBallerina(
-                                schema.getType().trim())));
+                headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
+                                convertOpenAPITypeToBallerina(schema.getType().trim())));
             }
 
             // Create annotation
@@ -731,7 +731,8 @@ public class BallerinaServiceGenerator {
     /**
      * This for generate query parameter nodes.
      */
-    private static void createNodeForQueryParam(List<Node> params, Token comma, Parameter parameter) {
+    private static void createNodeForQueryParam(List<Node> params, Token comma, Parameter parameter)
+            throws BallerinaOpenApiException {
         if (parameter.getIn().trim().equals("query")) {
             Schema schema = parameter.getSchema();
             NodeList<AnnotationNode> annotations = createEmptyNodeList();

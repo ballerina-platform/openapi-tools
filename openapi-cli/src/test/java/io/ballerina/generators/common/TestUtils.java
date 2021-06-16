@@ -56,7 +56,6 @@ public class TestUtils {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
-
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
@@ -64,8 +63,8 @@ public class TestUtils {
     // Get diagnostics
     public static List<Diagnostic> getDiagnostics(Path definitionPath, SyntaxTree syntaxTree)
             throws FormatterException, IOException, BallerinaOpenApiException {
-
-        SyntaxTree schemaSyntax = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+        SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         writeFile(clientPath, Formatter.format(syntaxTree).toString());
         writeFile(schemaPath, Formatter.format(schemaSyntax).toString());
         SemanticModel semanticModel = getSemanticModel(clientPath);

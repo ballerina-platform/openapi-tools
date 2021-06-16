@@ -1,0 +1,677 @@
+openapi: 3.0.0
+servers:
+  - url: http://api.sendgrid.com/v3
+  - url: https://api.sendgrid.com/v3
+info:
+  title: SendGrid v3 API Documentation
+  version: "3.0"
+  x-apisguru-categories:
+    - email
+    - marketing
+  x-logo:
+    url: https://user-images.githubusercontent.com/21603/27865240-b4c0da22-6189-11e7-9f2c-f35f4c6fa57c.png
+  x-origin:
+    - format: openapi
+      url: https://raw.githubusercontent.com/sendgrid/sendgrid-oai/main/oai.json
+      version: "3.0"
+  x-providerName: sendgrid.com
+externalDocs:
+  url: https://sendgrid.com/docs/API_Reference/Web_API_v3/index.html
+paths:
+  /sendEmail:
+    post:
+      tags:
+        - SendEmail
+      description: "Send an email to given recipient"
+      operationId: sendEmail
+      x-display:
+        label: "Send Email"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                recipient:
+                  type: string
+                  description: "The recipient of the mail"
+                  x-display: "Recipient"
+                subject:
+                  type: string
+                  description: "The subject of the mail"
+                  x-display:  "Subject"
+                body:
+                  type: string
+                  description: "The message body of the mail"
+                  x-display: "Message Body"
+                cc:
+                  type: string
+                  description: "The cc recipient of the mail. Optional"
+                  x-display: "Cc"
+                bcc:
+                  type: string
+                  description: "The bcc recipient of the mail. Optional"
+                  x-display: "Bcc"
+              required:
+                - recipient
+                - subject
+                - body
+      responses:
+        '200':
+          description: "If success, returns the message id, else return an error"
+          content:
+            application/json:
+              schema:
+                type: string
+  /alerts:
+    get:
+      operationId: getAlerts
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    - created_at: 1451498784
+                      email_to: example1@example.com
+                      id: 46
+                      percentage: 90
+                      type: number
+                      updated_at: 1451498784
+                    - created_at: 1451498812
+                      email_to: example2@example.com
+                      frequency: monthly
+                      id: 47
+                      type: number
+                      updated_at: 1451498812
+                    - created_at: 1451520930
+                      email_to: example3@example.com
+                      frequency: daily
+                      id: 48
+                      type: number
+                      updated_at: 1451520930
+              schema:
+                description: The list of alerts.
+                items:
+                  $ref: "#/components/schemas/GetAlertsResponse"
+                type: array
+          description: ""
+      security:
+        - Authorization: []
+      summary: Retrieve all alerts
+      tags:
+        - Alerts
+    post:
+      operationId: postAlerts
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      requestBody:
+        $ref: "#/components/requestBodies/postAlertBody"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostAlertsResponse"
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+                type: object
+          description: ""
+      security:
+        - Authorization: []
+      summary: Create a new Alert
+      tags:
+        - Alerts
+  "/alerts/{alert_id}":
+    delete:
+      operationId: deleteAlertsById
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      responses:
+        "204":
+          description: "No Content"
+      security:
+        - Authorization: []
+      summary: Delete an alert
+      tags:
+        - Alerts
+    get:
+      operationId: getAlertsById
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    created_at: 1451520930
+                    email_to: example@example.com
+                    frequency: daily
+                    id: 48
+                    type: number
+                    updated_at: 1451520930
+              schema:
+                $ref: "#/components/schemas/GetAlertByIdResponse"
+          description: ""
+      security:
+        - Authorization: []
+      summary: Retrieve a specific alert
+      tags:
+        - Alerts
+    parameters:
+      - description: The ID of the alert you would like to retrieve.
+        in: path
+        name: alert_id
+        required: true
+        schema:
+          type: integer
+components:
+  parameters:
+    traitOnBehalfOfSubUser:
+      in: header
+      name: on-behalf-of
+      schema:
+        default: subuser_<user_name>
+        type: string
+      required: true
+  requestBodies:
+    MailSendDetails:
+      description: ""
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/EmailContent"
+    GET_alertsBody:
+      content:
+        application/json:
+          schema:
+            nullable: true
+    getAlertsBody:
+      content:
+        application/json:
+          schema:
+            nullable: true
+    postAlertBody:
+      content:
+        application/json:
+          schema:
+            example:
+              email_to: example@example.com
+              frequency: daily
+              type: number
+            properties:
+              email_to:
+                description: |-
+                  The email address the alert will be sent to.
+                nullable: true
+                type: string
+              frequency:
+                description: |-
+                  Required for stats_notification. How frequently the alert will be sent.
+                type: string
+              percentage:
+                description: |-
+                  Required for usage_alert. When this usage threshold is reached, the alert will be sent.
+                  Example: 90
+                type: integer
+              type:
+                description: |-
+                  The type of alert you want to create. Can be either usage_limit or stats_notification.
+                enum:
+                  - stats_notification
+                  - usage_limit
+                type: string
+            required:
+              - type
+              - email_to
+            type: object
+    patchAlertBody:
+      content:
+        application/json:
+          schema:
+            example:
+              email_to: example@example.com
+            properties:
+              email_to:
+                description: |-
+                  The new email address you want your alert to be sent to.
+                  Example: test@example.com
+                type: string
+              frequency:
+                description: |-
+                  The new frequency at which to send the stats_notification alert.
+                  Example: monthly
+                type: string
+              percentage:
+                description: |-
+                  The new percentage threshold at which the usage_limit alert will be sent.
+                  Example: 90
+                type: integer
+            type: object
+  schemas:
+    errors:
+      properties:
+        errors:
+          items:
+            properties:
+              field:
+                description: The field that has the error.
+                nullable: true
+                type: string
+              message:
+                description: The message the API caller will receive.
+                type: string
+            type: object
+          type: array
+      title: Error Schema
+      type: object
+    EmailContent:
+      properties:
+        asm:
+          description: An object allowing you to specify how to handle unsubscribes.
+          properties:
+            group_id:
+              description: The unsubscribe group to associate with this email.
+              type: integer
+            groups_to_display:
+              description: An array containing the unsubscribe groups that you would like to be displayed on the unsubscribe preferences page.
+              items:
+                type: integer
+              maxItems: 25
+              type: array
+          required:
+            - group_id
+          type: object
+        attachments:
+          description: An array of objects in which you can specify any attachments you want to include.
+          items:
+            properties:
+              content:
+                description: The Base64 encoded content of the attachment.
+                minLength: 1
+                type: string
+              content_id:
+                description: The content id for the attachment. This is used when the disposition is set to “inline” and the attachment is an image, allowing the file to be displayed within the body of your email.
+                type: string
+              disposition:
+                default: attachment
+                description: The content-disposition of the attachment specifying how you would like the attachment to be displayed. For example, “inline” results in the attached file being displayed automatically within the message while “attachment” results in the attached file requiring some action to be taken before it is displayed (e.g. opening or downloading the file).
+                enum:
+                  - inline
+                  - attachment
+                type: string
+              filename:
+                description: The filename of the attachment.
+                type: string
+              type:
+                description: The mime type of the content you are attaching. For example, “text/plain” or “text/html”.
+                minLength: 1
+                type: string
+            required:
+              - content
+              - filename
+            type: object
+          type: array
+        batch_id:
+          type: string
+        categories:
+          description: "An array of category names for this message. Each category name may not exceed 255 characters. "
+          items:
+            maxLength: 255
+            type: string
+          maxItems: 10
+          type: array
+          uniqueItems: true
+        content:
+          items:
+            properties:
+              type:
+                description: The mime type of the content you are including in your email. For example, “text/plain” or “text/html”.
+                minLength: 1
+                type: string
+              value:
+                description: The actual content of the specified mime type that you are including in your email.
+                minLength: 1
+                type: string
+            required:
+              - type
+              - value
+            type: object
+          type: array
+        custom_args:
+          type: object
+        from:
+          $ref: "#/components/schemas/email_object"
+        headers:
+          type: object
+        ip_pool_name:
+          description: The IP Pool that you would like to send this email from.
+          maxLength: 64
+          minLength: 2
+          type: string
+        mail_settings:
+          description: A collection of different mail settings that you can use to specify how you would like this email to be handled.
+          properties:
+            bcc:
+              description: This allows you to have a blind carbon copy automatically sent to the specified email address for every email that is sent.
+              properties:
+                email:
+                  description: The email address that you would like to receive the BCC.
+                  format: email
+                  type: string
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+              type: object
+            bypass_list_management:
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+              type: object
+            footer:
+              description: The default footer that you would like included on every email.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                html:
+                  description: The HTML content of your footer.
+                  type: string
+                text:
+                  description: The plain text content of your footer.
+                  type: string
+              type: object
+            sandbox_mode:
+              description: This allows you to send a test email to ensure that your request body is valid and formatted correctly.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+              type: object
+            spam_check:
+              description: This allows you to test the content of your email for spam.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                post_to_url:
+                  description: An Inbound Parse URL that you would like a copy of your email along with the spam report to be sent to.
+                  type: string
+                threshold:
+                  maximum: 10
+                  minimum: 1
+                  type: integer
+              type: object
+          type: object
+        personalizations:
+          items:
+            properties:
+              bcc:
+                items:
+                  $ref: "#/components/schemas/email_object"
+                maxItems: 1000
+                type: array
+              cc:
+                items:
+                  $ref: "#/components/schemas/email_object"
+                maxItems: 1000
+                type: array
+              custom_args:
+                type: object
+              headers:
+                type: object
+              send_at:
+                description: A unix timestamp allowing you to specify when you want your email to be delivered. Scheduling more than 72 hours in advance is forbidden.
+                type: integer
+              subject:
+                description: The subject of your email. Char length requirements, according to the RFC - http://stackoverflow.com/questions/1592291/what-is-the-email-subject-length-limit#answer-1592310
+                minLength: 1
+                type: string
+              substitutions:
+                maxProperties: 10000
+                type: object
+              to:
+                description: An array of recipients. Each object within this array may contain the name, but must always contain the email, of a recipient.
+                items:
+                  $ref: "#/components/schemas/email_object"
+                maxItems: 1000
+                minItems: 1
+                type: array
+            required:
+              - to
+            type: object
+          maxItems: 1000
+          type: array
+          uniqueItems: false
+        reply_to:
+          $ref: "#/components/schemas/email_object"
+        sections:
+          description: An object of key/value pairs that define block sections of code to be used as substitutions.
+          type: object
+        send_at:
+          type: integer
+        subject:
+          description: The global, or “message level”, subject of your email. This may be overridden by personalizations[x].subject.
+          minLength: 1
+          type: string
+        template_id:
+          type: string
+        tracking_settings:
+          description: Settings to determine how you would like to track the metrics of how your recipients interact with your email.
+          properties:
+            click_tracking:
+              description: Allows you to track whether a recipient clicked a link in your email.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                enable_text:
+                  description: Indicates if this setting should be included in the text/plain portion of your email.
+                  type: boolean
+              type: object
+            ganalytics:
+              description: Allows you to enable tracking provided by Google Analytics.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                utm_campaign:
+                  description: "The name of the campaign.\t"
+                  type: string
+                utm_content:
+                  description: "Used to differentiate your campaign from advertisements.\t"
+                  type: string
+                utm_medium:
+                  description: Name of the marketing medium. (e.g. Email)
+                  type: string
+                utm_source:
+                  description: Name of the referrer source. (e.g. Google, SomeDomain.com, or Marketing Email)
+                  type: string
+                utm_term:
+                  description: "Used to identify any paid keywords.\t"
+                  type: string
+              type: object
+            open_tracking:
+              description: Allows you to track whether the email was opened or not, but including a single pixel image in the body of the content. When the pixel is loaded, we can log that the email was opened.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                substitution_tag:
+                  type: string
+              type: object
+            subscription_tracking:
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                html:
+                  type: string
+                substitution_tag:
+                  type: string
+                text:
+                  type: string
+              type: object
+          type: object
+      required:
+        - personalizations
+        - from
+        - subject
+        - content
+      type: object
+    email_object:
+      properties:
+        email:
+          format: email
+          type: string
+        name:
+          description: The name of the person to whom you are sending an email.
+          type: string
+      required:
+        - email
+      title: Email Object
+      type: object
+    GetAlertsResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          description: If the alert is of type stats_notification, this indicates how frequently the stats notifications will be sent. For example, "daily", "weekly", or "monthly".
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          description: If the alert is of type usage_limit, this indicates the percentage of email usage that must be reached before the alert will be sent.
+          type: integer
+        type:
+          description: The type of alert.
+          enum:
+            - usage_limit
+            - stats_notification
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+      type: object
+    PostAlertsResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          type: integer
+        type:
+          description: The type of alert.
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+        - updated_at
+      type: object
+    GetAlertByIdResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          description: 'If the alert is of type stats_notification, this indicates how frequently the stats notifications will be sent. For example: "daily", "weekly", or "monthly".'
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          description: If the alert is of type usage_limit, this indicates the percentage of email usage that must be reached before the alert will be sent.
+          type: integer
+        type:
+          description: The type of alert.
+          enum:
+            - usage_alert
+            - stats_notification
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+        - updated_at
+      type: object
+    PatchAlertsResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          description: If the alert is of type usage_limit, this indicates the percentage of email usage that must be reached before the alert will be sent.
+          type: integer
+        type:
+          description: The type of alert.
+          enum:
+            - usage_alert
+            - stats_notification
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+        - updated_at
+      type: object
+  securitySchemes:
+    Authorization:
+      in: header
+      name: Authorization
+      type: apiKey

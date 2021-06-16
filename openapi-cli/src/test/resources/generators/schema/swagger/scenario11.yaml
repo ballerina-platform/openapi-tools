@@ -62,13 +62,15 @@ components:
           type: integer
           format: int64
         name:
+          description: name field
           type: string
         tag:
           type: string
         type:
           type: object
           properties:
-            id:
+            typeId:
+              description: type id
               type: string
             tagType:
               type: string

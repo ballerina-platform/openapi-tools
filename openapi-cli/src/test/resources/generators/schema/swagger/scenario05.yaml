@@ -59,6 +59,7 @@ paths:
 components:
   schemas:
     Pet:
+      description: "Pet details"
       required:
         - id
         - name

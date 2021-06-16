@@ -94,7 +94,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
-            deleteGeneratedFiles("openapipetstore_client.bal");
+            deleteGeneratedFiles("client.bal");
         }
     }
 
