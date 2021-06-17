@@ -53,7 +53,7 @@ public class QueryParameterTests {
     @Test(description = "Generate Client for query parameter has default value")
     public void generateQueryParamwithDefault() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_default_value.yaml");
-        Path generatedPath = RES_DIR.resolve("swagger/query_param_with_default_value.bal");
+        Path generatedPath = RES_DIR.resolve("ballerina/query_param_with_default_value.bal");
         SyntaxTree syntaxTree = generateSyntaxTree(definitionPath, filter);
         List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
