@@ -1355,6 +1355,7 @@ public class BallerinaClientGenerator {
                 statementsList.add(updatedPath);
                 isQuery = true;
             }
+
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<any>",
                         "headerValues", headerApiKeyNameList, true));
@@ -1362,6 +1363,25 @@ public class BallerinaClientGenerator {
                         "getMapForHeaders(headerValues)"));
                 isHeader = true;
             }
+        } else {
+            List<String> queryApiKeyNameList = BallerinaAuthConfigGenerator.getQueryApiKeyNameList();
+            List<String> headerApiKeyNameList = BallerinaAuthConfigGenerator.getHeaderApiKeyNameList();
+
+            if (!queryApiKeyNameList.isEmpty()) {
+                statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
+                        "queryParam", queryApiKeyNameList, false));
+                // Add updated path
+                ExpressionStatementNode updatedPath = getSimpleExpressionStatementNode("path = path + " +
+                        "getPathForQueryParam(queryParam)");
+                statementsList.add(updatedPath);
+                isQuery = true;
+            }
+            if (!headerApiKeyNameList.isEmpty()) {
+                statementsList.add(getMapForParameters(new ArrayList<>(), "map<string|string[]>",
+                        "accHeaders", headerApiKeyNameList, true));
+                isHeader = false;
+            }
+
         }
 
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
