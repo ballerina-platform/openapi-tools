@@ -21,6 +21,7 @@ package io.ballerina.generators;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.BinaryExpressionNode;
 import io.ballerina.compiler.syntax.tree.BlockStatementNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
@@ -121,6 +122,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createAnnotationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createAssignmentStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createBinaryExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBlockStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
@@ -174,6 +176,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.IF_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.IN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.IS_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.LOGICAL_OR_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
@@ -214,6 +217,7 @@ public class BallerinaClientGenerator {
     private static Filter filters;
     private static List<ImportDeclarationNode> imports = new ArrayList<>();
     private static boolean isQuery;
+    private static boolean isHeader;
     private static Info info;
     private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
     private static OpenAPI openAPI;
@@ -255,11 +259,18 @@ public class BallerinaClientGenerator {
             FunctionDefinitionNode queryParamFunction = getQueryParamPath();
 
             nodes.add(queryParamFunction);
+            if (isHeader) {
+                FunctionDefinitionNode headerMap = generateFunctionForHeaderMap();
+                nodes.add(headerMap);
+            }
             modulePartNode = createModulePartNode(importsList,
                     createNodeList(nodes),
                     createToken(EOF_TOKEN));
-
         } else {
+            if (isHeader) {
+                FunctionDefinitionNode headerMap = generateFunctionForHeaderMap();
+                nodes.add(headerMap);
+            }
             NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
             modulePartNode = createModulePartNode(importsList, createNodeList(nodes),
                     createToken(EOF_TOKEN));
@@ -1292,7 +1303,7 @@ public class BallerinaClientGenerator {
     public static FunctionBodyNode getFunctionBodyNode(String path, Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        boolean isHeader = false;
+        isHeader = false;
         // Create statements
         List<StatementNode> statementsList =  new ArrayList<>();
         // -- create variable declaration
@@ -1345,8 +1356,10 @@ public class BallerinaClientGenerator {
                 isQuery = true;
             }
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
-                statementsList.add(getMapForParameters(headerParameters, "map<string|string[]>",
-                        "accHeaders", headerApiKeyNameList, true));
+                statementsList.add(getMapForParameters(headerParameters, "map<any>",
+                        "headerValues", headerApiKeyNameList, true));
+                statementsList.add(getSimpleExpressionStatementNode("map<string|string[]> accHeaders = " +
+                        "getMapForHeaders(headerValues)"));
                 isHeader = true;
             }
         }
@@ -1884,5 +1897,125 @@ public class BallerinaClientGenerator {
         if (configRecord != null) {
             typeDefinitionNodeList.add(configRecord);
         }
+    }
+
+    /** Generate function for functionDefinition Node.
+     *
+     * <pre>
+     *     isolated function getMapForHeaders(map<any> headerParam) returns map<string|string[]> {
+     *     map<string|string[]> headerMap = {};
+     *     foreach var [key, value] in headerParam.entries() {
+     *         if value is string {
+     *             headerMap[key] = value;
+     *         }
+     *     }
+     *     return headerMap;
+     * }
+     * </pre>
+     *
+     * @return functionDefinitionNode
+     */
+    private static FunctionDefinitionNode generateFunctionForHeaderMap() {
+        // API doc for function
+        List<Node> docs = new ArrayList<>();
+        MarkdownDocumentationLineNode functionDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createLiteralValueToken(null,
+                                "Generate header map for given header values.",
+                                createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+        docs.add(functionDescription);
+        MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
+                createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+        docs.add(hashNewLine);
+        // Create client init description
+        MarkdownParameterDocumentationLineNode queryParam = createParamAPIDoc("headerParam",
+                "Headers  map");
+        docs.add(queryParam);
+        MarkdownParameterDocumentationLineNode returnDoc = createParamAPIDoc("return",
+                "Returns generated map or error at failure of client initialization");
+        docs.add(returnDoc);
+
+        MarkdownDocumentationNode functionDoc = createMarkdownDocumentationNode(createNodeList(docs));
+        MetadataNode metadataNode = createMetadataNode(functionDoc, createEmptyNodeList());
+
+        Token functionKeyWord = createIdentifierToken("isolated function");
+        IdentifierToken functionName = createIdentifierToken(" getMapForHeaders");
+        FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
+                createSeparatedNodeList(createRequiredParameterNode(createEmptyNodeList(),
+                        createIdentifierToken("map<any> "),
+                        createIdentifierToken(" headerParam"))),
+                createToken(CLOSE_PAREN_TOKEN),
+                createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
+                        createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(
+                                null, createIdentifierToken("map<string|string[]>"))));
+
+        List<StatementNode> statementNodes = new ArrayList<>();
+        VariableDeclarationNode headerMap = getSimpleStatement("map<string|string[]>",
+                "headerMap", "{}");
+        statementNodes.add(headerMap);
+        // Create foreach loop
+        Token forEachKeyWord = createToken(FOREACH_KEYWORD);
+
+        BuiltinSimpleNameReferenceNode type = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken(" var"));
+        ListBindingPatternNode bindingPattern =
+                createListBindingPatternNode(createToken(OPEN_BRACKET_TOKEN),
+                        createSeparatedNodeList(createCaptureBindingPatternNode(
+                                createIdentifierToken("key")), createToken(COMMA_TOKEN),
+                                createCaptureBindingPatternNode(createIdentifierToken("value"))),
+                        createToken(CLOSE_BRACKET_TOKEN));
+
+        TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(type,
+                bindingPattern);
+
+        Token inKeyWord = createToken(IN_KEYWORD);
+        SimpleNameReferenceNode expr = createSimpleNameReferenceNode(createIdentifierToken(" headerParam"));
+        Token dotToken = createToken(DOT_TOKEN);
+        SimpleNameReferenceNode methodName = createSimpleNameReferenceNode(createIdentifierToken("entries"));
+        MethodCallExpressionNode actionOrExpr = createMethodCallExpressionNode(expr, dotToken, methodName
+                , createToken(OPEN_PAREN_TOKEN), createSeparatedNodeList(), createToken(CLOSE_PAREN_TOKEN));
+        //Foreach block statement
+        List<StatementNode> foreachBlock = new ArrayList<>();
+        // if-else statements
+        Token ifKeyWord = createToken(IF_KEYWORD);
+        // Create 'value is string' statement
+        SimpleNameReferenceNode expression = createSimpleNameReferenceNode(createIdentifierToken(" value "));
+        Token isKeyWord = createToken(IS_KEYWORD);
+        BuiltinSimpleNameReferenceNode lhd = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken(" string"));
+        TypeTestExpressionNode lhdCondition = createTypeTestExpressionNode(expression, isKeyWord,
+                lhd);
+        // Create 'value is string[]' statement
+        BuiltinSimpleNameReferenceNode rhd = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken(" string[]"));
+        TypeTestExpressionNode rhdCondition = createTypeTestExpressionNode(expression, isKeyWord,
+                rhd);
+
+        BinaryExpressionNode mainCondition = createBinaryExpressionNode(null, lhdCondition,
+                createToken(LOGICAL_OR_TOKEN), rhdCondition);
+        ExpressionStatementNode assignStatement = getSimpleExpressionStatementNode("headerMap[key] = value");
+        BlockStatementNode ifBlockStatementMain = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
+                createNodeList(assignStatement), createToken(CLOSE_BRACE_TOKEN));
+        IfElseStatementNode ifElseStatementNode =
+                createIfElseStatementNode(ifKeyWord, mainCondition, ifBlockStatementMain, null);
+        foreachBlock.add(ifElseStatementNode);
+        BlockStatementNode forEachBlockStatement = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
+                createNodeList(foreachBlock), createToken(CLOSE_BRACE_TOKEN));
+
+        ForEachStatementNode forEachStatementNode = createForEachStatementNode(forEachKeyWord,
+                typedBindingPatternNode, inKeyWord, actionOrExpr, forEachBlockStatement, null);
+
+        statementNodes.add(forEachStatementNode);
+
+        // return statement
+        ExpressionStatementNode returnHeaderMap = getSimpleExpressionStatementNode("return headerMap");
+        statementNodes.add(returnHeaderMap);
+
+        FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
+                null, createNodeList(statementNodes), createToken(CLOSE_BRACE_TOKEN));
+
+        return createFunctionDefinitionNode(FUNCTION_DEFINITION, metadataNode, createEmptyNodeList(), functionKeyWord,
+                functionName, createEmptyNodeList(), functionSignatureNode, functionBodyNode);
+
     }
 }
