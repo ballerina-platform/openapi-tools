@@ -30,7 +30,7 @@ public client class Client {
     remote isolated function getWeatherForecast(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string? exclude = (), @display {label: "Units"} int? units = 12, @display {label: "Language"} string? lang = ()) returns WeatherForecast|error {
         string  path = string `/onecall`;
         map<anydata> queryParam = {lat: lat, lon: lon, exclude: exclude, units: units, lang: lang, appid: self.apiKeys["appid"]};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         WeatherForecast response = check self.clientEp-> get(path, targetType = WeatherForecast);
         return response;
     }
@@ -40,7 +40,7 @@ public client class Client {
 #
 # + queryParam - Query parameter map
 # + return - Returns generated Path or error at failure of client initialization
-isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
+isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string|error {
     string[] param = [];
     param[param.length()] = "?";
     foreach  var [key, value] in  queryParam.entries() {
@@ -54,7 +54,7 @@ isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  str
             }
             param[param.length()] = "=";
             if  value  is  string {
-                string updateV =  checkpanic url:encode(value, "UTF-8");
+                string updateV =  check url:encode(value, "UTF-8");
                 param[param.length()] = updateV;
             } else {
                 param[param.length()] = value.toString();

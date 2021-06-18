@@ -26,7 +26,7 @@ public client class Client {
     remote isolated function  pets(int offset) returns http:Response | error {
         string  path = string `/pets`;
         map<anydata> queryParam = {offset: offset};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Response  response = check self.clientEp->get(path, targetType = http:Response );
         return response;
     }
@@ -40,7 +40,7 @@ public client class Client {
     remote isolated function getImage(string? tag, int? 'limit) returns http:Response | error {
         string  path = string `/image`;
         map<anydata> queryParam = {tag: tag, 'limit: 'limit};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Response  response = check self.clientEp->get(path, targetType = http:Response );
         return response;
     }
@@ -52,7 +52,7 @@ public client class Client {
     }
 }
 
-isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
+isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string|error {
     string[] param = [];
     param[param.length()] = "?";
     foreach  var [key, value] in  queryParam.entries() {
@@ -66,7 +66,7 @@ isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  str
             }
             param[param.length()] = "=";
             if  value  is  string {
-                string updateV =  checkpanic url:encode(value, "UTF-8");
+                string updateV =  check url:encode(value, "UTF-8");
                 param[param.length()] = updateV;
             } else {
                 param[param.length()] = value.toString();
