@@ -1,849 +1,677 @@
 openapi: 3.0.0
 servers:
-  - url: https://disease.sh
+  - url: http://api.sendgrid.com/v3
+  - url: https://api.sendgrid.com/v3
 info:
-  version: 3.0.0
-  title: Novel Covid19 API - Disease.sh - An open API for disease-related statistics
-  description: Third Party API for reliable global disease information
-  license:
-    name: GNU V3
-    url: 'https://github.com/disease-sh/API/blob/master/LICENSE'
-tags:
-  - name: 'COVID-19: Worldometers'
-    description: '(COVID-19 data sourced from Worldometers, updated every 10 minutes)'
-  - name: 'COVID-19: Vaccine'
-    description: '(COVID-19 vaccine trial data from raps.org, updated every 24 hours)'
-
-paths:
-  /v3/covid-19/all:
-    get:
-      tags:
-        - 'COVID-19: Worldometers'
-      operationId: getGlobalStatus
-      parameters:
-        - name: yesterday
-          description: Queries data reported a day ago
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            type: string
-        - name: twoDaysAgo
-          description: Queries data reported two days ago
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            type: string
-        - name: allowNull
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            type: string
-          description: 'By default, if a value is missing, it is returned as 0. This allows nulls to be returned'
-      description: 'Get global COVID-19 totals for today, yesterday and two days ago'
-      responses:
-        '200':
-          description: Status OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CovidAll'
-  '/v3/covid-19/states/{states}':
-    get:
-      tags:
-        - 'COVID-19: Worldometers'
-      operationId: getUSAStatusByState
-      parameters:
-        - name: states
-          in: path
-          required: true
-          description: State name or comma separated names spelled correctly
-          schema:
-            type: string
-        - name: yesterday
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            description: Queries data reported a day ago
-            type: string
-        - name: allowNull
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            description: 'By default, if a value is missing, it is returned as 0. This allows nulls to be returned'
-            type: string
-      description: Get COVID-19 totals for specific US State(s)
-      responses:
-        '200':
-          description: Status OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CovidState'
-  '/v3/covid-19/continents/{continent}':
-    get:
-      tags:
-        - 'COVID-19: Worldometers'
-      operationId: getStatusByContinent
-      parameters:
-        - name: continent
-          in: path
-          required: true
-          description: Continent name
-          schema:
-            type: string
-        - name: yesterday
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            description: Queries data reported a day ago
-            type: string
-        - name: twoDaysAgo
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            description: Queries data reported two days ago
-            type: string
-        - name: strict
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-            default: 'true'
-            description: Setting to false gives you the ability to fuzzy search continents (i.e. Oman vs. rOMANia)
-            type: string
-        - name: allowNull
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            description: 'By default, if a value is missing, it is returned as 0. This allows nulls to be returned'
-            type: string
-      description: Get COVID-19 totals for a specific continent
-      responses:
-        '200':
-          description: Status OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CovidContinent'
-  '/v3/covid-19/countries/{country}':
-    get:
-      tags:
-        - 'COVID-19: Worldometers'
-      operationId: getStatusByCountry
-      parameters:
-        - name: country
-          in: path
-          required: true
-          description: 'A country name, iso2, iso3, or country ID code'
-          schema:
-            type: string
-        - name: yesterday
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            description: Queries data reported a day ago
-            type: string
-        - name: twoDaysAgo
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            description: Queries data reported two days ago
-            type: string
-        - name: strict
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-            default: 'true'
-            description: Setting to false gives you the ability to fuzzy search countries (i.e. Oman vs. rOMANia)
-            type: string
-        - name: allowNull
-          in: query
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-              - '1'
-              - '0'
-            description: 'By default, if a value is missing, it is returned as 0. This allows nulls to be returned'
-            type: string
-      description: Get COVID-19 totals for a specific country
-      responses:
-        '200':
-          description: Status OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CovidCountry'
-  /v3/covid-19/historical/all:
-    get:
-      tags:
-        - 'COVID-19: JHUCSSE'
-      operationId: getGlobalStatusInTimeSeries
-      parameters:
-        - name: lastdays
-          in: query
-          description: 'Number of days to return. Use ''all'' for the full data set (e.g. 15, all, 24)'
-          schema:
-            type: string
-      description: Get global accumulated COVID-19 time series data
-      responses:
-        '200':
-          description: Status Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CovidHistoricalAll'
-  '/v3/covid-19/historical/{country}':
-    get:
-      tags:
-        - 'COVID-19: JHUCSSE'
-      operationId: getTimeSeriesbycountry
-      parameters:
-        - name: country
-          in: path
-          required: true
-          description: 'A country name, iso2, iso3, or country ID code'
-          schema:
-            type: string
-        - name: lastdays
-          in: query
-          description: 'Number of days to return. Use ''all'' for the full data set (e.g. 15, all, 24)'
-          schema:
-            type: string
-            default: 30
-      description: Get COVID-19 time series data for a specific country
-      responses:
-        '200':
-          description: Status Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CovidHistoricalCountry'
-  '/v3/covid-19/historical/{country}/{province}':
-    get:
-      tags:
-        - 'COVID-19: JHUCSSE'
-      operationId: getTimeSeriesByProvince
-      parameters:
-        - name: country
-          in: path
-          required: true
-          description: 'A country name, iso2, iso3, or country ID code'
-          schema:
-            type: string
-        - name: province
-          in: path
-          required: true
-          description: 'Province name. All available names can be found in the /v3/covid-19/historical/{query} endpoint'
-          schema:
-            type: string
-        - name: lastdays
-          in: query
-          description: 'Number of days to return. Use ''all'' for the full data set (e.g. 15, all, 24)'
-          schema:
-            type: string
-            default: 30
-      description: Get COVID-19 time series data for a specific province in a country
-      responses:
-        '200':
-          description: Status Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CovidHistoricalProvince'
-  /v3/covid-19/vaccine:
-    get:
-      tags:
-        - 'COVID-19: Vaccine'
-      operationId: getVaccineTrialData
-      description: 'Get vaccine trial data from RAPS (Regulatory Affairs Professional Society).'
-      responses:
-        '200':
-          description: Status Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Vaccines'
-  /v3/covid-19/vaccine/coverage:
-    get:
-      tags:
-        - 'COVID-19: Vaccine'
-      operationId: getTotalGlobalVaccineDosesAdministered
-      parameters:
-        - name: lastdays
-          in: query
-          description: 'Number of days to return. Use ''all'' for the full data set (e.g. 15, all, 24)'
-          schema:
-            type: string
-            default: 30
-        - name: fullData
-          in: query
-          description: Flag indicating whether to return data type as SimpleVaccineTimeline (false) or FullVaccineTimeline (true).
-          schema:
-            type: string
-            default: 'false'
-      description: 'Get total global COVID-19 Vaccine doses administered.'
-      responses:
-        '200':
-          description: Status Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VaccineCoverage'
-              examples:
-                simpleTimeline:
-                  $ref: '#/components/examples/SimpleVaccineTimeline'
-                fullTimeline:
-                  $ref: '#/components/examples/FullVaccineTimeline'
-  '/v3/covid-19/vaccine/coverage/countries/{country}':
-    get:
-      tags:
-        - 'COVID-19: Vaccine'
-      operationId: getVaccineCoverageByCountry
-      parameters:
-        - name: country
-          in: path
-          required: true
-          description: 'A valid country name, iso2, iso3'
-          schema:
-            type: string
-        - name: lastdays
-          in: query
-          description: 'Number of days to return. Use ''all'' for the full data set (e.g. 15, all, 24)'
-          schema:
-            type: string
-            default: 30
-        - name: fullData
-          in: query
-          description: Flag indicating whether to return timeline data type as SimpleVaccineTimeline (false) or FullVaccineTimeline (true).
-          schema:
-            type: string
-            default: 'false'
-      description: 'Get COVID-19 vaccine doses administered for a country that has reported vaccination rollout.'
-      responses:
-        '200':
-          description: Status Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VaccineCountryCoverage'
-              examples:
-                simpleTimeline:
-                  $ref: '#/components/examples/countrySimpleVaccineTimeline'
-                fullTimeline:
-                  $ref: '#/components/examples/countryFullVaccineTimeline'
-components:
-  schemas:
-    CovidAll:
-      properties:
-        updated:
-          type: number
-          description: Last updated timestamp
-        cases:
-          type: number
-          description: Total cases
-        todayCases:
-          type: number
-          description: Today cases
-        deaths:
-          type: number
-          description: Total deaths
-        todayDeaths:
-          type: number
-          description: Today deaths
-        recovered:
-          type: number
-          description: Total recovered
-        todayRecovered:
-          type: number
-          description: Today recovered
-        active:
-          type: number
-          description: Active cases
-        critical:
-          type: number
-          description: Critical cases
-        casesPerOneMillion:
-          type: number
-          description: Cases per one million
-        deathsPerOneMillion:
-          type: number
-          description: Deaths per one million
-        tests:
-          type: number
-          description: Total number of Covid-19 tests administered
-        testsPerOneMillion:
-          type: number
-          description: Covid-19 tests for one million
-        population:
-          type: number
-          description: World population
-        oneCasePerPeople:
-          type: number
-          description: One case per people
-        oneDeathPerPeople:
-          type: number
-          description: One deaths per people
-        oneTestPerPeople:
-          type: number
-          description: One tests per people
-        activePerOneMillion:
-          type: number
-          description: Active cases per one million
-        recoveredPerOneMillion:
-          type: number
-          description: Recovered cases per one million
-        criticalPerOneMillion:
-          type: number
-          description: Critical cases per one million
-        affectedCountries:
-          type: number
-          description: Affected countries
-      description: Covid-19 global status
-    CovidState:
-      properties:
-        state:
-          type: string
-          description: State name
-        updated:
-          type: number
-          description: Updated time stamp
-        cases:
-          type: number
-          description: Total cases
-        todayCases:
-          type: number
-          description: Today cases
-        deaths:
-          type: number
-          description: Total deaths
-        todayDeaths:
-          type: number
-          description: Today deaths
-        active:
-          type: number
-          description: Active cases
-        casesPerOneMillion:
-          type: number
-          description: Cases per one million
-        deathsPerOneMillion:
-          type: number
-          description: Deaths per one million
-        tests:
-          type: number
-          description: Total number of Covid-19 tests administered
-        testsPerOneMillion:
-          type: number
-          description: Covid-19 tests for one million
-        population:
-          type: number
-          description: Population of the state
-      description: Covid-19 status in the given USA state
-    CovidContinent:
-      properties:
-        updated:
-          type: number
-          description: Last updated timestamp
-        cases:
-          type: number
-          description: Total cases
-        todayCases:
-          type: number
-          description: Today cases
-        deaths:
-          type: number
-          description: Total deaths
-        todayDeaths:
-          type: number
-          description: Today deaths
-        recovered:
-          type: number
-          description: Total recovered
-        todayRecovered:
-          type: number
-          description: Today recovered
-        active:
-          type: number
-          description: Active cases
-        critical:
-          type: number
-          description: Critical cases
-        casesPerOneMillion:
-          type: number
-          description: Cases per one million
-        deathsPerOneMillion:
-          type: number
-          description: Deaths per one million
-        tests:
-          type: number
-          description: Total number of Covid-19 tests administered
-        testsPerOneMillion:
-          type: number
-          description: Tests per one milliom
-        population:
-          type: number
-          description: Population of the continent
-        continent:
-          type: string
-          description: Continent name
-        activePerOneMillion:
-          type: number
-          description: Active cases per one million
-        recoveredPerOneMillion:
-          type: number
-          description: Recovered cases per one million
-        criticalPerOneMillion:
-          type: number
-          description: Critical cases per one million
-        continentInfo:
-          description: Continent information
-          type: object
-          properties:
-            lat:
-              type: number
-              description: Latitude
-            long:
-              type: number
-              description: Longtitude
-        countries:
-          description: List of countries in the continent
-          type: array
-          items:
-            type: string
-      description: Covid-19 status of the given continent
-    CovidCountry:
-      properties:
-        updated:
-          type: number
-        country:
-          type: string
-        countryInfo:
-          type: object
-          properties:
-            _id:
-              type: number
-              uniqueItems: true
-            iso2:
-              type: string
-              uniqueItems: true
-            iso3:
-              type: string
-              uniqueItems: true
-            lat:
-              type: number
-            long:
-              type: number
-            flag:
-              type: string
-        cases:
-          type: number
-        todayCases:
-          type: number
-        deaths:
-          type: number
-        todayDeaths:
-          type: number
-        recovered:
-          type: number
-        todayRecovered:
-          type: number
-        active:
-          type: number
-        critical:
-          type: number
-        casesPerOneMillion:
-          type: number
-        deathsPerOneMillion:
-          type: number
-        tests:
-          type: number
-        testsPerOneMillion:
-          type: number
-        population:
-          type: number
-        continent:
-          type: string
-        oneCasePerPeople:
-          type: number
-        oneDeathPerPeople:
-          type: number
-        oneTestPerPeople:
-          type: number
-        activePerOneMillion:
-          type: number
-        recoveredPerOneMillion:
-          type: number
-        criticalPerOneMillion:
-          type: number
-      description: Covid-19 status of the given country
-    CovidHistoricalAll:
-      description: 'The amount of key-value pairs in ''cases'', ''deaths'' and ''recovered'' is dependent on the ''lastdays'' query'
-      properties:
-        cases:
-          type: object
-          properties:
-            date:
-              type: number
-        deaths:
-          type: object
-          properties:
-            date:
-              type: number
-        recovered:
-          type: object
-          properties:
-            date:
-              type: number
-    CovidHistoricalCountry:
-      properties:
-        country:
-          type: string
-        province:
-          type: array
-          items:
-            type: string
-        timeline:
-          type: object
-          description: 'The amount of key-value pairs in ''cases'', ''deaths'' and ''recovered'' is dependent on the ''lastdays'' query'
-          properties:
-            cases:
-              type: object
-              properties:
-                date:
-                  type: number
-            deaths:
-              type: object
-              properties:
-                date:
-                  type: number
-            recovered:
-              type: object
-              properties:
-                date:
-                  type: number
-      description: Covid-19 historical data of the given country
-    CovidHistoricalProvince:
-      properties:
-        country:
-          type: string
-        province:
-          type: string
-        timeline:
-          type: object
-          description: 'The amount of key-value pairs in ''cases'', ''deaths'' and ''recovered'' is dependent on the ''lastdays'' query'
-          properties:
-            cases:
-              type: object
-              properties:
-                date:
-                  type: number
-            deaths:
-              type: object
-              properties:
-                date:
-                  type: number
-            recovered:
-              type: object
-              properties:
-                date:
-                  type: number
-      description: Covid-19 historical data of the given province
-    Vaccines:
-      properties:
-        source:
-          type: string
-        totalCandidates:
-          type: string
-        phases:
-          type: array
-          items:
-            $ref: '#/components/schemas/Phases'
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Vaccine'
-      description: Covid19-19 vaccine trial data
-    Vaccine:
-      properties:
-        candidate:
-          type: string
-        mechanism:
-          type: string
-        sponsors:
-          type: array
-          items:
-            type: string
-        details:
-          type: string
-        trialPhase:
-          type: string
-        institutions:
-          type: array
-          items:
-            type: string
-      description: Covid-19 vaccine related data
-    Phases:
-      properties:
-        phase:
-          type: string
-        candidates:
-          type: string
-    VaccineCoverage:
-      oneOf:
-        - $ref: '#/components/schemas/SimpleVaccineTimeline'
-        - $ref: '#/components/schemas/FullVaccineTimeline'
-      description: Covid-19 vaccine coverage related data
-    VaccineCountryCoverage:
-      type: object
-      properties:
-        country:
-          type: string
-        timeline:
-          oneOf:
-            - $ref: '#/components/schemas/SimpleVaccineTimeline'
-            - $ref: '#/components/schemas/FullVaccineTimeline'
-    SimpleVaccineTimeline:
-      type: object
-      properties:
-        date:
-          type: number
-      description: Covid-19 Vaccine timeline briefly
-    FullVaccineTimeline:
-      type: array
-      items:
-        type: object
-        properties:
-          total:
-            type: number
-          daily:
-            type: number
-          totalPerHundred:
-            type: number
-          dailyPerMillion:
-            type: number
-          date:
-            type: string
-      description: Descriptive Covid-19 vaccine timeline
-  examples:
-    countriesSimpleVaccineTimeline:
-      value:
-        - country: USA
-          timeline:
-            4/25/2021: 1000
-      summary: Simple Vaccine Timeline
-    countriesFullVaccineTimeline:
-      value:
-        - country: USA
-          timeline:
-            - total: 1000
-              daily: 1000
-              totalPerHundred: 1000
-              dailyPerMillion: 1000
-              date: 4/25/2021
-      summary: Full Vaccine Timeline
-    countrySimpleVaccineTimeline:
-      value:
-        country: USA
-        timeline:
-          4/25/2021: 1000
-      summary: Simple Vaccine Timeline
-    countryFullVaccineTimeline:
-      value:
-        country: USA
-        timeline:
-          - total: 1000
-            daily: 1000
-            totalPerHundred: 1000
-            dailyPerMillion: 1000
-            date: 4/25/2021
-      summary: Full Vaccine Timeline
-    statesSimpleVaccineTimeline:
-      value:
-        - state: California
-          timeline:
-            4/25/2021: 1000
-      summary: Simple Vaccine Timeline
-    statesFullVaccineTimeline:
-      value:
-        - state: California
-          timeline:
-            - total: 1000
-              daily: 1000
-              totalPerHundred: 1000
-              dailyPerMillion: 1000
-              date: 4/25/2021
-      summary: Full Vaccine Timeline
-    stateSimpleVaccineTimeline:
-      value:
-        state: California
-        timeline:
-          4/25/2021: 1000
-      summary: Simple Vaccine Timeline
-    stateFullVaccineTimeline:
-      value:
-        state: California
-        timeline:
-          - total: 1000
-            daily: 1000
-            totalPerHundred: 1000
-            dailyPerMillion: 1000
-            date: 4/25/2021
-      summary: Full Vaccine Timeline
-    SimpleVaccineTimeline:
-      value:
-        4/25/2021: 1000
-      summary: Simple Vaccine Timeline
-    FullVaccineTimeline:
-      value:
-        - total: 1000
-          daily: 1000
-          totalPerHundred: 1000
-          dailyPerMillion: 1000
-          date: 4/25/2021
-      summary: Full Vaccine Timeline
+  title: SendGrid v3 API Documentation
+  version: "3.0"
+  x-apisguru-categories:
+    - email
+    - marketing
+  x-logo:
+    url: https://user-images.githubusercontent.com/21603/27865240-b4c0da22-6189-11e7-9f2c-f35f4c6fa57c.png
+  x-origin:
+    - format: openapi
+      url: https://raw.githubusercontent.com/sendgrid/sendgrid-oai/main/oai.json
+      version: "3.0"
+  x-providerName: sendgrid.com
 externalDocs:
-  description: Find out more about this API
-  url: 'https://github.com/disease-sh/API'
+  url: https://sendgrid.com/docs/API_Reference/Web_API_v3/index.html
+paths:
+  /sendEmail:
+    post:
+      tags:
+        - SendEmail
+      description: "Send an email to given recipient"
+      operationId: sendEmail
+      x-display:
+        label: "Send Email"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                recipient:
+                  type: string
+                  description: "The recipient of the mail"
+                  x-display: "Recipient"
+                subject:
+                  type: string
+                  description: "The subject of the mail"
+                  x-display:  "Subject"
+                body:
+                  type: string
+                  description: "The message body of the mail"
+                  x-display: "Message Body"
+                cc:
+                  type: string
+                  description: "The cc recipient of the mail. Optional"
+                  x-display: "Cc"
+                bcc:
+                  type: string
+                  description: "The bcc recipient of the mail. Optional"
+                  x-display: "Bcc"
+              required:
+                - recipient
+                - subject
+                - body
+      responses:
+        '200':
+          description: "If success, returns the message id, else return an error"
+          content:
+            application/json:
+              schema:
+                type: string
+  /alerts:
+    get:
+      operationId: getAlerts
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    - created_at: 1451498784
+                      email_to: example1@example.com
+                      id: 46
+                      percentage: 90
+                      type: number
+                      updated_at: 1451498784
+                    - created_at: 1451498812
+                      email_to: example2@example.com
+                      frequency: monthly
+                      id: 47
+                      type: number
+                      updated_at: 1451498812
+                    - created_at: 1451520930
+                      email_to: example3@example.com
+                      frequency: daily
+                      id: 48
+                      type: number
+                      updated_at: 1451520930
+              schema:
+                description: The list of alerts.
+                items:
+                  $ref: "#/components/schemas/GetAlertsResponse"
+                type: array
+          description: ""
+      security:
+        - Authorization: []
+      summary: Retrieve all alerts
+      tags:
+        - Alerts
+    post:
+      operationId: postAlerts
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      requestBody:
+        $ref: "#/components/requestBodies/postAlertBody"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostAlertsResponse"
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+                type: object
+          description: ""
+      security:
+        - Authorization: []
+      summary: Create a new Alert
+      tags:
+        - Alerts
+  "/alerts/{alert_id}":
+    delete:
+      operationId: deleteAlertsById
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      responses:
+        "204":
+          description: "No Content"
+      security:
+        - Authorization: []
+      summary: Delete an alert
+      tags:
+        - Alerts
+    get:
+      operationId: getAlertsById
+      parameters:
+        - $ref: "#/components/parameters/traitOnBehalfOfSubUser"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    created_at: 1451520930
+                    email_to: example@example.com
+                    frequency: daily
+                    id: 48
+                    type: number
+                    updated_at: 1451520930
+              schema:
+                $ref: "#/components/schemas/GetAlertByIdResponse"
+          description: ""
+      security:
+        - Authorization: []
+      summary: Retrieve a specific alert
+      tags:
+        - Alerts
+    parameters:
+      - description: The ID of the alert you would like to retrieve.
+        in: path
+        name: alert_id
+        required: true
+        schema:
+          type: integer
+components:
+  parameters:
+    traitOnBehalfOfSubUser:
+      in: header
+      name: on-behalf-of
+      schema:
+        default: subuser_<user_name>
+        type: string
+      required: true
+  requestBodies:
+    MailSendDetails:
+      description: ""
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/EmailContent"
+    GET_alertsBody:
+      content:
+        application/json:
+          schema:
+            nullable: true
+    getAlertsBody:
+      content:
+        application/json:
+          schema:
+            nullable: true
+    postAlertBody:
+      content:
+        application/json:
+          schema:
+            example:
+              email_to: example@example.com
+              frequency: daily
+              type: number
+            properties:
+              email_to:
+                description: |-
+                  The email address the alert will be sent to.
+                nullable: true
+                type: string
+              frequency:
+                description: |-
+                  Required for stats_notification. How frequently the alert will be sent.
+                type: string
+              percentage:
+                description: |-
+                  Required for usage_alert. When this usage threshold is reached, the alert will be sent.
+                  Example: 90
+                type: integer
+              type:
+                description: |-
+                  The type of alert you want to create. Can be either usage_limit or stats_notification.
+                enum:
+                  - stats_notification
+                  - usage_limit
+                type: string
+            required:
+              - type
+              - email_to
+            type: object
+    patchAlertBody:
+      content:
+        application/json:
+          schema:
+            example:
+              email_to: example@example.com
+            properties:
+              email_to:
+                description: |-
+                  The new email address you want your alert to be sent to.
+                  Example: test@example.com
+                type: string
+              frequency:
+                description: |-
+                  The new frequency at which to send the stats_notification alert.
+                  Example: monthly
+                type: string
+              percentage:
+                description: |-
+                  The new percentage threshold at which the usage_limit alert will be sent.
+                  Example: 90
+                type: integer
+            type: object
+  schemas:
+    errors:
+      properties:
+        errors:
+          items:
+            properties:
+              field:
+                description: The field that has the error.
+                nullable: true
+                type: string
+              message:
+                description: The message the API caller will receive.
+                type: string
+            type: object
+          type: array
+      title: Error Schema
+      type: object
+    EmailContent:
+      properties:
+        asm:
+          description: An object allowing you to specify how to handle unsubscribes.
+          properties:
+            group_id:
+              description: The unsubscribe group to associate with this email.
+              type: integer
+            groups_to_display:
+              description: An array containing the unsubscribe groups that you would like to be displayed on the unsubscribe preferences page.
+              items:
+                type: integer
+              maxItems: 25
+              type: array
+          required:
+            - group_id
+          type: object
+        attachments:
+          description: An array of objects in which you can specify any attachments you want to include.
+          items:
+            properties:
+              content:
+                description: The Base64 encoded content of the attachment.
+                minLength: 1
+                type: string
+              content_id:
+                description: The content id for the attachment. This is used when the disposition is set to “inline” and the attachment is an image, allowing the file to be displayed within the body of your email.
+                type: string
+              disposition:
+                default: attachment
+                description: The content-disposition of the attachment specifying how you would like the attachment to be displayed. For example, “inline” results in the attached file being displayed automatically within the message while “attachment” results in the attached file requiring some action to be taken before it is displayed (e.g. opening or downloading the file).
+                enum:
+                  - inline
+                  - attachment
+                type: string
+              filename:
+                description: The filename of the attachment.
+                type: string
+              type:
+                description: The mime type of the content you are attaching. For example, “text/plain” or “text/html”.
+                minLength: 1
+                type: string
+            required:
+              - content
+              - filename
+            type: object
+          type: array
+        batch_id:
+          type: string
+        categories:
+          description: "An array of category names for this message. Each category name may not exceed 255 characters. "
+          items:
+            maxLength: 255
+            type: string
+          maxItems: 10
+          type: array
+          uniqueItems: true
+        content:
+          items:
+            properties:
+              type:
+                description: The mime type of the content you are including in your email. For example, “text/plain” or “text/html”.
+                minLength: 1
+                type: string
+              value:
+                description: The actual content of the specified mime type that you are including in your email.
+                minLength: 1
+                type: string
+            required:
+              - type
+              - value
+            type: object
+          type: array
+        custom_args:
+          type: object
+        from:
+          $ref: "#/components/schemas/email_object"
+        headers:
+          type: object
+        ip_pool_name:
+          description: The IP Pool that you would like to send this email from.
+          maxLength: 64
+          minLength: 2
+          type: string
+        mail_settings:
+          description: A collection of different mail settings that you can use to specify how you would like this email to be handled.
+          properties:
+            bcc:
+              description: This allows you to have a blind carbon copy automatically sent to the specified email address for every email that is sent.
+              properties:
+                email:
+                  description: The email address that you would like to receive the BCC.
+                  format: email
+                  type: string
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+              type: object
+            bypass_list_management:
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+              type: object
+            footer:
+              description: The default footer that you would like included on every email.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                html:
+                  description: The HTML content of your footer.
+                  type: string
+                text:
+                  description: The plain text content of your footer.
+                  type: string
+              type: object
+            sandbox_mode:
+              description: This allows you to send a test email to ensure that your request body is valid and formatted correctly.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+              type: object
+            spam_check:
+              description: This allows you to test the content of your email for spam.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                post_to_url:
+                  description: An Inbound Parse URL that you would like a copy of your email along with the spam report to be sent to.
+                  type: string
+                threshold:
+                  maximum: 10
+                  minimum: 1
+                  type: integer
+              type: object
+          type: object
+        personalizations:
+          items:
+            properties:
+              bcc:
+                items:
+                  $ref: "#/components/schemas/email_object"
+                maxItems: 1000
+                type: array
+              cc:
+                items:
+                  $ref: "#/components/schemas/email_object"
+                maxItems: 1000
+                type: array
+              custom_args:
+                type: object
+              headers:
+                type: object
+              send_at:
+                description: A unix timestamp allowing you to specify when you want your email to be delivered. Scheduling more than 72 hours in advance is forbidden.
+                type: integer
+              subject:
+                description: The subject of your email. Char length requirements, according to the RFC - http://stackoverflow.com/questions/1592291/what-is-the-email-subject-length-limit#answer-1592310
+                minLength: 1
+                type: string
+              substitutions:
+                maxProperties: 10000
+                type: object
+              to:
+                description: An array of recipients. Each object within this array may contain the name, but must always contain the email, of a recipient.
+                items:
+                  $ref: "#/components/schemas/email_object"
+                maxItems: 1000
+                minItems: 1
+                type: array
+            required:
+              - to
+            type: object
+          maxItems: 1000
+          type: array
+          uniqueItems: false
+        reply_to:
+          $ref: "#/components/schemas/email_object"
+        sections:
+          description: An object of key/value pairs that define block sections of code to be used as substitutions.
+          type: object
+        send_at:
+          type: integer
+        subject:
+          description: The global, or “message level”, subject of your email. This may be overridden by personalizations[x].subject.
+          minLength: 1
+          type: string
+        template_id:
+          type: string
+        tracking_settings:
+          description: Settings to determine how you would like to track the metrics of how your recipients interact with your email.
+          properties:
+            click_tracking:
+              description: Allows you to track whether a recipient clicked a link in your email.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                enable_text:
+                  description: Indicates if this setting should be included in the text/plain portion of your email.
+                  type: boolean
+              type: object
+            ganalytics:
+              description: Allows you to enable tracking provided by Google Analytics.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                utm_campaign:
+                  description: "The name of the campaign.\t"
+                  type: string
+                utm_content:
+                  description: "Used to differentiate your campaign from advertisements.\t"
+                  type: string
+                utm_medium:
+                  description: Name of the marketing medium. (e.g. Email)
+                  type: string
+                utm_source:
+                  description: Name of the referrer source. (e.g. Google, SomeDomain.com, or Marketing Email)
+                  type: string
+                utm_term:
+                  description: "Used to identify any paid keywords.\t"
+                  type: string
+              type: object
+            open_tracking:
+              description: Allows you to track whether the email was opened or not, but including a single pixel image in the body of the content. When the pixel is loaded, we can log that the email was opened.
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                substitution_tag:
+                  type: string
+              type: object
+            subscription_tracking:
+              properties:
+                enable:
+                  description: Indicates if this setting is enabled.
+                  type: boolean
+                html:
+                  type: string
+                substitution_tag:
+                  type: string
+                text:
+                  type: string
+              type: object
+          type: object
+      required:
+        - personalizations
+        - from
+        - subject
+        - content
+      type: object
+    email_object:
+      properties:
+        email:
+          format: email
+          type: string
+        name:
+          description: The name of the person to whom you are sending an email.
+          type: string
+      required:
+        - email
+      title: Email Object
+      type: object
+    GetAlertsResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          description: If the alert is of type stats_notification, this indicates how frequently the stats notifications will be sent. For example, "daily", "weekly", or "monthly".
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          description: If the alert is of type usage_limit, this indicates the percentage of email usage that must be reached before the alert will be sent.
+          type: integer
+        type:
+          description: The type of alert.
+          enum:
+            - usage_limit
+            - stats_notification
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+      type: object
+    PostAlertsResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          type: integer
+        type:
+          description: The type of alert.
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+        - updated_at
+      type: object
+    GetAlertByIdResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          description: 'If the alert is of type stats_notification, this indicates how frequently the stats notifications will be sent. For example: "daily", "weekly", or "monthly".'
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          description: If the alert is of type usage_limit, this indicates the percentage of email usage that must be reached before the alert will be sent.
+          type: integer
+        type:
+          description: The type of alert.
+          enum:
+            - usage_alert
+            - stats_notification
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+        - updated_at
+      type: object
+    PatchAlertsResponse:
+      properties:
+        created_at:
+          description: A Unix timestamp indicating when the alert was created.
+          type: integer
+        email_to:
+          description: The email address that the alert will be sent to.
+          type: string
+        frequency:
+          type: string
+        id:
+          description: The ID of the alert.
+          type: integer
+        percentage:
+          description: If the alert is of type usage_limit, this indicates the percentage of email usage that must be reached before the alert will be sent.
+          type: integer
+        type:
+          description: The type of alert.
+          enum:
+            - usage_alert
+            - stats_notification
+          type: string
+        updated_at:
+          description: A Unix timestamp indicating when the alert was last modified.
+          type: integer
+      required:
+        - created_at
+        - email_to
+        - id
+        - type
+        - updated_at
+      type: object
+  securitySchemes:
+    Authorization:
+      in: header
+      name: Authorization
+      type: apiKey

@@ -306,12 +306,14 @@ public class OpenApiConverterUtils {
     private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
 
         for (File file : listFiles) {
-            if (file.getName().equals(openApiName)) {
-                String userInput = System.console().readLine("There is already a/an " + file.getName() +
-                        " in the location. Do you want to override the file? [y/N] ");
-                if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
-                    int duplicateCount = 0;
-                    openApiName = setGeneratedFileName(listFiles, openApiName, duplicateCount, isJson);
+            if (System.console() != null) {
+                if (file.getName().equals(openApiName)) {
+                    String userInput = System.console().readLine("There is already a/an " + file.getName() +
+                            " in the location. Do you want to override the file? [y/N] ");
+                    if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
+                        int duplicateCount = 0;
+                        openApiName = setGeneratedFileName(listFiles, openApiName, duplicateCount, isJson);
+                    }
                 }
             }
         }

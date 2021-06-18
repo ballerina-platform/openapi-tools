@@ -50,22 +50,6 @@ paths:
       responses:
         '200':
           description: An paged array of pets
-  /action:
-    x-MULTI:
-      operationId: getAction
-      responses:
-        '200':
-          description: Successful
-          examples:
-            application/json: Ok
-      x-METHODS:
-        - HEAD
-        - OPTIONS
-        - PATCH
-        - DELETE
-        - POST
-        - PUT
-        - GET
 components:
   schemas:
     Pet:

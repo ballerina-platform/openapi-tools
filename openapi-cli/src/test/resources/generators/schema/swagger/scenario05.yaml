@@ -77,6 +77,5 @@ components:
       properties:
         pets:
           $ref: "#/components/schemas/Pet"
-          description: "Pet details"
         bark:
           type: boolean

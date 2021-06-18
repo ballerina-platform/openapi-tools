@@ -18,6 +18,9 @@
 
 package io.ballerina.generators.schema;
 
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.common.TestUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -34,10 +37,12 @@ import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to AnyDataType handling the {@link io.ballerina.generators.BallerinaSchemaGenerator} util.
+ * All the tests related to OneOF data binding handling the {@link io.ballerina.generators.BallerinaSchemaGenerator}
+ * util.
  */
 public class OneOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
+    BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
 
     @Test(description = "Generate record for schema has oneOF")
     public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException {
@@ -61,4 +66,10 @@ public class OneOfDataTypeTests {
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
     }
 
+    @Test(description = "Tests full schema genrations with oneOf type")
+    public void generateOneOFTests() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/oneOf.yaml");
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/oneOf.bal", syntaxTree);
+    }
 }

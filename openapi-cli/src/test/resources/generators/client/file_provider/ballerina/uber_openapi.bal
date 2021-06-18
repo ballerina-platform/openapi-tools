@@ -21,7 +21,7 @@ public client class Client {
         self.clientEp = httpEp;
         self.apiKeys = apiKeyConfig.apiKeys;
     }
-    # The Products endpoint returns information about the Uber products offered at a given location. The response includes the display name and other details about each product, and lists the products in the proper display order.
+    # Product Types
     #
     # + latitude - Latitude component of location.
     # + longitude - Longitude component of location.
@@ -33,7 +33,7 @@ public client class Client {
         ProductArr response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
     }
-    # The Price Estimates endpoint returns an estimated price range for each product offered at a given location. The price estimate is provided as a formatted string with the full price range and the localized currency symbol.The response also includes low and high estimates, and the [ISO 4217](http://en.wikipedia.org/wiki/ISO_4217) currency code for situations requiring currency conversion. When surge is active for a particular product, its surge_multiplier will be greater than 1, but the price estimate already factors in this multiplier.
+    # Price Estimates
     #
     # + start_latitude - Latitude component of start location.
     # + start_longitude - Longitude component of start location.
@@ -47,7 +47,7 @@ public client class Client {
         PriceEstimateArr response = check self.clientEp-> get(path, targetType = PriceEstimateArr);
         return response;
     }
-    # The Time Estimates endpoint returns ETAs for all products offered at a given location, with the responses expressed as integers in seconds. We recommend that this endpoint be called every minute to provide the most accurate, up-to-date ETAs.
+    # Time Estimates
     #
     # + start_latitude - Latitude component of start location.
     # + start_longitude - Longitude component of start location.
@@ -61,7 +61,7 @@ public client class Client {
         ProductArr response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
     }
-    # The User Profile endpoint returns information about the Uber user that has authorized with the application.
+    # User Profile
     #
     # + return - Profile information for a user
     remote isolated function  me() returns Profile|error {
@@ -69,7 +69,7 @@ public client class Client {
         Profile response = check self.clientEp-> get(path, targetType = Profile);
         return response;
     }
-    # The User Activity endpoint returns data about a user's lifetime activity with Uber. The response will include pickup locations and times, dropoff locations and times, the distance of past requests, and information about which products were requested.The history array in the response will have a maximum length based on the limit parameter. The response value count may exceed limit, therefore subsequent API requests may be necessary.
+    # User Activity
     #
     # + offset - Offset the list of returned results by this amount. Default is zero.
     # + 'limit - Number of items to retrieve. Default is 5, maximum is 100.

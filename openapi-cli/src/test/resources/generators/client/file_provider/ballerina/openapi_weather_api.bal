@@ -18,7 +18,7 @@ public client class Client {
         self.clientEp = httpEp;
         self.apiKeys = apiKeyConfig.apiKeys;
     }
-    # Access current weather data for any location on Earth including over 200,000 cities! Current weather is frequently updated based on global models and data from more than 40,000 weather stations.
+    # Call current weather data for one location
     #
     # + q - **City name**. *Example: London*. You can call by city name, or by city name and country code. The API responds with a list of results that match a searching word. For the query value, type the city name and optionally the country code divided by comma; use ISO 3166 country codes.
     # + id - **City ID**. *Example: `2172797`*. You can call by city ID. API responds with exact result. The List of city IDs can be downloaded [here](http://bulk.openweathermap.org/sample/). You can include multiple cities in parameter &mdash; just separate them by commas. The limit of locations is 20. *Note: A single ID counts as a one API call. So, if you have city IDs. it's treated as 3 API calls.*
@@ -30,14 +30,14 @@ public client class Client {
     # + mode - **Mode**. *Example: html*. Determines format of response. Possible values are `xml` and `html`. If mode parameter is empty the format is `json` by default.
     # + return - Successful response
     @display {label: "Current Weather"}
-    remote isolated function getCurretWeatherData(@display {label: "CityName or StateCode or CountryCode"} string? q = (), @display {label: "City Id"} string? id = (), @display {label: "Latitude"} string? lat = (), @display {label: "Longitude"} string? lon = (), @display {label: "Zip Code"} string? zip = (), @display {label: "Units"} string? units = (), @display {label: "Language"} string? lang = (), @display {label: "Mode"} string? mode = ()) returns CurrentWeatherData|error {
+    remote isolated function getCurretWeatherData(@display {label: "CityName or StateCode or CountryCode"} string? q = (), @display {label: "City Id"} string? id = (), @display {label: "Latitude"} string? lat = (), @display {label: "Longitude"} string? lon = (), @display {label: "Zip Code"} string? zip = (), @display {label: "Units"} string? units = "imperial", @display {label: "Language"} string? lang = "en", @display {label: "Mode"} string? mode = "json") returns CurrentWeatherData|error {
         string  path = string `/weather`;
         map<anydata> queryParam = {q: q, id: id, lat: lat, lon: lon, zip: zip, units: units, lang: lang, mode: mode, appid: self.apiKeys["appid"]};
         path = path + getPathForQueryParam(queryParam);
         CurrentWeatherData response = check self.clientEp-> get(path, targetType = CurrentWeatherData);
         return response;
     }
-    # Access to current weather, minute forecast for 1 hour, hourly forecast for 48 hours, daily forecast for 7 days and government weather alerts.
+    # Provide weather forecast for any geographical coordinates
     #
     # + lat - Latitude
     # + lon - Longtitude

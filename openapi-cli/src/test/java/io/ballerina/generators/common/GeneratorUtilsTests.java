@@ -16,8 +16,10 @@
  * under the License.
  */
 
-package io.ballerina.generators;
+package io.ballerina.generators.common;
 
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
@@ -29,12 +31,15 @@ import java.nio.file.Paths;
 
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
+import static io.ballerina.generators.GeneratorUtils.getValidName;
+import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
  * This util class for testing functionality for {@GeneratorUtils.java}.
  */
 public class GeneratorUtilsTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators").toAbsolutePath();
+    private  static BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
 
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class,
@@ -62,7 +67,23 @@ public class GeneratorUtilsTests {
     @Test(description = "Add valid reference path for extract")
     public static void testForReferenceLinkValid() throws BallerinaOpenApiException {
         Assert.assertEquals(extractReferenceType("#/components/schemas/Error"), "Error");
-        Assert.assertEquals(extractReferenceType("#/components/schemas/Pet."), "'Pet\\.");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/Pet.-id"), "PetId");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/Pet."), "Pet");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/200"), "200");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/worker"), "Worker");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/worker abc"), "WorkerAbc");
     }
 
+    @Test(description = "Generate the readable function, record name removing special characters")
+    public static void testGenerateReadableName() {
+        Assert.assertEquals(getValidName("endpoint-remove-shows-user", true), "EndpointRemoveShowsUser");
+    }
+
+    @Test(description = "Set record name with removing special Characters")
+    public static void testRecordName() throws IOException, BallerinaOpenApiException {
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(RES_DIR.resolve("schema/swagger" +
+                "/recordName.yaml"));
+        Path expectedPath = RES_DIR.resolve("schema/ballerina/recordName.bal");
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
 }

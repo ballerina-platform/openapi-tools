@@ -21,7 +21,6 @@ import io.ballerina.ballerina.OpenApiConverterException;
 import io.ballerina.ballerina.OpenApiConverterUtils;
 import io.ballerina.cli.BLauncherCmd;
 import io.ballerina.generators.GeneratorConstants;
-import io.ballerina.generators.OpenApiException;
 import io.ballerina.openapi.CodeGenerator;
 import io.ballerina.openapi.OpenApiMesseges;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -255,7 +254,7 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             generator.generateClient(executionPath.toString(), resourcePath.toString(), clientName,
                     targetOutputPath.toString(), filter);
-        } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             if (e.getLocalizedMessage() != null) {
                 outStream.println(e.getLocalizedMessage());
                 exitError(this.exitWhenFinish);
@@ -279,7 +278,7 @@ public class OpenApiCmd implements BLauncherCmd {
             assert resourcePath != null;
             generator.generateService(executionPath.toString(), resourcePath.toString(),
                     relativePath.toString(), serviceName, targetOutputPath.toString(), filter);
-        } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
                     ". " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
@@ -299,7 +298,7 @@ public class OpenApiCmd implements BLauncherCmd {
             generator.generateBothFiles(
                     GeneratorConstants.GenType.GEN_BOTH, resourcePath.toString(), relativePath.toString(),
                     fileName, targetOutputPath.toString(), filter);
-        } catch (IOException | BallerinaOpenApiException | FormatterException | OpenApiException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
                     " " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
