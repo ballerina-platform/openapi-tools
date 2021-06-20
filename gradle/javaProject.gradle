@@ -59,6 +59,9 @@ dependencies {
         implementation "org.ballerinalang:formatter-core:${ballerinaLangVersion}"
         implementation "org.ballerinalang:ballerina-tools-api:${ballerinaLangVersion}"
         implementation "org.ballerinalang:http-native:${stdlibHttpVersion}"
+        implementation "org.ballerinalang:language-server-commons:${ballerinaLangVersion}"
+        implementation "org.ballerinalang:language-server:${ballerinaLangVersion}"
+        implementation "org.ballerinalang:language-server:language-server-commons:${ballerinaLangVersion}"
         testImplementation "org.testng:testng:${testngVersion}"
     }
 
