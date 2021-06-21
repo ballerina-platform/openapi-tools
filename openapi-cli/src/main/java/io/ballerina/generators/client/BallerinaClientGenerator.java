@@ -74,6 +74,7 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeTestExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.generators.GeneratorConstants;
 import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.openapi.cmd.Filter;

@@ -19,8 +19,6 @@
 package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;

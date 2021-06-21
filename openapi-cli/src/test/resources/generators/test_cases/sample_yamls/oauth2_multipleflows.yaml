@@ -20,6 +20,7 @@ paths:
       parameters:
         - name: id
           in: path
+          description: Account Id
           required: true
           style: simple
           explode: false

@@ -21,8 +21,6 @@ package io.ballerina.generators.schema;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -39,7 +37,8 @@ import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTre
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to AnyDataType handling the {@link BallerinaClientGenerator} util.
+ * All the tests related to AnyDataType handling the {@link io.ballerina.generators.client.BallerinaClientGenerator}
+ * util.
  */
 public class AnyOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();

@@ -3,7 +3,6 @@ package io.ballerina.generators.testcases;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.generators.client.BallerinaClientGenerator;
 import io.ballerina.generators.client.BallerinaTestGenerator;
 import io.ballerina.generators.common.TestUtils;
@@ -33,6 +32,7 @@ public class BallerinaTestGeneratorTests {
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     private static final Path testPath = RES_DIR.resolve("ballerina_project/tests/test.bal");
     private static final Path configPath = RES_DIR.resolve("ballerina_project/tests/Config.toml");
+    private final BallerinaSchemaGenerator schemaGenerator = new BallerinaSchemaGenerator();
 
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
@@ -44,7 +44,7 @@ public class BallerinaTestGeneratorTests {
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
         SyntaxTree syntaxTreeClient = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         SyntaxTree syntaxTreeTest = BallerinaTestGenerator.generateSyntaxTree();
-        SyntaxTree syntaxTreeSchema = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        SyntaxTree syntaxTreeSchema = schemaGenerator.generateSyntaxTree(definitionPath);
         String configFile = BallerinaTestGenerator.getConfigTomlFile();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTreeClient, syntaxTreeTest, syntaxTreeSchema, configFile);
         Assert.assertTrue(diagnostics.isEmpty());
@@ -79,10 +79,7 @@ public class BallerinaTestGeneratorTests {
                 "basic_auth.yaml",
                 "bearer_auth.yaml",
                 "oauth2_authrization_code.yaml",
-                "oauth2_client_credential.yaml",
                 "oauth2_implicit.yaml",
-                "oauth2_password.yaml",
-                "oauth2_multipleflows.yaml",
                 "query_api_key.yaml",
                 "no_auth.yaml"
         };

@@ -169,6 +169,7 @@ components:
         name:
           type: string
           example: Cairns
+          description: Name
         cod:
           type: integer
           description: Internal parameter
@@ -177,6 +178,7 @@ components:
     Coord:
       title: Coord
       type: object
+      description: Geo location
       properties:
         lon:
           type: number
@@ -189,6 +191,7 @@ components:
     Weather:
       title: Weather
       type: object
+      description: Weather
       properties:
         id:
           type: integer
@@ -210,6 +213,7 @@ components:
     Main:
       title: Main
       type: object
+      description: Main weather data
       properties:
         temp:
           type: number
@@ -244,6 +248,7 @@ components:
     Wind:
       title: Wind
       type: object
+      description: wind related data
       properties:
         speed:
           type: number
@@ -257,6 +262,7 @@ components:
     Clouds:
       title: Clouds
       type: object
+      description: Cloud related data
       properties:
         all:
           type: integer
@@ -266,6 +272,7 @@ components:
     Rain:
       title: Rain
       type: object
+      description: Rain related data
       properties:
         3h:
           type: integer
@@ -275,6 +282,7 @@ components:
     Snow:
       title: Snow
       type: object
+      description: Snow related data
       properties:
         3h:
           type: number
@@ -283,6 +291,7 @@ components:
     Sys:
       title: Sys
       type: object
+      description: System data
       properties:
         type:
           type: integer
