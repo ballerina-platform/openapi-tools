@@ -19,7 +19,6 @@
 package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.generators.BallerinaClientGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -38,7 +37,7 @@ import static io.ballerina.generators.common.TestUtils.getDiagnostics;
 
 /**
  * All the tests related to the check diagnostic issue in code generators
- * {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * {@link BallerinaClientGenerator} util.
  */
 public class BallerinaDiagnosticTests {
     private static final Path RESDIR =

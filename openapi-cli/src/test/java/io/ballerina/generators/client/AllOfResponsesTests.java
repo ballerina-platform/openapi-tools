@@ -27,12 +27,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static io.ballerina.generators.BallerinaClientGenerator.getReturnType;
+import static io.ballerina.generators.client.BallerinaClientGenerator.getReturnType;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
  * All the tests related to the functionSignatureNode  Return type tests in
- * {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * {@link BallerinaClientGenerator} util.
  */
 public class AllOfResponsesTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();

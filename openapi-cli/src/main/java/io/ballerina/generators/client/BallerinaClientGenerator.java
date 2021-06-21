@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.generators;
+package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
@@ -74,6 +74,9 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeTestExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.GeneratorConstants;
+import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.generators.auth.BallerinaAuthConfigGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -212,16 +215,35 @@ import static io.ballerina.generators.GeneratorUtils.isValidSchemaName;
  * This Util class use for generating ballerina client file according to given yaml file.
  */
 public class BallerinaClientGenerator {
-    private static Server server;
-    private static Paths paths;
-    private static Filter filters;
-    private static List<ImportDeclarationNode> imports = new ArrayList<>();
-    private static boolean isQuery;
-    private static boolean isHeader;
-    private static Info info;
-    private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
-    private static OpenAPI openAPI;
-    private static BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+    private Server server;
+    private Paths paths;
+    private Filter filters;
+    private List<ImportDeclarationNode> imports = new ArrayList<>();
+    private boolean isQuery;
+    private boolean isHeader;
+    private Info info;
+    private List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+    private OpenAPI openAPI;
+    private BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+
+    public BallerinaClientGenerator(Server server, Paths paths, Filter filters,
+                                    List<ImportDeclarationNode> imports, boolean isQuery, boolean isHeader,
+                                    Info info,
+                                    List<TypeDefinitionNode> typeDefinitionNodeList,
+                                    OpenAPI openAPI,
+                                    BallerinaSchemaGenerator ballerinaSchemaGenerator) {
+
+        this.server = server;
+        this.paths = paths;
+        this.filters = filters;
+        this.imports = imports;
+        this.isQuery = isQuery;
+        this.isHeader = isHeader;
+        this.info = info;
+        this.typeDefinitionNodeList = typeDefinitionNodeList;
+        this.openAPI = openAPI;
+        this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
+    }
 
     public static SyntaxTree generateSyntaxTree(Path definitionPath, Filter filter) throws IOException,
             BallerinaOpenApiException {

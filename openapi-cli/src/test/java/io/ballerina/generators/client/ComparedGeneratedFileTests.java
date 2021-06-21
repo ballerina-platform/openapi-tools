@@ -19,7 +19,6 @@
 package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.generators.BallerinaClientGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -40,7 +39,7 @@ import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTre
 import static io.ballerina.generators.common.TestUtils.getDiagnostics;
 
 /**
- * All the tests related to the {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * All the tests related to the {@link BallerinaClientGenerator} util.
  */
 public class ComparedGeneratedFileTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();

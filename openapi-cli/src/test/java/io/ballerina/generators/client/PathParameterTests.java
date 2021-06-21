@@ -28,8 +28,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static io.ballerina.generators.BallerinaClientGenerator.generatePathWithPathParameter;
-import static io.ballerina.generators.BallerinaClientGenerator.getPathParameters;
+import static io.ballerina.generators.client.BallerinaClientGenerator.generatePathWithPathParameter;
+import static io.ballerina.generators.client.BallerinaClientGenerator.getPathParameters;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**

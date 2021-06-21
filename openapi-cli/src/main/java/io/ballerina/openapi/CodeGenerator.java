@@ -25,7 +25,7 @@ import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
-import io.ballerina.generators.BallerinaClientGenerator;
+import io.ballerina.generators.client.BallerinaClientGenerator;
 import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.generators.BallerinaServiceGenerator;
 import io.ballerina.generators.GeneratorConstants;
