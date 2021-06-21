@@ -23,11 +23,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.ballerina.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
+import static io.ballerina.generators.GeneratorConstants.TEST_DIR;
+
 /**
  * Test cases related to ballerina test skeleton generation.
  */
 public class BallerinaTestGeneratorTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/test_cases/").toAbsolutePath();
+    private static final Path PROJECT_DIR = RES_DIR.resolve("ballerina_project");
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     private static final Path testPath = RES_DIR.resolve("ballerina_project/tests/test.bal");
@@ -41,6 +45,7 @@ public class BallerinaTestGeneratorTests {
     @Test(description = "Generate Client with test skelotins", dataProvider = "httpAuthIOProvider")
     public void generateclientWithTestSkel(String yamlFile) throws IOException, BallerinaOpenApiException,
             FormatterException, BallerinaOpenApiException {
+        Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
         SyntaxTree syntaxTreeClient = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
         SyntaxTree syntaxTreeTest = BallerinaTestGenerator.generateSyntaxTree();
