@@ -21,12 +21,15 @@ package org.ballerinalang.ballerina;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import org.ballerinalang.annotation.JavaSPIService;
-import org.ballerinalang.ballerina.util.OpenApiConverterException;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService;
+import org.ballerinalang.langserver.commons.workspace.WorkspaceManager;
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 import org.eclipse.lsp4j.jsonrpc.services.JsonSegment;
+import org.eclipse.lsp4j.services.LanguageServer;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -37,30 +40,31 @@ import java.util.concurrent.CompletableFuture;
 @JavaSPIService("org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService")
 @JsonSegment("openAPILSExtension")
 public class OpenAPIConverterService implements ExtendedLanguageServerService {
-    private LanguageServer languageServer;
     private WorkspaceManager workspaceManager;
 
     @Override
-    public void init(languageServer, workspaceManager) {
-        this.languageServer = languageServer;
+    public void init(LanguageServer langServer, WorkspaceManager workspaceManager) {
         this.workspaceManager = workspaceManager;
     }
 
     @Override
-    public class <?> remoteInterface() {
-        return getClass();
+    public Class<?> getRemoteInterface() {
+
+        return null;
     }
 
     @JsonRequest
-    public CompletableFuture<OpenAPIConverter> generateOpenAPIFile(OpenAPIConverterRequest request) {
+    public CompletableFuture<OpenAPIConverterResponse> generateOpenAPIFile(OpenAPIConverterRequest request) {
         return CompletableFuture.supplyAsync(() -> {
             OpenAPIConverterResponse response = new OpenAPIConverterResponse();
             try {
-                String documentPath = request.getDocumentFilePath();
-                SyntaxTree syntaxTree = workspaceManager.syntaxTree(documentPath);
-                SemanticModel semanticModel = workspaceManager.semanticModel(documentPath);
-                OpenAPIConverter openAPIConverter = new OpenAPIConverter(syntaxTree, semanticModel);
-                String yamlContent = openAPIConverter.generateOAS3Definition(syntaxTree, false);
+//                languageServer.toString();
+                Path documentPath = Paths.get(request.getDocumentFilePath());
+                Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath);
+                Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath);
+                OpenAPIConverter openAPIConverter = new OpenAPIConverter(syntaxTree.orElseThrow(),
+                        semanticModel.orElseThrow());
+                String yamlContent = openAPIConverter.generateOAS3Definition(syntaxTree.orElseThrow(), false);
                 //Response should handle
                 response.setYamlContent(yamlContent);
             } catch (Throwable e) {
@@ -70,8 +74,4 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             return response;
         });
     }
-
-
-
-
 }

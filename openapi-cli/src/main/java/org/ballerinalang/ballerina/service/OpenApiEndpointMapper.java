@@ -53,7 +53,7 @@ public class OpenApiEndpointMapper {
      * @param service   service node with bound endpoints
      * @return openapi definition with Server information
      */
-    public static OpenAPI convertListenerEndPointToOpenAPI (OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
+    public OpenAPI convertListenerEndPointToOpenAPI (OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
                                                      ServiceDeclarationNode service) {
         if (openAPI == null) {
             return new OpenAPI();

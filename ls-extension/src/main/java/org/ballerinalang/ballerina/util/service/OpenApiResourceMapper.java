@@ -71,7 +71,7 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import org.ballerinalang.ballerina.Constants;
+import org.ballerinalang.ballerina.util.Constants;
 import org.ballerinalang.net.http.HttpConstants;
 
 import java.util.ArrayList;
@@ -89,9 +89,8 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.ws.rs.core.MediaType;
 
-import static org.ballerinalang.ballerina.Constants.HTTP_HEADER;
-import static org.ballerinalang.ballerina.Constants.HTTP_PAYLOAD;
-import static org.ballerinalang.ballerina.ConverterUtils.convertBallerinaTypeToOpenAPIType;
+import static org.ballerinalang.ballerina.util.Constants.HTTP_PAYLOAD;
+import static org.ballerinalang.ballerina.util.ConverterUtils.convertBallerinaTypeToOpenAPIType;
 import static org.ballerinalang.net.http.HttpConstants.HTTP_METHOD_GET;
 
 /**
@@ -847,7 +846,7 @@ public class OpenApiResourceMapper {
                 } else if (queryParam.typeName() instanceof TypeDescriptorNode && !queryParam.annotations().isEmpty()) {
                     NodeList<AnnotationNode> annotations = queryParam.annotations();
                     for (AnnotationNode annotation: annotations) {
-                        if ((annotation.annotReference().toString()).trim().equals(HTTP_HEADER) &&
+                        if ((annotation.annotReference().toString()).trim().equals("http:Header") &&
                                 annotation.annotValue().isPresent()) {
                             //Handle with string current header a support with only string and string[]
                             if (queryParam.typeName() instanceof ArrayTypeDescriptorNode)  {

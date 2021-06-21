@@ -34,7 +34,7 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
-import org.ballerinalang.ballerina.Constants;
+import org.ballerinalang.ballerina.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;

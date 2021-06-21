@@ -59,12 +59,11 @@ public class OpenApiServiceContainer {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof org.ballerinalang.ballerina.service.model.OpenApiServiceContainer)) {
+        if (!(o instanceof OpenApiServiceContainer)) {
             return false;
         }
         
-        org.ballerinalang.ballerina.service.model.OpenApiServiceContainer
-                that = (org.ballerinalang.ballerina.service.model.OpenApiServiceContainer) o;
+        OpenApiServiceContainer that = (OpenApiServiceContainer) o;
         
         if (!getBallerinaDefinition().equals(that.getBallerinaDefinition())) {
             return false;
