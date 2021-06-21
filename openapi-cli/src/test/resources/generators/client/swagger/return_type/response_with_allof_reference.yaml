@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: Uber API
+  description: Move your app forward with the Uber API
+  version: 1.0.0
+servers:
+  - url: https://api.uber.com/v1
+paths:
+  /products:
+    get:
+      operationId: Tests products
+      summary: Product Types
+      description: The Products endpoint returns information about the Uber products
+        offered at a given location. The response includes the display name and
+        other details about each product, and lists the products in the proper
+        display order.
+      parameters:
+        - name: latitude
+          in: query
+          description: Latitude component of location.
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: longitude
+          in: query
+          description: Longitude component of location.
+          required: true
+          schema:
+            type: number
+            format: double
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Returned if the request is successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Product'
+                  - $ref: '#/components/schemas/Activity'
+                  - type: object
+                    properties:
+                      bark:
+                        type: boolean
+                      breed:
+                        type: string
+components:
+  schemas:
+    Product:
+      properties:
+        product_id:
+          type: string
+          description: Unique identifier representing a specific product for a given
+            latitude & longitude. For example, uberX in San Francisco will have
+            a different product_id than uberX in Los Angeles.
+        description:
+          type: string
+          description: Description of product.
+        display_name:
+          type: string
+          description: Display name of product.
+        capacity:
+          type: integer
+          description: Capacity of product. For example, 4 people.
+        image:
+          type: string
+          description: Image URL representing the product.
+    Activity:
+      properties:
+        uuid:
+          type: string
+          description: Unique identifier for the activity

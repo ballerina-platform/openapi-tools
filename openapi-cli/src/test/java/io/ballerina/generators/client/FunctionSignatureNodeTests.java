@@ -57,7 +57,7 @@ public class FunctionSignatureNodeTests {
     public void getFunctionSignatureNodeTests() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/valid_operation.yaml"));
         FunctionSignatureNode signature = getFunctionSignatureNode(openAPI.getPaths()
-                .get("/products/{country}").getGet());
+                .get("/products/{country}").getGet(), new ArrayList<>());
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
         Assert.assertFalse(parameters.isEmpty());
         RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);

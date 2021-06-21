@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static io.ballerina.generators.BallerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema;
 import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
@@ -44,26 +43,28 @@ import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 public class AdvanceRecordTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
+    BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
 
-//check nested array -test
-    @Test(description = "Generate record for schema has not type")
+
+    // Enable after adding `not` data bind support
+    @Test(description = "Generate record for schema has not type", enabled = false)
     public void generateSchemaHasNotType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario10.yaml");
-        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema10.bal", syntaxTree);
     }
 
     @Test(description = "Generate record for schema has inline record in fields reference")
     public void generateSchemaHasInlineRecord() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario11.yaml");
-        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema11.bal", syntaxTree);
     }
 
     @Test(description = "Generate record for openapi weather api")
     public void generateOpenAPIWeatherAPI() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
-        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/openapi_weather_api_schema.bal", syntaxTree);
     }
 
@@ -73,10 +74,10 @@ public class AdvanceRecordTypeTests {
         OpenAPI openAPI = getOpenAPI(definitionPath);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ObjectSchema objectSchema = (ObjectSchema) schema;
-        TypeDefinitionNode recordNode = getTypeDefinitionNodeForObjectSchema(null,
+        TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(null,
                         AbstractNodeFactory.createIdentifierToken("public type"),
                         AbstractNodeFactory.createIdentifierToken("Error"),
-                        null, objectSchema.getProperties());
+                        null, objectSchema.getProperties(), "", openAPI);
         Assert.assertTrue(((RecordTypeDescriptorNode) recordNode.typeDescriptor()).fields().isEmpty());
     }
 }

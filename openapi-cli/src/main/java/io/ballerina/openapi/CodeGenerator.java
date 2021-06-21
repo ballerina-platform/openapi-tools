@@ -409,7 +409,8 @@ public class CodeGenerator {
         }
 
         // Generate ballerina records to represent schemas.
-        String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+        String schemaContent = Formatter.format(ballerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
                 schemaContent));
 
@@ -431,7 +432,8 @@ public class CodeGenerator {
                         filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
-        String schemaContent = Formatter.format(BallerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+        String schemaContent = Formatter.format(ballerinaSchemaGenerator.generateSyntaxTree(openAPI)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  TYPE_FILE_NAME,
                 schemaContent));
 

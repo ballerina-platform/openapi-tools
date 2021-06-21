@@ -34,18 +34,19 @@ import java.nio.file.Paths;
 public class AllOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
+    BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
 
     @Test(description = "Generate record for schema has allOf reference")
     public void generateAllOf() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario09.yaml");
-        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema09.bal", syntaxTree);
     }
 
     @Test(description = "Generate record for schema has allOf reference in record field")
     public void generateAllOfInRecordField() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/allOf.yaml");
-        syntaxTree = BallerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/allOf.bal", syntaxTree);
     }
 }

@@ -23,7 +23,6 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.ErrorTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -343,7 +342,8 @@ public class BallerinaServiceGenerator {
         functions.add(functionDefinitionNode);
     }
 
-    private static void createNodeForHeaderParameter(List<Node> params, Token comma, Parameter parameter) {
+    private static void createNodeForHeaderParameter(List<Node> params, Token comma, Parameter parameter)
+            throws BallerinaOpenApiException {
 
         Schema schema = parameter.getSchema();
         String type = "string";
@@ -371,9 +371,8 @@ public class BallerinaServiceGenerator {
                 headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName, openSBracketToken, null,
                                 closeSBracketToken);
             } else {
-                headerTypeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(convertOpenAPITypeToBallerina(
-                                schema.getType().trim())));
+                headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
+                                convertOpenAPITypeToBallerina(schema.getType().trim())));
             }
 
             // Create annotation
@@ -480,17 +479,11 @@ public class BallerinaServiceGenerator {
                 }
             }
         } else {
-            // --errorTypeDescriptor
-            Token errorKeyWordToken = createIdentifierToken("error");
-            // errorTypeParamsNode can be null
-            ErrorTypeDescriptorNode errorTypeDescriptorNode =
-                    NodeFactory.createErrorTypeDescriptorNode(errorKeyWordToken, null);
-            Token questionMarkToken = createIdentifierToken("?");
-
-            OptionalTypeDescriptorNode type =
-                    createOptionalTypeDescriptorNode(errorTypeDescriptorNode, questionMarkToken);
-            returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotations,
-                    type);
+            // --error node TypeDescriptor
+            Token returnsKeyword = AbstractNodeFactory.createToken(SyntaxKind.RETURNS_KEYWORD,
+                    null, null);
+            returnNode = createReturnTypeDescriptorNode(returnsKeyword, createEmptyNodeList(),
+                            createSimpleNameReferenceNode(createIdentifierToken("error?")));
         }
         return returnNode;
     }
@@ -738,7 +731,8 @@ public class BallerinaServiceGenerator {
     /**
      * This for generate query parameter nodes.
      */
-    private static void createNodeForQueryParam(List<Node> params, Token comma, Parameter parameter) {
+    private static void createNodeForQueryParam(List<Node> params, Token comma, Parameter parameter)
+            throws BallerinaOpenApiException {
         if (parameter.getIn().trim().equals("query")) {
             Schema schema = parameter.getSchema();
             NodeList<AnnotationNode> annotations = createEmptyNodeList();

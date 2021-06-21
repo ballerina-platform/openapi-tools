@@ -1,0 +1,175 @@
+openapi: 3.0.0
+servers:
+  - url: https://disease.sh
+info:
+  version: 3.0.0
+  title: Novel Covid19 API - Disease.sh - An open API for disease-related statistics
+  description: Third Party API for reliable global disease information
+  license:
+    name: GNU V3
+    url: 'https://github.com/disease-sh/API/blob/master/LICENSE'
+tags:
+  - name: 'COVID-19: Worldometers'
+    description: '(COVID-19 data sourced from Worldometers, updated every 10 minutes)'
+  - name: 'COVID-19: Vaccine'
+    description: '(COVID-19 vaccine trial data from raps.org, updated every 24 hours)'
+
+paths:
+  /v3/covid-19/all:
+    get:
+      tags:
+        - 'COVID-19: Worldometers'
+      operationId: getGlobalStatus
+      parameters:
+        - name: yesterday
+          description: Queries data reported a day ago
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            type: string
+        - name: twoDaysAgo
+          description: Queries data reported two days ago
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            type: string
+        - name: allowNull
+          in: query
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+              - '1'
+              - '0'
+            type: string
+          description: 'By default, if a value is missing, it is returned as 0. This allows nulls to be returned'
+      description: 'Get global COVID-19 totals for today, yesterday and two days ago'
+      responses:
+        '200':
+          description: Status OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleVaccineTimeline'
+components:
+  schemas:
+    VaccineCountryCoverage:
+      type: object
+      properties:
+        country:
+          type: string
+        timeline:
+          description: "One of"
+          oneOf:
+            - $ref: '#/components/schemas/SimpleVaccineTimeline'
+            - $ref: '#/components/schemas/FullVaccineTimeline'
+    SimpleVaccineTimeline:
+      type: object
+      properties:
+        date:
+          type: number
+      description: Covid-19 Vaccine timeline briefly
+    FullVaccineTimeline:
+      type: array
+      items:
+        type: object
+        properties:
+          total:
+            type: number
+          daily:
+            type: number
+          totalPerHundred:
+            type: number
+          dailyPerMillion:
+            type: number
+          date:
+            type: string
+      description: Descriptive Covid-19 vaccine timeline
+  examples:
+    countriesSimpleVaccineTimeline:
+      value:
+        - country: USA
+          timeline:
+            4/25/2021: 1000
+      summary: Simple Vaccine Timeline
+    countriesFullVaccineTimeline:
+      value:
+        - country: USA
+          timeline:
+            - total: 1000
+              daily: 1000
+              totalPerHundred: 1000
+              dailyPerMillion: 1000
+              date: 4/25/2021
+      summary: Full Vaccine Timeline
+    countrySimpleVaccineTimeline:
+      value:
+        country: USA
+        timeline:
+          4/25/2021: 1000
+      summary: Simple Vaccine Timeline
+    countryFullVaccineTimeline:
+      value:
+        country: USA
+        timeline:
+          - total: 1000
+            daily: 1000
+            totalPerHundred: 1000
+            dailyPerMillion: 1000
+            date: 4/25/2021
+      summary: Full Vaccine Timeline
+    statesSimpleVaccineTimeline:
+      value:
+        - state: California
+          timeline:
+            4/25/2021: 1000
+      summary: Simple Vaccine Timeline
+    statesFullVaccineTimeline:
+      value:
+        - state: California
+          timeline:
+            - total: 1000
+              daily: 1000
+              totalPerHundred: 1000
+              dailyPerMillion: 1000
+              date: 4/25/2021
+      summary: Full Vaccine Timeline
+    stateSimpleVaccineTimeline:
+      value:
+        state: California
+        timeline:
+          4/25/2021: 1000
+      summary: Simple Vaccine Timeline
+    stateFullVaccineTimeline:
+      value:
+        state: California
+        timeline:
+          - total: 1000
+            daily: 1000
+            totalPerHundred: 1000
+            dailyPerMillion: 1000
+            date: 4/25/2021
+      summary: Full Vaccine Timeline
+    SimpleVaccineTimeline:
+      value:
+        4/25/2021: 1000
+      summary: Simple Vaccine Timeline
+    FullVaccineTimeline:
+      value:
+        - total: 1000
+          daily: 1000
+          totalPerHundred: 1000
+          dailyPerMillion: 1000
+          date: 4/25/2021
+      summary: Full Vaccine Timeline
+externalDocs:
+  description: Find out more about this API
+  url: 'https://github.com/disease-sh/API'

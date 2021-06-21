@@ -63,22 +63,24 @@ public class FunctionBodyNodeTests {
         Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
         FunctionBodyNode bodyNode = getFunctionBodyNode(path, iterator.next());
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
-        String bodyNodeContent = bodyNode.toString().trim().replaceAll("\n", "").replaceAll("\\s+", "");
+        String bodyNodeContent = bodyNode.toString().trim().replaceAll("\n", "")
+                .replaceAll("\\s+", "");
         Assert.assertEquals(bodyNodeContent, content);
     }
     @DataProvider(name = "dataProviderForFunctionBody")
     public Object[][] dataProviderForFunctionBody() {
         return new Object[][]{
-                {"diagnostic_files/header_parameter.yaml", "/pets", "{string path=string`/pets`;" +
-                        "map<string|string[]>accHeaders=" +
-                        "{'X\\-Request\\-ID:'X\\-Request\\-ID,'X\\-Request\\-Client:'X\\-Request\\-Client};" +
-                        "_=check self.clientEp-> get(path, accHeaders, targetType = " +
-                        "http:Response);}"},
-                {"file_provider/swagger/uber_openapi.yaml", "/history", "{string  path = string `/history`;\n" +
-                        "        map<anydata> queryParam = {offset: offset, 'limit: 'limit};\n" +
-                        "        path = path + getPathForQueryParam(queryParam);\n" +
-                        "        Activities response = check self.clientEp-> get(path, targetType = Activities);\n" +
-                        "        return response;}"},
+                {"diagnostic_files/header_parameter.yaml", "/pets", "{stringpath=string`/pets`;map<any>headerValues" +
+                        "={'X\\-Request\\-ID:'X\\-Request\\-ID,'X\\-Request\\-Client:'X\\-Request\\-Client};" +
+                        "map<string|string[]>accHeaders=getMapForHeaders(headerValues);_=checkself.clientEp->" +
+                        "get(path,accHeaders,targetType=http:Response);}"},
+//                {"file_provider/swagger/uber_openapi.yaml", "/history", "{\n" +
+//                        "        string  path = string `/history`;\n" +
+//                        "        map<anydata> queryParam = {offset: offset, 'limit:
+//                        'limit, server_token: self.apiKeys[\"server_token\"]};\n" +
+//                        "        path = path + getPathForQueryParam(queryParam);\n" +
+//                        "        Activities response = check self.clientEp-> get(path, targetType = Activities);\n" +
+//                        "        return response;"},
         };
     }
 

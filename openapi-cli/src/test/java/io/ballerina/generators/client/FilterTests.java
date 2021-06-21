@@ -43,7 +43,7 @@ public class FilterTests {
 
 
     @Test(description = "With tag filter")
-    public void testWithTag() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testWithTag() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/tag.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/tag.bal");
         list1.clear();

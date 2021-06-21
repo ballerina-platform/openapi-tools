@@ -69,6 +69,8 @@ components:
       description: "**City name**. *Example: London*. You can call by city name, or by city name and country code. The API responds with a list of results that match a searching word. For the query value, type the city name and optionally the country code divided by comma; use ISO 3166 country codes."
       schema:
         type: string
+      x-display:
+        label: "City name"
     id:
       name: id
       in: query
@@ -169,6 +171,7 @@ components:
         name:
           type: string
           example: Cairns
+          description: name
         cod:
           type: integer
           description: Internal parameter
@@ -177,6 +180,7 @@ components:
     Coord:
       title: Coord
       type: object
+      description: coord
       properties:
         lon:
           type: number
@@ -188,6 +192,7 @@ components:
           example: -16.920000000000002
     Weather:
       title: Weather
+      description: weather
       type: object
       properties:
         id:
@@ -209,6 +214,7 @@ components:
           example: 04n
     Main:
       title: Main
+      description: tests
       type: object
       properties:
         temp:
@@ -242,6 +248,7 @@ components:
           description: Atmospheric pressure on the ground level, hPa
           example: 990
     Wind:
+      description: wind
       title: Wind
       type: object
       properties:
@@ -255,6 +262,7 @@ components:
           format: int32
           example: 150
     Clouds:
+      description: cloud
       title: Clouds
       type: object
       properties:
@@ -264,6 +272,7 @@ components:
           format: int32
           example: 75
     Rain:
+      description: rain
       title: Rain
       type: object
       properties:
@@ -274,6 +283,7 @@ components:
           example: 3
     Snow:
       title: Snow
+      description: snow
       type: object
       properties:
         3h:
@@ -283,6 +293,7 @@ components:
     Sys:
       title: Sys
       type: object
+      description: sys
       properties:
         type:
           type: integer

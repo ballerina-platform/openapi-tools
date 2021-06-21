@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: World Bank Indicator API
+  description: Here you can find documentation for COVID-19 REST API.
+servers:
+  - description: Indicators represent data like total population, gross national income, energy use, and many more
+    url: http://api.worldbank.org/v2/
+paths:
+  /country/{country_name}/indicator/NY.GDP.MKTP.CD:
+    get:
+      tags: ["GDP data of a given country"]
+      operationId: getGDPBycountry
+      parameters:
+        - name: date
+          in: query
+          description: Date-range by year, month or quarter that scopes the result-set.
+          required: false
+          schema:
+            type: string
+        - name: country_name
+          in: path
+          description: Date-range by year, month or quarter that scopes the result-set.
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format of the response.
+          required: false
+          schema:
+            type: string
+            default: json
+      responses:
+        '200':
+          description: List GDP information of each year
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+components:
+  schemas:
+    Country:
+      type: object
+      properties:
+        id:
+          type: string
+          example: CHL
+        value:
+          type: string
+          example: Chilie
+    YouthLiteracyRate:
+      type: object
+      properties:
+        indicator:
+          type: object
+        country:
+          "$ref": "#/components/schemas/Country"
+        date:
+          type: string
+          example: "2016"
+        value:
+          type: integer
+          example: 100
+        decimal:
+          type: integer
+          example: 2
+    Error:
+      type: object
+      properties:
+        name:
+          type: string

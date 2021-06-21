@@ -1,5 +1,4 @@
-
-type Pet record { 
+type Pet record {
      int id;
      string name;
      string tag?;

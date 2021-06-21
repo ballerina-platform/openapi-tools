@@ -2,12 +2,17 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
+# + clientEp - Connector http endpoint
 public client class Client {
     http:Client clientEp;
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
+    # List all pets
+    #
+    # + 'limit - How many items to return at one time (max 100)
+    # + return - An paged array of pets
     remote isolated function listPets(int? 'limit = ()) returns Pets|error {
         string  path = string `/pets`;
         map<anydata> queryParam = {'limit: 'limit};
@@ -15,12 +20,19 @@ public client class Client {
         Pets response = check self.clientEp-> get(path, targetType = Pets);
         return response;
     }
+    # Create a pet
+    #
+    # + return - Null response
     remote isolated function  pets() returns error? {
         string  path = string `/pets`;
         http:Request request = new;
         //TODO: Update the request as needed;
          _ = check self.clientEp-> post(path, request, targetType =http:Response);
     }
+    # Info for a specific pet
+    #
+    # + petId - The id of the pet to retrieve
+    # + return - Expected response to a valid request
     remote isolated function showPetById(string petId) returns Pets|error {
         string  path = string `/pets/${petId}`;
         Pets response = check self.clientEp-> get(path, targetType = Pets);
@@ -28,6 +40,10 @@ public client class Client {
     }
 }
 
+# Generate query path with query parameter.
+#
+# + queryParam - Query parameter map
+# + return - Returns generated Path or error at failure of client initialization
 isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
     string[] param = [];
     param[param.length()] = "?";
