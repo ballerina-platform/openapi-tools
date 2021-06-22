@@ -67,11 +67,11 @@ public class GeneratorUtilsTests {
     @Test(description = "Add valid reference path for extract")
     public static void testForReferenceLinkValid() throws BallerinaOpenApiException {
         Assert.assertEquals(extractReferenceType("#/components/schemas/Error"), "Error");
-        Assert.assertEquals(extractReferenceType("#/components/schemas/Pet.-id"), "PetId");
-        Assert.assertEquals(extractReferenceType("#/components/schemas/Pet."), "Pet");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/Pet.-id"), "Pet.-id");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/Pet."), "Pet.");
         Assert.assertEquals(extractReferenceType("#/components/schemas/200"), "200");
-        Assert.assertEquals(extractReferenceType("#/components/schemas/worker"), "Worker");
-        Assert.assertEquals(extractReferenceType("#/components/schemas/worker abc"), "WorkerAbc");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/worker"), "worker");
+        Assert.assertEquals(extractReferenceType("#/components/schemas/worker abc"), "worker abc");
     }
 
     @Test(description = "Generate the readable function, record name removing special characters")

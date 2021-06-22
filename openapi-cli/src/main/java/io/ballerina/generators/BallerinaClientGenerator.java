@@ -801,7 +801,7 @@ public class BallerinaClientGenerator {
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                        createParamAPIDoc(getValidName(parameter.getName(), false),
                                                 parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
@@ -810,7 +810,7 @@ public class BallerinaClientGenerator {
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                        createParamAPIDoc(getValidName(parameter.getName(), false),
                                                 parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
@@ -879,13 +879,14 @@ public class BallerinaClientGenerator {
         }
         if (parameter.getRequired()) {
              typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
-            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
             return createRequiredParameterNode(annotationNodes, typeName, paramName);
         } else {
             // TODO: for optional change to defaultable with there values
             typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(paramType)), createToken(QUESTION_MARK_TOKEN));
-            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            IdentifierToken paramName =
+                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
 
             if (parameterSchema.getDefault() != null) {
                 LiteralValueToken literalValueToken;
@@ -947,13 +948,13 @@ public class BallerinaClientGenerator {
             }
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(type));
-            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
             return createRequiredParameterNode(annotationNodes, typeName, paramName);
         } else {
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(convertOpenAPITypeToBallerina(
                             parameter.getSchema().getType().trim()) + "?"));
-            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
             NilLiteralNode nilLiteralNode =
                     createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
             return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
@@ -1355,6 +1356,7 @@ public class BallerinaClientGenerator {
                 statementsList.add(updatedPath);
                 isQuery = true;
             }
+
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<any>",
                         "headerValues", headerApiKeyNameList, true));
@@ -1362,6 +1364,25 @@ public class BallerinaClientGenerator {
                         "getMapForHeaders(headerValues)"));
                 isHeader = true;
             }
+        } else {
+            List<String> queryApiKeyNameList = BallerinaAuthConfigGenerator.getQueryApiKeyNameList();
+            List<String> headerApiKeyNameList = BallerinaAuthConfigGenerator.getHeaderApiKeyNameList();
+
+            if (!queryApiKeyNameList.isEmpty()) {
+                statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
+                        "queryParam", queryApiKeyNameList, false));
+                // Add updated path
+                ExpressionStatementNode updatedPath = getSimpleExpressionStatementNode("path = path + " +
+                        "getPathForQueryParam(queryParam)");
+                statementsList.add(updatedPath);
+                isQuery = true;
+            }
+            if (!headerApiKeyNameList.isEmpty()) {
+                statementsList.add(getMapForParameters(new ArrayList<>(), "map<string|string[]>",
+                        "accHeaders", headerApiKeyNameList, true));
+                isHeader = false;
+            }
+
         }
 
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
@@ -1611,10 +1632,10 @@ public class BallerinaClientGenerator {
 
         for (Parameter parameter: parameters) {
             // Initializer
-            IdentifierToken fieldName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            IdentifierToken fieldName = createIdentifierToken('"' + (parameter.getName().trim()) + '"');
             Token colon = createToken(COLON_TOKEN);
             SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
-                    createIdentifierToken(escapeIdentifier(parameter.getName().trim())));
+                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false))));
             SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
                     fieldName, colon, valueExpr);
             filedOfMap.add(specificFieldNode);

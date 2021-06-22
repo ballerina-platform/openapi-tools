@@ -31,7 +31,7 @@ public client class Client {
     # + return - An paged array of pets
     remote isolated function listPets(int? 'limit = ()) returns Pets|error {
         string  path = string `/pets`;
-        map<anydata> queryParam = {'limit: 'limit};
+        map<anydata> queryParam = {"limit": 'limit};
         path = path + getPathForQueryParam(queryParam);
         Pets response = check self.clientEp-> get(path, targetType = Pets);
         return response;
