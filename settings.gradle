@@ -22,7 +22,7 @@ include(':config:checkstyle')
 include(':module-ballerina-openapi')
 include(':openapi-cli')
 include(':openapi-validator')
-include(':ls-extension')
+include(':openapi-ls-extension')
 //include(':openapi-tests')
 
 gradleEnterprise {
