@@ -801,7 +801,7 @@ public class BallerinaClientGenerator {
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                        createParamAPIDoc(getValidName(parameter.getName(), false),
                                                 parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
@@ -810,7 +810,7 @@ public class BallerinaClientGenerator {
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                        createParamAPIDoc(getValidName(parameter.getName(), false),
                                                 parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
@@ -885,7 +885,8 @@ public class BallerinaClientGenerator {
             // TODO: for optional change to defaultable with there values
             typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(paramType)), createToken(QUESTION_MARK_TOKEN));
-            IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
+            IdentifierToken paramName =
+                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
 
             if (parameterSchema.getDefault() != null) {
                 LiteralValueToken literalValueToken;
@@ -1634,7 +1635,7 @@ public class BallerinaClientGenerator {
             IdentifierToken fieldName = createIdentifierToken('"' + (parameter.getName().trim()) + '"');
             Token colon = createToken(COLON_TOKEN);
             SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
-                    createIdentifierToken(getValidName(parameter.getName().trim(), false)));
+                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false))));
             SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
                     fieldName, colon, valueExpr);
             filedOfMap.add(specificFieldNode);

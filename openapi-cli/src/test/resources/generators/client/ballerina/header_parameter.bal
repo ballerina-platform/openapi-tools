@@ -9,12 +9,12 @@ public client class Client {
     }
     # Info for a specific pet
     #
-    # + 'X\-Request\-ID - Tests header
-    # + 'X\-Request\-Client - Tests header
+    # + xRequestId - Tests header
+    # + xRequestClient - Tests header
     # + return - Expected response to a valid request
-    remote isolated function showPetById(string 'X\-Request\-ID, string[] 'X\-Request\-Client) returns error? {
+    remote isolated function showPetById(string xRequestId, string[] xRequestClient) returns error? {
         string  path = string `/pets`;
-        map<any> headerValues = {'X\-Request\-ID: 'X\-Request\-ID, 'X\-Request\-Client: 'X\-Request\-Client};
+        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient};
         map<string|string[]> accHeaders = getMapForHeaders(headerValues);
          _ = check self.clientEp-> get(path, accHeaders, targetType=http:Response);
     }

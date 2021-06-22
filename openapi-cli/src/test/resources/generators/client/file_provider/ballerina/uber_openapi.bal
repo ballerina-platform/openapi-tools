@@ -28,7 +28,7 @@ public client class Client {
     # + return - An array of products
     remote isolated function  products(float latitude, float longitude) returns ProductArr|error {
         string  path = string `/products`;
-        map<anydata> queryParam = {latitude: latitude, longitude: longitude, server_token: self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, server_token: self.apiKeys["server_token"]};
         path = path + getPathForQueryParam(queryParam);
         ProductArr response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
@@ -40,9 +40,9 @@ public client class Client {
     # + end_latitude - Latitude component of end location.
     # + end_longitude - Longitude component of end location.
     # + return - An array of price estimates by product
-    remote isolated function  price(float start_latitude, float start_longitude, float end_latitude, float end_longitude) returns PriceEstimateArr|error {
+    remote isolated function  price(float startLatitude, float startLongitude, float endLatitude, float endLongitude) returns PriceEstimateArr|error {
         string  path = string `/estimates/price`;
-        map<anydata> queryParam = {start_latitude: start_latitude, start_longitude: start_longitude, end_latitude: end_latitude, end_longitude: end_longitude, server_token: self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude, server_token: self.apiKeys["server_token"]};
         path = path + getPathForQueryParam(queryParam);
         PriceEstimateArr response = check self.clientEp-> get(path, targetType = PriceEstimateArr);
         return response;
@@ -54,9 +54,9 @@ public client class Client {
     # + customer_uuid - Unique customer identifier to be used for experience customization.
     # + product_id - Unique identifier representing a specific product for a given latitude & longitude.
     # + return - An array of products
-    remote isolated function  time(float start_latitude, float start_longitude, string? customer_uuid = (), string? product_id = ()) returns ProductArr|error {
+    remote isolated function  time(float startLatitude, float startLongitude, string? customerUuid = (), string? productId = ()) returns ProductArr|error {
         string  path = string `/estimates/time`;
-        map<anydata> queryParam = {start_latitude: start_latitude, start_longitude: start_longitude, customer_uuid: customer_uuid, product_id: product_id, server_token: self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId, server_token: self.apiKeys["server_token"]};
         path = path + getPathForQueryParam(queryParam);
         ProductArr response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
@@ -66,6 +66,8 @@ public client class Client {
     # + return - Profile information for a user
     remote isolated function  me() returns Profile|error {
         string  path = string `/me`;
+        map<anydata> queryParam = {server_token: self.apiKeys["server_token"]};
+        path = path + getPathForQueryParam(queryParam);
         Profile response = check self.clientEp-> get(path, targetType = Profile);
         return response;
     }
@@ -76,7 +78,7 @@ public client class Client {
     # + return - History information for the given user
     remote isolated function  history(int? offset = (), int? 'limit = ()) returns Activities|error {
         string  path = string `/history`;
-        map<anydata> queryParam = {offset: offset, 'limit: 'limit, server_token: self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"offset": offset, "limit": 'limit, server_token: self.apiKeys["server_token"]};
         path = path + getPathForQueryParam(queryParam);
         Activities response = check self.clientEp-> get(path, targetType = Activities);
         return response;

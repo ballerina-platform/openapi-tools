@@ -29,7 +29,8 @@ public client class Client {
     @display {label: "Weather Forecast"}
     remote isolated function getWeatherForecast(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string? exclude = (), @display {label: "Units"} int? units = 12, @display {label: "Language"} string? lang = ()) returns WeatherForecast|error {
         string  path = string `/onecall`;
-        map<anydata> queryParam = {lat: lat, lon: lon, exclude: exclude, units: units, lang: lang, appid: self.apiKeys["appid"]};
+        map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, "lang": lang, appid: self
+        .apiKeys["appid"]};
         path = path + getPathForQueryParam(queryParam);
         WeatherForecast response = check self.clientEp-> get(path, targetType = WeatherForecast);
         return response;
