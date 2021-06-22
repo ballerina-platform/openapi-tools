@@ -41,10 +41,12 @@ import java.util.concurrent.CompletableFuture;
 @JsonSegment("openAPILSExtension")
 public class OpenAPIConverterService implements ExtendedLanguageServerService {
     private WorkspaceManager workspaceManager;
+    private LanguageServer languageServer;
 
     @Override
     public void init(LanguageServer langServer, WorkspaceManager workspaceManager) {
         this.workspaceManager = workspaceManager;
+        this.languageServer = langServer;
     }
 
     @Override
