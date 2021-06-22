@@ -27,6 +27,9 @@ import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 import org.eclipse.lsp4j.jsonrpc.services.JsonSegment;
 import org.eclipse.lsp4j.services.LanguageServer;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -42,6 +45,12 @@ import java.util.concurrent.CompletableFuture;
 public class OpenAPIConverterService implements ExtendedLanguageServerService {
     private WorkspaceManager workspaceManager;
     private LanguageServer languageServer;
+
+    public OpenAPIConverterService(WorkspaceManager workspaceManager, LanguageServer languageServer) {
+
+        this.workspaceManager = workspaceManager;
+        this.languageServer = languageServer;
+    }
 
     @Override
     public void init(LanguageServer langServer, WorkspaceManager workspaceManager) {
@@ -60,9 +69,10 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
         return CompletableFuture.supplyAsync(() -> {
             OpenAPIConverterResponse response = new OpenAPIConverterResponse();
             try {
-                Path documentPath = Paths.get(request.getDocumentFilePath());
-                Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath);
-                Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath);
+                String fileUri = request.getDocumentFilePath();
+                Optional<Path> documentPath = getPathFromURI(fileUri);
+                Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath.orElseThrow());
+                Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath.orElseThrow());
                 OpenAPIConverter openAPIConverter = new OpenAPIConverter(syntaxTree.orElseThrow(),
                         semanticModel.orElseThrow());
                 String yamlContent = openAPIConverter.generateOAS3Definition(syntaxTree.orElseThrow(), false);
@@ -74,5 +84,15 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             }
             return response;
         });
+    }
+
+    // Refactor documentation path
+    public static Optional<Path> getPathFromURI(String uri) {
+        try {
+            return Optional.of(Paths.get(new URL(uri).toURI()));
+        } catch (URISyntaxException | MalformedURLException e) {
+            // ignore
+        }
+        return Optional.empty();
     }
 }

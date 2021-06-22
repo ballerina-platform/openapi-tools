@@ -347,13 +347,4 @@ public class OpenApiConverterUtilsTest {
             System.gc();
         }
     }
-
-//    @Test
-//    public void testWithLS() {
-//        WorkspaceManager workspaceManager = WorkspaceManager.getInstance(new LanguageServerContextImpl());
-//
-//        OpenAPIConverterService openAPIConverterService = new OpenAPIConverterService();
-//        openAPIConverterService.init();
-//
-//    }
 }
