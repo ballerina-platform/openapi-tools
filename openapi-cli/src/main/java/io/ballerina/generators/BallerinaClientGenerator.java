@@ -104,6 +104,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -235,6 +236,18 @@ public class BallerinaClientGenerator {
         List<Server> servers = openAPI.getServers();
         server = servers.get(0);
         paths = setOperationId(openAPI.getPaths());
+        if (openAPI.getComponents() != null) {
+            // Refactor schema name with valid name
+            Map<String, Schema> allSchemas = openAPI.getComponents().getSchemas();
+            if (allSchemas != null) {
+                Map<String, Schema> refacSchema = new HashMap<>();
+                for (Map.Entry<String, Schema> schemaEntry : allSchemas.entrySet()) {
+                    String name = getValidName(schemaEntry.getKey(), true);
+                    refacSchema.put(name, schemaEntry.getValue());
+                }
+                openAPI.getComponents().setSchemas(refacSchema);
+            }
+        }
         filters = filter;
         // 1. Load client template syntax tree
         SyntaxTree syntaxTree = null;
