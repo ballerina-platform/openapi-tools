@@ -104,6 +104,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -235,6 +236,18 @@ public class BallerinaClientGenerator {
         List<Server> servers = openAPI.getServers();
         server = servers.get(0);
         paths = setOperationId(openAPI.getPaths());
+        if (openAPI.getComponents() != null) {
+            // Refactor schema name with valid name
+            Map<String, Schema> allSchemas = openAPI.getComponents().getSchemas();
+            if (allSchemas != null) {
+                Map<String, Schema> refacSchema = new HashMap<>();
+                for (Map.Entry<String, Schema> schemaEntry : allSchemas.entrySet()) {
+                    String name = getValidName(schemaEntry.getKey(), true);
+                    refacSchema.put(name, schemaEntry.getValue());
+                }
+                openAPI.getComponents().setSchemas(refacSchema);
+            }
+        }
         filters = filter;
         // 1. Load client template syntax tree
         SyntaxTree syntaxTree = null;
@@ -413,7 +426,7 @@ public class BallerinaClientGenerator {
         if (info.getDescription() != null) {
             MarkdownDocumentationLineNode clientDescription =
                     createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                            createNodeList(createLiteralValueToken(null, info.getDescription(),
+                            createNodeList(createLiteralValueToken(null, info.getDescription().split("\n")[0],
                                     createEmptyMinutiaeList(), createEmptyMinutiaeList())));
             documentationLines.add(clientDescription);
             MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
@@ -779,8 +792,8 @@ public class BallerinaClientGenerator {
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription().split("\n")[0]);
+                                        createParamAPIDoc(escapeIdentifier(getValidName(parameter.getName(),
+                                                false)), parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
@@ -788,8 +801,8 @@ public class BallerinaClientGenerator {
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription().split("\n")[0]);
+                                        createParamAPIDoc(escapeIdentifier(getValidName(parameter.getName(),
+                                                false)), parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
                         }
@@ -801,7 +814,7 @@ public class BallerinaClientGenerator {
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                        createParamAPIDoc(getValidName(parameter.getName(), false),
                                                 parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
@@ -810,7 +823,7 @@ public class BallerinaClientGenerator {
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
+                                        createParamAPIDoc(getValidName(parameter.getName(), false),
                                                 parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
@@ -874,18 +887,20 @@ public class BallerinaClientGenerator {
                     paramType = convertOpenAPITypeToBallerina(itemType) + "[]";
                 }
             } else if (arraySchema.getItems().get$ref() != null) {
-                paramType = extractReferenceType(arraySchema.getItems().get$ref().trim()) + "[]";
+                paramType = getValidName(extractReferenceType(arraySchema.getItems().get$ref().trim()), true) + "[]";
             }
         }
         if (parameter.getRequired()) {
              typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
-            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            IdentifierToken paramName =
+                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
             return createRequiredParameterNode(annotationNodes, typeName, paramName);
         } else {
             // TODO: for optional change to defaultable with there values
             typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(paramType)), createToken(QUESTION_MARK_TOKEN));
-            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            IdentifierToken paramName =
+                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
 
             if (parameterSchema.getDefault() != null) {
                 LiteralValueToken literalValueToken;
@@ -940,20 +955,22 @@ public class BallerinaClientGenerator {
             if (schema instanceof ArraySchema) {
                 ArraySchema arraySchema = (ArraySchema) schema;
                 if (arraySchema.getItems().get$ref() != null) {
-                    type = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
+                    type = getValidName(extractReferenceType(arraySchema.getItems().get$ref()), true) + "[]";
                 } else {
                     type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType().trim()) + "[]";
                 }
             }
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(type));
-            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            IdentifierToken paramName =
+                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
             return createRequiredParameterNode(annotationNodes, typeName, paramName);
         } else {
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(convertOpenAPITypeToBallerina(
                             parameter.getSchema().getType().trim()) + "?"));
-            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            IdentifierToken paramName =
+                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
             NilLiteralNode nilLiteralNode =
                     createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
             return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
@@ -977,7 +994,7 @@ public class BallerinaClientGenerator {
             String paramType = "";
             //Take payload type
             if (schema.get$ref() != null) {
-                paramType = extractReferenceType(schema.get$ref().trim());
+                paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
             } else if (schema.getType() != null && !schema.getType().equals("array") && !schema.getType().equals(
                     "object")) {
                 String typeOfPayload = schema.getType().trim();
@@ -988,7 +1005,7 @@ public class BallerinaClientGenerator {
                 if (arraySchema.getItems().getType() != null) {
                     paramType = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
                 } else if (arraySchema.getItems().get$ref() != null) {
-                    paramType = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
+                    paramType = getValidName(extractReferenceType(arraySchema.getItems().get$ref()), true) + "[]";
                 } else {
                     paramType = getBallerinaMeidaType(next.getKey().trim()) + "[]";
                 }
@@ -1162,7 +1179,8 @@ public class BallerinaClientGenerator {
                                 ArraySchema arraySchema = (ArraySchema) schema;
                                 // TODO: Nested array when response has
                                 if (arraySchema.getItems().get$ref() != null) {
-                                    String name = extractReferenceType(arraySchema.getItems().get$ref());
+                                    String name = getValidName(extractReferenceType(arraySchema.getItems().get$ref())
+                                            , true);
                                     type = name + "[]";
                                     String typeName = name + "Arr";
                                     TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
@@ -1236,7 +1254,7 @@ public class BallerinaClientGenerator {
         String type;
         type = getValidName(operation.getOperationId(), true) + "Response";
         if (ref != null) {
-            type = extractReferenceType(ref.trim());
+            type = getValidName(extractReferenceType(ref.trim()), true);
         } else if (properties2 != null) {
             Map<String, Schema> properties = properties2;
             if (properties.isEmpty()) {
@@ -1246,7 +1264,8 @@ public class BallerinaClientGenerator {
                 List<Node> recordFieldList = new ArrayList<>();
                 String description = "";
                 if (operation.getResponses().entrySet().iterator().next().getValue().getDescription() != null) {
-                    description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
+                    description = operation.getResponses().entrySet().iterator().next().getValue().getDescription().
+                            split("\n")[0];
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
                         createIdentifierToken("public type"),
@@ -1628,10 +1647,10 @@ public class BallerinaClientGenerator {
 
         for (Parameter parameter: parameters) {
             // Initializer
-            IdentifierToken fieldName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+            IdentifierToken fieldName = createIdentifierToken('"' + (parameter.getName().trim()) + '"');
             Token colon = createToken(COLON_TOKEN);
             SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
-                    createIdentifierToken(escapeIdentifier(parameter.getName().trim())));
+                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false))));
             SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
                     fieldName, colon, valueExpr);
             filedOfMap.add(specificFieldNode);
