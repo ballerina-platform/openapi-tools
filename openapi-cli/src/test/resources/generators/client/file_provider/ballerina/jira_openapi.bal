@@ -75,7 +75,7 @@ public client class Client {
     remote isolated function getApplicationProperty(string? 'key, string? permissionLevel, string? keyFilter) returns ApplicationPropertyArr|error {
         string  path = string `/rest/api/2/application-properties`;
         map<anydata> queryParam = {'key: 'key, permissionLevel: permissionLevel, keyFilter: keyFilter};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check check getPathForQueryParam(queryParam);
         ApplicationPropertyArr response = check self.clientEp-> get(path, targetType = ApplicationPropertyArr);
         return response;
     }
@@ -132,7 +132,7 @@ public client class Client {
     remote isolated function getAuditRecords(int? offset, int? 'limit, string? filter, string? 'from, string? to) returns AuditRecords|error {
         string  path = string `/rest/api/2/auditing/record`;
         map<anydata> queryParam = {offset: offset, 'limit: 'limit, filter: filter, 'from: 'from, to: to};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check check getPathForQueryParam(queryParam);
         AuditRecords response = check self.clientEp-> get(path, targetType = AuditRecords);
         return response;
     }
@@ -144,7 +144,7 @@ public client class Client {
     remote isolated function getCommentsByIds(string? expand, IssueCommentListRequestBean payload) returns PageBeanComment|error {
         string  path = string `/rest/api/2/comment/list`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -200,7 +200,7 @@ public client class Client {
     remote isolated function deleteComponent(string id, string? moveIssuesTo) returns http:Response | error {
         string  path = string `/rest/api/2/component/${id}`;
         map<anydata> queryParam = {moveIssuesTo: moveIssuesTo};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -250,7 +250,7 @@ public client class Client {
     remote isolated function getOptionsForField(int fieldId, int? startAt, int? maxResults) returns PageBeanCustomFieldOptionDetails|error {
         string  path = string `/rest/api/2/customField/${fieldId}/option`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check check getPathForQueryParam(queryParam);
         PageBeanCustomFieldOptionDetails response = check self.clientEp-> get(path, targetType = PageBeanCustomFieldOptionDetails);
         return response;
     }
@@ -278,7 +278,7 @@ public client class Client {
     remote isolated function getAllDashboards(string? filter, int? startAt, int? maxResults) returns PageOfDashboards|error {
         string  path = string `/rest/api/2/dashboard`;
         map<anydata> queryParam = {filter: filter, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check check getPathForQueryParam(queryParam);
         PageOfDashboards response = check self.clientEp-> get(path, targetType = PageOfDashboards);
         return response;
     }
@@ -293,7 +293,7 @@ public client class Client {
     remote isolated function getDashboardsPaginated(string? dashboardName, string? accountId, string? owner, string? groupname, int? projectId, string? orderBy, int? startAt, int? maxResults, string? expand) returns PageBeanDashboard|error {
         string  path = string `/rest/api/2/dashboard/search`;
         map<anydata> queryParam = {dashboardName: dashboardName, accountId: accountId, owner: owner, groupname: groupname, projectId: projectId, orderBy: orderBy, startAt: startAt, maxResults: maxResults, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check check getPathForQueryParam(queryParam);
         PageBeanDashboard response = check self.clientEp-> get(path, targetType = PageBeanDashboard);
         return response;
     }
@@ -353,7 +353,7 @@ public client class Client {
     remote isolated function analyseExpression(string? 'check, JiraExpressionForAnalysis payload) returns JiraExpressionsAnalysis|error {
         string  path = string `/rest/api/2/expression/analyse`;
         map<anydata> queryParam = {'check: 'check};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -363,7 +363,7 @@ public client class Client {
     remote isolated function evaluateJiraExpression(string? expand, JiraExpressionEvalRequestBean payload) returns JiraExpressionResult|error {
         string  path = string `/rest/api/2/expression/eval`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -386,7 +386,7 @@ public client class Client {
     remote isolated function getFieldsPaginated(int? startAt, int? maxResults, string[]? 'type, string[]? id, string? query, string? orderBy, string? expand) returns PageBeanField|error {
         string  path = string `/rest/api/2/field/search`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, 'type: 'type, id: id, query: query, orderBy: orderBy, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check check getPathForQueryParam(queryParam);
         PageBeanField response = check self.clientEp-> get(path, targetType = PageBeanField);
         return response;
     }
@@ -401,7 +401,7 @@ public client class Client {
     remote isolated function getContextsForField(string fieldId, boolean? isAnyIssueType, boolean? isGlobalContext, int[]? contextId, int? startAt, int? maxResults) returns PageBeanCustomFieldContext|error {
         string  path = string `/rest/api/2/field/${fieldId}/context`;
         map<anydata> queryParam = {isAnyIssueType: isAnyIssueType, isGlobalContext: isGlobalContext, contextId: contextId, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanCustomFieldContext response = check self.clientEp-> get(path, targetType = PageBeanCustomFieldContext);
         return response;
     }
@@ -416,7 +416,7 @@ public client class Client {
     remote isolated function getDefaultValues(string fieldId, int[]? contextId, int? startAt, int? maxResults) returns PageBeanCustomFieldContextDefaultValue|error {
         string  path = string `/rest/api/2/field/${fieldId}/context/defaultValue`;
         map<anydata> queryParam = {contextId: contextId, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanCustomFieldContextDefaultValue response = check self.clientEp-> get(path, targetType = PageBeanCustomFieldContextDefaultValue);
         return response;
     }
@@ -431,14 +431,14 @@ public client class Client {
     remote isolated function getIssueTypeMappingsForContexts(string fieldId, int[]? contextId, int? startAt, int? maxResults) returns PageBeanIssueTypeToContextMapping|error {
         string  path = string `/rest/api/2/field/${fieldId}/context/issuetypemapping`;
         map<anydata> queryParam = {contextId: contextId, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueTypeToContextMapping response = check self.clientEp-> get(path, targetType = PageBeanIssueTypeToContextMapping);
         return response;
     }
     remote isolated function getCustomFieldContextsForProjectsAndIssueTypes(string fieldId, int? startAt, int? maxResults, ProjectIssueTypeMappings payload) returns PageBeanContextForProjectAndIssueType|error {
         string  path = string `/rest/api/2/field/${fieldId}/context/mapping`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -448,7 +448,7 @@ public client class Client {
     remote isolated function getProjectContextMapping(string fieldId, int[]? contextId, int? startAt, int? maxResults) returns PageBeanCustomFieldContextProjectMapping|error {
         string  path = string `/rest/api/2/field/${fieldId}/context/projectmapping`;
         map<anydata> queryParam = {contextId: contextId, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanCustomFieldContextProjectMapping response = check self.clientEp-> get(path, targetType = PageBeanCustomFieldContextProjectMapping);
         return response;
     }
@@ -486,7 +486,7 @@ public client class Client {
     remote isolated function getOptionsForContext(string fieldId, int contextId, int? optionId, boolean? onlyOptions, int? startAt, int? maxResults) returns PageBeanCustomFieldContextOption|error {
         string  path = string `/rest/api/2/field/${fieldId}/context/${contextId}/option`;
         map<anydata> queryParam = {optionId: optionId, onlyOptions: onlyOptions, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanCustomFieldContextOption response = check self.clientEp-> get(path, targetType = PageBeanCustomFieldContextOption);
         return response;
     }
@@ -540,21 +540,21 @@ public client class Client {
     remote isolated function getContextsForFieldDeprecated(string fieldId, int? startAt, int? maxResults) returns PageBeanContext|error {
         string  path = string `/rest/api/2/field/${fieldId}/contexts`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanContext response = check self.clientEp-> get(path, targetType = PageBeanContext);
         return response;
     }
     remote isolated function getScreensForField(string fieldId, int? startAt, int? maxResults, string? expand) returns PageBeanScreenWithTab|error {
         string  path = string `/rest/api/2/field/${fieldId}/screens`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanScreenWithTab response = check self.clientEp-> get(path, targetType = PageBeanScreenWithTab);
         return response;
     }
     remote isolated function getAllIssueFieldOptions(int? startAt, int? maxResults, string fieldKey) returns PageBeanIssueFieldOption|error {
         string  path = string `/rest/api/2/field/${fieldKey}/option`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueFieldOption response = check self.clientEp-> get(path, targetType = PageBeanIssueFieldOption);
         return response;
     }
@@ -569,14 +569,14 @@ public client class Client {
     remote isolated function getSelectableIssueFieldOptions(int? startAt, int? maxResults, int? projectId, string fieldKey) returns PageBeanIssueFieldOption|error {
         string  path = string `/rest/api/2/field/${fieldKey}/option/suggestions/edit`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, projectId: projectId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueFieldOption response = check self.clientEp-> get(path, targetType = PageBeanIssueFieldOption);
         return response;
     }
     remote isolated function getVisibleIssueFieldOptions(int? startAt, int? maxResults, int? projectId, string fieldKey) returns PageBeanIssueFieldOption|error {
         string  path = string `/rest/api/2/field/${fieldKey}/option/suggestions/search`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, projectId: projectId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueFieldOption response = check self.clientEp-> get(path, targetType = PageBeanIssueFieldOption);
         return response;
     }
@@ -603,7 +603,7 @@ public client class Client {
     remote isolated function replaceIssueFieldOption(int? replaceWith, string? jql, string fieldKey, int optionId) returns TaskProgressBeanRemoveOptionFromIssuesResult|error {
         string  path = string `/rest/api/2/field/${fieldKey}/option/${optionId}/issue`;
         map<anydata> queryParam = {replaceWith: replaceWith, jql: jql};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         TaskProgressBeanRemoveOptionFromIssuesResult response = check self.clientEp-> delete(path, request, targetType = TaskProgressBeanRemoveOptionFromIssuesResult);
@@ -612,35 +612,35 @@ public client class Client {
     remote isolated function getAllFieldConfigurations(int? startAt, int? maxResults, int[]? id, boolean? isDefault, string? query) returns PageBeanFieldConfiguration|error {
         string  path = string `/rest/api/2/fieldconfiguration`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, id: id, isDefault: isDefault, query: query};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanFieldConfiguration response = check self.clientEp-> get(path, targetType = PageBeanFieldConfiguration);
         return response;
     }
     remote isolated function getFieldConfigurationItems(int id, int? startAt, int? maxResults) returns PageBeanFieldConfigurationItem|error {
         string  path = string `/rest/api/2/fieldconfiguration/${id}/fields`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanFieldConfigurationItem response = check self.clientEp-> get(path, targetType = PageBeanFieldConfigurationItem);
         return response;
     }
     remote isolated function getAllFieldConfigurationSchemes(int? startAt, int? maxResults, int[]? id) returns PageBeanFieldConfigurationScheme|error {
         string  path = string `/rest/api/2/fieldconfigurationscheme`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, id: id};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanFieldConfigurationScheme response = check self.clientEp-> get(path, targetType = PageBeanFieldConfigurationScheme);
         return response;
     }
     remote isolated function getFieldConfigurationSchemeMappings(int? startAt, int? maxResults, int[]? fieldConfigurationSchemeId) returns PageBeanFieldConfigurationIssueTypeItem|error {
         string  path = string `/rest/api/2/fieldconfigurationscheme/mapping`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, fieldConfigurationSchemeId: fieldConfigurationSchemeId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanFieldConfigurationIssueTypeItem response = check self.clientEp-> get(path, targetType = PageBeanFieldConfigurationIssueTypeItem);
         return response;
     }
     remote isolated function getFieldConfigurationSchemeProjectMapping(int? startAt, int? maxResults, int[] projectId) returns PageBeanFieldConfigurationSchemeProjects|error {
         string  path = string `/rest/api/2/fieldconfigurationscheme/project`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, projectId: projectId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanFieldConfigurationSchemeProjects response = check self.clientEp-> get(path, targetType = PageBeanFieldConfigurationSchemeProjects);
         return response;
     }
@@ -655,14 +655,14 @@ public client class Client {
     remote isolated function getFilters(string? expand) returns FilterArr|error {
         string  path = string `/rest/api/2/filter`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         FilterArr response = check self.clientEp-> get(path, targetType = FilterArr);
         return response;
     }
     remote isolated function createFilter(string? expand, Filter payload) returns Filter|error {
         string  path = string `/rest/api/2/filter`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -685,35 +685,35 @@ public client class Client {
     remote isolated function getFavouriteFilters(string? expand) returns FilterArr|error {
         string  path = string `/rest/api/2/filter/favourite`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         FilterArr response = check self.clientEp-> get(path, targetType = FilterArr);
         return response;
     }
     remote isolated function getMyFilters(string? expand, boolean? includeFavourites) returns FilterArr|error {
         string  path = string `/rest/api/2/filter/my`;
         map<anydata> queryParam = {expand: expand, includeFavourites: includeFavourites};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         FilterArr response = check self.clientEp-> get(path, targetType = FilterArr);
         return response;
     }
     remote isolated function getFiltersPaginated(string? filterName, string? accountId, string? owner, string? groupname, int? projectId, int[]? id, string? orderBy, int? startAt, int? maxResults, string? expand) returns PageBeanFilterDetails|error {
         string  path = string `/rest/api/2/filter/search`;
         map<anydata> queryParam = {filterName: filterName, accountId: accountId, owner: owner, groupname: groupname, projectId: projectId, id: id, orderBy: orderBy, startAt: startAt, maxResults: maxResults, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanFilterDetails response = check self.clientEp-> get(path, targetType = PageBeanFilterDetails);
         return response;
     }
     remote isolated function getFilter(int id, string? expand) returns Filter|error {
         string  path = string `/rest/api/2/filter/${id}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         Filter response = check self.clientEp-> get(path, targetType = Filter);
         return response;
     }
     remote isolated function updateFilter(int id, string? expand, Filter payload) returns Filter|error {
         string  path = string `/rest/api/2/filter/${id}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -748,7 +748,7 @@ public client class Client {
     remote isolated function setFavouriteForFilter(int id, string? expand) returns Filter|error {
         string  path = string `/rest/api/2/filter/${id}/favourite`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         Filter response = check self.clientEp-> put(path, request, targetType = Filter);
@@ -757,7 +757,7 @@ public client class Client {
     remote isolated function deleteFavouriteForFilter(int id, string? expand) returns Filter|error {
         string  path = string `/rest/api/2/filter/${id}/favourite`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         Filter response = check self.clientEp-> delete(path, request, targetType = Filter);
@@ -791,7 +791,7 @@ public client class Client {
     remote isolated function getGroup(string groupname, string? expand) returns Group|error {
         string  path = string `/rest/api/2/group`;
         map<anydata> queryParam = {groupname: groupname, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         Group response = check self.clientEp-> get(path, targetType = Group);
         return response;
     }
@@ -806,7 +806,7 @@ public client class Client {
     remote isolated function removeGroup(string groupname, string? swapGroup) returns http:Response | error {
         string  path = string `/rest/api/2/group`;
         map<anydata> queryParam = {groupname: groupname, swapGroup: swapGroup};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -815,21 +815,21 @@ public client class Client {
     remote isolated function bulkGetGroups(int? startAt, int? maxResults, string[]? groupId, string[]? groupName) returns PageBeanGroupDetails|error {
         string  path = string `/rest/api/2/group/bulk`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, groupId: groupId, groupName: groupName};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanGroupDetails response = check self.clientEp-> get(path, targetType = PageBeanGroupDetails);
         return response;
     }
     remote isolated function getUsersFromGroup(string groupname, boolean? includeInactiveUsers, int? startAt, int? maxResults) returns PageBeanUserDetails|error {
         string  path = string `/rest/api/2/group/member`;
         map<anydata> queryParam = {groupname: groupname, includeInactiveUsers: includeInactiveUsers, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanUserDetails response = check self.clientEp-> get(path, targetType = PageBeanUserDetails);
         return response;
     }
     remote isolated function addUserToGroup(string groupname, UpdateUserToGroupBean payload) returns Group|error {
         string  path = string `/rest/api/2/group/user`;
         map<anydata> queryParam = {groupname: groupname};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -839,7 +839,7 @@ public client class Client {
     remote isolated function removeUserFromGroup(string groupname, string? username, string accountId) returns http:Response | error {
         string  path = string `/rest/api/2/group/user`;
         map<anydata> queryParam = {groupname: groupname, username: username, accountId: accountId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -848,14 +848,14 @@ public client class Client {
     remote isolated function findGroups(string? accountId, string? query, string[]? exclude, int? maxResults, string? userName) returns FoundGroups|error {
         string  path = string `/rest/api/2/groups/picker`;
         map<anydata> queryParam = {accountId: accountId, query: query, exclude: exclude, maxResults: maxResults, userName: userName};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         FoundGroups response = check self.clientEp-> get(path, targetType = FoundGroups);
         return response;
     }
     remote isolated function findUsersAndGroups(string query, int? maxResults, boolean? showAvatar, string? fieldId, string[]? projectId, string[]? issueTypeId, string? avatarSize, boolean? caseInsensitive, boolean? excludeConnectAddons) returns FoundUsersAndGroups|error {
         string  path = string `/rest/api/2/groupuserpicker`;
         map<anydata> queryParam = {query: query, maxResults: maxResults, showAvatar: showAvatar, fieldId: fieldId, projectId: projectId, issueTypeId: issueTypeId, avatarSize: avatarSize, caseInsensitive: caseInsensitive, excludeConnectAddons: excludeConnectAddons};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         FoundUsersAndGroups response = check self.clientEp-> get(path, targetType = FoundUsersAndGroups);
         return response;
     }
@@ -867,7 +867,7 @@ public client class Client {
     remote isolated function createIssue(boolean? updateHistory, IssueUpdateDetails payload) returns CreatedIssue|error {
         string  path = string `/rest/api/2/issue`;
         map<anydata> queryParam = {updateHistory: updateHistory};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -885,14 +885,14 @@ public client class Client {
     remote isolated function getCreateIssueMeta(string[]? projectIds, string[]? projectKeys, string[]? issuetypeIds, string[]? issuetypeNames, string? expand) returns IssueCreateMetadata|error {
         string  path = string `/rest/api/2/issue/createmeta`;
         map<anydata> queryParam = {projectIds: projectIds, projectKeys: projectKeys, issuetypeIds: issuetypeIds, issuetypeNames: issuetypeNames, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         IssueCreateMetadata response = check self.clientEp-> get(path, targetType = IssueCreateMetadata);
         return response;
     }
     remote isolated function getIssuePickerResource(string? query, string? currentJQL, string? currentIssueKey, string? currentProjectId, boolean? showSubTasks, boolean? showSubTaskParent) returns IssuePickerSuggestions|error {
         string  path = string `/rest/api/2/issue/picker`;
         map<anydata> queryParam = {query: query, currentJQL: currentJQL, currentIssueKey: currentIssueKey, currentProjectId: currentProjectId, showSubTasks: showSubTasks, showSubTaskParent: showSubTaskParent};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         IssuePickerSuggestions response = check self.clientEp-> get(path, targetType = IssuePickerSuggestions);
         return response;
     }
@@ -922,14 +922,14 @@ public client class Client {
     remote isolated function getIssue(string issueIdOrKey, string[]? fields, boolean? fieldsByKeys, string? expand, string[]? properties, boolean? updateHistory) returns IssueBean|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}`;
         map<anydata> queryParam = {fields: fields, fieldsByKeys: fieldsByKeys, expand: expand, properties: properties, updateHistory: updateHistory};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         IssueBean response = check self.clientEp-> get(path, targetType = IssueBean);
         return response;
     }
     remote isolated function editIssue(string issueIdOrKey, boolean? notifyUsers, boolean? overrideScreenSecurity, boolean? overrideEditableFlag, IssueUpdateDetails payload) returns json|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}`;
         map<anydata> queryParam = {notifyUsers: notifyUsers, overrideScreenSecurity: overrideScreenSecurity, overrideEditableFlag: overrideEditableFlag};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -939,7 +939,7 @@ public client class Client {
     remote isolated function deleteIssue(string issueIdOrKey, string? deleteSubtasks) returns http:Response | error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}`;
         map<anydata> queryParam = {deleteSubtasks: deleteSubtasks};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -962,21 +962,21 @@ public client class Client {
     remote isolated function getChangeLogs(string issueIdOrKey, int? startAt, int? maxResults) returns PageBeanChangelog|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/changelog`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanChangelog response = check self.clientEp-> get(path, targetType = PageBeanChangelog);
         return response;
     }
     remote isolated function getComments(string issueIdOrKey, int? startAt, int? maxResults, string? orderBy, string? expand) returns PageOfComments|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/comment`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, orderBy: orderBy, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageOfComments response = check self.clientEp-> get(path, targetType = PageOfComments);
         return response;
     }
     remote isolated function addComment(string issueIdOrKey, string? expand, Comment payload) returns Comment|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/comment`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -986,14 +986,14 @@ public client class Client {
     remote isolated function getComment(string issueIdOrKey, string id, string? expand) returns Comment|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/comment/${id}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         Comment response = check self.clientEp-> get(path, targetType = Comment);
         return response;
     }
     remote isolated function updateComment(string issueIdOrKey, string id, string? expand, Comment payload) returns Comment|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/comment/${id}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -1010,7 +1010,7 @@ public client class Client {
     remote isolated function getEditIssueMeta(string issueIdOrKey, boolean? overrideScreenSecurity, boolean? overrideEditableFlag) returns IssueUpdateMetadata|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/editmeta`;
         map<anydata> queryParam = {overrideScreenSecurity: overrideScreenSecurity, overrideEditableFlag: overrideEditableFlag};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         IssueUpdateMetadata response = check self.clientEp-> get(path, targetType = IssueUpdateMetadata);
         return response;
     }
@@ -1050,7 +1050,7 @@ public client class Client {
     remote isolated function getRemoteIssueLinks(string issueIdOrKey, string? globalId) returns RemoteIssueLink|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/remotelink`;
         map<anydata> queryParam = {globalId: globalId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         RemoteIssueLink response = check self.clientEp-> get(path, targetType = RemoteIssueLink);
         return response;
     }
@@ -1065,7 +1065,7 @@ public client class Client {
     remote isolated function deleteRemoteIssueLinkByGlobalId(string issueIdOrKey, string globalId) returns http:Response | error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/remotelink`;
         map<anydata> queryParam = {globalId: globalId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -1094,7 +1094,7 @@ public client class Client {
     remote isolated function getTransitions(string issueIdOrKey, string? expand, string? transitionId, boolean? skipRemoteOnlyCondition, boolean? includeUnavailableTransitions, boolean? sortByOpsBarAndStatus) returns Transitions|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/transitions`;
         map<anydata> queryParam = {expand: expand, transitionId: transitionId, skipRemoteOnlyCondition: skipRemoteOnlyCondition, includeUnavailableTransitions: includeUnavailableTransitions, sortByOpsBarAndStatus: sortByOpsBarAndStatus};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         Transitions response = check self.clientEp-> get(path, targetType = Transitions);
         return response;
     }
@@ -1141,7 +1141,7 @@ public client class Client {
     remote isolated function removeWatcher(string issueIdOrKey, string? username, string? accountId) returns http:Response | error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/watchers`;
         map<anydata> queryParam = {username: username, accountId: accountId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -1150,14 +1150,14 @@ public client class Client {
     remote isolated function getIssueWorklog(string issueIdOrKey, int? startAt, int? maxResults, int? startedAfter, string? expand) returns PageOfWorklogs|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/worklog`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, startedAfter: startedAfter, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageOfWorklogs response = check self.clientEp-> get(path, targetType = PageOfWorklogs);
         return response;
     }
     remote isolated function addWorklog(string issueIdOrKey, boolean? notifyUsers, string? adjustEstimate, string? newEstimate, string? reduceBy, string? expand, boolean? overrideEditableFlag, Worklog payload) returns Worklog|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/worklog`;
         map<anydata> queryParam = {notifyUsers: notifyUsers, adjustEstimate: adjustEstimate, newEstimate: newEstimate, reduceBy: reduceBy, expand: expand, overrideEditableFlag: overrideEditableFlag};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -1167,14 +1167,14 @@ public client class Client {
     remote isolated function getWorklog(string issueIdOrKey, string id, string? expand) returns Worklog|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/worklog/${id}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         Worklog response = check self.clientEp-> get(path, targetType = Worklog);
         return response;
     }
     remote isolated function updateWorklog(string issueIdOrKey, string id, boolean? notifyUsers, string? adjustEstimate, string? newEstimate, string? expand, boolean? overrideEditableFlag, Worklog payload) returns Worklog|error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/worklog/${id}`;
         map<anydata> queryParam = {notifyUsers: notifyUsers, adjustEstimate: adjustEstimate, newEstimate: newEstimate, expand: expand, overrideEditableFlag: overrideEditableFlag};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -1184,7 +1184,7 @@ public client class Client {
     remote isolated function deleteWorklog(string issueIdOrKey, string id, boolean? notifyUsers, string? adjustEstimate, string? newEstimate, string? increaseBy, boolean? overrideEditableFlag) returns http:Response | error {
         string  path = string `/rest/api/2/issue/${issueIdOrKey}/worklog/${id}`;
         map<anydata> queryParam = {notifyUsers: notifyUsers, adjustEstimate: adjustEstimate, newEstimate: newEstimate, increaseBy: increaseBy, overrideEditableFlag: overrideEditableFlag};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -1281,7 +1281,7 @@ public client class Client {
     remote isolated function getIssueSecurityLevelMembers(int issueSecuritySchemeId, int? startAt, int? maxResults, int[]? issueSecurityLevelId, string? expand) returns PageBeanIssueSecurityLevelMember|error {
         string  path = string `/rest/api/2/issuesecurityschemes/${issueSecuritySchemeId}/members`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, issueSecurityLevelId: issueSecurityLevelId, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueSecurityLevelMember response = check self.clientEp-> get(path, targetType = PageBeanIssueSecurityLevelMember);
         return response;
     }
@@ -1314,7 +1314,7 @@ public client class Client {
     remote isolated function deleteIssueType(string id, string? alternativeIssueTypeId) returns http:Response | error {
         string  path = string `/rest/api/2/issuetype/${id}`;
         map<anydata> queryParam = {alternativeIssueTypeId: alternativeIssueTypeId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -1328,7 +1328,7 @@ public client class Client {
     remote isolated function createIssueTypeAvatar(string id, int? x, int? y, int size, json payload) returns Avatar|error {
         string  path = string `/rest/api/2/issuetype/${id}/avatar2`;
         map<anydata> queryParam = {x: x, y: y, size: size};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         Avatar response = check self.clientEp->post(path, request, targetType=Avatar);
         return response;
@@ -1361,7 +1361,7 @@ public client class Client {
     remote isolated function getAllIssueTypeSchemes(int? startAt, int? maxResults, int[]? id) returns PageBeanIssueTypeScheme|error {
         string  path = string `/rest/api/2/issuetypescheme`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, id: id};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueTypeScheme response = check self.clientEp-> get(path, targetType = PageBeanIssueTypeScheme);
         return response;
     }
@@ -1376,14 +1376,14 @@ public client class Client {
     remote isolated function getIssueTypeSchemesMapping(int? startAt, int? maxResults, int[]? issueTypeSchemeId) returns PageBeanIssueTypeSchemeMapping|error {
         string  path = string `/rest/api/2/issuetypescheme/mapping`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, issueTypeSchemeId: issueTypeSchemeId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueTypeSchemeMapping response = check self.clientEp-> get(path, targetType = PageBeanIssueTypeSchemeMapping);
         return response;
     }
     remote isolated function getIssueTypeSchemeForProjects(int? startAt, int? maxResults, int[] projectId) returns PageBeanIssueTypeSchemeProjects|error {
         string  path = string `/rest/api/2/issuetypescheme/project`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, projectId: projectId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueTypeSchemeProjects response = check self.clientEp-> get(path, targetType = PageBeanIssueTypeSchemeProjects);
         return response;
     }
@@ -1436,7 +1436,7 @@ public client class Client {
     remote isolated function getIssueTypeScreenSchemes(int? startAt, int? maxResults, int[]? id) returns PageBeanIssueTypeScreenScheme|error {
         string  path = string `/rest/api/2/issuetypescreenscheme`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, id: id};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueTypeScreenScheme response = check self.clientEp-> get(path, targetType = PageBeanIssueTypeScreenScheme);
         return response;
     }
@@ -1451,14 +1451,14 @@ public client class Client {
     remote isolated function getIssueTypeScreenSchemeMappings(int? startAt, int? maxResults, int[]? issueTypeScreenSchemeId) returns PageBeanIssueTypeScreenSchemeItem|error {
         string  path = string `/rest/api/2/issuetypescreenscheme/mapping`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, issueTypeScreenSchemeId: issueTypeScreenSchemeId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueTypeScreenSchemeItem response = check self.clientEp-> get(path, targetType = PageBeanIssueTypeScreenSchemeItem);
         return response;
     }
     remote isolated function getIssueTypeScreenSchemeProjectAssociations(int? startAt, int? maxResults, int[] projectId) returns PageBeanIssueTypeScreenSchemesProjects|error {
         string  path = string `/rest/api/2/issuetypescreenscheme/project`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, projectId: projectId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanIssueTypeScreenSchemesProjects response = check self.clientEp-> get(path, targetType = PageBeanIssueTypeScreenSchemesProjects);
         return response;
     }
@@ -1525,7 +1525,7 @@ public client class Client {
     remote isolated function getFieldAutoCompleteForQueryString(string? fieldName, string? fieldValue, string? predicateName, string? predicateValue) returns AutoCompleteSuggestions|error {
         string  path = string `/rest/api/2/jql/autocompletedata/suggestions`;
         map<anydata> queryParam = {fieldName: fieldName, fieldValue: fieldValue, predicateName: predicateName, predicateValue: predicateValue};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         AutoCompleteSuggestions response = check self.clientEp-> get(path, targetType = AutoCompleteSuggestions);
         return response;
     }
@@ -1540,7 +1540,7 @@ public client class Client {
     remote isolated function parseJqlQueries(string? validation, JqlQueriesToParse payload) returns ParsedJqlQueries|error {
         string  path = string `/rest/api/2/jql/parse`;
         map<anydata> queryParam = {validation: validation};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -1558,28 +1558,28 @@ public client class Client {
     remote isolated function getAllLabels(int? startAt, int? maxResults) returns PageBeanString|error {
         string  path = string `/rest/api/2/label`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanString response = check self.clientEp-> get(path, targetType = PageBeanString);
         return response;
     }
     remote isolated function getMyPermissions(string? projectKey, string? projectId, string? issueKey, string? issueId, string? permissions, string? projectUuid, string? projectConfigurationUuid) returns Permissions|error {
         string  path = string `/rest/api/2/mypermissions`;
         map<anydata> queryParam = {projectKey: projectKey, projectId: projectId, issueKey: issueKey, issueId: issueId, permissions: permissions, projectUuid: projectUuid, projectConfigurationUuid: projectConfigurationUuid};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         Permissions response = check self.clientEp-> get(path, targetType = Permissions);
         return response;
     }
     remote isolated function getPreference(string 'key) returns string|error {
         string  path = string `/rest/api/2/mypreferences`;
         map<anydata> queryParam = {'key: 'key};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         string response = check self.clientEp-> get(path, targetType = string);
         return response;
     }
     remote isolated function setPreference(string 'key, string payload) returns json|error {
         string  path = string `/rest/api/2/mypreferences`;
         map<anydata> queryParam = {'key: 'key};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -1589,7 +1589,7 @@ public client class Client {
     remote isolated function removePreference(string 'key) returns http:Response | error {
         string  path = string `/rest/api/2/mypreferences`;
         map<anydata> queryParam = {'key: 'key};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -1618,21 +1618,21 @@ public client class Client {
     remote isolated function getCurrentUser(string? expand) returns User|error {
         string  path = string `/rest/api/2/myself`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         User response = check self.clientEp-> get(path, targetType = User);
         return response;
     }
     remote isolated function getNotificationSchemes(int? startAt, int? maxResults, string? expand) returns PageBeanNotificationScheme|error {
         string  path = string `/rest/api/2/notificationscheme`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanNotificationScheme response = check self.clientEp-> get(path, targetType = PageBeanNotificationScheme);
         return response;
     }
     remote isolated function getNotificationScheme(int id, string? expand) returns NotificationScheme|error {
         string  path = string `/rest/api/2/notificationscheme/${id}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         NotificationScheme response = check self.clientEp-> get(path, targetType = NotificationScheme);
         return response;
     }
@@ -1660,14 +1660,14 @@ public client class Client {
     remote isolated function getAllPermissionSchemes(string? expand) returns PermissionSchemes|error {
         string  path = string `/rest/api/2/permissionscheme`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PermissionSchemes response = check self.clientEp-> get(path, targetType = PermissionSchemes);
         return response;
     }
     remote isolated function createPermissionScheme(string? expand, PermissionScheme payload) returns PermissionScheme|error {
         string  path = string `/rest/api/2/permissionscheme`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -1677,14 +1677,14 @@ public client class Client {
     remote isolated function getPermissionScheme(int schemeId, string? expand) returns PermissionScheme|error {
         string  path = string `/rest/api/2/permissionscheme/${schemeId}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PermissionScheme response = check self.clientEp-> get(path, targetType = PermissionScheme);
         return response;
     }
     remote isolated function updatePermissionScheme(int schemeId, string? expand, PermissionScheme payload) returns PermissionScheme|error {
         string  path = string `/rest/api/2/permissionscheme/${schemeId}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -1701,14 +1701,14 @@ public client class Client {
     remote isolated function getPermissionSchemeGrants(int schemeId, string? expand) returns PermissionGrants|error {
         string  path = string `/rest/api/2/permissionscheme/${schemeId}/permission`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PermissionGrants response = check self.clientEp-> get(path, targetType = PermissionGrants);
         return response;
     }
     remote isolated function createPermissionGrant(int schemeId, string? expand, PermissionGrant payload) returns PermissionGrant|error {
         string  path = string `/rest/api/2/permissionscheme/${schemeId}/permission`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -1718,7 +1718,7 @@ public client class Client {
     remote isolated function getPermissionSchemeGrant(int schemeId, int permissionId, string? expand) returns PermissionGrant|error {
         string  path = string `/rest/api/2/permissionscheme/${schemeId}/permission/${permissionId}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PermissionGrant response = check self.clientEp-> get(path, targetType = PermissionGrant);
         return response;
     }
@@ -1742,7 +1742,7 @@ public client class Client {
     remote isolated function getAllProjects(string? expand, int? recent, string[]? properties) returns ProjectArr|error {
         string  path = string `/rest/api/2/project`;
         map<anydata> queryParam = {expand: expand, recent: recent, properties: properties};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ProjectArr response = check self.clientEp-> get(path, targetType = ProjectArr);
         return response;
     }
@@ -1757,7 +1757,7 @@ public client class Client {
     remote isolated function searchProjects(int? startAt, int? maxResults, string? orderBy, string? query, string? typeKey, int? categoryId, string? action, string? expand, string[]? status, StringList[]? properties, string? propertyQuery) returns PageBeanProject|error {
         string  path = string `/rest/api/2/project/search`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, orderBy: orderBy, query: query, typeKey: typeKey, categoryId: categoryId, action: action, expand: expand, status: status, properties: properties, propertyQuery: propertyQuery};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanProject response = check self.clientEp-> get(path, targetType = PageBeanProject);
         return response;
     }
@@ -1784,14 +1784,14 @@ public client class Client {
     remote isolated function getProject(string projectIdOrKey, string? expand, string[]? properties) returns Project|error {
         string  path = string `/rest/api/2/project/${projectIdOrKey}`;
         map<anydata> queryParam = {expand: expand, properties: properties};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         Project response = check self.clientEp-> get(path, targetType = Project);
         return response;
     }
     remote isolated function updateProject(string projectIdOrKey, string? expand, ProjectInputBean payload) returns Project|error {
         string  path = string `/rest/api/2/project/${projectIdOrKey}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -1801,7 +1801,7 @@ public client class Client {
     remote isolated function deleteProject(string projectIdOrKey, boolean? enableUndo) returns http:Response | error {
         string  path = string `/rest/api/2/project/${projectIdOrKey}`;
         map<anydata> queryParam = {enableUndo: enableUndo};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -1832,7 +1832,7 @@ public client class Client {
     remote isolated function createProjectAvatar(string projectIdOrKey, int? x, int? y, int? size, json payload) returns Avatar|error {
         string  path = string `/rest/api/2/project/${projectIdOrKey}/avatar2`;
         map<anydata> queryParam = {x: x, y: y, size: size};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         Avatar response = check self.clientEp->post(path, request, targetType=Avatar);
         return response;
@@ -1845,7 +1845,7 @@ public client class Client {
     remote isolated function getProjectComponentsPaginated(string projectIdOrKey, int? startAt, int? maxResults, string? orderBy, string? query) returns PageBeanComponentWithIssueCount|error {
         string  path = string `/rest/api/2/project/${projectIdOrKey}/component`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, orderBy: orderBy, query: query};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanComponentWithIssueCount response = check self.clientEp-> get(path, targetType = PageBeanComponentWithIssueCount);
         return response;
     }
@@ -1935,7 +1935,7 @@ public client class Client {
     remote isolated function deleteActor(string projectIdOrKey, int id, string? user, string? 'group) returns http:Response | error {
         string  path = string `/rest/api/2/project/${projectIdOrKey}/role/${id}`;
         map<anydata> queryParam = {user: user, 'group: 'group};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -1944,7 +1944,7 @@ public client class Client {
     remote isolated function getProjectRoleDetails(string projectIdOrKey, boolean? currentMember, boolean? excludeConnectAddons) returns ProjectRoleDetailsArr|error {
         string  path = string `/rest/api/2/project/${projectIdOrKey}/roledetails`;
         map<anydata> queryParam = {currentMember: currentMember, excludeConnectAddons: excludeConnectAddons};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ProjectRoleDetailsArr response = check self.clientEp-> get(path, targetType = ProjectRoleDetailsArr);
         return response;
     }
@@ -1963,14 +1963,14 @@ public client class Client {
     remote isolated function getProjectVersionsPaginated(string projectIdOrKey, int? startAt, int? maxResults, string? orderBy, string? query, string? status, string? expand) returns PageBeanVersion|error {
         string  path = string `/rest/api/2/project/${projectIdOrKey}/version`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, orderBy: orderBy, query: query, status: status, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanVersion response = check self.clientEp-> get(path, targetType = PageBeanVersion);
         return response;
     }
     remote isolated function getProjectVersions(string projectIdOrKey, string? expand) returns VersionArr|error {
         string  path = string `/rest/api/2/project/${projectIdOrKey}/versions`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         VersionArr response = check self.clientEp-> get(path, targetType = VersionArr);
         return response;
     }
@@ -2000,21 +2000,21 @@ public client class Client {
     remote isolated function getNotificationSchemeForProject(string projectKeyOrId, string? expand) returns NotificationScheme|error {
         string  path = string `/rest/api/2/project/${projectKeyOrId}/notificationscheme`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         NotificationScheme response = check self.clientEp-> get(path, targetType = NotificationScheme);
         return response;
     }
     remote isolated function getAssignedPermissionScheme(string projectKeyOrId, string? expand) returns PermissionScheme|error {
         string  path = string `/rest/api/2/project/${projectKeyOrId}/permissionscheme`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PermissionScheme response = check self.clientEp-> get(path, targetType = PermissionScheme);
         return response;
     }
     remote isolated function assignPermissionScheme(string projectKeyOrId, string? expand, IdBean payload) returns PermissionScheme|error {
         string  path = string `/rest/api/2/project/${projectKeyOrId}/permissionscheme`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -2062,21 +2062,21 @@ public client class Client {
     remote isolated function validateProjectKey(string? 'key) returns ErrorCollection|error {
         string  path = string `/rest/api/2/projectvalidate/key`;
         map<anydata> queryParam = {'key: 'key};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ErrorCollection response = check self.clientEp-> get(path, targetType = ErrorCollection);
         return response;
     }
     remote isolated function getValidProjectKey(string? 'key) returns string|error {
         string  path = string `/rest/api/2/projectvalidate/validProjectKey`;
         map<anydata> queryParam = {'key: 'key};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         string response = check self.clientEp-> get(path, targetType = string);
         return response;
     }
     remote isolated function getValidProjectName(string name) returns string|error {
         string  path = string `/rest/api/2/projectvalidate/validProjectName`;
         map<anydata> queryParam = {name: name};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         string response = check self.clientEp-> get(path, targetType = string);
         return response;
     }
@@ -2127,7 +2127,7 @@ public client class Client {
     remote isolated function deleteProjectRole(int id, int? swap) returns http:Response | error {
         string  path = string `/rest/api/2/role/${id}`;
         map<anydata> queryParam = {swap: swap};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -2149,7 +2149,7 @@ public client class Client {
     remote isolated function deleteProjectRoleActorsFromRole(int id, string? user, string? 'group) returns ProjectRole|error {
         string  path = string `/rest/api/2/role/${id}/actors`;
         map<anydata> queryParam = {user: user, 'group: 'group};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         ProjectRole response = check self.clientEp-> delete(path, request, targetType = ProjectRole);
@@ -2158,7 +2158,7 @@ public client class Client {
     remote isolated function getScreens(int? startAt, int? maxResults, int[]? id) returns PageBeanScreen|error {
         string  path = string `/rest/api/2/screens`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, id: id};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanScreen response = check self.clientEp-> get(path, targetType = PageBeanScreen);
         return response;
     }
@@ -2200,7 +2200,7 @@ public client class Client {
     remote isolated function getAllScreenTabs(int screenId, string? projectKey) returns ScreenableTabArr|error {
         string  path = string `/rest/api/2/screens/${screenId}/tabs`;
         map<anydata> queryParam = {projectKey: projectKey};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ScreenableTabArr response = check self.clientEp-> get(path, targetType = ScreenableTabArr);
         return response;
     }
@@ -2230,7 +2230,7 @@ public client class Client {
     remote isolated function getAllScreenTabFields(int screenId, int tabId, string? projectKey) returns ScreenableFieldArr|error {
         string  path = string `/rest/api/2/screens/${screenId}/tabs/${tabId}/fields`;
         map<anydata> queryParam = {projectKey: projectKey};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ScreenableFieldArr response = check self.clientEp-> get(path, targetType = ScreenableFieldArr);
         return response;
     }
@@ -2267,7 +2267,7 @@ public client class Client {
     remote isolated function getScreenSchemes(int? startAt, int? maxResults, int[]? id) returns PageBeanScreenScheme|error {
         string  path = string `/rest/api/2/screenscheme`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, id: id};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanScreenScheme response = check self.clientEp-> get(path, targetType = PageBeanScreenScheme);
         return response;
     }
@@ -2297,7 +2297,7 @@ public client class Client {
     remote isolated function searchForIssuesUsingJql(string? jql, int? startAt, int? maxResults, string? validateQuery, string[]? fields, string? expand, string[]? properties, boolean? fieldsByKeys) returns SearchResults|error {
         string  path = string `/rest/api/2/search`;
         map<anydata> queryParam = {jql: jql, startAt: startAt, maxResults: maxResults, validateQuery: validateQuery, fields: fields, expand: expand, properties: properties, fieldsByKeys: fieldsByKeys};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         SearchResults response = check self.clientEp-> get(path, targetType = SearchResults);
         return response;
     }
@@ -2370,7 +2370,7 @@ public client class Client {
     remote isolated function storeAvatar(string 'type, string entityId, int? x, int? y, int size, json payload) returns Avatar|error {
         string  path = string `/rest/api/2/universal_avatar/'type/${'type}/owner/${entityId}`;
         map<anydata> queryParam = {x: x, y: y, size: size};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         Avatar response = check self.clientEp->post(path, request, targetType=Avatar);
         return response;
@@ -2385,7 +2385,7 @@ public client class Client {
     remote isolated function getUser(string? accountId, string? username, string? 'key, string? expand) returns User|error {
         string  path = string `/rest/api/2/user`;
         map<anydata> queryParam = {accountId: accountId, username: username, 'key: 'key, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         User response = check self.clientEp-> get(path, targetType = User);
         return response;
     }
@@ -2400,7 +2400,7 @@ public client class Client {
     remote isolated function removeUser(string accountId, string? username, string? 'key) returns http:Response | error {
         string  path = string `/rest/api/2/user`;
         map<anydata> queryParam = {accountId: accountId, username: username, 'key: 'key};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -2409,42 +2409,42 @@ public client class Client {
     remote isolated function findBulkAssignableUsers(string? query, string? username, string? accountId, string projectKeys, int? startAt, int? maxResults) returns UserArr|error {
         string  path = string `/rest/api/2/user/assignable/multiProjectSearch`;
         map<anydata> queryParam = {query: query, username: username, accountId: accountId, projectKeys: projectKeys, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         UserArr response = check self.clientEp-> get(path, targetType = UserArr);
         return response;
     }
     remote isolated function findAssignableUsers(string? query, string? sessionId, string? username, string? accountId, string? project, string? issueKey, int? startAt, int? maxResults, int? actionDescriptorId, boolean? recommend) returns UserArr|error {
         string  path = string `/rest/api/2/user/assignable/search`;
         map<anydata> queryParam = {query: query, sessionId: sessionId, username: username, accountId: accountId, project: project, issueKey: issueKey, startAt: startAt, maxResults: maxResults, actionDescriptorId: actionDescriptorId, recommend: recommend};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         UserArr response = check self.clientEp-> get(path, targetType = UserArr);
         return response;
     }
     remote isolated function bulkGetUsers(int? startAt, int? maxResults, string[]? username, string[]? 'key, string[] accountId) returns PageBeanUser|error {
         string  path = string `/rest/api/2/user/bulk`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, username: username, 'key: 'key, accountId: accountId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanUser response = check self.clientEp-> get(path, targetType = PageBeanUser);
         return response;
     }
     remote isolated function bulkGetUsersMigration(int? startAt, int? maxResults, string[]? username, string[]? 'key) returns UserMigrationBeanArr|error {
         string  path = string `/rest/api/2/user/bulk/migration`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, username: username, 'key: 'key};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         UserMigrationBeanArr response = check self.clientEp-> get(path, targetType = UserMigrationBeanArr);
         return response;
     }
     remote isolated function getUserDefaultColumns(string? accountId, string? username) returns ColumnItemArr|error {
         string  path = string `/rest/api/2/user/columns`;
         map<anydata> queryParam = {accountId: accountId, username: username};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ColumnItemArr response = check self.clientEp-> get(path, targetType = ColumnItemArr);
         return response;
     }
     remote isolated function setUserColumns(string? accountId, [] payload) returns json|error {
         string  path = string `/rest/api/2/user/columns`;
         map<anydata> queryParam = {accountId: accountId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json response = check self.clientEp->put(path, request, targetType=json);
         return response;
@@ -2452,7 +2452,7 @@ public client class Client {
     remote isolated function resetUserColumns(string? accountId, string? username) returns http:Response | error {
         string  path = string `/rest/api/2/user/columns`;
         map<anydata> queryParam = {accountId: accountId, username: username};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -2461,56 +2461,56 @@ public client class Client {
     remote isolated function getUserEmail(string accountId) returns UnrestrictedUserEmail|error {
         string  path = string `/rest/api/2/user/email`;
         map<anydata> queryParam = {accountId: accountId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         UnrestrictedUserEmail response = check self.clientEp-> get(path, targetType = UnrestrictedUserEmail);
         return response;
     }
     remote isolated function getUserEmailBulk(string[] accountId) returns UnrestrictedUserEmail|error {
         string  path = string `/rest/api/2/user/email/bulk`;
         map<anydata> queryParam = {accountId: accountId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         UnrestrictedUserEmail response = check self.clientEp-> get(path, targetType = UnrestrictedUserEmail);
         return response;
     }
     remote isolated function getUserGroups(string accountId, string? username, string? 'key) returns GroupNameArr|error {
         string  path = string `/rest/api/2/user/groups`;
         map<anydata> queryParam = {accountId: accountId, username: username, 'key: 'key};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         GroupNameArr response = check self.clientEp-> get(path, targetType = GroupNameArr);
         return response;
     }
     remote isolated function findUsersWithAllPermissions(string? query, string? username, string? accountId, string permissions, string? issueKey, string? projectKey, int? startAt, int? maxResults) returns UserArr|error {
         string  path = string `/rest/api/2/user/permission/search`;
         map<anydata> queryParam = {query: query, username: username, accountId: accountId, permissions: permissions, issueKey: issueKey, projectKey: projectKey, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         UserArr response = check self.clientEp-> get(path, targetType = UserArr);
         return response;
     }
     remote isolated function findUsersForPicker(string query, int? maxResults, boolean? showAvatar, string[]? exclude, string[]? excludeAccountIds, string? avatarSize, boolean? excludeConnectUsers) returns FoundUsers|error {
         string  path = string `/rest/api/2/user/picker`;
         map<anydata> queryParam = {query: query, maxResults: maxResults, showAvatar: showAvatar, exclude: exclude, excludeAccountIds: excludeAccountIds, avatarSize: avatarSize, excludeConnectUsers: excludeConnectUsers};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         FoundUsers response = check self.clientEp-> get(path, targetType = FoundUsers);
         return response;
     }
     remote isolated function getUserPropertyKeys(string? accountId, string? userKey, string? username) returns PropertyKeys|error {
         string  path = string `/rest/api/2/user/properties`;
         map<anydata> queryParam = {accountId: accountId, userKey: userKey, username: username};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PropertyKeys response = check self.clientEp-> get(path, targetType = PropertyKeys);
         return response;
     }
     remote isolated function getUserProperty(string? accountId, string? userKey, string? username, string propertyKey) returns EntityProperty|error {
         string  path = string `/rest/api/2/user/properties/${propertyKey}`;
         map<anydata> queryParam = {accountId: accountId, userKey: userKey, username: username};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         EntityProperty response = check self.clientEp-> get(path, targetType = EntityProperty);
         return response;
     }
     remote isolated function setUserProperty(string? accountId, string? userKey, string? username, string propertyKey, json payload) returns json|error {
         string  path = string `/rest/api/2/user/properties/${propertyKey}`;
         map<anydata> queryParam = {accountId: accountId, userKey: userKey, username: username};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -2520,7 +2520,7 @@ public client class Client {
     remote isolated function deleteUserProperty(string? accountId, string? userKey, string? username, string propertyKey) returns http:Response | error {
         string  path = string `/rest/api/2/user/properties/${propertyKey}`;
         map<anydata> queryParam = {accountId: accountId, userKey: userKey, username: username};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -2529,42 +2529,42 @@ public client class Client {
     remote isolated function findUsers(string? query, string? username, string? accountId, int? startAt, int? maxResults, string? property) returns UserArr|error {
         string  path = string `/rest/api/2/user/search`;
         map<anydata> queryParam = {query: query, username: username, accountId: accountId, startAt: startAt, maxResults: maxResults, property: property};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         UserArr response = check self.clientEp-> get(path, targetType = UserArr);
         return response;
     }
     remote isolated function findUsersByQuery(string query, int? startAt, int? maxResults) returns PageBeanUser|error {
         string  path = string `/rest/api/2/user/search/query`;
         map<anydata> queryParam = {query: query, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanUser response = check self.clientEp-> get(path, targetType = PageBeanUser);
         return response;
     }
     remote isolated function findUserKeysByQuery(string query, int? startAt, int? maxResults) returns PageBeanUserKey|error {
         string  path = string `/rest/api/2/user/search/query/key`;
         map<anydata> queryParam = {query: query, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanUserKey response = check self.clientEp-> get(path, targetType = PageBeanUserKey);
         return response;
     }
     remote isolated function findUsersWithBrowsePermission(string? query, string? username, string? accountId, string? issueKey, string? projectKey, int? startAt, int? maxResults) returns UserArr|error {
         string  path = string `/rest/api/2/user/viewissue/search`;
         map<anydata> queryParam = {query: query, username: username, accountId: accountId, issueKey: issueKey, projectKey: projectKey, startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         UserArr response = check self.clientEp-> get(path, targetType = UserArr);
         return response;
     }
     remote isolated function getAllUsersDefault(int? startAt, int? maxResults) returns UserArr|error {
         string  path = string `/rest/api/2/users`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         UserArr response = check self.clientEp-> get(path, targetType = UserArr);
         return response;
     }
     remote isolated function getAllUsers(int? startAt, int? maxResults) returns UserArr|error {
         string  path = string `/rest/api/2/users/search`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         UserArr response = check self.clientEp-> get(path, targetType = UserArr);
         return response;
     }
@@ -2579,7 +2579,7 @@ public client class Client {
     remote isolated function getVersion(string id, string? expand) returns Version|error {
         string  path = string `/rest/api/2/version/${id}`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         Version response = check self.clientEp-> get(path, targetType = Version);
         return response;
     }
@@ -2594,7 +2594,7 @@ public client class Client {
     remote isolated function deleteVersion(string id, string? moveFixIssuesTo, string? moveAffectedIssuesTo) returns http:Response | error {
         string  path = string `/rest/api/2/version/${id}`;
         map<anydata> queryParam = {moveFixIssuesTo: moveFixIssuesTo, moveAffectedIssuesTo: moveAffectedIssuesTo};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -2636,7 +2636,7 @@ public client class Client {
     remote isolated function getDynamicWebhooksForApp(int? startAt, int? maxResults) returns PageBeanWebhook|error {
         string  path = string `/rest/api/2/webhook`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanWebhook response = check self.clientEp-> get(path, targetType = PageBeanWebhook);
         return response;
     }
@@ -2658,7 +2658,7 @@ public client class Client {
     remote isolated function getFailedWebhooks(int? maxResults, int? after) returns FailedWebhooks|error {
         string  path = string `/rest/api/2/webhook/failed`;
         map<anydata> queryParam = {maxResults: maxResults, after: after};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         FailedWebhooks response = check self.clientEp-> get(path, targetType = FailedWebhooks);
         return response;
     }
@@ -2673,7 +2673,7 @@ public client class Client {
     remote isolated function getAllWorkflows(string? workflowName) returns DeprecatedWorkflowArr|error {
         string  path = string `/rest/api/2/workflow`;
         map<anydata> queryParam = {workflowName: workflowName};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         DeprecatedWorkflowArr response = check self.clientEp-> get(path, targetType = DeprecatedWorkflowArr);
         return response;
     }
@@ -2688,7 +2688,7 @@ public client class Client {
     remote isolated function getWorkflowTransitionRuleConfigurations(int? startAt, int? maxResults, string[] types, string[]? keys, string? expand) returns PageBeanWorkflowTransitionRules|error {
         string  path = string `/rest/api/2/workflow/rule/config`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, types: types, keys: keys, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanWorkflowTransitionRules response = check self.clientEp-> get(path, targetType = PageBeanWorkflowTransitionRules);
         return response;
     }
@@ -2703,21 +2703,21 @@ public client class Client {
     remote isolated function getWorkflowsPaginated(int? startAt, int? maxResults, string[]? workflowName, string? expand) returns PageBeanWorkflow|error {
         string  path = string `/rest/api/2/workflow/search`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults, workflowName: workflowName, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanWorkflow response = check self.clientEp-> get(path, targetType = PageBeanWorkflow);
         return response;
     }
     remote isolated function getWorkflowTransitionProperties(int transitionId, boolean? includeReservedKeys, string? 'key, string workflowName, string? workflowMode) returns WorkflowTransitionProperty|error {
         string  path = string `/rest/api/2/workflow/transitions/${transitionId}/properties`;
         map<anydata> queryParam = {includeReservedKeys: includeReservedKeys, 'key: 'key, workflowName: workflowName, workflowMode: workflowMode};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         WorkflowTransitionProperty response = check self.clientEp-> get(path, targetType = WorkflowTransitionProperty);
         return response;
     }
     remote isolated function updateWorkflowTransitionProperty(int transitionId, string 'key, string workflowName, string? workflowMode, WorkflowTransitionProperty payload) returns WorkflowTransitionProperty|error {
         string  path = string `/rest/api/2/workflow/transitions/${transitionId}/properties`;
         map<anydata> queryParam = {'key: 'key, workflowName: workflowName, workflowMode: workflowMode};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -2727,7 +2727,7 @@ public client class Client {
     remote isolated function createWorkflowTransitionProperty(int transitionId, string 'key, string workflowName, string? workflowMode, WorkflowTransitionProperty payload) returns WorkflowTransitionProperty|error {
         string  path = string `/rest/api/2/workflow/transitions/${transitionId}/properties`;
         map<anydata> queryParam = {'key: 'key, workflowName: workflowName, workflowMode: workflowMode};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -2737,7 +2737,7 @@ public client class Client {
     remote isolated function deleteWorkflowTransitionProperty(int transitionId, string 'key, string workflowName, string? workflowMode) returns http:Response | error {
         string  path = string `/rest/api/2/workflow/transitions/${transitionId}/properties`;
         map<anydata> queryParam = {'key: 'key, workflowName: workflowName, workflowMode: workflowMode};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -2753,7 +2753,7 @@ public client class Client {
     remote isolated function getAllWorkflowSchemes(int? startAt, int? maxResults) returns PageBeanWorkflowScheme|error {
         string  path = string `/rest/api/2/workflowscheme`;
         map<anydata> queryParam = {startAt: startAt, maxResults: maxResults};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PageBeanWorkflowScheme response = check self.clientEp-> get(path, targetType = PageBeanWorkflowScheme);
         return response;
     }
@@ -2768,7 +2768,7 @@ public client class Client {
     remote isolated function getWorkflowSchemeProjectAssociations(int[] projectId) returns ContainerOfWorkflowSchemeAssociations|error {
         string  path = string `/rest/api/2/workflowscheme/project`;
         map<anydata> queryParam = {projectId: projectId};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ContainerOfWorkflowSchemeAssociations response = check self.clientEp-> get(path, targetType = ContainerOfWorkflowSchemeAssociations);
         return response;
     }
@@ -2783,7 +2783,7 @@ public client class Client {
     remote isolated function getWorkflowScheme(int id, boolean? returnDraftIfExists) returns WorkflowScheme|error {
         string  path = string `/rest/api/2/workflowscheme/${id}`;
         map<anydata> queryParam = {returnDraftIfExists: returnDraftIfExists};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         WorkflowScheme response = check self.clientEp-> get(path, targetType = WorkflowScheme);
         return response;
     }
@@ -2812,7 +2812,7 @@ public client class Client {
     remote isolated function getDefaultWorkflow(int id, boolean? returnDraftIfExists) returns DefaultWorkflow|error {
         string  path = string `/rest/api/2/workflowscheme/${id}/default`;
         map<anydata> queryParam = {returnDraftIfExists: returnDraftIfExists};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         DefaultWorkflow response = check self.clientEp-> get(path, targetType = DefaultWorkflow);
         return response;
     }
@@ -2827,7 +2827,7 @@ public client class Client {
     remote isolated function deleteDefaultWorkflow(int id, boolean? updateDraftIfNeeded) returns WorkflowScheme|error {
         string  path = string `/rest/api/2/workflowscheme/${id}/default`;
         map<anydata> queryParam = {updateDraftIfNeeded: updateDraftIfNeeded};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> delete(path, request, targetType = WorkflowScheme);
@@ -2896,14 +2896,14 @@ public client class Client {
     remote isolated function getDraftWorkflow(int id, string? workflowName) returns IssueTypesWorkflowMapping|error {
         string  path = string `/rest/api/2/workflowscheme/${id}/draft/workflow`;
         map<anydata> queryParam = {workflowName: workflowName};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         IssueTypesWorkflowMapping response = check self.clientEp-> get(path, targetType = IssueTypesWorkflowMapping);
         return response;
     }
     remote isolated function updateDraftWorkflowMapping(int id, string workflowName, IssueTypesWorkflowMapping payload) returns WorkflowScheme|error {
         string  path = string `/rest/api/2/workflowscheme/${id}/draft/workflow`;
         map<anydata> queryParam = {workflowName: workflowName};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -2913,7 +2913,7 @@ public client class Client {
     remote isolated function deleteDraftWorkflowMapping(int id, string workflowName) returns http:Response | error {
         string  path = string `/rest/api/2/workflowscheme/${id}/draft/workflow`;
         map<anydata> queryParam = {workflowName: workflowName};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -2922,7 +2922,7 @@ public client class Client {
     remote isolated function getWorkflowSchemeIssueType(int id, string issueType, boolean? returnDraftIfExists) returns IssueTypeWorkflowMapping|error {
         string  path = string `/rest/api/2/workflowscheme/${id}/issuetype/${issueType}`;
         map<anydata> queryParam = {returnDraftIfExists: returnDraftIfExists};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         IssueTypeWorkflowMapping response = check self.clientEp-> get(path, targetType = IssueTypeWorkflowMapping);
         return response;
     }
@@ -2937,7 +2937,7 @@ public client class Client {
     remote isolated function deleteWorkflowSchemeIssueType(int id, string issueType, boolean? updateDraftIfNeeded) returns WorkflowScheme|error {
         string  path = string `/rest/api/2/workflowscheme/${id}/issuetype/${issueType}`;
         map<anydata> queryParam = {updateDraftIfNeeded: updateDraftIfNeeded};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         WorkflowScheme response = check self.clientEp-> delete(path, request, targetType = WorkflowScheme);
@@ -2946,14 +2946,14 @@ public client class Client {
     remote isolated function getWorkflow(int id, string? workflowName, boolean? returnDraftIfExists) returns IssueTypesWorkflowMapping|error {
         string  path = string `/rest/api/2/workflowscheme/${id}/workflow`;
         map<anydata> queryParam = {workflowName: workflowName, returnDraftIfExists: returnDraftIfExists};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         IssueTypesWorkflowMapping response = check self.clientEp-> get(path, targetType = IssueTypesWorkflowMapping);
         return response;
     }
     remote isolated function updateWorkflowMapping(int id, string workflowName, IssueTypesWorkflowMapping payload) returns WorkflowScheme|error {
         string  path = string `/rest/api/2/workflowscheme/${id}/workflow`;
         map<anydata> queryParam = {workflowName: workflowName};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -2963,7 +2963,7 @@ public client class Client {
     remote isolated function deleteWorkflowMapping(int id, string workflowName, boolean? updateDraftIfNeeded) returns http:Response | error {
         string  path = string `/rest/api/2/workflowscheme/${id}/workflow`;
         map<anydata> queryParam = {workflowName: workflowName, updateDraftIfNeeded: updateDraftIfNeeded};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -2972,14 +2972,14 @@ public client class Client {
     remote isolated function getIdsOfWorklogsDeletedSince(int? since) returns ChangedWorklogs|error {
         string  path = string `/rest/api/2/worklog/deleted`;
         map<anydata> queryParam = {since: since};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ChangedWorklogs response = check self.clientEp-> get(path, targetType = ChangedWorklogs);
         return response;
     }
     remote isolated function getWorklogsForIds(string? expand, WorklogIdsRequestBean payload) returns WorklogArr|error {
         string  path = string `/rest/api/2/worklog/list`;
         map<anydata> queryParam = {expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
@@ -2989,7 +2989,7 @@ public client class Client {
     remote isolated function getIdsOfWorklogsModifiedSince(int? since, string? expand) returns ChangedWorklogs|error {
         string  path = string `/rest/api/2/worklog/updated`;
         map<anydata> queryParam = {since: since, expand: expand};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ChangedWorklogs response = check self.clientEp-> get(path, targetType = ChangedWorklogs);
         return response;
     }
@@ -3034,7 +3034,7 @@ public client class Client {
     remote isolated function 'DynamicModulesResource\.removeModules\_delete(string[]? moduleKey) returns http:Response | error {
         string  path = string `/rest/atlassian-connect/1/app/module/dynamic`;
         map<anydata> queryParam = {moduleKey: moduleKey};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         http:Request request = new;
         //TODO: Update the request as needed;
         http:Response  response = check self.clientEp-> delete(path, request, targetType = http:Response );
@@ -3042,7 +3042,7 @@ public client class Client {
     }
 }
 
-isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string {
+isolated function getPathForQueryParam(map<anydata>   queryParam)  returns  string|error {
     string[] param = [];
     param[param.length()] = "?";
     foreach  var [key, value] in  queryParam.entries() {
@@ -3056,7 +3056,7 @@ isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  str
             }
             param[param.length()] = "=";
             if  value  is  string {
-                string updateV =  checkpanic url:encode(value, "UTF-8");
+                string updateV =  check url:encode(value, "UTF-8");
                 param[param.length()] = updateV;
             } else {
                 param[param.length()] = value.toString();

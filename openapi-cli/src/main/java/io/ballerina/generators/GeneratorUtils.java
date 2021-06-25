@@ -368,7 +368,7 @@ public class GeneratorUtils {
     public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
         if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
             String[] refArray = referenceVariable.split("/");
-            return getValidName(refArray[refArray.length - 1], true);
+            return refArray[refArray.length - 1];
         } else {
             throw new BallerinaOpenApiException("Invalid reference value : " + referenceVariable
                     + "\nBallerina only supports local reference values.");

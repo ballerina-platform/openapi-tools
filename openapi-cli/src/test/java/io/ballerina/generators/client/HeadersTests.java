@@ -58,10 +58,10 @@ public class HeadersTests {
                 display.getPaths().get("/pets").readOperationsMap().entrySet();
         Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
         FunctionBodyNode bodyNode = getFunctionBodyNode("/pets", iterator.next());
-        Assert.assertEquals(bodyNode.toString().trim().replaceAll("\\s+", ""), ("{stringpath=string" +
-                "`/pets`;map<any>headerValues={'X\\-Request\\-ID:'X\\-Request\\-ID,'X\\-Request\\-Client:'X\\-" +
-                "Request\\-Client};map<string|string[]>accHeaders=getMapForHeaders(headerValues);_=checkself." +
-                "clientEp->get(path,accHeaders,targetType=http:Response);}").trim()
+        Assert.assertEquals(bodyNode.toString().trim().replaceAll("\\s+", ""), ("{string path= " +
+                "string`/pets`; map<any>headerValues={\"X-Request-ID\":xRequestId," +
+                "\"X-Request-Client\":xRequestClient};map<string|string[]>accHeaders=getMapForHeaders(headerValues);" +
+                "_=checkself.clientEp->get(path,accHeaders,targetType=http:Response);}").trim()
                 .replaceAll("\\s+", ""));
     }
 

@@ -3,7 +3,7 @@ import  ballerina/url;
 import  ballerina/lang.'string;
 
 public type ApiKeysConfig record {
-    map<string> apiKeys;
+    map<string|string[]> apiKeys;
 };
 
 public type ProductArr Product[];
@@ -15,7 +15,7 @@ public type PriceEstimateArr PriceEstimate[];
 # + clientEp - Connector http endpoint
 public client class Client {
     http:Client clientEp;
-    map<string> apiKeys;
+    map<string|string[]> apiKeys;
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://api.uber.com/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
@@ -40,7 +40,7 @@ public client class Client {
     # + endLatitude - Latitude component of end location.
     # + endLongitude - Longitude component of end location.
     # + return - An array of price estimates by product
-    remote isolated function  price(float startLatitude, float startLongitude, float endLatitude, float endLongitude) returns PriceEstimateArr|error {
+    remote isolated function  price(float start_latitude, float start_longitude, float end_latitude, float end_longitude) returns PriceEstimateArr|error {
         string  path = string `/estimates/price`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude, server_token: self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
@@ -54,7 +54,7 @@ public client class Client {
     # + customerUuid - Unique customer identifier to be used for experience customization.
     # + productId - Unique identifier representing a specific product for a given latitude & longitude.
     # + return - An array of products
-    remote isolated function  time(float startLatitude, float startLongitude, string? customerUuid = (), string? productId = ()) returns ProductArr|error {
+    remote isolated function  time(float start_latitude, float start_longitude, string? customer_uuid = (), string? product_id = ()) returns ProductArr|error {
         string  path = string `/estimates/time`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId, server_token: self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
@@ -74,7 +74,7 @@ public client class Client {
     # User Activity
     #
     # + offset - Offset the list of returned results by this amount. Default is zero.
-    # + 'limit - Number of items to retrieve. Default is 5, maximum is 100.
+    # + limit - Number of items to retrieve. Default is 5, maximum is 100.
     # + return - History information for the given user
     remote isolated function  history(int? offset = (), int? 'limit = ()) returns Activities|error {
         string  path = string `/history`;
@@ -118,3 +118,4 @@ isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  str
     string restOfPath = string:'join("", ...param);
     return restOfPath;
 }
+
