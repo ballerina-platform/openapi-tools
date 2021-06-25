@@ -1351,7 +1351,7 @@ public class BallerinaClientGenerator {
                         "queryParam", queryApiKeyNameList, false));
                 // Add updated path
                 ExpressionStatementNode updatedPath = getSimpleExpressionStatementNode("path = path + " +
-                        "getPathForQueryParam(queryParam)");
+                        "check getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
                 isQuery = true;
             }
@@ -1361,6 +1361,23 @@ public class BallerinaClientGenerator {
                 statementsList.add(getSimpleExpressionStatementNode("map<string|string[]> accHeaders = " +
                         "getMapForHeaders(headerValues)"));
                 isHeader = true;
+            }
+        } else {
+            List<String> queryApiKeyNameList = BallerinaAuthConfigGenerator.getQueryApiKeyNameList();
+            List<String> headerApiKeyNameList = BallerinaAuthConfigGenerator.getHeaderApiKeyNameList();
+
+            if (!queryApiKeyNameList.isEmpty()) {
+                statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
+                        "queryParam", queryApiKeyNameList, false));
+                // Add updated path
+                ExpressionStatementNode updatedPath = getSimpleExpressionStatementNode("path = path + " +
+                        "check getPathForQueryParam(queryParam)");
+                statementsList.add(updatedPath);
+                isQuery = true;
+            }
+            if (!headerApiKeyNameList.isEmpty()) {
+                statementsList.add(getMapForParameters(new ArrayList<>(), "map<string|string[]>",
+                        "accHeaders", headerApiKeyNameList, true));
             }
         }
 
@@ -1698,7 +1715,7 @@ public class BallerinaClientGenerator {
                         createToken(CLOSE_PAREN_TOKEN),
                         createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
                                 createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(
-                                        null, createIdentifierToken("string"))));
+                                        null, createIdentifierToken("string|error"))));
 
         // FunctionBody
         List<StatementNode> statementNodes = new ArrayList<>();
@@ -1782,7 +1799,7 @@ public class BallerinaClientGenerator {
                         createIdentifierToken(" string"));
         TypeTestExpressionNode condition03 = createTypeTestExpressionNode(exprIf03, isKeyWord, typeCondition03);
 
-        ExpressionStatementNode variableIf03 = getSimpleExpressionStatementNode("string updateV =  checkpanic " +
+        ExpressionStatementNode variableIf03 = getSimpleExpressionStatementNode("string updateV =  check " +
                 "url:encode(value, \"UTF-8\")");
         ExpressionStatementNode assignIf03 = getSimpleExpressionStatementNode("param[param.length()] = updateV");
 
