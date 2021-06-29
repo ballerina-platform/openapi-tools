@@ -19,9 +19,11 @@
 package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.common.TestUtils;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -52,8 +54,10 @@ public class BallerinaDiagnosticTests {
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RESDIR.resolve(yamlFile);
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
+        OpenAPI openAPI = TestUtils.getOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
     }
 

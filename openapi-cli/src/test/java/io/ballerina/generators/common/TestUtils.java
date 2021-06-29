@@ -21,6 +21,7 @@ package io.ballerina.generators.common;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.projects.DocumentId;
@@ -61,10 +62,12 @@ public class TestUtils {
     Filter filter = new Filter(list1, list2);
 
     // Get diagnostics
-    public static List<Diagnostic> getDiagnostics(Path definitionPath, SyntaxTree syntaxTree)
+    public static List<Diagnostic> getDiagnostics(Path definitionPath, SyntaxTree syntaxTree, OpenAPI openAPI,
+                                                  BallerinaClientGenerator ballerinaClientGenerator)
             throws FormatterException, IOException, BallerinaOpenApiException {
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
-        SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        ballerinaClientGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree();
         writeFile(clientPath, Formatter.format(syntaxTree).toString());
         writeFile(schemaPath, Formatter.format(schemaSyntax).toString());
         SemanticModel semanticModel = getSemanticModel(clientPath);

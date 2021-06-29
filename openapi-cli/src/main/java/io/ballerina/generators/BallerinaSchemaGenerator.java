@@ -91,16 +91,34 @@ import static io.ballerina.generators.GeneratorUtils.isValidSchemaName;
  *while populating syntax tree.
  */
 public class BallerinaSchemaGenerator {
+    private List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
+    private  OpenAPI openAPI;
 
-    public SyntaxTree generateSyntaxTree(Path definitionPath) throws IOException,
-            BallerinaOpenApiException {
-        OpenAPI openApi = parseOpenAPIFile(definitionPath.toString());
-        // TypeDefinitionNodes their
-        List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
-        if (openApi.getComponents() != null) {
+    public BallerinaSchemaGenerator(OpenAPI openAPI) {
+        this.openAPI = openAPI;
+        this.typeDefinitionNodeList = typeDefinitionNodeList;
+    }
+
+    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
+
+        return typeDefinitionNodeList;
+    }
+
+    public void setTypeDefinitionNodeList(
+            List<TypeDefinitionNode> typeDefinitionNodeList) {
+
+        this.typeDefinitionNodeList = typeDefinitionNodeList;
+    }
+
+    public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
+//        OpenAPI openApi = parseOpenAPIFile(definitionPath.toString());
+        // TypeDefinitionNodes
+
+        typeDefinitionNodeList = new LinkedList<>();
+        if (openAPI.getComponents() != null) {
             // Refactor schema name with valid name
             //Create typeDefinitionNode
-            Components components = openApi.getComponents();
+            Components components = openAPI.getComponents();
             Map<String, Schema> componentsSchemas = components.getSchemas();
             if (componentsSchemas != null) {
                 Map<String, Schema> refacSchema = new HashMap<>();
@@ -108,7 +126,7 @@ public class BallerinaSchemaGenerator {
                     String name = getValidName(schemaEntry.getKey(), true);
                     refacSchema.put(name, schemaEntry.getValue());
                 }
-                openApi.getComponents().setSchemas(refacSchema);
+                openAPI.getComponents().setSchemas(refacSchema);
             }
             Map<String, Schema> schemas = components.getSchemas();
             if (schemas != null) {
@@ -129,7 +147,7 @@ public class BallerinaSchemaGenerator {
                     List<String> required = schema.getValue().getRequired();
                     String recordName = getValidName(schema.getKey().trim(), true);
                     if (isValidSchemaName(recordName)) {
-                        getTypeDefinitionNode(openApi, typeDefinitionNodeList, schema, schemaDoc, required, recordName);
+                        getTypeDefinitionNode(openAPI, typeDefinitionNodeList, schema, schemaDoc, required, recordName);
                     }
                 }
             }
