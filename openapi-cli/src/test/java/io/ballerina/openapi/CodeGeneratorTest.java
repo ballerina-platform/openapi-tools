@@ -74,7 +74,7 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test Ballerina client generation", enabled = false)
+    @Test(description = "Test Ballerina client generation")
     public void generateClient() {
         final String clientName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
