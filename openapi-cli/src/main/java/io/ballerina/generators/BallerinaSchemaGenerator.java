@@ -79,10 +79,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
-import static io.ballerina.generators.GeneratorUtils.createParamAPIDoc;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
-import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
 import static io.ballerina.generators.GeneratorUtils.isValidSchemaName;
 
@@ -93,6 +91,7 @@ import static io.ballerina.generators.GeneratorUtils.isValidSchemaName;
 public class BallerinaSchemaGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
     private  OpenAPI openAPI;
+    private  GeneratorUtils generatorUtils = new GeneratorUtils();
 
     public BallerinaSchemaGenerator(OpenAPI openAPI) {
         this.openAPI = openAPI;
@@ -104,8 +103,7 @@ public class BallerinaSchemaGenerator {
         return typeDefinitionNodeList;
     }
 
-    public void setTypeDefinitionNodeList(
-            List<TypeDefinitionNode> typeDefinitionNodeList) {
+    public void setTypeDefinitionNodeList(List<TypeDefinitionNode> typeDefinitionNodeList) {
 
         this.typeDefinitionNodeList = typeDefinitionNodeList;
     }
@@ -114,7 +112,7 @@ public class BallerinaSchemaGenerator {
 //        OpenAPI openApi = parseOpenAPIFile(definitionPath.toString());
         // TypeDefinitionNodes
 
-        typeDefinitionNodeList = new LinkedList<>();
+//        typeDefinitionNodeList = new LinkedList<>();
         if (openAPI.getComponents() != null) {
             // Refactor schema name with valid name
             //Create typeDefinitionNode
@@ -187,7 +185,7 @@ public class BallerinaSchemaGenerator {
             typeDefinitionNodeList.add(typeDefNode);
         } else if (composedSchema.getOneOf() != null) {
             List<Schema> oneOf = composedSchema.getOneOf();
-            String unionTypeCont = getOneOfUnionType(oneOf);
+            String unionTypeCont = generatorUtils.getOneOfUnionType(oneOf);
             String type  = escapeIdentifier(schema.getKey().trim());
             MarkdownDocumentationNode documentationNode =
                     createMarkdownDocumentationNode(createNodeList(schemaDoc));
@@ -200,7 +198,7 @@ public class BallerinaSchemaGenerator {
             typeDefinitionNodeList.add(typeDefNode);
         } else if (composedSchema.getAnyOf() != null) {
             List<Schema> anyOf = composedSchema.getAnyOf();
-            String unionTypeCont = getOneOfUnionType(anyOf);
+            String unionTypeCont = generatorUtils.getOneOfUnionType(anyOf);
             String type  = escapeIdentifier(schema.getKey().trim());
             MarkdownDocumentationNode documentationNode =
                     createMarkdownDocumentationNode(createNodeList(schemaDoc));
@@ -237,7 +235,7 @@ public class BallerinaSchemaGenerator {
                         fieldTypeName = NodeFactory.createBuiltinSimpleNameReferenceNode(null, type);
                     }
                     if (schemaValue.getDescription() != null) {
-                        MarkdownParameterDocumentationLineNode paramAPIDoc = createParamAPIDoc(
+                        MarkdownParameterDocumentationLineNode paramAPIDoc = generatorUtils.createParamAPIDoc(
                                 fieldTypeName.toString(), schemaValue.getDescription().split("\n")[0]);
                         schemaDoc.add(paramAPIDoc);
                     }
@@ -601,13 +599,13 @@ public class BallerinaSchemaGenerator {
         }  else if (schema instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schema;
             if (composedSchema.getOneOf() != null) {
-                String  oneOf = getOneOfUnionType(composedSchema.getOneOf());
+                String  oneOf = generatorUtils.getOneOfUnionType(composedSchema.getOneOf());
                 return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(oneOf));
             } else if (composedSchema.getAnyOf() != null) {
-                String  anyOf = getOneOfUnionType(composedSchema.getAnyOf());
+                String  anyOf = generatorUtils.getOneOfUnionType(composedSchema.getAnyOf());
                 return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(anyOf));
             } else if (composedSchema.getAllOf() != null) {
-                String  allOf = getOneOfUnionType(composedSchema.getAllOf());
+                String  allOf = generatorUtils.getOneOfUnionType(composedSchema.getAllOf());
                 return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(allOf));
             } else if (composedSchema.getType() != null) {
                 return createBuiltinSimpleNameReferenceNode(null,

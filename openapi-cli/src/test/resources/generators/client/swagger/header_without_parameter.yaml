@@ -25,23 +25,6 @@ paths:
       operationId: showPetById
       tags:
         - pets
-      parameters:
-        - in: header
-          description: Tests header 01
-          name: X-Request-ID
-          schema:
-            type: string
-            format: uuid
-          required: true
-        - in: header
-          description: Tests header 02
-          name: X-Request-Client
-          schema:
-            type: array
-            items:
-              type: string
-              format: uuid
-          required: true
       responses:
         '200':
           description: Expected response to a valid request

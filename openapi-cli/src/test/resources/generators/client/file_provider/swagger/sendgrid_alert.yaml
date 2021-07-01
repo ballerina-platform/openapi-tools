@@ -13,7 +13,7 @@ info:
     Every endpoint requires Authentication in the form of an Authorization Header:
 
     Authorization: Bearer API_KEY
-  title: SendGrid v3 API Documentation
+  title: SendGrid v3 API DocCommentsGenerator
   version: "3.0"
   x-apisguru-categories:
     - email

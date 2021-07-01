@@ -52,14 +52,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 
-public class Documentation {
+public class DocCommentsGenerator {
     /**
      * Extract extension for find the display annotation.
      *
      * @param extensions openapi extension.
      * @return Annotation node list.
      * */
-    public static NodeList<AnnotationNode> extractDisplayAnnotation(Map<String, Object> extensions) {
+    public NodeList<AnnotationNode> extractDisplayAnnotation(Map<String, Object> extensions) {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         if (extensions != null) {
             for (Map.Entry<String, Object> extension: extensions.entrySet()) {
@@ -72,7 +72,7 @@ public class Documentation {
         return annotationNodes;
     }
 
-    private static AnnotationNode getAnnotationNode(Map.Entry<String, Object> extension) {
+    private AnnotationNode getAnnotationNode(Map.Entry<String, Object> extension) {
 
         LinkedHashMap<String, String> extFields = (LinkedHashMap<String, String>) extension.getValue();
         List<Node> annotFields = new ArrayList<>();
@@ -110,7 +110,7 @@ public class Documentation {
     /*
      * Generate metaDataNode with display annotation.
      */
-    public static MetadataNode getMetadataNodeForDisplayAnnotation(Map.Entry<String, Object> extension) {
+    public MetadataNode getMetadataNodeForDisplayAnnotation(Map.Entry<String, Object> extension) {
 
         MetadataNode metadataNode;
         AnnotationNode annotationNode = getAnnotationNode(extension);

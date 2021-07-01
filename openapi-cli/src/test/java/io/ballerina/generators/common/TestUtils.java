@@ -62,11 +62,11 @@ public class TestUtils {
     Filter filter = new Filter(list1, list2);
 
     // Get diagnostics
-    public static List<Diagnostic> getDiagnostics(Path definitionPath, SyntaxTree syntaxTree, OpenAPI openAPI,
+    public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree, OpenAPI openAPI,
                                                   BallerinaClientGenerator ballerinaClientGenerator)
             throws FormatterException, IOException, BallerinaOpenApiException {
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
-        ballerinaClientGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree();
         writeFile(clientPath, Formatter.format(syntaxTree).toString());
         writeFile(schemaPath, Formatter.format(schemaSyntax).toString());

@@ -1,7 +1,5 @@
 import  ballerina/http;
 
-public type CountryInfoArr CountryInfo[];
-
 #Here you can find documentation for COVID-19 REST API.
 #
 #+clientEp-Connector http endpoint
@@ -13,9 +11,9 @@ public client class Client {
     }
     #
     #+return-Default response with array of strings
-    remote isolated function getCountryList() returns CountryInfoArr|error {
+    remote isolated function getCountryList() returns CountryInfo[]|error {
         string  path = string `/api/v1/countries/list/`;
-        CountryInfoArr response = check self.clientEp-> get(path, targetType = CountryInfoArr);
+        CountryInfo[] response = check self.clientEp-> get(path, targetType = CountryInfoArr);
         return response;
     }
 }

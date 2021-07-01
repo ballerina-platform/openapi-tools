@@ -20,6 +20,7 @@ package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.generators.common.TestConstants;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -35,8 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
-
 /**
  * All the tests related to the auth related code snippet generation for http or oauth 2.0 mechanisms.
  */
@@ -51,7 +50,8 @@ public class HttpAuthTests {
     public void testGetConfigRecord(String yamlFile, String configRecord) throws IOException,
             BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/http/" + yamlFile);
-        OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedConfigRecord = configRecord;
         String generatedConfigRecord = Objects.requireNonNull(
                 BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();

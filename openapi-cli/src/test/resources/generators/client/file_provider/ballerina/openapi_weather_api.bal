@@ -2,10 +2,6 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
-public type ApiKeysConfig record {
-    map<string|string[]> apiKeys;
-};
-
 # Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city. Helpful stats, graphics, and this day in history charts are available for your reference. Interactive maps show precipitation, clouds, pressure, wind around your location stations. Data is available in JSON, XML, or HTML format. **Note**: All parameters are optional, but you must select at least one parameter. Calling the API by city ID (using the `id` parameter) will provide the most precise location results.
 #
 # + clientEp - Connector http endpoint
@@ -32,7 +28,7 @@ public client class Client {
     @display {label: "Current Weather"}
     remote isolated function getCurretWeatherData(@display {label: "CityName or StateCode or CountryCode"} string? q = (), @display {label: "City Id"} string? id = (), @display {label: "Latitude"} string? lat = (), @display {label: "Longitude"} string? lon = (), @display {label: "Zip Code"} string? zip = (), @display {label: "Units"} string? units = "imperial", @display {label: "Language"} string? lang = "en", @display {label: "Mode"} string? mode = "json") returns CurrentWeatherData|error {
         string  path = string `/weather`;
-        map<anydata> queryParam = {q: q, id: id, lat: lat, lon: lon, zip: zip, units: units, lang: lang, mode: mode, appid: self.apiKeys["appid"]};
+        map<anydata> queryParam = {"q": q, "id": id, "lat": lat, "lon": lon, "zip": zip, "units": units, "lang": lang, "mode": mode, appid: self.apiKeys["appid"]};
         path = path + getPathForQueryParam(queryParam);
         CurrentWeatherData response = check self.clientEp-> get(path, targetType = CurrentWeatherData);
         return response;
@@ -48,7 +44,7 @@ public client class Client {
     @display {label: "Weather Forecast"}
     remote isolated function getWeatherForecast(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string? exclude = (), @display {label: "Units"} string? units = (), @display {label: "Language"} string? lang = ()) returns WeatherForecast|error {
         string  path = string `/onecall`;
-        map<anydata> queryParam = {lat: lat, lon: lon, exclude: exclude, units: units, lang: lang, appid: self.apiKeys["appid"]};
+        map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, "lang": lang, appid: self.apiKeys["appid"]};
         path = path + getPathForQueryParam(queryParam);
         WeatherForecast response = check self.clientEp-> get(path, targetType = WeatherForecast);
         return response;

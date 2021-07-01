@@ -19,6 +19,7 @@
 package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.generators.common.TestConstants;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -34,8 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
-
 /**
  * All the tests related to the auth related code snippet generation for api key auth mechanism.
  */
@@ -48,8 +47,9 @@ public class ApiKeyAuthTests {
     @Test(description = "Generate config record for openweathermap api", dataProvider = "apiKeyAuthIOProvider")
     public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
         // generate ApiKeysConfig record
+        GeneratorUtils generatorUtils = new GeneratorUtils();
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/" + yamlFile);
-        OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedConfigRecord = TestConstants.API_KEY_CONFIG_REC;
         String generatedConfigRecord = Objects.requireNonNull(
                 BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();

@@ -7,7 +7,7 @@ servers:
 paths:
   /:
     get:
-      operationId: operation2_get_/
+      operationId: operationId01
       responses:
         "200":
           description: Ok
@@ -16,7 +16,7 @@ paths:
               schema:
                 type: string
     post:
-      operationId: operation2_post_/
+      operationId: operationId02
       responses:
         "200":
           description: Ok
@@ -26,7 +26,7 @@ paths:
                 type: string
   /v1/{id}:
     get:
-      operationId: "operation1_get_/v1/{id}"
+      operationId: "op2"
       parameters:
         - name: id
           in: path

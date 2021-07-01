@@ -70,7 +70,6 @@ import static io.ballerina.generators.GeneratorConstants.TEMPLATES_DIR_PATH_KEY;
 import static io.ballerina.generators.GeneratorConstants.TEMPLATES_SUFFIX;
 import static io.ballerina.generators.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.generators.GeneratorConstants.UNTITLED_SERVICE;
-import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
 
 /**
@@ -386,22 +385,8 @@ public class CodeGenerator {
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String srcFile = "client.bal";
-        // Refactor OpenAPI definition
-        OpenAPI openAPIDef =  getBallerinaOpenApiType(openAPI);
-        GeneratorUtils.setOperationId(openAPIDef.getPaths());
-        if (openAPIDef.getComponents() != null) {
-            // Refactor schema name with valid name
-            Components components = openAPIDef.getComponents();
-            Map<String, Schema> componentsSchemas = components.getSchemas();
-            if (componentsSchemas != null) {
-                Map<String, Schema> refacSchema = new HashMap<>();
-                for (Map.Entry<String, Schema> schemaEntry: componentsSchemas.entrySet()) {
-                    String name = getValidName(schemaEntry.getKey(), true);
-                    refacSchema.put(name, schemaEntry.getValue());
-                }
-                openAPIDef.getComponents().setSchemas(refacSchema);
-            }
-        }
+        // Normalize OpenAPI definition
+        OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
 
         // Generate ballerina service and resources.
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter);
@@ -421,6 +406,7 @@ public class CodeGenerator {
     private List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
                                                       Filter filter)
             throws IOException, FormatterException, BallerinaOpenApiException {
+
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage =  DEFAULT_MOCK_PKG;
         }
@@ -428,32 +414,43 @@ public class CodeGenerator {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
-
-        OpenAPI openAPIDef =  getBallerinaOpenApiType(openAPI);
-        GeneratorUtils.setOperationId(openAPIDef.getPaths());
-        if (openAPIDef.getComponents() != null) {
-            // Refactor schema name with valid name
-            Components components = openAPIDef.getComponents();
-            Map<String, Schema> componentsSchemas = components.getSchemas();
-            if (componentsSchemas != null) {
-                Map<String, Schema> refacSchema = new HashMap<>();
-                for (Map.Entry<String, Schema> schemaEntry: componentsSchemas.entrySet()) {
-                    String name = getValidName(schemaEntry.getKey(), true);
-                    refacSchema.put(name, schemaEntry.getValue());
-                }
-                openAPIDef.getComponents().setSchemas(refacSchema);
-            }
-        }
-
+        OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
         String mainContent = Formatter.format(BallerinaServiceGenerator.generateSyntaxTree(openAPI, serviceName,
                         filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef);
         String schemaContent = Formatter.format(ballerinaSchemaGenerator.generateSyntaxTree()).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  TYPE_FILE_NAME,
-                schemaContent));
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  TYPE_FILE_NAME, schemaContent));
 
         return sourceFiles;
+    }
+
+    /**
+     * Normalized OpenAPI specification with adding proper naming to schema.
+     *
+     * @param openAPIPath       - openAPI file path
+     * @return                  - openAPI specification
+     * @throws IOException
+     * @throws BallerinaOpenApiException
+     */
+    public OpenAPI normalizeOpenAPI(Path openAPIPath) throws IOException, BallerinaOpenApiException {
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
+        generatorUtils.setOperationId(openAPI.getPaths());
+        if (openAPI.getComponents() != null) {
+            // Refactor schema name with valid name
+            Components components = openAPI.getComponents();
+            Map<String, Schema> componentsSchemas = components.getSchemas();
+            if (componentsSchemas != null) {
+                Map<String, Schema> refacSchema = new HashMap<>();
+                for (Map.Entry<String, Schema> schemaEntry : componentsSchemas.entrySet()) {
+                    String name = getValidName(schemaEntry.getKey(), true);
+                    refacSchema.put(name, schemaEntry.getValue());
+                }
+                openAPI.getComponents().setSchemas(refacSchema);
+            }
+        }
+        return openAPI;
     }
 }

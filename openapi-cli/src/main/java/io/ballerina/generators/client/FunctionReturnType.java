@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -32,7 +33,6 @@ import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
@@ -51,8 +51,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinition
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
-import static io.ballerina.generators.GeneratorUtils.getBallerinaMeidaType;
-import static io.ballerina.generators.GeneratorUtils.getOneOfUnionType;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
 import static io.ballerina.generators.GeneratorUtils.isValidSchemaName;
 
@@ -60,6 +58,7 @@ public class FunctionReturnType {
     private OpenAPI openAPI;
     private BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
+    private GeneratorUtils generatorUtils = new GeneratorUtils();
 
 
     public FunctionReturnType() {}
@@ -86,7 +85,7 @@ public class FunctionReturnType {
                 createIdentifierToken(typeName),
                 createSimpleNameReferenceNode(createIdentifierToken(type)),
                 createToken(SEMICOLON_TOKEN));
-        generateTypeDefinitionNodeType(typeName, typeDefNode);
+        updateTypeDefinitionNodeList(typeName, typeDefNode);
         if (!isSignature) {
             return typeName;
         } else {
@@ -94,7 +93,13 @@ public class FunctionReturnType {
         }
     }
 
-    public void generateTypeDefinitionNodeType(String typeName, TypeDefinitionNode typeDefNode) {
+    /**
+     * This util function for update the typeDefinition node after check it duplicates.
+     *
+     * @param typeName      - Given Node name
+     * @param typeDefNode   - Generated Node
+     */
+    public void updateTypeDefinitionNodeList(String typeName, TypeDefinitionNode typeDefNode) {
         boolean isExit = false;
         if (!typeDefinitionNodeList.isEmpty()) {
             for (TypeDefinitionNode typeNode: typeDefinitionNodeList) {
@@ -109,6 +114,7 @@ public class FunctionReturnType {
             typeDefinitionNodeList.add(typeDefNode);
         }
     }
+
 
     /**
      * Get return type of the remote function.
@@ -133,52 +139,9 @@ public class FunctionReturnType {
                         String type = "";
                         if (media.getValue().getSchema() != null) {
                             Schema schema = media.getValue().getSchema();
-                            if (schema instanceof ComposedSchema) {
-                                ComposedSchema composedSchema = (ComposedSchema) schema;
-                                type = generateReturnTypeForComposedSchema(operation, type, composedSchema);
-                            } else if (schema instanceof ObjectSchema) {
-                                ObjectSchema objectSchema = (ObjectSchema) schema;
-                                type = handleInLineRecordInResponse(operation, media, objectSchema.get$ref(),
-                                        objectSchema.getProperties(), objectSchema.getRequired());
-                            } else if (schema instanceof MapSchema) {
-                                MapSchema mapSchema = (MapSchema) schema;
-                                type = handleInLineRecordInResponse(operation, media, mapSchema.get$ref(),
-                                        mapSchema.getProperties(),
-                                        mapSchema.getRequired());
-                            } else  if (schema.get$ref() != null) {
-                                type = getValidName(extractReferenceType(schema.get$ref()), true);
-                                Schema componentSchema = openAPI.getComponents().getSchemas().get(type);
-                                if (!isValidSchemaName(type)) {
-                                    String operationId = operation.getOperationId();
-                                    type = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1) +
-                                            "Response";
-                                    List<String> required = componentSchema.getRequired();
-                                    Token typeKeyWord = createIdentifierToken("public type");
-                                    List<Node> recordFieldList = new ArrayList<>();
-                                    Map<String, Schema> properties = componentSchema.getProperties();
-                                    String description = "";
-                                    if (response.getDescription() != null) {
-                                        description = response.getDescription().split("\n")[0];
-                                    }
-                                    TypeDefinitionNode typeDefinitionNode =
-                                            ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(
-                                                    required, typeKeyWord, createIdentifierToken(type), recordFieldList,
-                                                    properties, description, openAPI);
-                                    generateTypeDefinitionNodeType(type, typeDefinitionNode);
-                                }
-                            } else if (schema instanceof ArraySchema) {
-                                ArraySchema arraySchema = (ArraySchema) schema;
-                                // TODO: Nested array when response has
-                                type = generateReturnTypeForArraySchema(media, arraySchema, true);
-                            } else if (schema.getType() != null) {
-                                type = convertOpenAPITypeToBallerina(schema.getType());
-                            } else if (media.getKey().trim().equals("application/xml")) {
-                                type = generateCustomTypeDefine("xml", "XML", isSignature);
-                            } else {
-                                type = getBallerinaMeidaType(media.getKey().trim());
-                            }
+                            type = getDataType(operation, isSignature, response, media, type, schema);
                         } else {
-                            type = getBallerinaMeidaType(media.getKey().trim());
+                            type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
                         }
 
                         StringBuilder builder = new StringBuilder();
@@ -206,7 +169,55 @@ public class FunctionReturnType {
         return returnType;
     }
 
-    public String generateReturnTypeForArraySchema(Map.Entry<String, MediaType> media, ArraySchema arraySchema,
+    private String getDataType(Operation operation, boolean isSignature, ApiResponse response,
+                               Map.Entry<String, MediaType> media, String type, Schema schema)
+            throws BallerinaOpenApiException {
+
+        // get a single function
+        if (schema instanceof ComposedSchema) {
+            //schema instead of composedSchema
+            type = generateReturnDataTypeForComposedSchema(operation, type, schema);
+        } else if (schema instanceof ObjectSchema) {
+            ObjectSchema objectSchema = (ObjectSchema) schema;
+            type = handleInLineRecordInResponse(operation, media, objectSchema);
+        } else if (schema instanceof MapSchema) {
+            type = handleResponseWithMapSchema(operation, media, schema);
+        } else  if (schema.get$ref() != null) {
+            type = getValidName(extractReferenceType(schema.get$ref()), true);
+            Schema componentSchema = openAPI.getComponents().getSchemas().get(type);
+            if (!isValidSchemaName(type)) {
+                String operationId = operation.getOperationId();
+                type = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1) +
+                        "Response";
+                List<String> required = componentSchema.getRequired();
+                Token typeKeyWord = createIdentifierToken("public type");
+                List<Node> recordFieldList = new ArrayList<>();
+                Map<String, Schema> properties = componentSchema.getProperties();
+                String description = "";
+                if (response.getDescription() != null) {
+                    description = response.getDescription().split("\n")[0];
+                }
+                TypeDefinitionNode typeDefinitionNode =
+                        ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(
+                                required, typeKeyWord, createIdentifierToken(type), recordFieldList,
+                                properties, description, openAPI);
+                updateTypeDefinitionNodeList(type, typeDefinitionNode);
+            }
+        } else if (schema instanceof ArraySchema) {
+            ArraySchema arraySchema = (ArraySchema) schema;
+            // TODO: Nested array when response has
+            type = generateReturnTypeForArraySchema(media, arraySchema, isSignature);
+        } else if (schema.getType() != null) {
+            type = convertOpenAPITypeToBallerina(schema.getType());
+        } else if (media.getKey().trim().equals("application/xml")) {
+            type = generateCustomTypeDefine("xml", "XML", isSignature);
+        } else {
+            type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
+        }
+        return type;
+    }
+
+    private String generateReturnTypeForArraySchema(Map.Entry<String, MediaType> media, ArraySchema arraySchema,
                                                     boolean isSignature) throws BallerinaOpenApiException {
 
         String type;
@@ -220,7 +231,7 @@ public class FunctionReturnType {
                     createSimpleNameReferenceNode(createIdentifierToken(type)),
                     createToken(SEMICOLON_TOKEN));
             // Check already typeDescriptor has same name
-            generateTypeDefinitionNodeType(typeName, typeDefNode);
+            updateTypeDefinitionNodeList(typeName, typeDefNode);
             if (!isSignature) {
                 type = typeName;
             }
@@ -230,12 +241,12 @@ public class FunctionReturnType {
             } else if (media.getKey().trim().equals("application/pdf") ||
                     media.getKey().trim().equals("image/png") ||
                     media.getKey().trim().equals("application/octet-stream")) {
-                String typeName = getBallerinaMeidaType(media.getKey().trim()) + "Arr";
-                type = getBallerinaMeidaType(media.getKey().trim());
+                String typeName = generatorUtils.getBallerinaMediaType(media.getKey().trim()) + "Arr";
+                type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
                 type = generateCustomTypeDefine(type, typeName, isSignature);
             } else {
-                String typeName = getBallerinaMeidaType(media.getKey().trim()) + "Arr";
-                type = getBallerinaMeidaType(media.getKey().trim()) + "[]";
+                String typeName = generatorUtils.getBallerinaMediaType(media.getKey().trim()) + "Arr";
+                type = generatorUtils.getBallerinaMediaType(media.getKey().trim()) + "[]";
                 type = generateCustomTypeDefine(type, typeName, isSignature);
             }
         } else {
@@ -247,73 +258,50 @@ public class FunctionReturnType {
         return type;
     }
 
-    public String generateReturnTypeForComposedSchema(Operation operation, String type, ComposedSchema composedSchema)
+    private String generateReturnDataTypeForComposedSchema(Operation operation, String type, Schema schema)
             throws BallerinaOpenApiException {
-
-        if (composedSchema.getOneOf() != null) {
-            List<Schema> oneOf = composedSchema.getOneOf();
-            type = getOneOfUnionType(oneOf);
-            //Get oneOfUnionType name
-            String typeName = type.replaceAll("\\|", "");
-            TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
-                    createIdentifierToken("public type"),
-                    createIdentifierToken(typeName),
-                    createSimpleNameReferenceNode(createIdentifierToken(type)),
-                    createToken(SEMICOLON_TOKEN));
-            generateTypeDefinitionNodeType(typeName, typeDefNode);
-        } else if (composedSchema.getAllOf() != null) {
-            List<Schema> allOf = composedSchema.getAllOf();
-            String recordName = "Compound" + getValidName(operation.getOperationId(), true) +
-                    "Response";
-            List<String> required = composedSchema.getRequired();
-            TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
-                    .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
-                            createIdentifierToken(recordName), new ArrayList<>(), allOf);
-            generateTypeDefinitionNodeType(recordName, allOfTypeDefinitionNode);
-            type = recordName;
+        if (schema instanceof ComposedSchema) {
+            ComposedSchema composedSchema = (ComposedSchema) schema;
+            if (composedSchema.getOneOf() != null) {
+                List<Schema> oneOf = composedSchema.getOneOf();
+                type = generatorUtils.getOneOfUnionType(oneOf);
+                //Get oneOfUnionType name
+                String typeName = type.replaceAll("\\|", "");
+                TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
+                        createIdentifierToken("public type"),
+                        createIdentifierToken(typeName),
+                        createSimpleNameReferenceNode(createIdentifierToken(type)),
+                        createToken(SEMICOLON_TOKEN));
+                updateTypeDefinitionNodeList(typeName, typeDefNode);
+            } else if (composedSchema.getAllOf() != null) {
+                List<Schema> allOf = composedSchema.getAllOf();
+                String recordName = "Compound" + getValidName(operation.getOperationId(), true) +
+                        "Response";
+                List<String> required = composedSchema.getRequired();
+                TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
+                        .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
+                                createIdentifierToken(recordName), new ArrayList<>(), allOf);
+                updateTypeDefinitionNodeList(recordName, allOfTypeDefinitionNode);
+                type = recordName;
+            }
         }
         return type;
     }
 
-    //Handle inline record by generating record with name for request.
-    public String generateRecordForInlineRequestBody(String operationId, RequestBody requestBody,
-                                                       Map<String, Schema> properties2, List<String> required2)
-            throws BallerinaOpenApiException {
-
-        String paramType;
-        Map<String, Schema> properties = properties2;
-        operationId = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1);
-        String typeName = operationId + "Request";
-        List<String> required = required2;
-        List<Node> fields = new ArrayList<>();
-        String description = "";
-        if (requestBody.getDescription() != null) {
-            description = requestBody.getDescription().split("\n")[0];
-        }
-        TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
-                createIdentifierToken("public type"), createIdentifierToken(typeName), fields,
-                properties, description, openAPI);
-        generateTypeDefinitionNodeType(typeName, recordNode);
-        paramType = typeName;
-        return paramType;
-    }
-
-
     //Handle inline record by generating record with name for response.
-    public String handleInLineRecordInResponse(Operation operation, Map.Entry<String, MediaType> media,
-                                                 String ref, Map<String, Schema> properties2,
-                                                 List<String> required2) throws BallerinaOpenApiException {
+    private String handleInLineRecordInResponse(Operation operation, Map.Entry<String, MediaType> media, ObjectSchema objectSchema)
+            throws BallerinaOpenApiException {
+        Map<String, Schema> properties = objectSchema.getProperties();
+        String ref = objectSchema.get$ref();
+        List<String> required = objectSchema.getRequired();
+        String type = getValidName(operation.getOperationId(), true) + "Response";
 
-        String type;
-        type = getValidName(operation.getOperationId(), true) + "Response";
         if (ref != null) {
             type = extractReferenceType(ref.trim());
-        } else if (properties2 != null) {
-            Map<String, Schema> properties = properties2;
+        } else if (properties != null) {
             if (properties.isEmpty()) {
-                type = getBallerinaMeidaType(media.getKey().trim());
+                type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
             } else {
-                List<String> required = required2;
                 List<Node> recordFieldList = new ArrayList<>();
                 String description = "";
                 if (operation.getResponses().entrySet().iterator().next().getValue().getDescription() != null) {
@@ -322,13 +310,41 @@ public class FunctionReturnType {
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
                         createIdentifierToken("public type"),
                         createIdentifierToken(type), recordFieldList, properties, description, openAPI);
-                generateTypeDefinitionNodeType(type, recordNode);
+                updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {
-            type = getBallerinaMeidaType(media.getKey().trim());
+            type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
         }
         return type;
     }
 
+    private String handleResponseWithMapSchema(Operation operation, Map.Entry<String, MediaType> media, Schema schema)
+            throws BallerinaOpenApiException {
+        MapSchema mapSchema = (MapSchema) schema;
+        Map<String, Schema> properties = mapSchema.getProperties();
+        String ref = mapSchema.get$ref();
+        List<String> required = mapSchema.getRequired();
+        String type = getValidName(operation.getOperationId(), true) + "Response";
 
+        if (ref != null) {
+            type = extractReferenceType(ref.trim());
+        } else if (properties != null) {
+            if (properties.isEmpty()) {
+                type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
+            } else {
+                List<Node> recordFieldList = new ArrayList<>();
+                String description = "";
+                if (operation.getResponses().entrySet().iterator().next().getValue().getDescription() != null) {
+                    description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
+                }
+                TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
+                        createIdentifierToken("public type"),
+                        createIdentifierToken(type), recordFieldList, properties, description, openAPI);
+                updateTypeDefinitionNodeList(type, recordNode);
+            }
+        } else {
+            type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
+        }
+        return type;
+    }
 }

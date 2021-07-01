@@ -41,7 +41,6 @@ paths:
           required: false
           schema:
             type: string
-            default: 'current'
           x-display:
             label: Exclude
         - description: 'tests'
@@ -50,7 +49,6 @@ paths:
           required: false
           schema:
             type: integer
-            default: 12
           x-display:
             label: Units
       x-display:

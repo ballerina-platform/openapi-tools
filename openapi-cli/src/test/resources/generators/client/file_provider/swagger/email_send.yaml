@@ -4,7 +4,7 @@ servers:
   - url: https://api.sendgrid.com/v3
 info:
   description: Client endpoint for Sendgrid API
-  title: SendGrid v3 API Documentation
+  title: SendGrid v3 API DocCommentsGenerator
   version: "3.0"
 externalDocs:
   url: https://sendgrid.com/docs/API_Reference/Web_API_v3/index.html
