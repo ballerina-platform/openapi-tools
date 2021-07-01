@@ -773,8 +773,8 @@ public class BallerinaClientGenerator {
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription().split("\n")[0]);
+                                        createParamAPIDoc(escapeIdentifier(getValidName(parameter.getName(),
+                                                false)), parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
@@ -782,8 +782,8 @@ public class BallerinaClientGenerator {
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription().split("\n")[0]);
+                                        createParamAPIDoc(escapeIdentifier(getValidName(parameter.getName(),
+                                                false)), parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
                         }
@@ -795,8 +795,8 @@ public class BallerinaClientGenerator {
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription().split("\n")[0]);
+                                        createParamAPIDoc(escapeIdentifier(getValidName(parameter.getName(),
+                                                false)), parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
@@ -804,8 +804,8 @@ public class BallerinaClientGenerator {
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription().split("\n")[0]);
+                                        createParamAPIDoc(escapeIdentifier(getValidName(parameter.getName(),
+                                                false)), parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
                         }
@@ -1370,7 +1370,7 @@ public class BallerinaClientGenerator {
                         "queryParam", queryApiKeyNameList, false));
                 // Add updated path
                 ExpressionStatementNode updatedPath = getSimpleExpressionStatementNode("path = path + " +
-                        "getPathForQueryParam(queryParam)");
+                        "check getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
                 isQuery = true;
             }
@@ -1737,7 +1737,7 @@ public class BallerinaClientGenerator {
                         createToken(CLOSE_PAREN_TOKEN),
                         createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
                                 createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(
-                                        null, createIdentifierToken("string"))));
+                                        null, createIdentifierToken("string|error"))));
 
         // FunctionBody
         List<StatementNode> statementNodes = new ArrayList<>();
@@ -1821,7 +1821,7 @@ public class BallerinaClientGenerator {
                         createIdentifierToken(" string"));
         TypeTestExpressionNode condition03 = createTypeTestExpressionNode(exprIf03, isKeyWord, typeCondition03);
 
-        ExpressionStatementNode variableIf03 = getSimpleExpressionStatementNode("string updateV =  checkpanic " +
+        ExpressionStatementNode variableIf03 = getSimpleExpressionStatementNode("string updateV =  check " +
                 "url:encode(value, \"UTF-8\")");
         ExpressionStatementNode assignIf03 = getSimpleExpressionStatementNode("param[param.length()] = updateV");
 
