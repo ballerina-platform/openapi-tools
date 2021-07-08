@@ -66,7 +66,7 @@ public class QueryParameterTests {
         OpenAPI openAPI = getOpenAPI(definitionPath);
         Parameter parameter = openAPI.getPaths().get("/onecall").getGet().getParameters().get(3);
         Node queryParameters = getQueryParameters(parameter);
-        String expected = "@display{label:\"Units\"}int?units=12";
+        String expected = "@display{label:\"Units\"}intunits=12";
         Assert.assertEquals(queryParameters.toString(), expected);
 
         Parameter parameter02 = openAPI.getPaths().get("/onecall").getGet().getParameters().get(4);
