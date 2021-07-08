@@ -537,7 +537,6 @@ public class BallerinaClientGenerator {
         FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(imports, isQuery, isHeader,
                 typeDefinitionNodeList, openAPI, ballerinaSchemaGenerator);
         FunctionBodyNode functionBodyNode = functionBodyGenerator.getFunctionBodyNode(path, operation);
-//        typeDefinitionNodeList.addAll(functionBodyGenerator.getTypeDefinitionNodeList());
         if (!isQuery) {
             isQuery = functionBodyGenerator.isQuery();
         }

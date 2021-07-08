@@ -50,6 +50,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.error.ErrorMessages;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -410,13 +411,18 @@ public class GeneratorUtils {
      */
     public OpenAPI getOpenAPIFromOpenAPIV3Parser(Path definitionPath)
             throws IOException, BallerinaOpenApiException {
+
+        Path contractPath = java.nio.file.Paths.get(definitionPath.toString());
+        if (!Files.exists(contractPath)) {
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFilePath(definitionPath.toString()));
+        }
+        if (!(definitionPath.toString().endsWith(".yaml") || definitionPath.endsWith(".json") || definitionPath.toString().endsWith(
+                ".yml"))) {
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFileType());
+        }
         String openAPIFileContent = Files.readString(definitionPath);
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
-//        parseOptions.setResolve(true);
-        parseOptions.setResolveCombinators(false);
-//        parseOptions.setResolveFully(true);
-
         parseOptions.setFlatten(true);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
@@ -495,7 +501,7 @@ public class GeneratorUtils {
      * @return - UnionString
      * @throws BallerinaOpenApiException
      */
-    public  String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
+    public String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
 
         StringBuilder unionType = new StringBuilder();
         for (Schema oneOfSchema: oneOf) {
@@ -505,11 +511,12 @@ public class GeneratorUtils {
                     unionType.append("|");
                     unionType.append(type);
                 }
-            }
-            if (oneOfSchema.get$ref() != null) {
+            } else if (oneOfSchema.get$ref() != null) {
                 String type = extractReferenceType(oneOfSchema.get$ref());
                 unionType.append("|");
                 unionType.append(type);
+            } else if (!oneOfSchema.getProperties().isEmpty()) {
+                // TODO: generate warning to move inline schema to schema
             }
         }
         String unionTypeCont = unionType.toString();

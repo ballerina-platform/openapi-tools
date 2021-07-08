@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.NilLiteralNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
@@ -77,6 +78,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.error.ErrorMessages.invalidPathParamType;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
@@ -150,7 +152,7 @@ public class FunctionSignatureGenerator {
                 returnTypeDescriptorNode);
     }
 
-    /*
+    /**
      * Generate function parameters.
      */
     private void setFunctionParameters(Operation operation, List<Node> parameterList, Token comma,
@@ -259,7 +261,7 @@ public class FunctionSignatureGenerator {
         }
     }
 
-    /*
+    /**
      * Create query parameters.
      *
      * Note: currently ballerina supports for this data type.
@@ -330,7 +332,7 @@ public class FunctionSignatureGenerator {
         }
     }
 
-    /*
+    /**
      * Create path parameters.
      */
     public Node getPathParameters(Parameter parameter) throws BallerinaOpenApiException {
@@ -346,7 +348,7 @@ public class FunctionSignatureGenerator {
         return createRequiredParameterNode(annotationNodes, typeName, paramName);
     }
 
-    /*
+    /**
      * Create header when it comes under the parameter section in swagger.
      */
     private Node getHeaderParameter(Parameter parameter) throws BallerinaOpenApiException {
@@ -380,7 +382,7 @@ public class FunctionSignatureGenerator {
         }
     }
 
-    /*
+    /**
      * Create request body parameter.
      */
     private  List<Node> setRequestBodyParameters(String operationId, RequestBody requestBody,
@@ -442,6 +444,9 @@ public class FunctionSignatureGenerator {
         return parameterList;
     }
 
+    /**
+     * Generate RequestBody for array type schema.
+     */
     private String getRequestBodyParameterForArraySchema(String operationId, RequestBody requestBody,
                                                          Map.Entry<String, MediaType> next, String paramType,
                                                          ArraySchema arraySchema) throws BallerinaOpenApiException {
@@ -459,7 +464,16 @@ public class FunctionSignatureGenerator {
                 paramType = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
             }
         } else if (arraySchema.getItems().get$ref() != null) {
-            paramType = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
+            paramType = getValidName(extractReferenceType(arraySchema.getItems().get$ref()), true) + "[]";
+        } else if (arraySchema.getItems() instanceof ComposedSchema) {
+            paramType = "CompoundArrayItem" +  getValidName(operationId, true) + "Request";
+            TypeDescriptorNode typeDescriptorNodeForArraySchema = ballerinaSchemaGenerator
+                    .getTypeDescriptorNodeForArraySchema(openAPI, arraySchema);
+            // TODO - Add API doc by checking requestBody
+            TypeDefinitionNode arrayTypeNode = NodeFactory.createTypeDefinitionNode(null, null,
+                    createIdentifierToken("public type"),
+                    createIdentifierToken(paramType), typeDescriptorNodeForArraySchema, createToken(SEMICOLON_TOKEN));
+            functionReturnType.updateTypeDefinitionNodeList(paramType, arrayTypeNode);
         } else {
             paramType = generatorUtils.getBallerinaMediaType(next.getKey().trim()) + "[]";
         }
@@ -488,15 +502,8 @@ public class FunctionSignatureGenerator {
 
     /**
      * Handle inline record with request parameter.
-     *
-     * @param operationId
-     * @param requestBody
-     * @param properties
-     * @param required
-     * @return
-     * @throws BallerinaOpenApiException
      */
-    public String generateRecordForInlineRequestBody(String operationId, RequestBody requestBody,
+    private String generateRecordForInlineRequestBody(String operationId, RequestBody requestBody,
                                                      Map<String, Schema> properties, List<String> required)
             throws BallerinaOpenApiException {
 

@@ -49,10 +49,20 @@ public class RequestBodyTests {
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Test for generate function signature for given operations")
-    public void getFunctionSignatureNodeTests() throws IOException, BallerinaOpenApiException {
+    public void testForRequestBody() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_basic_scenarios.bal");
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/request_body_basic_scenarios.yaml"));
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Test for generate function signature for given operations")
+    public void testForRequestBodyWithAllOf() throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/request_body_allOf_scenarios.bal");
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/request_body_allOf_scenarios.yaml"));
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);

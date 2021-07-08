@@ -130,6 +130,8 @@ paths:
                 required:
                   - userName
                 properties:
+                  id:
+                    type: integer
                   userName:
                     type: string
                   firstName:
