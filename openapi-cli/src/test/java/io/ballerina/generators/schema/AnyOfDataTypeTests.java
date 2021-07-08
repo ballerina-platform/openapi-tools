@@ -37,7 +37,8 @@ import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTre
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to AnyDataType handling the {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * All the tests related to AnyDataType handling the {@link io.ballerina.generators.client.BallerinaClientGenerator}
+ * util.
  */
 public class AnyOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();

@@ -56,7 +56,8 @@ under the License.
             <class name="io.ballerina.generators.schema.RecordDataTypeTests"/>
             <class name="io.ballerina.generators.schema.ReferenceResolveTests"/>
             <class name="io.ballerina.generators.schema.SwaggerFileParserTests"/>
-<!--            <class name="io.ballerina.generators.schema.SwaggerParserTests"/>-->
+            <class name="io.ballerina.generators.testcases.BallerinaTestGeneratorTests"></class>
+            <!--            <class name="io.ballerina.generators.schema.SwaggerParserTests"/>-->
         </classes>
     </test>
 </suite>

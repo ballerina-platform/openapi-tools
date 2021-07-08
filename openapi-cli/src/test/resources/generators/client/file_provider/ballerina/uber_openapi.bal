@@ -3,7 +3,7 @@ import  ballerina/url;
 import  ballerina/lang.'string;
 
 public type ApiKeysConfig record {
-    map<string|string[]> apiKeys;
+    map<string> apiKeys;
 };
 
 public type ProductArr Product[];
@@ -15,7 +15,7 @@ public type PriceEstimateArr PriceEstimate[];
 # + clientEp - Connector http endpoint
 public client class Client {
     http:Client clientEp;
-    map<string|string[]> apiKeys;
+    map<string> apiKeys;
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://api.uber.com/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;

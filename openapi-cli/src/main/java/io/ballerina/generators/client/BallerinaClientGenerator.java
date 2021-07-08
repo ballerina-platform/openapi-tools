@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.generators;
+package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
@@ -74,7 +74,9 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeTestExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.generators.auth.BallerinaAuthConfigGenerator;
+import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.GeneratorConstants;
+import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.text.TextDocument;
@@ -221,6 +223,8 @@ public class BallerinaClientGenerator {
     private static boolean isHeader;
     private static Info info;
     private static List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+    private static List<String> remoteFunctionNameList = new ArrayList<>();
+    private static String serverURL;
     private static OpenAPI openAPI;
     private static BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
 
@@ -355,8 +359,9 @@ public class BallerinaClientGenerator {
                 createIdentifierToken("string"));
         IdentifierToken paramName = createIdentifierToken(GeneratorConstants.SERVICE_URL);
         IdentifierToken equalToken = createIdentifierToken("=");
+        serverURL = getServerURL(server);
         BasicLiteralNode expression = createBasicLiteralNode(STRING_LITERAL,
-                createIdentifierToken('"' + getServerURL(server) + '"'));
+                createIdentifierToken('"' + serverURL + '"'));
 
         DefaultableParameterNode serviceUrl = createDefaultableParameterNode(annotationNodes, typeName,
                 paramName, equalToken, expression);
@@ -617,6 +622,7 @@ public class BallerinaClientGenerator {
             throws BallerinaOpenApiException {
         List<FunctionDefinitionNode> functionDefinitionNodeList = new ArrayList<>();
         Set<Map.Entry<String, PathItem>> pathsItems = paths.entrySet();
+        remoteFunctionNameList.clear();
         for (Map.Entry<String, PathItem> path : pathsItems) {
             if (!path.getValue().readOperationsMap().isEmpty()) {
                 Map<PathItem.HttpMethod, Operation> operationMap = path.getValue().readOperationsMap();
@@ -694,6 +700,7 @@ public class BallerinaClientGenerator {
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
         NodeList<Node> relativeResourcePath = createEmptyNodeList();
+        remoteFunctionNameList.add(operation.getValue().getOperationId());
 
         FunctionSignatureNode functionSignatureNode = getFunctionSignatureNode(operation.getValue(),
                 remoteFunctionDocs);
@@ -1933,6 +1940,14 @@ public class BallerinaClientGenerator {
         if (configRecord != null) {
             typeDefinitionNodeList.add(configRecord);
         }
+    }
+
+    public static List<String> getRemoteFunctionNameList () {
+        return remoteFunctionNameList;
+    }
+
+    public static String getServerUrl () {
+        return serverURL;
     }
 
     /** Generate function for functionDefinition Node.
