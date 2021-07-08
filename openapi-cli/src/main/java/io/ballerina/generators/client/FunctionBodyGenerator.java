@@ -485,7 +485,9 @@ public class FunctionBodyGenerator {
         } else if (mediaTypeEntry.getKey().contains("xml")) {
             ImportDeclarationNode xmlImport = generatorUtils.getImportDeclarationNode(
                     GeneratorConstants.BALLERINA, "xmldata");
-            imports.add(xmlImport);
+            if (!checkImportDuplicate(imports, "xmldata")) {
+                imports.add(xmlImport);
+            }
             VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
                     "jsonBody", "check payload.cloneWithType(json)");
             statementsList.add(jsonVariable);
@@ -579,5 +581,14 @@ public class FunctionBodyGenerator {
         return createVariableDeclarationNode(createEmptyNodeList(),
                 null, bindingPatternNode, createToken(EQUAL_TOKEN), initialize,
                 createToken(SEMICOLON_TOKEN));
+    }
+
+    private boolean checkImportDuplicate(List<ImportDeclarationNode> imports, String module) {
+        for (ImportDeclarationNode importModule:imports) {
+            if (importModule.toString().equals("import ballerina/" + module + ";")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

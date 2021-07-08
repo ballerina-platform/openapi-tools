@@ -350,7 +350,9 @@ public class GeneratorUtils {
      * @return string with new generated name
      */
     public static String getValidName(String identifier, boolean isSchema) {
-        if (!identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") && !identifier.matches("\\b[0-9]*\\b")) {
+        //For the flatten enable we need to remove first Part of valid name check
+        // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
+        if (!identifier.matches("\\b[0-9]*\\b")) {
             String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
             StringBuilder validName = new StringBuilder();
             for (String part: split) {
@@ -411,6 +413,11 @@ public class GeneratorUtils {
         String openAPIFileContent = Files.readString(definitionPath);
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
+//        parseOptions.setResolve(true);
+        parseOptions.setResolveCombinators(false);
+//        parseOptions.setResolveFully(true);
+
+        parseOptions.setFlatten(true);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);

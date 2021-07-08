@@ -314,36 +314,51 @@ public class BallerinaSchemaGenerator {
             , IdentifierToken typeName, List<Node> recordFieldList, List<Schema> allOf)
             throws BallerinaOpenApiException {
 
-        for (Schema allOfschema: allOf) {
-            if (allOfschema.getType() == null && allOfschema.get$ref() != null) {
+        for (Schema allOfSchema: allOf) {
+            if (allOfSchema.getType() == null && allOfSchema.get$ref() != null) {
                 //Generate typeReferenceNode
-                Token typeRef = AbstractNodeFactory.createIdentifierToken(getValidName(
-                                extractReferenceType(allOfschema.get$ref()), true));
-                Token asterisk = AbstractNodeFactory.createIdentifierToken("*");
-                Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
-                TypeReferenceNode recordField =
-                        NodeFactory.createTypeReferenceNode(asterisk, typeRef, semicolon);
-                recordFieldList.add(recordField);
-                if (allOfschema.getDescription() != null) {
-                    MarkdownDocumentationLineNode recordDes = createMarkdownDocumentationLineNode(null,
-                            createToken(SyntaxKind.HASH_TOKEN), createNodeList(createLiteralValueToken(
-                                    null, allOfschema.getDescription().split("\n")[0],
-                                    createEmptyMinutiaeList(), createEmptyMinutiaeList())));
-                    schemaDoc.add(recordDes);
-                }
-            } else if (allOfschema instanceof ObjectSchema && (allOfschema.getProperties() != null)) {
-                if (allOfschema.getDescription() != null) {
+                getAllOfRecordFieldForReference(schemaDoc, recordFieldList, allOfSchema);
+            } else if (allOfSchema instanceof ObjectSchema && (allOfSchema.getProperties() != null)) {
+                if (allOfSchema.getDescription() != null) {
                     MarkdownDocumentationLineNode recordDes = createMarkdownDocumentationLineNode(null,
                                     createToken(SyntaxKind.HASH_TOKEN), createNodeList(createLiteralValueToken(
-                                            null, allOfschema.getDescription().split("\n")[0],
+                                            null, allOfSchema.getDescription().split("\n")[0],
                                             createEmptyMinutiaeList(), createEmptyMinutiaeList())));
                     schemaDoc.add(recordDes);
                 }
-                Map<String, Schema> properties = allOfschema.getProperties();
+                Map<String, Schema> properties = allOfSchema.getProperties();
                 for (Map.Entry<String, Schema> field : properties.entrySet()) {
                     addRecordFields(required, recordFieldList, field, openApi);
                 }
-            } else  {
+            } else if (allOfSchema instanceof ComposedSchema) {
+                ComposedSchema allOfNested = (ComposedSchema) allOfSchema;
+                if (allOfNested.getAllOf() != null) {
+                    List<Schema> nestedAllOf = allOfNested.getAllOf();
+                    for (Schema schema: allOfNested.getAllOf()) {
+                        if (schema instanceof ObjectSchema) {
+                            ObjectSchema objectSchema = (ObjectSchema) schema;
+                            List<String> requiredField = objectSchema.getRequired();
+                            Map<String, Schema> properties = objectSchema.getProperties();
+                            // TODO: add api documentation
+                            for (Map.Entry<String, Schema> field : properties.entrySet()) {
+                                addRecordFields(requiredField, recordFieldList, field, openApi);
+                            }
+                        } else if (schema instanceof ComposedSchema) {
+                            ComposedSchema composedSchema = (ComposedSchema) schema;
+                            // this is looks like two allOf
+                            if (composedSchema.getAllOf() != null) {
+                                // reference has properties
+                                List<Schema> all = composedSchema.getAllOf();
+                                for (Schema allSchema: all) {
+                                    if (allSchema instanceof ObjectSchema) {
+                                        ObjectSchema nested = (ObjectSchema) allSchema;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // TODO handle OneOf, AnyOf
 //                TypeDefinitionNode
             }
         }
@@ -357,6 +372,25 @@ public class BallerinaSchemaGenerator {
         MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
         return NodeFactory.createTypeDefinitionNode(metadataNode,
                 null, createIdentifierToken("public type"), typeName, recordTypeDescriptorNode, semicolon);
+    }
+
+    private void getAllOfRecordFieldForReference(List<Node> schemaDoc, List<Node> recordFieldList, Schema allOfSchema)
+            throws BallerinaOpenApiException {
+
+        Token typeRef = AbstractNodeFactory.createIdentifierToken(getValidName(
+                        extractReferenceType(allOfSchema.get$ref()), true));
+        Token asterisk = AbstractNodeFactory.createIdentifierToken("*");
+        Token semicolon = AbstractNodeFactory.createIdentifierToken(";");
+        TypeReferenceNode recordField =
+                NodeFactory.createTypeReferenceNode(asterisk, typeRef, semicolon);
+        recordFieldList.add(recordField);
+        if (allOfSchema.getDescription() != null) {
+            MarkdownDocumentationLineNode recordDes = createMarkdownDocumentationLineNode(null,
+                    createToken(SyntaxKind.HASH_TOKEN), createNodeList(createLiteralValueToken(
+                            null, allOfSchema.getDescription().split("\n")[0],
+                            createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+            schemaDoc.add(recordDes);
+        }
     }
 
     /**
@@ -419,7 +453,7 @@ public class BallerinaSchemaGenerator {
      */
     private void addRecordFields(List<String> required, List<Node> recordFieldList, Map.Entry<String, Schema> field,
                                  OpenAPI openApi) throws BallerinaOpenApiException {
-
+        // TODO: Handle allOf
         RecordFieldNode recordFieldNode;
         // API doc
         List<Node> schemaDoc = new ArrayList<>();
@@ -587,8 +621,8 @@ public class BallerinaSchemaGenerator {
             }
         } else if (schema.get$ref() != null) {
             String type = extractReferenceType(schema.get$ref());
-            Schema refSchema = openApi.getComponents().getSchemas().get(type);
             type = getValidName(type, true);
+            Schema refSchema = openApi.getComponents().getSchemas().get(type);
             if (refSchema.getNullable() != null) {
                 if (refSchema.getNullable()) {
                     type = type + "?";

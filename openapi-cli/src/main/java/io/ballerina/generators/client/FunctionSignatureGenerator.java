@@ -261,6 +261,10 @@ public class FunctionSignatureGenerator {
 
     /*
      * Create query parameters.
+     *
+     * Note: currently ballerina supports for this data type.
+     * type BasicType boolean|int|float|decimal|string;
+     * public type QueryParamType ()|BasicType|BasicType[];
      */
     public Node getQueryParameters(Parameter parameter) throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
@@ -283,7 +287,7 @@ public class FunctionSignatureGenerator {
             if (arraySchema.getItems().getType() != null) {
                 String itemType = arraySchema.getItems().getType();
                 if (itemType.equals("string") || itemType.equals("integer") || itemType.equals("boolean")
-                        || itemType.equals("float") || itemType.equals("decimal")) {
+                        || itemType.equals("number")) {
                     paramType = convertOpenAPITypeToBallerina(itemType) + "[]";
                 }
             } else if (arraySchema.getItems().get$ref() != null) {
@@ -398,42 +402,23 @@ public class FunctionSignatureGenerator {
                 String typeOfPayload = schema.getType().trim();
                 paramType = convertOpenAPITypeToBallerina(typeOfPayload);
             } else if (schema instanceof ArraySchema) {
-                //TODO: handle nested array
+                //TODO: handle nested array - this is impossible to handle
                 ArraySchema arraySchema = (ArraySchema) schema;
-                if (arraySchema.getItems().getType() != null) {
-                    paramType = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
-                } else if (arraySchema.getItems().get$ref() != null) {
-                    paramType = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
-                } else {
-                    paramType = generatorUtils.getBallerinaMediaType(next.getKey().trim()) + "[]";
-                }
+                paramType = getRequestBodyParameterForArraySchema(operationId, requestBody, next, paramType,
+                        arraySchema);
             } else if (schema instanceof ComposedSchema) {
                 // The requestBody only can have oneOf and anyOf data types
                 ComposedSchema composedSchema = (ComposedSchema) schema;
-                if (composedSchema.getOneOf() != null) {
-                    paramType = generatorUtils.getOneOfUnionType(composedSchema.getOneOf());
-                } else if (composedSchema.getAnyOf() != null) {
-                    paramType = generatorUtils.getOneOfUnionType(composedSchema.getAnyOf());
-                } else if (composedSchema.getAllOf() != null) {
-                    paramType = "Compound" +  getValidName(operationId, true) + "Request";
-                    List<Schema> allOf = composedSchema.getAllOf();
-                    List<String> required = composedSchema.getRequired();
-                    TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
-                            .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
-                                    createIdentifierToken(paramType), new ArrayList<>(), allOf);
-                    functionReturnType.updateTypeDefinitionNodeList(paramType, allOfTypeDefinitionNode);
-                }
+                paramType = getRequestBodyParameterForComposedSchema(operationId, paramType, composedSchema);
             } else if (schema instanceof ObjectSchema) {
                 ObjectSchema objectSchema = (ObjectSchema) schema;
                 if (objectSchema.getProperties() != null) {
                     // Generate properties
-                    // TODO replace this name generation after merge old PR
                     paramType = generateRecordForInlineRequestBody(operationId, requestBody,
                             objectSchema.getProperties(), objectSchema.getRequired());
                 }
             } else if (schema.getProperties() != null) {
-                paramType = generateRecordForInlineRequestBody(operationId, requestBody,
-                        schema.getProperties(),
+                paramType = generateRecordForInlineRequestBody(operationId, requestBody, schema.getProperties(),
                         schema.getRequired());
             } else {
                 paramType = generatorUtils.getBallerinaMediaType(next.getKey());
@@ -455,6 +440,50 @@ public class FunctionSignatureGenerator {
             break;
         }
         return parameterList;
+    }
+
+    private String getRequestBodyParameterForArraySchema(String operationId, RequestBody requestBody,
+                                                         Map.Entry<String, MediaType> next, String paramType,
+                                                         ArraySchema arraySchema) throws BallerinaOpenApiException {
+
+        if (arraySchema.getItems().getType() != null) {
+            if (arraySchema.getItems().getType().equals("object")) {
+                ObjectSchema objectSchema = (ObjectSchema) arraySchema.getItems();
+                if (objectSchema.getProperties() != null) {
+                    // Generate properties
+                    paramType = generateRecordForInlineRequestBody(operationId, requestBody,
+                            objectSchema.getProperties(), objectSchema.getRequired());
+                    paramType = paramType + "[]";
+                }
+            } else {
+                paramType = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
+            }
+        } else if (arraySchema.getItems().get$ref() != null) {
+            paramType = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
+        } else {
+            paramType = generatorUtils.getBallerinaMediaType(next.getKey().trim()) + "[]";
+        }
+        return paramType;
+    }
+
+    private String getRequestBodyParameterForComposedSchema(String operationId, String paramType,
+                                                            ComposedSchema composedSchema)
+            throws BallerinaOpenApiException {
+
+        if (composedSchema.getOneOf() != null) {
+            paramType = generatorUtils.getOneOfUnionType(composedSchema.getOneOf());
+        } else if (composedSchema.getAnyOf() != null) {
+            paramType = generatorUtils.getOneOfUnionType(composedSchema.getAnyOf());
+        } else if (composedSchema.getAllOf() != null) {
+            paramType = "Compound" +  getValidName(operationId, true) + "Request";
+            List<Schema> allOf = composedSchema.getAllOf();
+            List<String> required = composedSchema.getRequired();
+            TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
+                    .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
+                            createIdentifierToken(paramType), new ArrayList<>(), allOf);
+            functionReturnType.updateTypeDefinitionNodeList(paramType, allOfTypeDefinitionNode);
+        }
+        return paramType;
     }
 
     /**

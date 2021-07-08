@@ -95,7 +95,7 @@ public class GeneratorConstants {
                     "rollback", "configurable",  "class", "module", "never", "outer", "order", "null", "key", "let",
                     "by"));
 
-    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*-=^+();:\\_{}\\s|.$])";
+    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\_{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
