@@ -711,9 +711,11 @@ public class BallerinaClientGenerator {
 
         // FunctionBody
         List<StatementNode> statementNodes = new ArrayList<>();
-        VariableDeclarationNode variable = generatorUtils.getSimpleStatement("string[]", "param", "[]");
+        VariableDeclarationNode variable = generatorUtils.getSimpleStatement("string[]", "param",
+                "[]");
         statementNodes.add(variable);
-        ExpressionStatementNode assign = generatorUtils.getSimpleExpressionStatementNode("param[param.length()] = \"?\"");
+        ExpressionStatementNode assign = generatorUtils.getSimpleExpressionStatementNode(
+                "param[param.length()] = \"?\"");
         statementNodes.add(assign);
 
         // Create for each loop
@@ -748,7 +750,8 @@ public class BallerinaClientGenerator {
         TypeTestExpressionNode mainCondition = createTypeTestExpressionNode(expression, isKeyWord,
                 typeCondition);
         // If body
-        ExpressionStatementNode assignStatement = generatorUtils.getSimpleExpressionStatementNode("_ = queryParam.remove(key)");
+        ExpressionStatementNode assignStatement = generatorUtils.getSimpleExpressionStatementNode(
+                "_ = queryParam.remove(key)");
         BlockStatementNode ifBlockStatementMain = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 createNodeList(assignStatement), createToken(CLOSE_BRACE_TOKEN));
         //else body
@@ -762,8 +765,8 @@ public class BallerinaClientGenerator {
                                 createIdentifierToken("\"'\""))), createToken(CLOSE_PAREN_TOKEN));
         List<StatementNode> statements = new ArrayList<>();
         // if body-02
-        ExpressionStatementNode ifBody02Statement = generatorUtils.getSimpleExpressionStatementNode(" param[param.length()] = " +
-                "string:substring(key, 1, key.length())");
+        ExpressionStatementNode ifBody02Statement = generatorUtils.getSimpleExpressionStatementNode(
+                " param[param.length()] = string:substring(key, 1, key.length())");
 
         NodeList<StatementNode> statementNodesForIf02 = createNodeList(ifBody02Statement);
         BlockStatementNode ifBlock02 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
@@ -772,8 +775,8 @@ public class BallerinaClientGenerator {
         // else block-02
         // else body 02
 
-        ExpressionStatementNode elseBody02Statement = generatorUtils.getSimpleExpressionStatementNode("param[param.length()] = " +
-                "key");
+        ExpressionStatementNode elseBody02Statement = generatorUtils.getSimpleExpressionStatementNode
+                ("param[param.length()] = key");
         NodeList<StatementNode> statementNodesForElse02 = createNodeList(elseBody02Statement);
         BlockStatementNode elseBlockNode02 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 statementNodesForElse02, createToken(CLOSE_BRACE_TOKEN));
@@ -793,8 +796,8 @@ public class BallerinaClientGenerator {
                 createIdentifierToken(" string|error"));
         TypeTestExpressionNode condition03 = createTypeTestExpressionNode(exprIf03, isKeyWord, typeCondition03);
 
-        ExpressionStatementNode variableIf03 = generatorUtils.getSimpleExpressionStatementNode("string updateV =  check " +
-                "url:encode(value, \"UTF-8\")");
+        ExpressionStatementNode variableIf03 = generatorUtils.getSimpleExpressionStatementNode(
+                "string updateV =  check url:encode(value, \"UTF-8\")");
         ExpressionStatementNode assignIf03 = generatorUtils
                 .getSimpleExpressionStatementNode("param[param.length()] = updateV");
 
@@ -832,7 +835,8 @@ public class BallerinaClientGenerator {
         statementNodes.add(forEachStatementNode);
 
         //Remove last `&` statement
-        ExpressionStatementNode assignLine02 = generatorUtils.getSimpleExpressionStatementNode("_ = param.remove(param.length()-1)");
+        ExpressionStatementNode assignLine02 = generatorUtils.getSimpleExpressionStatementNode(
+                "_ = param.remove(param.length()-1)");
         statementNodes.add(assignLine02);
 
         //IfElseStatement

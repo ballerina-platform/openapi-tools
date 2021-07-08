@@ -108,7 +108,7 @@ public class FunctionSignatureGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.typeDefinitionNodeList = typeDefinitionNodeList;
-        this. docCommentsGenerator = new DocCommentsGenerator();
+        this.docCommentsGenerator = new DocCommentsGenerator();
         this.generatorUtils = new GeneratorUtils();
         this.functionReturnType =  new FunctionReturnType(openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
 
@@ -146,7 +146,8 @@ public class FunctionSignatureGenerator {
 
         // Return Type
         ReturnTypeDescriptorNode returnTypeDescriptorNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD),
-                createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(returnType)));
+                createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(returnType)));
 
         return createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN), parameters, createToken(CLOSE_PAREN_TOKEN),
                 returnTypeDescriptorNode);
@@ -194,16 +195,17 @@ public class FunctionSignatureGenerator {
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        generatorUtils.createParamAPIDoc(escapeIdentifier(getValidName(parameter.getName(),
-                                                false)), parameter.getDescription().split("\n")[0]);
+                                        generatorUtils.createParamAPIDoc(escapeIdentifier(
+                                                getValidName(parameter.getName(), false)),
+                                                parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
                             defaultable.add(paramq);
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        generatorUtils.createParamAPIDoc(escapeIdentifier(getValidName(parameter.getName(),
+                                MarkdownParameterDocumentationLineNode paramAPIDoc = generatorUtils.createParamAPIDoc(
+                                                escapeIdentifier(getValidName(parameter.getName(),
                                                 false)), parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
@@ -215,8 +217,8 @@ public class FunctionSignatureGenerator {
                             parameterList.add(paramh);
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        generatorUtils.createParamAPIDoc(escapeIdentifier(getValidName(parameter.getName(),
+                                MarkdownParameterDocumentationLineNode paramAPIDoc = generatorUtils.createParamAPIDoc(
+                                                escapeIdentifier(getValidName(parameter.getName(),
                                                 false)), parameter.getDescription().split("\n")[0]);
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
@@ -224,8 +226,8 @@ public class FunctionSignatureGenerator {
                             defaultable.add(paramh);
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        generatorUtils.createParamAPIDoc(escapeIdentifier(getValidName(parameter.getName(),
+                                MarkdownParameterDocumentationLineNode paramAPIDoc = generatorUtils.createParamAPIDoc(
+                                                escapeIdentifier(getValidName(parameter.getName(),
                                                 false)), parameter.getDescription().split("\n")[0]);
                                 defaultParam.add(paramAPIDoc);
                             }
@@ -310,9 +312,8 @@ public class FunctionSignatureGenerator {
             if (parameterSchema.getDefault() != null) {
                 LiteralValueToken literalValueToken;
                 if (parameterSchema.getType().equals("string")) {
-                    literalValueToken =
-                            createLiteralValueToken(null, '"' + parameterSchema.getDefault().toString() + '"',
-                                    createEmptyMinutiaeList(),
+                    literalValueToken = createLiteralValueToken(null,
+                            '"' + parameterSchema.getDefault().toString() + '"', createEmptyMinutiaeList(),
                                     createEmptyMinutiaeList());
                 } else {
                     literalValueToken =

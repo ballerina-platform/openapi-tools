@@ -416,7 +416,8 @@ public class GeneratorUtils {
         if (!Files.exists(contractPath)) {
             throw new BallerinaOpenApiException(ErrorMessages.invalidFilePath(definitionPath.toString()));
         }
-        if (!(definitionPath.toString().endsWith(".yaml") || definitionPath.endsWith(".json") || definitionPath.toString().endsWith(
+        if (!(definitionPath.toString().endsWith(".yaml") || definitionPath.endsWith(".json") ||
+                definitionPath.toString().endsWith(
                 ".yml"))) {
             throw new BallerinaOpenApiException(ErrorMessages.invalidFileType());
         }

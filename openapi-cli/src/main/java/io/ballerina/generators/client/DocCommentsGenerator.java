@@ -52,6 +52,9 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 
+/**
+ * This class util for maintain the API doc comment related functions.
+ */
 public class DocCommentsGenerator {
     /**
      * Extract extension for find the display annotation.

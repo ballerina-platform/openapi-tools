@@ -58,8 +58,8 @@ public class AllOfResponsesTests {
     }
     @Test(description = "Tests for the object response without property")
     public void getReturnTypeForObjectSchema() throws IOException, BallerinaOpenApiException {
-        OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_without_properties_with_additional" +
-                ".yaml"));
+        OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
+                "response_without_properties_with_additional.yaml"));
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
         FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
                 new ArrayList<>());
@@ -77,7 +77,8 @@ public class AllOfResponsesTests {
         FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
                 new ArrayList<>());
 
-        String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(), true);
+        String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
+                true);
         Assert.assertEquals(returnType, "TestsProductsResponse|error");
     }
 
@@ -96,8 +97,8 @@ public class AllOfResponsesTests {
 
     @Test(description = "Tests for the map response with property without additional properties")
     public void getReturnTypeForMapSchemaWithOutAdditionalProperties() throws IOException, BallerinaOpenApiException {
-        OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_properties_without_additional" +
-                ".yaml"));
+        OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
+                "response_with_properties_without_additional.yaml"));
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
         FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
                 new ArrayList<>());

@@ -40,7 +40,7 @@ public class FunctionSignatureReturnTypeTests {
         FunctionReturnType functionReturnType = new FunctionReturnType();
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/all_return_type_operation.yaml"));
         Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/jsonproducts").getGet(),
-                true),"json|error");
+                true), "json|error");
         Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/stringproducts/record").getGet(),
                 true), "Product[]|error");
         Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/stringproducts/record").getGet(),

@@ -54,6 +54,9 @@ import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
 import static io.ballerina.generators.GeneratorUtils.isValidSchemaName;
 
+/**
+ * This util class for maintain the operation response with ballerina return type.
+ */
 public class FunctionReturnType {
     private OpenAPI openAPI;
     private BallerinaSchemaGenerator ballerinaSchemaGenerator;
@@ -288,8 +291,11 @@ public class FunctionReturnType {
         return type;
     }
 
-    //Handle inline record by generating record with name for response.
-    private String handleInLineRecordInResponse(Operation operation, Map.Entry<String, MediaType> media, ObjectSchema objectSchema)
+    /**
+     * Handle inline record by generating record with name for response.
+     */
+    private String handleInLineRecordInResponse(Operation operation, Map.Entry<String, MediaType> media,
+                                                ObjectSchema objectSchema)
             throws BallerinaOpenApiException {
         Map<String, Schema> properties = objectSchema.getProperties();
         String ref = objectSchema.get$ref();

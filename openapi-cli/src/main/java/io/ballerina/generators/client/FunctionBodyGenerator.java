@@ -204,8 +204,8 @@ public class FunctionBodyGenerator {
                 statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
                         "queryParam", queryApiKeyNameList, false));
                 // Add updated path
-                ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode("path = path + " +
-                        "check getPathForQueryParam(queryParam)");
+                ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
+                        "path = path + check getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
                 isQuery = true;
             }
@@ -213,8 +213,8 @@ public class FunctionBodyGenerator {
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<any>",
                         "headerValues", headerApiKeyNameList, true));
-                statementsList.add(generatorUtils.getSimpleExpressionStatementNode("map<string|string[]> accHeaders = " +
-                        "getMapForHeaders(headerValues)"));
+                statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
+                        "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
             }
         } else {
@@ -225,8 +225,8 @@ public class FunctionBodyGenerator {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
                         "queryParam", queryApiKeyNameList, false));
                 // Add updated path
-                ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode("path = path + " +
-                        "check getPathForQueryParam(queryParam)");
+                ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
+                        "path = path + check getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
                 isQuery = true;
             }
@@ -347,7 +347,7 @@ public class FunctionBodyGenerator {
      * This method use to generate Path statement inside the function body node.
      *
      * ex:
-     * <pre> string  path = string `/weather`; <pre/>
+     * <pre> string  path = string `/weather`; </pre>
      *
      * @param path              - Given path
      * @param annotationNodes   - Node list for path implementation

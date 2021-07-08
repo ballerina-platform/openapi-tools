@@ -38,11 +38,11 @@ import static io.ballerina.generators.common.TestUtils.getOpenAPI;
  * util.
  */
 public class DisplayAnnotationTests {
-    private final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
+    private static final Path RESDIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     private DocCommentsGenerator docCommentsGenerator = new DocCommentsGenerator();
     @Test(description = "Display Annotation tests for parameters")
     public void extractDisplayAnnotationTests() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
+        Path definitionPath = RESDIR.resolve("swagger/openapi_display_annotation.yaml");
         OpenAPI display = getOpenAPI(definitionPath);
         Map<String, Object> param01 =
                 display.getPaths().get("/weather").getGet().getParameters().get(0).getExtensions();

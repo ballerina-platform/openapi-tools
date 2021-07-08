@@ -36,7 +36,7 @@ import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTre
  * This tests class for the tests Path parameters in swagger file.
  */
 public class PathParameterTests {
-    private final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
+    private static final Path RESDIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     private SyntaxTree syntaxTree;
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
@@ -50,8 +50,8 @@ public class PathParameterTests {
         // "/v1/{age}/v2/{name}", "/v1/${age}/v2/${name}"
 
         CodeGenerator codeGenerator = new CodeGenerator();
-        Path definitionPath = RES_DIR.resolve("swagger/path_parameter_valid.yaml");
-        Path expectedPath = RES_DIR.resolve("ballerina/path_parameter_valid.bal");
+        Path definitionPath = RESDIR.resolve("swagger/path_parameter_valid.yaml");
+        Path expectedPath = RESDIR.resolve("ballerina/path_parameter_valid.bal");
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
@@ -63,7 +63,7 @@ public class PathParameterTests {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Invalid path parameter data type for the parameter: .*")
     public void testInvalidPathParameterType() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/path_parameter_invalid.yaml");
+        Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid.yaml");
         // int, string, boolean, decimal, float,
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
@@ -75,7 +75,7 @@ public class PathParameterTests {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Unsupported OAS data type .*")
     public void testInvalidDataType() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/path_parameter_invalid02.yaml");
+        Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid02.yaml");
         // int, string, boolean, decimal, float,
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
