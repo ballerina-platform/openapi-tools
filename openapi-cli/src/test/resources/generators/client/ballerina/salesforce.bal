@@ -19,7 +19,7 @@ public client class Client {
             latitude: latitude,
             longitude: longitude
         };
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ProductArr response = check self.clientEp->get(path, targetType = ProductArr);
         return response;
     }
@@ -32,7 +32,7 @@ public client class Client {
             end_latitude: end_latitude,
             end_longitude: end_longitude
         };
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         PriceEstimateArr response = check self.clientEp->get(path, targetType = PriceEstimateArr);
         return response;
     }
@@ -45,7 +45,7 @@ public client class Client {
             customer_uuid: customer_uuid,
             product_id: product_id
         };
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         ProductArr response = check self.clientEp->get(path, targetType = ProductArr);
         return response;
     }
@@ -57,13 +57,13 @@ public client class Client {
     remote isolated function history(int? offset, int? 'limit) returns Activities|error {
         string path = string `/history`;
         map<anydata> queryParam = {offset: offset, 'limit: 'limit};
-        path = path + getPathForQueryParam(queryParam);
+        path = path + check getPathForQueryParam(queryParam);
         Activities response = check self.clientEp->get(path, targetType = Activities);
         return response;
     }
 }
 
-isolated function getPathForQueryParam(map<anydata> queryParam) returns string {
+isolated function getPathForQueryParam(map<anydata> queryParam) returns string|error {
     string[] param = [];
     param[param.length()] = "?";
     foreach var [key, value] in queryParam.entries() {
@@ -77,7 +77,7 @@ isolated function getPathForQueryParam(map<anydata> queryParam) returns string {
             }
             param[param.length()] = "=";
             if value is string {
-                string updateV = checkpanic url:encode(value, "UTF-8");
+                string updateV = check url:encode(value, "UTF-8");
                 param[param.length()] = updateV;
             } else {
                 param[param.length()] = value.toString();
