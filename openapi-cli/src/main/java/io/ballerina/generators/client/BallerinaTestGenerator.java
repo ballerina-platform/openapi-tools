@@ -94,9 +94,18 @@ import static io.ballerina.generators.GeneratorConstants.PASSWORD;
  * This class use for generating boilerplate codes for test cases.
  */
 public class BallerinaTestGenerator {
-    private static final List<String> remoteFunctionNameList = BallerinaClientGenerator.getRemoteFunctionNameList();
-    private static String configFileName = "";
-    private static boolean isHttpOrOAuth;
+    private BallerinaClientGenerator ballerinaClientGenerator;
+    private final List<String> remoteFunctionNameList;
+    private String configFileName;
+    private boolean isHttpOrOAuth;
+
+    public BallerinaTestGenerator(BallerinaClientGenerator ballerinaClientGenerator) {
+
+        this.ballerinaClientGenerator = ballerinaClientGenerator;
+        this.remoteFunctionNameList = ballerinaClientGenerator.getRemoteFunctionNameList();
+        this.configFileName = "";
+        this.isHttpOrOAuth = false;
+    }
 
     /**
      * Generate test.bal file synatx tree.
@@ -105,8 +114,7 @@ public class BallerinaTestGenerator {
      * @throws IOException                  Throws exception when syntax tree not modified
      * @throws BallerinaOpenApiException    Throws exception if open api validation failed
      */
-    public static SyntaxTree generateSyntaxTree()
-            throws IOException, BallerinaOpenApiException {
+    public SyntaxTree generateSyntaxTree() throws IOException, BallerinaOpenApiException {
         List<FunctionDefinitionNode> functions = new ArrayList<>();
         getFunctionDefinitionNodes(functions);
         List<ModuleMemberDeclarationNode> nodes = new ArrayList<>(getModuleVariableDeclarationNodes());
@@ -124,7 +132,7 @@ public class BallerinaTestGenerator {
      *
      * @return  Import node list
      */
-    private static NodeList<ImportDeclarationNode> getImportNodes () {
+    private NodeList<ImportDeclarationNode> getImportNodes () {
         NodeList<ImportDeclarationNode> imports;
         ImportDeclarationNode importForTest = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA,
                 GeneratorConstants.MODULE_TEST);
@@ -144,7 +152,7 @@ public class BallerinaTestGenerator {
      * @return {@link String}
      * @throws IOException  Throws an exception if file not exists
      */
-    public static String getConfigTomlFile () throws IOException {
+    public String getConfigTomlFile () throws IOException {
         Path resDir = Paths.get("src/main/resources/config_toml_files").toAbsolutePath();
         if (!configFileName.isBlank()) {
             Path configFile = resDir.resolve(Paths.get(configFileName));
@@ -164,9 +172,9 @@ public class BallerinaTestGenerator {
      *
      * @return  {@link List<ModuleVariableDeclarationNode>} List of variable declaration nodes
      */
-    private static List<ModuleVariableDeclarationNode> getModuleVariableDeclarationNodes () {
+    private List<ModuleVariableDeclarationNode> getModuleVariableDeclarationNodes () {
         isHttpOrOAuth = true;
-        Set<String> authTypes = BallerinaAuthConfigGenerator.getAuthType();
+        Set<String> authTypes = ballerinaClientGenerator.getAuthType();
         List<ModuleVariableDeclarationNode> moduleVariableDeclarationNodes = new ArrayList<>();
         BuiltinSimpleNameReferenceNode typeBindingPattern;
         if (!authTypes.isEmpty()) {
@@ -231,7 +239,7 @@ public class BallerinaTestGenerator {
      *
      * @return  {@link ModuleVariableDeclarationNode}   ClientConfig declaration node
      */
-    private static ModuleVariableDeclarationNode getAuthConfigAssignmentNode () {
+    private ModuleVariableDeclarationNode getAuthConfigAssignmentNode () {
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(GeneratorConstants.CONFIG_RECORD_NAME));
@@ -256,7 +264,7 @@ public class BallerinaTestGenerator {
      * @param   typeBindingPattern                      Variable name
      * @return  {@link ModuleVariableDeclarationNode}   Configurable variable declaration node
      */
-    private static ModuleVariableDeclarationNode getConfigurableVariable (
+    private ModuleVariableDeclarationNode getConfigurableVariable (
             BuiltinSimpleNameReferenceNode typeBindingPattern) {
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         Token configurableNode = createIdentifierToken("configurable");
@@ -286,8 +294,8 @@ public class BallerinaTestGenerator {
      * @param   configRecordName                        Config record name
      * @return  {@link ModuleVariableDeclarationNode}   Client initialization node
      */
-    private static ModuleVariableDeclarationNode getClientInitializationNode (String configRecordName) {
-        String serverURL = BallerinaClientGenerator.getServerUrl();
+    private ModuleVariableDeclarationNode getClientInitializationNode (String configRecordName) {
+        String serverURL = ballerinaClientGenerator.getServerUrl();
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
@@ -329,8 +337,8 @@ public class BallerinaTestGenerator {
      *
      * @return {@link ModuleVariableDeclarationNode}
      */
-    private static ModuleVariableDeclarationNode getClientInitForNoAuth () {
-        String serverURL = BallerinaClientGenerator.getServerUrl();
+    private ModuleVariableDeclarationNode getClientInitForNoAuth () {
+        String serverURL = ballerinaClientGenerator.getServerUrl();
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
@@ -372,7 +380,7 @@ public class BallerinaTestGenerator {
      *
      * @param functions Empty function definition node list
      */
-    private static void getFunctionDefinitionNodes(List<FunctionDefinitionNode> functions) {
+    private void getFunctionDefinitionNodes(List<FunctionDefinitionNode> functions) {
         if (!remoteFunctionNameList.isEmpty()) {
             for (String functionName : remoteFunctionNameList) {
                 MetadataNode metadataNode = getAnnotation();
@@ -398,7 +406,7 @@ public class BallerinaTestGenerator {
      *
      * @return {@link FunctionSignatureNode}
      */
-    private static FunctionSignatureNode getFunctionSignature() {
+    private FunctionSignatureNode getFunctionSignature() {
         List<Node> parameterList = new ArrayList<>();
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(parameterList);
         return createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
@@ -411,7 +419,7 @@ public class BallerinaTestGenerator {
      *
      * @return {@link FunctionBodyNode}
      */
-    private static FunctionBodyNode getFunctionBody() {
+    private FunctionBodyNode getFunctionBody() {
         List<StatementNode> statementsList = new ArrayList<>();
         NodeList<StatementNode> statementsNodeList = createNodeList(statementsList);
         return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
@@ -424,7 +432,7 @@ public class BallerinaTestGenerator {
      *
      * @return {@link MetadataNode}
      */
-    private static MetadataNode getAnnotation() {
+    private MetadataNode getAnnotation() {
         SimpleNameReferenceNode annotateReference =
                 createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANNOT_TEST));
         List<Node> fileds = new ArrayList<>();
@@ -442,7 +450,7 @@ public class BallerinaTestGenerator {
      * @param   name    remote function name
      * @return  formatted name
      */
-    private static String modifyFunctionName(String name) {
+    private String modifyFunctionName(String name) {
         return name.substring(0, 1).toUpperCase(Locale.getDefault()) + name.substring(1);
     }
 
@@ -453,10 +461,11 @@ public class BallerinaTestGenerator {
      * @return  {@link String}
      * @throws  IOException     Throws an error if file not exists in the given path
      */
-    private static String getStringFromGivenBalFile(Path configFile) throws IOException {
+    private String getStringFromGivenBalFile(Path configFile) throws IOException {
         Stream<String> configFileLines = Files.lines(configFile);
         String configFileStr = configFileLines.collect(Collectors.joining("\n"));
         configFileLines.close();
         return configFileStr;
     }
+
 }

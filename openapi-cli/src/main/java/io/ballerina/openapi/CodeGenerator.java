@@ -407,10 +407,11 @@ public class CodeGenerator {
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         // Generate test boilerplate code for test cases
-        String testContent = Formatter.format(BallerinaTestGenerator.generateSyntaxTree()).toString();
+        BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
+        String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
 
-        String configContent = BallerinaTestGenerator.getConfigTomlFile();
+        String configContent = ballerinaTestGenerator.getConfigTomlFile();
         if (!configContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
                     GeneratorConstants.CONFIG_FILE_NAME, configContent));

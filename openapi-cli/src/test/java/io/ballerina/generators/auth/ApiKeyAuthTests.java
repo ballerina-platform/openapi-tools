@@ -19,8 +19,8 @@
 package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.generators.client.BallerinaAuthConfigGenerator;
 import io.ballerina.generators.GeneratorUtils;
+import io.ballerina.generators.client.BallerinaAuthConfigGenerator;
 import io.ballerina.generators.common.TestConstants;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -44,6 +44,7 @@ public class ApiKeyAuthTests {
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
+    BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
 
     @Test(description = "Generate config record for openweathermap api", dataProvider = "apiKeyAuthIOProvider")
     public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
@@ -53,7 +54,7 @@ public class ApiKeyAuthTests {
         OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedConfigRecord = TestConstants.API_KEY_CONFIG_REC;
         String generatedConfigRecord = Objects.requireNonNull(
-                BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
+                ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
@@ -63,7 +64,7 @@ public class ApiKeyAuthTests {
             dependsOnMethods = {"testGetConfigRecord"})
     public void testGetApiKeyMapClassVariable () {
         String expectedClassVariable = TestConstants.API_KEY_MAP_VAR;
-        String generatedClassVariable = BallerinaAuthConfigGenerator.getApiKeyMapClassVariable().toString();
+        String generatedClassVariable = ballerinaAuthConfigGenerator.getApiKeyMapClassVariable().toString();
         generatedClassVariable = (generatedClassVariable.trim()).replaceAll("\\s+", "");
         expectedClassVariable = (expectedClassVariable.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedClassVariable, generatedClassVariable);
@@ -74,7 +75,7 @@ public class ApiKeyAuthTests {
     public void testGetConfigParamForClassInit() {
         String expectedParams = TestConstants.API_KEY_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = BallerinaAuthConfigGenerator.getConfigParamForClassInit();
+        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }
@@ -88,7 +89,7 @@ public class ApiKeyAuthTests {
     public void testGetApiKeyAssignmentNode () {
         String expectedAssignmentNode = TestConstants.API_KEY_ASSIGNMENT;
         String generatedAssignmentNode = Objects.requireNonNull
-                (BallerinaAuthConfigGenerator.getApiKeyAssignmentNode()).toString();
+                (ballerinaAuthConfigGenerator.getApiKeyAssignmentNode()).toString();
         generatedAssignmentNode = (generatedAssignmentNode.trim()).replaceAll("\\s+", "");
         expectedAssignmentNode = (expectedAssignmentNode.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedAssignmentNode, generatedAssignmentNode);

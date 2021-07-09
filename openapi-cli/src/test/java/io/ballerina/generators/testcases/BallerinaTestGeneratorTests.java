@@ -6,9 +6,11 @@ import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.generators.client.BallerinaClientGenerator;
 import io.ballerina.generators.client.BallerinaTestGenerator;
 import io.ballerina.generators.common.TestUtils;
+import io.ballerina.openapi.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
@@ -36,7 +38,6 @@ public class BallerinaTestGeneratorTests {
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     private static final Path testPath = RES_DIR.resolve("ballerina_project/tests/test.bal");
     private static final Path configPath = RES_DIR.resolve("ballerina_project/tests/Config.toml");
-    private final BallerinaSchemaGenerator schemaGenerator = new BallerinaSchemaGenerator();
 
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
@@ -47,10 +48,15 @@ public class BallerinaTestGeneratorTests {
             FormatterException, BallerinaOpenApiException {
         Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
-        SyntaxTree syntaxTreeClient = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        SyntaxTree syntaxTreeTest = BallerinaTestGenerator.generateSyntaxTree();
-        SyntaxTree syntaxTreeSchema = schemaGenerator.generateSyntaxTree(definitionPath);
-        String configFile = BallerinaTestGenerator.getConfigTomlFile();
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        BallerinaSchemaGenerator schemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
+        SyntaxTree syntaxTreeClient = ballerinaClientGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTreeTest = ballerinaTestGenerator.generateSyntaxTree();
+        SyntaxTree syntaxTreeSchema = schemaGenerator.generateSyntaxTree();
+        String configFile = ballerinaTestGenerator.getConfigTomlFile();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTreeClient, syntaxTreeTest, syntaxTreeSchema, configFile);
         Assert.assertTrue(diagnostics.isEmpty());
     }

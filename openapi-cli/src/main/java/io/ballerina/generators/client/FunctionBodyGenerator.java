@@ -46,7 +46,6 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.generators.GeneratorConstants;
 import io.ballerina.generators.GeneratorUtils;
-import io.ballerina.generators.auth.BallerinaAuthConfigGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -120,7 +119,7 @@ public class FunctionBodyGenerator {
     private BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private FunctionReturnType functionReturnType;
     private GeneratorUtils generatorUtils;
-
+    private BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
 
     public List<ImportDeclarationNode> getImports() {
 
@@ -134,7 +133,8 @@ public class FunctionBodyGenerator {
 
     public FunctionBodyGenerator(List<ImportDeclarationNode> imports, boolean isQuery, boolean isHeader,
                                  List<TypeDefinitionNode> typeDefinitionNodeList, OpenAPI openAPI,
-                                 BallerinaSchemaGenerator ballerinaSchemaGenerator) {
+                                 BallerinaSchemaGenerator ballerinaSchemaGenerator,
+                                 BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator) {
 
         this.imports = imports;
         this.isQuery = isQuery;
@@ -143,6 +143,7 @@ public class FunctionBodyGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.generatorUtils = new GeneratorUtils();
+        this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
     }
 
     public boolean isQuery() {
@@ -197,8 +198,8 @@ public class FunctionBodyGenerator {
                 }
             }
 
-            List<String> queryApiKeyNameList = BallerinaAuthConfigGenerator.getQueryApiKeyNameList();
-            List<String> headerApiKeyNameList = BallerinaAuthConfigGenerator.getHeaderApiKeyNameList();
+            List<String> queryApiKeyNameList = ballerinaAuthConfigGenerator.getQueryApiKeyNameList();
+            List<String> headerApiKeyNameList = ballerinaAuthConfigGenerator.getHeaderApiKeyNameList();
 
             if (!queryParameters.isEmpty() || !queryApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
@@ -218,8 +219,8 @@ public class FunctionBodyGenerator {
                 isHeader = true;
             }
         } else {
-            List<String> queryApiKeyNameList = BallerinaAuthConfigGenerator.getQueryApiKeyNameList();
-            List<String> headerApiKeyNameList = BallerinaAuthConfigGenerator.getHeaderApiKeyNameList();
+            List<String> queryApiKeyNameList = ballerinaAuthConfigGenerator.getQueryApiKeyNameList();
+            List<String> headerApiKeyNameList = ballerinaAuthConfigGenerator.getHeaderApiKeyNameList();
 
             if (!queryApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",

@@ -220,9 +220,10 @@ public class FunctionReturnType {
     }
 
     /**
-     * Get the return data type according to the OAS ComposedSchemas ex: AllOf, OneOf, AnyOf
+     * Get the return data type according to the OAS ComposedSchemas ex: AllOf, OneOf, AnyOf.
      */
-    private String generateReturnDataTypeForComposedSchema(Operation operation, String type, ComposedSchema composedSchema)
+    private String generateReturnDataTypeForComposedSchema(Operation operation, String type,
+                                                           ComposedSchema composedSchema)
             throws BallerinaOpenApiException {
         if (composedSchema.getOneOf() != null) {
             List<Schema> oneOf = composedSchema.getOneOf();
@@ -314,7 +315,7 @@ public class FunctionReturnType {
     /**
      * Generate Type for datatype that can not bind to the targetType.
      *
-     * @param type - data Type.
+     * @param type     - Data Type.
      * @param typeName - Created datType name.
      * @return return dataType
      */
