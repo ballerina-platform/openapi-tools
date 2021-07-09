@@ -81,13 +81,13 @@ import static io.ballerina.generators.GeneratorUtils.isValidSchemaName;
  *while populating syntax tree.
  */
 public class BallerinaSchemaGenerator {
-    private List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
+    private List<TypeDefinitionNode> typeDefinitionNodeList;
     private  OpenAPI openAPI;
     private  GeneratorUtils generatorUtils = new GeneratorUtils();
 
     public BallerinaSchemaGenerator(OpenAPI openAPI) {
         this.openAPI = openAPI;
-        this.typeDefinitionNodeList = typeDefinitionNodeList;
+        this.typeDefinitionNodeList = new LinkedList<>();
     }
 
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {

@@ -184,7 +184,8 @@ public class FunctionReturnType {
             ObjectSchema objectSchema = (ObjectSchema) schema;
             type = handleInLineRecordInResponse(operation, media, objectSchema);
         } else if (schema instanceof MapSchema) {
-            type = handleResponseWithMapSchema(operation, media, schema);
+            MapSchema mapSchema = (MapSchema) schema;
+            type = handleResponseWithMapSchema(operation, media, mapSchema);
         } else  if (schema.get$ref() != null) {
             type = getValidName(extractReferenceType(schema.get$ref()), true);
             Schema componentSchema = openAPI.getComponents().getSchemas().get(type);
@@ -324,9 +325,8 @@ public class FunctionReturnType {
         return type;
     }
 
-    private String handleResponseWithMapSchema(Operation operation, Map.Entry<String, MediaType> media, Schema schema)
-            throws BallerinaOpenApiException {
-        MapSchema mapSchema = (MapSchema) schema;
+    private String handleResponseWithMapSchema(Operation operation, Map.Entry<String, MediaType> media,
+                                               MapSchema mapSchema) throws BallerinaOpenApiException {
         Map<String, Schema> properties = mapSchema.getProperties();
         String ref = mapSchema.get$ref();
         List<String> required = mapSchema.getRequired();

@@ -516,9 +516,10 @@ public class GeneratorUtils {
                 String type = extractReferenceType(oneOfSchema.get$ref());
                 unionType.append("|");
                 unionType.append(type);
-            } else if (!oneOfSchema.getProperties().isEmpty()) {
-                // TODO: generate warning to move inline schema to schema
             }
+//            else if (!oneOfSchema.getProperties().isEmpty()) {
+                // TODO: generate warning to move inline schema to schema
+//            }
         }
         String unionTypeCont = unionType.toString();
         if (!unionTypeCont.isBlank() && unionTypeCont.startsWith("|")) {

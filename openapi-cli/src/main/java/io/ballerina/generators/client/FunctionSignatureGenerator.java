@@ -452,9 +452,10 @@ public class FunctionSignatureGenerator {
                                                          Map.Entry<String, MediaType> next, String paramType,
                                                          ArraySchema arraySchema) throws BallerinaOpenApiException {
 
-        if (arraySchema.getItems().getType() != null) {
-            if (arraySchema.getItems().getType().equals("object")) {
-                ObjectSchema objectSchema = (ObjectSchema) arraySchema.getItems();
+        Schema<?> arrayItems = arraySchema.getItems();
+        if (arrayItems.getType() != null) {
+            if (arrayItems.getType().equals("object") && arrayItems instanceof ObjectSchema) {
+                ObjectSchema objectSchema = (ObjectSchema) arrayItems;
                 if (objectSchema.getProperties() != null) {
                     // Generate properties
                     paramType = generateRecordForInlineRequestBody(operationId, requestBody,
@@ -462,11 +463,11 @@ public class FunctionSignatureGenerator {
                     paramType = paramType + "[]";
                 }
             } else {
-                paramType = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
+                paramType = convertOpenAPITypeToBallerina(arrayItems.getType()) + "[]";
             }
-        } else if (arraySchema.getItems().get$ref() != null) {
-            paramType = getValidName(extractReferenceType(arraySchema.getItems().get$ref()), true) + "[]";
-        } else if (arraySchema.getItems() instanceof ComposedSchema) {
+        } else if (arrayItems.get$ref() != null) {
+            paramType = getValidName(extractReferenceType(arrayItems.get$ref()), true) + "[]";
+        } else if (arrayItems instanceof ComposedSchema) {
             paramType = "CompoundArrayItem" +  getValidName(operationId, true) + "Request";
             TypeDescriptorNode typeDescriptorNodeForArraySchema = ballerinaSchemaGenerator
                     .getTypeDescriptorNodeForArraySchema(openAPI, arraySchema);
