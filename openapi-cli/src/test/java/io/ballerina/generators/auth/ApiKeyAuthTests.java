@@ -44,7 +44,7 @@ public class ApiKeyAuthTests {
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
-    BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
+    BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(true, false);
 
     @Test(description = "Generate config record for openweathermap api", dataProvider = "apiKeyAuthIOProvider")
     public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {

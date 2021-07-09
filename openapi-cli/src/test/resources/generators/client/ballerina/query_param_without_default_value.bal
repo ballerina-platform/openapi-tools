@@ -3,7 +3,7 @@ import  ballerina/url;
 import  ballerina/lang.'string;
 
 public type ApiKeysConfig record {
-    map<string|string[]> apiKeys;
+    map<string> apiKeys;
 };
 
 # Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city.
@@ -12,7 +12,7 @@ public type ApiKeysConfig record {
 @display {label: "Open Weather Client"}
 public client class Client {
     http:Client clientEp;
-    map<string|string[]> apiKeys;
+    map<string> apiKeys;
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
@@ -52,7 +52,7 @@ isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  str
                 param[param.length()] = key;
             }
             param[param.length()] = "=";
-            if  value  is  string|error {
+            if  value  is  string {
                 string updateV =  check url:encode(value, "UTF-8");
                 param[param.length()] = updateV;
             } else {

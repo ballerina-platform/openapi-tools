@@ -24,6 +24,7 @@ public client class Client {
         return response;
     }
     #
+    # + id - id value
     # + return - Ok
     remote isolated function operationId03(int id) returns string|error {
         string  path = string `/v1/${id}`;

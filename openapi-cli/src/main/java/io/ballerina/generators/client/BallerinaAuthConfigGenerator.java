@@ -113,8 +113,8 @@ import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 public class BallerinaAuthConfigGenerator {
     private final List<String> headerApiKeyNameList = new ArrayList<>();
     private final List<String> queryApiKeyNameList = new ArrayList<>();
-    private boolean isAPIKey;
-    private boolean isHttpOROAuth;
+    private boolean isAPIKey = false;
+    private boolean isHttpOROAuth = false;
     private final Set<String> authTypes = new LinkedHashSet<>();
 
     public BallerinaAuthConfigGenerator(boolean isAPIKey, boolean isHttpOROAuth) {
@@ -123,6 +123,9 @@ public class BallerinaAuthConfigGenerator {
         this.isHttpOROAuth = isHttpOROAuth;
     }
 
+    public BallerinaAuthConfigGenerator() {
+
+    }
     public boolean isHttpOROAuth() {
 
         return isHttpOROAuth;
@@ -148,7 +151,7 @@ public class BallerinaAuthConfigGenerator {
      * @param openAPI                       OpenApi object received from swagger open-api parser
      * @return {@link TypeDefinitionNode}   Syntax tree node of config record
      */
-    public TypeDefinitionNode getConfigRecord (OpenAPI openAPI) {
+    public TypeDefinitionNode getConfigRecord(OpenAPI openAPI) {
         if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
             List<Node> recordFieldList = addItemstoRecordFieldList(openAPI);
             if (!recordFieldList.isEmpty()) {

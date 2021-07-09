@@ -198,7 +198,7 @@ public class BallerinaClientGenerator {
         this.generatorUtils = new GeneratorUtils();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
-        this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
+        this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator();
     }
 
     public BallerinaClientGenerator(OpenAPI openAPI, Filter filters) {
@@ -808,7 +808,7 @@ public class BallerinaClientGenerator {
         //If block 03
         SimpleNameReferenceNode exprIf03 = createSimpleNameReferenceNode(createIdentifierToken(" value "));
         BuiltinSimpleNameReferenceNode typeCondition03 = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(" string|error"));
+                createIdentifierToken(" string"));
         TypeTestExpressionNode condition03 = createTypeTestExpressionNode(exprIf03, isKeyWord, typeCondition03);
 
         ExpressionStatementNode variableIf03 = generatorUtils.getSimpleExpressionStatementNode(

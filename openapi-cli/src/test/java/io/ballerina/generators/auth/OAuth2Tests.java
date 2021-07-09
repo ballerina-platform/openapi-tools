@@ -46,7 +46,7 @@ public class OAuth2Tests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
     BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false,
-            false);
+            true);
 
     @Test(description = "Generate config record for OAuth 2.0 authorization code flow",
             dataProvider = "oAuth2IOProvider")

@@ -6,10 +6,6 @@ public type ApiKeysConfig record {
     map<string> apiKeys;
 };
 
-public type ProductArr Product[];
-
-public type PriceEstimateArr PriceEstimate[];
-
 # Move your app forward with the Uber API
 #
 # + clientEp - Connector http endpoint
@@ -26,11 +22,11 @@ public client class Client {
     # + latitude - Latitude component of location.
     # + longitude - Longitude component of location.
     # + return - An array of products
-    remote isolated function  products(float latitude, float longitude) returns ProductArr|error {
+    remote isolated function  products(float latitude, float longitude) returns Product[]|error {
         string  path = string `/products`;
         map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, server_token: self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp-> get(path, targetType = ProductArr);
+        Product[] response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
     }
     # Price Estimates
@@ -40,11 +36,11 @@ public client class Client {
     # + endLatitude - Latitude component of end location.
     # + endLongitude - Longitude component of end location.
     # + return - An array of price estimates by product
-    remote isolated function  price(float startLatitude, float startLongitude, float endLatitude, float endLongitude) returns PriceEstimateArr|error {
+    remote isolated function  price(float startLatitude, float startLongitude, float endLatitude, float endLongitude) returns PriceEstimate[]|error {
         string  path = string `/estimates/price`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude, server_token: self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
-        PriceEstimateArr response = check self.clientEp-> get(path, targetType = PriceEstimateArr);
+        PriceEstimate[] response = check self.clientEp-> get(path, targetType = PriceEstimateArr);
         return response;
     }
     # Time Estimates
@@ -54,11 +50,11 @@ public client class Client {
     # + customerUuid - Unique customer identifier to be used for experience customization.
     # + productId - Unique identifier representing a specific product for a given latitude & longitude.
     # + return - An array of products
-    remote isolated function  time(float startLatitude, float startLongitude, string? customerUuid = (), string? productId = ()) returns ProductArr|error {
+    remote isolated function  time(float startLatitude, float startLongitude, string? customerUuid = (), string? productId = ()) returns Product[]|error {
         string  path = string `/estimates/time`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId, server_token: self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp-> get(path, targetType = ProductArr);
+        Product[] response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
     }
     # User Profile

@@ -183,7 +183,7 @@ public class FunctionReturnType {
 
         String type;
         if (arraySchema.getItems().get$ref() != null) {
-            String name = extractReferenceType(arraySchema.getItems().get$ref());
+            String name = getValidName(extractReferenceType(arraySchema.getItems().get$ref()), true);
             type = name + "[]";
             String typeName = name + "Arr";
             TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
