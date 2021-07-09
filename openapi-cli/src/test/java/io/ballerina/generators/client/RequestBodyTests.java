@@ -48,7 +48,7 @@ public class RequestBodyTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    @Test(description = "Test for generate function signature for given operations")
+    @Test(description = "Test for generate request body payload when operation has request body")
     public void testForRequestBody() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_basic_scenarios.bal");
         CodeGenerator codeGenerator = new CodeGenerator();
@@ -58,11 +58,21 @@ public class RequestBodyTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
-    @Test(description = "Test for generate function signature for given operations")
+    @Test(description = "Test for generate request body payload when operation has request body with AllOf scenarios")
     public void testForRequestBodyWithAllOf() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_allOf_scenarios.bal");
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/request_body_allOf_scenarios.yaml"));
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Test for generate request body payload when operation has request body OneOf scenarios")
+    public void testForRequestBodyWithOneOf() throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/request_body_oneOf_scenarios.bal");
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml"));
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);

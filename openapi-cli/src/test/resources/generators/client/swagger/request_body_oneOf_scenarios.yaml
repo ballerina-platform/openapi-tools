@@ -1,0 +1,90 @@
+openapi: 3.0.0
+info:
+  title: RequestBody with AllOf
+  description: refComponent
+  version: 1.0.0
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+        description: this value is assigned by the service provider
+  - url: https://{subdomain}.swagger.io:{port}/{basePath}
+    description: The production API server
+    variables:
+      subdomain:
+        default: petstore
+        description: this value is assigned by the service provider
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '443'
+      basePath:
+        default: v2
+paths:
+  /path01:
+    post:
+      operationId: postXMLUser
+      summary: Request Body has nested allOf.
+      responses:
+        200:
+          description: OK
+      requestBody:
+        description: A JSON object containing pet information
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Cat'
+                - $ref: '#/components/schemas/Dog'
+
+components:
+  requestBodies:
+    PetBody:
+      description: A JSON object containing pet information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Cat'
+  schemas:
+    Cat:
+      type: object
+      required:
+        - userName
+      properties:
+        userName:
+          type: string
+        petName:
+          type: string
+        isHunt:
+          type: boolean
+    Dog:
+      type: object
+      required:
+        - userName
+      properties:
+        userName:
+          type: string
+        petName:
+          type: string
+        isBark:
+          type: boolean
+
+  #public type Cat record {
+  # string userName;
+  # string petName?;
+  # boolean isHunt?;
+  #};
+
+  #public type Dog record {
+  # string userName;
+  # string petName?;
+  # boolean isBark?;
+  # };
+
+  #public type  Body Cat|Dog;
+
+
