@@ -408,8 +408,7 @@ public class GeneratorUtils {
     /**
      * Util for take OpenApi spec from given yaml file.
      */
-    public OpenAPI getOpenAPIFromOpenAPIV3Parser(Path definitionPath)
-            throws IOException, BallerinaOpenApiException {
+    public OpenAPI getOpenAPIFromOpenAPIV3Parser(Path definitionPath) throws IOException, BallerinaOpenApiException {
 
         Path contractPath = java.nio.file.Paths.get(definitionPath.toString());
         if (!Files.exists(contractPath)) {

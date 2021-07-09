@@ -59,7 +59,7 @@ public class DocCommentsGenerator {
     /**
      * Extract extension for find the display annotation.
      *
-     * @param extensions openapi extension.
+     * @param extensions    - openapi extension.
      * @return Annotation node list.
      * */
     public NodeList<AnnotationNode> extractDisplayAnnotation(Map<String, Object> extensions) {
@@ -110,7 +110,7 @@ public class DocCommentsGenerator {
     }
 
 
-    /*
+    /**
      * Generate metaDataNode with display annotation.
      */
     public MetadataNode getMetadataNodeForDisplayAnnotation(Map.Entry<String, Object> extension) {

@@ -86,7 +86,8 @@ import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
 
 /**
- * This Util class use for generating ballerina client file according to given yaml file.
+ * This util class uses for generating {@link io.ballerina.compiler.syntax.tree.FunctionSignatureNode} for given OAS
+ * operation.
  */
 public class FunctionSignatureGenerator {
     private final OpenAPI openAPI;
@@ -117,7 +118,7 @@ public class FunctionSignatureGenerator {
     /**
      * This function for generate function signatures.
      *
-     * @param operation openapi operation
+     * @param operation     - openapi operation
      * @return {@link io.ballerina.compiler.syntax.tree.FunctionSignatureNode}
      * @throws BallerinaOpenApiException - throws exception when node creation fails.
      */
@@ -503,7 +504,7 @@ public class FunctionSignatureGenerator {
     }
 
     /**
-     * Handle inline record with request parameter.
+     * Handle inline record with request parameter OAS ObjectSchema.
      */
     private String generateRecordForInlineRequestBody(String operationId, RequestBody requestBody,
                                                      Map<String, Schema> properties, List<String> required)

@@ -108,7 +108,7 @@ import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
 
 /**
- * This Util class use for generating ballerina client file according to given yaml file.
+ * This Util class uses for generating remote function body  {@link io.ballerina.compiler.syntax.tree.FunctionBodyNode}.
  */
 public class FunctionBodyGenerator {
     private List<ImportDeclarationNode> imports;
@@ -122,12 +122,10 @@ public class FunctionBodyGenerator {
     private BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
 
     public List<ImportDeclarationNode> getImports() {
-
         return imports;
     }
 
     public void setImports(List<ImportDeclarationNode> imports) {
-
         this.imports = imports;
     }
 
@@ -147,31 +145,27 @@ public class FunctionBodyGenerator {
     }
 
     public boolean isQuery() {
-
         return isQuery;
     }
 
     public void setQuery(boolean query) {
-
         isQuery = query;
     }
 
     public boolean isHeader() {
-
         return isHeader;
     }
 
     public void setHeader(boolean header) {
-
         isHeader = header;
     }
 
     /**
-     * Generate function body node.
+     * Generate function body node for the remote function.
      *
      * @param path      - remote function path
      * @param operation - opneapi operation
-     * @return - function body node
+     * @return - {@link io.ballerina.compiler.syntax.tree.FunctionBodyNode}
      * @throws BallerinaOpenApiException - throws exception if generating FunctionBodyNode fails.
      */
     public FunctionBodyNode getFunctionBodyNode(String path, Map.Entry<PathItem.HttpMethod, Operation> operation)
@@ -186,6 +180,33 @@ public class FunctionBodyGenerator {
         statementsList.add(pathInt);
 
         //Handel query parameter map
+        handleParameterSchemaInOperation(operation, statementsList);
+
+        String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
+        // This return type for target data type binding.
+        String rType = functionReturnType.getReturnType(operation.getValue(), true);
+        String tType = functionReturnType.getReturnType(operation.getValue(), false);
+        String returnType = returnTypeForTargetTypeField(rType);
+        String targetType = returnTypeForTargetTypeField(tType);
+        // Statement Generator for requestBody
+        if (operation.getValue().getRequestBody() != null) {
+            RequestBody requestBody = operation.getValue().getRequestBody();
+            handleRequestBodyInOperation(statementsList, method, returnType, targetType, requestBody);
+        } else {
+            createCommonFunctionBodyStatements(statementsList, method, rType, returnType, targetType);
+        }
+        //Create statements
+        NodeList<StatementNode> statements = createNodeList(statementsList);
+        return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN), null, statements,
+                createToken(CLOSE_BRACE_TOKEN));
+    }
+
+    /**
+     * Generate statements for query parameters and headers.
+     */
+    private void handleParameterSchemaInOperation(Map.Entry<PathItem.HttpMethod, Operation> operation,
+                                                  List<StatementNode> statementsList) {
+
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
             List<Parameter> queryParameters = new ArrayList<>();
@@ -238,46 +259,41 @@ public class FunctionBodyGenerator {
             }
 
         }
-
-        String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
-        // This return type for target data type binding.
-        String rType = functionReturnType.getReturnType(operation.getValue(), true);
-        String tType = functionReturnType.getReturnType(operation.getValue(), false);
-        String returnType = returnTypeForTargetTypeField(rType);
-        String targetType = returnTypeForTargetTypeField(tType);
-        // Statement Generator for requestBody
-        if (operation.getValue().getRequestBody() != null) {
-            RequestBody requestBody = operation.getValue().getRequestBody();
-            if (requestBody.getContent() != null) {
-                Content rbContent = requestBody.getContent();
-                Set<Map.Entry<String, MediaType>> entries = rbContent.entrySet();
-                Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
-                //Currently align with first content of the requestBody
-                while (iterator.hasNext()) {
-                    createRequestBodyStatements(isHeader, statementsList, method, returnType, targetType, iterator);
-                    break;
-                }
-            } else if (requestBody.get$ref() != null) {
-                RequestBody requestBodySchema =
-                        openAPI.getComponents().getRequestBodies().get(extractReferenceType(requestBody.get$ref()));
-                Content rbContent = requestBodySchema.getContent();
-                Set<Map.Entry<String, MediaType>> entries = rbContent.entrySet();
-                Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
-                //Currently align with first content of the requestBody
-                while (iterator.hasNext()) {
-                    createRequestBodyStatements(isHeader, statementsList, method, returnType, targetType, iterator);
-                    break;
-                }
-            }
-        } else {
-            createCommonFunctionBodyStatements(statementsList, method, rType, returnType, targetType);
-        }
-        //Create statements
-        NodeList<StatementNode> statements = createNodeList(statementsList);
-        return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN), null, statements,
-                createToken(CLOSE_BRACE_TOKEN));
     }
 
+    /**
+     * Handle request body in operation.
+     */
+    private void handleRequestBodyInOperation(List<StatementNode> statementsList, String method, String returnType,
+                                              String targetType, RequestBody requestBody)
+            throws BallerinaOpenApiException {
+
+        if (requestBody.getContent() != null) {
+            Content rbContent = requestBody.getContent();
+            Set<Map.Entry<String, MediaType>> entries = rbContent.entrySet();
+            Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
+            //Currently align with first content of the requestBody
+            while (iterator.hasNext()) {
+                createRequestBodyStatements(isHeader, statementsList, method, returnType, targetType, iterator);
+                break;
+            }
+        } else if (requestBody.get$ref() != null) {
+            RequestBody requestBodySchema =
+                    openAPI.getComponents().getRequestBodies().get(extractReferenceType(requestBody.get$ref()));
+            Content rbContent = requestBodySchema.getContent();
+            Set<Map.Entry<String, MediaType>> entries = rbContent.entrySet();
+            Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
+            //Currently align with first content of the requestBody
+            while (iterator.hasNext()) {
+                createRequestBodyStatements(isHeader, statementsList, method, returnType, targetType, iterator);
+                break;
+            }
+        }
+    }
+
+    /**
+     * Generate common statements in function bosy.
+     */
     private void createCommonFunctionBodyStatements(List<StatementNode> statementsList, String method, String rType,
                                                     String returnType, String targetType) {
 
@@ -526,7 +542,10 @@ public class FunctionBodyGenerator {
         return returnType;
     }
 
-    private  VariableDeclarationNode getMapForParameters(List<Parameter> parameters, String mapDataType,
+    /**
+     * Generate map variable for query parameters and headers.
+     */
+    private VariableDeclarationNode getMapForParameters(List<Parameter> parameters, String mapDataType,
                                                          String mapName, List<String> apiKeyNames,
                                                          boolean isHeader) {
         List<Node> filedOfMap = new ArrayList();

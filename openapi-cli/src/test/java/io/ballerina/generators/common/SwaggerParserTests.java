@@ -43,7 +43,7 @@ public class SwaggerParserTests {
 
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Unsupported OAS data type .*")
+            expectedExceptionsMessageRegExp = "Couldn't read or parse the definition from file: .*")
     public void generateHandleUnsupportedData() throws  IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid.yaml");
         OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

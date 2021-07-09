@@ -385,7 +385,7 @@ public class BallerinaAuthConfigGenerator {
      * </pre>
      * -- ex: Record fields for API Key Authentication mechanism.
      * <pre>
-     *     map<string|string[]> apiKeys;
+     *     map<string> apiKeys;
      * </pre>
      *
      * @return  {@link List<Node>}  syntax tree node list of record fields

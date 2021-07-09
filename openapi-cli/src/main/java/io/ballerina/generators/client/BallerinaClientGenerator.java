@@ -146,7 +146,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.generators.GeneratorConstants.HTTP;
 
 /**
- * This Util class use for generating ballerina client file according to given yaml file.
+ * This Util class uses for generating ballerina client file according to given yaml file.
  */
 public class BallerinaClientGenerator {
     private Filter filters;
@@ -221,9 +221,9 @@ public class BallerinaClientGenerator {
     /**
      * This method for generate the client syntax tree.
      *
-     * @return
-     * @throws IOException
-     * @throws BallerinaOpenApiException
+     * @return              - return Syntax tree for the ballerina code.
+     * @throws IOException  - throws exception when function fail in process.
+     * @throws BallerinaOpenApiException - throws exception when function fail in process.
      */
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
 
@@ -232,7 +232,7 @@ public class BallerinaClientGenerator {
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
                 , GeneratorConstants.HTTP);
         imports.add(importForHttp);
-        addConfigRecordToTypeDefnitionNodeList(openAPI, ballerinaAuthConfigGenerator);
+        addConfigRecordToTypeDefinitionNodeList(openAPI, ballerinaAuthConfigGenerator);
         ClassDefinitionNode classDefinitionNode = getClassDefinitionNode();
         ModulePartNode modulePartNode;
         List<ModuleMemberDeclarationNode> nodes =  new ArrayList<>();
@@ -301,7 +301,23 @@ public class BallerinaClientGenerator {
     }
 
     /**
-     * Generate Class definition Node.
+     * Generate Class definition Node with below code structure.
+     * <pre>
+     *     public client class Client {
+     *     http:Client clientEp;
+     *     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "/url")
+     *     returns error? {
+     *         http:Client httpEp = check new (serviceUrl, clientConfig);
+     *         self.clientEp = httpEp;
+     *     }
+     *     // Remote functions
+     *     remote isolated function pathParameter(int 'version, string name) returns string|error {
+     *         string  path = string `/v1/${'version}/v2/${name}`;
+     *         string response = check self.clientEp-> get(path, targetType = string);
+     *         return response;
+     *     }
+     * }
+     * </pre>
      */
     private  ClassDefinitionNode getClassDefinitionNode() throws BallerinaOpenApiException {
 
@@ -323,7 +339,7 @@ public class BallerinaClientGenerator {
         NodeList<Token> qualifierList = createNodeList(createIdentifierToken(GeneratorConstants.PUBLIC_ISOLATED));
         IdentifierToken functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION);
         IdentifierToken functionName = createIdentifierToken("init");
-        //Create function signature
+        //Create function signature for client class init
         //Add parameters
         List<Node> parameters  = new ArrayList<>();
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
@@ -357,7 +373,7 @@ public class BallerinaClientGenerator {
                 createToken(OPEN_PAREN_TOKEN), parameterList, createToken(CLOSE_PAREN_TOKEN), returnNode);
 
         VariableDeclarationNode sslDeclarationNode = ballerinaAuthConfigGenerator.getSecureSocketInitNode();
-        //Create function body node
+        //Create function body node client init
         VariableDeclarationNode clientInitializationNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
 
         //Assigment for client
@@ -381,8 +397,6 @@ public class BallerinaClientGenerator {
             assignmentNodes.add(assignmentStatementNodeApiKey);
         }
         NodeList<StatementNode> statementList = createNodeList(assignmentNodes);
-        //statementList.addAll(assignmentStatementNodes);
-
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, statementList, createToken(CLOSE_BRACE_TOKEN));
         FunctionDefinitionNode initFunctionNode = createFunctionDefinitionNode(null, null,
@@ -510,6 +524,13 @@ public class BallerinaClientGenerator {
 
     /**
      * Generate function definition node.
+     * <pre>
+     *     remote isolated function pathParameter(int 'version, string name) returns string|error {
+     *          string  path = string `/v1/${'version}/v2/${name}`;
+     *          string response = check self.clientEp-> get(path, targetType = string);
+     *          return response;
+     *    }
+     * </pre>
      */
     private  FunctionDefinitionNode getFunctionDefinitionNode(MetadataNode metadataNode, String path,
                                                               Map.Entry<PathItem.HttpMethod, Operation> operation)
@@ -565,7 +586,7 @@ public class BallerinaClientGenerator {
                 functionSignatureNode, functionBodyNode);
     }
 
-    /** Generate function for functionDefinition Node.
+    /** Generate headerMap filtering functionDefinition Node.
      *
      * <pre>
      *     isolated function getMapForHeaders(map<any> headerParam) returns map<string|string[]> {
@@ -687,7 +708,7 @@ public class BallerinaClientGenerator {
     }
 
     /**
-     * Generate queryParameter path generation function.
+     * Generate queryParameter path generation functionDefinitionNode.
      *
      * @return functionDefinitionNode
      */
@@ -880,8 +901,14 @@ public class BallerinaClientGenerator {
                 functionSignatureNode, functionBodyNode);
     }
 
-    public void addConfigRecordToTypeDefnitionNodeList(OpenAPI openAPI,
-                                                       BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator) {
+    /**
+     * Generate Auth related record s for the client.
+     *
+     * @param openAPI - OpenAPI specification.
+     * @param ballerinaAuthConfigGenerator - {@Link BallerinaAuthConfigGenerator}
+     */
+    private void addConfigRecordToTypeDefinitionNodeList(OpenAPI openAPI,
+                                                         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator) {
         TypeDefinitionNode configRecord = ballerinaAuthConfigGenerator.getConfigRecord(openAPI);
         if (configRecord != null) {
             typeDefinitionNodeListWithAuth.add(configRecord);

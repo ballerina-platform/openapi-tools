@@ -218,7 +218,7 @@ public class BallerinaSchemaGenerator {
                     ArraySchema arraySchema = (ArraySchema) schemaValue;
                     TypeDescriptorNode fieldTypeName;
                     if (arraySchema.getItems() != null) {
-                        fieldTypeName = extractOpenApiSchema(arraySchema.getItems(), openAPI);
+                        fieldTypeName = extractOpenAPISchema(arraySchema.getItems(), openAPI);
                     } else {
                         Token type =
                                 AbstractNodeFactory.createIdentifierToken("string ");
@@ -244,7 +244,6 @@ public class BallerinaSchemaGenerator {
                 }
             } else {
                 Schema value = schema.getValue();
-
                 MarkdownDocumentationNode documentationNode =
                         createMarkdownDocumentationNode(createNodeList(schemaDoc));
                 MetadataNode metadataNode =
@@ -467,7 +466,7 @@ public class BallerinaSchemaGenerator {
         //FiledName
         IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldN);
 
-        TypeDescriptorNode fieldTypeName = extractOpenApiSchema(field.getValue(), openApi);
+        TypeDescriptorNode fieldTypeName = extractOpenAPISchema(field.getValue(), openApi);
         Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
         Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
@@ -492,7 +491,7 @@ public class BallerinaSchemaGenerator {
      *
      * @param schema - OpenApi Schema
      */
-    private TypeDescriptorNode extractOpenApiSchema(Schema schema, OpenAPI openApi) throws BallerinaOpenApiException {
+    private TypeDescriptorNode extractOpenAPISchema(Schema schema, OpenAPI openApi) throws BallerinaOpenApiException {
 
         if (schema.getType() != null || schema.getProperties() != null) {
             if (schema.getType() != null && ((schema.getType().equals("integer") || schema.getType().equals("number"))
@@ -624,13 +623,13 @@ public class BallerinaSchemaGenerator {
             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                     null, closeSBracketToken);
         } else if (schemaItem instanceof ArraySchema) {
-            memberTypeDesc = extractOpenApiSchema(arraySchema.getItems(), openApi);
+            memberTypeDesc = extractOpenAPISchema(arraySchema.getItems(), openApi);
             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                     null, closeSBracketToken);
         } else if (schemaItem instanceof ObjectSchema) {
             //Array has inline record
             ObjectSchema inlineSchema = (ObjectSchema) schemaItem;
-            memberTypeDesc = extractOpenApiSchema(inlineSchema, openApi);
+            memberTypeDesc = extractOpenAPISchema(inlineSchema, openApi);
             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                     null, closeSBracketToken);
         } else if (schemaItem instanceof ComposedSchema) {

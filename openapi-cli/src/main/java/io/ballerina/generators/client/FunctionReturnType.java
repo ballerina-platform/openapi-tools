@@ -178,9 +178,11 @@ public class FunctionReturnType {
         return type;
     }
 
+    /**
+     * Get the return data type according to the OAS ArraySchema.
+     */
     private String generateReturnTypeForArraySchema(Map.Entry<String, MediaType> media, ArraySchema arraySchema,
                                                     boolean isSignature) throws BallerinaOpenApiException {
-
         String type;
         if (arraySchema.getItems().get$ref() != null) {
             String name = getValidName(extractReferenceType(arraySchema.getItems().get$ref()), true);
@@ -251,7 +253,7 @@ public class FunctionReturnType {
     }
 
     /**
-     * Handle inline record by generating record with name for response.
+     * Handle inline record by generating record with name for response in OAS type ObjectSchema.
      */
     private String handleInLineRecordInResponse(Operation operation, Map.Entry<String, MediaType> media,
                                                 ObjectSchema objectSchema)
@@ -283,6 +285,9 @@ public class FunctionReturnType {
         return type;
     }
 
+    /**
+     * Get the return data type according to the OAS MapSchema type.
+     */
     private String handleResponseWithMapSchema(Operation operation, Map.Entry<String, MediaType> media,
                                                MapSchema mapSchema) throws BallerinaOpenApiException {
         Map<String, Schema> properties = mapSchema.getProperties();
