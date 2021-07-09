@@ -30,6 +30,7 @@ import io.ballerina.generators.BallerinaServiceGenerator;
 import io.ballerina.generators.GeneratorConstants;
 import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.generators.client.BallerinaClientGenerator;
+import io.ballerina.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.model.GenSrcFile;
@@ -61,13 +62,17 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static io.ballerina.generators.GeneratorConstants.CONFIG_FILE_NAME;
 import static io.ballerina.generators.GeneratorConstants.DEFAULT_CLIENT_PKG;
 import static io.ballerina.generators.GeneratorConstants.DEFAULT_MOCK_PKG;
 import static io.ballerina.generators.GeneratorConstants.ESCAPE_PATTERN;
 import static io.ballerina.generators.GeneratorConstants.GenType.GEN_CLIENT;
 import static io.ballerina.generators.GeneratorConstants.GenType.GEN_SERVICE;
+import static io.ballerina.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.generators.GeneratorConstants.TEMPLATES_DIR_PATH_KEY;
 import static io.ballerina.generators.GeneratorConstants.TEMPLATES_SUFFIX;
+import static io.ballerina.generators.GeneratorConstants.TEST_DIR;
+import static io.ballerina.generators.GeneratorConstants.TEST_FILE_NAME;
 import static io.ballerina.generators.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.generators.GeneratorConstants.UNTITLED_SERVICE;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
@@ -333,7 +338,15 @@ public class CodeGenerator {
                     CodegenUtils.writeFile(filePath, file.getContent());
                 }
             } else {
-                filePath = Paths.get(srcPath.resolve(file.getFileName()).toFile().getCanonicalPath());
+                if (file.getFileName().equals(TEST_FILE_NAME) || file.getFileName().equals(CONFIG_FILE_NAME)) {
+                    // Create test directory if not exists in the path. If exists do not throw an error
+                    Files.createDirectories(Paths.get(srcPath + OAS_PATH_SEPARATOR + TEST_DIR));
+                    filePath = Paths.get(srcPath.resolve(TEST_DIR + OAS_PATH_SEPARATOR +
+                            file.getFileName()).toFile().getCanonicalPath());
+                } else {
+                    filePath = Paths.get(srcPath.resolve(file.getFileName()).toFile().getCanonicalPath());
+                }
+
                 CodegenUtils.writeFile(filePath, file.getContent());
             }
         }
@@ -392,6 +405,16 @@ public class CodeGenerator {
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
+
+        // Generate test boilerplate code for test cases
+        String testContent = Formatter.format(BallerinaTestGenerator.generateSyntaxTree()).toString();
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
+
+        String configContent = BallerinaTestGenerator.getConfigTomlFile();
+        if (!configContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
+                    GeneratorConstants.CONFIG_FILE_NAME, configContent));
+        }
 
         // Generate ballerina records to represent schemas.
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef);

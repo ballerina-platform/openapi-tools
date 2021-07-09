@@ -70,6 +70,8 @@ public class GeneratorConstants {
 
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
     public static final String TYPE_FILE_NAME = "types.bal";
+    public static final String TEST_FILE_NAME = "test.bal";
+    public static final String CONFIG_FILE_NAME = "Config.toml";
 
     public static final String TEMPLATES_SUFFIX = ".mustache";
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";
@@ -98,6 +100,7 @@ public class GeneratorConstants {
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\_{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
+    public static final String MODULE_TEST  = "test";
     public static final String BALLERINA = "ballerina";
     public static final String PUBLIC = "public";
     public static final String TYPE = "type";
@@ -116,6 +119,9 @@ public class GeneratorConstants {
     public static final String SEMICOLON = ";";
     public static final String FUNCTION = "function";
     public static final String RETURN = "returns";
+    public static final String PREFIX_TEST = " test";
+    public static final String ANNOT_TEST = "test:Config";
+    public static final String TEST_DIR = "tests";
     public static final String STRING = "string";
     public static final String SERVICE_URL = "serviceUrl";
     public static final String RECORD = "record";
@@ -124,10 +130,12 @@ public class GeneratorConstants {
     public static final String API_KEY_CONFIG = "ApiKeysConfig";
     public static final String API_KEY_CONFIG_PARAM = "apiKeyConfig";
     public static final String API_KEY_CONFIG_RECORD_FIELD = "apiKeys";
-    public static final String API_KEY_MAP = "map<string|string[]>";
+    public static final String API_KEY_MAP = "map<string>";
     public static final String AUTH_CONFIG_FILED_NAME = "authConfig";
     public static final String BASIC = "basic";
     public static final String BEARER = "bearer";
+    public static final String CLIENT_CRED = "client_cred";
+    public static final String PASSWORD = "password";
     public static final String CONFIG_RECORD_ARG = "clientConfig";
     public static final String CONFIG_RECORD_NAME = "ClientConfig";
     public static final String OAUTH2 = "oauth2";

@@ -265,7 +265,6 @@ public class GeneratorUtils {
 
     /**
      * Method for convert openApi type to ballerina type.
-     *
      * @param type  OpenApi parameter types
      * @return ballerina type
      */

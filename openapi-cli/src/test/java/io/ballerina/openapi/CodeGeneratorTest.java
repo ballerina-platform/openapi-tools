@@ -20,12 +20,14 @@ import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.model.GenSrcFile;
+import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -323,6 +325,8 @@ public class CodeGeneratorTest {
             Files.deleteIfExists(resourcePath.resolve(filename));
             Files.deleteIfExists(resourcePath.resolve("client.bal"));
             Files.deleteIfExists(resourcePath.resolve("types.bal"));
+            Files.deleteIfExists(resourcePath.resolve("test.bal"));
+            FileUtils.deleteDirectory(new File(resourcePath + "/tests"));
         } catch (IOException e) {
             //Ignore the exception
         }
