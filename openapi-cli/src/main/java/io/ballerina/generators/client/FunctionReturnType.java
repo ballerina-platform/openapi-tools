@@ -75,51 +75,6 @@ public class FunctionReturnType {
     }
 
     /**
-     * Generate Type for datatype that can not bind to the targetType.
-     *
-     * @param type - data Type.
-     * @param typeName - Created datType name.
-     * @return return dataType
-     */
-    private String generateCustomTypeDefine(String type, String typeName, boolean isSignature) {
-
-        TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null,
-                null, createIdentifierToken("public type"),
-                createIdentifierToken(typeName),
-                createSimpleNameReferenceNode(createIdentifierToken(type)),
-                createToken(SEMICOLON_TOKEN));
-        updateTypeDefinitionNodeList(typeName, typeDefNode);
-        if (!isSignature) {
-            return typeName;
-        } else {
-            return type;
-        }
-    }
-
-    /**
-     * This util function for update the typeDefinition node after check it duplicates.
-     *
-     * @param typeName      - Given Node name
-     * @param typeDefNode   - Generated Node
-     */
-    public void updateTypeDefinitionNodeList(String typeName, TypeDefinitionNode typeDefNode) {
-        boolean isExit = false;
-        if (!typeDefinitionNodeList.isEmpty()) {
-            for (TypeDefinitionNode typeNode: typeDefinitionNodeList) {
-                if (typeNode.typeName().toString().trim().equals(typeName)) {
-                    isExit = true;
-                }
-            }
-            if (!isExit) {
-                typeDefinitionNodeList.add(typeDefNode);
-            }
-        } else {
-            typeDefinitionNodeList.add(typeDefNode);
-        }
-    }
-
-
-    /**
      * Get return type of the remote function.
      *
      * @param operation     swagger operation.
@@ -172,14 +127,16 @@ public class FunctionReturnType {
         return returnType;
     }
 
+    /**
+     * Get return data type by traversing OAS schemas.
+     */
     private String getDataType(Operation operation, boolean isSignature, ApiResponse response,
                                Map.Entry<String, MediaType> media, String type, Schema schema)
             throws BallerinaOpenApiException {
 
-        // get a single function
         if (schema instanceof ComposedSchema) {
-            //schema instead of composedSchema
-            type = generateReturnDataTypeForComposedSchema(operation, type, schema);
+            ComposedSchema composedSchema = (ComposedSchema) schema;
+            type = generateReturnDataTypeForComposedSchema(operation, type, composedSchema);
         } else if (schema instanceof ObjectSchema) {
             ObjectSchema objectSchema = (ObjectSchema) schema;
             type = handleInLineRecordInResponse(operation, media, objectSchema);
@@ -262,32 +219,32 @@ public class FunctionReturnType {
         return type;
     }
 
-    private String generateReturnDataTypeForComposedSchema(Operation operation, String type, Schema schema)
+    /**
+     * Get the return data type according to the OAS ComposedSchemas ex: AllOf, OneOf, AnyOf
+     */
+    private String generateReturnDataTypeForComposedSchema(Operation operation, String type, ComposedSchema composedSchema)
             throws BallerinaOpenApiException {
-        if (schema instanceof ComposedSchema) {
-            ComposedSchema composedSchema = (ComposedSchema) schema;
-            if (composedSchema.getOneOf() != null) {
-                List<Schema> oneOf = composedSchema.getOneOf();
-                type = generatorUtils.getOneOfUnionType(oneOf);
-                //Get oneOfUnionType name
-                String typeName = type.replaceAll("\\|", "");
-                TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
-                        createIdentifierToken("public type"),
-                        createIdentifierToken(typeName),
-                        createSimpleNameReferenceNode(createIdentifierToken(type)),
-                        createToken(SEMICOLON_TOKEN));
-                updateTypeDefinitionNodeList(typeName, typeDefNode);
-            } else if (composedSchema.getAllOf() != null) {
-                List<Schema> allOf = composedSchema.getAllOf();
-                String recordName = "Compound" + getValidName(operation.getOperationId(), true) +
-                        "Response";
-                List<String> required = composedSchema.getRequired();
-                TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
-                        .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
-                                createIdentifierToken(recordName), new ArrayList<>(), allOf);
-                updateTypeDefinitionNodeList(recordName, allOfTypeDefinitionNode);
-                type = recordName;
-            }
+        if (composedSchema.getOneOf() != null) {
+            List<Schema> oneOf = composedSchema.getOneOf();
+            type = generatorUtils.getOneOfUnionType(oneOf);
+            // Get oneOfUnionType name
+            String typeName = type.replaceAll("\\|", "");
+            TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
+                    createIdentifierToken("public type"),
+                    createIdentifierToken(typeName),
+                    createSimpleNameReferenceNode(createIdentifierToken(type)),
+                    createToken(SEMICOLON_TOKEN));
+            updateTypeDefinitionNodeList(typeName, typeDefNode);
+        } else if (composedSchema.getAllOf() != null) {
+            List<Schema> allOf = composedSchema.getAllOf();
+            String recordName = "Compound" + getValidName(operation.getOperationId(), true) +
+                    "Response";
+            List<String> required = composedSchema.getRequired();
+            TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
+                    .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
+                            createIdentifierToken(recordName), new ArrayList<>(), allOf);
+            updateTypeDefinitionNodeList(recordName, allOfTypeDefinitionNode);
+            type = recordName;
         }
         return type;
     }
@@ -352,5 +309,49 @@ public class FunctionReturnType {
             type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
         }
         return type;
+    }
+
+    /**
+     * Generate Type for datatype that can not bind to the targetType.
+     *
+     * @param type - data Type.
+     * @param typeName - Created datType name.
+     * @return return dataType
+     */
+    private String generateCustomTypeDefine(String type, String typeName, boolean isSignature) {
+
+        TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null,
+                null, createIdentifierToken("public type"),
+                createIdentifierToken(typeName),
+                createSimpleNameReferenceNode(createIdentifierToken(type)),
+                createToken(SEMICOLON_TOKEN));
+        updateTypeDefinitionNodeList(typeName, typeDefNode);
+        if (!isSignature) {
+            return typeName;
+        } else {
+            return type;
+        }
+    }
+
+    /**
+     * This util function for update the typeDefinition node after check it duplicates.
+     *
+     * @param typeName      - Given Node name
+     * @param typeDefNode   - Generated Node
+     */
+    public void updateTypeDefinitionNodeList(String typeName, TypeDefinitionNode typeDefNode) {
+        boolean isExit = false;
+        if (!typeDefinitionNodeList.isEmpty()) {
+            for (TypeDefinitionNode typeNode: typeDefinitionNodeList) {
+                if (typeNode.typeName().toString().trim().equals(typeName)) {
+                    isExit = true;
+                }
+            }
+            if (!isExit) {
+                typeDefinitionNodeList.add(typeDefNode);
+            }
+        } else {
+            typeDefinitionNodeList.add(typeDefNode);
+        }
     }
 }
