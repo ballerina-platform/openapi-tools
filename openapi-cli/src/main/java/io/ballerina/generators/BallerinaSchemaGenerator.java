@@ -565,7 +565,7 @@ public class BallerinaSchemaGenerator {
                             convertOpenAPITypeToBallerina(schema.getType().trim()));
                     return createBuiltinSimpleNameReferenceNode(null, typeName);
                 }
-            } else if (schema.getType().equals("object")) {
+            } else if (schema.getType() != null && schema.getType().equals("object")) {
                 String type = convertOpenAPITypeToBallerina(schema.getType().trim());
                 Token typeName = AbstractNodeFactory.createIdentifierToken(type);
                 return createBuiltinSimpleNameReferenceNode(null, typeName);

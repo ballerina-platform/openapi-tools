@@ -355,12 +355,18 @@ public class BallerinaClientGenerator {
                 createIdentifierToken("string"));
         IdentifierToken paramName = createIdentifierToken(GeneratorConstants.SERVICE_URL);
         IdentifierToken equalToken = createIdentifierToken("=");
-        BasicLiteralNode expression = createBasicLiteralNode(STRING_LITERAL,
-                createIdentifierToken('"' + getServerURL(server) + '"'));
+        String serverURL = getServerURL(server);
+        if (serverURL.equals("/")) {
+            RequiredParameterNode serviceUrl = createRequiredParameterNode(annotationNodes, typeName, paramName);
+            parameters.add(serviceUrl);
+        } else {
+            BasicLiteralNode expression = createBasicLiteralNode(STRING_LITERAL,
+                    createIdentifierToken('"' + getServerURL(server) + '"'));
 
-        DefaultableParameterNode serviceUrl = createDefaultableParameterNode(annotationNodes, typeName,
-                paramName, equalToken, expression);
-        parameters.add(serviceUrl);
+            DefaultableParameterNode serviceUrl = createDefaultableParameterNode(annotationNodes, typeName,
+                    paramName, equalToken, expression);
+            parameters.add(serviceUrl);
+        }
 
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 
@@ -897,19 +903,18 @@ public class BallerinaClientGenerator {
             return createRequiredParameterNode(annotationNodes, typeName, paramName);
         } else {
             // TODO: for optional change to defaultable with there values
-            typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
-                    createIdentifierToken(paramType)), createToken(QUESTION_MARK_TOKEN));
+
             IdentifierToken paramName =
                     createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
 
             if (parameterSchema.getDefault() != null) {
+                typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
                 LiteralValueToken literalValueToken;
                 if (parameterSchema.getType().equals("string")) {
                     literalValueToken =
                             createLiteralValueToken(null, '"' + parameterSchema.getDefault().toString() + '"',
                                     createEmptyMinutiaeList(),
                                     createEmptyMinutiaeList());
-
                 } else {
                     literalValueToken =
                             createLiteralValueToken(null, parameterSchema.getDefault().toString(),
@@ -920,6 +925,8 @@ public class BallerinaClientGenerator {
                 return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
                         literalValueToken);
             } else {
+                typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(paramType)), createToken(QUESTION_MARK_TOKEN));
                 NilLiteralNode nilLiteralNode =
                         createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
                 return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
