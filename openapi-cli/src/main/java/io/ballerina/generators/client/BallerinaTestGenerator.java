@@ -38,17 +38,15 @@ import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -153,10 +151,12 @@ public class BallerinaTestGenerator {
      * @throws IOException  Throws an exception if file not exists
      */
     public String getConfigTomlFile () throws IOException {
-        Path resDir = Paths.get("src/main/resources/config_toml_files").toAbsolutePath();
+        ClassLoader classLoader = getClass().getClassLoader();
         if (!configFileName.isBlank()) {
-            Path configFile = resDir.resolve(Paths.get(configFileName));
-            return getStringFromGivenBalFile(configFile);
+            InputStream inputStream = classLoader.getResourceAsStream("config_toml_files/" + configFileName);
+            if (inputStream != null) {
+                return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            }
         }
         return "";
     }
@@ -453,19 +453,4 @@ public class BallerinaTestGenerator {
     private String modifyFunctionName(String name) {
         return name.substring(0, 1).toUpperCase(Locale.getDefault()) + name.substring(1);
     }
-
-    /**
-     * Get config.toml file content according to the authentication method in test.bal.
-     *
-     * @param   configFile      Config.toml file path
-     * @return  {@link String}
-     * @throws  IOException     Throws an error if file not exists in the given path
-     */
-    private String getStringFromGivenBalFile(Path configFile) throws IOException {
-        Stream<String> configFileLines = Files.lines(configFile);
-        String configFileStr = configFileLines.collect(Collectors.joining("\n"));
-        configFileLines.close();
-        return configFileStr;
-    }
-
 }
