@@ -19,9 +19,10 @@
 package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.generators.BallerinaClientGenerator;
+import io.ballerina.openapi.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
@@ -30,6 +31,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
  * Client generation with filters.
@@ -49,8 +52,11 @@ public class FilterTests {
         list2.clear();
         list1.add("Data for all countries");
         Filter filter = new Filter(list1, list2);
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        //compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "With Operation filter")
@@ -61,8 +67,11 @@ public class FilterTests {
         list2.clear();
         list2.add("getCountryList");
         Filter filter = new Filter(list1, list2);
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        //compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
 }

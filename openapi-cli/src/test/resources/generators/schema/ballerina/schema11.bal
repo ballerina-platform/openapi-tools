@@ -3,9 +3,11 @@ public type Pet record {
     # name field
     string name;
     string tag?;
-    record  {
-        # type id
-        string typeId?;
-        string tagType?;
-    } 'type?;
+    PetType 'type?;
+};
+
+public type PetType record {
+    # type id
+    string typeId?;
+    string tagType?;
 };

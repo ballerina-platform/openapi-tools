@@ -17,45 +17,69 @@
  */
 package io.ballerina.generators.client;
 
-import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.CodeGenerator;
+import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.parameters.Parameter;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
-import static io.ballerina.generators.BallerinaClientGenerator.generatePathWithPathParameter;
-import static io.ballerina.generators.BallerinaClientGenerator.getPathParameters;
-import static io.ballerina.generators.common.TestUtils.getOpenAPI;
+import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
  * This tests class for the tests Path parameters in swagger file.
  */
 public class PathParameterTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
+    private static final Path RESDIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
+    private SyntaxTree syntaxTree;
+    List<String> list1 = new ArrayList<>();
+    List<String> list2 = new ArrayList<>();
+    Filter filter = new Filter(list1, list2);
 
     @Test(description = "Generate Client for path parameter has parameter name as key word - unit tests for method")
-    public void generatePathWithPathParameterTests() {
-        Assert.assertEquals(generatePathWithPathParameter("/v1/v2"), "/v1/v2");
-        Assert.assertEquals(generatePathWithPathParameter("/v1/{version}/v2/{name}"),
-                "/v1/${'version}/v2/${name}");
-        Assert.assertEquals(generatePathWithPathParameter("/v1/{version}/v2/{limit}"),
-                "/v1/${'version}/v2/${'limit}");
-        Assert.assertEquals(generatePathWithPathParameter("/v1/{age}/v2/{name}"), "/v1/${age}/v2/${name}");
+    public void generatePathWithPathParameterTests() throws IOException, BallerinaOpenApiException {
+        // "/v1/v2"), "/v1/v2"
+        // "/v1/{version}/v2/{name}", "/v1/${'version}/v2/${name}"
+        // "/v1/{version}/v2/{limit}", "/v1/${'version}/v2/${'limit}"
+        // "/v1/{age}/v2/{name}", "/v1/${age}/v2/${name}"
+
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RESDIR.resolve("swagger/path_parameter_valid.yaml");
+        Path expectedPath = RESDIR.resolve("ballerina/path_parameter_valid.bal");
+
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
     @Test(description = "When path parameter has given unmatch data type in ballerina",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Invalid path parameter data type for the parameter: .*")
     public void testInvalidPathParameterType() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/path_parameter.yaml");
-        OpenAPI openAPI = getOpenAPI(definitionPath);
-        Parameter parameter = openAPI.getPaths().get("/v1/{id}").getGet().getParameters().get(0);
+        Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid.yaml");
         // int, string, boolean, decimal, float,
-        Node pathParameters = getPathParameters(parameter);
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        ballerinaClientGenerator.generateSyntaxTree();
+    }
+
+    @Test(description = "When given data type not match with ballerina data type",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Unsupported OAS data type .*")
+    public void testInvalidDataType() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid02.yaml");
+        // int, string, boolean, decimal, float,
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        ballerinaClientGenerator.generateSyntaxTree();
     }
 }

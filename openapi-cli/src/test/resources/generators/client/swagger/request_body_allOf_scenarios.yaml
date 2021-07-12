@@ -1,0 +1,159 @@
+openapi: 3.0.0
+info:
+  title: RequestBody with AllOf
+  description: refComponent
+  version: 1.0.0
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+        description: this value is assigned by the service provider
+  - url: https://{subdomain}.swagger.io:{port}/{basePath}
+    description: The production API server
+    variables:
+      subdomain:
+        default: petstore
+        description: this value is assigned by the service provider
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '443'
+      basePath:
+        default: v2
+paths:
+  /path01:
+    post:
+      operationId: postXMLUser
+      summary: Request Body has nested allOf.
+      responses:
+        200:
+          description: OK
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - properties:
+                    schedule_for:
+                      description: Email or userId if you want to schedule meeting for another user.
+                      type: string
+                  type: object
+                - allOf:
+                    - description: Base object for sessions.
+                      properties:
+                        agenda:
+                          description: Meeting description.
+                          type: string
+                        duration:
+                          description: Meeting duration (minutes). Used for scheduled meetings only.
+                          type: integer
+                        password:
+                          type: string
+                        recurrence:
+                          properties:
+                            end_date_time:
+                              description: Select the final date on which the meeting will recur before it is
+                                canceled. Should be in UTC time, such as
+                                2017-11-25T12:00:00Z. (Cannot be used with
+                                "end_times".)
+                              format: date-time
+                              type: string
+                            end_times:
+                              type: integer
+                          type: object
+                        settings:
+                          allOf:
+                            - description: Meeting settings.
+                              properties:
+                                allow_multiple_devices:
+                                  type: boolean
+                                alternative_hosts:
+                                  type: string
+                                approved_or_denied_countries_or_regions:
+                                  properties:
+                                    approved_list:
+                                      description: "List of countries/regions from where participants can join this
+                                        meeting. "
+                                      items:
+                                        type: string
+                                      type: array
+                                    denied_list:
+                                      description: "List of countries/regions from where participants can not join
+                                        this meeting. "
+                                      items:
+                                        type: string
+                                      type: array
+                                  type: object
+                              type: object
+                            - properties:
+                                registrants_confirmation_email:
+                                  description: Send confirmation Email to Registrants
+                                  type: boolean
+                              type: object
+                      type: object
+                  description: Meeting object
+                  type: object
+    put:
+      operationId: updateXMLUser
+      summary: Request Body has allOf with specific properties.
+      responses:
+        200:
+          description: OK
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              allOf: # Combines the main `User` schema with `RequestBody`-specific properties
+                - $ref: '#/components/schemas/User'
+                - type: object
+                  properties:
+                    hunts:
+                      type: boolean
+                    age:
+                      type: integer
+
+  /path02:
+    post:
+      operationId: postXMLUserInLineArray
+      summary: Request Body has Array type AllOf.
+      responses:
+        200:
+          description: OK
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              type: array
+              items:
+                allOf: # Combines the main `User` schema with `RequestBody`-specific properties
+                  - $ref: '#/components/schemas/User'
+                  - type: object
+                    properties:
+                      hunts:
+                        type: boolean
+                      age:
+                        type: integer
+components:
+  requestBodies:
+    PetBody:
+      description: A JSON object containing pet information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+  schemas:
+    User:
+      type: object
+      required:
+        - userName
+      properties:
+        userName:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string

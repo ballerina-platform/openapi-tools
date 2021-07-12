@@ -18,6 +18,7 @@
 
 package io.ballerina.generators.client;
 
+import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
@@ -26,39 +27,52 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
-import static io.ballerina.generators.BallerinaClientGenerator.getReturnType;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
  * All the tests related to the functionSignatureNode  Return type tests in
- * {@link io.ballerina.generators.BallerinaClientGenerator} util.
+ * {@link BallerinaClientGenerator} util.
  */
 public class FunctionSignatureReturnTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     @Test(description = "Tests for returnType")
     public void getReturnTypeTests() throws IOException, BallerinaOpenApiException {
+        FunctionReturnType functionReturnType = new FunctionReturnType();
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/all_return_type_operation.yaml"));
-        Assert.assertEquals(getReturnType(array.getPaths().get("/jsonproducts").getGet()), "json|error");
-        Assert.assertEquals(getReturnType(array.getPaths().get("/stringproducts/record").getGet()),
-                "ProductArr|error");
-        Assert.assertEquals(getReturnType(array.getPaths().get("/xmlproducts").getGet()), "XML|error");
-        Assert.assertEquals(getReturnType(array.getPaths().get("/xmlarrayproducts").getGet()), "XMLArr|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/jsonproducts").getGet(),
+                true), "json|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/stringproducts/record").getGet(),
+                true), "Product[]|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/stringproducts/record").getGet(),
+                false), "ProductArr|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/xmlproducts").getGet(),
+                true), "xml|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/xmlarrayproducts").getGet(),
+                true), "xml[]|error");
+        Assert.assertEquals(functionReturnType.getReturnType(array.getPaths().get("/xmlarrayproducts").getGet(),
+                false), "XMLArr|error");
     }
 
     @Test(description = "Tests for the object response without property")
     public void getReturnTypeForObjectSchema() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_without_properties_with_additional" +
                 ".yaml"));
-        String returnType = getReturnType(array.getPaths().get("/products").getGet());
+        FunctionReturnType functionReturnType = new FunctionReturnType();
+        String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
+                true);
         Assert.assertEquals(returnType, "json|error");
     }
 
     @Test(description = "Tests for the object response without property")
     public void getReturnTypeForMapSchema() throws IOException, BallerinaOpenApiException {
-        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_properties_with_additional" +
-                ".yaml"));
-        String returnType = getReturnType(array.getPaths().get("/products").getGet());
+        OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
+                "response_with_properties_with_additional.yaml"));
+        FunctionReturnType functionReturnType = new FunctionReturnType(array, new BallerinaSchemaGenerator(array),
+                new ArrayList<>());
+        String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
+                true);
         Assert.assertEquals(returnType, "TestsProductsResponse|error");
     }
 
@@ -67,7 +81,9 @@ public class FunctionSignatureReturnTypeTests {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type" +
                 "/response_without_properties_without_additional" +
                 ".yaml"));
-        String returnType = getReturnType(array.getPaths().get("/products").getGet());
+        FunctionReturnType functionReturnType = new FunctionReturnType();
+        String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
+                true);
         Assert.assertEquals(returnType, "json|error");
     }
 
@@ -75,7 +91,10 @@ public class FunctionSignatureReturnTypeTests {
     public void getReturnTypeForMapSchemaWithOutAdditionalProperties() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_properties_without_additional" +
                 ".yaml"));
-        String returnType = getReturnType(array.getPaths().get("/products").getGet());
+        FunctionReturnType functionReturnType = new FunctionReturnType(array, new BallerinaSchemaGenerator(array),
+                new ArrayList<>());
+        String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
+                true);
         Assert.assertEquals(returnType, "TestsProductsResponse|error");
     }
 }

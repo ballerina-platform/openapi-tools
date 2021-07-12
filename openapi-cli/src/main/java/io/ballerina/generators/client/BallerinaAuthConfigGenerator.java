@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.generators.auth;
+package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
@@ -54,6 +54,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -97,10 +98,12 @@ import static io.ballerina.generators.GeneratorConstants.AUTH_CONFIG_FILED_NAME;
 import static io.ballerina.generators.GeneratorConstants.AuthConfigTypes;
 import static io.ballerina.generators.GeneratorConstants.BASIC;
 import static io.ballerina.generators.GeneratorConstants.BEARER;
+import static io.ballerina.generators.GeneratorConstants.CLIENT_CRED;
 import static io.ballerina.generators.GeneratorConstants.CONFIG_RECORD_ARG;
 import static io.ballerina.generators.GeneratorConstants.CONFIG_RECORD_NAME;
 import static io.ballerina.generators.GeneratorConstants.HTTP;
 import static io.ballerina.generators.GeneratorConstants.OAUTH2;
+import static io.ballerina.generators.GeneratorConstants.PASSWORD;
 import static io.ballerina.generators.GeneratorConstants.SSL_FIELD_NAME;
 import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
 
@@ -108,10 +111,26 @@ import static io.ballerina.generators.GeneratorUtils.escapeIdentifier;
  * This class is used to generate authentication related nodes of the ballerina connector client syntax tree.
  */
 public class BallerinaAuthConfigGenerator {
-    private static final List<String> headerApiKeyNameList = new ArrayList<>();
-    private static final List<String> queryApiKeyNameList = new ArrayList<>();
-    private static boolean isAPIKey = false;
-    private static boolean isHttpOROAuth = false;
+    private final List<String> headerApiKeyNameList = new ArrayList<>();
+    private final List<String> queryApiKeyNameList = new ArrayList<>();
+    private boolean isAPIKey = false;
+    private boolean isHttpOROAuth = false;
+    private final Set<String> authTypes = new LinkedHashSet<>();
+
+    public BallerinaAuthConfigGenerator(boolean isAPIKey, boolean isHttpOROAuth) {
+
+        this.isAPIKey = isAPIKey;
+        this.isHttpOROAuth = isHttpOROAuth;
+    }
+
+    public BallerinaAuthConfigGenerator() {
+
+    }
+    public boolean isHttpOROAuth() {
+
+        return isHttpOROAuth;
+    }
+
 
     /**
      * Generate the Config record for the relevant authentication type.
@@ -130,10 +149,9 @@ public class BallerinaAuthConfigGenerator {
      * </pre>
      *
      * @param openAPI                       OpenApi object received from swagger open-api parser
-     * @return {@link TypeDefinitionNode}   Synatx tree node of config record
+     * @return {@link TypeDefinitionNode}   Syntax tree node of config record
      */
-    public static TypeDefinitionNode getConfigRecord (OpenAPI openAPI) {
-        clearStaticVariables();
+    public TypeDefinitionNode getConfigRecord(OpenAPI openAPI) {
         if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
             List<Node> recordFieldList = addItemstoRecordFieldList(openAPI);
             if (!recordFieldList.isEmpty()) {
@@ -166,7 +184,7 @@ public class BallerinaAuthConfigGenerator {
      *
      * @return {@link List<ObjectFieldNode>}    syntax tree object field node list
      */
-    public static ObjectFieldNode getApiKeyMapClassVariable() { // return ObjectFieldNode
+    public ObjectFieldNode getApiKeyMapClassVariable() { // return ObjectFieldNode
         if (isAPIKey) {
             NodeList<Token> qualifierList = createEmptyNodeList();
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
@@ -190,7 +208,7 @@ public class BallerinaAuthConfigGenerator {
      *
      * @return  {@link List<Node>}  syntax tree node list of config parameters
      */
-    public static List<Node> getConfigParamForClassInit() {
+    public List<Node> getConfigParamForClassInit() {
         List<Node> parameters  = new ArrayList<>();
         IdentifierToken equalToken = createIdentifierToken(GeneratorConstants.EQUAL);
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
@@ -227,12 +245,12 @@ public class BallerinaAuthConfigGenerator {
      *
      * @return  {@link VariableDeclarationNode} syntax tree variable declaration node.
      */
-    public static VariableDeclarationNode getSecureSocketInitNode () {
+    public VariableDeclarationNode getSecureSocketInitNode () {
         if (isHttpOROAuth) {
             NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
             TypeDescriptorNode typeName = createOptionalTypeDescriptorNode(
                     createBuiltinSimpleNameReferenceNode(null,
-                    createIdentifierToken("http:ClientSecureSocket")), createToken(QUESTION_MARK_TOKEN));
+                            createIdentifierToken("http:ClientSecureSocket")), createToken(QUESTION_MARK_TOKEN));
             CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
                     createIdentifierToken(SSL_FIELD_NAME));
             TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(typeName,
@@ -268,7 +286,7 @@ public class BallerinaAuthConfigGenerator {
      *
      * @return {@link VariableDeclarationNode}   Synatx tree node of client initialization
      */
-    public static VariableDeclarationNode getClientInitializationNode () {
+    public VariableDeclarationNode getClientInitializationNode () {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken("http:Client"));
@@ -317,7 +335,7 @@ public class BallerinaAuthConfigGenerator {
      *
      * @return  {@link AssignmentStatementNode} syntax tree assignment statement node.
      */
-    public static AssignmentStatementNode getApiKeyAssignmentNode() {
+    public AssignmentStatementNode getApiKeyAssignmentNode() {
         if (isAPIKey) {
             FieldAccessExpressionNode varRefApiKey = createFieldAccessExpressionNode(
                     createSimpleNameReferenceNode(createIdentifierToken("self")), createToken(DOT_TOKEN),
@@ -336,7 +354,7 @@ public class BallerinaAuthConfigGenerator {
      *
      * @return  {@link List<String>}    API key name list
      */
-    public static List<String> getQueryApiKeyNameList () {
+    public List<String> getQueryApiKeyNameList () {
         return queryApiKeyNameList;
     }
 
@@ -345,8 +363,17 @@ public class BallerinaAuthConfigGenerator {
      *
      * @return  {@link List<String>}    API key name list
      */
-    public static List<String> getHeaderApiKeyNameList () {
+    public List<String> getHeaderApiKeyNameList () {
         return headerApiKeyNameList;
+    }
+
+    /**
+     * Return auth type to generate test file.
+     *
+     * @return {@link Set<String>}
+     */
+    public Set<String> getAuthType () {
+        return authTypes;
     }
 
     /**
@@ -358,18 +385,18 @@ public class BallerinaAuthConfigGenerator {
      * </pre>
      * -- ex: Record fields for API Key Authentication mechanism.
      * <pre>
-     *     map<string|string[]> apiKeys;
+     *     map<string> apiKeys;
      * </pre>
      *
      * @return  {@link List<Node>}  syntax tree node list of record fields
      */
-    private static List<Node> addItemstoRecordFieldList (OpenAPI openAPI) {
+    private List<Node> addItemstoRecordFieldList (OpenAPI openAPI) {
         List<Node> recordFieldNodes = new ArrayList<>();
 
         Token semicolonToken = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.SEMICOLON);
         Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
         String httpFieldTypeNames = getConfigRecordFieldTypeNames (securitySchemeMap);
-        if (!httpFieldTypeNames.isEmpty())  {
+        if (!httpFieldTypeNames.isBlank())  {
             // add auth config field
             Token authFieldType = AbstractNodeFactory.createIdentifierToken(httpFieldTypeNames);
             IdentifierToken authFieldName = AbstractNodeFactory.createIdentifierToken(escapeIdentifier(
@@ -404,8 +431,8 @@ public class BallerinaAuthConfigGenerator {
      * @param securitySchemeMap     Map of security schemas of the given open api spec
      * @return {@link String}       Type name of the authConfig field in ClientConfig record
      */
-    private static String getConfigRecordFieldTypeNames(Map<String, SecurityScheme> securitySchemeMap) {
-        Set<String> httpFieldTypeNames = new HashSet<String>();
+    private String getConfigRecordFieldTypeNames(Map<String, SecurityScheme> securitySchemeMap) {
+        Set<String> httpFieldTypeNames = new HashSet<>();
         for (Map.Entry<String, SecurityScheme> securitySchemeEntry : securitySchemeMap.entrySet()) {
             SecurityScheme schemaValue = securitySchemeEntry.getValue();
             if (schemaValue != null && schemaValue.getType() != null) {
@@ -416,29 +443,36 @@ public class BallerinaAuthConfigGenerator {
                         String scheme = schemaValue.getScheme();
                         if (scheme.equals(BASIC)) {
                             httpFieldTypeNames.add(AuthConfigTypes.BASIC.getValue());
+                            authTypes.add(BASIC);
                         } else if (scheme.equals(BEARER)) {
                             httpFieldTypeNames.add(AuthConfigTypes.BEARER.getValue());
+                            authTypes.add(BEARER);
                         }
                         break;
                     case OAUTH2:
                         isHttpOROAuth = true;
                         if (schemaValue.getFlows().getClientCredentials() != null) {
                             httpFieldTypeNames.add(AuthConfigTypes.CLIENT_CREDENTIAL.getValue());
+                            authTypes.add(CLIENT_CRED);
                         }
                         if (schemaValue.getFlows().getPassword() != null) {
                             httpFieldTypeNames.add(AuthConfigTypes.PASSWORD.getValue());
+                            authTypes.add(PASSWORD);
                         }
                         if (schemaValue.getFlows().getAuthorizationCode() != null) {
                             httpFieldTypeNames.add(AuthConfigTypes.BEARER.getValue());
                             httpFieldTypeNames.add(AuthConfigTypes.REFRESH_TOKEN.getValue());
+                            authTypes.add(BEARER);
                         }
                         if (schemaValue.getFlows().getImplicit() != null) {
                             httpFieldTypeNames.add(AuthConfigTypes.BEARER.getValue());
+                            authTypes.add(BEARER);
                         }
                         break;
                     case API_KEY:
                         isAPIKey = true;
                         String apiKeyType = schemaValue.getIn().name().toLowerCase(Locale.getDefault());
+                        authTypes.add(API_KEY);
                         switch (apiKeyType) {
                             case "query":
                                 queryApiKeyNameList.add(schemaValue.getName());
@@ -449,6 +483,7 @@ public class BallerinaAuthConfigGenerator {
                             default:
                                 break;
                         }
+                        break;
                 }
             }
         }
@@ -456,12 +491,12 @@ public class BallerinaAuthConfigGenerator {
     }
 
     /**
-     * This static method is used concat the config record authConfig field type.
+     * This method is used concat the config record authConfig field type.
      *
      * @param fieldtypes        Type name set from {@link #getConfigRecordFieldTypeNames(Map)} method.
      * @return {@link String}   Pipe concatenated list of type names
      */
-    private static StringBuilder buildConfigRecordFieldTypes(Set<String> fieldtypes) {
+    private StringBuilder buildConfigRecordFieldTypes(Set<String> fieldtypes) {
         StringBuilder httpAuthFieldTypes = new StringBuilder();
         if (!fieldtypes.isEmpty()) {
             for (String fieldType: fieldtypes) {
@@ -473,15 +508,5 @@ public class BallerinaAuthConfigGenerator {
             }
         }
         return httpAuthFieldTypes;
-    }
-
-    /**
-     * Clear class static variable at the beginning of execution.
-     */
-    private static void clearStaticVariables() {
-        isHttpOROAuth = false;
-        isAPIKey = false;
-        queryApiKeyNameList.clear();
-        headerApiKeyNameList.clear();
     }
 }

@@ -20,6 +20,7 @@ package io.ballerina.generators.common;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
@@ -30,7 +31,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static io.ballerina.generators.GeneratorUtils.extractReferenceType;
-import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 import static io.ballerina.generators.GeneratorUtils.getValidName;
 import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
@@ -39,14 +39,14 @@ import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTre
  */
 public class GeneratorUtilsTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators").toAbsolutePath();
-    private  static BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+    private static final GeneratorUtils generatorUtils = new GeneratorUtils();
 
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Couldn't read or parse the definition from file: .*")
     public static void getIncorrectYamlContract() throws IOException, BallerinaOpenApiException {
         Path path = RES_DIR.resolve("swagger/invalid/petstore_without_info.yaml");
-        OpenAPI ballerinaOpenApiType = getBallerinaOpenApiType(path);
+        OpenAPI ballerinaOpenApiType = generatorUtils.getOpenAPIFromOpenAPIV3Parser(path);
     }
 
     @Test(description = "Functionality tests for When info section null",
@@ -54,7 +54,7 @@ public class GeneratorUtilsTests {
             expectedExceptionsMessageRegExp = "Couldn't read or parse the definition from file: .*")
     public static void testForInfoNull() throws IOException, BallerinaOpenApiException {
         Path path = RES_DIR.resolve("swagger/invalid/petstore_without_info.yaml");
-        OpenAPI ballerinaOpenApiType = getBallerinaOpenApiType(path);
+        OpenAPI ballerinaOpenApiType = generatorUtils.getOpenAPIFromOpenAPIV3Parser(path);
     }
 
     @Test(description = "Functionality negative tests for extractReferenceType",
@@ -70,20 +70,24 @@ public class GeneratorUtilsTests {
         Assert.assertEquals(extractReferenceType("#/components/schemas/Pet.-id"), "Pet.-id");
         Assert.assertEquals(extractReferenceType("#/components/schemas/Pet."), "Pet.");
         Assert.assertEquals(extractReferenceType("#/components/schemas/200"), "200");
-        Assert.assertEquals(extractReferenceType("#/components/schemas/worker"), "worker");
+        Assert.assertEquals(getValidName(extractReferenceType("#/components/schemas/worker"),
+                true), "Worker");
         Assert.assertEquals(getValidName(extractReferenceType("#/components/schemas/worker abc"),
                 true), "WorkerAbc");
     }
 
     @Test(description = "Generate the readable function, record name removing special characters")
     public static void testGenerateReadableName() {
-        Assert.assertEquals(getValidName("endpoint-remove-shows-user", true), "EndpointRemoveShowsUser");
+        Assert.assertEquals(getValidName("endpoint-remove-shows-user", true),
+                "EndpointRemoveShowsUser");
     }
 
     @Test(description = "Set record name with removing special Characters")
     public static void testRecordName() throws IOException, BallerinaOpenApiException {
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(RES_DIR.resolve("schema/swagger" +
-                "/recordName.yaml"));
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("schema/swagger/recordName" +
+                ".yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         Path expectedPath = RES_DIR.resolve("schema/ballerina/recordName.bal");
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }

@@ -61,7 +61,7 @@ tags:
     description: "Get current weather details"
 
 externalDocs:
-  description: API Documentation
+  description: API DocCommentsGenerator
   url: https://openweathermap.org/api
 
 components:

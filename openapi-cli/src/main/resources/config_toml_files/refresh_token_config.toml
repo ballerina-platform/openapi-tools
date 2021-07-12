@@ -1,0 +1,5 @@
+[authConfig]
+refreshUrl = "<Enter your refreshUrl here>"
+refreshToken = "<Enter your refreshToken>"
+clientId = "<Enter your clientId>"
+clientSecret = "<Enter your clientSecret>"

@@ -23,6 +23,8 @@ import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
+import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
@@ -46,10 +48,14 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
+import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.error.ErrorMessages;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -67,14 +73,32 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLiteralValueToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createExpressionStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownParameterDocumentationLineNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.generators.GeneratorConstants.DELETE;
+import static io.ballerina.generators.GeneratorConstants.GET;
+import static io.ballerina.generators.GeneratorConstants.HEAD;
+import static io.ballerina.generators.GeneratorConstants.OPTIONS;
+import static io.ballerina.generators.GeneratorConstants.PATCH;
+import static io.ballerina.generators.GeneratorConstants.PUT;
+import static io.ballerina.generators.GeneratorConstants.TRACE;
 import static io.ballerina.openapi.OpenApiMesseges.BAL_KEYWORDS;
 import static io.ballerina.openapi.OpenApiMesseges.BAL_TYPES;
 
@@ -241,7 +265,6 @@ public class GeneratorUtils {
 
     /**
      * Method for convert openApi type to ballerina type.
-     *
      * @param type  OpenApi parameter types
      * @return ballerina type
      */
@@ -327,7 +350,9 @@ public class GeneratorUtils {
      * @return string with new generated name
      */
     public static String getValidName(String identifier, boolean isSchema) {
-        if (!identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") && !identifier.matches("\\b[0-9]*\\b")) {
+        //For the flatten enable we need to remove first Part of valid name check
+        // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
+        if (!identifier.matches("\\b[0-9]*\\b")) {
             String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
             StringBuilder validName = new StringBuilder();
             for (String part: split) {
@@ -376,20 +401,28 @@ public class GeneratorUtils {
         }
     }
 
-    public static boolean hasTags(List<String> tags, List<String> filterTags) {
+    public boolean hasTags(List<String> tags, List<String> filterTags) {
         return !Collections.disjoint(filterTags, tags);
     }
 
     /**
      * Util for take OpenApi spec from given yaml file.
      */
-    public static OpenAPI getBallerinaOpenApiType(Path definitionPath)
-            throws IOException, BallerinaOpenApiException {
+    public OpenAPI getOpenAPIFromOpenAPIV3Parser(Path definitionPath) throws IOException, BallerinaOpenApiException {
+
+        Path contractPath = java.nio.file.Paths.get(definitionPath.toString());
+        if (!Files.exists(contractPath)) {
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFilePath(definitionPath.toString()));
+        }
+        if (!(definitionPath.toString().endsWith(".yaml") || definitionPath.endsWith(".json") ||
+                definitionPath.toString().endsWith(
+                ".yml"))) {
+            throw new BallerinaOpenApiException(ErrorMessages.invalidFileType());
+        }
         String openAPIFileContent = Files.readString(definitionPath);
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
-//        parseOptions.setFlatten(true);
-//        parseOptions.setResolveFully(true);
+        parseOptions.setFlatten(true);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
@@ -404,7 +437,7 @@ public class GeneratorUtils {
      * @param variables variable values to populate the url template
      * @return resolved url
      */
-    public static String buildUrl(String absUrl, ServerVariables variables) {
+    public String buildUrl(String absUrl, ServerVariables variables) {
         String url = absUrl;
         if (variables != null) {
             for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
@@ -422,7 +455,7 @@ public class GeneratorUtils {
      * @param type - type or method name
      * @return - escaped string
      */
-    public static String escapeType(String type) {
+    public String escapeType(String type) {
         if (!type.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") ||
                 (BAL_KEYWORDS.stream().anyMatch(type::equals) && BAL_TYPES.stream().noneMatch(type::equals))) {
             // TODO: Temporary fix(es) as identifier literals only support alphanumerics when writing this.
@@ -439,7 +472,7 @@ public class GeneratorUtils {
     /**
      * Generate BallerinaMediaType for all the mediaTypes.
      */
-    public static String getBallerinaMeidaType(String mediaType) {
+    public  String getBallerinaMediaType(String mediaType) {
         switch (mediaType) {
             case "*/*":
             case "application/json":
@@ -467,7 +500,7 @@ public class GeneratorUtils {
      * @return - UnionString
      * @throws BallerinaOpenApiException
      */
-    public static String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
+    public String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
 
         StringBuilder unionType = new StringBuilder();
         for (Schema oneOfSchema: oneOf) {
@@ -477,12 +510,14 @@ public class GeneratorUtils {
                     unionType.append("|");
                     unionType.append(type);
                 }
-            }
-            if (oneOfSchema.get$ref() != null) {
+            } else if (oneOfSchema.get$ref() != null) {
                 String type = extractReferenceType(oneOfSchema.get$ref());
                 unionType.append("|");
                 unionType.append(type);
             }
+//            else if (!oneOfSchema.getProperties().isEmpty()) {
+                // TODO: generate warning to move inline schema to schema
+//            }
         }
         String unionTypeCont = unionType.toString();
         if (!unionTypeCont.isBlank() && unionTypeCont.startsWith("|")) {
@@ -491,11 +526,175 @@ public class GeneratorUtils {
         return unionTypeCont;
     }
 
-    public static MarkdownParameterDocumentationLineNode createParamAPIDoc(String paramName, String description) {
+    public  MarkdownParameterDocumentationLineNode createParamAPIDoc(String paramName, String description) {
 
         return createMarkdownParameterDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
                 createToken(SyntaxKind.PLUS_TOKEN), createIdentifierToken(paramName),
                 createToken(SyntaxKind.MINUS_TOKEN), createNodeList(createLiteralValueToken(null
                         , description,  createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+    }
+
+    /**
+     * Generate remote function method name , when operation ID is not available for given operation.
+     *
+     * @param paths - swagger paths object
+     * @return {@link io.swagger.v3.oas.models.Paths }
+     */
+    public  Paths setOperationId(Paths paths) {
+        Set<Map.Entry<String, PathItem>> entries = paths.entrySet();
+        for (Map.Entry<String, PathItem> entry: entries) {
+            PathItem pathItem = entry.getValue();
+            int countMissId = 0;
+            for (Operation operation : entry.getValue().readOperations()) {
+                if (operation.getOperationId() == null) {
+                    //simplify here with 1++
+                    countMissId = countMissId + 1;
+                } else {
+                    String operationId = getValidName(operation.getOperationId(), false);
+                    operation.setOperationId(operationId);
+                }
+            }
+
+            if (pathItem.getGet() != null) {
+                Operation getOp = pathItem.getGet();
+                if (getOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, GET);
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    getOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getPut() != null) {
+                Operation putOp = pathItem.getPut();
+                if (putOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, PUT);
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    putOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getPost() != null) {
+                Operation postOp = pathItem.getPost();
+                if (postOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, "post");
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    postOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getDelete() != null) {
+                Operation deleteOp = pathItem.getDelete();
+                if (deleteOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, DELETE);
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    deleteOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getOptions() != null) {
+                Operation optionOp = pathItem.getOptions();
+                if (optionOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, OPTIONS);
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    optionOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getHead() != null) {
+                Operation headOp = pathItem.getHead();
+                if (headOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, HEAD);
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    headOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getPatch() != null) {
+                Operation patchOp = pathItem.getPatch();
+                if (patchOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, PATCH);
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    patchOp.setOperationId(operationId);
+                }
+            }
+            if (pathItem.getTrace() != null) {
+                Operation traceOp = pathItem.getTrace();
+                if (traceOp.getOperationId() == null) {
+                    String operationId;
+                    String[] split = entry.getKey().trim().split("/");
+                    if (countMissId > 1) {
+                        operationId = getOperationId(split, TRACE);
+                    } else {
+                        operationId = getOperationId(split, " ");
+                    }
+                    traceOp.setOperationId(operationId);
+                }
+            }
+        }
+        return paths;
+    }
+
+    private  String getOperationId(String[] split, String method) {
+        String operationId;
+        String regEx = "\\{([^}]*)\\}";
+        Matcher matcher = Pattern.compile(regEx).matcher(split[split.length - 1]);
+        if (matcher.matches()) {
+            operationId = method + split[split.length - 2] + "By" + matcher.group(1);
+        } else {
+            operationId = method + split[split.length - 1];
+        }
+        return Character.toLowerCase(operationId.charAt(0)) + operationId.substring(1);
+    }
+
+    /*
+     * Generate variableDeclarationNode.
+     */
+    public  VariableDeclarationNode getSimpleStatement(String responseType, String variable,
+                                                             String initializer) {
+        SimpleNameReferenceNode resTypeBind = createSimpleNameReferenceNode(createIdentifierToken(responseType));
+        CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(createIdentifierToken(variable));
+        TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(resTypeBind, bindingPattern);
+        SimpleNameReferenceNode init = createSimpleNameReferenceNode(createIdentifierToken(initializer));
+
+        return createVariableDeclarationNode(createEmptyNodeList(), null, typedBindingPatternNode,
+                createToken(EQUAL_TOKEN), init, createToken(SEMICOLON_TOKEN));
+    }
+
+    /*
+     * Generate expressionStatementNode.
+     */
+    public  ExpressionStatementNode getSimpleExpressionStatementNode(String expression) {
+        SimpleNameReferenceNode expressionNode = createSimpleNameReferenceNode(
+                createIdentifierToken(expression));
+        return createExpressionStatementNode(null, expressionNode, createToken(SEMICOLON_TOKEN));
     }
 }

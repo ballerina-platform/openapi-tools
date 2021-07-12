@@ -20,7 +20,9 @@ package io.ballerina.generators.common;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -37,14 +39,16 @@ import java.util.stream.Stream;
 public class SwaggerParserTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-    private BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+    private GeneratorUtils generatorUtils = new GeneratorUtils();
 
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Unsupported OAS data type .*")
+            expectedExceptionsMessageRegExp = "Couldn't read or parse the definition from file: .*")
     public void generateHandleUnsupportedData() throws  IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid.yaml");
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
     }
 
     //Get string as a content of ballerina file

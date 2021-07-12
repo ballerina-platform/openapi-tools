@@ -104,9 +104,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParame
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
-import static io.ballerina.generators.GeneratorUtils.buildUrl;
 import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
-import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
 import static io.ballerina.generators.GeneratorUtils.getListenerDeclarationNode;
 import static io.ballerina.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static io.ballerina.generators.GeneratorUtils.getRelativeResourcePath;
@@ -129,6 +127,7 @@ public class BallerinaServiceGenerator {
     private static final Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
     private static final MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
     private static final Token questionMark = createIdentifierToken("?");
+    private static GeneratorUtils generatorUtils = new GeneratorUtils();
 
     @Nonnull
     public static SyntaxTree generateSyntaxTree(Path definitionPath, String serviceName, Filter filter) throws
@@ -141,7 +140,7 @@ public class BallerinaServiceGenerator {
         // Add multiple imports
         NodeList<ImportDeclarationNode> imports = AbstractNodeFactory.createNodeList(importForHttp);
         // Summaries OpenAPI details
-        OpenAPI openApi = getBallerinaOpenApiType(definitionPath);
+        OpenAPI openApi = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         // Assign host port value to listeners
         String host;
         int port;
@@ -152,7 +151,7 @@ public class BallerinaServiceGenerator {
                 ServerVariables variables = server.getVariables();
                 URL url;
                 try {
-                    String resolvedUrl = buildUrl(server.getUrl(), variables);
+                    String resolvedUrl = generatorUtils.buildUrl(server.getUrl(), variables);
                     url = new URL(resolvedUrl);
                     host = url.getHost();
                     basePath = url.getPath();
@@ -225,7 +224,7 @@ public class BallerinaServiceGenerator {
                         if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
                             if (operationTags != null || ((!filterOperations.isEmpty())
                                     && (operation.getValue().getOperationId() != null))) {
-                                if (GeneratorUtils.hasTags(operationTags, filterTags) ||
+                                if (generatorUtils.hasTags(operationTags, filterTags) ||
                                         ((operation.getValue().getOperationId() != null) &&
                                         filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                                     // getRelative resource path

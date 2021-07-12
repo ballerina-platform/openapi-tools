@@ -20,12 +20,14 @@ import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.model.GenSrcFile;
+import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -288,11 +290,12 @@ public class CodeGeneratorTest {
 
     @Test
     public void escapeIdentifierTest() {
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("abc"), "abc");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("string"), "'string");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("int"), "'int");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("io.foo.bar"), "'io\\.foo\\.bar");
-        Assert.assertEquals(GeneratorUtils.escapeIdentifier("getV1CoreVersion"), "getV1CoreVersion");
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        Assert.assertEquals(generatorUtils.escapeIdentifier("abc"), "abc");
+        Assert.assertEquals(generatorUtils.escapeIdentifier("string"), "'string");
+        Assert.assertEquals(generatorUtils.escapeIdentifier("int"), "'int");
+        Assert.assertEquals(generatorUtils.escapeIdentifier("io.foo.bar"), "'io\\.foo\\.bar");
+        Assert.assertEquals(generatorUtils.escapeIdentifier("getV1CoreVersion"), "getV1CoreVersion");
 //        Assert.assertEquals(GeneratorUtils.escapeIdentifier
 //        ("sample_service_\\ \\!\\:\\[\\;"), "'sample_service_\\ \\!\\:\\[\\;");
 //        Assert.assertEquals(GeneratorUtils.escapeIdentifier
@@ -301,11 +304,12 @@ public class CodeGeneratorTest {
 
     @Test
     public void escapeTypeTest() {
-        Assert.assertEquals(GeneratorUtils.escapeType("abc"), "abc");
-        Assert.assertEquals(GeneratorUtils.escapeType("string"), "string");
-        Assert.assertEquals(GeneratorUtils.escapeType("int"), "int");
-        Assert.assertEquals(GeneratorUtils.escapeType("io.foo.bar"), "'io\\.foo\\.bar");
-        Assert.assertEquals(GeneratorUtils.escapeType("getV1CoreVersion"), "getV1CoreVersion");
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        Assert.assertEquals(generatorUtils.escapeType("abc"), "abc");
+        Assert.assertEquals(generatorUtils.escapeType("string"), "string");
+        Assert.assertEquals(generatorUtils.escapeType("int"), "int");
+        Assert.assertEquals(generatorUtils.escapeType("io.foo.bar"), "'io\\.foo\\.bar");
+        Assert.assertEquals(generatorUtils.escapeType("getV1CoreVersion"), "getV1CoreVersion");
     }
 
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
@@ -321,6 +325,8 @@ public class CodeGeneratorTest {
             Files.deleteIfExists(resourcePath.resolve(filename));
             Files.deleteIfExists(resourcePath.resolve("client.bal"));
             Files.deleteIfExists(resourcePath.resolve("types.bal"));
+            Files.deleteIfExists(resourcePath.resolve("test.bal"));
+            FileUtils.deleteDirectory(new File(resourcePath + "/tests"));
         } catch (IOException e) {
             //Ignore the exception
         }

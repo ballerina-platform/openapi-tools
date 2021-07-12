@@ -29,11 +29,12 @@ under the License.
             <class name="io.ballerina.openapi.cmd.OpenApiGenServiceCmdTest"/>
             <class name="io.ballerina.openapi.CodeGeneratorTest"/>
             <class name="io.ballerina.generators.common.GeneratorUtilsTests"/>
+            <class name="io.ballerina.generators.common.SwaggerParserTests"></class>
             <class name="io.ballerina.generators.service.BallerinaServiceGeneratorTest"/>
-            <class name="io.ballerina.generators.client.ComparedGeneratedFileTests"/>
             <class name="io.ballerina.generators.client.ImportsTests"/>
             <class name="io.ballerina.generators.client.BallerinaDiagnosticTests"/>
             <class name="io.ballerina.generators.client.ComparedGeneratedFileTests"/>
+            <class name="io.ballerina.generators.client.DisplayAnnotationTests"/>
             <class name="io.ballerina.generators.client.FunctionBodyNodeTests"/>
             <class name="io.ballerina.generators.client.FunctionSignatureNodeTests"/>
             <class name="io.ballerina.generators.client.FunctionSignatureReturnTypeTests"/>
@@ -42,6 +43,7 @@ under the License.
             <class name="io.ballerina.generators.client.PathParameterTests"/>
             <class name="io.ballerina.generators.client.AllOfResponsesTests"/>
             <class name="io.ballerina.generators.client.QueryParameterTests"/>
+            <class name="io.ballerina.generators.client.RequestBodyTests"></class>
             <class name="io.ballerina.generators.auth.HttpAuthTests"/>
             <class name="io.ballerina.generators.auth.OAuth2Tests"/>
             <class name="io.ballerina.generators.auth.ApiKeyAuthTests"/>
@@ -56,7 +58,8 @@ under the License.
             <class name="io.ballerina.generators.schema.RecordDataTypeTests"/>
             <class name="io.ballerina.generators.schema.ReferenceResolveTests"/>
             <class name="io.ballerina.generators.schema.SwaggerFileParserTests"/>
-<!--            <class name="io.ballerina.generators.schema.SwaggerParserTests"/>-->
+            <class name="io.ballerina.generators.testcases.BallerinaTestGeneratorTests"></class>
+            <!--            <class name="io.ballerina.generators.schema.SwaggerParserTests"/>-->
         </classes>
     </test>
 </suite>

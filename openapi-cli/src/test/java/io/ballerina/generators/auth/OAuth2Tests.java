@@ -20,6 +20,8 @@ package io.ballerina.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.generators.GeneratorUtils;
+import io.ballerina.generators.client.BallerinaAuthConfigGenerator;
 import io.ballerina.generators.common.TestConstants;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -35,8 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.ballerina.generators.GeneratorUtils.getBallerinaOpenApiType;
-
 /**
  * All the tests related to the auth related code snippet generation for http or oauth 2.0 mechanisms.
  */
@@ -45,16 +45,20 @@ public class OAuth2Tests {
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
+    BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false,
+            true);
 
     @Test(description = "Generate config record for OAuth 2.0 authorization code flow",
             dataProvider = "oAuth2IOProvider")
     public void testGetConfigRecord(String yamlFile, String configRecord) throws IOException,
             BallerinaOpenApiException {
+
+        GeneratorUtils generatorUtils = new GeneratorUtils();
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2/" + yamlFile);
-        OpenAPI openAPI = getBallerinaOpenApiType(definitionPath);
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedConfigRecord = configRecord;
         String generatedConfigRecord = Objects.requireNonNull(
-                BallerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
+                ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);
@@ -66,7 +70,7 @@ public class OAuth2Tests {
     public void testGetConfigParamForClassInit() {
         String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = BallerinaAuthConfigGenerator.getConfigParamForClassInit();
+        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }
@@ -79,7 +83,7 @@ public class OAuth2Tests {
             dependsOnMethods = {"testGetConfigRecord"})
     public void testGetSecureSocketInitNode() {
         String expectedParam = TestConstants.SSL_ASSIGNMENT;
-        VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getSecureSocketInitNode();
+        VariableDeclarationNode generatedInitParamNode = ballerinaAuthConfigGenerator.getSecureSocketInitNode();
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
         String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedParam, generatedParamsStr);
@@ -89,7 +93,7 @@ public class OAuth2Tests {
             dependsOnMethods = {"testGetConfigRecord"})
     public void testGetClientInitializationNode() {
         String expectedParam = TestConstants.HTTP_CLIENT_DECLARATION;
-        VariableDeclarationNode generatedInitParamNode = BallerinaAuthConfigGenerator.getClientInitializationNode();
+        VariableDeclarationNode generatedInitParamNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
         String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedParam, generatedParamsStr);
