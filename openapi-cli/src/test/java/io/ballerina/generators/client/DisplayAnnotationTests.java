@@ -30,27 +30,26 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import static io.ballerina.generators.client.BallerinaClientGenerator.extractDisplayAnnotation;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
  * All the tests related to the Display Annotation in the generated code related to the
- * {@link io.ballerina.generators.client.BallerinaClientGenerator}
+ * {@link BallerinaClientGenerator}
  * util.
  */
 public class DisplayAnnotationTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
-
+    private static final Path RESDIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
+    private DocCommentsGenerator docCommentsGenerator = new DocCommentsGenerator();
     @Test(description = "Display Annotation tests for parameters")
     public void extractDisplayAnnotationTests() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/openapi_display_annotation.yaml");
+        Path definitionPath = RESDIR.resolve("swagger/openapi_display_annotation.yaml");
         OpenAPI display = getOpenAPI(definitionPath);
         Map<String, Object> param01 =
                 display.getPaths().get("/weather").getGet().getParameters().get(0).getExtensions();
         Map<String, Object> param02 =
                 display.getPaths().get("/weather").getGet().getParameters().get(1).getExtensions();
-        NodeList<AnnotationNode> annotationNodes01 = extractDisplayAnnotation(param01);
-        NodeList<AnnotationNode> annotationNodes02 = extractDisplayAnnotation(param02);
+        NodeList<AnnotationNode> annotationNodes01 = docCommentsGenerator.extractDisplayAnnotation(param01);
+        NodeList<AnnotationNode> annotationNodes02 = docCommentsGenerator.extractDisplayAnnotation(param02);
         Assert.assertEquals(annotationNodes01.get(0).annotValue().orElseThrow().toString().trim(),
                 "{label:\"City name\"}");
         Assert.assertTrue(annotationNodes02.isEmpty());

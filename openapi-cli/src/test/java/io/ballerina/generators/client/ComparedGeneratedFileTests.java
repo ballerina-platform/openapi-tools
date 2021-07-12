@@ -19,9 +19,11 @@
 package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -52,21 +54,14 @@ public class ComparedGeneratedFileTests {
 
     @Test(description = "Generate Client for path parameter has parameter name as key word", enabled = false)
     public void generateClientForJira() throws IOException, BallerinaOpenApiException, FormatterException {
-//        Path definitionPath = RES_DIR.resolve("swagger/return_type/inline_all_of_response.yaml");
-        Path definitionPath = RES_DIR.resolve("file_provider/swagger/uber_openapi.yaml");
+        Path definitionPath = RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml");
+//        Path definitionPath = RES_DIR.resolve("file_provider/swagger/multiple_pathparam.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/jira_openapi.bal");
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
-    }
-
-    @Test(description = "Generate Client for salesforce yaml", enabled = false)
-    public void generateClientForSalesForce() throws IOException, BallerinaOpenApiException, FormatterException {
-        Path definitionPath = RES_DIR.resolve("swagger/salesforce.yaml");
-        Path expectedPath = RES_DIR.resolve("/ballerina/salesforce.bal");
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -77,8 +72,11 @@ public class ComparedGeneratedFileTests {
             BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/" + yamlFile);
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/" + expectedFile);
-        syntaxTree = BallerinaClientGenerator.generateSyntaxTree(definitionPath, filter);
-        List<Diagnostic> diagnostics = getDiagnostics(definitionPath, syntaxTree);
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }

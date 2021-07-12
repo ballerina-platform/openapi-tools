@@ -19,6 +19,7 @@
 package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
+import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -38,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static io.ballerina.generators.client.BallerinaClientGenerator.getFunctionBodyNode;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
@@ -61,7 +61,10 @@ public class FunctionBodyNodeTests {
         Set<Map.Entry<PathItem.HttpMethod, Operation>> operation =
                 display.getPaths().get(path).readOperationsMap().entrySet();
         Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
-        FunctionBodyNode bodyNode = getFunctionBodyNode(path, iterator.next());
+        FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(new ArrayList<>(),
+                false, false, new ArrayList<>(), display, new BallerinaSchemaGenerator(display),
+                new BallerinaAuthConfigGenerator(false, false));
+        FunctionBodyNode bodyNode = functionBodyGenerator.getFunctionBodyNode(path, iterator.next());
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
         String bodyNodeContent = bodyNode.toString().trim().replaceAll("\n", "")
                 .replaceAll("\\s+", "");
@@ -76,6 +79,7 @@ public class FunctionBodyNodeTests {
                         "targetType=http:Response);}"}
         };
     }
+    //TODO:Different mediaType
 
     @AfterTest
     private void deleteGeneratedFiles() {

@@ -133,7 +133,7 @@ tags:
     description: "Get data related to weather forecast"
 
 externalDocs:
-  description: API Documentation
+  description: API DocCommentsGenerator
   url: https://openweathermap.org/api
 
 components:

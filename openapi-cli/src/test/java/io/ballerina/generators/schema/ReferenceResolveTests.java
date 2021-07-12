@@ -21,7 +21,9 @@ package io.ballerina.generators.schema;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.generators.common.TestUtils;
+import io.ballerina.openapi.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -33,18 +35,24 @@ import java.nio.file.Paths;
  */
 public class ReferenceResolveTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+    CodeGenerator codeGenerator = new CodeGenerator();
 
     @Test(description = "Tests with object type include reference")
     public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException {
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(RES_DIR.resolve("swagger/world_bank.yaml"));
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/world_bank.bal", syntaxTree);
     }
 
     @Test(description = "Test for object data type when absent reference and properties fields")
     public void testWorldBank() throws IOException, BallerinaOpenApiException {
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/object_without_fields_reference.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/object_without_fields_reference.bal", syntaxTree);
     }

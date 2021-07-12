@@ -1,0 +1,1435 @@
+openapi: 3.0.1
+servers:
+  - url: https://api.spotify.com/v1
+info:
+  title: Spotify Web API
+  version: 0.1.0
+  x-display:
+    label: "Spotify Client"
+externalDocs:
+  description: Find more info on the official Spotify Web API Reference
+  url: https://developer.spotify.com/documentation/web-api/reference
+tags:
+  - description: Playlists API
+    externalDocs:
+      description: Find more info on the official Spotify Web API Reference
+      url: https://developer.spotify.com/documentation/web-api/reference/#category-playlists
+    name: category-playlists
+paths:
+  /me/playlists:
+    get:
+      description: |-
+        Get a list of the playlists owned or followed by the current Spotify
+        user.
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-get-a-list-of-current-users-playlists
+      operationId: getMyPlaylists
+      x-display:
+        label: "My Playlists"
+      parameters:
+        - description: "'The maximum number of playlists to return. Default: 20. Minimum: 1. Maximum: 50.'"
+          in: query
+          name: limit
+          required: false
+          schema:
+            format: int32
+            type: integer
+          x-display:
+            label: "Limit"
+        - description: "'The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with `limit` to get the next set of playlists.'"
+          in: query
+          name: offset
+          required: false
+          schema:
+            format: int32
+            type: integer
+          x-display:
+            label: "Offset"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentPlaylistDetails"
+          description: On success, the HTTP status code in the response header is `200` OK and the response body contains an array of simplified [playlist objects](https://developer.spotify.com/documentation/web-api/reference/#object-simplifiedplaylistobject) (wrapped in a [paging object](https://developer.spotify.com/documentation/web-api/reference/#object-pagingobject)) in JSON format. On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes) and the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema). Please note that the access token has to be tied to a user.
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      security:
+        - spotify_auth:
+            - playlist-read-private
+            - playlist-read-collaborative
+      summary: Get a List of Current User's Playlists
+      tags:
+        - category-playlists
+  /playlists/{playlist_id}:
+    get:
+      description: Get a playlist owned by a Spotify user.
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-get-playlist
+      operationId: getPlaylistById
+      x-display:
+        label: "Playlist By Id"
+      parameters:
+        - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
+          in: path
+          name: playlist_id
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "Playlist Id"
+        - description: |-
+            An [ISO 3166-1 alpha-2 country code](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) or the string `from_token`. Provide this parameter if you want to apply [Track
+            Relinking](https://developer.spotify.com/documentation/general/guides/track-relinking-guide/). For episodes, if a valid user access token is specified in the request header, the country associated with the user account will take priority over this parameter.
+            *Note: If neither market or user country are provided, the episode is considered unavailable for the client.*
+          in: query
+          name: market
+          required: false
+          schema:
+            type: string
+          x-display:
+            label: "Market"
+        - description: "Filters for the query: a comma-separated list of the fields to return. If omitted, all fields are returned. For example, to get just the playlist''s description and URI: `fields=description,uri`. A dot separator can be used to specify non-reoccurring fields, while parentheses can be used to specify reoccurring fields within objects. For example, to get just the added date and user ID of the adder: `fields=tracks.items(added_at,added_by.id)`. Use multiple parentheses to drill down into nested objects, for example: `fields=tracks.items(track(name,href,album(name,href)))`. Fields can be excluded by prefixing them with an exclamation mark, for example: `fields=tracks.items(track(name,href,album(!name,href)))`"
+          in: query
+          name: fields
+          required: false
+          schema:
+            type: string
+          x-display:
+            label: "Fields to Return"
+        - description: "A comma-separated list of item types that your client supports besides the default `track` type. Valid types are: `track` and `episode`. **Note** : This parameter was introduced to allow existing clients to maintain their current behaviour and might be deprecated in the future. In addition to providing this parameter, make sure that your client properly handles cases of new types in the future by checking against the `type` field of each object."
+          in: query
+          name: additional_types
+          required: false
+          schema:
+            type: string
+          x-display:
+            label: "Additional Types"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaylistObject"
+          description: On success, the response body contains a [playlist object](https://developer.spotify.com/documentation/web-api/reference/#object-playlistobject) in JSON format and the HTTP status code in the response header is `200` OK. If an episode is unavailable in the given `market`, its information will not be included in the response. On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes) and the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema). Requesting playlists that you do not have the user's authorization to access returns error `403` Forbidden.
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      security:
+        - spotify_auth: []
+      summary: Get a Playlist
+      tags:
+        - category-playlists
+    put:
+      description: |-
+        Change a playlist's name and public/private state. (The user must, of
+        course, own the playlist.)
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-change-playlist-details
+      operationId: updatePlaylist
+      x-display:
+        label: "Update Playlist"
+      parameters:
+        - description: "The content type of the request body: `application/json`"
+          in: header
+          name: Content-Type
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "Content Type"
+        - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
+          in: path
+          name: playlist_id
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "Playlist Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Content to update the playlist
+              $ref: "#/components/schemas/ChangePlayListDetails"
+              type: object
+        required: false
+      responses:
+        "200":
+          description: |-
+            On success the HTTP status code in the response header is `200` OK.
+
+            On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes) and the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema). Trying to change a playlist when you do not have the user's authorization returns error `403` Forbidden.
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      security:
+        - spotify_auth:
+            - playlist-modify-public
+            - playlist-modify-private
+      summary: Change a Playlist's Details
+      tags:
+        - category-playlists
+  /playlists/{playlist_id}/images:
+    get:
+      description: Get the current image associated with a specific playlist.
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-get-playlist-cover
+      operationId: getPlaylistCover
+      x-display:
+        label: "Playlist Cover"
+      parameters:
+        - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
+          in: path
+          name: playlist_id
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "Playlist Id"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ImageObject"
+                type: array
+          description: |-
+            On success, the response body contains a list of [image objects](https://developer.spotify.com/documentation/web-api/reference/#object-imageobject) in JSON format and the HTTP status code in the response header is `200` OK
+            On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes) and the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema).
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      security:
+        - spotify_auth: []
+      summary: Get a Playlist Cover Image
+      tags:
+        - category-playlists
+    put:
+      description: Replace the image used to represent a specific playlist.
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-upload-custom-playlist-cover
+      operationId: updatePlaylistCover
+      x-display:
+        label: "Update Playlist Cover"
+      parameters:
+        - description: "The content type of the request body: `image/jpeg`"
+          in: header
+          name: Content-Type
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "Content Type"
+        - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
+          in: path
+          name: playlist_id
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "Playlist Id"
+      responses:
+        "202":
+          description: |-
+            If you get status code `429`, it means that you have sent too many requests.
+            If this happens, have a look in the `Retry-After` header, where you will see a number displayed.
+            This is the amount of seconds that you need to wait, before you can retry sending your requests.
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      security:
+        - spotify_auth:
+            - ugc-image-upload
+            - playlist-modify-public
+            - playlist-modify-private
+      summary: Upload a Custom Playlist Cover Image
+      tags:
+        - category-playlists
+  /playlists/{playlist_id}/tracks:
+    get:
+      description: Get full details of the items of a playlist owned by a Spotify user.
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-get-playlists-tracks
+      operationId: getPlaylistTracks
+      x-display:
+        label: "Playlist Tracks"
+      parameters:
+        - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
+          in: path
+          name: playlist_id
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "Playlist Id"
+        - description: |-
+            An [ISO 3166-1 alpha-2 country code](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) or the string `from_token`. Provide this parameter if you want to apply [Track
+            Relinking](https://developer.spotify.com/documentation/general/guides/track-relinking-guide/). For episodes, if a valid user access token is specified in the request header, the country associated with the user account will take priority over this parameter.
+            *Note: If neither market or user country are provided, the episode is considered unavailable for the client.*
+          in: query
+          name: market
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "Market"
+        - description: |-
+            Filters for the query: a comma-separated list of the fields to return. If omitted, all fields are returned. For example, to get just the total number of items and the request limit:
+            `fields=total,limit`
+            A dot separator can be used to specify non-reoccurring fields, while parentheses can be used to specify reoccurring fields within objects. For example, to get just the added date and user ID of the adder:
+            `fields=items(added_at,added_by.id)`
+            Use multiple parentheses to drill down into nested objects, for example:
+            `fields=items(track(name,href,album(name,href)))`
+            Fields can be excluded by prefixing them with an exclamation mark, for example:
+            `fields=items.track.album(!external_urls,images)`
+          in: query
+          name: fields
+          required: false
+          schema:
+            type: string
+          x-display:
+            label: "Fields to Return"
+        - description: "The maximum number of items to return. Default: 100. Minimum: 1. Maximum: 100."
+          in: query
+          name: limit
+          required: false
+          schema:
+            format: int32
+            type: integer
+          x-display:
+            label: "Limit"
+        - description: "The index of the first item to return. Default: 0 (the first object)."
+          in: query
+          name: offset
+          required: false
+          schema:
+            format: int32
+            type: integer
+          x-display:
+            label: "Offset"
+        - description: "A comma-separated list of item types that your client supports besides the default `track` type. Valid types are: `track` and `episode`. **Note** : This parameter was introduced to allow existing clients to maintain their current behaviour and might be deprecated in the future. In addition to providing this parameter, make sure that your client properly handles cases of new types in the future by checking against the `type` field of each object."
+          in: query
+          name: additional_types
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaylistTrackDetails"
+          description: On success, the response body contains an array of [track objects](https://developer.spotify.com/documentation/web-api/reference/#object-simplifiedtrackobject) and [episode objects](https://developer.spotify.com/documentation/web-api/reference/#object-simplifiedepisodeobject) (depends on the `additional_types` parameter), wrapped in a [paging object](https://developer.spotify.com/documentation/web-api/reference/#object-pagingobject) in JSON format and the HTTP status code in the response header is `200` OK. If an episode is unavailable in the given `market`, its information will not be included in the response. On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes) and the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema). Requesting playlists that you do not have the user's authorization to access returns error `403` Forbidden.
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      security:
+        - spotify_auth: []
+      summary: Get a Playlist's Items
+      tags:
+        - category-playlists
+    put:
+      description: |-
+        Either reorder or replace items in a playlist depending on the request's parameters.
+        To reorder items, include `range_start`, `insert_before`, `range_length` and `snapshot_id` in the request's body.
+        To replace items, include `uris` as either a query parameter or in the request's body.
+        Replacing items in a playlist will overwrite its existing items. This operation can be used for replacing or clearing items in a playlist.
+
+
+        **Note**: Replace and reorder are mutually exclusive operations which share the same endpoint, but have different parameters.
+        These operations can't be applied together in a single request.
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-reorder-or-replace-playlists-tracks
+      operationId: reorderOrReplacePlaylistTracks
+      x-display:
+        label: "Reorder or Replace Tracks"
+      parameters:
+        - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
+          in: path
+          name: playlist_id
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "Playlist Id"
+        - description: |-
+            A comma-separated list of [Spotify URIs](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) to set, can be track or episode URIs. For example: `uris=spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:track:1301WleyT98MSxVHPZCA6M,spotify:episode:512ojhOuo1ktJprKbVcKyQ`
+            A maximum of 100 items can be set in one request.
+          in: query
+          name: uris
+          required: false
+          schema:
+            type: string
+          x-display:
+            label: "Track URIs"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Information needed to reorder the playlist
+              $ref: "#/components/schemas/PlayListReorderDetails"
+        required: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnapshotIdObject"
+          description: |-
+            On a successful **reorder** operation, the response body contains a `snapshot_id` in JSON format
+            and the HTTP status code in the response header is `200` OK. The `snapshot_id`
+            can be used to identify your playlist version in future requests.
+
+            On a successful **replace** operation, the HTTP status code in the response header is `201`
+            Created.
+
+            On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes),
+            the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema),
+            and the existing playlist is unmodified.
+            Trying to set an item when you do not have the user's authorization returns error `403` Forbidden.
+        "201":
+          description: |-
+            On a successful **reorder** operation, the response body contains a `snapshot_id` in JSON format
+            and the HTTP status code in the response header is `200` OK. The `snapshot_id`
+            can be used to identify your playlist version in future requests.
+
+            On a successful **replace** operation, the HTTP status code in the response header is `201`
+            Created.
+
+            On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes),
+            the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema),
+            and the existing playlist is unmodified.
+            Trying to set an item when you do not have the user's authorization returns error `403` Forbidden.
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      security:
+        - spotify_auth:
+            - playlist-modify-public
+            - playlist-modify-private
+      summary: Reorder or Replace a Playlist's Items
+      tags:
+        - category-playlists
+  /users/{user_id}/playlists:
+    get:
+      description: Get a list of the playlists owned or followed by a Spotify user.
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-get-list-users-playlists
+      operationId: getPlayslistsByUserID
+      x-display:
+        label: "Playlist By User Id"
+      parameters:
+        - description: The user's [Spotify user ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids).
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "User Id"
+        - description: "The maximum number of playlists to return. Default: 20. Minimum: 1. Maximum: 50."
+          in: query
+          name: limit
+          required: false
+          schema:
+            format: int32
+            type: integer
+          x-display:
+            label: "Limit"
+        - description: "The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with `limit` to get the next set of playlists."
+          in: query
+          name: offset
+          required: false
+          schema:
+            format: int32
+            type: integer
+          x-display:
+            label: "Offset"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPlayListDetails"
+          description: On success, the HTTP status code in the response header is `200` OK and the response body contains an array of simplified [playlist objects](https://developer.spotify.com/documentation/web-api/reference/#object-simplifiedplaylistobject) (wrapped in a [paging object](https://developer.spotify.com/documentation/web-api/reference/#object-pagingobject)) in JSON format. On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes) and the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema).
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      security:
+        - spotify_auth:
+            - playlist-read-private
+            - playlist-read-collaborative
+      summary: Get a List of a User's Playlists
+      tags:
+        - category-playlists
+    post:
+      description: |-
+        Create a playlist for a Spotify user. (The playlist will be empty until
+        you [add tracks](https://developer.spotify.com/documentation/web-api/reference/#endpoint-add-tracks-to-playlist).)
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-create-playlist
+      operationId: createPlaylist
+      x-display:
+        label: "Create Playlist"
+      parameters:
+        - description: The user's [Spotify user ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids).
+          in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: "User Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Content of the playlist
+              $ref: "#/components/schemas/PlayListDetails"
+              type: object
+              required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaylistObject"
+          description: |-
+            On success, the response body contains the created [playlist object](https://developer.spotify.com/documentation/web-api/reference/#object-playlistobject)
+            in JSON format and the HTTP status code in the response header is `200` OK or
+            `201` Created. There is also a `Location` response header giving the Web API
+            endpoint for the new playlist.
+
+            On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes) and the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema). Trying to create a playlist when you do not have the user's authorization returns error `403` Forbidden.
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaylistObject"
+          description: |-
+            On success, the response body contains the created [playlist object](https://developer.spotify.com/documentation/web-api/reference/#object-playlistobject)
+            in JSON format and the HTTP status code in the response header is `200` OK or
+            `201` Created. There is also a `Location` response header giving the Web API
+            endpoint for the new playlist.
+
+            On error, the header status code is an [error code](https://developer.spotify.com/documentation/web-api/#response-status-codes) and the response body contains an [error object](https://developer.spotify.com/documentation/web-api/#response-schema). Trying to create a playlist when you do not have the user's authorization returns error `403` Forbidden.
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      security:
+        - spotify_auth:
+            - playlist-modify-public
+            - playlist-modify-private
+      summary: Create a Playlist
+      tags:
+        - category-playlists
+components:
+  responses:
+    ErrorResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponseObject"
+      description: Unexpected error
+  schemas:
+    PlayListDetails:
+      description: Playlist details
+      properties:
+        collaborative:
+          description: Defaults to `false` . If `true` the playlist will be collaborative. Note that to create a collaborative playlist you must also set `public` to `false` . To create collaborative playlists you must have granted `playlist-modify-private` and `playlist-modify-public` [scopes](https://developer.spotify.com/documentation/general/guides/authorization-guide/#list-of-scopes) .
+          type: boolean
+        description:
+          description: value for playlist description as displayed in Spotify Clients and in the Web API.
+          type: string
+        name:
+          description: The name for the new playlist, for example `"Your Coolest Playlist"` . This name does not need to be unique; a user may have several playlists with the same name.
+          type: string
+        public:
+          description: Defaults to `true` . If `true` the playlist will be public, if `false` it will be private. To be able to create private playlists, the user must have granted the `playlist-modify-private` [scope](https://developer.spotify.com/documentation/general/guides/authorization-guide/#list-of-scopes)
+          type: boolean
+      required:
+        - name
+      type: object
+    UserPlayListDetails:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-pagingobject
+      properties:
+        href:
+          description: A link to the Web API endpoint returning the full result of the request
+          type: string
+        items:
+          description: The requested data.
+          items:
+            $ref: "#/components/schemas/SimplifiedPlaylistObject"
+          type: array
+        limit:
+          description: The maximum number of items in the response (as set in the query or by default).
+          format: int32
+          type: integer
+        next:
+          description: URL to the next page of items. ( `null` if none)
+          type: string
+          nullable: true
+        offset:
+          description: The offset of the items returned (as set in the query or by default)
+          format: int32
+          type: integer
+        previous:
+          description: URL to the previous page of items. ( `null` if none)
+          type: string
+          nullable: true
+        total:
+          description: The total number of items available to return.
+          format: int32
+          type: integer
+      type: object
+    PlaylistTrackInsertionDetails:
+      properties:
+        position:
+          description: 'The position to insert the items, a zero-based index. For example, to insert the items in the first position: `position=0` ; to insert the items in the third position: `position=2`. If omitted, the items will be appended to the playlist. Items are added in the order they appear in the uris array. For example: `{"uris": ["spotify:track:4iV5W9uYEdYUVa79Axb7Rh","spotify:track:1301WleyT98MSxVHPZCA6M"], "position": 3}`'
+          format: int32
+          type: integer
+        uris:
+          description: |-
+            A JSON array of the [Spotify URIs](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) to add. For example: `{"uris": ["spotify:track:4iV5W9uYEdYUVa79Axb7Rh","spotify:track:1301WleyT98MSxVHPZCA6M", "spotify:episode:512ojhOuo1ktJprKbVcKyQ"]}`
+            A maximum of 100 items can be added in one request. *Note: if the `uris` parameter is present in the query string, any URIs listed here in the body will be ignored.*
+          items:
+            type: string
+          type: array
+      type: object
+    PlayListReorderDetails:
+      description: Information needed to reorder the playlist
+      properties:
+        insert_before:
+          description: |-
+            The position where the items should be inserted.
+            To reorder the items to the end of the playlist, simply set *insert_before* to the position after the last item.
+            Examples:
+            To reorder the first item to the last position in a playlist with 10 items, set *range_start* to 0, and *insert_before* to 10.
+            To reorder the last item in a playlist with 10 items to the start of the playlist, set *range_start* to 9, and *insert_before* to 0.
+          format: int32
+          type: integer
+        range_length:
+          description: |-
+            The amount of items to be reordered. Defaults to 1 if not set.
+            The range of items to be reordered begins from the *range_start* position, and includes the *range_length* subsequent items.
+            Example:
+            To move the items at index 9-10 to the start of the playlist, *range_start* is set to 9, and *range_length* is set to 2.
+          format: int32
+          type: integer
+        range_start:
+          description: The position of the first item to be reordered.
+          format: int32
+          type: integer
+        snapshot_id:
+          description: The playlist's snapshot ID against which you want to make the changes.
+          type: string
+        uris:
+          description: |-
+            A comma-separated list of [Spotify URIs](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) to set, can be track or episode URIs. For example: `uris=spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:track:1301WleyT98MSxVHPZCA6M,spotify:episode:512ojhOuo1ktJprKbVcKyQ`
+            A maximum of 100 items can be set in one request.
+          items:
+            type: string
+          type: array
+      type: object
+    PlaylistTrackDetails:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-pagingobject
+      properties:
+        href:
+          description: A link to the Web API endpoint returning the full result of the request
+          type: string
+        items:
+          description: The requested data.
+          items:
+            $ref: "#/components/schemas/PlaylistTrackObject"
+          type: array
+        limit:
+          description: The maximum number of items in the response (as set in the query or by default).
+          format: int32
+          type: integer
+        next:
+          description: URL to the next page of items. ( `null` if none)
+          type: string
+          nullable: true
+        offset:
+          description: The offset of the items returned (as set in the query or by default)
+          format: int32
+          type: integer
+        previous:
+          description: URL to the previous page of items. ( `null` if none)
+          type: string
+          nullable: true
+        total:
+          description: The total number of items available to return.
+          format: int32
+          type: integer
+      type: object
+    ChangePlayListDetails:
+      description: Content to update the playlist
+      properties:
+        collaborative:
+          description: "If `true` , the playlist will become collaborative and other users will be able to modify the playlist in their Spotify client. *Note: You can only set `collaborative` to `true` on non-public playlists.*"
+          type: boolean
+        description:
+          description: Value for playlist description as displayed in Spotify Clients and in the Web API.
+          type: string
+        name:
+          description: The new name for the playlist, for example `"My New Playlist Title"`
+          type: string
+        public:
+          description: If `true` the playlist will be public, if `false` it will be private.
+          type: boolean
+      type: object
+    CurrentPlaylistDetails:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-pagingobject
+      properties:
+        href:
+          description: A link to the Web API endpoint returning the full result of the request
+          type: string
+        items:
+          description: The requested data.
+          items:
+            $ref: "#/components/schemas/SimplifiedPlaylistObject"
+          type: array
+        limit:
+          description: The maximum number of items in the response (as set in the query or by default).
+          format: int32
+          type: integer
+        next:
+          description: URL to the next page of items. ( `null` if none)
+          type: string
+          nullable: true
+        offset:
+          description: The offset of the items returned (as set in the query or by default)
+          format: int32
+          type: integer
+        previous:
+          description: URL to the previous page of items. ( `null` if none)
+          type: string
+          nullable: true
+        total:
+          description: The total number of items available to return.
+          format: int32
+          type: integer
+    PlaylistObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-playlistobject
+      properties:
+        collaborative:
+          description: "`true` if the owner allows other users to modify the playlist."
+          type: boolean
+        description:
+          description: The playlist description. *Only returned for modified, verified playlists, otherwise* `null`.
+          type: string
+        external_urls:
+          $ref: "#/components/schemas/ExternalUrlObject"
+        followers:
+          $ref: "#/components/schemas/FollowersObject"
+        href:
+          description: A link to the Web API endpoint providing full details of the playlist.
+          type: string
+        id:
+          description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
+          type: string
+        images:
+          description: "Images for the playlist. The array may be empty or contain up to three images. The images are returned by size in descending order. See [Working with Playlists](https://developer.spotify.com/documentation/general/guides/working-with-playlists/). *Note: If returned, the source URL for the image (`url`) is temporary and will expire in less than a day.*"
+          items:
+            $ref: "#/components/schemas/ImageObject"
+          type: array
+        name:
+          description: The name of the playlist.
+          type: string
+        owner:
+          $ref: "#/components/schemas/PublicUserObject"
+        public:
+          description: "The playlist's public/private status: `true` the playlist is public, `false` the playlist is private, `null` the playlist status is not relevant. For more about public/private status, see [Working with Playlists](https://developer.spotify.com/documentation/general/guides/working-with-playlists/)"
+          type: boolean
+        snapshot_id:
+          description: The version identifier for the current playlist. Can be supplied in other requests to target a specific playlist version
+          type: string
+        tracks:
+          description: Information about the tracks of the playlist. Note, a track object may be `null`. This can happen if a track is no longer available.
+          externalDocs:
+            description: Find more info on the official Spotify Web API Reference
+            url: https://developer.spotify.com/documentation/web-api/reference/#object-pagingobject
+          properties:
+            href:
+              description: A link to the Web API endpoint returning the full result of the request
+              type: string
+            items:
+              description: The requested data.
+              items:
+                $ref: "#/components/schemas/PlaylistTrackObject"
+              type: array
+            limit:
+              description: The maximum number of items in the response (as set in the query or by default).
+              format: int32
+              type: integer
+            next:
+              description: URL to the next page of items. ( `null` if none)
+              type: string
+              nullable: true
+            offset:
+              description: The offset of the items returned (as set in the query or by default)
+              format: int32
+              type: integer
+            previous:
+              description: URL to the previous page of items. ( `null` if none)
+              type: string
+              nullable: true
+            total:
+              description: The total number of items available to return.
+              format: int32
+              type: integer
+          type: object
+        type:
+          description: 'The object type: "playlist"'
+          type: string
+        uri:
+          description: The [Spotify URI](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
+          type: string
+      type: object
+    ImageObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-imageobject
+      properties:
+        height:
+          description: "The image height in pixels. If unknown: `null` or not returned."
+          format: int32
+          type: integer
+        url:
+          description: The source URL of the image.
+          type: string
+        width:
+          description: "The image width in pixels. If unknown: `null` or not returned."
+          format: int32
+          type: integer
+      type: object
+    SnapshotIdObject:
+      properties:
+        snapshot_id:
+          description: The snapshot_id can be used to identify your playlist version in future requests.
+          type: string
+      type: object
+    ErrorResponseObject:
+      properties:
+        error:
+          $ref: "#/components/schemas/ErrorObject"
+      type: object
+    SimplifiedPlaylistObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-simplifiedplaylistobject
+      properties:
+        collaborative:
+          description: "`true` if the owner allows other users to modify the playlist."
+          type: boolean
+        description:
+          description: The playlist description. *Only returned for modified, verified playlists, otherwise* `null`.
+          type: string
+        external_urls:
+          $ref: "#/components/schemas/ExternalUrlObject"
+        href:
+          description: A link to the Web API endpoint providing full details of the playlist.
+          type: string
+        id:
+          description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
+          type: string
+        images:
+          description: "Images for the playlist. The array may be empty or contain up to three images. The images are returned by size in descending order. See [Working with Playlists](https://developer.spotify.com/documentation/general/guides/working-with-playlists/). *Note: If returned, the source URL for the image (`url`) is temporary and will expire in less than a day.*"
+          items:
+            $ref: "#/components/schemas/ImageObject"
+          type: array
+        name:
+          description: The name of the playlist.
+          type: string
+        owner:
+          $ref: "#/components/schemas/PublicUserObject"
+        public:
+          description: "The playlist's public/private status: `true` the playlist is public, `false` the playlist is private, `null` the playlist status is not relevant. For more about public/private status, see [Working with Playlists](https://developer.spotify.com/documentation/general/guides/working-with-playlists/)"
+          type: boolean
+        snapshot_id:
+          description: The version identifier for the current playlist. Can be supplied in other requests to target a specific playlist version
+          type: string
+        tracks:
+          $ref: "#/components/schemas/PlaylistTracksRefObject"
+        type:
+          description: 'The object type: "playlist"'
+          type: string
+        uri:
+          description: The [Spotify URI](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
+          type: string
+      type: object
+    PlaylistTrackObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-playlisttrackobject
+      properties:
+        added_at:
+          description: The date and time the track or episode was added. *Note that some very old playlists may return `null` in this field.*
+          format: date-time
+          type: string
+        added_by:
+          $ref: "#/components/schemas/PublicUserObject"
+        is_local:
+          description: Whether this track or episode is a [local file](https://developer.spotify.com/web-api/local-files-spotify-playlists/) or not.
+          type: boolean
+        track:
+          description: Information about the track or episode.
+          oneOf:
+            - $ref: "#/components/schemas/TrackObject"
+            - $ref: "#/components/schemas/EpisodeObject"
+      type: object
+    ExternalUrlObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-externalurlobject
+      properties:
+        spotify:
+          description: The [Spotify URL](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the object.
+          type: string
+      type: object
+    FollowersObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-followersobject
+      properties:
+        href:
+          description: A link to the Web API endpoint providing full details of the followers; `null` if not available. Please note that this will always be set to null, as the Web API does not support it at the moment.
+          type: string
+        total:
+          description: The total number of followers.
+          format: int32
+          type: integer
+    PublicUserObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-publicuserobject
+      properties:
+        display_name:
+          description: The name displayed on the user's profile. `null` if not available.
+          type: string
+        external_urls:
+          $ref: "#/components/schemas/ExternalUrlObject"
+        followers:
+          $ref: "#/components/schemas/FollowersObject"
+        href:
+          description: A link to the Web API endpoint for this user.
+          type: string
+        id:
+          description: The [Spotify user ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for this user.
+          type: string
+        images:
+          description: The user's profile image.
+          items:
+            $ref: "#/components/schemas/ImageObject"
+          type: array
+        type:
+          description: 'The object type: "user"'
+          type: string
+        uri:
+          description: The [Spotify URI](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for this user.
+          type: string
+      type: object
+    ErrorObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-errorobject
+      properties:
+        message:
+          description: A short description of the cause of the error.
+          type: string
+        status:
+          description: The HTTP status code (also returned in the response header; see [Response Status Codes](https://developer.spotify.com/documentation/web-api/#response-status-codes) for more information).
+          format: int32
+          type: integer
+      type: object
+    PlaylistTracksRefObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-playlisttracksrefobject
+      properties:
+        href:
+          description: A link to the Web API endpoint where full details of the playlist's tracks can be retrieved.
+          type: string
+        total:
+          description: Number of tracks in the playlist.
+          format: int32
+          type: integer
+      type: object
+    EpisodeObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-episodeobject
+      properties:
+        audio_preview_url:
+          description: A URL to a 30 second preview (MP3 format) of the episode. `null` if not available.
+          type: string
+        description:
+          description: A description of the episode. HTML tags are stripped away from this field, use `html_description` field in case HTML tags are needed.
+          type: string
+        duration_ms:
+          description: The episode length in milliseconds.
+          format: int32
+          type: integer
+        explicit:
+          description: Whether or not the episode has explicit content (true = yes it does; false = no it does not OR unknown).
+          type: boolean
+        external_urls:
+          $ref: "#/components/schemas/ExternalUrlObject"
+        href:
+          description: A link to the Web API endpoint providing full details of the episode.
+          type: string
+        html_description:
+          description: A description of the episode. This field may contain HTML tags.
+          type: string
+        id:
+          description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the episode.
+          type: string
+        images:
+          description: The cover art for the episode in various sizes, widest first.
+          items:
+            $ref: "#/components/schemas/ImageObject"
+          type: array
+        is_externally_hosted:
+          description: True if the episode is hosted outside of Spotify's CDN.
+          type: boolean
+        is_playable:
+          description: True if the episode is playable in the given market. Otherwise false.
+          type: boolean
+        language:
+          description: "**Note: This field is deprecated and might be removed in the future. Please use the `languages` field instead.** The language used in the episode, identified by a [ISO 639](https://en.wikipedia.org/wiki/ISO_639) code."
+          type: string
+        languages:
+          description: A list of the languages used in the episode, identified by their [ISO 639](https://en.wikipedia.org/wiki/ISO_639) code.
+          items:
+            type: string
+          type: array
+        name:
+          description: The name of the episode.
+          type: string
+        release_date:
+          description: The date the episode was first released, for example `"1981-12-15"`. Depending on the precision, it might be shown as `"1981"` or `"1981-12"`.
+          type: string
+        release_date_precision:
+          description: 'The precision with which `release_date` value is known: `"year"`, `"month"`, or `"day"`.'
+          type: string
+        restrictions:
+          $ref: "#/components/schemas/EpisodeRestrictionObject"
+        resume_point:
+          $ref: "#/components/schemas/ResumePointObject"
+        show:
+          $ref: "#/components/schemas/SimplifiedShowObject"
+        type:
+          description: 'The object type: "episode".'
+          type: string
+        uri:
+          description: The [Spotify URI](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the episode.
+          type: string
+      type: object
+    EpisodeRestrictionObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-episoderestrictionobject
+      properties:
+        reason:
+          description: |-
+            The reason for the restriction. Supported values:
+
+            - `market` - The content item is not available in the given market.
+            - `product` - The content item is not available for the user's subscription type.
+            - `explicit` - The content item is explicit and the user's account is set to not play explicit content.
+              Additional reasons may be added in the future. **Note**: If you use this field, make sure that your application safely handles unknown values.
+          type: string
+      type: object
+    ResumePointObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-resumepointobject
+      properties:
+        fully_played:
+          description: Whether or not the episode has been fully played by the user.
+          type: boolean
+        resume_position_ms:
+          description: The user's most recent position in the episode in milliseconds.
+          format: int32
+          type: integer
+      type: object
+    SimplifiedShowObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-simplifiedshowobject
+      properties:
+        available_markets:
+          description: A list of the countries in which the show can be played, identified by their [ISO 3166-1 alpha-2](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code.
+          items:
+            type: string
+          type: array
+        copyrights:
+          description: The copyright statements of the show.
+          items:
+            $ref: "#/components/schemas/CopyrightObject"
+          type: array
+        description:
+          description: A description of the show. HTML tags are stripped away from this field, use `html_description` field in case HTML tags are needed.
+          type: string
+        explicit:
+          description: Whether or not the show has explicit content (true = yes it does; false = no it does not OR unknown).
+          type: boolean
+        external_urls:
+          $ref: "#/components/schemas/ExternalUrlObject"
+        href:
+          description: A link to the Web API endpoint providing full details of the show.
+          type: string
+        html_description:
+          description: A description of the show. This field may contain HTML tags.
+          type: string
+        id:
+          description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the show.
+          type: string
+        images:
+          description: The cover art for the show in various sizes, widest first.
+          items:
+            $ref: "#/components/schemas/ImageObject"
+          type: array
+        is_externally_hosted:
+          description: True if all of the show's episodes are hosted outside of Spotify's CDN. This field might be `null` in some cases.
+          type: boolean
+        languages:
+          description: A list of the languages used in the show, identified by their [ISO 639](https://en.wikipedia.org/wiki/ISO_639) code.
+          items:
+            type: string
+          type: array
+        media_type:
+          description: The media type of the show.
+          type: string
+        name:
+          description: The name of the episode.
+          type: string
+        publisher:
+          description: The publisher of the show.
+          type: string
+        type:
+          description: 'The object type: "show".'
+          type: string
+        uri:
+          description: The [Spotify URI](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the show.
+          type: string
+      type: object
+    CopyrightObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-copyrightobject
+      properties:
+        text:
+          description: The copyright text for this content.
+          type: string
+        type:
+          description: "The type of copyright: `C` = the copyright, `P` = the sound recording (performance) copyright."
+          type: string
+      type: object
+    SimplifiedArtistObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-simplifiedartistobject
+      properties:
+        external_urls:
+          $ref: "#/components/schemas/ExternalUrlObject"
+        href:
+          description: A link to the Web API endpoint providing full details of the artist.
+          type: string
+        id:
+          description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the artist.
+          type: string
+        name:
+          description: The name of the artist.
+          type: string
+        type:
+          description: 'The object type: `"artist"`'
+          type: string
+        uri:
+          description: The [Spotify URI](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the artist.
+          type: string
+      type: object
+    SimplifiedAlbumObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-simplifiedalbumobject
+      properties:
+        album_group:
+          description: The field is present when getting an artist's albums. Possible values are "album", "single", "compilation", "appears_on". Compare to album_type this field represents relationship between the artist and the album.
+          type: string
+        album_type:
+          description: 'The type of the album: one of "album", "single", or "compilation".'
+          type: string
+        artists:
+          description: The artists of the album. Each artist object includes a link in `href` to more detailed information about the artist.
+          items:
+            $ref: "#/components/schemas/SimplifiedArtistObject"
+          type: array
+        available_markets:
+          description: "The markets in which the album is available: [ISO 3166-1 alpha-2 country codes](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Note that an album is considered available in a market when at least 1 of its tracks is available in that market."
+          items:
+            type: string
+          type: array
+        external_urls:
+          $ref: "#/components/schemas/ExternalUrlObject"
+        href:
+          description: A link to the Web API endpoint providing full details of the album.
+          type: string
+        id:
+          description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the album.
+          type: string
+        images:
+          description: The cover art for the album in various sizes, widest first.
+          items:
+            $ref: "#/components/schemas/ImageObject"
+          type: array
+        name:
+          description: The name of the album. In case of an album takedown, the value may be an empty string.
+          type: string
+        release_date:
+          description: The date the album was first released, for example `1981`. Depending on the precision, it might be shown as `1981-12` or `1981-12-15`.
+          type: string
+        release_date_precision:
+          description: "The precision with which `release_date` value is known: `year` , `month` , or `day`."
+          type: string
+        restrictions:
+          $ref: "#/components/schemas/AlbumRestrictionObject"
+        total_tracks:
+          description: The total number of tracks in the album.
+          format: int32
+          type: integer
+        type:
+          description: 'The object type: "album"'
+          type: string
+        uri:
+          description: The [Spotify URI](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the album.
+          type: string
+      type: object
+    AlbumRestrictionObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-albumrestrictionobject
+      properties:
+        reason:
+          description: |-
+            The reason for the restriction. Supported values:
+
+            - `market` - The content item is not available in the given market.
+            - `product` - The content item is not available for the user's subscription type.
+            - `explicit` - The content item is explicit and the user's account is set to not play explicit content.
+              Additional reasons may be added in the future. **Note**: If you use this field, make sure that your application safely handles unknown values.
+          type: string
+      type: object
+    ArtistObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-artistobject
+      properties:
+        external_urls:
+          $ref: "#/components/schemas/ExternalUrlObject"
+        followers:
+          $ref: "#/components/schemas/FollowersObject"
+        genres:
+          description: 'A list of the genres the artist is associated with. For example: `"Prog Rock"` , `"Post-Grunge"`. (If not yet classified, the array is empty.)'
+          items:
+            type: string
+          type: array
+        href:
+          description: A link to the Web API endpoint providing full details of the artist.
+          type: string
+        id:
+          description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the artist.
+          type: string
+        images:
+          description: Images of the artist in various sizes, widest first.
+          items:
+            $ref: "#/components/schemas/ImageObject"
+          type: array
+        name:
+          description: The name of the artist.
+          type: string
+        popularity:
+          description: The popularity of the artist. The value will be between 0 and 100, with 100 being the most popular. The artist's popularity is calculated from the popularity of all the artist's tracks.
+          format: int32
+          type: integer
+        type:
+          description: 'The object type: `"artist"`'
+          type: string
+        uri:
+          description: The [Spotify URI](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the artist.
+          type: string
+      type: object
+    ExternalIdObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-externalidobject
+      properties:
+        ean:
+          description: "[International Article Number](http://en.wikipedia.org/wiki/International_Article_Number_%28EAN%29)"
+          type: string
+        isrc:
+          description: "[International Standard Recording Code](http://en.wikipedia.org/wiki/International_Standard_Recording_Code)"
+          type: string
+        upc:
+          description: "[Universal Product Code](http://en.wikipedia.org/wiki/Universal_Product_Code)"
+          type: string
+      type: object
+    LinkedTrackObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-linkedtrackobject
+      properties:
+        external_urls:
+          $ref: "#/components/schemas/ExternalUrlObject"
+        href:
+          description: A link to the Web API endpoint providing full details of the track.
+          type: string
+        id:
+          description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the track.
+          type: string
+        type:
+          description: 'The object type: "track".'
+          type: string
+        uri:
+          description: The [Spotify URI](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the track.
+          type: string
+      type: object
+    TrackRemovingDetails:
+      properties:
+        snapshot_id:
+          description: The playlist's snapshot ID against which you want to make the changes. The API will validate that the specified items exist and in the specified positions and make the changes, even if more recent changes have been made to the playlist.
+          type: string
+        tracks:
+          description: 'An array of objects containing [Spotify URIs](https://developer.spotify.com/spotify-documentation/web-api/#spotify-uris-and-ids) of the tracks or episodes to remove. For example: `{ "tracks": [{ "uri": "spotify:track:4iV5W9uYEdYUVa79Axb7Rh" },{ "uri": "spotify:track:1301WleyT98MSxVHPZCA6M" }] }`. A maximum of 100 objects can be sent at once.'
+          items:
+            type: string
+          type: array
+      required:
+        - tracks
+      type: object
+    TrackObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-trackobject
+      properties:
+        album:
+          $ref: "#/components/schemas/SimplifiedAlbumObject"
+        artists:
+          description: The artists who performed the track. Each artist object includes a link in `href` to more detailed information about the artist.
+          items:
+            $ref: "#/components/schemas/ArtistObject"
+          type: array
+        available_markets:
+          description: A list of the countries in which the track can be played, identified by their [ISO 3166-1 alpha-2](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code.
+          items:
+            type: string
+          type: array
+        disc_number:
+          description: The disc number (usually `1` unless the album consists of more than one disc).
+          format: int32
+          type: integer
+        duration_ms:
+          description: The track length in milliseconds.
+          format: int32
+          type: integer
+        explicit:
+          description: Whether or not the track has explicit lyrics ( `true` = yes it does; `false` = no it does not OR unknown).
+          type: boolean
+        external_ids:
+          $ref: "#/components/schemas/ExternalIdObject"
+        external_urls:
+          $ref: "#/components/schemas/ExternalUrlObject"
+        href:
+          description: A link to the Web API endpoint providing full details of the track.
+          type: string
+        id:
+          description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the track.
+          type: string
+        is_local:
+          description: Whether or not the track is from a local file.
+          type: boolean
+        is_playable:
+          description: Part of the response when [Track Relinking](https://developer.spotify.com/documentation/general/guides/track-relinking-guide/) is applied. If `true` , the track is playable in the given market. Otherwise `false`.
+          type: boolean
+        linked_from:
+          $ref: "#/components/schemas/LinkedTrackObject"
+        name:
+          description: The name of the track.
+          type: string
+        popularity:
+          description: |-
+            The popularity of the track. The value will be between 0 and 100, with 100 being the most popular.
+            The popularity of a track is a value between 0 and 100, with 100 being the most popular. The popularity is calculated by algorithm and is based, in the most part, on the total number of plays the track has had and how recent those plays are.
+            Generally speaking, songs that are being played a lot now will have a higher popularity than songs that were played a lot in the past. Duplicate tracks (e.g. the same track from a single and an album) are rated independently. Artist and album popularity is derived mathematically from track popularity. Note that the popularity value may lag actual popularity by a few days: the value is not updated in real time.
+          format: int32
+          type: integer
+        preview_url:
+          description: A link to a 30 second preview (MP3 format) of the track. Can be `null`
+          type: string
+        restrictions:
+          $ref: "#/components/schemas/TrackRestrictionObject"
+        track_number:
+          description: The number of the track. If an album has several discs, the track number is the number on the specified disc.
+          format: int32
+          type: integer
+        type:
+          description: 'The object type: "track".'
+          type: string
+        uri:
+          description: The [Spotify URI](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the track.
+          type: string
+      type: object
+    TrackRestrictionObject:
+      externalDocs:
+        description: Find more info on the official Spotify Web API Reference
+        url: https://developer.spotify.com/documentation/web-api/reference/#object-trackrestrictionobject
+      properties:
+        reason:
+          description: |-
+            The reason for the restriction. Supported values:
+
+            - `market` - The content item is not available in the given market.
+            - `product` - The content item is not available for the user's subscription type.
+            - `explicit` - The content item is explicit and the user's account is set to not play explicit content.
+              Additional reasons may be added in the future. **Note**: If you use this field, make sure that your application safely handles unknown values.
+          type: string
+      type: object
+  securitySchemes:
+    spotify_auth:
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.spotify.com/authorize
+          scopes:
+            app-remote-control: Remote control playback of Spotify. This scope is currently available to Spotify iOS and Android SDKs.
+            playlist-modify-private: Write access to a user's private playlists.
+            playlist-modify-public: Write access to a user's public playlists.
+            playlist-read-collaborative: Include collaborative playlists when requesting a user's playlists.
+            playlist-read-private: Read access to user's private playlists.
+            streaming: Control playback of a Spotify track. This scope is currently available to the Web Playback SDK. The user must have a Spotify Premium account.
+            ugc-image-upload: Write access to user-provided images.
+            user-follow-modify: Write/delete access to the list of artists and other users that the user follows.
+            user-follow-read: Read access to the list of artists and other users that the user follows.
+            user-library-modify: Write/delete access to a user's "Your Music" library.
+            user-library-read: Read access to a user's library.
+            user-modify-playback-state: Write access to a user’s playback state
+            user-read-currently-playing: Read access to a user’s currently playing content.
+            user-read-email: Read access to user’s email address.
+            user-read-playback-position: Read access to a user’s playback position in a content.
+            user-read-playback-state: Read access to a user’s player state.
+            user-read-private: Read access to user’s subscription details (type of user account).
+            user-read-recently-played: Read access to a user’s recently played tracks.
+            user-top-read: Read access to a user's top artists and tracks.
+          tokenUrl: https://accounts.spotify.com/api/token
+      type: oauth2

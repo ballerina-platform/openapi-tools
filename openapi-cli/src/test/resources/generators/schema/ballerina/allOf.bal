@@ -19,5 +19,5 @@ public type Profile01 record {
 public type Subject record {
     int id?;
     string name?;
-    Activity subject_type?;
+    record {*Activity;} subject_type?;
 };

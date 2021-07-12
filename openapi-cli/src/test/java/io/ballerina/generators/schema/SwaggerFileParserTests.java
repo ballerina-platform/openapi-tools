@@ -18,7 +18,7 @@
 
 package io.ballerina.generators.schema;
 
-import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
@@ -32,26 +32,26 @@ import java.nio.file.Paths;
  */
 public class SwaggerFileParserTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+    GeneratorUtils parser = new GeneratorUtils();
 
     @Test(description = "Test invalid file path",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI contract doesn't exist in the given .*")
     public void testInvalidFilePath() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = ballerinaSchemaGenerator.parseOpenAPIFile(RES_DIR.resolve("user.yaml").toString());
+        OpenAPI openAPI = parser.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("user.yaml"));
     }
 
     @Test(description = "Test invalid file type",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Invalid file type.*")
     public void testInvalidFileType() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = ballerinaSchemaGenerator.parseOpenAPIFile(RES_DIR.resolve("swagger/petstore.txt").toString());
+        OpenAPI openAPI = parser.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/petstore.txt"));
     }
 
     @Test(description = "Test invalid swagger file ",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Invalid swagger file in the given .*")
+            expectedExceptionsMessageRegExp = "Couldn't read or parse the definition from file: .*")
     public void testInvalidFile() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = ballerinaSchemaGenerator.parseOpenAPIFile(RES_DIR.resolve("swagger/invalid.yaml").toString());
+        OpenAPI openAPI = parser.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/invalid.yaml"));
     }
 }

@@ -23,6 +23,7 @@ import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.generators.BallerinaSchemaGenerator;
+import io.ballerina.openapi.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -35,7 +36,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static io.ballerina.generators.common.TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree;
-import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
  * Tests for Special scenarios in schema handling.
@@ -43,37 +43,46 @@ import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 public class AdvanceRecordTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-    BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator();
+    CodeGenerator codeGenerator = new CodeGenerator();
 
 
     // Enable after adding `not` data bind support
     @Test(description = "Generate record for schema has not type", enabled = false)
     public void generateSchemaHasNotType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario10.yaml");
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema10.bal", syntaxTree);
     }
 
     @Test(description = "Generate record for schema has inline record in fields reference")
     public void generateSchemaHasInlineRecord() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario11.yaml");
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema11.bal", syntaxTree);
     }
 
-    @Test(description = "Generate record for openapi weather api")
+    @Test(description = "Generate record for openapi weather api", enabled = false)
     public void generateOpenAPIWeatherAPI() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree(definitionPath);
+
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/openapi_weather_api_schema.bal", syntaxTree);
     }
 
     @Test(description = "Generate record for schema has object type only")
     public void generateForSchemaHasObjectTypeOnly() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario14.yaml");
-        OpenAPI openAPI = getOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ObjectSchema objectSchema = (ObjectSchema) schema;
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(null,
                         AbstractNodeFactory.createIdentifierToken("public type"),
                         AbstractNodeFactory.createIdentifierToken("Error"),

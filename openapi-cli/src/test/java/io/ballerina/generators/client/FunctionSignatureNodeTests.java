@@ -24,6 +24,7 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -38,7 +39,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.generators.client.BallerinaClientGenerator.getFunctionSignatureNode;
 import static io.ballerina.generators.common.TestUtils.getOpenAPI;
 
 /**
@@ -56,7 +56,9 @@ public class FunctionSignatureNodeTests {
     @Test(description = "Test for generate function signature for given operations")
     public void getFunctionSignatureNodeTests() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/valid_operation.yaml"));
-        FunctionSignatureNode signature = getFunctionSignatureNode(openAPI.getPaths()
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaSchemaGenerator(openAPI), new ArrayList<>());
+        FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/products/{country}").getGet(), new ArrayList<>());
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
         Assert.assertFalse(parameters.isEmpty());
@@ -74,7 +76,7 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(param03.typeName().toString(), "string");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
-        Assert.assertEquals(returnTypeNode.type().toString(), "ProductArr|error");
+        Assert.assertEquals(returnTypeNode.type().toString(), "Product[]|error");
     }
 
     @AfterTest
