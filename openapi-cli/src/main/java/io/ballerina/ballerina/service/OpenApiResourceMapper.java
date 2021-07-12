@@ -54,6 +54,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.stdlib.http.api.HttpConstants;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
@@ -72,7 +73,6 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import org.ballerinalang.net.http.HttpConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -90,7 +90,7 @@ import javax.annotation.Nullable;
 import javax.ws.rs.core.MediaType;
 
 import static io.ballerina.ballerina.ConverterUtils.convertBallerinaTypeToOpenAPIType;
-import static org.ballerinalang.net.http.HttpConstants.HTTP_METHOD_GET;
+import static io.ballerina.stdlib.http.api.HttpConstants.HTTP_METHOD_GET;
 
 /**
  * This class will do resource mapping from ballerina to openApi.
