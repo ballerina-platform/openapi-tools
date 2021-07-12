@@ -3,6 +3,11 @@ import  ballerina/xmldata;
 
 public client class Client {
     public http:Client clientEp;
+    # Client initialization.
+    #
+    # + clientConfig - Client Configuration details
+    # + serviceUrl - connector server URL
+    # + return -  Returns error at failure of client initialization
     public isolated function init(http:ClientConfiguration  clientConfig =  {}, string serviceUrl = "http://localhost:9090/petstore/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;

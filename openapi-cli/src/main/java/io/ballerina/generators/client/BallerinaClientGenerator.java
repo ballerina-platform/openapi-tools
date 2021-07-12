@@ -320,6 +320,30 @@ public class BallerinaClientGenerator {
      * </pre>
      */
     private  ClassDefinitionNode getClassDefinitionNode() throws BallerinaOpenApiException {
+        // Client init api doc
+        List<Node> docs = new ArrayList<>();
+        MarkdownDocumentationLineNode initDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createLiteralValueToken(null,
+                                "Client initialization.",
+                                createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+        docs.add(initDescription);
+        MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
+                createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+        docs.add(hashNewLine);
+        // Create method description
+        MarkdownParameterDocumentationLineNode clientConfig = generatorUtils.createParamAPIDoc("clientConfig",
+                "Client Configuration details");
+        docs.add(clientConfig);
+        MarkdownParameterDocumentationLineNode serviceUrlAPI = generatorUtils.createParamAPIDoc("serviceUrl",
+                "Connector server URL");
+        docs.add(serviceUrlAPI);
+        MarkdownParameterDocumentationLineNode returnDoc = generatorUtils.createParamAPIDoc("return",
+                "Returns error at failure of client initialization");
+        docs.add(returnDoc);
+
+        MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));
+        MetadataNode clientInit = createMetadataNode(clientInitDoc, createEmptyNodeList());
 
         // Generate client class
         Token visibilityQualifier = createIdentifierToken(GeneratorConstants.PUBLIC);
@@ -399,7 +423,7 @@ public class BallerinaClientGenerator {
         NodeList<StatementNode> statementList = createNodeList(assignmentNodes);
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, statementList, createToken(CLOSE_BRACE_TOKEN));
-        FunctionDefinitionNode initFunctionNode = createFunctionDefinitionNode(null, null,
+        FunctionDefinitionNode initFunctionNode = createFunctionDefinitionNode(null, clientInit,
                 qualifierList, functionKeyWord, functionName, createEmptyNodeList(), functionSignatureNode
                 , functionBodyNode);
 
@@ -724,7 +748,7 @@ public class BallerinaClientGenerator {
         MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
                 createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
         docs.add(hashNewLine);
-        // Create client init description
+        // Create method description
         MarkdownParameterDocumentationLineNode queryParam = generatorUtils.createParamAPIDoc("queryParam",
                 "Query parameter map");
         docs.add(queryParam);
