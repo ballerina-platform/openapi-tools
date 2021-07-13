@@ -28,8 +28,6 @@ public class OpenApiMesseges {
 
     public static final String OPENAPI_CLIENT_EXCEPTION = "Error occurred when generating client for OpenAPI contract";
 
-    public static final String EXPERIMENTAL_FEATURE = "Note: This is an experimental tool, which only" +
-            " supports a limited set of functionality.";
     public static final String MESSAGE_FOR_MISSING_INPUT = "An OpenAPI definition file is required to generate the " +
             "service. \ne.g: bal openapi --input <OpenAPIContract> or <Ballerina file>";
 

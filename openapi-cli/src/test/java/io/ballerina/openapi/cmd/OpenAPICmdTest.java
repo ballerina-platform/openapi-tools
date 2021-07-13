@@ -50,7 +50,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         openApiCommand.execute();
 
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("Note: This is an experimental tool"));
+        Assert.assertTrue(output.contains("NAME\n      Generate a Ballerina service"));
     }
 
     @Test(description = "Test openapi command without help flag")
@@ -59,7 +59,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(openApiCommand);
         openApiCommand.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("Note: This is an experimental tool"));
+        Assert.assertTrue(output.contains("NAME\n      Generate a Ballerina service"));
     }
 
     @Test(description = "Test openapi gen-service without openapi contract file")
