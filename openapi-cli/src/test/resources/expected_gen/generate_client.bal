@@ -23,11 +23,12 @@ public client class Client {
     # Create a pet
     #
     # + return - Null response
-    remote isolated function  pets() returns error? {
+    remote isolated function  pets() returns http:Response|error {
         string  path = string `/pets`;
         http:Request request = new;
         //TODO: Update the request as needed;
-         _ = check self.clientEp-> post(path, request, targetType =http:Response);
+        http:Response response = check self.clientEp-> post(path, request, targetType =http:Response);
+        return response;
     }
     # Info for a specific pet
     #
