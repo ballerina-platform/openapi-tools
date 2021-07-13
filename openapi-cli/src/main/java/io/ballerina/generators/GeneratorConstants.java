@@ -95,9 +95,9 @@ public class GeneratorConstants {
                     "map", "group", "from", "default", "field", "limit", "as", "on", "isolated", "readonly",
                     "distinct", "where", "select", "do", "transactional", "commit", "enum", "base16", "base64",
                     "rollback", "configurable",  "class", "module", "never", "outer", "order", "null", "key", "let",
-                    "by"));
+                    "by", "equals"));
 
-    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\_{}\\s|.$])";
+    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
     public static final String MODULE_TEST  = "test";
