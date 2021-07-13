@@ -42,7 +42,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         super.setup();
     }
 
-    @Test(description = "Test openapi command with help flag", enabled = false)
+    @Test(description = "Test openapi command with help flag")
     public void testOpenAPICmdHelp() throws IOException {
         String[] args = {"-h"};
         OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
@@ -50,16 +50,16 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         openApiCommand.execute();
 
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("NAME\n       The Ballerina OpenAPI Tool"));
+        Assert.assertTrue(output.contains("Note: This is an experimental tool"));
     }
 
-    @Test(description = "Test openapi command without help flag", enabled = false)
+    @Test(description = "Test openapi command without help flag")
     public void testOpenAPICmdHelpWithoutFlag() throws IOException {
         OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(openApiCommand);
         openApiCommand.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("NAME\n       The Ballerina OpenAPI Tool"));
+        Assert.assertTrue(output.contains("Note: This is an experimental tool"));
     }
 
     @Test(description = "Test openapi gen-service without openapi contract file")
