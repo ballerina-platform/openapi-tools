@@ -136,7 +136,7 @@ public class FunctionReturnType {
 
         if (schema instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schema;
-            type = generateReturnDataTypeForComposedSchema(operation, type, composedSchema);
+            type = generateReturnDataTypeForComposedSchema(operation, type, composedSchema, isSignature);
         } else if (schema instanceof ObjectSchema) {
             ObjectSchema objectSchema = (ObjectSchema) schema;
             type = handleInLineRecordInResponse(operation, media, objectSchema);
@@ -225,19 +225,22 @@ public class FunctionReturnType {
      * Get the return data type according to the OAS ComposedSchemas ex: AllOf, OneOf, AnyOf.
      */
     private String generateReturnDataTypeForComposedSchema(Operation operation, String type,
-                                                           ComposedSchema composedSchema)
+                                                           ComposedSchema composedSchema, boolean isSignature)
             throws BallerinaOpenApiException {
         if (composedSchema.getOneOf() != null) {
             List<Schema> oneOf = composedSchema.getOneOf();
             type = generatorUtils.getOneOfUnionType(oneOf);
             // Get oneOfUnionType name
-            String typeName = type.replaceAll("\\|", "");
+            String typeName = "OneOf" + getValidName(operation.getOperationId().trim(), true) +  "Response";
             TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
                     createIdentifierToken("public type"),
                     createIdentifierToken(typeName),
                     createSimpleNameReferenceNode(createIdentifierToken(type)),
                     createToken(SEMICOLON_TOKEN));
             updateTypeDefinitionNodeList(typeName, typeDefNode);
+            if (!isSignature) {
+                type = typeName;
+            }
         } else if (composedSchema.getAllOf() != null) {
             List<Schema> allOf = composedSchema.getAllOf();
             String recordName = "Compound" + getValidName(operation.getOperationId(), true) +
