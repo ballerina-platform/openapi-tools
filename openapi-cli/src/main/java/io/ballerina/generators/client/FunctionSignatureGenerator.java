@@ -279,7 +279,7 @@ public class FunctionSignatureGenerator {
         }
 
         Schema parameterSchema = parameter.getSchema();
-        if (parameterSchema.getType() == null || parameterSchema.get$ref() != null) {
+        if (parameterSchema.getType() == null && parameterSchema.get$ref() != null) {
             String referenceRecord = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
             Schema schema = openAPI.getComponents().getSchemas().get(referenceRecord.trim());
             if (schema != null && schema instanceof ObjectSchema) {
