@@ -45,7 +45,7 @@ public class OpenApiMesseges {
             "NULL_LITERAL", "ascending", "descending", "foreach", "map", "group", "from", "default", "field",
             "limit", "as", "on", "isolated", "readonly", "distinct", "where", "select", "do", "transactional"
             , "commit", "enum", "base16", "base64", "rollback", "configurable",  "class", "module", "never",
-            "outer", "order", "null", "key", "let", "by"};
+            "outer", "order", "null", "key", "let", "by", "equals"};
     
     private static final String[] TYPES = new String[]{"int", "any", "anydata", "boolean", "byte", "float", "int",
                                                        "json", "string", "table", "var", "xml"};
