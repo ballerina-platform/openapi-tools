@@ -83,7 +83,7 @@ public class FunctionReturnType {
      */
     public String getReturnType(Operation operation, boolean isSignature) throws BallerinaOpenApiException {
         //TODO: Handle multiple media-type
-        String returnType = "http:Response | error";
+        String returnType = "http:Response|error";
         if (operation.getResponses() != null) {
             ApiResponses responses = operation.getResponses();
             Collection<ApiResponse> values = responses.values();
@@ -110,15 +110,6 @@ public class FunctionReturnType {
                         // Currently support for first media type
                         break;
                     }
-                } else {
-                    // Handle response has no content type
-                    /**
-                     * It will return in functionSignature
-                     * <pre> returns error? </>
-                     * in functionBody it return nothing, no targetType bindings
-                     * <pre> _ = check self.clientEp->post(path, request); </>
-                     */
-                    returnType = "error?";
                 }
                 // Currently support for first response.
                 break;

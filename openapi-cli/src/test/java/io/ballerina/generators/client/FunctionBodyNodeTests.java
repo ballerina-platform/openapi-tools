@@ -75,8 +75,8 @@ public class FunctionBodyNodeTests {
         return new Object[][]{
                 {"diagnostic_files/header_parameter.yaml", "/pets", "{stringpath=string`/pets`;map<any>headerValues=" +
                         "{\"X-Request-ID\":xRequestId,\"X-Request-Client\":xRequestClient};map<string|string[]>" +
-                        "accHeaders=getMapForHeaders(headerValues);_=checkself.clientEp->get(path,accHeaders," +
-                        "targetType=http:Response);}"}
+                        "accHeaders=getMapForHeaders(headerValues);http:Response response =checkself.clientEp->get" +
+                        "(path,accHeaders, targetType=http:Response); return response;}"}
         };
     }
     //TODO:Different mediaType

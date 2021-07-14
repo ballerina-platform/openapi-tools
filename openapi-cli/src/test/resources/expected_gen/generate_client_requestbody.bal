@@ -12,11 +12,12 @@ public client class Client {
     # Creates a new user.
     #
     # + return - OK
-    remote isolated function  requestBody(User payload) returns error? {
+    remote isolated function  requestBody(User payload) returns http:Response|error {
         string  path = string `/requestBody`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-         _ = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        return response;
     }
 }
