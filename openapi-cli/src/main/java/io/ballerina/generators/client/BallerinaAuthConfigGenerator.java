@@ -132,7 +132,6 @@ public class BallerinaAuthConfigGenerator {
     }
 
     public boolean isAPIKey() {
-
         return isAPIKey;
     }
 
