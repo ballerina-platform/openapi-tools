@@ -131,6 +131,10 @@ public class BallerinaAuthConfigGenerator {
         return isHttpOROAuth;
     }
 
+    public boolean isAPIKey() {
+
+        return isAPIKey;
+    }
 
     /**
      * Generate the Config record for the relevant authentication type.

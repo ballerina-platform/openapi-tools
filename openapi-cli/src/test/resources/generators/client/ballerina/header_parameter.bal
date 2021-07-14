@@ -11,8 +11,9 @@ public client class Client {
 
     # Client initialization.
     #
-    # + clientConfig - Client Configuration details
-    # + serviceUrl - connector server URL
+    # + apiKeyConfig - API key configuration detail
+    # + clientConfig - Client configuration details
+    # + serviceUrl - Connector server URL
     # + return -  Returns error at failure of client initialization
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);

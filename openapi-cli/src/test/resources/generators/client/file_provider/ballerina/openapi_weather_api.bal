@@ -15,7 +15,8 @@ public client class Client {
     map<string> apiKeys;
     # Client initialization.
     #
-    # + clientConfig - Client Configuration details
+    # + apiKeyConfig - API key configuration detail
+    # + clientConfig - Client configuration details
     # + serviceUrl - Connector server URL
     # + return - Returns error at failure of client initialization
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {

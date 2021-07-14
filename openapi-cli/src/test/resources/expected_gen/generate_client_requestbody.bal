@@ -7,8 +7,8 @@ public client class Client {
     http:Client clientEp;
     # Client initialization.
     #
-    # + clientConfig - Client Configuration details
-    # + serviceUrl - connector server URL
+    # + clientConfig - Client configuration details
+    # + serviceUrl - Connector server URL
     # + return -  Returns error at failure of client initialization
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);

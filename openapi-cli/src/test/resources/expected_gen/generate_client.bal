@@ -7,9 +7,9 @@ public client class Client {
     http:Client clientEp;
     # Client initialization.
     #
-    # + clientConfig - Client Configuration details
-    # + serviceUrl - connector server URL
-    # + return -  Returns error at failure of client initialization
+    # + clientConfig - Client configuration details
+    # + serviceUrl - Connector server URL
+    # + return - Returns error at failure of client initialization
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
@@ -32,7 +32,7 @@ public client class Client {
         string  path = string `/pets`;
         http:Request request = new;
         //TODO: Update the request as needed;
-        http:Response response = check self.clientEp-> post(path, request, targetType =http:Response);
+        http:Response response = check self.clientEp-> post(path, request, targetType = http:Response);
         return response;
     }
     # Info for a specific pet
@@ -50,7 +50,7 @@ public client class Client {
 #
 # + queryParam - Query parameter map
 # + return - Returns generated Path or error at failure of client initialization
-isolated function  getPathForQueryParam(map<anydata> queryParam)  returns  string|error {
+isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  string|error {
     string[] param = [];
     param[param.length()] = "?";
     foreach  var [key, value] in  queryParam.entries() {
