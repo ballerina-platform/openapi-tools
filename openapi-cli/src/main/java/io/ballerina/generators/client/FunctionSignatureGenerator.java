@@ -279,8 +279,16 @@ public class FunctionSignatureGenerator {
         }
 
         Schema parameterSchema = parameter.getSchema();
+        if (parameterSchema.getType() == null && parameterSchema.get$ref() != null) {
+            String referenceRecord = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
+            Schema schema = openAPI.getComponents().getSchemas().get(referenceRecord.trim());
+            if (schema != null && schema instanceof ObjectSchema) {
+                throw new BallerinaOpenApiException("Ballerina does not support to object type query parameter type.");
+            }
+        }
 
         String paramType = convertOpenAPITypeToBallerina(parameterSchema.getType().trim());
+
         if (parameterSchema.getType().equals("number")) {
             if (parameterSchema.getFormat() != null) {
                 paramType = convertOpenAPITypeToBallerina(parameterSchema.getFormat().trim());

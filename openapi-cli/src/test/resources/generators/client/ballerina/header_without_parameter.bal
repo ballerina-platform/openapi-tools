@@ -22,10 +22,11 @@ public client class Client {
     # Info for a specific pet
     #
     # + return - Expected response to a valid request
-    remote isolated function showPetById() returns error? {
+    remote isolated function showPetById() returns http:Response|error {
         string  path = string `/pets`;
         map<string|string[]> accHeaders = {'X\-API\-KEY: self.apiKeys.get("X-API-KEY")};
-         _ = check self.clientEp-> get(path, accHeaders, targetType=http:Response);
+        http:Response response = check self.clientEp-> get(path, accHeaders, targetType=http:Response);
+        return response;
     }
 }
 

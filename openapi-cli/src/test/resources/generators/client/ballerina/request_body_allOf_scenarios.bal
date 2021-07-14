@@ -18,33 +18,36 @@ public client class Client {
     # Request Body has allOf with specific properties.
     #
     # + return - OK
-    remote isolated function updateXMLUser(Body payload) returns error? {
+    remote isolated function updateXMLUser(Body payload) returns http:Response|error {
         string  path = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-         _ = check self.clientEp-> put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> put(path, request, targetType=http:Response);
+        return response;
     }
     # Request Body has nested allOf.
     #
     # + return - OK
-    remote isolated function postXMLUser(Body1 payload) returns error? {
+    remote isolated function postXMLUser(Body1 payload) returns http:Response|error {
         string  path = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-         _ = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        return response;
     }
     # Request Body has Array type AllOf.
     #
     # + return - OK
-    remote isolated function postXMLUserInLineArray(CompoundArrayItemPostXMLUserInLineArrayRequest payload) returns error? {
+    remote isolated function postXMLUserInLineArray(CompoundArrayItemPostXMLUserInLineArrayRequest payload) returns http:Response|error {
         string  path = string `/path02`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-         _ = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        return response;
     }
 }
