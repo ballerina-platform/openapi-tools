@@ -13,6 +13,12 @@ public type ApiKeysConfig record {
 public client class Client {
     http:Client clientEp;
     map<string> apiKeys;
+    # Client initialization.
+    #
+    # + apiKeyConfig - API key configuration detail
+    # + clientConfig - Client configuration details
+    # + serviceUrl - Connector server URL
+    # + return - Returns error at failure of client initialization
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;

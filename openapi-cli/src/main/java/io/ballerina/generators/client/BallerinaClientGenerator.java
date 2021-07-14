@@ -343,9 +343,38 @@ public class BallerinaClientGenerator {
         //Add parameters
         List<Node> parameters  = new ArrayList<>();
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        //get config parameters relevant to the auth mechanism used
+        //Get config parameters relevant to the auth mechanism used
         parameters.addAll(ballerinaAuthConfigGenerator.getConfigParamForClassInit());
         parameters.add(createToken(COMMA_TOKEN));
+        // Client init api documentation
+        List<Node> docs = new ArrayList<>();
+        MarkdownDocumentationLineNode initDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createLiteralValueToken(null,
+                                "Client initialization.",
+                                createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+        docs.add(initDescription);
+        MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
+                createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+        docs.add(hashNewLine);
+        if (ballerinaAuthConfigGenerator.isAPIKey()) {
+            MarkdownParameterDocumentationLineNode apiKeyConfig = generatorUtils.createParamAPIDoc(
+                    "apiKeyConfig", "API key configuration detail");
+            docs.add(apiKeyConfig);
+        }
+        // Create method description
+        MarkdownParameterDocumentationLineNode clientConfig = generatorUtils.createParamAPIDoc("clientConfig",
+                "Client configuration details");
+        docs.add(clientConfig);
+        MarkdownParameterDocumentationLineNode serviceUrlAPI = generatorUtils.createParamAPIDoc("serviceUrl",
+                "Connector server URL");
+        docs.add(serviceUrlAPI);
+        MarkdownParameterDocumentationLineNode returnDoc = generatorUtils.createParamAPIDoc("return",
+                "Returns error at failure of client initialization");
+        docs.add(returnDoc);
+        MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));
+        MetadataNode clientInit = createMetadataNode(clientInitDoc, createEmptyNodeList());
+
         BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken("string"));
         IdentifierToken paramName = createIdentifierToken(GeneratorConstants.SERVICE_URL);
@@ -399,7 +428,7 @@ public class BallerinaClientGenerator {
         NodeList<StatementNode> statementList = createNodeList(assignmentNodes);
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, statementList, createToken(CLOSE_BRACE_TOKEN));
-        FunctionDefinitionNode initFunctionNode = createFunctionDefinitionNode(null, null,
+        FunctionDefinitionNode initFunctionNode = createFunctionDefinitionNode(null, clientInit,
                 qualifierList, functionKeyWord, functionName, createEmptyNodeList(), functionSignatureNode
                 , functionBodyNode);
 
@@ -724,7 +753,7 @@ public class BallerinaClientGenerator {
         MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
                 createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
         docs.add(hashNewLine);
-        // Create client init description
+        // Create method description
         MarkdownParameterDocumentationLineNode queryParam = generatorUtils.createParamAPIDoc("queryParam",
                 "Query parameter map");
         docs.add(queryParam);
