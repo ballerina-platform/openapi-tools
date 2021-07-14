@@ -40,18 +40,17 @@ import java.util.stream.Stream;
 public class OpenApiConverterUtilsTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
     private Path tempDir;
-    private OpenApiConverterUtils openApiConverterUtils;
 
     @BeforeMethod
     public void setup() throws IOException {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
-        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
     }
 
     @Test(description = "Generate OpenAPI spec")
     public void testBasicServices() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("basic_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
+        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
                 false);
 
         Assert.assertTrue(Files.exists(this.tempDir.resolve("hello_openapi.yaml")));
@@ -59,19 +58,21 @@ public class OpenApiConverterUtilsTest {
     }
 
     @Test(description = "Generate OpenAPI spec by filtering non existing service",
-          expectedExceptions = OpenApiConverterException.class,
-          expectedExceptionsMessageRegExp = "No Ballerina services found with name '/abc' to generate an OpenAPI " +
-                  "specification. These services are available in ballerina file. \\[/hello, /hello02]")
+            expectedExceptions = OpenApiConverterException.class,
+            expectedExceptionsMessageRegExp = "No Ballerina services found with name '/abc' to generate an OpenAPI " +
+                    "specification. These services are available in ballerina file. \\[/hello, /hello02]")
     public void testBasicServicesWithInvalidServiceName() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("basic_service.bal");
+        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.of("/abc"),
                 false);
     }
-    
+
     @Test(description = "Test if invalid 'exampleSetFlag' attribute is coming it the generated spec")
     public void testIfExampleSetFlagContains() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("basic_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
+        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
                 false);
 
         Assert.assertTrue(Files.exists(this.tempDir.resolve("hello_openapi.yaml")));
@@ -81,6 +82,7 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec by filtering service name")
     public void testBasicServicesByFiltering() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("basic_service.bal");
+        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir,
                 Optional.of("/hello02"), false);
 
@@ -91,17 +93,19 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec with complex base paths")
     public void testComplexBasePathServices() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("complex_base_path.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
+        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
                 false);
 
         Assert.assertTrue(Files.exists(this.tempDir.resolve("hello-foo-bar_openapi.yaml")));
         Assert.assertTrue(Files.exists(this.tempDir.resolve("hello02-bar-baz_openapi.yaml")));
     }
-    
+
     @Test(description = "Generate OpenAPI spec with no base path")
     public void testServicesWithNoBasePath() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("no_base_path_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
+        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
                 false);
         Assert.assertTrue(Files.exists(this.tempDir.resolve("no_base_path_service_openapi.yaml")));
     }
@@ -109,7 +113,8 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec with no base path")
     public void testServicesWithNoBasePathWithFilterina() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("no_base_path_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.of("/"),
+        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.of("/"),
                 false);
         Assert.assertTrue(Files.exists(this.tempDir.resolve("no_base_path_service_openapi.yaml")));
     }
@@ -124,7 +129,8 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec with xml payload")
     public void testXmlPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("xml_payload_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
+        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
                 false);
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadXml_openapi.yaml")));
     }
@@ -334,7 +340,8 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec for build project")
     public void testRecordFieldPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("project_bal/record_payload_service.bal");
-        OpenApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
+        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
                 false);
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadV_openapi.yaml")));
     }
@@ -407,6 +414,7 @@ public class OpenApiConverterUtilsTest {
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen/json"),
                     "nestedRecord.json");
+            OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
             openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
                     , true);
             if (Files.exists(this.tempDir.resolve("payloadV_openapi.json"))) {
@@ -427,7 +435,6 @@ public class OpenApiConverterUtilsTest {
     @AfterMethod
     public void cleanUp() {
         deleteDirectory(this.tempDir);
-        openApiConverterUtils = null;
     }
 
     private void deleteDirectory(Path path) {
@@ -463,6 +470,7 @@ public class OpenApiConverterUtilsTest {
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
 
+            OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
             openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
                     , false);
             if (Files.exists(this.tempDir.resolve("payloadV_openapi.yaml"))) {

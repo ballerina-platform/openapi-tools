@@ -66,8 +66,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-import static io.ballerina.ballerina.service.OpenApiEndpointMapper.extractServerForExpressionNode;
-import static io.ballerina.ballerina.service.OpenApiEndpointMapper.getServiceBasePath;
 import static io.ballerina.openapi.utils.CodegenUtils.writeFile;
 
 /**
@@ -75,11 +73,19 @@ import static io.ballerina.openapi.utils.CodegenUtils.writeFile;
  */
 
 public class OpenApiConverterUtils {
-    private static final Logger logger = LoggerFactory.getLogger(OpenApiConverterUtils.class);
-    private static SyntaxTree syntaxTree;
-    private static SemanticModel semanticModel;
-    private static Project project;
-    private static List<ListenerDeclarationNode> endpoints = new ArrayList<>();
+    private  final Logger logger = LoggerFactory.getLogger(OpenApiConverterUtils.class);
+    private  SyntaxTree syntaxTree;
+    private  SemanticModel semanticModel;
+    private  Project project;
+    private  List<ListenerDeclarationNode> endpoints;
+    private OpenApiEndpointMapper openApiEndpointMapper;
+    private OpenApiServiceMapper openApiServiceMapper;
+
+    public OpenApiConverterUtils() {
+        this.endpoints = new ArrayList<>();
+        this.openApiEndpointMapper = new OpenApiEndpointMapper();
+        this.openApiServiceMapper = new OpenApiServiceMapper(this.openApiEndpointMapper);
+    }
 
     /**
      * This util for generating files when not available with specific service name.
@@ -90,10 +96,9 @@ public class OpenApiConverterUtils {
      * @throws IOException               Error when writing the OpenAPI specification file.
      * @throws OpenApiConverterException Error occurred generating OpenAPI specification.
      */
-    public static void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, Optional<String> serviceName
+    public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, Optional<String> serviceName
             , Boolean needJson)
             throws IOException, OpenApiConverterException {
-        endpoints.clear();
         List<String> availableService = new ArrayList<>();
 
         // Load project instance for single ballerina file
@@ -140,7 +145,7 @@ public class OpenApiConverterUtils {
                     ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
                     if (serviceName.isPresent()) {
                         // Filtering by service name
-                        String service = getServiceBasePath(serviceNode);
+                        String service = openApiEndpointMapper.getServiceBasePath(serviceNode);
                         availableService.add(service);
                         if (serviceName.get().equals(service)) {
                             servicesToGenerate.add(serviceNode);
@@ -161,7 +166,7 @@ public class OpenApiConverterUtils {
 
             // Generating for the services
             for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
-                String serviceNodeName = getServiceBasePath(serviceNode);
+                String serviceNodeName = openApiEndpointMapper.getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
                 String openApiSource = generateOAS3Definitions(syntaxTree, serviceNodeName, needJson);
                 //  Checked old generated file with same name
@@ -171,7 +176,7 @@ public class OpenApiConverterUtils {
         }
     }
 
-    private static String getOpenApiFileName(String servicePath, String serviceName, Boolean isJson) {
+    private String getOpenApiFileName(String servicePath, String serviceName, Boolean isJson) {
         String cleanedServiceName;
         if (serviceName.isBlank() || serviceName.equals("/")) {
             cleanedServiceName = FilenameUtils.removeExtension(servicePath);
@@ -190,7 +195,7 @@ public class OpenApiConverterUtils {
         return cleanedServiceName + ConverterConstants.OPENAPI_SUFFIX + ConverterConstants.YAML_EXTENSION;
     }
 
-    public static String generateOAS3Definitions(SyntaxTree ballerinaSource, String serviceName, Boolean needJson) {
+    public String generateOAS3Definitions(SyntaxTree ballerinaSource, String serviceName, Boolean needJson) {
         //travers syntax tree
         //check top level node for get the annotation attachment for openapi
 
@@ -200,11 +205,7 @@ public class OpenApiConverterUtils {
         ModulePartNode modulePartNode = ballerinaSource.rootNode();
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
-            if (syntaxKind.equals(SyntaxKind.ANNOTATION_DECLARATION)) {
-                // TO-Do
-
-            } else if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                OpenApiServiceMapper openApiServiceMapper = new OpenApiServiceMapper();
+            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                 openApiServiceMapper.setSemanticModel(semanticModel);
                 OpenAPI openapi = getOpenApiDefinition(new OpenAPI(), openApiServiceMapper, serviceName, endpoints);
                 if (needJson) {
@@ -216,7 +217,7 @@ public class OpenApiConverterUtils {
         return serviceName;
     }
 
-    private static OpenAPI getOpenApiDefinition(OpenAPI openapi, OpenApiServiceMapper openApiServiceMapper,
+    private OpenAPI getOpenApiDefinition(OpenAPI openapi, OpenApiServiceMapper openApiServiceMapper,
                                                 String serviceName, List<ListenerDeclarationNode> endpoints) {
         ModulePartNode modulePartNode = syntaxTree.rootNode();
         for (Node node : modulePartNode.members()) {
@@ -225,11 +226,11 @@ public class OpenApiConverterUtils {
             if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                 ServiceDeclarationNode serviceDefinition = (ServiceDeclarationNode) node;
                 //Take base path of service
-                String currentServiceName = getServiceBasePath(serviceDefinition);
+                String currentServiceName = openApiEndpointMapper.getServiceBasePath(serviceDefinition);
                 if (openapi.getServers() == null) {
-                    OpenApiEndpointMapper openApiEndpointMapper = new OpenApiEndpointMapper();
                     SeparatedNodeList<ExpressionNode> expressions = ((ServiceDeclarationNode) node).expressions();
-                    openapi = extractServerForExpressionNode(openapi, expressions, serviceDefinition);
+                    openapi = openApiEndpointMapper.extractServerForExpressionNode(openapi, expressions,
+                            serviceDefinition);
                     if (!endpoints.isEmpty()) {
                         openapi = openApiEndpointMapper.convertListenerEndPointToOpenAPI(openapi, endpoints,
                                 serviceDefinition);
@@ -260,7 +261,7 @@ public class OpenApiConverterUtils {
     }
 
 
-    public static Property mapBallerinaTypes(String type, boolean isArray) {
+    public  Property mapBallerinaTypes(String type, boolean isArray) {
         switch (type) {
             case "any":
                 //TODO handle any type to OpenApi
@@ -292,7 +293,7 @@ public class OpenApiConverterUtils {
      * @param openApiName   given file name
      * @return              file name with duplicate number tag
      */
-    private static String checkDuplicateFiles(Path outPath, String openApiName, Boolean isJson) {
+    private  String checkDuplicateFiles(Path outPath, String openApiName, Boolean isJson) {
 
         if (Files.exists(outPath)) {
             final File[] listFiles = new File(String.valueOf(outPath)).listFiles();
@@ -303,7 +304,7 @@ public class OpenApiConverterUtils {
         return openApiName;
     }
 
-    private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
+    private  String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
 
         for (File file : listFiles) {
             if (System.console() != null) {
@@ -326,7 +327,7 @@ public class OpenApiConverterUtils {
      * @param fileName          File name
      * @param duplicateCount    add the tag with duplicate number if file already exist
      */
-    private static String setGeneratedFileName(File[] listFiles, String fileName, int duplicateCount, Boolean isJson) {
+    private  String setGeneratedFileName(File[] listFiles, String fileName, int duplicateCount, Boolean isJson) {
         for (File listFile : listFiles) {
             String listFileName = listFile.getName();
             if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2)

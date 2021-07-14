@@ -20,6 +20,7 @@
 package io.ballerina.ballerina.service;
 
 import io.ballerina.ballerina.Constants;
+import io.ballerina.ballerina.ConverterUtils;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
@@ -89,7 +90,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.ws.rs.core.MediaType;
 
-import static io.ballerina.ballerina.ConverterUtils.convertBallerinaTypeToOpenAPIType;
 import static io.ballerina.stdlib.http.api.HttpConstants.HTTP_METHOD_GET;
 
 /**
@@ -99,6 +99,7 @@ public class OpenApiResourceMapper {
     private SemanticModel semanticModel;
     private Paths pathObject = new Paths();
     private Components components = new Components();
+    private ConverterUtils converterUtils = new ConverterUtils();
 
     /**
      * Initializes a resource parser for openApi.
@@ -967,7 +968,7 @@ public class OpenApiResourceMapper {
                 io.swagger.v3.oas.models.parameters.QueryParameter qParam = new QueryParameter();
                 RequiredParameterNode queryParam = (RequiredParameterNode) paramAttributes;
                 qParam.setName(queryParam.paramName().get().text());
-                type = convertBallerinaTypeToOpenAPIType(queryParam.typeName().toString().trim());
+                type = converterUtils.convertBallerinaTypeToOpenAPIType(queryParam.typeName().toString().trim());
                 qParam.schema(getOpenApiSchema(type));
                 param = qParam;
                 break;
@@ -987,7 +988,7 @@ public class OpenApiResourceMapper {
             default:
                 io.swagger.v3.oas.models.parameters.PathParameter pParam = new PathParameter();
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) paramAttributes;
-                type = convertBallerinaTypeToOpenAPIType(pathParam.typeDescriptor().toString().trim());
+                type = converterUtils.convertBallerinaTypeToOpenAPIType(pathParam.typeDescriptor().toString().trim());
                 pParam.schema(getOpenApiSchema(type));
                 pParam.setName(pathParam.paramName().text());
                 param = pParam;

@@ -41,7 +41,7 @@ public class ConverterUtils {
      * @param list The BLangRecord list.
      * @return A map of attributes.
      */
-    public static Map<String, BLangExpression> listToMap(List<RecordLiteralNode.RecordField> list) {
+    public Map<String, BLangExpression> listToMap(List<RecordLiteralNode.RecordField> list) {
         Map<String, BLangExpression> attrMap = new HashMap<>();
 
         for (RecordLiteralNode.RecordField field : list) {
@@ -64,7 +64,7 @@ public class ConverterUtils {
      * @param valueNode The annotation attachment.
      * @return The string value.
      */
-    public static String getStringLiteralValue(ParenthesizedArgList valueNode) {
+    public String getStringLiteralValue(ParenthesizedArgList valueNode) {
         SeparatedNodeList<FunctionArgumentNode> arg = valueNode.arguments();
         return arg.get(0).toString();
     }
@@ -78,7 +78,7 @@ public class ConverterUtils {
      * @return returns annotation with the name <code>name</code> if found or
      * null if annotation not found in the list
      */
-    public static AnnotationAttachmentNode getAnnotationFromList(String name, String pkg,
+    public AnnotationAttachmentNode getAnnotationFromList(String name, String pkg,
                                                                  List<? extends AnnotationAttachmentNode> annotations) {
         AnnotationAttachmentNode annotation = null;
         if (name == null || pkg == null) {
@@ -99,7 +99,7 @@ public class ConverterUtils {
      * @param type this string type parameter according to ballerina type
      * @return  this return the string value of openAPI type
      */
-    public static String convertBallerinaTypeToOpenAPIType(String type) {
+    public String convertBallerinaTypeToOpenAPIType(String type) {
         String convertedType;
         switch (type) {
             case Constants.INT:

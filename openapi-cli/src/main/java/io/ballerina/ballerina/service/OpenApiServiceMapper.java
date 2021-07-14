@@ -43,6 +43,7 @@ public class OpenApiServiceMapper {
     private static final Logger logger = LoggerFactory.getLogger(
             OpenApiServiceMapper.class);
     private  SemanticModel semanticModel;
+    private OpenApiEndpointMapper openApiEndpointMapper;
 
     public SemanticModel getSemanticModel() {
         return semanticModel;
@@ -58,9 +59,10 @@ public class OpenApiServiceMapper {
     /**
      * Initializes a service parser for OpenApi.
      */
-    public OpenApiServiceMapper() {
+    public OpenApiServiceMapper(OpenApiEndpointMapper openApiEndpointMapper) {
         // Default object mapper is JSON mapper available in openApi utils.
         this.objectMapper = Json.mapper();
+        this.openApiEndpointMapper = openApiEndpointMapper;
     }
 
     /**
@@ -86,7 +88,7 @@ public class OpenApiServiceMapper {
      */
     public OpenAPI convertServiceToOpenApi(ServiceDeclarationNode service) {
         OpenAPI openapi = new OpenAPI();
-        String currentServiceName = OpenApiEndpointMapper.getServiceBasePath(service);
+        String currentServiceName = openApiEndpointMapper.getServiceBasePath(service);
         return convertServiceToOpenApi(service, openapi, currentServiceName);
     }
 

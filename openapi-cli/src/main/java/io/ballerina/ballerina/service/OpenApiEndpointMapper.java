@@ -47,6 +47,10 @@ import java.util.Optional;
  */
 public class OpenApiEndpointMapper {
 
+    public OpenApiEndpointMapper() {
+
+    }
+
     /**
      * Convert endpoints bound to {@code service} openapi server information.
      *
@@ -96,7 +100,7 @@ public class OpenApiEndpointMapper {
         return openAPI;
     }
 
-    private static Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
+    private Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
         Optional<ParenthesizedArgList> list;
         if (ep.initializer().kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
            ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) ep.initializer();
@@ -110,7 +114,7 @@ public class OpenApiEndpointMapper {
     }
 
     //Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
-    public static OpenAPI extractServerForExpressionNode(OpenAPI openAPI,
+    public OpenAPI extractServerForExpressionNode(OpenAPI openAPI,
                                                                     SeparatedNodeList<ExpressionNode> bTypeExplicit,
                                                                     ServiceDeclarationNode service) {
         if (openAPI == null) {
@@ -137,7 +141,7 @@ public class OpenApiEndpointMapper {
     }
 
     //Assign host and port values
-    private static Server getServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
+    private Server getServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
 
         String port = null;
         String host = null;
@@ -167,7 +171,7 @@ public class OpenApiEndpointMapper {
     }
 
     // Extract host value for creating URL.
-    private static String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
+    private String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
         String host = null;
         MappingConstructorExpressionNode recordConfig = bLangRecordLiteral;
         if (recordConfig.fields() != null && !recordConfig.fields().isEmpty()) {
@@ -196,7 +200,7 @@ public class OpenApiEndpointMapper {
      * @param serviceDefinition The service definition node.
      * @return The base path.
      */
-    public static String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
+    public String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
         StringBuilder currentServiceName = new StringBuilder();
         NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
         for (Node serviceBasedPathNode : serviceNameNodes) {
