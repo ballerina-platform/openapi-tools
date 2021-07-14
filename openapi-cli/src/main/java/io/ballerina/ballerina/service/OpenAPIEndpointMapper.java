@@ -45,9 +45,9 @@ import java.util.Optional;
 /**
  * Extract OpenApi server information from and Ballerina endpoint.
  */
-public class OpenApiEndpointMapper {
+public class OpenAPIEndpointMapper {
 
-    public OpenApiEndpointMapper() {
+    public OpenAPIEndpointMapper() {
 
     }
 

@@ -19,8 +19,8 @@
 package io.ballerina.ballerina;
 
 import io.ballerina.ballerina.service.ConverterConstants;
-import io.ballerina.ballerina.service.OpenApiEndpointMapper;
-import io.ballerina.ballerina.service.OpenApiServiceMapper;
+import io.ballerina.ballerina.service.OpenAPIServiceMapper;
+import io.ballerina.ballerina.service.OpenAPIEndpointMapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
@@ -39,14 +39,6 @@ import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
-import io.swagger.models.properties.BooleanProperty;
-import io.swagger.models.properties.ByteArrayProperty;
-import io.swagger.models.properties.DecimalProperty;
-import io.swagger.models.properties.FloatProperty;
-import io.swagger.models.properties.IntegerProperty;
-import io.swagger.models.properties.ObjectProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.StringProperty;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -78,17 +70,17 @@ public class OpenApiConverterUtils {
     private  SemanticModel semanticModel;
     private  Project project;
     private  List<ListenerDeclarationNode> endpoints;
-    private OpenApiEndpointMapper openApiEndpointMapper;
-    private OpenApiServiceMapper openApiServiceMapper;
+    private OpenAPIEndpointMapper openApiEndpointMapper;
+    private OpenAPIServiceMapper openApiServiceMapper;
 
     public OpenApiConverterUtils() {
         this.endpoints = new ArrayList<>();
-        this.openApiEndpointMapper = new OpenApiEndpointMapper();
-        this.openApiServiceMapper = new OpenApiServiceMapper(this.openApiEndpointMapper);
+        this.openApiEndpointMapper = new OpenAPIEndpointMapper();
+        this.openApiServiceMapper = new OpenAPIServiceMapper(this.openApiEndpointMapper);
     }
 
     /**
-     * This util for generating files when not available with specific service name.
+     * This util for generating OAS files.
      *
      * @param servicePath The path to a single ballerina file
      * @param outPath     The output directory to which the OpenAPI specifications should be generated to.
@@ -217,7 +209,7 @@ public class OpenApiConverterUtils {
         return serviceName;
     }
 
-    private OpenAPI getOpenApiDefinition(OpenAPI openapi, OpenApiServiceMapper openApiServiceMapper,
+    private OpenAPI getOpenApiDefinition(OpenAPI openapi, OpenAPIServiceMapper openApiServiceMapper,
                                                 String serviceName, List<ListenerDeclarationNode> endpoints) {
         ModulePartNode modulePartNode = syntaxTree.rootNode();
         for (Node node : modulePartNode.members()) {
@@ -235,7 +227,6 @@ public class OpenApiConverterUtils {
                         openapi = openApiEndpointMapper.convertListenerEndPointToOpenAPI(openapi, endpoints,
                                 serviceDefinition);
                     }
-
                     if (openapi.getServers().isEmpty()) {
                         List<Server> servers = new ArrayList<>();
                         Server server = new Server().url(currentServiceName);
@@ -258,33 +249,6 @@ public class OpenApiConverterUtils {
         }
 
         return openapi;
-    }
-
-
-    public  Property mapBallerinaTypes(String type, boolean isArray) {
-        switch (type) {
-            case "any":
-                //TODO handle any type to OpenApi
-                return null;
-            case "int":
-                return new IntegerProperty();
-            case "string":
-                return new StringProperty();
-            case "boolean":
-                return new BooleanProperty();
-            case "decimal":
-                return new DecimalProperty();
-            case "byte":
-                return new ByteArrayProperty();
-            case "float":
-                return new FloatProperty();
-            case "json":
-                //TODO json is mapped to Object property. Will need to handle it properly.
-                return new ObjectProperty();
-            default:
-                //TODO handle unmatched type
-                return null;
-        }
     }
 
     /**

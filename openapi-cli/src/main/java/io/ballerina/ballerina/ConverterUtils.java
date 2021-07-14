@@ -21,6 +21,12 @@ package io.ballerina.ballerina;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.BooleanSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.expressions.RecordLiteralNode;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
@@ -34,6 +40,11 @@ import java.util.Map;
  * Utilities used in Ballerina  to OpenAPI converter.
  */
 public class ConverterUtils {
+
+    public ConverterUtils() {
+
+    }
+
     /**
      * Converts the attributes of an annotation to a map of key being attribute key and value being an annotation
      * attachment value.
@@ -124,5 +135,50 @@ public class ConverterUtils {
                 convertedType = "";
         }
         return convertedType;
+    }
+
+    /**
+     * Retrieves a matching OpenApi {@link Schema} for a provided ballerina type.
+     *
+     * @param type ballerina type name as a String
+     * @return OpenApi {@link Schema} for type defined by {@code type}
+     */
+    public Schema getOpenApiSchema(String type) {
+        Schema schema;
+
+        switch (type) {
+            case Constants.STRING:
+            case Constants.PLAIN:
+                schema = new StringSchema();
+                break;
+            case Constants.BOOLEAN:
+                schema = new BooleanSchema();
+                break;
+            case Constants.ARRAY:
+                schema = new ArraySchema();
+                break;
+            case Constants.NUMBER:
+            case Constants.INT:
+            case Constants.INTEGER:
+                schema = new IntegerSchema();
+                break;
+            case Constants.TYPE_REFERENCE:
+            case Constants.TYPEREFERENCE:
+                schema = new Schema();
+                schema.$ref("true");
+                break;
+            case Constants.BYTE_ARRAY:
+            case Constants.OCTET_STREAM:
+                schema = new StringSchema();
+                schema.setFormat("uuid");
+                break;
+            case Constants.XML:
+            case Constants.JSON:
+            default:
+                schema = new ObjectSchema();
+                break;
+        }
+
+        return schema;
     }
 }

@@ -119,59 +119,6 @@ public class OpenApiConverterUtilsTest {
         Assert.assertTrue(Files.exists(this.tempDir.resolve("no_base_path_service_openapi.yaml")));
     }
 
-    @Test(description = "Generate OpenAPI spec with json payload")
-    public void testJsonPayLoad() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("json_payload_service.bal");
-        //Compare generated yaml file with expected yaml content
-        compareWithGeneratedFile(ballerinaFilePath, "json_payload.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with xml payload")
-    public void testXmlPayLoad() throws IOException, OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("xml_payload_service.bal");
-        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
-        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
-                false);
-        Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadXml_openapi.yaml")));
-    }
-
-    @Test(description = "Generate OpenAPI spec with mulitple payload")
-    public void testMultiplePayLoad() throws IOException, OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("multiple_payload_service.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "multiple_payload.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with record payload")
-    public void testRecordPayLoad() throws IOException, OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("record_payload_service.bal");
-        String yamlFile = "record_payload.yaml";
-        compareWithGeneratedFile(ballerinaFilePath, yamlFile);
-    }
-
-    @Test(description = "Generate OpenAPI spec with nested record payload")
-    public void testNestedRecordPayLoad() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("nestedRecord_payload_service.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "nested_record.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with nested payload")
-    public void testNested2RecordPayLoad() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("nested2Record_payload_service.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "nested_2record.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with array field payload")
-    public void testArrayNestedRecordPayLoad() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("arrayRecord_payload_service.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "nested_array.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with array field payload")
-    public void testArrayNestedRecordFiledPayLoad() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("arrayRecordfield_payload_service.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "record_field_array.yaml");
-    }
-
     @Test(description = "Generate OpenAPI spec for resource has .")
     public void testPathscenario01() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("path_scenario01.bal");
@@ -226,67 +173,6 @@ public class OpenApiConverterUtilsTest {
     public void testHeadscenario01() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario01.bal");
         compareWithGeneratedFile(ballerinaFilePath, "header_scenario01.yaml");
-    }
-
-    @Test(description = "RequestBody without mediaType")
-    public void testRequestBodyscenario01() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario01.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario01.yaml");
-    }
-
-    @Test(description = "RequestBody without mediaType, record type has payload")
-    public void testRequestBodyscenario02() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario02.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario02.yaml");
-    }
-
-    @Test(description = "RequestBody without mediaType, nested record type has payload")
-    public void testRequestBodyscenario03() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario03.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario03.yaml");
-    }
-
-    @Test(description = "RequestBody without mediaType, nested record type with array field has payload")
-    public void testRequestBodyscenario04() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario04.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario04.yaml");
-    }
-
-    @Test(description = "RequestBody without mediaType, nested record type with nested array field has payload")
-    public void testRequestBodyscenario05() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario05.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario05.yaml");
-    }
-
-    @Test(description = "RequestBody without mediaType, nested record type with nested array field has payload")
-    public void testRequestBodyscenario06() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario06.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario06.yaml");
-    }
-
-    @Test(description = "RequestBody without mediaType, payload has xml type")
-    public void testRequestBodyscenario07() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario07.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario07.yaml");
-    }
-
-    @Test(description = "RequestBody without mediaType, payload has xml type")
-    public void testRequestBodyscenario08() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario08.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario08.yaml");
-    }
-
-    @Test(description = "RequestBody without mediaType, payload has xml type")
-    public void testRequestBodyscenario09() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario09.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario09.yaml");
-    }
-
-    // Need to handle further implementation
-    @Test(description = "RequestBody without mediaType, payload has inline record type", enabled = false)
-    public void testRequestBodyscenario10() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario10.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario10.yaml");
     }
 
     @Test(description = "Response scenario01 without return type")
