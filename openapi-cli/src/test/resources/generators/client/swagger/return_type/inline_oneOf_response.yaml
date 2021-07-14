@@ -1,0 +1,34 @@
+openapi: 3.0.1
+info:
+  title: 'payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /pet:
+    get:
+      operationId: operationId01
+      description: "op1"
+      responses:
+        "2XX":
+          description: "Test function"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - items:
+                      $ref: "#/components/schemas/ChannelDetails"
+                    type: array
+                  - items:
+                      type: string
+                    type: array
+
+components:
+  schemas:
+    ChannelDetails:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
