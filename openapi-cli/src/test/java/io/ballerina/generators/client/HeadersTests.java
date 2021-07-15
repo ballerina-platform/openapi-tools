@@ -65,4 +65,15 @@ public class HeadersTests {
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
+    @Test(description = "Test for header with default values")
+    public void getHeaderTestsWithDefaultValues() throws IOException, BallerinaOpenApiException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RES_DIR.resolve("swagger/header_param_with_default_value.yaml");
+        Path expectedPath = RES_DIR.resolve("ballerina/header_param_with_default_value.bal");
+
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
 }

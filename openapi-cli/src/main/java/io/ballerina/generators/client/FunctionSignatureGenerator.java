@@ -313,12 +313,11 @@ public class FunctionSignatureGenerator {
                     createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
             return createRequiredParameterNode(annotationNodes, typeName, paramName);
         } else {
-            typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
-                    createIdentifierToken(paramType)), createToken(QUESTION_MARK_TOKEN));
             IdentifierToken paramName =
                     createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
             // Handle given default values in query parameter.
             if (parameterSchema.getDefault() != null) {
+                typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
                 LiteralValueToken literalValueToken;
                 if (parameterSchema.getType().equals("string")) {
                     literalValueToken = createLiteralValueToken(null,
@@ -334,6 +333,8 @@ public class FunctionSignatureGenerator {
                 return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
                         literalValueToken);
             } else {
+                typeName = createOptionalTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(paramType)), createToken(QUESTION_MARK_TOKEN));
                 NilLiteralNode nilLiteralNode =
                         createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
                 return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
@@ -365,9 +366,10 @@ public class FunctionSignatureGenerator {
 
         NodeList<AnnotationNode> annotationNodes = docCommentsGenerator
                 .extractDisplayAnnotation(parameter.getExtensions());
+        Schema schema = parameter.getSchema();
         if (parameter.getRequired()) {
             String type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
-            Schema schema = parameter.getSchema();
+
             if (schema instanceof ArraySchema) {
                 ArraySchema arraySchema = (ArraySchema) schema;
                 if (arraySchema.getItems().get$ref() != null) {
@@ -381,14 +383,34 @@ public class FunctionSignatureGenerator {
             IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
             return createRequiredParameterNode(annotationNodes, typeName, paramName);
         } else {
-            BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                    createIdentifierToken(convertOpenAPITypeToBallerina(
-                            parameter.getSchema().getType().trim()) + "?"));
             IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
-            NilLiteralNode nilLiteralNode =
-                    createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
-            return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
-                    nilLiteralNode);
+            if (schema.getDefault() != null) {
+                BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(convertOpenAPITypeToBallerina(
+                                parameter.getSchema().getType().trim())));
+                LiteralValueToken literalValueToken;
+                if (schema.getType().equals("string")) {
+                    literalValueToken = createLiteralValueToken(null,
+                            '"' + schema.getDefault().toString() + '"', createEmptyMinutiaeList(),
+                            createEmptyMinutiaeList());
+                } else {
+                    literalValueToken =
+                            createLiteralValueToken(null, schema.getDefault().toString(),
+                                    createEmptyMinutiaeList(),
+                                    createEmptyMinutiaeList());
+
+                }
+                return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
+                        literalValueToken);
+            } else {
+                BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(convertOpenAPITypeToBallerina(
+                                parameter.getSchema().getType().trim()) + "?"));
+                NilLiteralNode nilLiteralNode =
+                        createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
+                return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
+                        nilLiteralNode);
+            }
         }
     }
 
