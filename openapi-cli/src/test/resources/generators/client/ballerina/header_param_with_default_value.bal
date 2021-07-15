@@ -18,7 +18,7 @@ public client class Client {
     # + apiKeyConfig - API key configuration detail
     # + clientConfig - Client configuration details
     # + serviceUrl - Connector server URL
-    # + return -  Returns error at failure of client initialization
+    # + return - Returns error at failure of client initialization
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
@@ -34,9 +34,11 @@ public client class Client {
     @display {label: "Weather Forecast"}
     remote isolated function getWeatherForecast(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string exclude = "current", @display {label: "Units"} int units = 12) returns WeatherForecast|error {
         string  path = string `/onecall`;
-        map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, appid: self.apiKeys["appid"]};
+        map<anydata> queryParam = {"lat": lat, "lon": lon, appid: self.apiKeys["appid"]};
         path = path + check getPathForQueryParam(queryParam);
-        WeatherForecast response = check self.clientEp-> get(path, targetType = WeatherForecast);
+        map<any> headerValues = {"exclude": exclude, "units": units};
+        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
+        WeatherForecast response = check self.clientEp-> get(path, accHeaders, targetType = WeatherForecast);
         return response;
     }
 }
@@ -73,4 +75,18 @@ isolated function  getPathForQueryParam(map<anydata>   queryParam)  returns  str
     }
     string restOfPath = string:'join("", ...param);
     return restOfPath;
+}
+
+# Generate header map for given header values.
+#
+# + headerParam - Headers  map
+# + return - Returns generated map or error at failure of client initialization
+isolated function  getMapForHeaders(map<any>   headerParam)  returns  map<string|string[]> {
+    map<string|string[]> headerMap = {};
+    foreach  var [key, value] in  headerParam.entries() {
+        if  value  is  string ||  value  is  string[] {
+            headerMap[key] = value;
+        }
+    }
+    return headerMap;
 }

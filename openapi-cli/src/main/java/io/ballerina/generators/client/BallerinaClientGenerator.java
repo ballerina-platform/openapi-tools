@@ -51,6 +51,7 @@ import io.ballerina.compiler.syntax.tree.ObjectFieldNode;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -381,14 +382,16 @@ public class BallerinaClientGenerator {
         List<Server> servers = openAPI.getServers();
         Server server = servers.get(0);
         serverURL = getServerURL(server);
-        IdentifierToken equalToken = createIdentifierToken("=");
-        BasicLiteralNode expression = createBasicLiteralNode(STRING_LITERAL,
-                createIdentifierToken('"' + serverURL + '"'));
-
-        DefaultableParameterNode serviceUrl = createDefaultableParameterNode(annotationNodes, typeName,
-                paramName, equalToken, expression);
-        parameters.add(serviceUrl);
-
+        if (serverURL.equals("/")) {
+            RequiredParameterNode serviceUrl = createRequiredParameterNode(annotationNodes, typeName, paramName);
+            parameters.add(serviceUrl);
+        } else {
+            BasicLiteralNode expression = createBasicLiteralNode(STRING_LITERAL,
+                createIdentifierToken('"' + getServerURL(server) + '"'));
+            DefaultableParameterNode serviceUrl = createDefaultableParameterNode(annotationNodes, typeName,
+                    paramName, createIdentifierToken("="), expression);
+            parameters.add(serviceUrl);
+        }
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 
         //Create return type node for inti function
