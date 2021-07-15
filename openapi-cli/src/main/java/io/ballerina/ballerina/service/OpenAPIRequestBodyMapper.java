@@ -69,9 +69,10 @@ public class OpenAPIRequestBodyMapper {
         if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
             // Creating request body - required.
             RequestBody bodyParameter = new RequestBody();
-            MappingConstructorExpressionNode mapMime = annotation.annotValue().orElseThrow();
-            SeparatedNodeList<MappingFieldNode> fields = mapMime.fields();
-            if (!fields.isEmpty() || fields.size() != 0) {
+            MappingConstructorExpressionNode mapMime = annotation.annotValue().orElse(null);
+            SeparatedNodeList<MappingFieldNode> fields = null;
+            if (mapMime != null) fields = mapMime.fields();
+            if (fields != null && (!fields.isEmpty() || fields.size() != 0)) {
                 handleMultipleMIMETypes(bodyParameter, fields, expr, queryParam, schema);
             }  else {
                 String consumes = "application/" + expr.typeName().toString().trim();

@@ -163,7 +163,7 @@ public class RequestBodyTest {
     @Test(description = "RequestBody without mediaType, payload has has record type")
     public void testRequestBodyscenario11() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("with_payload_annotation.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario09.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "with_payload_annotation.yaml");
     }
 
     @AfterMethod

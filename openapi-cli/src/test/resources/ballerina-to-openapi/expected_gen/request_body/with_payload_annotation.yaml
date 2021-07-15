@@ -1,0 +1,31 @@
+openapi: 3.0.1
+info:
+  title: ' payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /ping:
+    post:
+      operationId: operation1_post_/ping
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+      responses:
+        "200":
+          description: Ok
+components:
+  schemas:
+    Reservations:
+      type: object
+      properties:
+        roomId:
+          type: string
+        count:
+          type: integer
+        startDate:
+          type: string
+        endDate:
+          type: string
