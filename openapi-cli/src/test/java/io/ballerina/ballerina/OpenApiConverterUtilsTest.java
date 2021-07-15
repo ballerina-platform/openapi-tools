@@ -233,12 +233,6 @@ public class OpenApiConverterUtilsTest {
     }
 
     @Test(description = "Generate OpenAPI spec for build project")
-    public void testMIMERecordFiledPayLoad() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("mime_with_recordpayload_service.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "mime_with_record_payload.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec for build project")
     public void testForResponse01() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("scenario01.bal");
         compareWithGeneratedFile(ballerinaFilePath, "response01.yaml");
@@ -287,35 +281,6 @@ public class OpenApiConverterUtilsTest {
     public void testListeners06() throws OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("listener_scenario06.bal");
         compareWithGeneratedFile(ballerinaFilePath, "listener_scenario06.yaml");
-    }
-    @Test(description = "Generate OpenAPI spec for multiple records")
-    public void testMultipleRecords() throws OpenApiConverterException {
-        Path ballerinaFilePath = RES_DIR.resolve("rb_scenario11.bal");
-        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario11.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with json file")
-    public void testNestedRecordPayLoadJson() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("nestedRecord_payload_service.bal");
-        try {
-            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen/json"),
-                    "nestedRecord.json");
-            OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
-            openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
-                    , true);
-            if (Files.exists(this.tempDir.resolve("payloadV_openapi.json"))) {
-                String generatedYaml = getStringFromGivenBalFile(this.tempDir, "payloadV_openapi.json");
-                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
-                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
-                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
-            } else {
-                Assert.fail("Json was not generated");
-            }
-        } catch (IOException e) {
-            Assert.fail("Error while generating the service. " + e.getMessage());
-        } finally {
-            deleteGeneratedFiles("openapipetstore-service.json");
-        }
     }
 
     @AfterMethod

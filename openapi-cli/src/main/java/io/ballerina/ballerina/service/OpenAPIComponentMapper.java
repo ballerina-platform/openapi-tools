@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.ballerina.ballerina.service;
 
 import io.ballerina.ballerina.Constants;
@@ -19,6 +37,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * This util class for processing the mapping in between ballerina record and openAPI object schema.
+ */
 public class OpenAPIComponentMapper {
     private Components components;
     private SemanticModel semanticModel;
@@ -30,8 +51,15 @@ public class OpenAPIComponentMapper {
         this.semanticModel = semanticModel;
     }
 
-    public void handleRecordPayload(SimpleNameReferenceNode queryParam, Map<String, Schema> schema,
-                                    TypeSymbol typeSymbol) {
+    /**
+     * This function for doing the mapping with ballerina record to object schema.
+     *
+     * @param recordNode     Record Node
+     * @param schema         Map of current schemas
+     * @param typeSymbol     Record Name as a TypeSymbol
+     */
+    public void handleRecordNode(SimpleNameReferenceNode recordNode, Map<String, Schema> schema,
+                                 TypeSymbol typeSymbol) {
         String componentName = typeSymbol.getName().orElseThrow().trim();
         Schema componentSchema = new Schema();
         componentSchema.setType("object");
@@ -52,12 +80,12 @@ public class OpenAPIComponentMapper {
                         TypeSymbol recordVariable =  recordSymbol.orElseThrow();
                         if (recordVariable.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
                             TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
-                            handleRecordPayload(queryParam, schema, typeRecord);
+                            handleRecordNode(recordNode, schema, typeRecord);
                             schema = components.getSchemas();
                         }
                     }
                     if (property instanceof ArraySchema) {
-                        setArrayProperty(queryParam, schema, field.getValue(), (ArraySchema) property);
+                        setArraySchema(recordNode, schema, field.getValue(), (ArraySchema) property);
                         schema = components.getSchemas();
                     }
                     schemaProperties.put(field.getKey(), property);
@@ -76,7 +104,10 @@ public class OpenAPIComponentMapper {
         }
     }
 
-    private void setArrayProperty(SimpleNameReferenceNode queryParam, Map<String, Schema> schema,
+    /**
+     * Generate arraySchema for ballerina record  as array type.
+     */
+    private void setArraySchema(SimpleNameReferenceNode recordNode, Map<String, Schema> schema,
                                   RecordFieldSymbol field, ArraySchema property) {
 
         TypeSymbol symbol = field.typeDescriptor();
@@ -93,7 +124,7 @@ public class OpenAPIComponentMapper {
             //Set the record model to the definition
             if (symbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
                 TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) symbol;
-                handleRecordPayload(queryParam, schema, typeRecord);
+                handleRecordNode(recordNode, schema, typeRecord);
             }
         }
         //Handle nested array type
@@ -104,6 +135,9 @@ public class OpenAPIComponentMapper {
         }
     }
 
+    /**
+     * Handle nested array.
+     */
     private ArraySchema handleArray(int arrayDimensions, Schema property, ArraySchema arrayProperty) {
         if (arrayDimensions > 1) {
             ArraySchema narray = new ArraySchema();

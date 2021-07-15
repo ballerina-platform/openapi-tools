@@ -62,7 +62,7 @@ public class OpenAPIParameterMapper {
     }
 
     /**
-     * Create {@code Parameters} model for openApi operation.
+     * Create {@code Parameters} model for openAPI operation.
      *
      */
     public void createParametersModel() {

@@ -19,8 +19,8 @@
 package io.ballerina.ballerina;
 
 import io.ballerina.ballerina.service.ConverterConstants;
-import io.ballerina.ballerina.service.OpenAPIServiceMapper;
 import io.ballerina.ballerina.service.OpenAPIEndpointMapper;
+import io.ballerina.ballerina.service.OpenAPIServiceMapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;

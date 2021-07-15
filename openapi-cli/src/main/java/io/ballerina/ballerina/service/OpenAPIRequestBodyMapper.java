@@ -24,6 +24,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.ChildNodeList;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
@@ -33,7 +34,10 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -43,7 +47,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -63,19 +66,29 @@ public class OpenAPIRequestBodyMapper {
         this.semanticModel = semanticModel;
     }
 
-    public void handlePayloadAnnotation(RequiredParameterNode expr, RequiredParameterNode queryParam, Map<String,
-            Schema> schema, AnnotationNode annotation) {
+    /**
+     * This method convert ballerina payload node to OAS model {@link io.swagger.v3.oas.models.parameters.RequestBody}.
+     *
+     * @param payloadNode   - PayloadNode from resource function
+     * @param schema        - Current schema map from OAS
+     * @param annotation    - Payload annotation details from resource function
+     */
+    public void handlePayloadAnnotation(RequiredParameterNode payloadNode, Map<String, Schema> schema,
+                                        AnnotationNode annotation) {
 
         if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
             // Creating request body - required.
             RequestBody bodyParameter = new RequestBody();
             MappingConstructorExpressionNode mapMime = annotation.annotValue().orElse(null);
             SeparatedNodeList<MappingFieldNode> fields = null;
-            if (mapMime != null) fields = mapMime.fields();
+            if (mapMime != null) {
+                fields = mapMime.fields();
+            }
             if (fields != null && (!fields.isEmpty() || fields.size() != 0)) {
-                handleMultipleMIMETypes(bodyParameter, fields, expr, queryParam, schema);
+                handleMultipleMIMETypes(bodyParameter, fields, payloadNode, schema);
             }  else {
-                String consumes = "application/" + expr.typeName().toString().trim();
+                //TODO : fill with rest of media types
+                String consumes = "application/" + payloadNode.typeName().toString().trim();
                 switch (consumes) {
                     case MediaType.APPLICATION_JSON:
                         addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_JSON);
@@ -91,10 +104,12 @@ public class OpenAPIRequestBodyMapper {
                         addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_OCTET_STREAM);
                         break;
                     default:
-                        Node node = queryParam.typeName();
+                        Node node = payloadNode.typeName();
                         if (node instanceof SimpleNameReferenceNode) {
                             SimpleNameReferenceNode record = (SimpleNameReferenceNode) node;
-                            handleReferencePayload(operationAdaptor, record, schema,
+                            handleReferencePayload(record, schema, MediaType.APPLICATION_JSON, new RequestBody());
+                        } else if (node instanceof ArrayTypeDescriptorNode) {
+                            handleArrayTypePayload(schema, (ArrayTypeDescriptorNode) node,
                                     MediaType.APPLICATION_JSON, new RequestBody());
                         }
                         break;
@@ -103,9 +118,47 @@ public class OpenAPIRequestBodyMapper {
         }
     }
 
+    /**
+     * Handle {@link io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode} in ballerina request payload.
+     */
+    private void handleArrayTypePayload(Map<String, Schema> schema, ArrayTypeDescriptorNode arrayNode, String mimeType,
+                                        RequestBody requestBody) {
+
+        ArraySchema arraySchema = new ArraySchema();
+        TypeDescriptorNode typeDescriptorNode = arrayNode.memberTypeDesc();
+        // Nested array not allowed
+        if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+            //handel record for components
+            SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) typeDescriptorNode;
+            Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
+            TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
+            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, semanticModel);
+            componentMapper.handleRecordNode(referenceNode, schema, typeSymbol);
+            Schema itemSchema = new Schema();
+            arraySchema.setItems(itemSchema.$ref(referenceNode.name().text().trim()));
+            io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
+            media.setSchema(arraySchema);
+            if (requestBody.getContent() != null) {
+                Content content = requestBody.getContent();
+                content.addMediaType(mimeType, media);
+            } else {
+                requestBody.setContent(new Content().addMediaType(mimeType, media));
+            }
+            //  Adding conditional check for http delete operation as it cannot have body
+            //  parameter.
+            if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
+                operationAdaptor.getOperation().setRequestBody(requestBody);
+            }
+        }
+    }
+
+    /**
+     * Handle multiple mime type when attached with request payload annotation.
+     * ex: <pre> @http:Payload { mediaType:["application/json", "application/xml"] } Pet payload </pre>
+     */
     private void handleMultipleMIMETypes(RequestBody bodyParameter,
-                                         SeparatedNodeList<MappingFieldNode> fields, RequiredParameterNode expr,
-                                         RequiredParameterNode queryParam, Map<String, Schema> schema) {
+                                         SeparatedNodeList<MappingFieldNode> fields,
+                                         RequiredParameterNode payloadNode, Map<String, Schema> schema) {
 
         for (MappingFieldNode fieldNode: fields) {
             if (fieldNode.children() != null) {
@@ -121,11 +174,14 @@ public class OpenAPIRequestBodyMapper {
                                 if (mime instanceof BasicLiteralNode) {
                                     String mimeType = ((BasicLiteralNode) mime).literalToken().text().
                                             replaceAll("\"", "");
-                                    if (queryParam.typeName() instanceof SimpleNameReferenceNode) {
+                                    if (payloadNode.typeName() instanceof SimpleNameReferenceNode) {
                                         SimpleNameReferenceNode record =
-                                                (SimpleNameReferenceNode) queryParam.typeName();
-                                        handleReferencePayload(operationAdaptor, record, schema, mimeType,
-                                                requestBody);
+                                                (SimpleNameReferenceNode) payloadNode.typeName();
+                                        handleReferencePayload(record, schema, mimeType, requestBody);
+                                    } else if (payloadNode.typeName() instanceof ArrayTypeDescriptorNode) {
+                                        ArrayTypeDescriptorNode arrayTypeDescriptorNode =
+                                                (ArrayTypeDescriptorNode) payloadNode.typeName();
+                                        handleArrayTypePayload(schema, arrayTypeDescriptorNode, mimeType, requestBody);
                                     } else {
 
                                         io.swagger.v3.oas.models.media.MediaType media =
@@ -156,17 +212,18 @@ public class OpenAPIRequestBodyMapper {
         }
     }
 
-    private void handleReferencePayload(OperationAdaptor operationAdaptor, SimpleNameReferenceNode recordNode,
-                                        Map<String, Schema> schema, String mediaType,
-                                        @Nullable RequestBody bodyParameter) {
+    /**
+     * Handle record type request payload.
+     */
+    private void handleReferencePayload(SimpleNameReferenceNode referenceNode,
+                                        Map<String, Schema> schema, String mediaType, RequestBody bodyParameter) {
 
         // Creating request body - required.
-        SimpleNameReferenceNode referenceNode = recordNode;
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handel record for components
         OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, semanticModel);
-        componentMapper.handleRecordPayload(recordNode, schema, typeSymbol);
+        componentMapper.handleRecordNode(referenceNode, schema, typeSymbol);
 
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));

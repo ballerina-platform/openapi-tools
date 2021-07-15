@@ -5,28 +5,26 @@ info:
 servers:
   - url: localhost:9090/payloadV
 paths:
-  /reservation:
-    post:
-      operationId: operation1_post_/reservation
+  /pets:
+    put:
+      operationId: operation1_put_/pets
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Reservation'
+              type: array
+              items:
+                $ref: '#/components/schemas/Pet'
       responses:
         "200":
           description: Ok
 components:
   schemas:
-    Reservation:
+    Pet:
       type: object
       properties:
-        endDate:
+        name:
           type: string
-        count:
+        id:
           type: integer
           format: int32
-        roomId:
-          type: string
-        startDate:
-          type: string

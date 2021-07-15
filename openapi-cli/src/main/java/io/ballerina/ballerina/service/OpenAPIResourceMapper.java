@@ -66,7 +66,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.core.MediaType;
 
 import static io.ballerina.stdlib.http.api.HttpConstants.HTTP_METHOD_GET;
@@ -462,8 +461,7 @@ public class OpenAPIResourceMapper {
     }
 
     private void handleReferenceInResponse(OperationAdaptor operationAdaptor, SimpleNameReferenceNode recordNode,
-                                        Map<String, Schema> schema,
-                                        @Nullable ApiResponses apiResponses) {
+                                        Map<String, Schema> schema, ApiResponses apiResponses) {
 
         // Creating request body - required.
         SimpleNameReferenceNode referenceNode = recordNode;
@@ -471,7 +469,7 @@ public class OpenAPIResourceMapper {
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handel record for components
         OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, semanticModel);
-        componentMapper.handleRecordPayload(recordNode, schema, typeSymbol);
+        componentMapper.handleRecordNode(recordNode, schema, typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         if (recordNode.parent().kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
             ArraySchema arraySchema = new ArraySchema();
@@ -510,7 +508,8 @@ public class OpenAPIResourceMapper {
      */
     private void addResourceParameters(FunctionDefinitionNode resource, OperationAdaptor operationAdaptor) {
         //Add path parameters if in path and query parameters
-        OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, operationAdaptor.getOperation());
+        OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource,
+                operationAdaptor.getOperation());
         openAPIParameterMapper.createParametersModel();
 
         if (!HTTP_METHOD_GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
@@ -526,8 +525,7 @@ public class OpenAPIResourceMapper {
                         for (AnnotationNode annotation: annotations) {
                             OpenAPIRequestBodyMapper openAPIRequestBodyMapper =
                                     new OpenAPIRequestBodyMapper(components, operationAdaptor, semanticModel);
-                            openAPIRequestBodyMapper.handlePayloadAnnotation((RequiredParameterNode) expr, bodyParam,
-                                    schema, annotation);
+                            openAPIRequestBodyMapper.handlePayloadAnnotation(bodyParam, schema, annotation);
                         }
                     }
                 }
