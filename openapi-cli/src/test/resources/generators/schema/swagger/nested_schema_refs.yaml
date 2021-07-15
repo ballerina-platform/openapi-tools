@@ -1,0 +1,143 @@
+openapi: 3.0.0
+info:
+  description: This is the interface for interacting with the [Asana Platform](https://developers.asana.com).
+  title: Asana
+  termsOfService: https://asana.com/terms
+  contact:
+    name: Asana Support
+    url: https://asana.com/support
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: '1.0'
+servers:
+  - url: https://app.asana.com/api/1.0
+    description: Main endpoint.
+components:
+  schemas:
+    AsanaResource:
+      description: A generic Asana Resource, containing a globally unique identifier.
+      type: object
+      properties:
+        gid:
+          description: Globally unique identifier of the resource, as a string.
+          type: string
+          readOnly: true
+          example: '12345'
+          x-insert-after: false
+        resource_type:
+          description: The base type of this resource.
+          type: string
+          readOnly: true
+          example: task
+          x-insert-after: gid
+    UserCompact:
+      allOf:
+        - $ref: '#/components/schemas/AsanaResource'
+        - type: object
+          description: A user object represents an account in Asana that can be given
+            access to various workspaces, projects, and tasks.
+          x-docs-overrides:
+            properties.resource_type.example: user
+          properties:
+            name:
+              type: string
+              description: Read-only except when same user as requester.
+              example: Greg Sanchez
+    ProjectStatusCompact:
+      allOf:
+        - $ref: '#/components/schemas/AsanaResource'
+        - type: object
+          description: A project status is an update on the progress of a particular
+            project, and is sent out to all project followers when created.
+          properties:
+            title:
+              description: The title of the project status update.
+              type: string
+              example: Status Update - Jun 15
+    ProjectStatusRequest:
+      $ref: '#/components/schemas/ProjectStatusBase'
+    ProjectStatusBase:
+      allOf:
+        - $ref: '#/components/schemas/ProjectStatusCompact'
+        - type: object
+          required:
+            - text
+            - color
+          properties:
+            author:
+              $ref: '#/components/schemas/UserCompact'
+            modified_at:
+              description: The time at which this project status was last modified.
+            text:
+              description: The text content of the status update.
+              type: string
+              example: The project is moving forward according to plan...
+            html_text:
+              type: string
+              example: >-
+                <body>The project <strong>is</strong> moving forward according to
+                plan...</body>
+            color:
+              description: The color associated with the status update.
+              type: string
+  parameters:
+    project_path_gid:
+      name: project_gid
+      in: path
+      description: >-
+        Globally unique identifier for the project.
+      required: true
+      schema:
+        type: string
+      example: '1331'
+      x-env-variable: project
+    pretty:
+      name: opt_pretty
+      in: query
+      description: Provides “pretty” output.
+      required: false
+      allowEmptyValue: true
+      schema:
+        type: boolean
+      style: form
+    fields:
+      name: opt_fields
+      in: query
+      description: Defines fields to return.
+      example:
+        - followers
+        - assignee
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      style: form
+      explode: false
+paths:
+  /projects/{project_gid}/project_statuses:
+    parameters:
+      - $ref: '#/components/parameters/project_path_gid'
+      - $ref: '#/components/parameters/pretty'
+      - $ref: '#/components/parameters/fields'
+    post:
+      summary: Create a project status
+      description: Creates a new status update on the project.
+      tags:
+        - Project Statuses
+      operationId: createProjectStatusForProject
+      requestBody:
+        description: The project status to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/ProjectStatusRequest'
+      responses:
+        201:
+          description: Successfully created a new story.
+          content: {}
