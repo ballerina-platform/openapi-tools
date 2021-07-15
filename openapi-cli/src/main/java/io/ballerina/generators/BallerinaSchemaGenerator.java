@@ -284,21 +284,23 @@ public class BallerinaSchemaGenerator {
             MetadataNode metadataNode =
                     createMetadataNode(documentationNode, createEmptyNodeList());
             if (schemaValue.getNullable() != null) {
-                typeDefNode = createTypeDefinitionNode(metadataNode,
-                        null, createIdentifierToken("public type"),
-                        createIdentifierToken(getValidName((schema.getKey()), true)),
-                        createSimpleNameReferenceNode(createIdentifierToken(
-                                "any?")),
-                        createToken(SEMICOLON_TOKEN));
-            } else {
-                typeDefNode = createTypeDefinitionNode(metadataNode,
-                        null, createIdentifierToken("public type"),
-                        createIdentifierToken(getValidName((schema.getKey()), true)),
-                        createSimpleNameReferenceNode(createIdentifierToken(
-                                "any")),
-                        createToken(SEMICOLON_TOKEN));
+                if (schemaValue.getNullable()) {
+                    typeDefNode = createTypeDefinitionNode(metadataNode,
+                            null, createIdentifierToken("public type"),
+                            createIdentifierToken(getValidName((schema.getKey()), true)),
+                            createSimpleNameReferenceNode(createIdentifierToken(
+                                    "any?")),
+                            createToken(SEMICOLON_TOKEN));
+                } else {
+                    typeDefNode = createTypeDefinitionNode(metadataNode,
+                            null, createIdentifierToken("public type"),
+                            createIdentifierToken(getValidName((schema.getKey()), true)),
+                            createSimpleNameReferenceNode(createIdentifierToken(
+                                    "any")),
+                            createToken(SEMICOLON_TOKEN));
+                }
+                typeDefinitionNodeList.add(typeDefNode);
             }
-            typeDefinitionNodeList.add(typeDefNode);
         } else {
             throw new BallerinaOpenApiException("Unsupported OAS schema type.");
         }
