@@ -81,7 +81,7 @@ public class QueryParameterTests {
 
     @Test(description = "Generate Client for query parameter without default value",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Ballerina does not support to object type query parameter .*")
+            expectedExceptionsMessageRegExp = "Ballerina does not support object type query parameters.")
     public void invalidQueryParameter() throws IOException, BallerinaOpenApiException, FormatterException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/invalid_query_param.yaml");
