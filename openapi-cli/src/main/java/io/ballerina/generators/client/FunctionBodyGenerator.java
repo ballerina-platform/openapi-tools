@@ -24,13 +24,11 @@ import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
-import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.IndexedExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MethodCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
@@ -77,7 +75,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExp
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIndexedExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMethodCallExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
@@ -87,18 +84,17 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclar
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.BACKTICK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.generators.GeneratorConstants.DELETE;
 import static io.ballerina.generators.GeneratorConstants.EXECUTE;
+import static io.ballerina.generators.GeneratorConstants.HEAD;
 import static io.ballerina.generators.GeneratorConstants.PATCH;
 import static io.ballerina.generators.GeneratorConstants.POST;
 import static io.ballerina.generators.GeneratorConstants.PUT;
@@ -253,8 +249,10 @@ public class FunctionBodyGenerator {
                 isQuery = true;
             }
             if (!headerApiKeyNameList.isEmpty()) {
-                statementsList.add(getMapForParameters(new ArrayList<>(), "map<string|string[]>",
-                        "accHeaders", headerApiKeyNameList, true));
+                statementsList.add(getMapForParameters(new ArrayList<>(), "map<any>",
+                        "headerValues", headerApiKeyNameList, true));
+                statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
+                        "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
             }
 
@@ -315,8 +313,12 @@ public class FunctionBodyGenerator {
                             "accHeaders, targetType = " + targetType + ")";
 
             } else {
-                clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders, targetType = "
+                if (method.equals(HEAD)) {
+                    clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders)";
+                } else {
+                    clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders, targetType = "
                             + targetType + ")";
+                }
             }
         } else if (isMethod) {
             ExpressionStatementNode requestStatementNode = generatorUtils.getSimpleExpressionStatementNode(
@@ -540,18 +542,10 @@ public class FunctionBodyGenerator {
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
                         createIdentifierToken("\"" + apiKey + "\""));
                 SpecificFieldNode specificFieldNode;
-                if (isHeader) {
-                    SeparatedNodeList<FunctionArgumentNode> apiKeyNameArg = createSeparatedNodeList(valueExpr);
-                    MethodCallExpressionNode apiKeyExpr = createMethodCallExpressionNode(fieldExpr,
-                            createToken(DOT_TOKEN), createSimpleNameReferenceNode(createIdentifierToken("get")),
-                            createToken(OPEN_PAREN_TOKEN), apiKeyNameArg, createToken(CLOSE_PAREN_TOKEN));
-                    specificFieldNode = createSpecificFieldNode(null, fieldName, colon, apiKeyExpr);
-                } else {
-                    SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(valueExpr);
-                    IndexedExpressionNode apiKeyExpr = createIndexedExpressionNode(fieldExpr,
-                            createToken(OPEN_BRACKET_TOKEN), expressions, createToken(CLOSE_BRACKET_TOKEN));
-                    specificFieldNode = createSpecificFieldNode(null, fieldName, colon, apiKeyExpr);
-                }
+                SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(valueExpr);
+                IndexedExpressionNode apiKeyExpr = createIndexedExpressionNode(fieldExpr,
+                        createToken(OPEN_BRACKET_TOKEN), expressions, createToken(CLOSE_BRACKET_TOKEN));
+                specificFieldNode = createSpecificFieldNode(null, fieldName, colon, apiKeyExpr);
                 filedOfMap.add(specificFieldNode);
                 filedOfMap.add(createToken(COMMA_TOKEN));
             }
