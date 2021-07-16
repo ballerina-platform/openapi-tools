@@ -46,7 +46,7 @@ dependencies {
     implementation "org.ballerinalang:formatter-core"
     implementation "org.ballerinalang:ballerina-cli"
     implementation "org.ballerinalang:ballerina-tools-api"
-    implementation "io.ballerina.stdlib:http-native"
+    implementation "org.ballerinalang:http-native"
     implementation "com.google.code.findbugs:jsr305"
     testImplementation "org.testng:testng"
 
