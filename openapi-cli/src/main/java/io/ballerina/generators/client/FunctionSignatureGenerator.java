@@ -285,8 +285,7 @@ public class FunctionSignatureGenerator {
             paramType = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
             Schema schema = openAPI.getComponents().getSchemas().get(paramType.trim());
             if (schema instanceof ObjectSchema) {
-                throw new BallerinaOpenApiException
-                        ("Ballerina does not support to object type query parameter type.");
+                throw new BallerinaOpenApiException("Ballerina does not support object type query parameters.");
             }
         } else {
             paramType = convertOpenAPITypeToBallerina(parameterSchema.getType().trim());
@@ -359,8 +358,7 @@ public class FunctionSignatureGenerator {
             type = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
             Schema schema = openAPI.getComponents().getSchemas().get(type.trim());
             if (schema instanceof ObjectSchema) {
-                throw new BallerinaOpenApiException
-                        ("Ballerina does not support to object type query parameter type.");
+                throw new BallerinaOpenApiException("Ballerina does not support object type path parameters.");
             }
         } else {
             type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
