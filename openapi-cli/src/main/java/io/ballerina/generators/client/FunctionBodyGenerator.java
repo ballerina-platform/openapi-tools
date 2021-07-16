@@ -296,7 +296,6 @@ public class FunctionBodyGenerator {
                                                     String returnType, String targetType) {
 
         String clientCallStatement;
-        clientCallStatement = "check self.clientEp-> " + method + "(path, targetType = " + targetType + ")";
 
         // This condition for several methods.
         boolean isMethod = method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(
@@ -330,6 +329,10 @@ public class FunctionBodyGenerator {
             clientCallStatement =
                         "check self.clientEp-> " + method + "(path, request, targetType = " + targetType + ")";
 
+        } else if (method.equals(HEAD)) {
+            clientCallStatement = "check self.clientEp-> " + method + "(path)";
+        } else {
+            clientCallStatement = "check self.clientEp-> " + method + "(path, targetType = " + targetType + ")";
         }
         //Return Variable
         VariableDeclarationNode clientCall = generatorUtils.getSimpleStatement(returnType, RESPONSE,
