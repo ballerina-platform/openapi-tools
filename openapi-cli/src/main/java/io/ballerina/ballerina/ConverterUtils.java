@@ -21,6 +21,12 @@ package io.ballerina.ballerina;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.BooleanSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.expressions.RecordLiteralNode;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
@@ -34,6 +40,11 @@ import java.util.Map;
  * Utilities used in Ballerina  to OpenAPI converter.
  */
 public class ConverterUtils {
+
+    public ConverterUtils() {
+
+    }
+
     /**
      * Converts the attributes of an annotation to a map of key being attribute key and value being an annotation
      * attachment value.
@@ -41,7 +52,7 @@ public class ConverterUtils {
      * @param list The BLangRecord list.
      * @return A map of attributes.
      */
-    public static Map<String, BLangExpression> listToMap(List<RecordLiteralNode.RecordField> list) {
+    public Map<String, BLangExpression> listToMap(List<RecordLiteralNode.RecordField> list) {
         Map<String, BLangExpression> attrMap = new HashMap<>();
 
         for (RecordLiteralNode.RecordField field : list) {
@@ -64,7 +75,7 @@ public class ConverterUtils {
      * @param valueNode The annotation attachment.
      * @return The string value.
      */
-    public static String getStringLiteralValue(ParenthesizedArgList valueNode) {
+    public String getStringLiteralValue(ParenthesizedArgList valueNode) {
         SeparatedNodeList<FunctionArgumentNode> arg = valueNode.arguments();
         return arg.get(0).toString();
     }
@@ -78,7 +89,7 @@ public class ConverterUtils {
      * @return returns annotation with the name <code>name</code> if found or
      * null if annotation not found in the list
      */
-    public static AnnotationAttachmentNode getAnnotationFromList(String name, String pkg,
+    public AnnotationAttachmentNode getAnnotationFromList(String name, String pkg,
                                                                  List<? extends AnnotationAttachmentNode> annotations) {
         AnnotationAttachmentNode annotation = null;
         if (name == null || pkg == null) {
@@ -99,7 +110,7 @@ public class ConverterUtils {
      * @param type this string type parameter according to ballerina type
      * @return  this return the string value of openAPI type
      */
-    public static String convertBallerinaTypeToOpenAPIType(String type) {
+    public String convertBallerinaTypeToOpenAPIType(String type) {
         String convertedType;
         switch (type) {
             case Constants.INT:
@@ -124,5 +135,50 @@ public class ConverterUtils {
                 convertedType = "";
         }
         return convertedType;
+    }
+
+    /**
+     * Retrieves a matching OpenApi {@link Schema} for a provided ballerina type.
+     *
+     * @param type ballerina type name as a String
+     * @return OpenApi {@link Schema} for type defined by {@code type}
+     */
+    public Schema getOpenApiSchema(String type) {
+        Schema schema;
+
+        switch (type) {
+            case Constants.STRING:
+            case Constants.PLAIN:
+                schema = new StringSchema();
+                break;
+            case Constants.BOOLEAN:
+                schema = new BooleanSchema();
+                break;
+            case Constants.ARRAY:
+                schema = new ArraySchema();
+                break;
+            case Constants.NUMBER:
+            case Constants.INT:
+            case Constants.INTEGER:
+                schema = new IntegerSchema();
+                break;
+            case Constants.TYPE_REFERENCE:
+            case Constants.TYPEREFERENCE:
+                schema = new Schema();
+                schema.$ref("true");
+                break;
+            case Constants.BYTE_ARRAY:
+            case Constants.OCTET_STREAM:
+                schema = new StringSchema();
+                schema.setFormat("uuid");
+                break;
+            case Constants.XML:
+            case Constants.JSON:
+            default:
+                schema = new ObjectSchema();
+                break;
+        }
+
+        return schema;
     }
 }

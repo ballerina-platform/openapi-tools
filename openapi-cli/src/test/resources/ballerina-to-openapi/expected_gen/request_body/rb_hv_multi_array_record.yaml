@@ -1,0 +1,59 @@
+openapi: 3.0.1
+info:
+  title: ' payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /pets:
+    put:
+      operationId: operation1_put_/pets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Pet'
+          application/xml:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Pet'
+      responses:
+        "200":
+          description: Ok
+components:
+  schemas:
+    TagType:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        category:
+          type: array
+          items:
+            type: string
+    Tag:
+      type: object
+      properties:
+        name:
+          type: string
+        tagType:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagType'
+        id:
+          type: integer
+          format: int32
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+          format: int32
+        tag:
+          $ref: '#/components/schemas/Tag'
