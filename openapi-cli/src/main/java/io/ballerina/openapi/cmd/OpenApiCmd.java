@@ -174,7 +174,8 @@ public class OpenApiCmd implements BLauncherCmd {
         getTargetOutputPath();
         // Check service name it is mandatory
         try {
-            OpenApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName,
+            OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+            openApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName,
                     generatedFileType);
         } catch (IOException | OpenApiConverterException e) {
             outStream.println(e.getLocalizedMessage());

@@ -53,6 +53,7 @@ public class BallerinaTestGeneratorTests {
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         BallerinaSchemaGenerator schemaGenerator = new BallerinaSchemaGenerator(openAPI);
         schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        schemaGenerator.setEnumDeclarationNodeList(ballerinaClientGenerator.getEnumDeclarationNodeList());
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
         SyntaxTree syntaxTreeClient = ballerinaClientGenerator.generateSyntaxTree();
         SyntaxTree syntaxTreeTest = ballerinaTestGenerator.generateSyntaxTree();
