@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.ballerina.openapi;
+package io.ballerina.openapi.cmd;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.EscapingStrategy;
@@ -31,10 +31,9 @@ import io.ballerina.generators.GeneratorConstants;
 import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.generators.client.BallerinaClientGenerator;
 import io.ballerina.generators.client.BallerinaTestGenerator;
-import io.ballerina.openapi.cmd.Filter;
+import io.ballerina.openapi.cmd.model.GenSrcFile;
+import io.ballerina.openapi.cmd.utils.CodegenUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.model.GenSrcFile;
-import io.ballerina.openapi.utils.CodegenUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;

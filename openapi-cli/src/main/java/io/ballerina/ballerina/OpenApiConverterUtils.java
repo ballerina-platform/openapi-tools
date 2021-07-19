@@ -58,7 +58,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-import static io.ballerina.openapi.utils.CodegenUtils.writeFile;
+import static io.ballerina.openapi.cmd.utils.CodegenUtils.writeFile;
 
 /**
  * OpenApi related utility classes.

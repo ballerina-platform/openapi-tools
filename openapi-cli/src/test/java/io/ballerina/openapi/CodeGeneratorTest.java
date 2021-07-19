@@ -17,9 +17,10 @@ package io.ballerina.openapi;
 
 import io.ballerina.generators.GeneratorConstants;
 import io.ballerina.generators.GeneratorUtils;
+import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
+import io.ballerina.openapi.cmd.model.GenSrcFile;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.model.GenSrcFile;
 import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;

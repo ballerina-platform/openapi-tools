@@ -22,7 +22,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.generators.GeneratorUtils;
 import io.ballerina.generators.common.TestUtils;
-import io.ballerina.openapi.CodeGenerator;
+import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;

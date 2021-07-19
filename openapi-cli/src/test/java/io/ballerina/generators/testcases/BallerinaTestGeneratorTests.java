@@ -6,7 +6,7 @@ import io.ballerina.generators.BallerinaSchemaGenerator;
 import io.ballerina.generators.client.BallerinaClientGenerator;
 import io.ballerina.generators.client.BallerinaTestGenerator;
 import io.ballerina.generators.common.TestUtils;
-import io.ballerina.openapi.CodeGenerator;
+import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.tools.diagnostics.Diagnostic;

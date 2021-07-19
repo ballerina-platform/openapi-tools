@@ -21,8 +21,6 @@ import io.ballerina.ballerina.OpenApiConverterException;
 import io.ballerina.ballerina.OpenApiConverterUtils;
 import io.ballerina.cli.BLauncherCmd;
 import io.ballerina.generators.GeneratorConstants;
-import io.ballerina.openapi.CodeGenerator;
-import io.ballerina.openapi.OpenApiMesseges;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;

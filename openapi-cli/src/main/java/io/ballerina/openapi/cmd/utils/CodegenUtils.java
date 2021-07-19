@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.utils;
+package io.ballerina.openapi.cmd.utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;

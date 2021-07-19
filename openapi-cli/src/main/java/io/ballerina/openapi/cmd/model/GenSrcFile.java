@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.model;
+package io.ballerina.openapi.cmd.model;
 
 /**
  * Model class to hold generated source file information.

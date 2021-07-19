@@ -108,7 +108,7 @@ import static io.ballerina.generators.GeneratorUtils.convertOpenAPITypeToBalleri
 import static io.ballerina.generators.GeneratorUtils.getListenerDeclarationNode;
 import static io.ballerina.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static io.ballerina.generators.GeneratorUtils.getRelativeResourcePath;
-import static io.ballerina.openapi.OpenApiMesseges.BAL_KEYWORDS;
+import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
 
 /**
  * This Util class use for generating ballerina service file according to given yaml file.

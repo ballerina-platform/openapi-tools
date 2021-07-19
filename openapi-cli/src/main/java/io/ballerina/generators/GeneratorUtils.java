@@ -100,8 +100,8 @@ import static io.ballerina.generators.GeneratorConstants.OPTIONS;
 import static io.ballerina.generators.GeneratorConstants.PATCH;
 import static io.ballerina.generators.GeneratorConstants.PUT;
 import static io.ballerina.generators.GeneratorConstants.TRACE;
-import static io.ballerina.openapi.OpenApiMesseges.BAL_KEYWORDS;
-import static io.ballerina.openapi.OpenApiMesseges.BAL_TYPES;
+import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
+import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_TYPES;
 
 /**
  * This class util for store all the common scenarios.
