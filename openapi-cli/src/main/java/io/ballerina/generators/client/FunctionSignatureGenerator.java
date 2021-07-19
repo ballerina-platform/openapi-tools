@@ -20,6 +20,8 @@ package io.ballerina.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.EnumDeclarationNode;
+import io.ballerina.compiler.syntax.tree.EnumMemberNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
@@ -57,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
@@ -67,15 +70,21 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSepara
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createEnumDeclarationNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createEnumMemberNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignatureNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createNilLiteralNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ENUM_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
@@ -94,6 +103,7 @@ public class FunctionSignatureGenerator {
     private final OpenAPI openAPI;
     private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
+    private final List<EnumDeclarationNode> enumDeclarationNodeList;
     private FunctionReturnType functionReturnType;
     private DocCommentsGenerator docCommentsGenerator;
     private GeneratorUtils generatorUtils;
@@ -105,11 +115,13 @@ public class FunctionSignatureGenerator {
 
     public FunctionSignatureGenerator(OpenAPI openAPI,
                                       BallerinaSchemaGenerator ballerinaSchemaGenerator,
-                                      List<TypeDefinitionNode> typeDefinitionNodeList) {
+                                      List<TypeDefinitionNode> typeDefinitionNodeList, List<EnumDeclarationNode>
+                                              enumDeclarationNodeList) {
 
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.typeDefinitionNodeList = typeDefinitionNodeList;
+        this.enumDeclarationNodeList = enumDeclarationNodeList;
         this.docCommentsGenerator = new DocCommentsGenerator();
         this.generatorUtils = new GeneratorUtils();
         this.functionReturnType =  new FunctionReturnType(openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
@@ -191,7 +203,7 @@ public class FunctionSignatureGenerator {
                         }
                         break;
                     case "query":
-                        Node paramq = getQueryParameters(parameter);
+                        Node paramq = getQueryParameters(operation.getOperationId(), parameter);
                         if (paramq instanceof RequiredParameterNode) {
                             parameterList.add(paramq);
                             parameterList.add(comma);
@@ -214,7 +226,7 @@ public class FunctionSignatureGenerator {
                         }
                         break;
                     case "header":
-                        Node paramh = getHeaderParameter(parameter);
+                        Node paramh = getHeaderParameter(operation.getOperationId(), parameter);
                         if (paramh instanceof RequiredParameterNode) {
                             parameterList.add(paramh);
                             parameterList.add(comma);
@@ -393,18 +405,16 @@ public class FunctionSignatureGenerator {
             return createRequiredParameterNode(annotationNodes, typeName, paramName);
         } else {
             String type = "";
-            Schema schema = parameter.getSchema();
             if (schema.getEnum() != null && schema.getType().equals(GeneratorConstants.STRING)) {
                 type = getValidName(parameter.getName(), true);
                 createEnums(type, schema);
             } else {
-                type = parameter.getSchema().getType().trim();
+                type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
             }
             IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
             if (schema.getDefault() != null) {
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(convertOpenAPITypeToBallerina(
-                                parameter.getSchema().getType().trim())));
+                        createIdentifierToken(type));
                 LiteralValueToken literalValueToken;
                 if (schema.getType().equals("string")) {
                     literalValueToken = createLiteralValueToken(null,
@@ -421,8 +431,7 @@ public class FunctionSignatureGenerator {
                         literalValueToken);
             } else {
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(convertOpenAPITypeToBallerina(
-                                parameter.getSchema().getType().trim()) + "?"));
+                        createIdentifierToken(type + "?"));
                 NilLiteralNode nilLiteralNode =
                         createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
                 return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
@@ -552,7 +561,7 @@ public class FunctionSignatureGenerator {
         } else if (arrayItems instanceof ComposedSchema) {
             paramType = "CompoundArrayItem" +  getValidName(operationId, true) + "Request";
             TypeDescriptorNode typeDescriptorNodeForArraySchema = ballerinaSchemaGenerator
-                    .getTypeDescriptorNodeForArraySchema(openAPI, arraySchema);
+                    .getTypeDescriptorNodeForArraySchema(openAPI, arraySchema, createIdentifierToken(paramType));
             // TODO - Add API doc by checking requestBody
             TypeDefinitionNode arrayTypeNode = NodeFactory.createTypeDefinitionNode(null, null,
                     createIdentifierToken("public type"),
