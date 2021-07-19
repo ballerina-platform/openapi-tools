@@ -56,4 +56,14 @@ public class ReferenceResolveTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/object_without_fields_reference.bal", syntaxTree);
     }
+    @Test(description = "Test for type generation for query parameters with referenced schemas")
+    public void testParameterSchemaReferences() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/schema_referenced_in_parameters.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/parameter_schema_refs.bal", syntaxTree);
+    }
 }

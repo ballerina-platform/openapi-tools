@@ -59,6 +59,18 @@ public class PathParameterTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
+    @Test(description = "Generate Client for query parameter with referenced schema")
+    public void generateQueryParamWithReferencedSchema() throws IOException, BallerinaOpenApiException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RESDIR.resolve("swagger/path_param_with_ref_schemas.yaml");
+        Path expectedPath = RESDIR.resolve("ballerina/path_param_with_ref_schema.bal");
+
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
     @Test(description = "When path parameter has given unmatch data type in ballerina",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Invalid path parameter data type for the parameter: .*")
