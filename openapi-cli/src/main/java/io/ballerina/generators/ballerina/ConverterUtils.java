@@ -16,7 +16,7 @@
  *  under the License.
  */
  
-package io.ballerina.ballerina;
+package io.ballerina.generators.ballerina;
 
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;

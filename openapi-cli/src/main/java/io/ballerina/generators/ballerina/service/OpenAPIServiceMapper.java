@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.ballerina.service;
+package io.ballerina.generators.ballerina.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ballerina.compiler.api.SemanticModel;

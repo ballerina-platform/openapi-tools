@@ -16,10 +16,10 @@
  *  under the License.
  */
 
-package io.ballerina.ballerina.service;
+package io.ballerina.generators.ballerina.service;
 
-import io.ballerina.ballerina.Constants;
-import io.ballerina.ballerina.ConverterUtils;
+import io.ballerina.generators.ballerina.Constants;
+import io.ballerina.generators.ballerina.ConverterUtils;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;

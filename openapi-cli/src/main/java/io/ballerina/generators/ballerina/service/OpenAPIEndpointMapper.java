@@ -17,9 +17,9 @@
  */
 
 
-package io.ballerina.ballerina.service;
+package io.ballerina.generators.ballerina.service;
 
-import io.ballerina.ballerina.Constants;
+import io.ballerina.generators.ballerina.Constants;
 import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;

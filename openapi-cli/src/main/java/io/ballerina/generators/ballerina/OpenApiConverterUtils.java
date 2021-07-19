@@ -16,11 +16,11 @@
  *  under the License.
  */
 
-package io.ballerina.ballerina;
+package io.ballerina.generators.ballerina;
 
-import io.ballerina.ballerina.service.ConverterConstants;
-import io.ballerina.ballerina.service.OpenAPIEndpointMapper;
-import io.ballerina.ballerina.service.OpenAPIServiceMapper;
+import io.ballerina.generators.ballerina.service.ConverterConstants;
+import io.ballerina.generators.ballerina.service.OpenAPIEndpointMapper;
+import io.ballerina.generators.ballerina.service.OpenAPIServiceMapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;

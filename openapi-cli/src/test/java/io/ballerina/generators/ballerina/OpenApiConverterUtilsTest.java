@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.ballerina;
+package io.ballerina.generators.ballerina;
 
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;

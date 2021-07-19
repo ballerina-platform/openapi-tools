@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.ballerina;
+package io.ballerina.generators.ballerina;
 
 /**
  * Ballerina To OpenApi Service Constants.

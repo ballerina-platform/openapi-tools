@@ -16,10 +16,10 @@
  *  under the License.
  */
 
-package io.ballerina.ballerina.service;
+package io.ballerina.generators.ballerina.service;
 
-import io.ballerina.ballerina.Constants;
-import io.ballerina.ballerina.ConverterUtils;
+import io.ballerina.generators.ballerina.Constants;
+import io.ballerina.generators.ballerina.ConverterUtils;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
