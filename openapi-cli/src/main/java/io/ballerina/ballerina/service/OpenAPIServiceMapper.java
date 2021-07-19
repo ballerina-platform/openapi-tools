@@ -19,7 +19,6 @@
 
 package io.ballerina.ballerina.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -36,13 +35,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * OpenApiServiceMapper provides functionality for reading and writing OpenApi, either to and from ballerina service, or
+ * OpenAPIServiceMapper provides functionality for reading and writing OpenApi, either to and from ballerina service, or
  * to, as well as related functionality for performing conversions between openapi and ballerina.
  */
-public class OpenApiServiceMapper {
+public class OpenAPIServiceMapper {
     private static final Logger logger = LoggerFactory.getLogger(
-            OpenApiServiceMapper.class);
+            OpenAPIServiceMapper.class);
     private  SemanticModel semanticModel;
+    private OpenAPIEndpointMapper openApiEndpointMapper;
 
     public SemanticModel getSemanticModel() {
         return semanticModel;
@@ -58,24 +58,10 @@ public class OpenApiServiceMapper {
     /**
      * Initializes a service parser for OpenApi.
      */
-    public OpenApiServiceMapper() {
+    public OpenAPIServiceMapper(OpenAPIEndpointMapper openApiEndpointMapper) {
         // Default object mapper is JSON mapper available in openApi utils.
         this.objectMapper = Json.mapper();
-    }
-
-    /**
-     * Retrieves the String definition of a OpenApi object.
-     *
-     * @param openapi OpenApi definition
-     * @return String representation of current service object.
-     */
-    public String generateOpenApiString(OpenAPI openapi) {
-        try {
-            return objectMapper.writeValueAsString(openapi);
-        } catch (JsonProcessingException e) {
-            logger.error("Error while generating openApi string from definition" + e);
-            return "Error";
-        }
+        this.openApiEndpointMapper = openApiEndpointMapper;
     }
 
     /**
@@ -86,16 +72,16 @@ public class OpenApiServiceMapper {
      */
     public OpenAPI convertServiceToOpenApi(ServiceDeclarationNode service) {
         OpenAPI openapi = new OpenAPI();
-        String currentServiceName = OpenApiEndpointMapper.getServiceBasePath(service);
+        String currentServiceName = openApiEndpointMapper.getServiceBasePath(service);
         return convertServiceToOpenApi(service, openapi, currentServiceName);
     }
 
     /**
      * This method will convert ballerina @Service to openApi @OpenApi object.
      *
-     * @param service ballerina @Service object to be map to openApi definition
-     * @param openapi OpenApi model to populate
-     * @param basePath for string base path
+     * @param service   - Ballerina @Service object to be map to openApi definition
+     * @param openapi   - OpenApi model to populate
+     * @param basePath  - For string base path
      * @return OpenApi object which represent current service.
      */
     public OpenAPI convertServiceToOpenApi(ServiceDeclarationNode service, OpenAPI openapi, String basePath) {
@@ -110,7 +96,7 @@ public class OpenApiServiceMapper {
                 resource.add((FunctionDefinitionNode) function);
             }
         }
-        OpenApiResourceMapper resourceMapper = new OpenApiResourceMapper(this.semanticModel);
+        OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(this.semanticModel);
         openapi.setPaths(resourceMapper.convertResourceToPath(resource));
         openapi.setComponents(resourceMapper.getComponents());
         return openapi;
