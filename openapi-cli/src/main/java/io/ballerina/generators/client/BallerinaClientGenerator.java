@@ -27,6 +27,7 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ElseBlockNode;
+import io.ballerina.compiler.syntax.tree.EnumDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.ForEachStatementNode;
@@ -155,6 +156,7 @@ public class BallerinaClientGenerator {
     private boolean isHeader;
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private List<TypeDefinitionNode> typeDefinitionNodeListWithAuth;
+    private List<EnumDeclarationNode> enumDeclarationNodeList;
     private OpenAPI openAPI;
     private BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private DocCommentsGenerator docCommentsGenerator;
@@ -173,6 +175,17 @@ public class BallerinaClientGenerator {
 
         this.typeDefinitionNodeList = typeDefinitionNodeList;
     }
+
+    public List<EnumDeclarationNode> getEnumDeclarationNodeList() {
+
+        return enumDeclarationNodeList;
+    }
+
+    public void setEnumDeclarationNodeList(List<EnumDeclarationNode> enumDeclarationNodeList) {
+
+        this.enumDeclarationNodeList = enumDeclarationNodeList;
+    }
+
     public List<String> getRemoteFunctionNameList () {
         return remoteFunctionNameList;
     }
@@ -183,7 +196,7 @@ public class BallerinaClientGenerator {
     public BallerinaClientGenerator(Filter filters,
                                     List<ImportDeclarationNode> imports, boolean isQuery, boolean isHeader,
                                     List<TypeDefinitionNode> typeDefinitionNodeList,
-                                    OpenAPI openAPI,
+                                    List<EnumDeclarationNode> enumDeclarationNodeList, OpenAPI openAPI,
                                     BallerinaSchemaGenerator ballerinaSchemaGenerator) {
 
         this.filters = filters;
@@ -191,6 +204,7 @@ public class BallerinaClientGenerator {
         this.isQuery = isQuery;
         this.isHeader = isHeader;
         this.typeDefinitionNodeList = typeDefinitionNodeList;
+        this.enumDeclarationNodeList = enumDeclarationNodeList;
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.typeDefinitionNodeListWithAuth =  new ArrayList<>();
@@ -211,6 +225,7 @@ public class BallerinaClientGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         this.typeDefinitionNodeListWithAuth =  new ArrayList<>();
+        this.enumDeclarationNodeList = new ArrayList<>();
         this.docCommentsGenerator = new DocCommentsGenerator();
         this.generatorUtils = new GeneratorUtils();
         this.remoteFunctionNameList = new ArrayList<>();
@@ -560,7 +575,7 @@ public class BallerinaClientGenerator {
         remoteFunctionNameList.add(operation.getValue().getOperationId());
 
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                ballerinaSchemaGenerator, typeDefinitionNodeList);
+                ballerinaSchemaGenerator, typeDefinitionNodeList, enumDeclarationNodeList);
         FunctionSignatureNode functionSignatureNode =
                 functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
                         remoteFunctionDocs);
