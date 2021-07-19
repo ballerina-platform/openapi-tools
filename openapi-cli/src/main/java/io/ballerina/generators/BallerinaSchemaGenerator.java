@@ -103,23 +103,28 @@ public class BallerinaSchemaGenerator {
         this.enumDeclarationNodeList = new LinkedList<>();
     }
 
+    /**
+     * Returns a list of type definition nodes.
+     */
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
-
         return typeDefinitionNodeList;
     }
-
+    /**
+     * Set the typeDefinitionNodeList.
+     */
     public void setTypeDefinitionNodeList(List<TypeDefinitionNode> typeDefinitionNodeList) {
-
         this.typeDefinitionNodeList = typeDefinitionNodeList;
     }
-
+    /**
+     * Returns a list of enum declaration nodes.
+     */
     public List<EnumDeclarationNode> getEnumDeclarationNodeList() {
-
         return enumDeclarationNodeList;
     }
-
+    /**
+     * Set the enumDeclarationNodeList.
+     */
     public void setEnumDeclarationNodeList(List<EnumDeclarationNode> enumDeclarationNodeList) {
-
         this.enumDeclarationNodeList = enumDeclarationNodeList;
     }
 
