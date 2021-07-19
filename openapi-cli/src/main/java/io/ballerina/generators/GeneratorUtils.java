@@ -56,6 +56,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -414,9 +415,8 @@ public class GeneratorUtils {
         if (!Files.exists(contractPath)) {
             throw new BallerinaOpenApiException(ErrorMessages.invalidFilePath(definitionPath.toString()));
         }
-        if (!(definitionPath.toString().endsWith(".yaml") || definitionPath.endsWith(".json") ||
-                definitionPath.toString().endsWith(
-                ".yml"))) {
+        if (!(definitionPath.toString().endsWith(".yaml") || definitionPath.toString().endsWith(".json") ||
+                definitionPath.toString().endsWith(".yml"))) {
             throw new BallerinaOpenApiException(ErrorMessages.invalidFileType());
         }
         String openAPIFileContent = Files.readString(definitionPath);
@@ -505,7 +505,18 @@ public class GeneratorUtils {
         StringBuilder unionType = new StringBuilder();
         for (Schema oneOfSchema: oneOf) {
             if (oneOfSchema.getType() != null) {
-                String type = convertOpenAPITypeToBallerina(oneOfSchema.getType());
+                String oneOfSchemaType = oneOfSchema.getType();
+                String type = convertOpenAPITypeToBallerina(oneOfSchemaType);
+                if (oneOfSchema instanceof ArraySchema) {
+                    ArraySchema oneOfArraySchema = (ArraySchema) oneOfSchema;
+                    Schema<?> items = oneOfArraySchema.getItems();
+                    if (items.get$ref() != null) {
+                        String reference = items.get$ref();
+                        type = getValidName(extractReferenceType(reference), true) + "[]";
+                    } else if (items.getType() != null) {
+                        type = convertOpenAPITypeToBallerina(items.getType().trim()) + "[]";
+                    }
+                }
                 if (!type.equals("record")) {
                     unionType.append("|");
                     unionType.append(type);

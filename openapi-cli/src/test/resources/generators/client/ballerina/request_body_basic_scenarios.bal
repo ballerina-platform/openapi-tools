@@ -6,6 +6,11 @@ import  ballerina/xmldata;
 # + clientEp - Connector http endpoint
 public client class Client {
     http:Client clientEp;
+    # Client initialization.
+    #
+    # + clientConfig - Client configuration details
+    # + serviceUrl - Connector server URL
+    # + return -  Returns error at failure of client initialization
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
@@ -13,75 +18,82 @@ public client class Client {
     # 02 Example for rb has inline requestbody.
     #
     # + return - OK
-    remote isolated function updateUser(Body payload) returns error? {
+    remote isolated function updateUser(Body payload) returns http:Response|error {
         string  path = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-         _ = check self.clientEp-> put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> put(path, request, targetType=http:Response);
+        return response;
     }
     # 01 Request body with reference.
     #
     # + return - OK
-    remote isolated function postUser(User payload) returns error? {
+    remote isolated function postUser(User payload) returns http:Response|error {
         string  path = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-         _ = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        return response;
     }
     # 04 Example for rb has inline requestbody.
     #
     # + payload - A JSON object containing pet information
     # + return - OK
-    remote isolated function updateNewUser(User payload) returns error? {
+    remote isolated function updateNewUser(User payload) returns http:Response|error {
         string  path = string `/path02`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-         _ = check self.clientEp-> put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> put(path, request, targetType=http:Response);
+        return response;
     }
     # 03 Request body with record reference.
     #
     # + return - OK
-    remote isolated function postNewUser(User[] payload) returns error? {
+    remote isolated function postNewUser(User[] payload) returns http:Response|error {
         string  path = string `/path02`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-         _ = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        return response;
     }
     # 06 Example for rb has array inline requestbody.
     #
     # + return - OK
-    remote isolated function updateXMLUser(Body1 payload) returns error? {
+    remote isolated function updateXMLUser(Body1 payload) returns http:Response|error {
         string  path = string `/path03`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-         _ = check self.clientEp-> put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> put(path, request, targetType=http:Response);
+        return response;
     }
     # 05 Example for rb has array inline requestbody.
     #
     # + return - OK
-    remote isolated function postXMLUser(Body2 payload) returns error? {
+    remote isolated function postXMLUser(Body2 payload) returns http:Response|error {
         string  path = string `/path03`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-         _ = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        return response;
     }
     # 07 Example for rb has array inline requestbody.
     #
     # + return - OK
-    remote isolated function postXMLUserInLineArray(Body3[] payload) returns error? {
+    remote isolated function postXMLUserInLineArray(Body3[] payload) returns http:Response|error {
         string  path = string `/path04`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-         _ = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        return response;
     }
 }

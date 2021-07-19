@@ -8,6 +8,13 @@ public type ApiKeysConfig record {
 public client class Client {
     http:Client clientEp;
     map<string> apiKeys;
+
+    # Client initialization.
+    #
+    # + apiKeyConfig - API key configuration detail
+    # + clientConfig - Client configuration details
+    # + serviceUrl - Connector server URL
+    # + return -  Returns error at failure of client initialization
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
@@ -16,10 +23,11 @@ public client class Client {
     # Info for a specific pet
     #
     # + return - Expected response to a valid request
-    remote isolated function showPetById() returns error? {
+    remote isolated function showPetById() returns http:Response|error {
         string  path = string `/pets`;
         map<string|string[]> accHeaders = {'X\-API\-KEY: self.apiKeys.get("X-API-KEY")};
-         _ = check self.clientEp-> get(path, accHeaders, targetType=http:Response);
+        http:Response response = check self.clientEp-> get(path, accHeaders, targetType=http:Response);
+        return response;
     }
 }
 

@@ -2,46 +2,41 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
+public type ApiKeysConfig record {
+    map<string> apiKeys;
+};
+
+# Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city.
+#
 # + clientEp - Connector http endpoint
+@display {label: "Open Weather Client"}
 public client class Client {
     http:Client clientEp;
+    map<string> apiKeys;
     # Client initialization.
     #
+    # + apiKeyConfig - API key configuration detail
     # + clientConfig - Client configuration details
     # + serviceUrl - Connector server URL
     # + return - Returns error at failure of client initialization
-    public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
+    public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl) returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
+        self.apiKeys = apiKeyConfig.apiKeys;
     }
-    # List all pets
+    # Provide weather forecast for any geographical coordinates
     #
-    # + 'limit - How many items to return at one time (max 100)
-    # + return - An paged array of pets
-    remote isolated function listPets(int? 'limit = ()) returns Pets|error {
-        string  path = string `/pets`;
-        map<anydata> queryParam = {"limit": 'limit};
+    # + lat - Latitude
+    # + lon - Longtitude
+    # + exclude - test
+    # + units - tests
+    # + return - Successful response
+    @display {label: "Weather Forecast"}
+    remote isolated function getWeatherForecast(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string? exclude = (), @display {label: "Units"} int? units = ()) returns WeatherForecast|error {
+        string  path = string `/onecall`;
+        map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, appid: self.apiKeys["appid"]};
         path = path + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp-> get(path, targetType = Pets);
-        return response;
-    }
-    # Create a pet
-    #
-    # + return - Null response
-    remote isolated function  pets() returns http:Response|error {
-        string  path = string `/pets`;
-        http:Request request = new;
-        //TODO: Update the request as needed;
-        http:Response response = check self.clientEp-> post(path, request, targetType = http:Response);
-        return response;
-    }
-    # Info for a specific pet
-    #
-    # + petId - The id of the pet to retrieve
-    # + return - Expected response to a valid request
-    remote isolated function showPetById(string petId) returns Pets|error {
-        string  path = string `/pets/${petId}`;
-        Pets response = check self.clientEp-> get(path, targetType = Pets);
+        WeatherForecast response = check self.clientEp-> get(path, targetType = WeatherForecast);
         return response;
     }
 }

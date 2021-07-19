@@ -5,6 +5,11 @@ import  ballerina/http;
 # + clientEp - Connector http endpoint
 public client class Client {
     http:Client clientEp;
+    # Client initialization.
+    #
+    # + clientConfig - Client configuration details
+    # + serviceUrl - Connector server URL
+    # + return -  Returns error at failure of client initialization
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
@@ -13,11 +18,12 @@ public client class Client {
     #
     # + payload - A JSON object containing pet information
     # + return - OK
-    remote isolated function postXMLUser(Body payload) returns error? {
+    remote isolated function postXMLUser(Body payload) returns http:Response|error {
         string  path = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-         _ = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        return response;
     }
 }

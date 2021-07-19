@@ -103,8 +103,7 @@ public class OpenApiCmd implements BLauncherCmd {
     }
     @Override
     public void execute() {
-        //User notification of using an experimental tool
-        outStream.println(OpenApiMesseges.EXPERIMENTAL_FEATURE);
+
         if (helpFlag) {
             String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName());
             outStream.println(commandUsageInfo);

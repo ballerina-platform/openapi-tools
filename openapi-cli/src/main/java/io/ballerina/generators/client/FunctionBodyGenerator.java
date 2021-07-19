@@ -298,11 +298,8 @@ public class FunctionBodyGenerator {
                                                     String returnType, String targetType) {
 
         String clientCallStatement;
-        if (!rType.equals("error?")) {
-            clientCallStatement = "check self.clientEp-> " + method + "(path, targetType = " + targetType + ")";
-        } else {
-            clientCallStatement = "check self.clientEp-> " + method + "(path, targetType=http:Response)";
-        }
+        clientCallStatement = "check self.clientEp-> " + method + "(path, targetType = " + targetType + ")";
+
         // This condition for several methods.
         boolean isMethod = method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(
                 DELETE) || method.equals(EXECUTE);
@@ -314,21 +311,12 @@ public class FunctionBodyGenerator {
                 ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                         "//TODO: Update the request as needed");
                 statementsList.add(expressionStatementNode);
-                if (!rType.equals("error?")) {
-                    clientCallStatement = "check self.clientEp-> " + method + "(path, request, headers = " +
+                clientCallStatement = "check self.clientEp-> " + method + "(path, request, headers = " +
                             "accHeaders, targetType = " + targetType + ")";
-                } else {
-                    clientCallStatement = "check self.clientEp-> " + method + "(path, request, headers = " +
-                            "accHeaders, targetType=http:Response)";
-                }
+
             } else {
-                if (!rType.equals("error?")) {
-                    clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders, targetType = "
+                clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders, targetType = "
                             + targetType + ")";
-                } else {
-                    clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders, " +
-                            "targetType=http:Response)";
-                }
             }
         } else if (isMethod) {
             ExpressionStatementNode requestStatementNode = generatorUtils.getSimpleExpressionStatementNode(
@@ -337,27 +325,19 @@ public class FunctionBodyGenerator {
             ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                     "//TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
-            if (!rType.equals("error?")) {
-                clientCallStatement =
+            clientCallStatement =
                         "check self.clientEp-> " + method + "(path, request, targetType = " + targetType + ")";
-            } else {
-                clientCallStatement = "check self.clientEp-> " + method + "(path, request, targetType " +
-                        "=http:Response)";
-            }
+
         }
         //Return Variable
-        if (!rType.equals("error?")) {
-            VariableDeclarationNode clientCall = generatorUtils.getSimpleStatement(returnType, RESPONSE,
-                    clientCallStatement);
-            statementsList.add(clientCall);
-            Token returnKeyWord = createIdentifierToken("return");
-            SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
-            ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
-                    createToken(SEMICOLON_TOKEN));
-            statementsList.add(returnStatementNode);
-        } else {
-            statementsList.add(generatorUtils.getSimpleStatement("", "_", clientCallStatement));
-        }
+        VariableDeclarationNode clientCall = generatorUtils.getSimpleStatement(returnType, RESPONSE,
+                clientCallStatement);
+        statementsList.add(clientCall);
+        Token returnKeyWord = createIdentifierToken("return");
+        SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+        ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
+                createToken(SEMICOLON_TOKEN));
+        statementsList.add(returnStatementNode);
     }
 
     /**
@@ -450,36 +430,23 @@ public class FunctionBodyGenerator {
         if (isHeader) {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
-                if (!returnType.equals("error?")) {
-                    requestStatement = generatorUtils.getSimpleStatement(returnType, RESPONSE,
-                            "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
-                                    "targetType=" + targetType + ")");
-                    statementsList.add(requestStatement);
-                    Token returnKeyWord = createIdentifierToken("return");
-                    SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
-                    ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
-                            createToken(SEMICOLON_TOKEN));
-                    statementsList.add(returnStatementNode);
-                } else {
-                    requestStatement = generatorUtils.getSimpleStatement("", "_",
-                            "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
-                                    "targetType=http:Response)");
-                    statementsList.add(requestStatement);
-                }
-            }
-        } else {
-            if (!returnType.equals("error?")) {
+                requestStatement = generatorUtils.getSimpleStatement(returnType, RESPONSE,
+                        "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
+                                "targetType=" + targetType + ")");
                 statementsList.add(requestStatement);
                 Token returnKeyWord = createIdentifierToken("return");
-                SimpleNameReferenceNode returnVariable = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
-                ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returnVariable,
+                SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+                ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returns,
                         createToken(SEMICOLON_TOKEN));
                 statementsList.add(returnStatementNode);
-            } else {
-                String clientCallStatement = "check self.clientEp-> " + method + "(path, request, targetType"
-                        + "=http:Response)";
-                statementsList.add(generatorUtils.getSimpleStatement("", "_", clientCallStatement));
             }
+        } else {
+            statementsList.add(requestStatement);
+            Token returnKeyWord = createIdentifierToken("return");
+            SimpleNameReferenceNode returnVariable = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
+            ReturnStatementNode returnStatementNode = createReturnStatementNode(returnKeyWord, returnVariable,
+                    createToken(SEMICOLON_TOKEN));
+            statementsList.add(returnStatementNode);
         }
     }
 
@@ -530,14 +497,10 @@ public class FunctionBodyGenerator {
     private String returnTypeForTargetTypeField(String rType) {
 
         String returnType;
-        if (!rType.equals("error?")) {
-            int index = rType.lastIndexOf("|");
-            returnType = rType.substring(0, index);
-            if (returnType.contains("|")) {
-                returnType = returnType.replaceAll("\\|", "");
-            }
-        } else {
-            returnType = rType;
+        int index = rType.lastIndexOf("|");
+        returnType = rType.substring(0, index);
+        if (returnType.contains("|")) {
+            returnType = returnType.replaceAll("\\|", "");
         }
         return returnType;
     }
