@@ -50,7 +50,7 @@ public class QueryParameterTests {
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_default_value.bal");
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -62,7 +62,7 @@ public class QueryParameterTests {
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_without_default_value.bal");
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -74,7 +74,7 @@ public class QueryParameterTests {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/invalid_query_param.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
     }
 }
