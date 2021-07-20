@@ -24,6 +24,7 @@ import io.ballerina.generators.common.TestUtils;
 import io.ballerina.openapi.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -57,6 +58,27 @@ public class NullableFieldTests {
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nullable_array.bal",
                 syntaxTree);
+    }
+
+    @Test(description = "Test for nullable array referenced schemas")
+    public void testNullableArrayRefSchemas() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/nullable_ref_array.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nullable_ref_array.bal",
+                syntaxTree);
+    }
+
+    @Test(description = "Test nullable for primitive referenced type")
+    public void testPrimitiveReferencedTypes() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/nullable_string_type.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        String syntaxTreeContent = syntaxTree.toString().trim().replaceAll("\n", "")
+                .replaceAll("\\s+", "");
+        Assert.assertEquals(syntaxTreeContent, "publictypeLatitudestring?;");
     }
 
     @Test(description = "Test for nullable record fields")

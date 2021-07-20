@@ -66,7 +66,7 @@ public class PathParameterTests {
         Path expectedPath = RESDIR.resolve("ballerina/path_param_with_ref_schema.bal");
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
