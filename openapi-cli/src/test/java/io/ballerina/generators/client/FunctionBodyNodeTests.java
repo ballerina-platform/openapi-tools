@@ -76,7 +76,15 @@ public class FunctionBodyNodeTests {
                 {"diagnostic_files/header_parameter.yaml", "/pets", "{stringpath=string`/pets`;map<any>headerValues=" +
                         "{\"X-Request-ID\":xRequestId,\"X-Request-Client\":xRequestClient};map<string|string[]>" +
                         "accHeaders=getMapForHeaders(headerValues);http:Response response =checkself.clientEp->get" +
-                        "(path,accHeaders, targetType=http:Response); return response;}"}
+                        "(path,accHeaders, targetType=http:Response); return response;}"},
+                {"diagnostic_files/head_operation.yaml", "/{filesystem}", "{string path=string`/${filesystem}`;" +
+                        "map<anydata>queryParam={\"resource\":'resource,\"timeout\":timeout};" +
+                        "path = path + check getPathForQueryParam(queryParam);" +
+                        "map<any>headerValues={\"x-ms-client-request-id\":xMsClientRequestId," +
+                        "\"x-ms-date\":xMsDate,\"x-ms-version\":xMsVersion};map<string|string[]> " +
+                        "accHeaders = getMapForHeaders(headerValues);" +
+                        "http:Responseresponse=check self.clientEp-> head(path, accHeaders);returnresponse;}"}
+
         };
     }
     //TODO:Different mediaType

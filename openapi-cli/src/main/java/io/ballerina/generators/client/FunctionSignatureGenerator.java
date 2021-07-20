@@ -292,36 +292,37 @@ public class FunctionSignatureGenerator {
         }
 
         Schema parameterSchema = parameter.getSchema();
-        if (parameterSchema.getType() == null && parameterSchema.get$ref() != null) {
-            String referenceRecord = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
-            Schema schema = openAPI.getComponents().getSchemas().get(referenceRecord.trim());
-            if (schema != null && schema instanceof ObjectSchema) {
-                throw new BallerinaOpenApiException("Ballerina does not support to object type query parameter type.");
-            }
-        }
 
         String paramType = "";
-        if (parameterSchema.getEnum() != null && parameterSchema.getType().equals(GeneratorConstants.STRING)) {
-            paramType = getValidName(operationId, true) + getValidName(parameter.getName(), true);
-            createEnums(paramType, parameterSchema);
-        } else {
-            paramType = convertOpenAPITypeToBallerina(parameterSchema.getType().trim());
-            if (parameterSchema.getType().equals("number")) {
-                if (parameterSchema.getFormat() != null) {
-                    paramType = convertOpenAPITypeToBallerina(parameterSchema.getFormat().trim());
-                }
+        if (parameterSchema.get$ref() != null) {
+            paramType = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
+            Schema schema = openAPI.getComponents().getSchemas().get(paramType.trim());
+            if (schema instanceof ObjectSchema) {
+                throw new BallerinaOpenApiException("Ballerina does not support object type query parameters.");
             }
-
-            if (parameterSchema instanceof ArraySchema) {
-                ArraySchema arraySchema = (ArraySchema) parameterSchema;
-                if (arraySchema.getItems().getType() != null) {
-                    String itemType = arraySchema.getItems().getType();
-                    if (itemType.equals("string") || itemType.equals("integer") || itemType.equals("boolean")
-                            || itemType.equals("number")) {
-                        paramType = convertOpenAPITypeToBallerina(itemType) + "[]";
+        } else {
+            if (parameterSchema.getEnum() != null && parameterSchema.getType().equals(GeneratorConstants.STRING)) {
+                paramType = getValidName(operationId, true) + getValidName(parameter.getName(), true);
+                createEnums(paramType, parameterSchema);
+            } else {
+                paramType = convertOpenAPITypeToBallerina(parameterSchema.getType().trim());
+                if (parameterSchema.getType().equals("number")) {
+                    if (parameterSchema.getFormat() != null) {
+                        paramType = convertOpenAPITypeToBallerina(parameterSchema.getFormat().trim());
                     }
-                } else if (arraySchema.getItems().get$ref() != null) {
-                    paramType = extractReferenceType(arraySchema.getItems().get$ref().trim()) + "[]";
+                }
+
+                if (parameterSchema instanceof ArraySchema) {
+                    ArraySchema arraySchema = (ArraySchema) parameterSchema;
+                    if (arraySchema.getItems().getType() != null) {
+                        String itemType = arraySchema.getItems().getType();
+                        if (itemType.equals("string") || itemType.equals("integer") || itemType.equals("boolean")
+                                || itemType.equals("number")) {
+                            paramType = convertOpenAPITypeToBallerina(itemType) + "[]";
+                        }
+                    } else if (arraySchema.getItems().get$ref() != null) {
+                        paramType = extractReferenceType(arraySchema.getItems().get$ref().trim()) + "[]";
+                    }
                 }
             }
         }
@@ -368,9 +369,19 @@ public class FunctionSignatureGenerator {
         NodeList<AnnotationNode> annotationNodes =
                 docCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
         IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
-        String type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
-        if (type.equals("anydata") || type.equals("[]") || type.equals("record {}")) {
-            throw new BallerinaOpenApiException(invalidPathParamType(parameter.getName().trim()));
+        String type = "";
+        Schema parameterSchema = parameter.getSchema();
+        if (parameterSchema.get$ref() != null) {
+            type = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
+            Schema schema = openAPI.getComponents().getSchemas().get(type.trim());
+            if (schema instanceof ObjectSchema) {
+                throw new BallerinaOpenApiException("Ballerina does not support object type path parameters.");
+            }
+        } else {
+            type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
+            if (type.equals("anydata") || type.equals("[]") || type.equals("record {}")) {
+                throw new BallerinaOpenApiException(invalidPathParamType(parameter.getName().trim()));
+            }
         }
         BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(type));

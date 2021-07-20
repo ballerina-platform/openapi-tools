@@ -166,31 +166,47 @@ public class BallerinaClientGenerator {
     private String serverURL;
     private BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
 
+    /**
+     * Returns a list of type definition nodes.
+     */
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
 
         return typeDefinitionNodeList;
     }
-
+    /**
+     * Set the typeDefinitionNodeList.
+     */
     public void setTypeDefinitionNodeList(
             List<TypeDefinitionNode> typeDefinitionNodeList) {
 
         this.typeDefinitionNodeList = typeDefinitionNodeList;
     }
-
+    /**
+     * Returns a list of enum declaration nodes.
+     */
     public List<EnumDeclarationNode> getEnumDeclarationNodeList() {
 
         return enumDeclarationNodeList;
     }
-
+    /**
+     * Set the enumDeclarationNodeList.
+     */
     public void setEnumDeclarationNodeList(List<EnumDeclarationNode> enumDeclarationNodeList) {
 
         this.enumDeclarationNodeList = enumDeclarationNodeList;
     }
-
+    /**
+     * Returns remoteFunctionNameList.
+     * @return {@link List<String>}    Remote function name list
+     */
     public List<String> getRemoteFunctionNameList () {
         return remoteFunctionNameList;
     }
 
+    /**
+     * Returns server URL.
+     * @return {@link String}
+     */
     public String getServerUrl () {
         return serverURL;
     }
