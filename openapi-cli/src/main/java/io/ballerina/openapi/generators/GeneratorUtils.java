@@ -49,7 +49,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.error.ErrorMessages;
+import io.ballerina.openapi.ErrorMessages;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.openapi.Constants;
 import io.swagger.v3.oas.models.OpenAPI;

@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.error;
+package io.ballerina.openapi;
 
 /**
  * Container for error messages of the OpenAPI validator plugin.

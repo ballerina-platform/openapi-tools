@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.generators.openapi.service;
+package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -42,8 +42,6 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
-import io.ballerina.openapi.generators.openapi.Constants;
-import io.ballerina.openapi.generators.openapi.ConverterUtils;
 import io.ballerina.stdlib.http.api.HttpConstants;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;

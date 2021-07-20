@@ -89,7 +89,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.error.ErrorMessages.invalidPathParamType;
+import static io.ballerina.openapi.ErrorMessages.invalidPathParamType;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;

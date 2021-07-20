@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.generators.openapi.service;
+package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
@@ -32,8 +32,6 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.generators.openapi.Constants;
-import io.ballerina.openapi.generators.openapi.ConverterUtils;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;

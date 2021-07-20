@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.generators.openapi.service;
+package io.ballerina.openapi.generators.openapi;
 
 import io.swagger.v3.oas.models.Operation;
 
