@@ -60,6 +60,16 @@ public class FieldGenWithNullableOption {
         Assert.assertEquals(syntaxTreeContent, "publictypeLatitudestring?;");
     }
 
+    @Test(description = "Test for referenced schema with no type given")
+    public void testNullTypeReference() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/nullable_option_null_type.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, true);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/nullable_option_null_type.bal", syntaxTree);
+    }
+
     @Test(description = "Test field generation when nullable false")
     public void testNullableFalse() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
