@@ -747,7 +747,7 @@ public class BallerinaSchemaGenerator {
             type = getValidName(extractReferenceType(arraySchema.getItems().get$ref()), true);
             if (arraySchema.getNullable() != null) {
                 if (arraySchema.getNullable()) {
-                    closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");;
+                    closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
                 }
             } else if (nullable) {
                 closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");

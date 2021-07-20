@@ -204,7 +204,7 @@ public class OpenApiCmd implements BLauncherCmd {
                     generateServiceFile(generator, serviceName, resourcePath, relativePath, filter);
                     break;
                 case "client":
-                    generatesClientFile(generator, serviceName, resourcePath, filter, false);
+                    generatesClientFile(generator, serviceName, resourcePath, filter);
                     break;
                 default:
                     break;
@@ -251,8 +251,7 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param clientName        file name uses to name the generated file
      * @param resourcePath      resource Path
      */
-    private void generatesClientFile(CodeGenerator generator, String clientName, Path resourcePath, Filter filter,
-                                     boolean nullable) {
+    private void generatesClientFile(CodeGenerator generator, String clientName, Path resourcePath, Filter filter) {
         try {
             generator.generateClient(executionPath.toString(), resourcePath.toString(), clientName,
                     targetOutputPath.toString(), filter, nullable);

@@ -41,7 +41,7 @@ public class AllOfResponsesTests {
     @Test(description = "Tests for returnType")
     public void getReturnTypeTests() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_allof_reference.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response, false);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
         FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
                 new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
@@ -50,7 +50,7 @@ public class AllOfResponsesTests {
     @Test(description = "Tests for returnType")
     public void getReturnTypeForAllOf() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_all_of_response.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response, false);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
         FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
                 new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/users/{userId}/meetings")
@@ -60,7 +60,7 @@ public class AllOfResponsesTests {
     public void getReturnTypeForObjectSchema() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
                 "response_without_properties_with_additional.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response, false);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
         FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
                 new ArrayList<>());
 
@@ -73,7 +73,7 @@ public class AllOfResponsesTests {
     public void getReturnTypeForMapSchema() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_properties_with_additional" +
                 ".yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response, false);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
         FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
                 new ArrayList<>());
 
@@ -86,7 +86,7 @@ public class AllOfResponsesTests {
     public void getReturnTypeForObjectSchemaWithOutAdditional() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type" +
                 "/response_without_properties_without_additional.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response, false);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
         FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
                 new ArrayList<>());
 
@@ -99,7 +99,7 @@ public class AllOfResponsesTests {
     public void getReturnTypeForMapSchemaWithOutAdditionalProperties() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
                 "response_with_properties_without_additional.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response, false);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
         FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
                 new ArrayList<>());
 

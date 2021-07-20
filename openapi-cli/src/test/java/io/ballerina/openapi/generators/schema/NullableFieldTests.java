@@ -80,6 +80,16 @@ public class NullableFieldTests {
         Assert.assertEquals(syntaxTreeContent, "publictypeLatitudestring?;");
     }
 
+    @Test(description = "Test for referenced schema with no type given")
+    public void testNullTypeReference() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/nullable_null_type.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/nullable_option_null_type.bal", syntaxTree);
+    }
+
     @Test(description = "Test for nullable record fields")
     public void testNullableRecord() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
