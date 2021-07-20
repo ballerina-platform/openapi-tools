@@ -17,13 +17,12 @@
  */
 package io.ballerina.openapi.cmd;
 
-import io.ballerina.ballerina.OpenApiConverterException;
-import io.ballerina.ballerina.OpenApiConverterUtils;
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.generators.GeneratorConstants;
-import io.ballerina.openapi.CodeGenerator;
-import io.ballerina.openapi.OpenApiMesseges;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.GeneratorConstants;
+import io.ballerina.openapi.generators.openapi.OpenApiConverterException;
+import io.ballerina.openapi.generators.openapi.OpenApiConverterUtils;
+import io.ballerina.projects.ProjectException;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 
@@ -174,7 +173,7 @@ public class OpenApiCmd implements BLauncherCmd {
             OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
             openApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName,
                     generatedFileType);
-        } catch (IOException | OpenApiConverterException e) {
+        } catch (IOException | OpenApiConverterException | ProjectException e) {
             outStream.println(e.getLocalizedMessage());
             exitError(this.exitWhenFinish);
         }
@@ -295,9 +294,8 @@ public class OpenApiCmd implements BLauncherCmd {
                                    Filter filter) {
         try {
             assert resourcePath != null;
-            generator.generateBothFiles(
-                    GeneratorConstants.GenType.GEN_BOTH, resourcePath.toString(), relativePath.toString(),
-                    fileName, targetOutputPath.toString(), filter);
+            generator.generateBothFiles(GeneratorConstants.GenType.GEN_BOTH,
+                    resourcePath.toString(), relativePath.toString(), fileName, targetOutputPath.toString(), filter);
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
                     " " + e.getMessage() + ".");
