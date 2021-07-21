@@ -18,6 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.openapi.cmd.utils.CodegenUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.openapi.OpenApiConverterException;
@@ -57,6 +58,9 @@ public class OpenApiCmd implements BLauncherCmd {
 
     @CommandLine.Option(names = {"-i", "--input"}, description = "Generating the client and service both files")
     private boolean inputPath;
+
+    @CommandLine.Option(names = {"-l", "--license"}, description = "Location of the license header file")
+    private boolean licensePath;
 
     @CommandLine.Option(names = {"-o", "--output"}, description = "Location of the generated Ballerina service, " +
             "client and model files.")
@@ -116,6 +120,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 exitError(this.exitWhenFinish);
                 return;
             }
+            setLicenseHeader();
             // If given input is yaml contract, it generates service file and client stub
             // else if given ballerina service file it generates openapi contract file
             // else it generates error message to enter correct input file
@@ -239,6 +244,18 @@ public class OpenApiCmd implements BLauncherCmd {
             } else {
                 targetOutputPath = Paths.get(targetOutputPath.toString(), outputPath);
             }
+        }
+    }
+    private void setLicenseHeader() {
+        String licenseHeaderFileName = "";
+        if (licensePath && argList.size() > 1 && argList.get(1).endsWith(".txt")) {
+            licenseHeaderFileName = argList.get(1);
+        }
+        try {
+            CodegenUtils.setLicenseHeaderFilePath(licenseHeaderFileName);
+        } catch (IOException e) {
+            outStream.println(e.getLocalizedMessage());
+            exitError(this.exitWhenFinish);
         }
     }
 

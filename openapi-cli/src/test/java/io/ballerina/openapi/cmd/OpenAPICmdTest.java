@@ -108,6 +108,45 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
+    @Test(description = "Test openapi to ballerina generation with license headers")
+    public void testGenerationWithLicenseHeaders() throws IOException {
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
+        Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "-l",
+                licenseHeader.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen",
+                "petstore_schema_with_license.bal"));
+
+        Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile);
+        String expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
+        expectedSchemaLines.close();
+        if (Files.exists(this.tmpDir.resolve("client.bal")) &&
+                Files.exists(this.tmpDir.resolve("petstore_service.bal")) &&
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
+            //Compare schema contents
+            Stream<String> schemaLines = Files.lines(this.tmpDir.resolve("types.bal"));
+            String generatedSchema = schemaLines.collect(Collectors.joining("\n"));
+            schemaLines.close();
+
+            generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
+            expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
+            if (expectedSchemaContent.equals(generatedSchema)) {
+                Assert.assertTrue(true);
+                deleteGeneratedFiles();
+
+            } else {
+                Assert.fail("Expected content and actual generated content is mismatched for: "
+                        + petstoreYaml.toString());
+                deleteGeneratedFiles();
+            }
+        } else {
+            Assert.fail("Generation failed.");
+        }
+    }
+
     @Test(description = "Test openapi gen-service for .yml file service generation")
     public void testSuccessfulServiceGenerationForYML() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yml"));

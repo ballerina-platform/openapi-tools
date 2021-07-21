@@ -16,15 +16,18 @@
 
 package io.ballerina.openapi.cmd.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Utilities used by ballerina openapi code generator.
  */
 public class CodegenUtils {
-
+    private static String licenseHeader = "";
     /**
      * Resolves path to write generated implementation source files.
      *
@@ -37,6 +40,22 @@ public class CodegenUtils {
     }
 
     /**
+     * Resolves path to write generated implementation source files.
+     *
+     * @param fileName     name of the file which contains the content of license header
+     */
+    public static void setLicenseHeaderFilePath (String fileName) throws IOException {
+        licenseHeader = "";
+        if (!fileName.isBlank()) {
+            Path licenseHeaderPath = Paths.get((new File(fileName).getCanonicalPath()));
+            licenseHeader = Files.readString(Paths.get(licenseHeaderPath.toString()));
+            if (!licenseHeader.endsWith("\n")) {
+                licenseHeader = licenseHeader + "\n\n";
+            }
+        }
+    }
+
+    /**
      * Writes a file with content to specified {@code filePath}.
      *
      * @param filePath valid file path to write the content
@@ -44,6 +63,7 @@ public class CodegenUtils {
      * @throws IOException when a file operation fails
      */
     public static void writeFile(Path filePath, String content) throws IOException {
+        content = licenseHeader + content;
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(filePath.toString(), "UTF-8");
