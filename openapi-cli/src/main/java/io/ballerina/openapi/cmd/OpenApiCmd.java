@@ -59,8 +59,8 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Option(names = {"-i", "--input"}, description = "Generating the client and service both files")
     private boolean inputPath;
 
-    @CommandLine.Option(names = {"-l", "--license"}, description = "Location of the license header file")
-    private boolean licensePath;
+    @CommandLine.Option(names = {"--prefix"}, description = "Location of the file which contains any prefix to add")
+    private String prefixPath;
 
     @CommandLine.Option(names = {"-o", "--output"}, description = "Location of the generated Ballerina service, " +
             "client and model files.")
@@ -120,7 +120,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 exitError(this.exitWhenFinish);
                 return;
             }
-            setLicenseHeader();
+            setPrefixFilePath();
             // If given input is yaml contract, it generates service file and client stub
             // else if given ballerina service file it generates openapi contract file
             // else it generates error message to enter correct input file
@@ -246,15 +246,15 @@ public class OpenApiCmd implements BLauncherCmd {
             }
         }
     }
-    private void setLicenseHeader() {
-        String licenseHeaderFileName = "";
-        if (licensePath && argList.size() > 1 && argList.get(1).endsWith(".txt")) {
-            licenseHeaderFileName = argList.get(1);
-        }
+    /**
+     * A util to set the prefix value which is to be add at every beginning of ballerina files.
+     */
+    private void setPrefixFilePath() {
         try {
-            CodegenUtils.setLicenseHeaderFilePath(licenseHeaderFileName);
+            CodegenUtils.setPrefixContent(this.prefixPath);
         } catch (IOException e) {
-            outStream.println(e.getLocalizedMessage());
+            outStream.println("Invalid prefix file path : " + this.prefixPath +
+                    ". " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
         }
     }
