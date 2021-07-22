@@ -139,7 +139,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 deleteGeneratedFiles(false);
             }
         } else {
-            Assert.fail("Generation failed.");
+            Assert.fail("Code generation failed.");
         }
     }
 
@@ -147,7 +147,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testGenerationWithLicenseHeadersWithOneNewLine() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         Path licenseHeader = resourceDir.resolve(Paths.get("license_with_new_line.txt"));
-        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--prefix",
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString()};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
@@ -176,7 +176,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 deleteGeneratedFiles(false);
             }
         } else {
-            Assert.fail("Generation failed.");
+            Assert.fail("Code generation failed.");
         }
     }
 
@@ -184,7 +184,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testGenerationOfTestSuiteWithLicenseHeaders() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_with_auth.yaml"));
         Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
-        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--prefix",
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString()};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
@@ -214,7 +214,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 deleteGeneratedFiles(true);
             }
         } else {
-            Assert.fail("Generation failed.");
+            Assert.fail("Code generation failed.");
         }
     }
 
@@ -222,13 +222,13 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testInvalidPrefixFile() throws IOException, BallerinaOpenApiException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         Path licenseHeader = resourceDir.resolve(Paths.get("licence.txt"));
-        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--prefix",
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString()};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("Invalid prefix file path : "));
+        Assert.assertTrue(output.contains("Invalid license file path : "));
     }
 
     @Test(description = "Test openapi gen-service for .yml file service generation")
