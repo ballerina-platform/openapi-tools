@@ -29,8 +29,6 @@ tags:
     description: Pets Tag
   - name: list
     description: List Tag
-
-
 paths:
   /pets:
     get:
