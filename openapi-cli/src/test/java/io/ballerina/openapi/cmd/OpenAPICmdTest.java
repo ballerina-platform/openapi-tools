@@ -110,7 +110,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testGenerationWithLicenseHeaders() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
         Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
-        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--prefix",
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString()};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);

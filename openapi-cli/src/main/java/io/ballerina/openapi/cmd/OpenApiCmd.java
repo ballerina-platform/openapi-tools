@@ -59,8 +59,8 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Option(names = {"-i", "--input"}, description = "Generating the client and service both files")
     private boolean inputPath;
 
-    @CommandLine.Option(names = {"--prefix"}, description = "Location of the file which contains any prefix to add")
-    private String prefixPath;
+    @CommandLine.Option(names = {"--license"}, description = "Location of the file which contains the license header")
+    private String licenseFilePath;
 
     @CommandLine.Option(names = {"-o", "--output"}, description = "Location of the generated Ballerina service, " +
             "client and model files.")
@@ -120,7 +120,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 exitError(this.exitWhenFinish);
                 return;
             }
-            setPrefixFilePath();
+            setLicenseFilePath();
             // If given input is yaml contract, it generates service file and client stub
             // else if given ballerina service file it generates openapi contract file
             // else it generates error message to enter correct input file
@@ -247,13 +247,13 @@ public class OpenApiCmd implements BLauncherCmd {
         }
     }
     /**
-     * A util to set the prefix value which is to be add at every beginning of ballerina files.
+     * A util to set the license header content which is to be add at the beginning of the ballerina files.
      */
-    private void setPrefixFilePath() {
+    private void setLicenseFilePath() {
         try {
-            CodegenUtils.setPrefixContent(this.prefixPath);
+            CodegenUtils.setLicenseHeader(this.licenseFilePath);
         } catch (IOException e) {
-            outStream.println("Invalid prefix file path : " + this.prefixPath +
+            outStream.println("Invalid license file path : " + this.licenseFilePath +
                     ". " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
         }
