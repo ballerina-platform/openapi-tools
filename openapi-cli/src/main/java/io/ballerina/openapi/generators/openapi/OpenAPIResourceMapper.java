@@ -96,11 +96,13 @@ public class OpenAPIResourceMapper {
     protected Paths convertResourceToPath(List<FunctionDefinitionNode> resources) {
         for (FunctionDefinitionNode resource : resources) {
             List<String> methods = this.getHttpMethods(resource, false);
-            if (methods.size() == 0 || methods.size() > 1) {
-                useMultiResourceMapper(resource, methods);
-            } else {
-                useDefaultResourceMapper(resource);
-            }
+            useMultiResourceMapper(resource, methods);
+//            if (!methods.isEmpty()) {
+//                useMultiResourceMapper(resource, methods);
+//            }
+//            else {
+////                useDefaultResourceMapper(resource);
+//            }
         }
         return pathObject;
     }
@@ -112,7 +114,7 @@ public class OpenAPIResourceMapper {
     private void useMultiResourceMapper(FunctionDefinitionNode resource, List<String> httpMethods) {
         String path = this.getPath(resource);
         Operation operation;
-        if (httpMethods.size() > 1) {
+//        if (!httpMethods.isEmpty()) {
             int i = 1;
             for (String httpMethod : httpMethods) {
                 //Iterate through http methods and fill path map.
@@ -123,21 +125,21 @@ public class OpenAPIResourceMapper {
                 }
                 i++;
             }
-        }
+//        }
     }
 
-    /**
-     * Resource mapper when a resource has only one http method.
-     * @param resource The ballerina resource.
-     */
-    private void useDefaultResourceMapper(FunctionDefinitionNode resource) {
-        String httpMethod = getHttpMethods(resource, true).get(0);
-        OperationAdaptor operationAdaptor = this.convertResourceToOperation(resource, httpMethod, 1);
-        operationAdaptor.setHttpOperation(httpMethod);
-        String path = getPath(resource);
-        io.swagger.v3.oas.models.Operation operation = operationAdaptor.getOperation();
-        generatePathItem(httpMethod, pathObject, operation, path);
-    }
+//    /**
+//     * Resource mapper when a resource has only one http method.
+//     * @param resource The ballerina resource.
+//     */
+//    private void useDefaultResourceMapper(FunctionDefinitionNode resource) {
+//        String httpMethod = getHttpMethods(resource, true).get(0);
+//        OperationAdaptor operationAdaptor = this.convertResourceToOperation(resource, httpMethod, 1);
+//        operationAdaptor.setHttpOperation(httpMethod);
+//        String path = getPath(resource);
+//        io.swagger.v3.oas.models.Operation operation = operationAdaptor.getOperation();
+//        generatePathItem(httpMethod, pathObject, operation, path);
+//    }
 
     private void generatePathItem(String httpMethod, Paths path, Operation operation, String pathName) {
         PathItem pathItem = new PathItem();
@@ -509,7 +511,7 @@ public class OpenAPIResourceMapper {
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource,
                 operationAdaptor.getOperation());
         openAPIParameterMapper.createParametersModel();
-
+        // Need to check this since ballerina parser issue not generated when `GET` has requestBody
         if (!HTTP_METHOD_GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
             // set body parameter
             FunctionSignatureNode functionSignature = resource.functionSignature();

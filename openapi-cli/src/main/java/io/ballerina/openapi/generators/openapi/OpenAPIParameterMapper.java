@@ -97,25 +97,7 @@ public class OpenAPIParameterMapper {
                         !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
                         ((RequiredParameterNode) expr).annotations().isEmpty()) {
                     Node node = ((OptionalTypeDescriptorNode) queryParam.typeName()).typeDescriptor();
-                    if (node instanceof ArrayTypeDescriptorNode) {
-                        ArraySchema arraySchema = new ArraySchema();
-                        ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) node;
-                        TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
-                        if (!itemTypeNode.kind().equals(SyntaxKind.TYPE_REFERENCE)) {
-                            Schema itemSchema = converterUtils.getOpenApiSchema(itemTypeNode.toString().trim());
-                            arraySchema.setItems(itemSchema);
-                            QueryParameter queryParameter = new QueryParameter();
-                            queryParameter.schema(arraySchema);
-                            queryParameter.setName(queryParam.paramName().get().text());
-                            queryParameter.setRequired(false);
-                            parameters.add(queryParameter);
-                        }
-                    } else {
-                        io.swagger.v3.oas.models.parameters.Parameter
-                                parameter = buildParameter(Constants.QUERY, queryParam);
-                        parameter.setRequired(false);
-                        parameters.add(parameter);
-                    }
+                    setNullableQueryParameter(parameters, queryParam, node);
                 } else if (queryParam.typeName() instanceof ArrayTypeDescriptorNode &&
                         !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
                         ((RequiredParameterNode) expr).annotations().isEmpty()) {
@@ -134,39 +116,74 @@ public class OpenAPIParameterMapper {
                         }
                     }
                 } else if (queryParam.typeName() instanceof TypeDescriptorNode && !queryParam.annotations().isEmpty()) {
-                    NodeList<AnnotationNode> annotations = queryParam.annotations();
-                    for (AnnotationNode annotation: annotations) {
-                        if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER) &&
-                                annotation.annotValue().isPresent()) {
-                            //Handle with string current header a support with only string and string[]
-                            if (queryParam.typeName() instanceof ArrayTypeDescriptorNode)  {
-                                ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) queryParam.typeName();
-                                if (arrayNode.memberTypeDesc().kind().equals(SyntaxKind.STRING_TYPE_DESC)) {
-                                    TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
-                                    Schema itemSchema = converterUtils.getOpenApiSchema(itemTypeNode.toString().trim());
-                                    ArraySchema arraySchema = new ArraySchema();
-                                    arraySchema.setItems(itemSchema);
-                                    io.swagger.v3.oas.models.parameters.HeaderParameter headerParameter =
-                                            new io.swagger.v3.oas.models.parameters.HeaderParameter();
-                                    headerParameter.schema(arraySchema);
-                                    headerParameter.setName(queryParam.paramName().get().text().replaceAll("\\\\",
-                                            ""));
-                                    parameters.add(headerParameter);
-                                }
-                            } else {
-                                io.swagger.v3.oas.models.parameters.Parameter
-                                        parameter = buildParameter(Constants.HEADER, queryParam);
-                                parameters.add(parameter);
-                            }
-                        }
-                    }
+                    setHeaderParameter(parameters, queryParam);
                 }
             }
+            //TODO: query other scenarios
         }
         if (parameters.isEmpty()) {
             operation.setParameters(null);
         } else {
             operation.setParameters(parameters);
+        }
+    }
+
+    /**
+     * Handle header parameters in ballerina data type.
+     *
+     * @param parameters    -  OAS Parameters
+     * @param queryParam    -  Resource function parameter list
+     */
+    private void setHeaderParameter(List<Parameter> parameters, RequiredParameterNode queryParam) {
+
+        NodeList<AnnotationNode> annotations = queryParam.annotations();
+        for (AnnotationNode annotation: annotations) {
+            if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER) &&
+                    annotation.annotValue().isPresent()) {
+                //Handle with string current header a support with only string and string[]
+                if (queryParam.typeName() instanceof ArrayTypeDescriptorNode)  {
+                    ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) queryParam.typeName();
+                    if (arrayNode.memberTypeDesc().kind().equals(SyntaxKind.STRING_TYPE_DESC)) {
+                        TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
+                        Schema itemSchema = converterUtils.getOpenApiSchema(itemTypeNode.toString().trim());
+                        ArraySchema arraySchema = new ArraySchema();
+                        arraySchema.setItems(itemSchema);
+                        io.swagger.v3.oas.models.parameters.HeaderParameter headerParameter =
+                                new io.swagger.v3.oas.models.parameters.HeaderParameter();
+                        headerParameter.schema(arraySchema);
+                        headerParameter.setName(queryParam.paramName().get().text().replaceAll("\\\\",
+                                ""));
+                        parameters.add(headerParameter);
+                    }
+                } else {
+                    Parameter
+                            parameter = buildParameter(Constants.HEADER, queryParam);
+                    parameters.add(parameter);
+                }
+            }
+        }
+    }
+
+    private void setNullableQueryParameter(List<Parameter> parameters, RequiredParameterNode queryParam,
+                                           Node node) {
+
+        if (node instanceof ArrayTypeDescriptorNode) {
+            ArraySchema arraySchema = new ArraySchema();
+            ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) node;
+            TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
+            if (!itemTypeNode.kind().equals(SyntaxKind.TYPE_REFERENCE)) {
+                Schema itemSchema = converterUtils.getOpenApiSchema(itemTypeNode.toString().trim());
+                arraySchema.setItems(itemSchema);
+                QueryParameter queryParameter = new QueryParameter();
+                queryParameter.schema(arraySchema);
+                queryParameter.setName(queryParam.paramName().get().text());
+                queryParameter.setRequired(true);
+                parameters.add(queryParameter);
+            }
+        } else {
+            Parameter parameter = buildParameter(Constants.QUERY, queryParam);
+            parameter.setRequired(true);
+            parameters.add(parameter);
         }
     }
 
@@ -177,8 +194,8 @@ public class OpenAPIParameterMapper {
      * @param paramAttributes parameter attributes for the operation
      * @return OpenApi {@link io.swagger.models.parameters.Parameter} for parameter location {@code in}
      */
-    private io.swagger.v3.oas.models.parameters.Parameter buildParameter(String in, Node paramAttributes) {
-        io.swagger.v3.oas.models.parameters.Parameter param = null;
+    private Parameter buildParameter(String in, Node paramAttributes) {
+        Parameter param = null;
         String type;
         switch (in) {
             case Constants.BODY:

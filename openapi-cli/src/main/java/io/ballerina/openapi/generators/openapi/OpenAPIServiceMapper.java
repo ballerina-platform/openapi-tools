@@ -65,18 +65,6 @@ public class OpenAPIServiceMapper {
     }
 
     /**
-     * This method will convert ballerina @Service to OpenApi @OpenApi object.
-     *
-     * @param service ballerina @Service object to be map to openapi definition
-     * @return OpenApi object which represent current service.
-     */
-    public OpenAPI convertServiceToOpenApi(ServiceDeclarationNode service) {
-        OpenAPI openapi = new OpenAPI();
-        String currentServiceName = openApiEndpointMapper.getServiceBasePath(service);
-        return convertServiceToOpenApi(service, openapi, currentServiceName);
-    }
-
-    /**
      * This method will convert ballerina @Service to openApi @OpenApi object.
      *
      * @param service   - Ballerina @Service object to be map to openApi definition
@@ -84,7 +72,7 @@ public class OpenAPIServiceMapper {
      * @param basePath  - For string base path
      * @return OpenApi object which represent current service.
      */
-    public OpenAPI convertServiceToOpenApi(ServiceDeclarationNode service, OpenAPI openapi, String basePath) {
+    public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi, String basePath) {
         // Setting default values.
         openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(basePath.replace("/", " ")));
 

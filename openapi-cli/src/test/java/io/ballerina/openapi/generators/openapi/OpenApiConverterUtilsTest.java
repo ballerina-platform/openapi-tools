@@ -275,6 +275,12 @@ public class OpenApiConverterUtilsTest {
         compareWithGeneratedFile(ballerinaFilePath, "listener_scenario05.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for multiple listeners")
+    public void testForDefault() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("default_service.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "listener_scenario05.yaml");
+    }
+
     @Test(description = "When given ballerina file contain some compilation issue.",
             expectedExceptions = OpenApiConverterException.class,
             expectedExceptionsMessageRegExp = "Given ballerina file has syntax/compilation error.")
