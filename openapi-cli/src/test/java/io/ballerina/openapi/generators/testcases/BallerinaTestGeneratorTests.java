@@ -52,11 +52,11 @@ public class BallerinaTestGeneratorTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
         BallerinaSchemaGenerator schemaGenerator = new BallerinaSchemaGenerator(openAPI);
-        schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
-        schemaGenerator.setEnumDeclarationNodeList(ballerinaClientGenerator.getEnumDeclarationNodeList());
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
         SyntaxTree syntaxTreeClient = ballerinaClientGenerator.generateSyntaxTree();
         SyntaxTree syntaxTreeTest = ballerinaTestGenerator.generateSyntaxTree();
+        schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        schemaGenerator.setEnumDeclarationNodeList(ballerinaClientGenerator.getEnumDeclarationNodeList());
         SyntaxTree syntaxTreeSchema = schemaGenerator.generateSyntaxTree();
         String configFile = ballerinaTestGenerator.getConfigTomlFile();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTreeClient, syntaxTreeTest, syntaxTreeSchema, configFile);

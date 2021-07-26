@@ -565,7 +565,7 @@ public class FunctionBodyGenerator {
 
     private boolean checkImportDuplicate(List<ImportDeclarationNode> imports, String module) {
         for (ImportDeclarationNode importModule:imports) {
-            if (importModule.toString().equals("import ballerina/" + module + ";")) {
+            if (importModule.toString().equals("importballerina/" + module + ";")) {
                 return true;
             }
         }

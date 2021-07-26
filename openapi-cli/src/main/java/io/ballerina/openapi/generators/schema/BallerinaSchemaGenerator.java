@@ -59,6 +59,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -96,6 +98,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
 public class BallerinaSchemaGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private List<EnumDeclarationNode> enumDeclarationNodeList;
+    private List<TypeDefinitionNode> clientTypeDefinitionNodeList = null;
     private  OpenAPI openAPI;
     private GeneratorUtils generatorUtils = new GeneratorUtils();
 
@@ -113,10 +116,13 @@ public class BallerinaSchemaGenerator {
     }
     /**
      * Set the typeDefinitionNodeList.
+     * Set the clientTypeDefinitionNodeList which includes the types generated at the time of client generation
      */
     public void setTypeDefinitionNodeList(List<TypeDefinitionNode> typeDefinitionNodeList) {
-        this.typeDefinitionNodeList = typeDefinitionNodeList;
+        this.typeDefinitionNodeList = new LinkedList<>(typeDefinitionNodeList);
+        this.clientTypeDefinitionNodeList = new LinkedList<>(typeDefinitionNodeList);
     }
+
     /**
      * Returns a list of enum declaration nodes.
      */
@@ -127,7 +133,7 @@ public class BallerinaSchemaGenerator {
      * Set the enumDeclarationNodeList.
      */
     public void setEnumDeclarationNodeList(List<EnumDeclarationNode> enumDeclarationNodeList) {
-        this.enumDeclarationNodeList = enumDeclarationNodeList;
+        this.enumDeclarationNodeList = new LinkedList<>(enumDeclarationNodeList);
     }
 
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
@@ -175,6 +181,9 @@ public class BallerinaSchemaGenerator {
         // Create module member declaration
         ModulePartNode modulePartNode;
         List<ModuleMemberDeclarationNode> moduleMemberDeclarationNodes =  new ArrayList<>();
+        if (clientTypeDefinitionNodeList != null) {
+            removeUnusedRecords();
+        }
         moduleMemberDeclarationNodes.addAll(typeDefinitionNodeList);
         moduleMemberDeclarationNodes.addAll(enumDeclarationNodeList);
 
@@ -185,6 +194,24 @@ public class BallerinaSchemaGenerator {
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         return syntaxTree.modifyWith(modulePartNode);
+    }
+
+    /**
+     * This method removes unused record in typeDefinitionNodeList by checking whether each type contains in
+     * referencedSchemaList or clientTypeList.
+     */
+    private void removeUnusedRecords () {
+        List<String> clientTypeList = clientTypeDefinitionNodeList.stream().map(name -> name.typeName().toString()).
+                    collect(Collectors.toList());
+        List<TypeDefinitionNode> unusedTypeDefinitionNodeList = new ArrayList<>();
+        Set<String> referencedSchemaList = generatorUtils.getReferencedSchemaNameList();
+        typeDefinitionNodeList.stream().forEach(node -> {
+            if (!(referencedSchemaList.contains(node.typeName().toString()) ||
+                    clientTypeList.contains(node.typeName().toString()))) {
+                    unusedTypeDefinitionNodeList.add(node);
+            }
+        });
+        typeDefinitionNodeList.removeAll(unusedTypeDefinitionNodeList);
     }
 
     /*

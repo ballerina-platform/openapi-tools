@@ -70,6 +70,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -107,9 +108,10 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
  * This class util for store all the common scenarios.
  */
 public class GeneratorUtils {
+    private static final Set<String> referencedSchemaNameList = new LinkedHashSet<>();
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
-        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import ");
+        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import");
         Token orgNameToken = AbstractNodeFactory.createIdentifierToken(orgName);
         Token slashToken = AbstractNodeFactory.createIdentifierToken("/");
         ImportOrgNameNode importOrgNameNode = NodeFactory.createImportOrgNameNode(orgNameToken, slashToken);
@@ -395,11 +397,22 @@ public class GeneratorUtils {
     public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
         if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
             String[] refArray = referenceVariable.split("/");
-            return refArray[refArray.length - 1];
+            String refSchemaName = refArray[refArray.length - 1];
+            referencedSchemaNameList.add(getValidName(refSchemaName, true));
+            return refSchemaName;
+            //return refArray[refArray.length - 1];
         } else {
             throw new BallerinaOpenApiException("Invalid reference value : " + referenceVariable
                     + "\nBallerina only supports local reference values.");
         }
+    }
+
+    /**
+     * This method will return the list of schema names that have been referred in other places.
+     * @return  Set of Stringd
+     */
+    public Set<String> getReferencedSchemaNameList () {
+        return  referencedSchemaNameList;
     }
 
     public boolean hasTags(List<String> tags, List<String> filterTags) {
