@@ -125,7 +125,8 @@ public class CodeGenerator {
         List<GenSrcFile> genFiles =  new ArrayList<>();
         genFiles.addAll(generateBalSource(GEN_SERVICE,
                 definitionPath, reldefinitionPath, serviceName, filter, nullable));
-        genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, reldefinitionPath, serviceName, filter, nullable));
+        genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, reldefinitionPath, serviceName,
+                filter, nullable));
         List<GenSrcFile> newGenFiles = genFiles.stream().filter(distinctByKey(
                 GenSrcFile::getFileName)).collect(Collectors.toList());
         writeGeneratedSources(newGenFiles, srcPath, implPath, type);
