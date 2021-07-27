@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.generators.openapi;
 
+import io.ballerina.openapi.common.OpenApiConverterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -57,7 +58,7 @@ public class RequestBodyTest {
     @Test(description = "Generate OpenAPI spec with xml payload")
     public void testXmlPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/xml_payload_service.bal");
-        OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty(),
                 false);
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadXml_openapi.yaml")));
@@ -197,7 +198,7 @@ public class RequestBodyTest {
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen/json"),
                     "nestedRecord.json");
-            OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+            OpenApiConverter openApiConverterUtils = new OpenApiConverter();
             openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
                     , true);
             if (Files.exists(this.tempDir.resolve("payloadV_openapi.json"))) {
@@ -254,7 +255,7 @@ public class RequestBodyTest {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen/request_body"),
                     yamlFile);
 
-            OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
+            OpenApiConverter openApiConverterUtils = new OpenApiConverter();
             openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, Optional.empty()
                     , false);
             if (Files.exists(this.tempDir.resolve("payloadV_openapi.yaml"))) {

@@ -18,10 +18,10 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.openapi.common.OpenApiConverterException;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
-import io.ballerina.openapi.generators.openapi.OpenApiConverterException;
-import io.ballerina.openapi.generators.openapi.OpenApiConverterUtils;
+import io.ballerina.openapi.generators.openapi.OpenApiConverter;
 import io.ballerina.projects.ProjectException;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
@@ -170,10 +170,10 @@ public class OpenApiCmd implements BLauncherCmd {
         getTargetOutputPath();
         // Check service name it is mandatory
         try {
-            OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
-            openApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName,
+            OpenApiConverter openApiConverter = new OpenApiConverter();
+            openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName,
                     generatedFileType);
-        } catch (IOException | OpenApiConverterException | ProjectException e) {
+        } catch (IOException  | ProjectException | OpenApiConverterException e) {
             outStream.println(e.getLocalizedMessage());
             exitError(this.exitWhenFinish);
         }

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.openapi;
+package io.ballerina.openapi.common;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
@@ -31,7 +31,6 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -69,11 +68,6 @@ public class OpenAPIComponentMapper {
             if (typeRef.typeDescriptor() instanceof RecordTypeSymbol) {
                 //Handel typeInclusions
                 RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeRef.typeDescriptor();
-                List<TypeSymbol> typeSymbols = recordTypeSymbol.typeInclusions();
-                if (!typeSymbols.isEmpty()) {
-                    // Generate
-                }
-
                 Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
                 for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
                     String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);

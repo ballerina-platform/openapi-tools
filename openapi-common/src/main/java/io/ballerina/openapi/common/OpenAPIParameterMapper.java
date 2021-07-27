@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.generators.openapi;
+package io.ballerina.openapi.common;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
@@ -177,12 +177,12 @@ public class OpenAPIParameterMapper {
                 QueryParameter queryParameter = new QueryParameter();
                 queryParameter.schema(arraySchema);
                 queryParameter.setName(queryParam.paramName().get().text());
-                queryParameter.setRequired(true);
+                queryParameter.setRequired(false);
                 parameters.add(queryParameter);
             }
         } else {
             Parameter parameter = buildParameter(Constants.QUERY, queryParam);
-            parameter.setRequired(true);
+            parameter.setRequired(false);
             parameters.add(parameter);
         }
     }

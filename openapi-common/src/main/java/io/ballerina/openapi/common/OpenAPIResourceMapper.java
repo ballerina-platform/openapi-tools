@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.generators.openapi;
+package io.ballerina.openapi.common;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -42,7 +42,6 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
-import io.ballerina.stdlib.http.api.HttpConstants;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -66,7 +65,6 @@ import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 
-import static io.ballerina.stdlib.http.api.HttpConstants.HTTP_METHOD_GET;
 
 /**
  * This class will do resource mapping from ballerina to openApi.
@@ -144,7 +142,7 @@ public class OpenAPIResourceMapper {
     private void generatePathItem(String httpMethod, Paths path, Operation operation, String pathName) {
         PathItem pathItem = new PathItem();
         switch (httpMethod.trim().toUpperCase(Locale.ENGLISH)) {
-            case HttpConstants.ANNOTATION_METHOD_GET:
+            case "GET":
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setGet(operation);
                 } else {
@@ -152,7 +150,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case HttpConstants.ANNOTATION_METHOD_PUT:
+            case "PUT":
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setPut(operation);
                 } else {
@@ -160,7 +158,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case HttpConstants.ANNOTATION_METHOD_POST:
+            case "POST":
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setPost(operation);
                 } else {
@@ -168,7 +166,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case HttpConstants.ANNOTATION_METHOD_DELETE:
+            case "DELETE":
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setDelete(operation);
                 } else {
@@ -176,7 +174,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case HttpConstants.ANNOTATION_METHOD_OPTIONS:
+            case "OPTIONS":
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setOptions(operation);
                 } else {
@@ -184,7 +182,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case HttpConstants.ANNOTATION_METHOD_PATCH:
+            case "PATCH":
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setPatch(operation);
                 } else {
@@ -192,7 +190,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case HttpConstants.HTTP_METHOD_HEAD:
+            case "HEAD":
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setHead(operation);
                 } else {
@@ -512,7 +510,7 @@ public class OpenAPIResourceMapper {
                 operationAdaptor.getOperation());
         openAPIParameterMapper.createParametersModel();
         // Need to check this since ballerina parser issue not generated when `GET` has requestBody
-        if (!HTTP_METHOD_GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
+        if (!"GET".toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
             // set body parameter
             FunctionSignatureNode functionSignature = resource.functionSignature();
             SeparatedNodeList<ParameterNode> paramExprs = functionSignature.parameters();
@@ -561,12 +559,12 @@ public class OpenAPIResourceMapper {
 
         if (httpMethods.isEmpty() && useDefaults) {
             // By default all http methods are supported.
-            httpMethods.add(HttpConstants.ANNOTATION_METHOD_GET);
-            httpMethods.add(HttpConstants.ANNOTATION_METHOD_PUT);
-            httpMethods.add(HttpConstants.ANNOTATION_METHOD_POST);
-            httpMethods.add(HttpConstants.ANNOTATION_METHOD_DELETE);
-            httpMethods.add(HttpConstants.ANNOTATION_METHOD_PATCH);
-            httpMethods.add(HttpConstants.ANNOTATION_METHOD_OPTIONS);
+            httpMethods.add("GET");
+            httpMethods.add("PUT");
+            httpMethods.add("POST");
+            httpMethods.add("DELETE");
+            httpMethods.add("PATCH");
+            httpMethods.add("OPTIONS");
             httpMethods.add("HEAD");
         }
         List<String> httpMethodsAsString = new ArrayList<>(httpMethods);

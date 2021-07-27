@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.generators.openapi;
+package io.ballerina.openapi.common;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;

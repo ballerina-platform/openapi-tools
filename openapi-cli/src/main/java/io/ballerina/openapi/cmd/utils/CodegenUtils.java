@@ -25,6 +25,10 @@ import java.nio.file.Path;
  */
 public class CodegenUtils {
 
+    public CodegenUtils() {
+
+    }
+
     /**
      * Resolves path to write generated implementation source files.
      *
@@ -32,7 +36,7 @@ public class CodegenUtils {
      * @param srcPath resolved path for main source files
      * @return path to write generated source files
      */
-    public static Path getImplPath(String pkg, Path srcPath) {
+    public Path getImplPath(String pkg, Path srcPath) {
         return (pkg == null || pkg.isEmpty()) ? srcPath : srcPath.getParent();
     }
 
@@ -43,7 +47,7 @@ public class CodegenUtils {
      * @param content  content of the file
      * @throws IOException when a file operation fails
      */
-    public static void writeFile(Path filePath, String content) throws IOException {
+    public void writeFile(Path filePath, String content) throws IOException {
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(filePath.toString(), "UTF-8");

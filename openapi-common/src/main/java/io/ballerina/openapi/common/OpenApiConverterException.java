@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.generators.openapi;
+package io.ballerina.openapi.common;
 
 /**
  * Exception definition for Ballerina to OpenApi converter errors.

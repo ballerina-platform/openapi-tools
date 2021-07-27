@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.generators.openapi;
+package io.ballerina.openapi.common;
 
 /**
  * This class will hold all constants related to openapi ballerina conversion.

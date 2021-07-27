@@ -81,6 +81,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  */
 public class CodeGenerator {
     private String srcPackage;
+    private CodegenUtils codegenUtils = new CodegenUtils();
 
     private static final PrintStream outStream = System.err;
 
@@ -108,7 +109,7 @@ public class CodeGenerator {
             throws IOException, BallerinaOpenApiException, FormatterException {
 
         Path srcPath = Paths.get(outPath);
-        Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
+        Path implPath = codegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles = generateBalSource(type, definitionPath, reldefinitionPath, serviceName, filter);
         writeGeneratedSources(genFiles, srcPath, implPath, type);
     }
@@ -117,7 +118,7 @@ public class CodeGenerator {
                                   String reldefinitionPath , String serviceName, String outPath , Filter filter)
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
-        Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
+        Path implPath = codegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles =  new ArrayList<>();
         genFiles.addAll(generateBalSource(GEN_SERVICE,
                 definitionPath, reldefinitionPath, serviceName, filter));
@@ -334,7 +335,7 @@ public class CodeGenerator {
             if (!file.getType().isOverwritable()) {
                 filePath = implPath.resolve(file.getFileName());
                 if (Files.notExists(filePath)) {
-                    CodegenUtils.writeFile(filePath, file.getContent());
+                    codegenUtils.writeFile(filePath, file.getContent());
                 }
             } else {
                 if (file.getFileName().equals(TEST_FILE_NAME) || file.getFileName().equals(CONFIG_FILE_NAME)) {
@@ -346,7 +347,7 @@ public class CodeGenerator {
                     filePath = Paths.get(srcPath.resolve(file.getFileName()).toFile().getCanonicalPath());
                 }
 
-                CodegenUtils.writeFile(filePath, file.getContent());
+                codegenUtils.writeFile(filePath, file.getContent());
             }
         }
 
