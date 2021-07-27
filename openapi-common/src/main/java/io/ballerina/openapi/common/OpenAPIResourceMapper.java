@@ -112,22 +112,21 @@ public class OpenAPIResourceMapper {
     private void useMultiResourceMapper(FunctionDefinitionNode resource, List<String> httpMethods) {
         String path = this.getPath(resource);
         Operation operation;
-//        if (!httpMethods.isEmpty()) {
-            int i = 1;
-            for (String httpMethod : httpMethods) {
-                //Iterate through http methods and fill path map.
-                if (resource.functionName().toString().trim().equals(httpMethod)) {
-                    operation = this.convertResourceToOperation(resource, httpMethod, i).getOperation();
-                    generatePathItem(httpMethod, pathObject, operation, path);
-                    break;
-                }
-                i++;
+        int i = 1;
+        for (String httpMethod : httpMethods) {
+            //Iterate through http methods and fill path map.
+            if (resource.functionName().toString().trim().equals(httpMethod)) {
+                operation = this.convertResourceToOperation(resource, httpMethod, i).getOperation();
+                generatePathItem(httpMethod, pathObject, operation, path);
+                break;
             }
-//        }
+            i++;
+        }
     }
 
+// Enable after refactoring
 //    /**
-//     * Resource mapper when a resource has only one http method.
+//     * Resource mapper when a resource has default  one http method.
 //     * @param resource The ballerina resource.
 //     */
 //    private void useDefaultResourceMapper(FunctionDefinitionNode resource) {
@@ -142,7 +141,7 @@ public class OpenAPIResourceMapper {
     private void generatePathItem(String httpMethod, Paths path, Operation operation, String pathName) {
         PathItem pathItem = new PathItem();
         switch (httpMethod.trim().toUpperCase(Locale.ENGLISH)) {
-            case "GET":
+            case Constants.GET:
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setGet(operation);
                 } else {
@@ -150,7 +149,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case "PUT":
+            case Constants.PUT:
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setPut(operation);
                 } else {
@@ -158,7 +157,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case "POST":
+            case Constants.POST:
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setPost(operation);
                 } else {
@@ -166,7 +165,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case "DELETE":
+            case Constants.DELETE:
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setDelete(operation);
                 } else {
@@ -174,7 +173,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case "OPTIONS":
+            case Constants.OPTIONS:
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setOptions(operation);
                 } else {
@@ -182,7 +181,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case "PATCH":
+            case Constants.PATCH:
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setPatch(operation);
                 } else {
@@ -190,7 +189,7 @@ public class OpenAPIResourceMapper {
                     path.addPathItem(pathName, pathItem);
                 }
                 break;
-            case "HEAD":
+            case Constants.HEAD:
                 if (pathObject.containsKey(pathName)) {
                     pathObject.get(pathName).setHead(operation);
                 } else {
@@ -559,13 +558,13 @@ public class OpenAPIResourceMapper {
 
         if (httpMethods.isEmpty() && useDefaults) {
             // By default all http methods are supported.
-            httpMethods.add("GET");
-            httpMethods.add("PUT");
-            httpMethods.add("POST");
-            httpMethods.add("DELETE");
-            httpMethods.add("PATCH");
-            httpMethods.add("OPTIONS");
-            httpMethods.add("HEAD");
+            httpMethods.add(Constants.GET);
+            httpMethods.add(Constants.PUT);
+            httpMethods.add(Constants.POST);
+            httpMethods.add(Constants.DELETE);
+            httpMethods.add(Constants.PATCH);
+            httpMethods.add(Constants.OPTIONS);
+            httpMethods.add(Constants.HEAD);
         }
         List<String> httpMethodsAsString = new ArrayList<>(httpMethods);
         Collections.reverse(httpMethodsAsString);

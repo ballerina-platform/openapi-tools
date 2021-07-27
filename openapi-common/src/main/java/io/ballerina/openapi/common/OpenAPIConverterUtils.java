@@ -58,14 +58,6 @@ public class OpenAPIConverterUtils {
     private List<ServiceDeclarationNode> servicesToGenerate;
     private List<String> availableService;
 
-    public OpenAPIConverterUtils() {
-        this.endpoints = new ArrayList<>();
-        this.availableService = new ArrayList<>();
-        this.servicesToGenerate = new ArrayList<>();
-        this.openAPIEndpointMapper = new OpenAPIEndpointMapper();
-        this.openApiServiceMapper = new OpenAPIServiceMapper(openAPIEndpointMapper);
-    }
-
     public OpenAPIConverterUtils(SyntaxTree syntaxTree, SemanticModel semanticModel) {
         this.syntaxTree = syntaxTree;
         this.semanticModel = semanticModel;
