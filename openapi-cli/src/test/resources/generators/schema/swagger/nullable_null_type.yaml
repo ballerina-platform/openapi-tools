@@ -1,0 +1,91 @@
+openapi: "3.0.1"
+
+info:
+  title: "OpenWeather Map API for Query parameter"
+  description: "Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city."
+  version: "2.5.2"
+  x-display:
+    label: Open Weather Client
+
+servers:
+  - url: "http://api.openweathermap.org/data/2.5/"
+
+paths:
+  /onecall:
+    get:
+      tags:
+        - Weather Forecast
+      summary: "Provide weather forecast for any geographical coordinates"
+      description: "test"
+      operationId: getWeatherForecast
+      parameters:
+        - description: "Latitude"
+          in: query
+          name: lat
+          required: true
+          schema:
+            $ref: '#/components/schemas/Latitude'
+          x-display:
+            label: Latitude
+        - description: "Longtitude"
+          in: query
+          name: lon
+          required: true
+          schema:
+            type: string
+          x-display:
+            label: Longtitude
+        - description: "test"
+          in: query
+          name: exclude
+          required: false
+          schema:
+            type: string
+            default: 'current'
+          x-display:
+            label: Exclude
+        - description: 'tests'
+          in: query
+          name: units
+          required: false
+          schema:
+            type: integer
+            default: 12
+          x-display:
+            label: Units
+      x-display:
+        label: "Weather Forecast"
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema: {}
+        404:
+          description: Not found response
+          content:
+            text/plain:
+              schema:
+                title: Weather not found
+                type: string
+                example: Not found
+
+security:
+  - app_id: []
+
+tags:
+  - name: Current Weather Data
+    description: "Get current weather details"
+  - name: Weather Forecast
+    description: "Get data related to weather forecast"
+components:
+  schemas:
+    Latitude:
+      description: "Latitude"
+      nullable: true
+  securitySchemes:
+    app_id:
+      type: apiKey
+      description: API key.
+      name: appid
+      in: query

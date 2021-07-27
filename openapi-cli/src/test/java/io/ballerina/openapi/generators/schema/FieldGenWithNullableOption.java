@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -31,49 +30,47 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Tests for SwaggerParser.
+ * Tests for code generation when nullable command line option given.
  */
-public class NullableFieldTests {
+public class FieldGenWithNullableOption {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     CodeGenerator codeGenerator = new CodeGenerator();
 
     @Test(description = "Test for nullable primitive fields")
     public void testNullablePrimitive() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_primitive_schema.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
-
+                "/nullable_option_primitive_schema.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, true);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nullable_primitive.bal",
-                syntaxTree);
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/nullable_option_primitive_fields.bal", syntaxTree);
     }
 
     @Test(description = "Test for nullable array fields")
     public void testNullableArray() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_array_schema.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
-
+                "/nullable_option_array_schema.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, true);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nullable_array.bal",
-                syntaxTree);
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/nullale_option_array_schema.bal", syntaxTree);
     }
 
-    @Test(description = "Test for nullable array referenced schemas")
-    public void testNullableArrayRefSchemas() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Test for nullable record fields")
+    public void testNullableRecord() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_ref_array.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+                "/nullable_option_record_schema.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, true);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nullable_ref_array.bal",
-                syntaxTree);
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/nullable_option_record_schema.bal", syntaxTree);
     }
 
-    @Test(description = "Test nullable for primitive referenced type")
+    @Test(description = "Test for primitive referenced type")
     public void testPrimitiveReferencedTypes() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_string_type.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+                "/nullable_option_string_type.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, true);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String syntaxTreeContent = syntaxTree.toString().trim().replaceAll("\n", "")
                 .replaceAll("\\s+", "");
@@ -83,21 +80,20 @@ public class NullableFieldTests {
     @Test(description = "Test for referenced schema with no type given")
     public void testNullTypeReference() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_null_type.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+                "/nullable_option_null_type.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, true);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/nullable_option_null_type.bal", syntaxTree);
     }
 
-    @Test(description = "Test for nullable record fields")
-    public void testNullableRecord() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Test field generation when nullable false")
+    public void testNullableFalse() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/nullable_record_schema.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
-
+                "/nullable_false.yaml"));
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, true);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nullable_record.bal",
-                syntaxTree);
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/nullable_false.bal", syntaxTree);
     }
 }
