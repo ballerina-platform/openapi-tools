@@ -96,11 +96,20 @@ import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
 public class BallerinaSchemaGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private List<EnumDeclarationNode> enumDeclarationNodeList;
+    private boolean nullable;
     private  OpenAPI openAPI;
     private GeneratorUtils generatorUtils = new GeneratorUtils();
 
+    public BallerinaSchemaGenerator(OpenAPI openAPI, boolean nullable) {
+        this.openAPI = openAPI;
+        this.nullable = nullable;
+        this.typeDefinitionNodeList = new LinkedList<>();
+        this.enumDeclarationNodeList = new LinkedList<>();
+    }
+
     public BallerinaSchemaGenerator(OpenAPI openAPI) {
         this.openAPI = openAPI;
+        this.nullable = false;
         this.typeDefinitionNodeList = new LinkedList<>();
         this.enumDeclarationNodeList = new LinkedList<>();
     }
@@ -298,12 +307,22 @@ public class BallerinaSchemaGenerator {
                             createMarkdownDocumentationNode(createNodeList(schemaDoc));
                     MetadataNode metadataNode =
                             createMetadataNode(documentationNode, createEmptyNodeList());
-
+                    String fieldTypeNameArr = fieldTypeName.toString().trim() + "[]";
+                    if (schemaValue.getNullable() != null) {
+                        if (schemaValue.getNullable()) {
+                            String fieldTypeNameStr = fieldTypeName.toString();
+                            fieldTypeNameArr = fieldTypeNameStr.substring(0,
+                                    fieldTypeNameStr.length() - 1).trim() + "[]?";
+                        }
+                    } else if (nullable) {
+                        String fieldTypeNameStr = fieldTypeName.toString();
+                        fieldTypeNameArr = fieldTypeNameStr.substring(0,
+                                fieldTypeNameStr.length() - 1).trim() + "[]?";
+                    }
                     typeDefNode = createTypeDefinitionNode(metadataNode, null,
                             createIdentifierToken("public type"),
                             createIdentifierToken(escapeIdentifier(schema.getKey())),
-                            createSimpleNameReferenceNode(createIdentifierToken(
-                                    fieldTypeName.toString().trim() + "[]")),
+                            createSimpleNameReferenceNode(createIdentifierToken(fieldTypeNameArr)),
                             createToken(SEMICOLON_TOKEN));
                     typeDefinitionNodeList.add(typeDefNode);
                 }
@@ -314,11 +333,18 @@ public class BallerinaSchemaGenerator {
                 MetadataNode metadataNode =
                         createMetadataNode(documentationNode, createEmptyNodeList());
                 if (value.getType() != null) {
+                    String typedescriptorName = convertOpenAPITypeToBallerina(value.getType().trim());
+                    if (value.getNullable() != null) {
+                        if (value.getNullable()) {
+                            typedescriptorName = typedescriptorName + "?";
+                        }
+                    } else if (nullable) {
+                        typedescriptorName = typedescriptorName + "?";
+                    }
                     typeDefNode = createTypeDefinitionNode(metadataNode,
                             null, createIdentifierToken("public type"),
                             createIdentifierToken(getValidName((schema.getKey()), true)),
-                            createSimpleNameReferenceNode(createIdentifierToken(
-                                    convertOpenAPITypeToBallerina(value.getType().trim()))),
+                            createSimpleNameReferenceNode(createIdentifierToken(typedescriptorName)),
                             createToken(SEMICOLON_TOKEN));
                     typeDefinitionNodeList.add(typeDefNode);
                 }
@@ -349,24 +375,22 @@ public class BallerinaSchemaGenerator {
                     createMarkdownDocumentationNode(createNodeList(schemaDoc));
             MetadataNode metadataNode =
                     createMetadataNode(documentationNode, createEmptyNodeList());
+            String anyType = "any";
             if (schemaValue.getNullable() != null) {
                 if (schemaValue.getNullable()) {
-                    typeDefNode = createTypeDefinitionNode(metadataNode,
-                            null, createIdentifierToken("public type"),
-                            createIdentifierToken(getValidName((schema.getKey()), true)),
-                            createSimpleNameReferenceNode(createIdentifierToken(
-                                    "any?")),
-                            createToken(SEMICOLON_TOKEN));
-                } else {
-                    typeDefNode = createTypeDefinitionNode(metadataNode,
-                            null, createIdentifierToken("public type"),
-                            createIdentifierToken(getValidName((schema.getKey()), true)),
-                            createSimpleNameReferenceNode(createIdentifierToken(
-                                    "any")),
-                            createToken(SEMICOLON_TOKEN));
+                    anyType = anyType + "?";
                 }
-                typeDefinitionNodeList.add(typeDefNode);
+            } else if (nullable) {
+                anyType = anyType + "?";
             }
+            typeDefNode = createTypeDefinitionNode(metadataNode,
+                    null, createIdentifierToken("public type"),
+                    createIdentifierToken(getValidName((schema.getKey()), true)),
+                    createSimpleNameReferenceNode(createIdentifierToken(
+                            anyType)),
+                    createToken(SEMICOLON_TOKEN));
+            typeDefinitionNodeList.add(typeDefNode);
+
         } else {
             throw new BallerinaOpenApiException("Unsupported OAS schema type.");
         }
@@ -603,6 +627,8 @@ public class BallerinaSchemaGenerator {
                     if (schema.getNullable()) {
                         type = type + "?";
                     }
+                } else if (nullable) {
+                    type = type + "?";
                 }
                 Token typeName = AbstractNodeFactory.createIdentifierToken(type);
                 return createBuiltinSimpleNameReferenceNode(null, typeName);
@@ -637,6 +663,8 @@ public class BallerinaSchemaGenerator {
                         if (refSchema.getNullable()) {
                             type = type + "?";
                         }
+                    } else if (nullable) {
+                        type = type + "?";
                     }
                     Token typeName = AbstractNodeFactory.createIdentifierToken(type);
                     return createBuiltinSimpleNameReferenceNode(null, typeName);
@@ -660,6 +688,8 @@ public class BallerinaSchemaGenerator {
                 if (refSchema.getNullable()) {
                     type = type + "?";
                 }
+            } else if (nullable) {
+                type = type + "?";
             }
             Token typeName = AbstractNodeFactory.createIdentifierToken(type);
             return createBuiltinSimpleNameReferenceNode(null, typeName);
@@ -675,6 +705,8 @@ public class BallerinaSchemaGenerator {
                 if (schema.getNullable()) {
                     type = type + "?";
                 }
+            } else if (nullable) {
+                type = type + "?";
             }
             Token typeName = AbstractNodeFactory.createIdentifierToken(type);
             return createBuiltinSimpleNameReferenceNode(null, typeName);
@@ -687,6 +719,8 @@ public class BallerinaSchemaGenerator {
             if (schema.getNullable()) {
                 type = type + "?";
             }
+        } else if (nullable) {
+            type = type + "?";
         }
         Token typeName = AbstractNodeFactory.createIdentifierToken(type);
         return createBuiltinSimpleNameReferenceNode(null, typeName);
@@ -715,6 +749,8 @@ public class BallerinaSchemaGenerator {
                 if (arraySchema.getNullable()) {
                     closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
                 }
+            } else if (nullable) {
+                closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
             }
             typeName = AbstractNodeFactory.createIdentifierToken(type);
             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
@@ -743,6 +779,8 @@ public class BallerinaSchemaGenerator {
                 if (arraySchema.getNullable()) {
                     closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
                 }
+            } else if (nullable) {
+                closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
             }
             typeName = AbstractNodeFactory.createIdentifierToken(convertOpenAPITypeToBallerina(type));
             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
@@ -754,6 +792,8 @@ public class BallerinaSchemaGenerator {
                 if (arraySchema.getNullable()) {
                     closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
                 }
+            } else if (nullable) {
+                closeSBracketToken = AbstractNodeFactory.createIdentifierToken("]?");
             }
             typeName = AbstractNodeFactory.createIdentifierToken(type);
             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);

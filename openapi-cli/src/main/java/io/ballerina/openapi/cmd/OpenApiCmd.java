@@ -66,6 +66,9 @@ public class OpenApiCmd implements BLauncherCmd {
             " given mode type")
     private String mode;
 
+    @CommandLine.Option(names = {"-n", "--nullable"}, description = "Generate the code by setting nullable true")
+    private boolean nullable;
+
     @CommandLine.Option(names = {"-s", "--service"}, description = "Service name that need to documented as openapi " +
             "contract")
     private String service;
@@ -249,10 +252,9 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param resourcePath      resource Path
      */
     private void generatesClientFile(CodeGenerator generator, String clientName, Path resourcePath, Filter filter) {
-
         try {
             generator.generateClient(executionPath.toString(), resourcePath.toString(), clientName,
-                    targetOutputPath.toString(), filter);
+                    targetOutputPath.toString(), filter, nullable);
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             if (e.getLocalizedMessage() != null) {
                 outStream.println(e.getLocalizedMessage());
@@ -276,7 +278,7 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             assert resourcePath != null;
             generator.generateService(executionPath.toString(), resourcePath.toString(),
-                    relativePath.toString(), serviceName, targetOutputPath.toString(), filter);
+                    relativePath.toString(), serviceName, targetOutputPath.toString(), filter, nullable);
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
                     ". " + e.getMessage() + ".");
@@ -295,7 +297,8 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             assert resourcePath != null;
             generator.generateBothFiles(GeneratorConstants.GenType.GEN_BOTH,
-                    resourcePath.toString(), relativePath.toString(), fileName, targetOutputPath.toString(), filter);
+                    resourcePath.toString(), relativePath.toString(), fileName, targetOutputPath.toString(),
+                    filter, nullable);
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
                     " " + e.getMessage() + ".");

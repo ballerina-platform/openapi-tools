@@ -32,7 +32,7 @@ public class NoServerURLTest {
         Path expectedPath = RES_DIR.resolve("ballerina/missing_server_url.bal");
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }

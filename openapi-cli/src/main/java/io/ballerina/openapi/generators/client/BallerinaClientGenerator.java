@@ -232,7 +232,7 @@ public class BallerinaClientGenerator {
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator();
     }
 
-    public BallerinaClientGenerator(OpenAPI openAPI, Filter filters) {
+    public BallerinaClientGenerator(OpenAPI openAPI, Filter filters, boolean nullable) {
 
         this.filters = filters;
         this.imports = new ArrayList<>();
@@ -240,7 +240,7 @@ public class BallerinaClientGenerator {
         this.isHeader = false;
         this.typeDefinitionNodeList = new ArrayList<>();
         this.openAPI = openAPI;
-        this.ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        this.ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, nullable);
         this.typeDefinitionNodeListWithAuth =  new ArrayList<>();
         this.enumDeclarationNodeList = new ArrayList<>();
         this.docCommentsGenerator = new DocCommentsGenerator();
