@@ -22,6 +22,7 @@ include(':config:checkstyle')
 include(':module-ballerina-openapi')
 include(':openapi-common')
 include(':openapi-cli')
+include(':openapi-ls-extension')
 include(':openapi-validator')
 //include(':openapi-tests')
 
@@ -32,4 +33,5 @@ gradleEnterprise {
     }
 }
 include 'openapi-common'
+include 'openapi-ls-extension'
 

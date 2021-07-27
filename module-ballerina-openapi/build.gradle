@@ -28,6 +28,7 @@ dependencies {
     implementation project(':openapi-common')
     implementation project(':openapi-validator')
     implementation project(':openapi-cli')
+    implementation project(':openapi-ls-extension')
 }
 
 clean {
@@ -54,6 +55,7 @@ def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def targetNativeJar = file("""$project.rootDir/${packageName}-validator/build/libs/${packageName}-validator-${project.version}.jar""")
 def targetOpenApiCommonJar = file("$project.rootDir/openapi-common/build/libs/openapi-common-${project.version}.jar")
 def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
+def targetOpenApiLSJar = file("$project.rootDir/openapi-ls-extension/build/libs/openapi-ls-extension-${project.version}.jar")
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
 def originalConfig = ballerinaConfigFile.text
@@ -209,6 +211,11 @@ task ballerinaBuild {
             into file("$artifactLibParent/libs")
         }
 
+        copy {
+            from targetOpenApiLSJar
+            into file("$artifactLibParent/lslibs")
+        }
+
         // Doc creation and packing
         exec {
             workingDir project.projectDir
@@ -295,6 +302,7 @@ updateCompilerTomlFile.dependsOn updateTomlFile
 
 ballerinaBuild.dependsOn ":${packageName}-common:build"
 ballerinaBuild.dependsOn ":${packageName}-cli:build"
+ballerinaBuild.dependsOn ":${packageName}-ls-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-validator:build"
 ballerinaBuild.dependsOn updateCompilerTomlFile
 ballerinaBuild.dependsOn initializeVariables
