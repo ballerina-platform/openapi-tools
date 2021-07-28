@@ -18,7 +18,6 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.openapi.cmd.utils.CodegenUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.openapi.OpenApiConverterException;
@@ -30,6 +29,7 @@ import picocli.CommandLine;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -120,7 +120,6 @@ public class OpenApiCmd implements BLauncherCmd {
                 exitError(this.exitWhenFinish);
                 return;
             }
-            setLicenseFilePath();
             // If given input is yaml contract, it generates service file and client stub
             // else if given ballerina service file it generates openapi contract file
             // else it generates error message to enter correct input file
@@ -190,6 +189,7 @@ public class OpenApiCmd implements BLauncherCmd {
      */
     private void openApiToBallerina(String fileName, Filter filter) throws IOException {
         CodeGenerator generator = new CodeGenerator();
+        generator.setLicenseHeader(this.setLicenseHeader());
         final File openApiFile = new File(fileName);
         String serviceName;
         if (generatedServiceName != null) {
@@ -249,14 +249,24 @@ public class OpenApiCmd implements BLauncherCmd {
     /**
      * A util to set the license header content which is to be add at the beginning of the ballerina files.
      */
-    private void setLicenseFilePath() {
+    private String setLicenseHeader() {
+        String licenseHeader = "";
         try {
-            CodegenUtils.setLicenseHeader(this.licenseFilePath);
+            if (this.licenseFilePath != null && !this.licenseFilePath.isBlank()) {
+                Path filePath = Paths.get((new File(this.licenseFilePath).getCanonicalPath()));
+                licenseHeader = Files.readString(Paths.get(filePath.toString()));
+                if (!licenseHeader.endsWith("\n")) {
+                    licenseHeader = licenseHeader + "\n\n";
+                } else if (!licenseHeader.endsWith("\n\n")) {
+                    licenseHeader = licenseHeader + "\n";
+                }
+            }
         } catch (IOException e) {
             outStream.println("Invalid license file path : " + this.licenseFilePath +
                     ". " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
         }
+        return licenseHeader;
     }
 
     /**

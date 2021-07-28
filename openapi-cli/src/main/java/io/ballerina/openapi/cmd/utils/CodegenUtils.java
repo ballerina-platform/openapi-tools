@@ -16,19 +16,14 @@
 
 package io.ballerina.openapi.cmd.utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Utilities used by ballerina openapi code generator.
  */
 public class CodegenUtils {
-    private static String licenseHeader = "";
-    private static final String CONFIG_FILE_NAME = "Config.toml";
     /**
      * Resolves path to write generated implementation source files.
      *
@@ -41,24 +36,6 @@ public class CodegenUtils {
     }
 
     /**
-     * Resolves path to write generated implementation source files.
-     *
-     * @param licenseFilePath     path of the file which contains the content of license header
-     */
-    public static void setLicenseHeader(String licenseFilePath) throws IOException {
-        licenseHeader = "";
-        if (licenseFilePath != null && !licenseFilePath.isBlank()) {
-            Path filePath = Paths.get((new File(licenseFilePath).getCanonicalPath()));
-            licenseHeader = Files.readString(Paths.get(filePath.toString()));
-            if (!licenseHeader.endsWith("\n")) {
-                licenseHeader = licenseHeader + "\n\n";
-            } else if (!licenseHeader.endsWith("\n\n")) {
-                licenseHeader = licenseHeader + "\n";
-            }
-        }
-    }
-
-    /**
      * Writes a file with content to specified {@code filePath}.
      *
      * @param filePath valid file path to write the content
@@ -66,9 +43,6 @@ public class CodegenUtils {
      * @throws IOException when a file operation fails
      */
     public static void writeFile(Path filePath, String content) throws IOException {
-        if (!filePath.endsWith(CONFIG_FILE_NAME)) {
-            content = licenseHeader + content;
-        }
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(filePath.toString(), "UTF-8");
