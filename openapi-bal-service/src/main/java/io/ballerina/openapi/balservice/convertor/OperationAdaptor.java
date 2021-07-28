@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.balservice.converter;
+package io.ballerina.openapi.balservice.convertor;
 
 import io.swagger.v3.oas.models.Operation;
 

@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.balservice.converter;
+package io.ballerina.openapi.balservice.convertor;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;

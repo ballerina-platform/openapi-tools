@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.balservice.converter;
+package io.ballerina.openapi.balservice.convertor;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;

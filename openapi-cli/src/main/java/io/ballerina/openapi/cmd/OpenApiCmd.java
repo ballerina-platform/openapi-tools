@@ -18,7 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.openapi.balservice.converter.OpenApiConverterException;
+import io.ballerina.openapi.balservice.convertor.OpenApiConverterException;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.openapi.OpenApiConverter;

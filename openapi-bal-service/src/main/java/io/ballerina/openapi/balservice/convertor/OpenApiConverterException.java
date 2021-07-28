@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.balservice.converter;
+package io.ballerina.openapi.balservice.convertor;
 
 /**
  * Exception definition for Ballerina to OpenApi converter errors.

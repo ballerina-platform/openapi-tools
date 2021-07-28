@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.balservice.converter;
+package io.ballerina.openapi.balservice.convertor;
 
 /**
  * This class will hold all constants related to openapi ballerina conversion.

@@ -18,7 +18,7 @@
 
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.balservice.converter.OpenApiConverterException;
+import io.ballerina.openapi.balservice.convertor.OpenApiConverterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;

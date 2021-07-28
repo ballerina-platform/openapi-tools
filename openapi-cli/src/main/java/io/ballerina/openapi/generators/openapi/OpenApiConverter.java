@@ -20,8 +20,8 @@ package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.balservice.converter.BalServiceToOpenAPIConverter;
-import io.ballerina.openapi.balservice.converter.OpenApiConverterException;
+import io.ballerina.openapi.balservice.convertor.BalServiceToOpenAPIConverter;
+import io.ballerina.openapi.balservice.convertor.OpenApiConverterException;
 import io.ballerina.openapi.cmd.utils.CodegenUtils;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
