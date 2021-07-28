@@ -20,9 +20,9 @@ package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.balservice.converter.BalServiceToOpenAPIConverter;
+import io.ballerina.openapi.balservice.converter.OpenApiConverterException;
 import io.ballerina.openapi.cmd.utils.CodegenUtils;
-import io.ballerina.openapi.common.OpenAPIConverterUtils;
-import io.ballerina.openapi.common.OpenApiConverterException;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * OpenApi related utility classes.
@@ -61,7 +60,7 @@ public class OpenApiConverter {
      * @throws IOException               Error when writing the OpenAPI specification file.
      * @throws ProjectException          Error occurred generating OpenAPI specification.
      */
-    public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, Optional<String> serviceName
+    public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName
             , Boolean needJson) throws IOException, ProjectException, OpenApiConverterException {
         // Load project instance for single ballerina file
         project = ProjectLoader.loadProject(servicePath);
@@ -84,7 +83,8 @@ public class OpenApiConverter {
         }
         syntaxTree = doc.syntaxTree();
         semanticModel =  project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
-        OpenAPIConverterUtils openAPIConverterUtils = new OpenAPIConverterUtils(syntaxTree, semanticModel);
+        BalServiceToOpenAPIConverter openAPIConverterUtils = new BalServiceToOpenAPIConverter(syntaxTree,
+                semanticModel);
         Map<String, String> openAPIDefinitions = openAPIConverterUtils.generateOAS3Definition(serviceName, needJson,
                 outPath);
         if (!openAPIDefinitions.isEmpty()) {

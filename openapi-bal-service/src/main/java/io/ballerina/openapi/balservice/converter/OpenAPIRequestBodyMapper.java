@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.common;
+package io.ballerina.openapi.balservice.converter;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -51,7 +51,6 @@ import javax.ws.rs.core.MediaType;
  * OpenAPIRequestBodyMapper provides functionality for converting ballerina payload to OAS request body model.
  */
 public class OpenAPIRequestBodyMapper {
-    ConverterUtils converterUtils = new ConverterUtils();
     Components components;
     OperationAdaptor operationAdaptor;
     SemanticModel semanticModel;
@@ -187,13 +186,13 @@ public class OpenAPIRequestBodyMapper {
                                         Schema mimeSchema;
                                         if (bodyParameter.getContent() != null) {
                                             media = new io.swagger.v3.oas.models.media.MediaType();
-                                            mimeSchema = converterUtils.getOpenApiSchema(mimeType.split("/")[1]
+                                            mimeSchema = ConverterUtils.getOpenApiSchema(mimeType.split("/")[1]
                                                     .toLowerCase(Locale.ENGLISH));
                                             media.setSchema(mimeSchema);
                                             Content content = bodyParameter.getContent();
                                             content.addMediaType(mimeType, media);
                                         } else {
-                                            mimeSchema = converterUtils.getOpenApiSchema(mimeType.split("/")[1].
+                                            mimeSchema = ConverterUtils.getOpenApiSchema(mimeType.split("/")[1].
                                                     toLowerCase(Locale.ENGLISH));
                                             media.setSchema(mimeSchema);
                                             bodyParameter.setContent(new Content().addMediaType(mimeType,
@@ -241,7 +240,7 @@ public class OpenAPIRequestBodyMapper {
 
     private void addConsumes(OperationAdaptor operationAdaptor, RequestBody bodyParameter, String applicationType) {
         String type = applicationType.split("/")[1];
-        Schema schema = converterUtils.getOpenApiSchema(type);
+        Schema schema = ConverterUtils.getOpenApiSchema(type);
         io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
         mediaType.setSchema(schema);
         bodyParameter.setContent(new Content().addMediaType(applicationType, mediaType));

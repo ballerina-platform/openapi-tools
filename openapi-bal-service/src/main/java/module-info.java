@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module io.ballerina.openapi.common {
+module io.ballerina.openapi.balservice.common {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires handlebars;
@@ -35,6 +35,6 @@ module io.ballerina.openapi.common {
     requires swagger.parser.v2.converter;
     requires swagger.parser.v3;
     requires org.apache.commons.lang3;
-    exports io.ballerina.openapi.common;
+    exports io.ballerina.openapi.balservice.converter;
 }
 

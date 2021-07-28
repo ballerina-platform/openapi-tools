@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.common;
+package io.ballerina.openapi.balservice.converter;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -41,31 +41,30 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 
 /**
- * The OpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
+ * The BalServiceToOpenAPIConverter provide API for convert ballerina service into openAPI specification.
  *
  * @since 2.0.0
  */
-public class OpenAPIConverterUtils {
-    private SyntaxTree syntaxTree;
-    private SemanticModel semanticModel;
-    private List<ListenerDeclarationNode> endpoints;
-    private OpenAPIEndpointMapper openAPIEndpointMapper;
-    private OpenAPIServiceMapper openApiServiceMapper;
-    private List<ServiceDeclarationNode> servicesToGenerate;
-    private List<String> availableService;
+public class BalServiceToOpenAPIConverter {
+    private final SyntaxTree syntaxTree;
+    private final SemanticModel semanticModel;
+    private final List<ListenerDeclarationNode> endpoints;
+    private final OpenAPIEndpointMapper openAPIEndpointMapper;
+    private final OpenAPIServiceMapper openApiServiceMapper;
+    private final List<ServiceDeclarationNode> servicesToGenerate;
+    private final List<String> availableService;
 
-    public OpenAPIConverterUtils(SyntaxTree syntaxTree, SemanticModel semanticModel) {
+    public BalServiceToOpenAPIConverter(SyntaxTree syntaxTree, SemanticModel semanticModel) {
         this.syntaxTree = syntaxTree;
         this.semanticModel = semanticModel;
         this.endpoints = new ArrayList<>();
         this.availableService = new ArrayList<>();
         this.servicesToGenerate = new ArrayList<>();
         this.openAPIEndpointMapper = new OpenAPIEndpointMapper();
-        this.openApiServiceMapper = new OpenAPIServiceMapper(openAPIEndpointMapper);
+        this.openApiServiceMapper = new OpenAPIServiceMapper();
     }
 
     /**
@@ -74,10 +73,10 @@ public class OpenAPIConverterUtils {
      * @param serviceName - Service name that need to generate the openAPI specification
      * @param needJson    - Flag for enabling the generated file format with json or YAML
      * @param outPath     - Out put path to check given path has same name file
-     * @return            - {@Link java.util.Map} with openAPI definitions for service nodes
+     * @return            - {@link java.util.Map} with openAPI definitions for service nodes
      * @throws OpenApiConverterException when code generation is fail
      */
-    public Map<String, String> generateOAS3Definition(Optional<String> serviceName, Boolean needJson, Path outPath)
+    public Map<String, String> generateOAS3Definition(String serviceName, Boolean needJson, Path outPath)
             throws OpenApiConverterException {
         Map<String, String> openAPIDefinitions = new HashMap<>();
 
@@ -88,8 +87,8 @@ public class OpenAPIConverterUtils {
             extractListenersAndServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode);
 
             // If there are no services found for a given service name.
-            if (serviceName.isPresent() && servicesToGenerate.isEmpty()) {
-                throw new OpenApiConverterException("No Ballerina services found with name '" + serviceName.get() +
+            if (serviceName != null && servicesToGenerate.isEmpty()) {
+                throw new OpenApiConverterException("No Ballerina services found with name '" + serviceName +
                         "' to generate an OpenAPI specification. These services are " +
                         "available in ballerina file. " + availableService.toString());
             }
@@ -110,7 +109,7 @@ public class OpenAPIConverterUtils {
     /**
      * Filter all the end points and service nodes.
      */
-    private void extractListenersAndServiceNodes(Optional<String> serviceName, List<String> availableService,
+    private void extractListenersAndServiceNodes(String serviceName, List<String> availableService,
                                                  List<ServiceDeclarationNode> servicesToGenerate,
                                                  ModulePartNode modulePartNode) {
 
@@ -132,15 +131,15 @@ public class OpenAPIConverterUtils {
     /**
      * Filter all the serviceNodes in syntax tree.
      */
-    private void extractServiceDeclarationNodes(Optional<String> serviceName, List<String> availableService,
+    private void extractServiceDeclarationNodes(String serviceName, List<String> availableService,
                                                 List<ServiceDeclarationNode> servicesToGenerate,
                                                 ServiceDeclarationNode serviceNode) {
 
-        if (serviceName.isPresent()) {
+        if (serviceName != null) {
             // Filtering by service name
             String service = openAPIEndpointMapper.getServiceBasePath(serviceNode);
             availableService.add(service);
-            if (serviceName.get().equals(service)) {
+            if (serviceName.equals(service)) {
                 servicesToGenerate.add(serviceNode);
             }
         } else {
@@ -233,7 +232,7 @@ public class OpenAPIConverterUtils {
      * @param openApiName   given file name
      * @return              file name with duplicate number tag
      */
-    private  String checkDuplicateFiles(Path outPath, String openApiName, Boolean isJson) {
+    private String checkDuplicateFiles(Path outPath, String openApiName, Boolean isJson) {
 
         if (outPath != null && Files.exists(outPath)) {
             final File[] listFiles = new File(String.valueOf(outPath)).listFiles();
@@ -244,7 +243,7 @@ public class OpenAPIConverterUtils {
         return openApiName;
     }
 
-    private  String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
+    private String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
 
         for (File file : listFiles) {
             if (System.console() != null) {

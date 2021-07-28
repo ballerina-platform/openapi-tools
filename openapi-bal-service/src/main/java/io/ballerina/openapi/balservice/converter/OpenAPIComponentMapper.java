@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.common;
+package io.ballerina.openapi.balservice.converter;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
@@ -41,7 +41,6 @@ import java.util.Optional;
 public class OpenAPIComponentMapper {
     private Components components;
     private SemanticModel semanticModel;
-    private ConverterUtils converterUtils = new ConverterUtils();
 
     public OpenAPIComponentMapper(Components components, SemanticModel semanticModel) {
 
@@ -71,7 +70,7 @@ public class OpenAPIComponentMapper {
                 Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
                 for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
                     String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
-                    Schema property = converterUtils.getOpenApiSchema(type);
+                    Schema property = ConverterUtils.getOpenApiSchema(type);
                     if (type.equals(Constants.TYPE_REFERENCE) && property.get$ref().
                             equals("#/components/schemas/true")) {
                         property.set$ref(field.getValue().typeDescriptor().getName().orElseThrow().trim());
@@ -117,7 +116,7 @@ public class OpenAPIComponentMapper {
             symbol = arrayTypeSymbol.memberTypeDescriptor();
         }
         //handle record field has nested record array type ex: Tag[] tags
-        Schema symbolProperty  = converterUtils.getOpenApiSchema(symbol.typeKind().getName());
+        Schema symbolProperty  = ConverterUtils.getOpenApiSchema(symbol.typeKind().getName());
         if (symbolProperty.get$ref() != null && symbolProperty.get$ref().equals("#/components/schemas/true")) {
             symbolProperty.set$ref(symbol.getName().orElseThrow().trim());
             //Set the record model to the definition

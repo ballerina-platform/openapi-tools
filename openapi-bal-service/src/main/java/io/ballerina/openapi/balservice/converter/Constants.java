@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.common;
+package io.ballerina.openapi.balservice.converter;
 
 /**
  * Ballerina To OpenApi Service Constants.

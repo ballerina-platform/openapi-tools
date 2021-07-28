@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.common;
+package io.ballerina.openapi.balservice.converter;
 
 import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;

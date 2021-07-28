@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.common;
+package io.ballerina.openapi.balservice.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ballerina.compiler.api.SemanticModel;
@@ -39,10 +39,8 @@ import java.util.List;
  * to, as well as related functionality for performing conversions between openapi and ballerina.
  */
 public class OpenAPIServiceMapper {
-    private static final Logger logger = LoggerFactory.getLogger(
-            OpenAPIServiceMapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(OpenAPIServiceMapper.class);
     private  SemanticModel semanticModel;
-    private OpenAPIEndpointMapper openApiEndpointMapper;
 
     public SemanticModel getSemanticModel() {
         return semanticModel;
@@ -52,16 +50,15 @@ public class OpenAPIServiceMapper {
         this.semanticModel = semanticModel;
     }
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
 
     /**
      * Initializes a service parser for OpenApi.
      */
-    public OpenAPIServiceMapper(OpenAPIEndpointMapper openApiEndpointMapper) {
+    public OpenAPIServiceMapper() {
         // Default object mapper is JSON mapper available in openApi utils.
         this.objectMapper = Json.mapper();
-        this.openApiEndpointMapper = openApiEndpointMapper;
     }
 
     /**
