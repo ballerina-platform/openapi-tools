@@ -49,7 +49,7 @@ public class HeadersTests {
         Path expectedPath = RES_DIR.resolve("ballerina/header_parameter.bal");
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -61,7 +61,7 @@ public class HeadersTests {
         Path expectedPath = RES_DIR.resolve("ballerina/header_without_parameter.bal");
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -72,7 +72,7 @@ public class HeadersTests {
         Path expectedPath = RES_DIR.resolve("ballerina/header_param_with_default_value.bal");
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }

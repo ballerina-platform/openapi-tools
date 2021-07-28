@@ -24,6 +24,7 @@ import java.nio.file.Path;
  * Utilities used by ballerina openapi code generator.
  */
 public class CodegenUtils {
+
     /**
      * Resolves path to write generated implementation source files.
      *

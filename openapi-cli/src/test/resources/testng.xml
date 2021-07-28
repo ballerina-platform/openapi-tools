@@ -61,6 +61,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.schema.ReferenceResolveTests"/>
             <class name="io.ballerina.openapi.generators.schema.SwaggerFileParserTests"/>
             <class name="io.ballerina.openapi.generators.schema.NestedRecordInclusionTests"/>
+            <class name="io.ballerina.openapi.generators.schema.FieldGenWithNullableOption"/>
             <class name="io.ballerina.openapi.generators.testcases.BallerinaTestGeneratorTests"/>
             <class name="io.ballerina.openapi.generators.client.OneOfResponsesTests"/>
             <!--            <class name="io.ballerina.openapi.generators.schema.SwaggerParserTests"/>-->
