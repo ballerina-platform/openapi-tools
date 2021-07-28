@@ -20,7 +20,7 @@ plugins {
 rootProject.name = 'ballerina-openapi'
 include(':config:checkstyle')
 include(':module-ballerina-openapi')
-include(':openapi-common')
+include(':openapi-bal-service')
 include(':openapi-cli')
 include(':openapi-ls-extension')
 include(':openapi-validator')
@@ -32,6 +32,4 @@ gradleEnterprise {
         termsOfServiceAgree = 'yes'
     }
 }
-include 'openapi-common'
-include 'openapi-ls-extension'
 

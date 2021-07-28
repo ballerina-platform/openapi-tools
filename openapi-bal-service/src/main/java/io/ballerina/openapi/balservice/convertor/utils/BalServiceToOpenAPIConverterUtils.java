@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.common;
+package io.ballerina.openapi.balservice.convertor.utils;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -27,6 +27,9 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.balservice.convertor.Constants;
+import io.ballerina.openapi.balservice.convertor.OpenApiConverterException;
+import io.ballerina.openapi.balservice.convertor.service.OpenAPIServiceMapper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -41,64 +44,56 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 
 /**
- * The OpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
+ * The BalServiceToOpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
  *
  * @since 2.0.0
  */
-public class OpenAPIConverterUtils {
-    private SyntaxTree syntaxTree;
-    private SemanticModel semanticModel;
-    private List<ListenerDeclarationNode> endpoints;
-    private OpenAPIEndpointMapper openAPIEndpointMapper;
-    private OpenAPIServiceMapper openApiServiceMapper;
-    private List<ServiceDeclarationNode> servicesToGenerate;
-    private List<String> availableService;
-
-    public OpenAPIConverterUtils(SyntaxTree syntaxTree, SemanticModel semanticModel) {
-        this.syntaxTree = syntaxTree;
-        this.semanticModel = semanticModel;
-        this.endpoints = new ArrayList<>();
-        this.availableService = new ArrayList<>();
-        this.servicesToGenerate = new ArrayList<>();
-        this.openAPIEndpointMapper = new OpenAPIEndpointMapper();
-        this.openApiServiceMapper = new OpenAPIServiceMapper(openAPIEndpointMapper);
-    }
+public class BalServiceToOpenAPIConverterUtils {
 
     /**
-     * This util API is for generating OpenAPI definitions.
+     * This method will generate  openapi definition Map list with ballerina code.
      *
+     * @param syntaxTree  - Syntax tree the related to ballerina service
+     * @param semanticModel - Semantic model related to ballerina module
      * @param serviceName - Service name that need to generate the openAPI specification
      * @param needJson    - Flag for enabling the generated file format with json or YAML
      * @param outPath     - Out put path to check given path has same name file
-     * @return            - {@Link java.util.Map} with openAPI definitions for service nodes
+     * @return            - {@link java.util.Map} with openAPI definitions for service nodes
      * @throws OpenApiConverterException when code generation is fail
      */
-    public Map<String, String> generateOAS3Definition(Optional<String> serviceName, Boolean needJson, Path outPath)
+    public static Map<String, String> generateOAS3Definition(SyntaxTree syntaxTree, SemanticModel semanticModel,
+                                                             String serviceName,
+                                                             Boolean needJson,
+                                                             Path outPath)
             throws OpenApiConverterException {
         Map<String, String> openAPIDefinitions = new HashMap<>();
+        List<ListenerDeclarationNode> endpoints = new ArrayList<>();
+        List<ServiceDeclarationNode> servicesToGenerate = new ArrayList<>();
+        List<String> availableService = new ArrayList<>();
 
         if (!semanticModel.diagnostics().isEmpty()) {
             throw new OpenApiConverterException("Given ballerina file has syntax/compilation error.");
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
-            extractListenersAndServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode);
+            extractListenersAndServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode,
+                    endpoints);
 
             // If there are no services found for a given service name.
-            if (serviceName.isPresent() && servicesToGenerate.isEmpty()) {
-                throw new OpenApiConverterException("No Ballerina services found with name '" + serviceName.get() +
+            if (serviceName != null && servicesToGenerate.isEmpty()) {
+                throw new OpenApiConverterException("No Ballerina services found with name '" + serviceName +
                         "' to generate an OpenAPI specification. These services are " +
                         "available in ballerina file. " + availableService.toString());
             }
 
             // Generating for the services
             for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
-                String serviceNodeName = openAPIEndpointMapper.getServiceBasePath(serviceNode);
+                String serviceNodeName = OpenAPIEndpointMapperUtils.getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
-                String openApiSource = generateOASDefinition(serviceNode, serviceNodeName, needJson);
+                String openApiSource = generateOASDefinition(serviceNode, serviceNodeName, needJson, endpoints,
+                        semanticModel);
                 //  Checked old generated file with same name
                 openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
                 openAPIDefinitions.put(openApiName, openApiSource);
@@ -110,9 +105,10 @@ public class OpenAPIConverterUtils {
     /**
      * Filter all the end points and service nodes.
      */
-    private void extractListenersAndServiceNodes(Optional<String> serviceName, List<String> availableService,
+    private static void extractListenersAndServiceNodes(String serviceName, List<String> availableService,
                                                  List<ServiceDeclarationNode> servicesToGenerate,
-                                                 ModulePartNode modulePartNode) {
+                                                 ModulePartNode modulePartNode,
+                                                        List<ListenerDeclarationNode> endpoints) {
 
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
@@ -132,15 +128,15 @@ public class OpenAPIConverterUtils {
     /**
      * Filter all the serviceNodes in syntax tree.
      */
-    private void extractServiceDeclarationNodes(Optional<String> serviceName, List<String> availableService,
+    private static void extractServiceDeclarationNodes(String serviceName, List<String> availableService,
                                                 List<ServiceDeclarationNode> servicesToGenerate,
                                                 ServiceDeclarationNode serviceNode) {
 
-        if (serviceName.isPresent()) {
+        if (serviceName != null) {
             // Filtering by service name
-            String service = openAPIEndpointMapper.getServiceBasePath(serviceNode);
+            String service = OpenAPIEndpointMapperUtils.getServiceBasePath(serviceNode);
             availableService.add(service);
-            if (serviceName.get().equals(service)) {
+            if (serviceName.equals(service)) {
                 servicesToGenerate.add(serviceNode);
             }
         } else {
@@ -152,12 +148,11 @@ public class OpenAPIConverterUtils {
     /**
      * Generate openAPI definition according to the given format JSON or YAML.
      */
-    private String generateOASDefinition(ServiceDeclarationNode serviceDeclarationNode,
-                                          String serviceName,
-                                          Boolean needJson) {
-        openApiServiceMapper.setSemanticModel(semanticModel);
-        OpenAPI openapi = getOpenAPIDefinition(new OpenAPI(), openApiServiceMapper, serviceName, endpoints,
-                serviceDeclarationNode);
+    private static String generateOASDefinition(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
+                                               Boolean needJson, List<ListenerDeclarationNode> endpoints,
+                                               SemanticModel semanticModel) {
+        OpenAPI openapi = getOpenAPIDefinition(new OpenAPI(), serviceName, endpoints, serviceDeclarationNode,
+                semanticModel);
         if (needJson) {
             return Json.pretty(openapi);
         }
@@ -167,20 +162,21 @@ public class OpenAPIConverterUtils {
     /**
      * Generated OpenAPI specification with openAPI object.
      */
-    private OpenAPI getOpenAPIDefinition(OpenAPI openapi, OpenAPIServiceMapper openApiServiceMapper,
+    private static OpenAPI getOpenAPIDefinition(OpenAPI openapi,
                                          String serviceName, List<ListenerDeclarationNode> endpoints,
-                                         ServiceDeclarationNode serviceDefinition) {
+                                         ServiceDeclarationNode serviceDefinition, SemanticModel semanticModel) {
         //Take base path of service
-        String currentServiceName = openAPIEndpointMapper.getServiceBasePath(serviceDefinition);
+        OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
+        String currentServiceName = OpenAPIEndpointMapperUtils.getServiceBasePath(serviceDefinition);
         if (openapi.getServers() == null) {
             openapi = setServerURLInOAS(openapi, endpoints, serviceDefinition);
             // Generate openApi string for the mentioned service name.
             if (!serviceName.isBlank() && currentServiceName.trim().equals(serviceName)) {
-                openapi = openApiServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
+                openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
                         serviceName);
             } else {
                 // If no service name mentioned, then generate openApi definition for the first service.
-                openapi = openApiServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
+                openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
                         currentServiceName.trim());
             }
         }
@@ -190,15 +186,15 @@ public class OpenAPIConverterUtils {
     /**
      * Filter and set the ServerURLs according to endpoints.
      */
-    private OpenAPI setServerURLInOAS(OpenAPI openapi, List<ListenerDeclarationNode> endpoints,
+    private static OpenAPI setServerURLInOAS(OpenAPI openapi, List<ListenerDeclarationNode> endpoints,
                                       ServiceDeclarationNode serviceDefinition) {
 
         SeparatedNodeList<ExpressionNode> expressions = serviceDefinition.expressions();
-        openapi = openAPIEndpointMapper.extractServerForExpressionNode(openapi, expressions,
+        openapi = OpenAPIEndpointMapperUtils.extractServerForExpressionNode(openapi, expressions,
                 serviceDefinition);
         // Handle outbound listeners
         if (!endpoints.isEmpty()) {
-            openapi = openAPIEndpointMapper.convertListenerEndPointToOpenAPI(openapi, endpoints,
+            openapi = OpenAPIEndpointMapperUtils.convertListenerEndPointToOpenAPI(openapi, endpoints,
                     serviceDefinition);
         }
         return openapi;
@@ -207,7 +203,7 @@ public class OpenAPIConverterUtils {
     /**
      * Generate file name with service basePath.
      */
-    private String getOpenApiFileName(String servicePath, String serviceName, Boolean isJson) {
+    private static String getOpenApiFileName(String servicePath, String serviceName, Boolean isJson) {
         String cleanedServiceName;
         if (serviceName.isBlank() || serviceName.equals("/")) {
             cleanedServiceName = FilenameUtils.removeExtension(servicePath);
@@ -221,9 +217,9 @@ public class OpenAPIConverterUtils {
             cleanedServiceName = serviceName.replaceAll("/", "-");
         }
         if (isJson) {
-            return cleanedServiceName + ConverterConstants.OPENAPI_SUFFIX + ConverterConstants.JSON_EXTENSION;
+            return cleanedServiceName + Constants.OPENAPI_SUFFIX + Constants.JSON_EXTENSION;
         }
-        return cleanedServiceName + ConverterConstants.OPENAPI_SUFFIX + ConverterConstants.YAML_EXTENSION;
+        return cleanedServiceName + Constants.OPENAPI_SUFFIX + Constants.YAML_EXTENSION;
     }
 
     /**
@@ -233,7 +229,7 @@ public class OpenAPIConverterUtils {
      * @param openApiName   given file name
      * @return              file name with duplicate number tag
      */
-    private  String checkDuplicateFiles(Path outPath, String openApiName, Boolean isJson) {
+    private static String checkDuplicateFiles(Path outPath, String openApiName, Boolean isJson) {
 
         if (outPath != null && Files.exists(outPath)) {
             final File[] listFiles = new File(String.valueOf(outPath)).listFiles();
@@ -244,7 +240,7 @@ public class OpenAPIConverterUtils {
         return openApiName;
     }
 
-    private  String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
+    private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
 
         for (File file : listFiles) {
             if (System.console() != null) {
@@ -268,7 +264,7 @@ public class OpenAPIConverterUtils {
      * @param fileName          File name
      * @param duplicateCount    add the tag with duplicate number if file already exist
      */
-    private  String setGeneratedFileName(File[] listFiles, String fileName, int duplicateCount, Boolean isJson) {
+    private static String setGeneratedFileName(File[] listFiles, String fileName, int duplicateCount, Boolean isJson) {
         for (File listFile : listFiles) {
             String listFileName = listFile.getName();
             if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2)

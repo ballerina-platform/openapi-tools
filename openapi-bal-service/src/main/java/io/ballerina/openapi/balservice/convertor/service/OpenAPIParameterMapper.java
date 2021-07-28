@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.common;
+package io.ballerina.openapi.balservice.convertor.service;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
@@ -32,6 +32,8 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.openapi.balservice.convertor.Constants;
+import io.ballerina.openapi.balservice.convertor.utils.ConverterUtils;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -50,7 +52,6 @@ import java.util.List;
 public class OpenAPIParameterMapper {
     private FunctionDefinitionNode functionDefinitionNode;
     private Operation operation;
-    private ConverterUtils converterUtils = new ConverterUtils();
 
     public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode,
                                   Operation operation) {
@@ -106,7 +107,7 @@ public class OpenAPIParameterMapper {
                     if (!(arrayNode.memberTypeDesc() instanceof ArrayTypeDescriptorNode)) {
                         TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
                         if (!itemTypeNode.kind().equals(SyntaxKind.TYPE_REFERENCE)) {
-                            Schema itemSchema = converterUtils.getOpenApiSchema(itemTypeNode.toString().trim());
+                            Schema itemSchema = ConverterUtils.getOpenApiSchema(itemTypeNode.toString().trim());
                             arraySchema.setItems(itemSchema);
                             QueryParameter queryParameter = new QueryParameter();
                             queryParameter.schema(arraySchema);
@@ -145,7 +146,7 @@ public class OpenAPIParameterMapper {
                     ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) queryParam.typeName();
                     if (arrayNode.memberTypeDesc().kind().equals(SyntaxKind.STRING_TYPE_DESC)) {
                         TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
-                        Schema itemSchema = converterUtils.getOpenApiSchema(itemTypeNode.toString().trim());
+                        Schema itemSchema = ConverterUtils.getOpenApiSchema(itemTypeNode.toString().trim());
                         ArraySchema arraySchema = new ArraySchema();
                         arraySchema.setItems(itemSchema);
                         io.swagger.v3.oas.models.parameters.HeaderParameter headerParameter =
@@ -172,7 +173,7 @@ public class OpenAPIParameterMapper {
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) node;
             TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
             if (!itemTypeNode.kind().equals(SyntaxKind.TYPE_REFERENCE)) {
-                Schema itemSchema = converterUtils.getOpenApiSchema(itemTypeNode.toString().trim());
+                Schema itemSchema = ConverterUtils.getOpenApiSchema(itemTypeNode.toString().trim());
                 arraySchema.setItems(itemSchema);
                 QueryParameter queryParameter = new QueryParameter();
                 queryParameter.schema(arraySchema);
@@ -205,8 +206,8 @@ public class OpenAPIParameterMapper {
                 io.swagger.v3.oas.models.parameters.QueryParameter qParam = new QueryParameter();
                 RequiredParameterNode queryParam = (RequiredParameterNode) paramAttributes;
                 qParam.setName(queryParam.paramName().get().text());
-                type = converterUtils.convertBallerinaTypeToOpenAPIType(queryParam.typeName().toString().trim());
-                qParam.schema(converterUtils.getOpenApiSchema(type));
+                type = ConverterUtils.convertBallerinaTypeToOpenAPIType(queryParam.typeName().toString().trim());
+                qParam.schema(ConverterUtils.getOpenApiSchema(type));
                 param = qParam;
                 break;
             case Constants.HEADER:
@@ -225,8 +226,8 @@ public class OpenAPIParameterMapper {
             default:
                 io.swagger.v3.oas.models.parameters.PathParameter pParam = new PathParameter();
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) paramAttributes;
-                type = converterUtils.convertBallerinaTypeToOpenAPIType(pathParam.typeDescriptor().toString().trim());
-                pParam.schema(converterUtils.getOpenApiSchema(type));
+                type = ConverterUtils.convertBallerinaTypeToOpenAPIType(pathParam.typeDescriptor().toString().trim());
+                pParam.schema(ConverterUtils.getOpenApiSchema(type));
                 pParam.setName(pathParam.paramName().text());
                 param = pParam;
         }

@@ -16,101 +16,27 @@
  *  under the License.
  */
  
-package io.ballerina.openapi.common;
+package io.ballerina.openapi.balservice.convertor.utils;
 
-import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
-import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.openapi.balservice.convertor.Constants;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
-import org.ballerinalang.model.tree.AnnotationAttachmentNode;
-import org.ballerinalang.model.tree.expressions.RecordLiteralNode;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Utilities used in Ballerina  to OpenAPI converter.
  */
 public class ConverterUtils {
 
-    public ConverterUtils() {
-
-    }
-
-    /**
-     * Converts the attributes of an annotation to a map of key being attribute key and value being an annotation
-     * attachment value.
-     *
-     * @param list The BLangRecord list.
-     * @return A map of attributes.
-     */
-    public Map<String, BLangExpression> listToMap(List<RecordLiteralNode.RecordField> list) {
-        Map<String, BLangExpression> attrMap = new HashMap<>();
-
-        for (RecordLiteralNode.RecordField field : list) {
-            if (field.isKeyValueField()) {
-                BLangRecordLiteral.BLangRecordKeyValueField attr = (BLangRecordLiteral.BLangRecordKeyValueField) field;
-                attrMap.put(attr.getKey().toString(), attr.getValue());
-            } else {
-                BLangRecordLiteral.BLangRecordVarNameField varNameField =
-                        (BLangRecordLiteral.BLangRecordVarNameField) field;
-                attrMap.put(varNameField.variableName.value, varNameField);
-            }
-        }
-
-        return attrMap;
-    }
-
-    /**
-     * Coverts the string value of an annotation attachment to a string.
-     *
-     * @param valueNode The annotation attachment.
-     * @return The string value.
-     */
-    public String getStringLiteralValue(ParenthesizedArgList valueNode) {
-        SeparatedNodeList<FunctionArgumentNode> arg = valueNode.arguments();
-        return arg.get(0).toString();
-    }
-
-    /**
-     * Retrieves a specific annotation by name from a list of annotations.
-     *
-     * @param name        name of the required annotation
-     * @param pkg         package of the required annotation
-     * @param annotations list of annotations containing the required annotation
-     * @return returns annotation with the name <code>name</code> if found or
-     * null if annotation not found in the list
-     */
-    public AnnotationAttachmentNode getAnnotationFromList(String name, String pkg,
-                                                                 List<? extends AnnotationAttachmentNode> annotations) {
-        AnnotationAttachmentNode annotation = null;
-        if (name == null || pkg == null) {
-            return null;
-        }
-
-        for (AnnotationAttachmentNode ann : annotations) {
-            if (pkg.equals(ann.getPackageAlias().getValue()) && name.equals(ann.getAnnotationName().getValue())) {
-                annotation = ann;
-            }
-        }
-
-        return annotation;
-    }
-
     /**
      * This util function is for converting ballerina type to openapi type.
      * @param type this string type parameter according to ballerina type
      * @return  this return the string value of openAPI type
      */
-    public String convertBallerinaTypeToOpenAPIType(String type) {
+    public static String convertBallerinaTypeToOpenAPIType(String type) {
         String convertedType;
         switch (type) {
             case Constants.INT:
@@ -143,7 +69,7 @@ public class ConverterUtils {
      * @param type ballerina type name as a String
      * @return OpenApi {@link Schema} for type defined by {@code type}
      */
-    public Schema getOpenApiSchema(String type) {
+    public static Schema getOpenApiSchema(String type) {
         Schema schema;
 
         switch (type) {

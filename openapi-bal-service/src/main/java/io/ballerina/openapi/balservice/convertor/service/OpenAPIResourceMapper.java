@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.common;
+package io.ballerina.openapi.balservice.convertor.service;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -42,6 +42,8 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.openapi.balservice.convertor.Constants;
+import io.ballerina.openapi.balservice.convertor.utils.ConverterUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -73,7 +75,6 @@ public class OpenAPIResourceMapper {
     private SemanticModel semanticModel;
     private Paths pathObject = new Paths();
     private Components components = new Components();
-    private ConverterUtils converterUtils = new ConverterUtils();
 
     /**
      * Initializes a resource parser for openApi.
@@ -258,7 +259,7 @@ public class OpenAPIResourceMapper {
                 } else if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
                     ApiResponse apiResponse = new ApiResponse();
                     String type =  typeNode.toString().toLowerCase(Locale.ENGLISH).trim();
-                    Schema schema = converterUtils.getOpenApiSchema(type);
+                    Schema schema = ConverterUtils.getOpenApiSchema(type);
                     io.swagger.v3.oas.models.media.MediaType mediaType =
                             new io.swagger.v3.oas.models.media.MediaType();
                     String media = generateMIMETypeForBallerinaType(type);
@@ -351,7 +352,7 @@ public class OpenAPIResourceMapper {
                                 SimpleNameReferenceNode nameRefNode =  (SimpleNameReferenceNode) type;
                                 handleReferenceInResponse(op, nameRefNode, schemas, apiResponses);
                             } else {
-                                schema = converterUtils.getOpenApiSchema(nodeType);
+                                schema = ConverterUtils.getOpenApiSchema(nodeType);
                             }
                         }
                     }
@@ -381,7 +382,7 @@ public class OpenAPIResourceMapper {
                         String type =
                                 array.memberTypeDesc().kind().toString().trim().split("_")[0].
                                         toLowerCase(Locale.ENGLISH);
-                        Schema openApiSchema = converterUtils.getOpenApiSchema(type);
+                        Schema openApiSchema = ConverterUtils.getOpenApiSchema(type);
                         String mimeType = generateMIMETypeForBallerinaType(type);
                         arraySchema.setItems(openApiSchema);
                         mediaType.setSchema(arraySchema);

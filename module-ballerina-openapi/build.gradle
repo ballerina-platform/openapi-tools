@@ -25,7 +25,7 @@ dependencies {
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }
-    implementation project(':openapi-common')
+    implementation project(':openapi-bal-service')
     implementation project(':openapi-validator')
     implementation project(':openapi-cli')
     implementation project(':openapi-ls-extension')
@@ -53,7 +53,7 @@ def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def targetNativeJar = file("""$project.rootDir/${packageName}-validator/build/libs/${packageName}-validator-${project.version}.jar""")
-def targetOpenApiCommonJar = file("$project.rootDir/openapi-common/build/libs/openapi-common-${project.version}.jar")
+def targetOpenApiCommonJar = file("$project.rootDir/openapi-bal-service/build/libs/openapi-bal-service-${project.version}.jar")
 def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
 def targetOpenApiLSJar = file("$project.rootDir/openapi-ls-extension/build/libs/openapi-ls-extension-${project.version}.jar")
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
@@ -300,7 +300,7 @@ copyStdlibs.dependsOn unpackStdLibs
 updateTomlFile.dependsOn copyStdlibs
 updateCompilerTomlFile.dependsOn updateTomlFile
 
-ballerinaBuild.dependsOn ":${packageName}-common:build"
+ballerinaBuild.dependsOn ":${packageName}-bal-service:build"
 ballerinaBuild.dependsOn ":${packageName}-cli:build"
 ballerinaBuild.dependsOn ":${packageName}-ls-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-validator:build"
