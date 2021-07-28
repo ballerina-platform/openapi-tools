@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,22 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-plugins {
-    id "com.gradle.enterprise" version "3.5"
-}
-rootProject.name = 'ballerina-openapi'
-include(':config:checkstyle')
-include(':module-ballerina-openapi')
-include(':openapi-cli')
-include(':openapi-validator')
-include 'openapi-compiler-plugin'
-//include(':openapi-tests')
 
-gradleEnterprise {
-    buildScan {
-        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-        termsOfServiceAgree = 'yes'
-    }
+module io.ballerina.openapi.compiler.plugin {
+    requires io.ballerina.lang;
+    requires io.ballerina.tools.api;
+    requires io.ballerina.parser;
 }
