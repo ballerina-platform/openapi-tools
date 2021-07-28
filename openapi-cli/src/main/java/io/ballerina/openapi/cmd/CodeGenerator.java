@@ -124,24 +124,28 @@ public class CodeGenerator {
      */
     private void generate(GeneratorConstants.GenType type, String executionPath,
                           String definitionPath,
-                          String reldefinitionPath , String serviceName, String outPath, Filter filter)
+                          String reldefinitionPath , String serviceName, String outPath, Filter filter,
+                          boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
 
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles = generateBalSource(type, definitionPath, reldefinitionPath, serviceName, filter);
+        List<GenSrcFile> genFiles = generateBalSource(type, definitionPath, reldefinitionPath, serviceName, filter,
+                nullable);
         writeGeneratedSources(genFiles, srcPath, implPath, type);
     }
 
     public void generateBothFiles(GeneratorConstants.GenType type, String definitionPath,
-                                  String reldefinitionPath , String serviceName, String outPath , Filter filter)
+                                  String reldefinitionPath , String serviceName, String outPath , Filter filter,
+                                  boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles =  new ArrayList<>();
         genFiles.addAll(generateBalSource(GEN_SERVICE,
-                definitionPath, reldefinitionPath, serviceName, filter));
-        genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, reldefinitionPath, serviceName, filter));
+                definitionPath, reldefinitionPath, serviceName, filter, nullable));
+        genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, reldefinitionPath, serviceName, filter,
+                nullable));
         List<GenSrcFile> newGenFiles = genFiles.stream().filter(distinctByKey(
                 GenSrcFile::getFileName)).collect(Collectors.toList());
         writeGeneratedSources(newGenFiles, srcPath, implPath, type);
@@ -166,9 +170,9 @@ public class CodeGenerator {
      * @throws BallerinaOpenApiException when code generator fails
      */
     public void generateClient(String executionPath, String definitionPath, String serviceName, String outPath,
-                               Filter filter)
+                               Filter filter, boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
-        generate(GEN_CLIENT, executionPath, definitionPath, null, serviceName, outPath, filter);
+        generate(GEN_CLIENT, executionPath, definitionPath, null, serviceName, outPath, filter, nullable);
     }
 
     /**
@@ -186,10 +190,11 @@ public class CodeGenerator {
      * @throws BallerinaOpenApiException when code generator fails
      */
     public void generateService(String executionPath, String definitionPath,
-                                String reldefinitionPath, String serviceName, String outPath, Filter filter)
+                                String reldefinitionPath, String serviceName, String outPath, Filter filter,
+                                boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
         generate(GEN_SERVICE, executionPath, definitionPath,
-                reldefinitionPath, serviceName, outPath, filter);
+                reldefinitionPath, serviceName, outPath, filter, nullable);
     }
 
     /**
@@ -211,7 +216,8 @@ public class CodeGenerator {
      */
     public List<GenSrcFile> generateBalSource(GeneratorConstants.GenType type,
                                               String definitionPath,
-                                              String reldefinitionPath, String serviceName, Filter filter)
+                                              String reldefinitionPath, String serviceName, Filter filter,
+                                              boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
         String openAPIFileContent = Files.readString(Paths.get(definitionPath));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
@@ -241,10 +247,10 @@ public class CodeGenerator {
                 if (serviceName != null) {
                     api.getInfo().setTitle(serviceName.replaceAll(ESCAPE_PATTERN, "\\\\$1"));
                 }
-                sourceFiles = generateClient(Paths.get(definitionPath), filter);
+                sourceFiles = generateClient(Paths.get(definitionPath), filter, nullable);
                 break;
             case GEN_SERVICE:
-                sourceFiles = generateBallerinaService(Paths.get(definitionPath), serviceName, filter);
+                sourceFiles = generateBallerinaService(Paths.get(definitionPath), serviceName, filter, nullable);
                 break;
             default:
                 return null;
@@ -262,9 +268,11 @@ public class CodeGenerator {
      * @param outPath      Destination path for writing the resulting source file
      * @throws IOException when file operations fail
      * @deprecated This method is now deprecated.
-     * Use {@link #generateBalSource(GeneratorConstants.GenType, String, String, String, Filter) generate}
+     * Use {@link #generateBalSource
+     * (GeneratorConstants.GenType, String, String, String, Filter, boolean nullable) generate}
      * and implement a file write functionality your self, if you need to customize file writing steps.
-     * Otherwise use {@link #generate(GeneratorConstants.GenType, String, String, String, String, String, Filter)
+     * Otherwise use {@link #generate
+     * (GeneratorConstants.GenType, String, String, String, String, String, Filter, boolean nullable)
      * generate}
      * to directly write generated source to a ballerina module.
      */
@@ -333,7 +341,8 @@ public class CodeGenerator {
                     for (GenSrcFile gFile : sources) {
                         if (file.getName().equals(gFile.getFileName())) {
                             if (System.console() != null) {
-                                String userInput = System.console().readLine("There is already a/an " + file.getName() +
+                                String userInput = System.console().readLine("There is already a/an " +
+                                        file.getName() +
                                         " in the location. Do you want to override the file? [y/N] ");
                                 if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
                                     int duplicateCount = 0;
@@ -410,7 +419,7 @@ public class CodeGenerator {
      * @return generated source files as a list of {@link GenSrcFile}
      * @throws IOException when code generation with specified templates fails
      */
-    private List<GenSrcFile> generateClient(Path openAPI, Filter filter)
+    private List<GenSrcFile> generateClient(Path openAPI, Filter filter, boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage =  DEFAULT_CLIENT_PKG;
@@ -419,24 +428,21 @@ public class CodeGenerator {
         String srcFile = "client.bal";
         // Normalize OpenAPI definition
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
-
         // Generate ballerina service and resources.
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         // Generate ballerina records to represent schemas.
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         ballerinaSchemaGenerator.setEnumDeclarationNodeList(ballerinaClientGenerator.getEnumDeclarationNodeList());
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
-
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
             schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent);
         }
-
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
                 schemaContent));
 
@@ -554,7 +560,7 @@ public class CodeGenerator {
 
 
     private List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
-                                                      Filter filter)
+                                                      Filter filter, boolean nullable)
             throws IOException, FormatterException, BallerinaOpenApiException {
 
         if (srcPackage == null || srcPackage.isEmpty()) {
@@ -569,7 +575,7 @@ public class CodeGenerator {
                         filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
         String schemaContent = Formatter.format(ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  TYPE_FILE_NAME, schemaContent));
 
