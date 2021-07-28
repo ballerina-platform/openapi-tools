@@ -36,5 +36,6 @@ module io.ballerina.openapi.balservice.convertor {
     requires swagger.parser.v3;
     requires org.apache.commons.lang3;
     exports io.ballerina.openapi.balservice.convertor;
+    exports io.ballerina.openapi.balservice.convertor.utils;
 }
 

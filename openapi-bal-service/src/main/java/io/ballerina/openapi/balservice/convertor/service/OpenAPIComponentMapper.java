@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.balservice.convertor;
+package io.ballerina.openapi.balservice.convertor.service;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
@@ -26,6 +26,8 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.openapi.balservice.convertor.Constants;
+import io.ballerina.openapi.balservice.convertor.utils.ConverterUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;

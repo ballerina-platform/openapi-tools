@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.balservice.convertor;
+package io.ballerina.openapi.balservice.convertor.service;
 
 import io.swagger.v3.oas.models.Operation;
 
@@ -30,7 +30,7 @@ public class OperationAdaptor {
     private String path;
     private String httpOperation;
 
-    OperationAdaptor() {
+    public OperationAdaptor() {
         this.operation = new io.swagger.v3.oas.models.Operation();
     }
 

@@ -58,6 +58,9 @@ public class Constants {
     public static final String PUT = "PUT";
     public static final String OPTIONS = "OPTIONS";
     public static final String HEAD = "HEAD";
+    public static final String YAML_EXTENSION = ".yaml";
+    public static final String JSON_EXTENSION = ".json";
+    public static final String OPENAPI_SUFFIX = "_openapi";
 
     /**
      * Enum to select the Ballerina Type.

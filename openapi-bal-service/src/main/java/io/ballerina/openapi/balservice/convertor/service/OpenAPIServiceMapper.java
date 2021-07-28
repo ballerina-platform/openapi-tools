@@ -17,16 +17,14 @@
  */
 
 
-package io.ballerina.openapi.balservice.convertor;
+package io.ballerina.openapi.balservice.convertor.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,25 +38,15 @@ import java.util.List;
  */
 public class OpenAPIServiceMapper {
     private static final Logger logger = LoggerFactory.getLogger(OpenAPIServiceMapper.class);
-    private  SemanticModel semanticModel;
-
-    public SemanticModel getSemanticModel() {
-        return semanticModel;
-    }
-
-    public void setSemanticModel(SemanticModel semanticModel) {
-        this.semanticModel = semanticModel;
-    }
-
-    private final ObjectMapper objectMapper;
+    private final SemanticModel semanticModel;
 
 
     /**
      * Initializes a service parser for OpenApi.
      */
-    public OpenAPIServiceMapper() {
+    public OpenAPIServiceMapper(SemanticModel semanticModel) {
         // Default object mapper is JSON mapper available in openApi utils.
-        this.objectMapper = Json.mapper();
+        this.semanticModel = semanticModel;
     }
 
     /**

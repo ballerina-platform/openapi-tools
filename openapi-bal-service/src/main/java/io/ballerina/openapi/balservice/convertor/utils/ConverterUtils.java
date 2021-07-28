@@ -16,8 +16,9 @@
  *  under the License.
  */
  
-package io.ballerina.openapi.balservice.convertor;
+package io.ballerina.openapi.balservice.convertor.utils;
 
+import io.ballerina.openapi.balservice.convertor.Constants;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
