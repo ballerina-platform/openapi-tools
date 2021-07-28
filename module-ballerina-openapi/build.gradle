@@ -25,7 +25,7 @@ dependencies {
     jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
     }
-    implementation project(':openapi-common')
+    implementation project(':openapi-bal-service')
     implementation project(':openapi-validator')
     implementation project(':openapi-cli')
 }
@@ -294,7 +294,7 @@ copyStdlibs.dependsOn unpackStdLibs
 updateTomlFile.dependsOn copyStdlibs
 updateCompilerTomlFile.dependsOn updateTomlFile
 
-ballerinaBuild.dependsOn ":${packageName}-common:build"
+ballerinaBuild.dependsOn ":${packageName}-bal-service:build"
 ballerinaBuild.dependsOn ":${packageName}-cli:build"
 ballerinaBuild.dependsOn ":${packageName}-validator:build"
 ballerinaBuild.dependsOn updateCompilerTomlFile

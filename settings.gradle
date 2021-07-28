@@ -31,5 +31,4 @@ gradleEnterprise {
         termsOfServiceAgree = 'yes'
     }
 }
-include 'openapi-common'
 

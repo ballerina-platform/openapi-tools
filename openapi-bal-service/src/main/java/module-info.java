@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module io.ballerina.openapi.balservice.common {
+module io.ballerina.openapi.balservice.converter {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires handlebars;
