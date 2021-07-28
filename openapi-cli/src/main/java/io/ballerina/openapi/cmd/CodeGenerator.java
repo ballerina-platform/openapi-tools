@@ -81,6 +81,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  */
 public class CodeGenerator {
     private String srcPackage;
+    private String licenseHeader;
 
     private static final PrintStream outStream = System.err;
 
@@ -410,12 +411,12 @@ public class CodeGenerator {
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
         // Generate ballerina service and resources.
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable);
-        String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
+        String mainContent = licenseHeader + Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         // Generate test boilerplate code for test cases
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
-        String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
+        String testContent = licenseHeader + Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
 
         String configContent = ballerinaTestGenerator.getConfigTomlFile();
@@ -428,7 +429,8 @@ public class CodeGenerator {
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         ballerinaSchemaGenerator.setEnumDeclarationNodeList(ballerinaClientGenerator.getEnumDeclarationNodeList());
-        String schemaContent = Formatter.format(ballerinaSchemaGenerator.generateSyntaxTree()).toString();
+        String schemaContent = licenseHeader + Formatter.format(
+                ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
                 schemaContent));
 
@@ -447,12 +449,13 @@ public class CodeGenerator {
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
-        String mainContent = Formatter.format(BallerinaServiceGenerator.generateSyntaxTree(openAPI, serviceName,
-                        filter)).toString();
+        String mainContent = licenseHeader + Formatter.format
+                (BallerinaServiceGenerator.generateSyntaxTree(openAPI, serviceName, filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
-        String schemaContent = Formatter.format(ballerinaSchemaGenerator.generateSyntaxTree()).toString();
+        String schemaContent = licenseHeader + Formatter.format(
+                ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  TYPE_FILE_NAME, schemaContent));
 
         return sourceFiles;
@@ -484,5 +487,13 @@ public class CodeGenerator {
             }
         }
         return openAPI;
+    }
+
+    /**
+     * Set the content of license header.
+     * @param licenseHeader license header value received from command line.
+     */
+    public void setLicenseHeader (String licenseHeader) {
+        this.licenseHeader = licenseHeader;
     }
 }
