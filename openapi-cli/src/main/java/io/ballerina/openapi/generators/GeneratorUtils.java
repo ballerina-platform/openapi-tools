@@ -109,7 +109,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
 public class GeneratorUtils {
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
-        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import ");
+        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import");
         Token orgNameToken = AbstractNodeFactory.createIdentifierToken(orgName);
         Token slashToken = AbstractNodeFactory.createIdentifierToken("/");
         ImportOrgNameNode importOrgNameNode = NodeFactory.createImportOrgNameNode(orgNameToken, slashToken);

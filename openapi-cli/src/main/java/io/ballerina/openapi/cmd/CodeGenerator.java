@@ -50,6 +50,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -315,21 +316,31 @@ public class CodeGenerator {
                                         GeneratorConstants.GenType type)
             throws IOException {
         //  Remove old generated file with same name
+        List<File> listFiles = new ArrayList<>();
         if (Files.exists(srcPath)) {
-            final File[] listFiles = new File(String.valueOf(srcPath)).listFiles();
-            if (listFiles != null) {
-                for (File file : listFiles) {
-                    for (GenSrcFile gFile : sources) {
-                        if (file.getName().equals(gFile.getFileName())) {
-                            if (System.console() != null) {
-                                String userInput = System.console().readLine("There is already a/an " +
-                                        file.getName() +
-                                        " in the location. Do you want to override the file? [y/N] ");
-                                if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
-                                    int duplicateCount = 0;
-                                    setGeneratedFileName(listFiles, gFile, duplicateCount);
-                                }
-                            }
+            File[] files = new File(String.valueOf(srcPath)).listFiles();
+            if (files != null) {
+                listFiles.addAll(Arrays.asList(files));
+                for (File file : files) {
+                    if (file.isDirectory() && file.getName().equals("tests")) {
+                        File[] innerFiles = new File(srcPath + "/tests").listFiles();
+                        if (innerFiles != null) {
+                            listFiles.addAll(Arrays.asList(innerFiles));
+                        }
+                    }
+                }
+            }
+        }
+
+        for (File file : listFiles) {
+            for (GenSrcFile gFile : sources) {
+                if (file.getName().equals(gFile.getFileName())) {
+                    if (System.console() != null) {
+                        String userInput = System.console().readLine("There is already a/an " + file.getName() +
+                                " in the location. Do you want to override the file? [y/N] ");
+                        if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
+                            int duplicateCount = 0;
+                            setGeneratedFileName(listFiles, gFile, duplicateCount);
                         }
                     }
                 }
@@ -380,7 +391,7 @@ public class CodeGenerator {
      * @param gFile             GenSrcFile object
      * @param duplicateCount    add the tag with duplicate number if file already exist
      */
-    private void setGeneratedFileName(File[] listFiles, GenSrcFile gFile, int duplicateCount) {
+    private void setGeneratedFileName(List<File> listFiles, GenSrcFile gFile, int duplicateCount) {
 
         for (File listFile : listFiles) {
             String listFileName = listFile.getName();
