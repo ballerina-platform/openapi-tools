@@ -21,7 +21,7 @@ package io.ballerina.openapi.extension;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.common.OpenAPIConverterUtils;
+import io.ballerina.openapi.balservice.convertor.utils.BalServiceToOpenAPIConverterUtils;
 import org.ballerinalang.annotation.JavaSPIService;
 import org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService;
 import org.ballerinalang.langserver.commons.workspace.WorkspaceManager;
@@ -77,10 +77,9 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 Optional<Path> documentPath = getPathFromURI(fileUri);
                 Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath.orElseThrow());
                 Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath.orElseThrow());
-                OpenAPIConverterUtils openAPIConverter = new OpenAPIConverterUtils(syntaxTree.orElseThrow(),
-                        semanticModel.orElseThrow());
-                Map<String, String> yamlContent = openAPIConverter.generateOAS3Definition(null,
-                        false, null);
+                Map<String, String> yamlContent =
+                        BalServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.orElseThrow(),
+                                semanticModel.orElseThrow(), null, false, null);
                 //Response should handle
                 if (!yamlContent.isEmpty()) {
                     Map.Entry<String, String> content = yamlContent.entrySet().iterator().next();

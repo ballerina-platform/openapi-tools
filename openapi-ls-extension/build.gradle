@@ -32,7 +32,7 @@ configurations {
 }
 
 dependencies {
-    implementation project(':openapi-common')
+    implementation project(':openapi-bal-service')
     implementation "com.fasterxml.jackson.core:jackson-databind"
     implementation "io.swagger.core.v3:swagger-models"
     implementation ("io.swagger.parser.v3:swagger-parser-v2-converter") {
