@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.balservice.convertor.utils;
+package io.ballerina.openapi.converter.utils;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -27,9 +27,10 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.balservice.convertor.Constants;
-import io.ballerina.openapi.balservice.convertor.OpenApiConverterException;
-import io.ballerina.openapi.balservice.convertor.service.OpenAPIServiceMapper;
+import io.ballerina.openapi.converter.Constants;
+import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
+import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -47,11 +48,11 @@ import java.util.Objects;
 
 
 /**
- * The BalServiceToOpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
+ * The ServiceToOpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
  *
  * @since 2.0.0
  */
-public class BalServiceToOpenAPIConverterUtils {
+public class ServiceToOpenAPIConverterUtils {
 
     /**
      * This method will generate  openapi definition Map list with ballerina code.
@@ -90,7 +91,7 @@ public class BalServiceToOpenAPIConverterUtils {
 
             // Generating for the services
             for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
-                String serviceNodeName = OpenAPIEndpointMapperUtils.getServiceBasePath(serviceNode);
+                String serviceNodeName = new OpenAPIEndpointMapper().getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
                 String openApiSource = generateOASDefinition(serviceNode, serviceNodeName, needJson, endpoints,
                         semanticModel);
@@ -134,7 +135,7 @@ public class BalServiceToOpenAPIConverterUtils {
 
         if (serviceName != null) {
             // Filtering by service name
-            String service = OpenAPIEndpointMapperUtils.getServiceBasePath(serviceNode);
+            String service = new OpenAPIEndpointMapper().getServiceBasePath(serviceNode);
             availableService.add(service);
             if (serviceName.equals(service)) {
                 servicesToGenerate.add(serviceNode);
@@ -167,7 +168,7 @@ public class BalServiceToOpenAPIConverterUtils {
                                          ServiceDeclarationNode serviceDefinition, SemanticModel semanticModel) {
         //Take base path of service
         OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
-        String currentServiceName = OpenAPIEndpointMapperUtils.getServiceBasePath(serviceDefinition);
+        String currentServiceName = new OpenAPIEndpointMapper().getServiceBasePath(serviceDefinition);
         if (openapi.getServers() == null) {
             openapi = setServerURLInOAS(openapi, endpoints, serviceDefinition);
             // Generate openApi string for the mentioned service name.
@@ -190,11 +191,11 @@ public class BalServiceToOpenAPIConverterUtils {
                                       ServiceDeclarationNode serviceDefinition) {
 
         SeparatedNodeList<ExpressionNode> expressions = serviceDefinition.expressions();
-        openapi = OpenAPIEndpointMapperUtils.extractServerForExpressionNode(openapi, expressions,
+        openapi = new OpenAPIEndpointMapper().extractServerForExpressionNode(openapi, expressions,
                 serviceDefinition);
         // Handle outbound listeners
         if (!endpoints.isEmpty()) {
-            openapi = OpenAPIEndpointMapperUtils.convertListenerEndPointToOpenAPI(openapi, endpoints,
+            openapi = new OpenAPIEndpointMapper().convertListenerEndPointToOpenAPI(openapi, endpoints,
                     serviceDefinition);
         }
         return openapi;

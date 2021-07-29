@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.balservice.convertor.service;
+package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;

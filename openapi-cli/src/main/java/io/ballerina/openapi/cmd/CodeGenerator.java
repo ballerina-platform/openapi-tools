@@ -109,8 +109,7 @@ public class CodeGenerator {
 
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles = generateBalSource(type, definitionPath, serviceName, filter,
-                nullable);
+        List<GenSrcFile> genFiles = generateBalSource(type, definitionPath, serviceName, filter, nullable);
         writeGeneratedSources(genFiles, srcPath, implPath, type);
     }
 

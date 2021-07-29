@@ -22,7 +22,7 @@ module io.ballerina.openapi.extension.openAPILSExtension {
     requires io.ballerina.lang;
     requires io.ballerina.parser;
     requires io.ballerina.tools.api;
-    requires io.ballerina.openapi.balservice.convertor;
+    requires io.ballerina.openapi.converter;
     requires io.ballerina.language.server.commons;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
