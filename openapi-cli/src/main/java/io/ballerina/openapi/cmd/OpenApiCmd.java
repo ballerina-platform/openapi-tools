@@ -18,10 +18,10 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
-import io.ballerina.openapi.generators.openapi.OpenApiConverterException;
-import io.ballerina.openapi.generators.openapi.OpenApiConverterUtils;
+import io.ballerina.openapi.generators.openapi.OpenApiConverter;
 import io.ballerina.projects.ProjectException;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
@@ -29,12 +29,12 @@ import picocli.CommandLine;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Main class to implement "openapi" command for ballerina. Commands for Client Stub, Service file and OpenApi contract
@@ -57,6 +57,9 @@ public class OpenApiCmd implements BLauncherCmd {
 
     @CommandLine.Option(names = {"-i", "--input"}, description = "Generating the client and service both files")
     private boolean inputPath;
+
+    @CommandLine.Option(names = {"--license"}, description = "Location of the file which contains the license header")
+    private String licenseFilePath;
 
     @CommandLine.Option(names = {"-o", "--output"}, description = "Location of the generated Ballerina service, " +
             "client and model files.")
@@ -169,14 +172,13 @@ public class OpenApiCmd implements BLauncherCmd {
     private void ballerinaToOpenApi(String fileName) throws IOException {
         final File balFile = new File(fileName);
         Path balFilePath = Paths.get(balFile.getCanonicalPath());
-        Optional<String> serviceName = Optional.ofNullable(service);
         getTargetOutputPath();
         // Check service name it is mandatory
         try {
-            OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
-            openApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName,
+            OpenApiConverter openApiConverter = new OpenApiConverter();
+            openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
                     generatedFileType);
-        } catch (IOException | OpenApiConverterException | ProjectException e) {
+        } catch (IOException  | ProjectException | OpenApiConverterException e) {
             outStream.println(e.getLocalizedMessage());
             exitError(this.exitWhenFinish);
         }
@@ -188,6 +190,7 @@ public class OpenApiCmd implements BLauncherCmd {
      */
     private void openApiToBallerina(String fileName, Filter filter) throws IOException {
         CodeGenerator generator = new CodeGenerator();
+        generator.setLicenseHeader(this.setLicenseHeader());
         final File openApiFile = new File(fileName);
         String serviceName;
         if (generatedServiceName != null) {
@@ -243,6 +246,28 @@ public class OpenApiCmd implements BLauncherCmd {
                 targetOutputPath = Paths.get(targetOutputPath.toString(), outputPath);
             }
         }
+    }
+    /**
+     * A util to set the license header content which is to be add at the beginning of the ballerina files.
+     */
+    private String setLicenseHeader() {
+        String licenseHeader = "";
+        try {
+            if (this.licenseFilePath != null && !this.licenseFilePath.isBlank()) {
+                Path filePath = Paths.get((new File(this.licenseFilePath).getCanonicalPath()));
+                licenseHeader = Files.readString(Paths.get(filePath.toString()));
+                if (!licenseHeader.endsWith("\n")) {
+                    licenseHeader = licenseHeader + "\n\n";
+                } else if (!licenseHeader.endsWith("\n\n")) {
+                    licenseHeader = licenseHeader + "\n";
+                }
+            }
+        } catch (IOException e) {
+            outStream.println("Invalid license file path : " + this.licenseFilePath +
+                    ". " + e.getMessage() + ".");
+            exitError(this.exitWhenFinish);
+        }
+        return licenseHeader;
     }
 
     /**
