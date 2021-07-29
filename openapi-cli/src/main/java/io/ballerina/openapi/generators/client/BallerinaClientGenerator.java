@@ -124,6 +124,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDesc
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeTestExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLIENT_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
@@ -133,16 +134,19 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ELSE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EOF_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.FINAL_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FOREACH_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_DEFINITION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.IF_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.IN_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ISOLATED_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.IS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.LOGICAL_OR_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
@@ -335,8 +339,8 @@ public class BallerinaClientGenerator {
     /**
      * Generate Class definition Node with below code structure.
      * <pre>
-     *     public client class Client {
-     *     http:Client clientEp;
+     *     public isolated client class Client {
+     *     final http:Client clientEp;
      *     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "/url")
      *     returns error? {
      *         http:Client httpEp = check new (serviceUrl, clientConfig);
@@ -354,9 +358,10 @@ public class BallerinaClientGenerator {
     private  ClassDefinitionNode getClassDefinitionNode() throws BallerinaOpenApiException {
 
         // Generate client class
-        Token visibilityQualifier = createIdentifierToken(GeneratorConstants.PUBLIC);
-        Token clientKeyWord = createIdentifierToken(GeneratorConstants.CLIENT);
-        NodeList<Token> classTypeQualifiers = createNodeList(clientKeyWord);
+        Token visibilityQualifier = createToken(PUBLIC_KEYWORD);
+        Token isolatedToken = createToken(ISOLATED_KEYWORD);
+        Token clientToken = createToken(CLIENT_KEYWORD);
+        NodeList<Token> classTypeQualifiers = createNodeList(isolatedToken, clientToken);
 
         IdentifierToken classKeyWord = createIdentifierToken(GeneratorConstants.CLASS);
         IdentifierToken className = createIdentifierToken(GeneratorConstants.CLIENT_CLASS);
@@ -380,18 +385,46 @@ public class BallerinaClientGenerator {
         parameters.add(createToken(COMMA_TOKEN));
         // Client init api documentation
         List<Node> docs = new ArrayList<>();
-        MarkdownDocumentationLineNode initDescription =
-                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                        createNodeList(createLiteralValueToken(null,
-                                "Client initialization.",
-                                createEmptyMinutiaeList(), createEmptyMinutiaeList())));
-        docs.add(initDescription);
+        if (openAPI.getInfo().getExtensions() != null && !openAPI.getInfo().getExtensions().isEmpty()) {
+            Map<String, Object> extensions = openAPI.getInfo().getExtensions();
+            boolean isInitExtentionGiven = false;
+            for (Map.Entry<String, Object> extension: extensions.entrySet()) {
+                if (extension.getKey().trim().equals("x-init-description")) {
+                    String[] docLines = extension.getValue().toString().split("\n");
+                    for (String line : docLines) {
+                        MarkdownDocumentationLineNode initDescription =
+                                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                                        createNodeList(createLiteralValueToken(null,
+                                                line, createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+                        docs.add(initDescription);
+                    }
+                    isInitExtentionGiven = true;
+                    break;
+                }
+            }
+            if (!isInitExtentionGiven) {
+                MarkdownDocumentationLineNode initDescription =
+                        createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                                createNodeList(createLiteralValueToken(null,
+                                        "Client initialization.", createEmptyMinutiaeList(),
+                                        createEmptyMinutiaeList())));
+                docs.add(initDescription);
+            }
+        } else {
+            MarkdownDocumentationLineNode initDescription =
+                    createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                            createNodeList(createLiteralValueToken(null,
+                                    "Client initialization.", createEmptyMinutiaeList(),
+                                    createEmptyMinutiaeList())));
+            docs.add(initDescription);
+        }
+
         MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
                 createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
         docs.add(hashNewLine);
         if (ballerinaAuthConfigGenerator.isAPIKey()) {
             MarkdownParameterDocumentationLineNode apiKeyConfig = generatorUtils.createParamAPIDoc(
-                    "apiKeyConfig", "API key configuration detail");
+                    "apiKeyConfig", ballerinaAuthConfigGenerator.getApiKeyDescription());
             docs.add(apiKeyConfig);
         }
         // Create method description
@@ -402,7 +435,7 @@ public class BallerinaClientGenerator {
                 "Connector server URL");
         docs.add(serviceUrlAPI);
         MarkdownParameterDocumentationLineNode returnDoc = generatorUtils.createParamAPIDoc("return",
-                "Returns error at failure of client initialization");
+                "An error at the failure of client initialization");
         docs.add(returnDoc);
         MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));
         MetadataNode clientInit = createMetadataNode(clientInitDoc, createEmptyNodeList());
@@ -483,11 +516,15 @@ public class BallerinaClientGenerator {
         // Generate api doc
         List<Node> documentationLines = new ArrayList<>();
         if (openAPI.getInfo().getDescription() != null) {
-            MarkdownDocumentationLineNode clientDescription =
-                    createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                            createNodeList(createLiteralValueToken(null, openAPI.getInfo().getDescription(),
-                                    createEmptyMinutiaeList(), createEmptyMinutiaeList())));
-            documentationLines.add(clientDescription);
+            String[] descriptionLines = openAPI.getInfo().getDescription().split("\n");
+            for (String line : descriptionLines) {
+                MarkdownDocumentationLineNode documentationLineNode =
+                        createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                                createNodeList(createLiteralValueToken(null, line,
+                                        createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+                documentationLines.add(documentationLineNode);
+            }
+
             MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
                     createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
             documentationLines.add(newLine);
@@ -507,7 +544,8 @@ public class BallerinaClientGenerator {
      */
     private List<ObjectFieldNode> getClassField(BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator) {
         List<ObjectFieldNode> fieldNodeList = new ArrayList<>();
-        NodeList<Token> qualifierList = createEmptyNodeList();
+        Token finalKeywordToken = createToken(FINAL_KEYWORD);
+        NodeList<Token> qualifierList = createNodeList(finalKeywordToken);
         QualifiedNameReferenceNode typeName = createQualifiedNameReferenceNode(createIdentifierToken(HTTP),
                 createToken(COLON_TOKEN), createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
         IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.CLIENT_EP);
