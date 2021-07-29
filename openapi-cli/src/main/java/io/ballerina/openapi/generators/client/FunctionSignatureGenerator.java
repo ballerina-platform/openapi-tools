@@ -182,24 +182,15 @@ public class FunctionSignatureGenerator {
                 switch (in) {
                     case "path":
                         Node param = getPathParameters(parameter);
-                        if (param instanceof RequiredParameterNode) {
-                            parameterList.add(param);
-                            parameterList.add(comma);
-                            if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        generatorUtils.createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription().split("\n")[0]);
-                                remoteFunctionDoc.add(paramAPIDoc);
-                            }
-                        } else {
-                            defaultable.add(param);
-                            defaultable.add(comma);
-                            if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        generatorUtils.createParamAPIDoc(escapeIdentifier(parameter.getName()),
-                                                parameter.getDescription().split("\n")[0]);
-                                defaultParam.add(paramAPIDoc);
-                            }
+                        // Path parameters are always required. 
+                        parameterList.add(param);
+                        parameterList.add(comma);
+                        if (parameter.getDescription() != null) {
+                            MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                    generatorUtils.createParamAPIDoc(escapeIdentifier(getValidName(
+                                            parameter.getName(), false)),
+                                            parameter.getDescription().split("\n")[0]);
+                            remoteFunctionDoc.add(paramAPIDoc);
                         }
                         break;
                     case "query":
@@ -368,7 +359,8 @@ public class FunctionSignatureGenerator {
     public Node getPathParameters(Parameter parameter) throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes =
                 docCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
-        IdentifierToken paramName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+        IdentifierToken paramName = createIdentifierToken(escapeIdentifier(
+                getValidName(parameter.getName(), false)));
         String type = "";
         Schema parameterSchema = parameter.getSchema();
         if (parameterSchema.get$ref() != null) {
