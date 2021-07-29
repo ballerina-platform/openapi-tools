@@ -18,10 +18,10 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
-import io.ballerina.openapi.generators.openapi.OpenApiConverterException;
-import io.ballerina.openapi.generators.openapi.OpenApiConverterUtils;
+import io.ballerina.openapi.generators.openapi.OpenApiConverter;
 import io.ballerina.projects.ProjectException;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
@@ -35,7 +35,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Main class to implement "openapi" command for ballerina. Commands for Client Stub, Service file and OpenApi contract
@@ -173,14 +172,13 @@ public class OpenApiCmd implements BLauncherCmd {
     private void ballerinaToOpenApi(String fileName) throws IOException {
         final File balFile = new File(fileName);
         Path balFilePath = Paths.get(balFile.getCanonicalPath());
-        Optional<String> serviceName = Optional.ofNullable(service);
         getTargetOutputPath();
         // Check service name it is mandatory
         try {
-            OpenApiConverterUtils openApiConverterUtils = new OpenApiConverterUtils();
-            openApiConverterUtils.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, serviceName,
+            OpenApiConverter openApiConverter = new OpenApiConverter();
+            openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
                     generatedFileType);
-        } catch (IOException | OpenApiConverterException | ProjectException e) {
+        } catch (IOException  | ProjectException | OpenApiConverterException e) {
             outStream.println(e.getLocalizedMessage());
             exitError(this.exitWhenFinish);
         }

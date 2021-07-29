@@ -25,6 +25,10 @@ import java.nio.file.Path;
  */
 public class CodegenUtils {
 
+    public CodegenUtils() {
+
+    }
+
     /**
      * Resolves path to write generated implementation source files.
      *

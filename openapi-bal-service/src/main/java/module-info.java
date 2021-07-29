@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-module io.ballerina.openapi {
+module io.ballerina.openapi.converter {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires handlebars;
     requires info.picocli;
     requires io.ballerina.lang;
     requires io.ballerina.parser;
-    requires io.ballerina.stdlib.http;
-    requires io.ballerina.cli;
     requires io.ballerina.tools.api;
-    requires io.ballerina.formatter.core;
-    requires io.ballerina.openapi.converter;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
     requires java.ws.rs;
@@ -39,10 +35,7 @@ module io.ballerina.openapi {
     requires swagger.parser.v2.converter;
     requires swagger.parser.v3;
     requires org.apache.commons.lang3;
-    exports io.ballerina.openapi.generators.openapi;
-    exports io.ballerina.openapi.cmd;
-    exports io.ballerina.openapi.exception;
-    exports io.ballerina.openapi.cmd.model;
-    exports io.ballerina.openapi.cmd.utils;
+    exports io.ballerina.openapi.converter;
+    exports io.ballerina.openapi.converter.utils;
 }
 
