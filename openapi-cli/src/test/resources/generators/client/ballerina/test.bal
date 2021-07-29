@@ -6,7 +6,7 @@ public type openapiClientConfig record {
 };
 
 public client class openapiClient {
-    public http:Client clientEp;
+    public final http:Client clientEp;
     public openapiClientConfig config;
 
     public function init(openapiClientConfig config) {

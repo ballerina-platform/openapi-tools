@@ -4,21 +4,20 @@ public type ApiKeysConfig record {
     map<string> apiKeys;
 };
 
-# + clientEp - Connector http endpoint
-public client class Client {
-    http:Client clientEp;
-    map<string> apiKeys;
+public isolated client class Client {
+    final http:Client clientEp;
+    final readonly & map<string> apiKeys;
 
     # Client initialization.
     #
     # + apiKeyConfig - API key configuration detail
     # + clientConfig - Client configuration details
     # + serviceUrl - Connector server URL
-    # + return -  Returns error at failure of client initialization
+    # + return -  An error at the failure of client initialization
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
-        self.apiKeys = apiKeyConfig.apiKeys;
+        self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();
     }
     # Info for a specific pet
     #

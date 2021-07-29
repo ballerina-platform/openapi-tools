@@ -95,6 +95,20 @@ public class ApiKeyAuthTests {
         Assert.assertEquals(expectedAssignmentNode, generatedAssignmentNode);
     }
 
+    @Test(description = "Test the generation of api key documentation comment")
+    public void testGetApiKeyDescription () throws IOException, BallerinaOpenApiException {
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/custome_api_key_doc.yaml");
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        String expectedApiKeyDescription = TestConstants.API_KEY_DOC_COMMENT;
+        String generatedConfigRecord = Objects.requireNonNull(
+                ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
+        String generateApiKeyDescription = ballerinaAuthConfigGenerator.getApiKeyDescription();
+        generateApiKeyDescription = (generateApiKeyDescription.trim()).replaceAll("\\s+", "");
+        expectedApiKeyDescription = (expectedApiKeyDescription.trim()).replaceAll("\\s+", "");
+        Assert.assertEquals(expectedApiKeyDescription, generateApiKeyDescription);
+    }
+
     @DataProvider(name = "apiKeyAuthIOProvider")
     public Object[] dataProvider() {
         return new Object[]{
