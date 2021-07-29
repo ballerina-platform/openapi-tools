@@ -386,7 +386,7 @@ public class FunctionBodyGenerator {
             Matcher m = p.matcher(path);
             while (m.find()) {
                 String d = path.substring(m.start() + 1, m.end() - 1);
-                String replaceVariable = escapeIdentifier(d);
+                String replaceVariable = escapeIdentifier(getValidName(d, false));
                 refinedPath = refinedPath.replace(d, replaceVariable);
             }
             path = refinedPath.replaceAll("[{]", "\\${");
@@ -565,7 +565,7 @@ public class FunctionBodyGenerator {
 
     private boolean checkImportDuplicate(List<ImportDeclarationNode> imports, String module) {
         for (ImportDeclarationNode importModule:imports) {
-            if (importModule.toString().equals("import ballerina/" + module + ";")) {
+            if (importModule.toString().equals("importballerina/" + module + ";")) {
                 return true;
             }
         }

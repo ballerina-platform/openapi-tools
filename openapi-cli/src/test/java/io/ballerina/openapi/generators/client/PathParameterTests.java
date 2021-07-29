@@ -59,12 +59,23 @@ public class PathParameterTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
-    @Test(description = "Generate Client for query parameter with referenced schema")
-    public void generateQueryParamWithReferencedSchema() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Generate Client for path parameter with referenced schema")
+    public void generatePathParamWithReferencedSchema() throws IOException, BallerinaOpenApiException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/path_param_with_ref_schemas.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_param_with_ref_schema.bal");
 
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Generate Client while handling special characters in path parameter name")
+    public void generateFormattedPathParamName() throws IOException, BallerinaOpenApiException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RESDIR.resolve("swagger/path_parameter_special_name.yaml");
+        Path expectedPath = RESDIR.resolve("ballerina/path_parameter_with_special_name.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
