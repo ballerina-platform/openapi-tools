@@ -532,6 +532,11 @@ public class BallerinaClientGenerator {
         MarkdownParameterDocumentationLineNode httpClientParam = generatorUtils.createParamAPIDoc("clientEp",
                 "Connector http endpoint");
         documentationLines.add(httpClientParam);
+        if (ballerinaAuthConfigGenerator.isAPIKey()) {
+            MarkdownParameterDocumentationLineNode apiKeyParam = generatorUtils.createParamAPIDoc("apiKeys",
+                    "API key-value pairs");
+            documentationLines.add(apiKeyParam);
+        }
         MarkdownDocumentationNode apiDoc = createMarkdownDocumentationNode(createNodeList(documentationLines));
         metadataNode = metadataNode.modify(apiDoc, metadataNode.annotations());
         return createClassDefinitionNode(metadataNode, visibilityQualifier, classTypeQualifiers,
