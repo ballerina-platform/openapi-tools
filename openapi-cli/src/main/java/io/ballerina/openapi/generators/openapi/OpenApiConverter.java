@@ -20,9 +20,9 @@ package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.balservice.convertor.OpenApiConverterException;
-import io.ballerina.openapi.balservice.convertor.utils.BalServiceToOpenAPIConverterUtils;
 import io.ballerina.openapi.cmd.utils.CodegenUtils;
+import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -83,7 +83,7 @@ public class OpenApiConverter {
         syntaxTree = doc.syntaxTree();
         semanticModel =  project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
         Map<String, String> openAPIDefinitions =
-                BalServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree, semanticModel, serviceName,
+                ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree, semanticModel, serviceName,
                         needJson,
                 outPath);
         if (!openAPIDefinitions.isEmpty()) {

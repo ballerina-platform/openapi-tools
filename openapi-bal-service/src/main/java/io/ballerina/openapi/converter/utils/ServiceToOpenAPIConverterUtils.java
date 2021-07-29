@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.balservice.convertor.utils;
+package io.ballerina.openapi.converter.utils;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -27,9 +27,9 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.balservice.convertor.Constants;
-import io.ballerina.openapi.balservice.convertor.OpenApiConverterException;
-import io.ballerina.openapi.balservice.convertor.service.OpenAPIServiceMapper;
+import io.ballerina.openapi.converter.Constants;
+import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -47,11 +47,11 @@ import java.util.Objects;
 
 
 /**
- * The BalServiceToOpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
+ * The ServiceToOpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
  *
  * @since 2.0.0
  */
-public class BalServiceToOpenAPIConverterUtils {
+public class ServiceToOpenAPIConverterUtils {
 
     /**
      * This method will generate  openapi definition Map list with ballerina code.
