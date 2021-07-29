@@ -58,5 +58,7 @@ public class TestConstants {
     public static final String API_KEY_CONFIG_PARAM = "" +
             "ApiKeysConfig apiKeyConfig,http:ClientConfiguration clientConfig =  {}";
     public static final String API_KEY_ASSIGNMENT = "self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();";
+    public static final String API_KEY_DOC_COMMENT =
+            "Provide your API key as `appid` .Eg: `{\"appid\":\"<APIkey>\"}`";
 
 }
