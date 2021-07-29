@@ -46,7 +46,6 @@ public class OpenApiConverter {
     private  SyntaxTree syntaxTree;
     private  SemanticModel semanticModel;
     private  Project project;
-    private CodegenUtils codegenUtils = new CodegenUtils();
 
     public OpenApiConverter() {
     }
@@ -89,7 +88,7 @@ public class OpenApiConverter {
                 outPath);
         if (!openAPIDefinitions.isEmpty()) {
             for (Map.Entry<String, String> definition: openAPIDefinitions.entrySet()) {
-                codegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue());
+                CodegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue());
             }
         }
     }

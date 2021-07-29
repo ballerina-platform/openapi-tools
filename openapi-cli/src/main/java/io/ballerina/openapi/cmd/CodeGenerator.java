@@ -96,7 +96,6 @@ public class CodeGenerator {
      *                       <li>mock</li>
      *                       <li>client</li>
      *                       </ul>
-     * @param executionPath  Command execution path
      * @param definitionPath Input Open Api Definition file path
      * @param serviceName    Output Service Name
      * @param outPath        Destination file path to save generated source files. If not provided
@@ -104,29 +103,25 @@ public class CodeGenerator {
      * @throws IOException               when file operations fail
      * @throws BallerinaOpenApiException when code generator fails
      */
-    private void generate(GeneratorConstants.GenType type, String executionPath,
-                          String definitionPath,
-                          String reldefinitionPath , String serviceName, String outPath, Filter filter,
-                          boolean nullable)
+    private void generate(GeneratorConstants.GenType type, String definitionPath, String serviceName, String outPath,
+                          Filter filter, boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
 
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles = generateBalSource(type, definitionPath, reldefinitionPath, serviceName, filter,
+        List<GenSrcFile> genFiles = generateBalSource(type, definitionPath, serviceName, filter,
                 nullable);
         writeGeneratedSources(genFiles, srcPath, implPath, type);
     }
 
-    public void generateBothFiles(GeneratorConstants.GenType type, String definitionPath,
-                                  String reldefinitionPath , String serviceName, String outPath , Filter filter,
-                                  boolean nullable)
+    public void generateBothFiles(GeneratorConstants.GenType type, String definitionPath, String serviceName,
+                                  String outPath , Filter filter, boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles =  new ArrayList<>();
-        genFiles.addAll(generateBalSource(GEN_SERVICE,
-                definitionPath, reldefinitionPath, serviceName, filter, nullable));
-        genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, reldefinitionPath, serviceName, filter,
+        genFiles.addAll(generateBalSource(GEN_SERVICE, definitionPath,  serviceName, filter, nullable));
+        genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath,  serviceName, filter,
                 nullable));
         List<GenSrcFile> newGenFiles = genFiles.stream().filter(distinctByKey(
                 GenSrcFile::getFileName)).collect(Collectors.toList());
@@ -143,7 +138,6 @@ public class CodeGenerator {
      * Generated source will be written to a ballerina module at {@code outPath}
      * Method can be user for generating Ballerina clients.
      *
-     * @param executionPath  Command execution path
      * @param definitionPath Input Open Api Definition file path
      * @param serviceName    Name of the service
      * @param outPath        Destination file path to save generated source files. If not provided
@@ -151,10 +145,10 @@ public class CodeGenerator {
      * @throws IOException               when file operations fail
      * @throws BallerinaOpenApiException when code generator fails
      */
-    public void generateClient(String executionPath, String definitionPath, String serviceName, String outPath,
-                               Filter filter, boolean nullable)
+    public void generateClient(String definitionPath, String serviceName, String outPath, Filter filter,
+                               boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
-        generate(GEN_CLIENT, executionPath, definitionPath, null, serviceName, outPath, filter, nullable);
+        generate(GEN_CLIENT, definitionPath, serviceName, outPath, filter, nullable);
     }
 
     /**
@@ -162,21 +156,17 @@ public class CodeGenerator {
      * Generated source will be written to a ballerina module at {@code outPath}
      * Method can be user for generating Ballerina clients.
      *
-     * @param executionPath  Command execution path
      * @param definitionPath Input Open Api Definition file path
-     * @param reldefinitionPath Relative definition path to be used in the generated ballerina code
      * @param serviceName    service name for the generated service
      * @param outPath        Destination file path to save generated source files. If not provided
      *                       {@code definitionPath} will be used as the default destination path
      * @throws IOException               when file operations fail
      * @throws BallerinaOpenApiException when code generator fails
      */
-    public void generateService(String executionPath, String definitionPath,
-                                String reldefinitionPath, String serviceName, String outPath, Filter filter,
+    public void generateService(String definitionPath, String serviceName, String outPath, Filter filter,
                                 boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
-        generate(GEN_SERVICE, executionPath, definitionPath,
-                reldefinitionPath, serviceName, outPath, filter, nullable);
+        generate(GEN_SERVICE,  definitionPath, serviceName, outPath, filter, nullable);
     }
 
     /**
@@ -191,14 +181,13 @@ public class CodeGenerator {
      *                       </ul>
      * @param serviceName    Out put service name
      * @param definitionPath Input Open Api Definition file path
-     * @param reldefinitionPath Relative OpenApi File
      * @return a list of generated source files wrapped as {@link GenSrcFile}
      * @throws IOException               when file operations fail
      * @throws BallerinaOpenApiException when open api context building fail
      */
     public List<GenSrcFile> generateBalSource(GeneratorConstants.GenType type,
                                               String definitionPath,
-                                              String reldefinitionPath, String serviceName, Filter filter,
+                                              String serviceName, Filter filter,
                                               boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
         String openAPIFileContent = Files.readString(Paths.get(definitionPath));
