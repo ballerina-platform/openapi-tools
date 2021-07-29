@@ -2,8 +2,6 @@ import  ballerina/http;
 import  ballerina/xmldata;
 
 # refComponent
-#
-# + clientEp - Connector http endpoint
 public isolated client class Client {
     final http:Client clientEp;
     # Client initialization.

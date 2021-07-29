@@ -11,9 +11,7 @@ public type ProductArr Product[];
 public type PriceEstimateArr PriceEstimate[];
 
 # Move your app forward with the Uber API
-#
-# + clientEp - Connector http endpoint
-# + apiKeys - API key-value pairs
+
 public isolated client class Client {
     final http:Client clientEp;
     final readonly & map<string> apiKeys;

@@ -7,9 +7,6 @@ public type ApiKeysConfig record {
 };
 
 # Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city.
-#
-# + clientEp - Connector http endpoint
-# + apiKeys - API key-value pairs
 @display {label: "Open Weather Client"}
 public isolated client class Client {
     final http:Client clientEp;

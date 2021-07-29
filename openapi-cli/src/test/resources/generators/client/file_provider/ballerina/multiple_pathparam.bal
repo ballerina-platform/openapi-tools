@@ -1,8 +1,6 @@
 import  ballerina/http;
 
 # Title
-#
-# + clientEp - Connector http endpoint
 public isolated client class Client {
     final http:Client clientEp;
     # Client initialization.

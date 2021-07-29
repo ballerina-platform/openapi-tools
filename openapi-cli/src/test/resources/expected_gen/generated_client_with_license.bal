@@ -4,7 +4,6 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
-# + clientEp - Connector http endpoint
 public isolated client class Client {
     final http:Client clientEp;
     # Client initialization.

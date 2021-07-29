@@ -524,18 +524,6 @@ public class BallerinaClientGenerator {
                                         createEmptyMinutiaeList(), createEmptyMinutiaeList())));
                 documentationLines.add(documentationLineNode);
             }
-
-            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
-                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
-            documentationLines.add(newLine);
-        }
-        MarkdownParameterDocumentationLineNode httpClientParam = generatorUtils.createParamAPIDoc("clientEp",
-                "Connector http endpoint");
-        documentationLines.add(httpClientParam);
-        if (ballerinaAuthConfigGenerator.isAPIKey()) {
-            MarkdownParameterDocumentationLineNode apiKeyParam = generatorUtils.createParamAPIDoc("apiKeys",
-                    "API key-value pairs");
-            documentationLines.add(apiKeyParam);
         }
         MarkdownDocumentationNode apiDoc = createMarkdownDocumentationNode(createNodeList(documentationLines));
         metadataNode = metadataNode.modify(apiDoc, metadataNode.annotations());

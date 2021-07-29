@@ -102,6 +102,31 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test Ballerina client generation with doc comments in class init function")
+    public void generateClientWithInitDocComments() {
+        final String clientName = "client";
+        String definitionPath = RES_DIR.resolve("x_init_description.yaml").toString();
+        CodeGenerator generator = new CodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "x_init_description.bal");
+            generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(),
+                    filter, false);
+
+            if (Files.exists(resourcePath.resolve("client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+            } else {
+                Assert.fail("Client was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
     @Test(description = "Test Ballerina types generation when nullable option is given")
     public void generateTypesWithNullableFields() {
         final String clientName = "openapipetstore";
