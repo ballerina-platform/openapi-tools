@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.compiler.plugin;
+package io.ballerina.openapi.extension;
 
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.CodeAnalysisContext;

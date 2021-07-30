@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.compiler.plugin;
+package io.ballerina.openapi.extension;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -24,9 +25,18 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -39,11 +49,28 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
         ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) context.node();
-        Optional<Symbol> serviceDeclarationOpt = context.semanticModel().symbol(serviceNode);
+        SemanticModel semanticModel = context.semanticModel();
+        Optional<Symbol> serviceDeclarationOpt = semanticModel.symbol(serviceNode);
         if (serviceDeclarationOpt.isPresent()) {
             ServiceDeclarationSymbol serviceDeclarationSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
-            if (isHttpService(serviceDeclarationSymbol)) {
-                // todo: put logic to generate open-api doc
+            if (!isHttpService(serviceDeclarationSymbol)) {
+                return;
+            }
+            SyntaxTree syntaxTree = context.syntaxTree();
+            try {
+                Project currentProject = context.currentPackage().project();
+                File sourcePath = currentProject.sourceRoot().toFile();
+                final File outputFile = new File(sourcePath, "openapi-doc.json");
+                Path outputFilePath = Paths.get(outputFile.getCanonicalPath());
+                Map<String, String> openAPIDefinitions = ServiceToOpenAPIConverterUtils
+                        .generateOAS3Definition(syntaxTree, semanticModel, "", true, outputFilePath);
+                if (!openAPIDefinitions.isEmpty()) {
+                    for (Map.Entry<String, String> definition: openAPIDefinitions.entrySet()) {
+//                        CodegenUtils.writeFile(outputFilePath.resolve(definition.getKey()), definition.getValue());
+                    }
+                }
+            } catch (IOException | OpenApiConverterException e) {
+                throw new RuntimeException(e);
             }
         }
     }

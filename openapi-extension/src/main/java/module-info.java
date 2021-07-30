@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-module io.ballerina.openapi.compiler.plugin {
+module ballerina.openapi.openapi.extension {
     requires io.ballerina.lang;
     requires io.ballerina.tools.api;
     requires io.ballerina.parser;
+    requires io.ballerina.openapi.converter;
 }

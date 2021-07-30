@@ -23,7 +23,7 @@ include(':module-ballerina-openapi')
 include(':openapi-bal-service')
 include(':openapi-cli')
 include(':openapi-validator')
-include 'openapi-compiler-plugin'
+include('openapi-extension')
 //include(':openapi-tests')
 
 gradleEnterprise {
@@ -32,4 +32,3 @@ gradleEnterprise {
         termsOfServiceAgree = 'yes'
     }
 }
-
