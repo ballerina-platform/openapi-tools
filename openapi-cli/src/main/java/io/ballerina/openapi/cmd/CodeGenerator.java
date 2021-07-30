@@ -56,6 +56,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 
@@ -87,12 +88,14 @@ import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_MOCK_PK
 import static io.ballerina.openapi.generators.GeneratorConstants.ESCAPE_PATTERN;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_SERVICE;
+import static io.ballerina.openapi.generators.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEMPLATES_DIR_PATH_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEMPLATES_SUFFIX;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEST_DIR;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEST_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.TYPE_FILE_NAME;
+import static io.ballerina.openapi.generators.GeneratorConstants.TYPE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.UNTITLED_SERVICE;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
@@ -472,7 +475,7 @@ public class CodeGenerator {
             for (ModuleMemberDeclarationNode node : members) {
                 if (node.kind().equals(SyntaxKind.TYPE_DEFINITION)) {
                     for (ChildNodeEntry childNodeEntry : node.childEntries()) {
-                        if (childNodeEntry.name().equals("typeName")) {
+                        if (childNodeEntry.name().equals(TYPE_NAME)) {
                             if (unusedTypeDefinitionNameList.contains(childNodeEntry.node().get().toString())) {
                                 unusedTypeDefinitionNodeList.add(node);
                             }
@@ -480,7 +483,7 @@ public class CodeGenerator {
                     }
                 } else if (node.kind().equals(SyntaxKind.ENUM_DECLARATION)) {
                     for (ChildNodeEntry childNodeEntry : node.childEntries()) {
-                        if (childNodeEntry.name().equals("identifier")) {
+                        if (childNodeEntry.name().equals(IDENTIFIER)) {
                             if (unusedTypeDefinitionNameList.contains(childNodeEntry.node().get().toString())) {
                                 unusedTypeDefinitionNodeList.add(node);
                             }
@@ -502,7 +505,7 @@ public class CodeGenerator {
 
     private List<String> getUnusedTypeDefinitionNameList(Map<String, String> srcFiles) throws IOException {
         List<String> unusedTypeDefinitionNameList = new ArrayList<>();
-        Path tmpDir = Files.createTempDirectory("openapi-tmp" + System.nanoTime());
+        Path tmpDir = Files.createTempDirectory(".openapi-tmp" + System.nanoTime());
         writeFilesTemp(srcFiles, tmpDir);
         if (Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) && Files.exists(tmpDir.resolve(TYPE_FILE_NAME)) &&
                 Files.exists(tmpDir.resolve(BALLERINA_TOML))) {
@@ -517,6 +520,13 @@ public class CodeGenerator {
                 }
             }
         }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                FileUtils.deleteDirectory(tmpDir.toFile());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }));
         return unusedTypeDefinitionNameList;
     }
 

@@ -131,6 +131,8 @@ public class GeneratorConstants {
     public static final String STRING = "string";
     public static final String SERVICE_URL = "serviceUrl";
     public static final String RECORD = "record";
+    public static final String IDENTIFIER = "identifier";
+    public static final String TYPE_NAME = "typeName";
     // auth related constants
     public static final String API_KEY = "apikey";
     public static final String API_KEY_CONFIG = "ApiKeysConfig";
