@@ -30,9 +30,13 @@ import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.utils.ConverterUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -60,47 +64,73 @@ public class OpenAPIComponentMapper {
     public void handleRecordNode(SimpleNameReferenceNode recordNode, Map<String, Schema> schema,
                                  TypeSymbol typeSymbol) {
         String componentName = typeSymbol.getName().orElseThrow().trim();
-        Schema componentSchema = new Schema();
-        componentSchema.setType("object");
-        Map<String, Schema> schemaProperties = new HashMap<>();
         if (typeSymbol instanceof TypeReferenceTypeSymbol) {
             TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
             // Handle record type request body
             if (typeRef.typeDescriptor() instanceof RecordTypeSymbol) {
                 //Handel typeInclusions
                 RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeRef.typeDescriptor();
+                List<TypeSymbol> typeInclusions = recordTypeSymbol.typeInclusions();
                 Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
-                for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
-                    String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
-                    Schema property = ConverterUtils.getOpenApiSchema(type);
-                    if (type.equals(Constants.TYPE_REFERENCE) && property.get$ref().
-                            equals("#/components/schemas/true")) {
-                        property.set$ref(field.getValue().typeDescriptor().getName().orElseThrow().trim());
-                        Optional<TypeSymbol> recordSymbol = semanticModel.type(field.getValue().location().lineRange());
-                        TypeSymbol recordVariable =  recordSymbol.orElseThrow();
-                        if (recordVariable.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
-                            TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
-                            handleRecordNode(recordNode, schema, typeRecord);
+                HashSet<String> unionKeys = new HashSet(rfields.keySet());
+                if (typeInclusions.isEmpty()) {
+                    // Handle like object
+                     Schema componentSchema = new Schema();
+                     componentSchema.setType("object");
+                     Map<String, Schema> schemaProperties = new HashMap<>();
+                    for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
+                        String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
+                        Schema property = ConverterUtils.getOpenApiSchema(type);
+                        if (type.equals(Constants.TYPE_REFERENCE) && property.get$ref().
+                                equals("#/components/schemas/true")) {
+                            property.set$ref(field.getValue().typeDescriptor().getName().orElseThrow().trim());
+                            Optional<TypeSymbol> recordSymbol = semanticModel.type(field.getValue().location().lineRange());
+                            TypeSymbol recordVariable =  recordSymbol.orElseThrow();
+                            if (recordVariable.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
+                                TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
+                                handleRecordNode(recordNode, schema, typeRecord);
+                                schema = components.getSchemas();
+                            }
+                        }
+                        if (property instanceof ArraySchema) {
+                            setArraySchema(recordNode, schema, field.getValue(), (ArraySchema) property);
                             schema = components.getSchemas();
                         }
+                        schemaProperties.put(field.getKey(), property);
                     }
-                    if (property instanceof ArraySchema) {
-                        setArraySchema(recordNode, schema, field.getValue(), (ArraySchema) property);
-                        schema = components.getSchemas();
+                    componentSchema.setProperties(schemaProperties);
+                    if (schema != null && !schema.containsKey(componentName)) {
+                        //Set properties for the schema
+                        schema.put(componentName, componentSchema);
+                        this.components.setSchemas(schema);
+                    } else if (schema == null) {
+                        schema = new HashMap<>();
+                        schema.put(componentName, componentSchema);
+                        this.components.setSchemas(schema);
                     }
-                    schemaProperties.put(field.getKey(), property);
+                } else {
+                    // Map to allOF need to check the status code inclusion there
+                    ComposedSchema allOfSchema = new ComposedSchema();
+                    // Set schema
+                    List<Schema> allOfSchemaList = new ArrayList<>();
+                    for (TypeSymbol typeInclusion: typeInclusions) {
+                        Schema referenceSchema = new Schema();
+                        referenceSchema.set$ref(typeInclusion.toString().trim());
+                        allOfSchemaList.add(referenceSchema);
+                        if (typeInclusion.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
+                            TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) typeInclusion;
+                            if (typeRecord.typeDescriptor() instanceof RecordTypeSymbol) {
+                                RecordTypeSymbol typeInclusionRecord = (RecordTypeSymbol) typeRecord.typeDescriptor();
+                                Map<String, RecordFieldSymbol> fieldDescriptors =
+                                        typeInclusionRecord.fieldDescriptors();
+                                unionKeys.addAll(fieldDescriptors.keySet());
+                                unionKeys.remove(fieldDescriptors.keySet());
+                            }
+                        }
+                    }
+                    System.out.println(unionKeys);
                 }
-                componentSchema.setProperties(schemaProperties);
             }
-        }
-        if (schema != null && !schema.containsKey(componentName)) {
-            //Set properties for the schema
-            schema.put(componentName, componentSchema);
-            this.components.setSchemas(schema);
-        } else if (schema == null) {
-            schema = new HashMap<>();
-            schema.put(componentName, componentSchema);
-            this.components.setSchemas(schema);
         }
     }
 
