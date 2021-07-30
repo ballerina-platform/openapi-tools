@@ -16,20 +16,12 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.generators.openapi;
+package io.ballerina.openapi.converter;
 
 /**
  * Ballerina To OpenApi Service Constants.
  */
 public class Constants {
-    public static final String SERVICE_NAME = "ballerina-to-openapi";
-    public static final String SERVICE_PATH = "ballerina/openapi";
-    public static final String OPENAPI_PACKAGE_NAME = "ballerina/openapi";
-    public static final String BALLERINA_HTTP_PACKAGE_NAME = "ballerina/http";
-    public static final String CURRENT_PACKAGE_NAME = "Current Package";
-
-    public static final String SECURE_SOCKETS = "secureSocket";
-    public static final String ATTR_HTTP_PORT = "port";
     public static final String ATTR_HOST = "host";
     public static final String ATTR_DEF_HOST = "localhost";
     public static final String INT = "int";
@@ -59,6 +51,16 @@ public class Constants {
     public static final String XML = "xml";
     public static final String JSON = "json";
     public static final String PLAIN = "plain";
+    public static final String GET = "GET";
+    public static final String POST = "POST";
+    public static final String PATCH = "PATCH";
+    public static final String DELETE = "DELETE";
+    public static final String PUT = "PUT";
+    public static final String OPTIONS = "OPTIONS";
+    public static final String HEAD = "HEAD";
+    public static final String YAML_EXTENSION = ".yaml";
+    public static final String JSON_EXTENSION = ".json";
+    public static final String OPENAPI_SUFFIX = "_openapi";
 
     /**
      * Enum to select the Ballerina Type.

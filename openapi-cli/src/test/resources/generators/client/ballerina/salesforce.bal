@@ -6,8 +6,8 @@ type ProductArr Product[];
 
 type PriceEstimateArr PriceEstimate[];
 
-public client class Client {
-    public http:Client clientEp;
+public isolated client class Client {
+    public final http:Client clientEp;
     public isolated function init(string serviceUrl = "https://api.uber.com/v1", http:ClientConfiguration httpClientConfig =
                                   {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);

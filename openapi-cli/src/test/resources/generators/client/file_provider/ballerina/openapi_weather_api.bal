@@ -7,22 +7,21 @@ public type ApiKeysConfig record {
 };
 
 # Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city. Helpful stats, graphics, and this day in history charts are available for your reference. Interactive maps show precipitation, clouds, pressure, wind around your location stations. Data is available in JSON, XML, or HTML format. **Note**: All parameters are optional, but you must select at least one parameter. Calling the API by city ID (using the `id` parameter) will provide the most precise location results.
-#
-# + clientEp - Connector http endpoint
+
 @display {label: "Open Weather Client"}
-public client class Client {
-    http:Client clientEp;
-    map<string> apiKeys;
+public isolated client class Client {
+    final http:Client clientEp;
+    final readonly & map<string> apiKeys;
     # Client initialization.
     #
     # + apiKeyConfig - API key configuration detail
     # + clientConfig - Client configuration details
     # + serviceUrl - Connector server URL
-    # + return - Returns error at failure of client initialization
+    # + return - An error at the failure of client initialization
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
-        self.apiKeys = apiKeyConfig.apiKeys;
+        self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();
     }
     # Call current weather data for one location
     #

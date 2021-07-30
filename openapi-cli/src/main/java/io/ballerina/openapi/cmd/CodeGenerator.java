@@ -68,6 +68,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -104,6 +105,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  */
 public class CodeGenerator {
     private String srcPackage;
+    private String licenseHeader = "";
 
     private static final PrintStream outStream = System.err;
 
@@ -337,21 +339,31 @@ public class CodeGenerator {
                                         GeneratorConstants.GenType type)
             throws IOException {
         //  Remove old generated file with same name
+        List<File> listFiles = new ArrayList<>();
         if (Files.exists(srcPath)) {
-            final File[] listFiles = new File(String.valueOf(srcPath)).listFiles();
-            if (listFiles != null) {
-                for (File file : listFiles) {
-                    for (GenSrcFile gFile : sources) {
-                        if (file.getName().equals(gFile.getFileName())) {
-                            if (System.console() != null) {
-                                String userInput = System.console().readLine("There is already a/an " +
-                                        file.getName() +
-                                        " in the location. Do you want to override the file? [y/N] ");
-                                if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
-                                    int duplicateCount = 0;
-                                    setGeneratedFileName(listFiles, gFile, duplicateCount);
-                                }
-                            }
+            File[] files = new File(String.valueOf(srcPath)).listFiles();
+            if (files != null) {
+                listFiles.addAll(Arrays.asList(files));
+                for (File file : files) {
+                    if (file.isDirectory() && file.getName().equals("tests")) {
+                        File[] innerFiles = new File(srcPath + "/tests").listFiles();
+                        if (innerFiles != null) {
+                            listFiles.addAll(Arrays.asList(innerFiles));
+                        }
+                    }
+                }
+            }
+        }
+
+        for (File file : listFiles) {
+            for (GenSrcFile gFile : sources) {
+                if (file.getName().equals(gFile.getFileName())) {
+                    if (System.console() != null) {
+                        String userInput = System.console().readLine("There is already a/an " + file.getName() +
+                                " in the location. Do you want to override the file? [y/N] ");
+                        if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
+                            int duplicateCount = 0;
+                            setGeneratedFileName(listFiles, gFile, duplicateCount);
                         }
                     }
                 }
@@ -402,7 +414,7 @@ public class CodeGenerator {
      * @param gFile             GenSrcFile object
      * @param duplicateCount    add the tag with duplicate number if file already exist
      */
-    private void setGeneratedFileName(File[] listFiles, GenSrcFile gFile, int duplicateCount) {
+    private void setGeneratedFileName(List<File> listFiles, GenSrcFile gFile, int duplicateCount) {
 
         for (File listFile : listFiles) {
             String listFileName = listFile.getName();
@@ -433,7 +445,7 @@ public class CodeGenerator {
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
         // Generate ballerina service and resources.
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable);
-        String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
+        String mainContent = licenseHeader + Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         // Generate ballerina records to represent schemas.
@@ -446,12 +458,13 @@ public class CodeGenerator {
             // Remove unused records and enums when generating the client by the tags given.
             schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent);
         }
+        schemaContent = licenseHeader + schemaContent;
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
                 schemaContent));
 
         // Generate test boilerplate code for test cases
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
-        String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
+        String testContent = licenseHeader + Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
 
         String configContent = ballerinaTestGenerator.getConfigTomlFile();
@@ -581,12 +594,13 @@ public class CodeGenerator {
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
-        String mainContent = Formatter.format(BallerinaServiceGenerator.generateSyntaxTree(openAPI, serviceName,
-                        filter)).toString();
+        String mainContent = licenseHeader + Formatter.format
+                (BallerinaServiceGenerator.generateSyntaxTree(openAPI, serviceName, filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
-        String schemaContent = Formatter.format(ballerinaSchemaGenerator.generateSyntaxTree()).toString();
+        String schemaContent = licenseHeader + Formatter.format(
+                ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  TYPE_FILE_NAME, schemaContent));
 
         return sourceFiles;
@@ -618,5 +632,13 @@ public class CodeGenerator {
             }
         }
         return openAPI;
+    }
+
+    /**
+     * Set the content of license header.
+     * @param licenseHeader license header value received from command line.
+     */
+    public void setLicenseHeader (String licenseHeader) {
+        this.licenseHeader = licenseHeader;
     }
 }

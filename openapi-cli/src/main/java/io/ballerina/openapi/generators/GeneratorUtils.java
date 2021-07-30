@@ -50,8 +50,8 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.ErrorMessages;
+import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.openapi.Constants;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -109,7 +109,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
 public class GeneratorUtils {
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
-        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import ");
+        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import");
         Token orgNameToken = AbstractNodeFactory.createIdentifierToken(orgName);
         Token slashToken = AbstractNodeFactory.createIdentifierToken("/");
         ImportOrgNameNode importOrgNameNode = NodeFactory.createImportOrgNameNode(orgNameToken, slashToken);
