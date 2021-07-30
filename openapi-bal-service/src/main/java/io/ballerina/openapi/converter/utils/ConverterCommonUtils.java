@@ -104,7 +104,6 @@ public class ConverterCommonUtils {
                 schema = new ObjectSchema();
                 break;
         }
-
         return schema;
     }
 }
