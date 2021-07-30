@@ -114,7 +114,7 @@ test {
 shadowJar {
     configurations = [project.configurations.runtimeClasspath]
     dependencies {
-        include((dependency(':openapi-bal-service')))
+        include(dependency(':openapi-bal-service'))
         include(dependency('com.github.jknack:handlebars'))
         include(dependency('org.antlr:antlr4:4.5'))
         include(dependency('io.swagger.parser.v3:swagger-parser'))
