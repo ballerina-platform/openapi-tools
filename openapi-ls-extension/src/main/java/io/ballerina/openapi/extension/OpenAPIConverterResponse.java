@@ -27,12 +27,10 @@ public class OpenAPIConverterResponse {
     private String yamlContent;
 
     public String getYamlContent() {
-
         return yamlContent;
     }
 
     public void setYamlContent(String yamlContent) {
-
         this.yamlContent = yamlContent;
     }
 

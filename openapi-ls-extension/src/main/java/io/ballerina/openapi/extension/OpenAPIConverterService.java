@@ -78,7 +78,6 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 } else {
                     response.setYamlContent("Error occurred while generating yaml");
                 }
-
             } catch (Throwable e) {
                 // Throw a exceptions.
                 response.setYamlContent("Error occurred while generating yaml :" + e.getLocalizedMessage());
