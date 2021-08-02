@@ -32,7 +32,7 @@ public isolated client class Client {
     @display {label: "Weather Forecast"}
     remote isolated function getWeatherForecast(@display {label: "Latitude"} Latitude lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string exclude = "current", @display {label: "Units"} int units = 12) returns json|error {
         string  path = string `/onecall`;
-        map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, appid: self.apiKeys["appid"]};
+        map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, "appid": self.apiKeys["appid"]};
         path = path + check getPathForQueryParam(queryParam);
         json response = check self.clientEp-> get(path, targetType = json);
         return response;

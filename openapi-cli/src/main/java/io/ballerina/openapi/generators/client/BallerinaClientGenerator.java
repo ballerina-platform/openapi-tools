@@ -27,7 +27,6 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ElseBlockNode;
-import io.ballerina.compiler.syntax.tree.EnumDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.ForEachStatementNode;
@@ -161,7 +160,6 @@ public class BallerinaClientGenerator {
     private boolean isHeader;
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private List<TypeDefinitionNode> typeDefinitionNodeListWithAuth;
-    private List<EnumDeclarationNode> enumDeclarationNodeList;
     private OpenAPI openAPI;
     private BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private DocCommentsGenerator docCommentsGenerator;
@@ -185,24 +183,6 @@ public class BallerinaClientGenerator {
 
         this.typeDefinitionNodeList = typeDefinitionNodeList;
     }
-    /**
-     * Returns a list of enum declaration nodes.
-     */
-    public List<EnumDeclarationNode> getEnumDeclarationNodeList() {
-
-        return enumDeclarationNodeList;
-    }
-    /**
-     * Set the enumDeclarationNodeList.
-     */
-    public void setEnumDeclarationNodeList(List<EnumDeclarationNode> enumDeclarationNodeList) {
-
-        this.enumDeclarationNodeList = enumDeclarationNodeList;
-    }
-    /**
-     * Returns remoteFunctionNameList.
-     * @return {@link List<String>}    Remote function name list
-     */
     public List<String> getRemoteFunctionNameList () {
         return remoteFunctionNameList;
     }
@@ -217,7 +197,7 @@ public class BallerinaClientGenerator {
     public BallerinaClientGenerator(Filter filters,
                                     List<ImportDeclarationNode> imports, boolean isQuery, boolean isHeader,
                                     List<TypeDefinitionNode> typeDefinitionNodeList,
-                                    List<EnumDeclarationNode> enumDeclarationNodeList, OpenAPI openAPI,
+                                    OpenAPI openAPI,
                                     BallerinaSchemaGenerator ballerinaSchemaGenerator) {
 
         this.filters = filters;
@@ -225,7 +205,6 @@ public class BallerinaClientGenerator {
         this.isQuery = isQuery;
         this.isHeader = isHeader;
         this.typeDefinitionNodeList = typeDefinitionNodeList;
-        this.enumDeclarationNodeList = enumDeclarationNodeList;
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.typeDefinitionNodeListWithAuth =  new ArrayList<>();
@@ -246,7 +225,6 @@ public class BallerinaClientGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, nullable);
         this.typeDefinitionNodeListWithAuth =  new ArrayList<>();
-        this.enumDeclarationNodeList = new ArrayList<>();
         this.docCommentsGenerator = new DocCommentsGenerator();
         this.generatorUtils = new GeneratorUtils();
         this.remoteFunctionNameList = new ArrayList<>();
@@ -310,28 +288,33 @@ public class BallerinaClientGenerator {
     /**
      * Generate serverUrl for client default value.
      */
-    private static String getServerURL(Server server) throws BallerinaOpenApiException {
+    private static String getServerURL(List<Server> servers) throws BallerinaOpenApiException {
         String serverURL;
-        GeneratorUtils generatorUtils = new GeneratorUtils();
-        if (server != null) {
-            if (server.getUrl() == null) {
-                serverURL = "http://localhost:9090/v1";
-            } else if (server.getVariables() != null) {
-                ServerVariables variables = server.getVariables();
-                URL url;
-                String resolvedUrl = generatorUtils.buildUrl(server.getUrl(), variables);
-                try {
-                    url = new URL(resolvedUrl);
-                    serverURL = url.toString();
-                } catch (MalformedURLException e) {
-                    throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
-                            server.getUrl(), e);
+        Server selectedServer = servers.get(0);
+        if (!selectedServer.getUrl().startsWith("https:") && servers.size() > 1) {
+            for (Server server : servers) {
+                if (server.getUrl().startsWith("https:")) {
+                    selectedServer = server;
+                    break;
                 }
-            } else {
-                serverURL = server.getUrl();
+            }
+        }
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        if (selectedServer.getUrl() == null) {
+            serverURL = "http://localhost:9090/v1";
+        } else if (selectedServer.getVariables() != null) {
+            ServerVariables variables = selectedServer.getVariables();
+            URL url;
+            String resolvedUrl = generatorUtils.buildUrl(selectedServer.getUrl(), variables);
+            try {
+                url = new URL(resolvedUrl);
+                serverURL = url.toString();
+            } catch (MalformedURLException e) {
+                throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
+                        selectedServer.getUrl(), e);
             }
         } else {
-            serverURL = "http://localhost:9090/v1";
+            serverURL = selectedServer.getUrl();
         }
         return  serverURL;
     }
@@ -444,14 +427,13 @@ public class BallerinaClientGenerator {
                 createIdentifierToken("string"));
         IdentifierToken paramName = createIdentifierToken(GeneratorConstants.SERVICE_URL);
         List<Server> servers = openAPI.getServers();
-        Server server = servers.get(0);
-        serverURL = getServerURL(server);
+        serverURL = getServerURL(servers);
         if (serverURL.equals("/")) {
             RequiredParameterNode serviceUrl = createRequiredParameterNode(annotationNodes, typeName, paramName);
             parameters.add(serviceUrl);
         } else {
             BasicLiteralNode expression = createBasicLiteralNode(STRING_LITERAL,
-                createIdentifierToken('"' + getServerURL(server) + '"'));
+                createIdentifierToken('"' + serverURL + '"'));
             DefaultableParameterNode serviceUrl = createDefaultableParameterNode(annotationNodes, typeName,
                     paramName, createIdentifierToken("="), expression);
             parameters.add(serviceUrl);
@@ -654,7 +636,7 @@ public class BallerinaClientGenerator {
         remoteFunctionNameList.add(operation.getValue().getOperationId());
 
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                ballerinaSchemaGenerator, typeDefinitionNodeList, enumDeclarationNodeList);
+                ballerinaSchemaGenerator, typeDefinitionNodeList);
         FunctionSignatureNode functionSignatureNode =
                 functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
                         remoteFunctionDocs);
@@ -723,8 +705,8 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken(" getMapForHeaders");
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
                 createSeparatedNodeList(createRequiredParameterNode(createEmptyNodeList(),
-                        createIdentifierToken("map<any> "),
-                        createIdentifierToken(" headerParam"))),
+                        createIdentifierToken("map<any>"),
+                        createIdentifierToken("headerParam"))),
                 createToken(CLOSE_PAREN_TOKEN),
                 createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
                         createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(
@@ -832,8 +814,8 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken(" getPathForQueryParam");
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
                 createSeparatedNodeList(createRequiredParameterNode(createEmptyNodeList(),
-                        createIdentifierToken("map<anydata> "),
-                        createIdentifierToken(" queryParam"))),
+                        createIdentifierToken("map<anydata>"),
+                        createIdentifierToken("queryParam"))),
                 createToken(CLOSE_PAREN_TOKEN),
                 createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
                         createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(
