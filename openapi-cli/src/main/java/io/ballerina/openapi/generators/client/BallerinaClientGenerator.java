@@ -705,8 +705,8 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken(" getMapForHeaders");
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
                 createSeparatedNodeList(createRequiredParameterNode(createEmptyNodeList(),
-                        createIdentifierToken("map<any> "),
-                        createIdentifierToken(" headerParam"))),
+                        createIdentifierToken("map<any>"),
+                        createIdentifierToken("headerParam"))),
                 createToken(CLOSE_PAREN_TOKEN),
                 createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
                         createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(
@@ -814,8 +814,8 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken(" getPathForQueryParam");
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
                 createSeparatedNodeList(createRequiredParameterNode(createEmptyNodeList(),
-                        createIdentifierToken("map<anydata> "),
-                        createIdentifierToken(" queryParam"))),
+                        createIdentifierToken("map<anydata>"),
+                        createIdentifierToken("queryParam"))),
                 createToken(CLOSE_PAREN_TOKEN),
                 createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
                         createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(
