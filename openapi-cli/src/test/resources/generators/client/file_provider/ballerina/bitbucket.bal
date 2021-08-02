@@ -11,15 +11,14 @@ public type ProductArr Product[];
 public type PriceEstimateArr PriceEstimate[];
 
 # Move your app forward with the Uber API
-#
-# + clientEp - Connector http endpoint
-public client class Client {
-    http:Client clientEp;
-    map<string> apiKeys;
+
+public isolated client class Client {
+    final http:Client clientEp;
+    final readonly & map<string> apiKeys;
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://api.uber.com/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
-        self.apiKeys = apiKeyConfig.apiKeys;
+        self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();
     }
     # Product Types
     #

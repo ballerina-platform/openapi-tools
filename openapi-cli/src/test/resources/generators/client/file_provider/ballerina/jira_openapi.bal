@@ -58,8 +58,8 @@ public type DeprecatedWorkflowArr DeprecatedWorkflow[];
 
 public type WorklogArr Worklog[];
 
-public client class Client {
-    http:Client clientEp;
+public isolated client class Client {
+    final http:Client clientEp;
     public isolated function init(string serviceUrl = "https://your-domain.atlassian.com", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;

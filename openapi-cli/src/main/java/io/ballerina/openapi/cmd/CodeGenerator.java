@@ -82,7 +82,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  */
 public class CodeGenerator {
     private String srcPackage;
-    private String licenseHeader;
+    private String licenseHeader = "";
 
     private static final PrintStream outStream = System.err;
 

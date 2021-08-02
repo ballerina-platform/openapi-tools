@@ -4,14 +4,13 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
-# + clientEp - Connector http endpoint
-public client class Client {
-    http:Client clientEp;
+public isolated client class Client {
+    final http:Client clientEp;
     # Client initialization.
     #
     # + clientConfig - Client configuration details
     # + serviceUrl - Connector server URL
-    # + return - Returns error at failure of client initialization
+    # + return - An error at the failure of client initialization
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
