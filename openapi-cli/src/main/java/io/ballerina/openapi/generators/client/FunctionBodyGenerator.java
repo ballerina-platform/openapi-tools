@@ -220,7 +220,7 @@ public class FunctionBodyGenerator {
 
             if (!queryParameters.isEmpty() || !queryApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
-                        "queryParam", queryApiKeyNameList, false));
+                        "queryParam", queryApiKeyNameList));
                 // Add updated path
                 ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
                         "path = path + check getPathForQueryParam(queryParam)");
@@ -230,7 +230,7 @@ public class FunctionBodyGenerator {
 
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<any>",
-                        "headerValues", headerApiKeyNameList, true));
+                        "headerValues", headerApiKeyNameList));
                 statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
@@ -241,7 +241,7 @@ public class FunctionBodyGenerator {
 
             if (!queryApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
-                        "queryParam", queryApiKeyNameList, false));
+                        "queryParam", queryApiKeyNameList));
                 // Add updated path
                 ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
                         "path = path + check getPathForQueryParam(queryParam)");
@@ -250,7 +250,7 @@ public class FunctionBodyGenerator {
             }
             if (!headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<any>",
-                        "headerValues", headerApiKeyNameList, true));
+                        "headerValues", headerApiKeyNameList));
                 statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
@@ -514,8 +514,7 @@ public class FunctionBodyGenerator {
      * Generate map variable for query parameters and headers.
      */
     private VariableDeclarationNode getMapForParameters(List<Parameter> parameters, String mapDataType,
-                                                         String mapName, List<String> apiKeyNames,
-                                                         boolean isHeader) {
+                                                         String mapName, List<String> apiKeyNames) {
         List<Node> filedOfMap = new ArrayList();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(mapDataType));
@@ -537,13 +536,13 @@ public class FunctionBodyGenerator {
 
         if (!apiKeyNames.isEmpty()) {
             for (String apiKey : apiKeyNames) {
-                IdentifierToken fieldName = createIdentifierToken(escapeIdentifier(apiKey.trim()));
+                IdentifierToken fieldName = createIdentifierToken('"' + apiKey.trim() + '"');
                 Token colon = createToken(COLON_TOKEN);
                 FieldAccessExpressionNode fieldExpr = createFieldAccessExpressionNode(
                         createSimpleNameReferenceNode(createIdentifierToken("self")), createToken(DOT_TOKEN),
                         createSimpleNameReferenceNode(createIdentifierToken("apiKeys")));
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
-                        createIdentifierToken("\"" + apiKey + "\""));
+                        createIdentifierToken('"' + apiKey + '"'));
                 SpecificFieldNode specificFieldNode;
                 SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(valueExpr);
                 IndexedExpressionNode apiKeyExpr = createIndexedExpressionNode(fieldExpr,

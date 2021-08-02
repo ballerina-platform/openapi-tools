@@ -11,7 +11,7 @@ public isolated client class Client {
     # + clientConfig - Client configuration details
     # + serviceUrl - Connector server URL
     # + return - An error at the failure of client initialization
-    public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
+    public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://petstore.swagger.io:443/v2") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }

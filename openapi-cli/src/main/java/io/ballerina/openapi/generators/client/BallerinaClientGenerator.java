@@ -288,28 +288,33 @@ public class BallerinaClientGenerator {
     /**
      * Generate serverUrl for client default value.
      */
-    private static String getServerURL(Server server) throws BallerinaOpenApiException {
+    private static String getServerURL(List<Server> servers) throws BallerinaOpenApiException {
         String serverURL;
-        GeneratorUtils generatorUtils = new GeneratorUtils();
-        if (server != null) {
-            if (server.getUrl() == null) {
-                serverURL = "http://localhost:9090/v1";
-            } else if (server.getVariables() != null) {
-                ServerVariables variables = server.getVariables();
-                URL url;
-                String resolvedUrl = generatorUtils.buildUrl(server.getUrl(), variables);
-                try {
-                    url = new URL(resolvedUrl);
-                    serverURL = url.toString();
-                } catch (MalformedURLException e) {
-                    throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
-                            server.getUrl(), e);
+        Server selectedServer = servers.get(0);
+        if (!selectedServer.getUrl().startsWith("https:") && servers.size() > 1) {
+            for (Server server : servers) {
+                if (server.getUrl().startsWith("https:")) {
+                    selectedServer = server;
+                    break;
                 }
-            } else {
-                serverURL = server.getUrl();
+            }
+        }
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        if (selectedServer.getUrl() == null) {
+            serverURL = "http://localhost:9090/v1";
+        } else if (selectedServer.getVariables() != null) {
+            ServerVariables variables = selectedServer.getVariables();
+            URL url;
+            String resolvedUrl = generatorUtils.buildUrl(selectedServer.getUrl(), variables);
+            try {
+                url = new URL(resolvedUrl);
+                serverURL = url.toString();
+            } catch (MalformedURLException e) {
+                throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
+                        selectedServer.getUrl(), e);
             }
         } else {
-            serverURL = "http://localhost:9090/v1";
+            serverURL = selectedServer.getUrl();
         }
         return  serverURL;
     }
@@ -422,14 +427,13 @@ public class BallerinaClientGenerator {
                 createIdentifierToken("string"));
         IdentifierToken paramName = createIdentifierToken(GeneratorConstants.SERVICE_URL);
         List<Server> servers = openAPI.getServers();
-        Server server = servers.get(0);
-        serverURL = getServerURL(server);
+        serverURL = getServerURL(servers);
         if (serverURL.equals("/")) {
             RequiredParameterNode serviceUrl = createRequiredParameterNode(annotationNodes, typeName, paramName);
             parameters.add(serviceUrl);
         } else {
             BasicLiteralNode expression = createBasicLiteralNode(STRING_LITERAL,
-                createIdentifierToken('"' + getServerURL(server) + '"'));
+                createIdentifierToken('"' + serverURL + '"'));
             DefaultableParameterNode serviceUrl = createDefaultableParameterNode(annotationNodes, typeName,
                     paramName, createIdentifierToken("="), expression);
             parameters.add(serviceUrl);
@@ -701,8 +705,8 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken(" getMapForHeaders");
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
                 createSeparatedNodeList(createRequiredParameterNode(createEmptyNodeList(),
-                        createIdentifierToken("map<any> "),
-                        createIdentifierToken(" headerParam"))),
+                        createIdentifierToken("map<any>"),
+                        createIdentifierToken("headerParam"))),
                 createToken(CLOSE_PAREN_TOKEN),
                 createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
                         createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(
@@ -810,8 +814,8 @@ public class BallerinaClientGenerator {
         IdentifierToken functionName = createIdentifierToken(" getPathForQueryParam");
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN),
                 createSeparatedNodeList(createRequiredParameterNode(createEmptyNodeList(),
-                        createIdentifierToken("map<anydata> "),
-                        createIdentifierToken(" queryParam"))),
+                        createIdentifierToken("map<anydata>"),
+                        createIdentifierToken("queryParam"))),
                 createToken(CLOSE_PAREN_TOKEN),
                 createReturnTypeDescriptorNode(createIdentifierToken(" returns "),
                         createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(

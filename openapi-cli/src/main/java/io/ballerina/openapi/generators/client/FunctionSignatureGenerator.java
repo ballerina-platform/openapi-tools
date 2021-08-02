@@ -149,7 +149,6 @@ public class FunctionSignatureGenerator {
         ReturnTypeDescriptorNode returnTypeDescriptorNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD),
                 createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(null,
                         createIdentifierToken(returnType)));
-
         return createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN), parameters, createToken(CLOSE_PAREN_TOKEN),
                 returnTypeDescriptorNode);
     }
