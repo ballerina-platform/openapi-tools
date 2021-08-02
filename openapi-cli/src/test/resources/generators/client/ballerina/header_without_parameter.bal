@@ -24,7 +24,7 @@ public isolated client class Client {
     # + return - Expected response to a valid request
     remote isolated function showPetById() returns http:Response|error {
         string  path = string `/pets`;
-        map<any> headerValues = {'X\-API\-KEY: self.apiKeys["X-API-KEY"]};
+        map<any> headerValues = {"X-API-KEY": self.apiKeys["X-API-KEY"]};
         map<string|string[]> accHeaders = getMapForHeaders(headerValues);
         http:Response response = check self.clientEp-> get(path, accHeaders, targetType=http:Response);
         return response;

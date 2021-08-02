@@ -29,7 +29,7 @@ public isolated client class Client {
     # + return - An array of products
     remote isolated function  products(float latitude, float longitude) returns Product[]|error {
         string  path = string `/products`;
-        map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, server_token: self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, "server_token": self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
         Product[] response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
@@ -43,7 +43,7 @@ public isolated client class Client {
     # + return - An array of price estimates by product
     remote isolated function  price(float startLatitude, float startLongitude, float endLatitude, float endLongitude) returns PriceEstimate[]|error {
         string  path = string `/estimates/price`;
-        map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude, server_token: self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude, "server_token": self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
         PriceEstimate[] response = check self.clientEp-> get(path, targetType = PriceEstimateArr);
         return response;
@@ -57,7 +57,7 @@ public isolated client class Client {
     # + return - An array of products
     remote isolated function  time(float startLatitude, float startLongitude, string? customerUuid = (), string? productId = ()) returns Product[]|error {
         string  path = string `/estimates/time`;
-        map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId, server_token: self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId, "server_token": self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
         Product[] response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
@@ -67,7 +67,7 @@ public isolated client class Client {
     # + return - Profile information for a user
     remote isolated function  me() returns Profile|error {
         string  path = string `/me`;
-        map<anydata> queryParam = {server_token: self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"server_token": self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
         Profile response = check self.clientEp-> get(path, targetType = Profile);
         return response;
@@ -79,7 +79,7 @@ public isolated client class Client {
     # + return - History information for the given user
     remote isolated function  history(int? offset = (), int? 'limit = ()) returns Activities|error {
         string  path = string `/history`;
-        map<anydata> queryParam = {"offset": offset, "limit": 'limit, server_token: self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"offset": offset, "limit": 'limit, "server_token": self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
         Activities response = check self.clientEp-> get(path, targetType = Activities);
         return response;
