@@ -152,6 +152,33 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test Ballerina client generation")
+    public void generateFilteredClient() {
+        final String clientName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("petstore_tags.yaml").toString();
+        CodeGenerator generator = new CodeGenerator();
+        List<String> listTags = new ArrayList<>();
+        listTags.add("pets");
+        Filter filterCustom = new Filter(listTags, list2);
+        try {
+            String expectedSchemaContent = getStringFromGivenBalFile(expectedServiceFile, "type_filtered_by_tags.bal");
+            generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(),
+                    filterCustom, false);
+            if (Files.exists(resourcePath.resolve("types.bal")) && Files.exists(resourcePath.resolve("types.bal"))) {
+                String generatedSchema = getStringFromGivenBalFile(resourcePath, "types.bal");
+                generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
+                expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedSchema.contains(expectedSchemaContent));
+            } else {
+                Assert.fail("Client was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
     @Test(description = "Test Ballerina client generation with request body")
     public void generateClientwithRequestBody() {
         final String clientName = "openapipetstore";

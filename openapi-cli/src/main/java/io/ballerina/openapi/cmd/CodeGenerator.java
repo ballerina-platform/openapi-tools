@@ -25,6 +25,15 @@ import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.SymbolKind;
+import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
+import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
+import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.model.GenSrcFile;
 import io.ballerina.openapi.cmd.utils.CodegenUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -34,11 +43,20 @@ import io.ballerina.openapi.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
 import io.ballerina.openapi.generators.service.BallerinaServiceGenerator;
+import io.ballerina.projects.DocumentId;
+import io.ballerina.projects.Module;
+import io.ballerina.projects.Package;
+import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectException;
+import io.ballerina.projects.ProjectKind;
+import io.ballerina.projects.directory.ProjectLoader;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 
@@ -62,18 +80,23 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA_TOML;
+import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA_TOML_CONTENT;
+import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_CLIENT_PKG;
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_MOCK_PKG;
 import static io.ballerina.openapi.generators.GeneratorConstants.ESCAPE_PATTERN;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_SERVICE;
+import static io.ballerina.openapi.generators.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEMPLATES_DIR_PATH_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEMPLATES_SUFFIX;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEST_DIR;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEST_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.TYPE_FILE_NAME;
+import static io.ballerina.openapi.generators.GeneratorConstants.TYPE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.UNTITLED_SERVICE;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
@@ -355,7 +378,9 @@ public class CodeGenerator {
             if (!file.getType().isOverwritable()) {
                 filePath = implPath.resolve(file.getFileName());
                 if (Files.notExists(filePath)) {
-                    CodegenUtils.writeFile(filePath, file.getContent());
+                    String fileContent = file.getFileName().endsWith(".bal") ?
+                            (licenseHeader + file.getContent()) : file.getContent();
+                    CodegenUtils.writeFile(filePath, fileContent);
                 }
             } else {
                 if (file.getFileName().equals(TEST_FILE_NAME) || file.getFileName().equals(CONFIG_FILE_NAME)) {
@@ -366,8 +391,9 @@ public class CodeGenerator {
                 } else {
                     filePath = Paths.get(srcPath.resolve(file.getFileName()).toFile().getCanonicalPath());
                 }
-
-                CodegenUtils.writeFile(filePath, file.getContent());
+                String fileContent = file.getFileName().endsWith(".bal") ?
+                        (licenseHeader + file.getContent()) : file.getContent();
+                CodegenUtils.writeFile(filePath, fileContent);
             }
         }
 
@@ -422,12 +448,24 @@ public class CodeGenerator {
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
         // Generate ballerina service and resources.
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable);
-        String mainContent = licenseHeader + Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
+        String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
+
+        // Generate ballerina records to represent schemas.
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
+        ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        String schemaContent = Formatter.format(schemaSyntaxTree).toString();
+        if (filter.getTags().size() > 0) {
+            // Remove unused records and enums when generating the client by the tags given.
+            schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent);
+        }
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
+                schemaContent));
 
         // Generate test boilerplate code for test cases
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
-        String testContent = licenseHeader + Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
+        String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
 
         String configContent = ballerinaTestGenerator.getConfigTomlFile();
@@ -435,17 +473,115 @@ public class CodeGenerator {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
                     GeneratorConstants.CONFIG_FILE_NAME, configContent));
         }
-
-        // Generate ballerina records to represent schemas.
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
-        ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
-        String schemaContent = licenseHeader + Formatter.format(
-                ballerinaSchemaGenerator.generateSyntaxTree()).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
-                schemaContent));
-
         return sourceFiles;
     }
+
+    private String modifySchemaContent(SyntaxTree schemaSyntaxTree, String clientContent, String schemaContent)
+            throws IOException, FormatterException {
+        Map<String, String> tempSourceFiles = new HashMap<>();
+        tempSourceFiles.put(CLIENT_FILE_NAME, clientContent);
+        tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
+        List<String> unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
+        while (unusedTypeDefinitionNameList.size() > 0) {
+            ModulePartNode modulePartNode = schemaSyntaxTree.rootNode();
+            NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
+            List<ModuleMemberDeclarationNode> unusedTypeDefinitionNodeList = new ArrayList<>();
+            for (ModuleMemberDeclarationNode node : members) {
+                if (node.kind().equals(SyntaxKind.TYPE_DEFINITION)) {
+                    for (ChildNodeEntry childNodeEntry : node.childEntries()) {
+                        if (childNodeEntry.name().equals(TYPE_NAME)) {
+                            if (unusedTypeDefinitionNameList.contains(childNodeEntry.node().get().toString())) {
+                                unusedTypeDefinitionNodeList.add(node);
+                            }
+                        }
+                    }
+                } else if (node.kind().equals(SyntaxKind.ENUM_DECLARATION)) {
+                    for (ChildNodeEntry childNodeEntry : node.childEntries()) {
+                        if (childNodeEntry.name().equals(IDENTIFIER)) {
+                            if (unusedTypeDefinitionNameList.contains(childNodeEntry.node().get().toString())) {
+                                unusedTypeDefinitionNodeList.add(node);
+                            }
+                        }
+                    }
+                }
+            }
+            NodeList<ModuleMemberDeclarationNode> modifiedMembers = members.removeAll
+                    (unusedTypeDefinitionNodeList);
+            ModulePartNode modiedModulePartNode = modulePartNode.modify(modulePartNode.imports(),
+                    modifiedMembers, modulePartNode.eofToken());
+            schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
+            schemaContent = Formatter.format(schemaSyntaxTree).toString();
+            tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
+            unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
+        }
+        return schemaContent;
+    }
+
+    private List<String> getUnusedTypeDefinitionNameList(Map<String, String> srcFiles) throws IOException {
+        List<String> unusedTypeDefinitionNameList = new ArrayList<>();
+        Path tmpDir = Files.createTempDirectory(".openapi-tmp" + System.nanoTime());
+        writeFilesTemp(srcFiles, tmpDir);
+        if (Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) && Files.exists(tmpDir.resolve(TYPE_FILE_NAME)) &&
+                Files.exists(tmpDir.resolve(BALLERINA_TOML))) {
+            SemanticModel semanticModel = this.getSemanticModel(tmpDir.resolve(CLIENT_FILE_NAME));
+            List<Symbol> symbols = semanticModel.moduleSymbols();
+            for (Symbol symbol : symbols) {
+                if (symbol.kind().equals(SymbolKind.TYPE_DEFINITION) || symbol.kind().equals(SymbolKind.ENUM)) {
+                    List<Location> references = semanticModel.references(symbol);
+                    if (references.size() == 1) {
+                        unusedTypeDefinitionNameList.add(symbol.getName().get());
+                    }
+                }
+            }
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                FileUtils.deleteDirectory(tmpDir.toFile());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }));
+        return unusedTypeDefinitionNameList;
+    }
+
+    private void writeFilesTemp (Map<String, String> srcFiles, Path tmpDir) throws IOException {
+        srcFiles.put(BALLERINA_TOML, BALLERINA_TOML_CONTENT);
+        PrintWriter writer = null;
+        for (Map.Entry<String, String> entry : srcFiles.entrySet()) {
+            String key = entry.getKey();
+            Path filePath = tmpDir.resolve(key);
+            try {
+                writer = new PrintWriter(filePath.toString(), "UTF-8");
+                writer.print(entry.getValue());
+            } finally {
+                if (writer != null) {
+                    writer.close();
+                }
+            }
+        }
+    }
+
+    private  SemanticModel getSemanticModel(Path clientPath) throws ProjectException {
+        // Load project instance for single ballerina file
+        try {
+            Project project = ProjectLoader.loadProject(clientPath);
+            Package packageName = project.currentPackage();
+            DocumentId docId;
+
+            if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
+                docId = project.documentId(clientPath);
+            } else {
+                // Take module instance for traversing the syntax tree
+                Module currentModule = packageName.getDefaultModule();
+                Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
+                docId = documentIterator.next();
+            }
+            return project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
+        } catch (ProjectException e) {
+             throw new ProjectException(e.getMessage());
+        }
+    }
+
 
     private List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
                                                       Filter filter, boolean nullable)
@@ -459,12 +595,12 @@ public class CodeGenerator {
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
-        String mainContent = licenseHeader + Formatter.format
+        String mainContent = Formatter.format
                 (BallerinaServiceGenerator.generateSyntaxTree(openAPI, serviceName, filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
-        String schemaContent = licenseHeader + Formatter.format(
+        String schemaContent = Formatter.format(
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  TYPE_FILE_NAME, schemaContent));
 
