@@ -28,6 +28,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * This test class for the covering the unit tests for record scenarios.
+ */
 public class RecordTests {
     private static final Path RES_DIR =
             Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
@@ -37,8 +40,8 @@ public class RecordTests {
     public void setup() throws IOException {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
     }
-    @Test(description = "Generate OpenAPI spec with json payload")
-    public void testJsonPayLoad() throws OpenApiConverterException, IOException {
+    @Test(description = "When the record field has typeInclusion it map to allOfSchema in OAS")
+    public void testTypeInclusion() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("record/typeInclusion.bal");
         //Compare generated yaml file with expected yaml content
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "record/typeInclusion.yaml");

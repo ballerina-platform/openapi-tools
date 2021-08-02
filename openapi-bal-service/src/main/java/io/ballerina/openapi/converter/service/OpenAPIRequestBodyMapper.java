@@ -1,19 +1,19 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package io.ballerina.openapi.converter.service;
@@ -51,6 +51,8 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * OpenAPIRequestBodyMapper provides functionality for converting ballerina payload to OAS request body model.
+ *
+ * @since 2.0.0
  */
 public class OpenAPIRequestBodyMapper {
     Components components;
@@ -131,7 +133,7 @@ public class OpenAPIRequestBodyMapper {
             SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) typeDescriptorNode;
             Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
             TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
-            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, semanticModel);
+            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
             componentMapper.handleRecordNode(referenceNode, schema, typeSymbol);
             Schema itemSchema = new Schema();
             arraySchema.setItems(itemSchema.$ref(referenceNode.name().text().trim()));
@@ -221,7 +223,7 @@ public class OpenAPIRequestBodyMapper {
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handel record for components
-        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, semanticModel);
+        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
         componentMapper.handleRecordNode(referenceNode, schema, typeSymbol);
 
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
