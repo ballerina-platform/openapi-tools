@@ -67,7 +67,6 @@ public class TestUtils {
             throws FormatterException, IOException, BallerinaOpenApiException {
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
-        ballerinaSchemaGenerator.setEnumDeclarationNodeList(ballerinaClientGenerator.getEnumDeclarationNodeList());
         SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree();
         writeFile(clientPath, Formatter.format(syntaxTree).toString());
         writeFile(schemaPath, Formatter.format(schemaSyntax).toString());

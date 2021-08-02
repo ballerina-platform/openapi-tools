@@ -439,7 +439,6 @@ public class CodeGenerator {
         // Generate ballerina records to represent schemas.
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
-        ballerinaSchemaGenerator.setEnumDeclarationNodeList(ballerinaClientGenerator.getEnumDeclarationNodeList());
         String schemaContent = licenseHeader + Formatter.format(
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
