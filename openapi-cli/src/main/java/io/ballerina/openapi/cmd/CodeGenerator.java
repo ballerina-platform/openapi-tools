@@ -141,6 +141,8 @@ public class CodeGenerator {
      * @param serviceName    Name of the service
      * @param outPath        Destination file path to save generated source files. If not provided
      *                       {@code definitionPath} will be used as the default destination path
+     * @param filter         For take the tags and operation option values
+     * @param nullable       Enable nullable option for make record field optional
      * @throws IOException               when file operations fail
      * @throws BallerinaOpenApiException when code generator fails
      */
