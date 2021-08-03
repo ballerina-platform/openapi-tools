@@ -35,7 +35,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
-import io.ballerina.openapi.converter.utils.ConverterUtils;
+import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -188,13 +188,13 @@ public class OpenAPIRequestBodyMapper {
                                         Schema mimeSchema;
                                         if (bodyParameter.getContent() != null) {
                                             media = new io.swagger.v3.oas.models.media.MediaType();
-                                            mimeSchema = ConverterUtils.getOpenApiSchema(mimeType.split("/")[1]
+                                            mimeSchema = ConverterCommonUtils.getOpenApiSchema(mimeType.split("/")[1]
                                                     .toLowerCase(Locale.ENGLISH));
                                             media.setSchema(mimeSchema);
                                             Content content = bodyParameter.getContent();
                                             content.addMediaType(mimeType, media);
                                         } else {
-                                            mimeSchema = ConverterUtils.getOpenApiSchema(mimeType.split("/")[1].
+                                            mimeSchema = ConverterCommonUtils.getOpenApiSchema(mimeType.split("/")[1].
                                                     toLowerCase(Locale.ENGLISH));
                                             media.setSchema(mimeSchema);
                                             bodyParameter.setContent(new Content().addMediaType(mimeType,
@@ -242,7 +242,7 @@ public class OpenAPIRequestBodyMapper {
 
     private void addConsumes(OperationAdaptor operationAdaptor, RequestBody bodyParameter, String applicationType) {
         String type = applicationType.split("/")[1];
-        Schema schema = ConverterUtils.getOpenApiSchema(type);
+        Schema schema = ConverterCommonUtils.getOpenApiSchema(type);
         io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
         mediaType.setSchema(schema);
         bodyParameter.setContent(new Content().addMediaType(applicationType, mediaType));
