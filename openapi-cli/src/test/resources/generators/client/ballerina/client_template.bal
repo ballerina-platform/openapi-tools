@@ -5,10 +5,10 @@ import  ballerina/lang.'string;
 public isolated client class Client {
     public final http:Client clientEp;
 
-    # Client initialization.
+    # Gets invoked to initialize the `connector`.
     #
-    # + clientConfig - Client configuration details
-    # + serviceUrl - Connector server URL
+    # + clientConfig - The configurations to be used when initializing the `connector`
+    # + serviceUrl - URL of the target service
     # + return -  An error at the failure of client initialization
     public isolated function init(http:ClientConfiguration clientConfig = {}, string serviceUrl = "https://petstore.swagger.io:443/v2")
     returns error?{

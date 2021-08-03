@@ -4,14 +4,15 @@ import ballerina/http;
 # Please visit [NYTimes](https://developer.nytimes.com/accounts/login) for more details
 public isolated client class Client {
     final http:Client clientEp;
+    # Gets invoked to initialize the `connector`.
     # Client initialization required API credentials and service URL.
     # The service URL may set to the default value. You can override if required.
     # Create [NYTimes](https://developer.nytimes.com/accounts/login) Developer Account.
     # Log into NYTimes Developer Portal by visiting https://developer.nytimes.com/accounts/login.
     # Register an app and obtain the API Key following the process summarized [here](https://developer.nytimes.com/get-started).
     #
-    # + clientConfig - Client configuration details
-    # + serviceUrl - Connector server URL
+    # + clientConfig - The configurations to be used when initializing the `connector`
+    # + serviceUrl - URL of the target service
     # + return - An error at the failure of client initialization
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.nytimes.com/svc/movies/v2") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
