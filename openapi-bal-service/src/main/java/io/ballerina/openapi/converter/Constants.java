@@ -18,6 +18,10 @@
 
 package io.ballerina.openapi.converter;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Ballerina To OpenApi Service Constants.
  */
@@ -109,5 +113,19 @@ public class Constants {
             return this.name;
         }
     }
+
+    /**
+     * Http response statuscode
+     */
+    public static final List<String> STATUS_CODE_RESPONSE = Collections.unmodifiableList(
+            Arrays.asList(
+            "Continue","SwitchingProtocols","Ok","Created","Accepted","NonAuthoritativeInformation","NoContent",
+    "ResetContent","PartialContent","MultipleChoices","MovedPermanently","Found","SeeOther","NotModified","UseProxy","TemporaryRedirect",
+    "PermanentRedirect","BadRequest","Unauthorized","PaymentRequired","Forbidden","NotFound","MethodNotAllowed","NotAcceptable",
+    "ProxyAuthenticationRequired","RequestTimeout","Conflict","Gone","LengthRequired","PreconditionFailed","PayloadTooLarge",
+    "UriTooLong","UnsupportedMediaType","RangeNotSatisfiable","ExpectationFailed","UpgradeRequired","RequestHeaderFieldsTooLarge",
+    "InternalServerError","NotImplemented","BadGateway","ServiceUnavailable","GatewayTimeout",
+                    "HttpVersionNotSupported"));
+
 
 }

@@ -19,7 +19,9 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
@@ -46,11 +48,14 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
+
+import static io.ballerina.openapi.converter.Constants.STATUS_CODE_RESPONSE;
 
 /**
  * This class uses to map the Ballerina return details to the OAS response.
@@ -302,6 +307,32 @@ public class OpenAPIResponseMapper {
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handel record for components
         OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+        // Check typeInclusion is related to the http status code
+        if (typeSymbol.typeKind().getName().equals("typeReference")) {
+            TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) typeSymbol;
+            if (typeReferenceTypeSymbol.typeDescriptor().typeKind().getName().equals("record")) {
+                List<TypeSymbol> typeInclusions =
+                        ((RecordTypeSymbol) typeReferenceTypeSymbol.typeDescriptor()).typeInclusions();
+                for (TypeSymbol typeInSymbol : typeInclusions) {
+                    for (String status : STATUS_CODE_RESPONSE) {
+                        String[] statusCodes = typeInSymbol.toString().trim().split(":");
+                        if (statusCodes.length > 2) {
+                            if (status.equals(statusCodes[1])) {
+
+                            }
+                        }
+
+                    }
+                }
+//                if (STATUS_CODE_RESPONSE.stream().anyMatch(status -> typeInclusions.stream().anyMatch(key ->
+//                        ((key.toString().trim().split(":").length > 2) &&
+//                                (key.toString().trim().split(":")[1].equals(status)))))) {
+//
+//                }
+
+            }
+        }
+
         componentMapper.handleRecordNode(recordNode, schema, typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         if (recordNode.parent().kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
