@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.cmd.utils;
+package io.ballerina.openapi.converter.utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
+import java.util.Random;
 
 /**
  * Utilities used by ballerina openapi code generator.
  */
-public class CodegenUtils {
-
-    public CodegenUtils() {
-
-    }
-
+public final class CodegenUtils {
     /**
      * Resolves path to write generated implementation source files.
      *
@@ -57,5 +53,24 @@ public class CodegenUtils {
                 writer.close();
             }
         }
+    }
+
+    /**
+     * Generates a random alphanumeric string with the provided length.
+     *
+     * @param stringLength length of the generated string
+     * @return random alphanumeric string
+     */
+    public static String generateRandomAlphaNumericString(int stringLength) {
+        int leftLimit = 48; // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        Random random = new Random();
+        return random.ints(leftLimit, rightLimit + 1)
+                // character literals from 48 - 57 are numbers | 65 - 90 are capital letters |
+                // 97 - 122 are simple letters
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(stringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 }

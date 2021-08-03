@@ -26,7 +26,7 @@ import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
 import io.ballerina.openapi.cmd.model.GenSrcFile;
-import io.ballerina.openapi.cmd.utils.CodegenUtils;
+import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
