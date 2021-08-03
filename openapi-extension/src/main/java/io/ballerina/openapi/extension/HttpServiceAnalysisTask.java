@@ -26,17 +26,11 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.OpenApiConverterException;
-import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.openapi.extension.doc.Generator;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -46,8 +40,15 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
     private static final String PACKAGE_ORG = "ballerina";
     private static final String PACKAGE_NAME = "http";
 
+    private final Generator docGenerator;
+
+    public HttpServiceAnalysisTask() {
+        this.docGenerator = new Generator();
+    }
+
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
+        Project currentProject = context.currentPackage().project();
         ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) context.node();
         SemanticModel semanticModel = context.semanticModel();
         Optional<Symbol> serviceDeclarationOpt = semanticModel.symbol(serviceNode);
@@ -57,21 +58,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 return;
             }
             SyntaxTree syntaxTree = context.syntaxTree();
-            try {
-                Project currentProject = context.currentPackage().project();
-                File sourcePath = currentProject.sourceRoot().toFile();
-                final File outputFile = new File(sourcePath, "openapi-doc.json");
-                Path outputFilePath = Paths.get(outputFile.getCanonicalPath());
-                Map<String, String> openAPIDefinitions = ServiceToOpenAPIConverterUtils
-                        .generateOAS3Definition(syntaxTree, semanticModel, "", true, outputFilePath);
-                if (!openAPIDefinitions.isEmpty()) {
-                    for (Map.Entry<String, String> definition: openAPIDefinitions.entrySet()) {
-//                        CodegenUtils.writeFile(outputFilePath.resolve(definition.getKey()), definition.getValue());
-                    }
-                }
-            } catch (IOException | OpenApiConverterException e) {
-                throw new RuntimeException(e);
-            }
+            this.docGenerator.generate(currentProject.sourceRoot().toString(), semanticModel, syntaxTree);
         }
     }
 

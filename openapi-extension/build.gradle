@@ -30,6 +30,28 @@ dependencies {
     implementation project(':openapi-bal-service')
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId "openapi-extension"
+            version = project.version
+            artifact jar
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/ballerina-platform/ballerina-openapi")
+            credentials {
+                username = System.getenv("publishUser")
+                password = System.getenv("publishPAT")
+            }
+        }
+    }
+}
+
 compileJava {
     doFirst {
         options.compilerArgs = [
