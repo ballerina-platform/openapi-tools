@@ -158,7 +158,7 @@ public class CodeGeneratorTest {
         Filter filterCustom = new Filter(listTags, list2);
         try {
             String expectedSchemaContent = getStringFromGivenBalFile(expectedServiceFile, "type_filtered_by_tags.bal");
-            generator.generateClient(definitionPath, definitionPath, clientName, resourcePath.toString(),
+            generator.generateClient(definitionPath, clientName, resourcePath.toString(),
                     filterCustom, false);
             if (Files.exists(resourcePath.resolve("types.bal")) && Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedSchema = getStringFromGivenBalFile(resourcePath, "types.bal");
