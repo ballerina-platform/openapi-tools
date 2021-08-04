@@ -972,7 +972,8 @@ public class BallerinaClientGenerator {
      * @param ballerinaAuthConfigGenerator - {@Link BallerinaAuthConfigGenerator}
      */
     private void addConfigRecordToTypeDefinitionNodeList(OpenAPI openAPI,
-                                                         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator) {
+                                                         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator)
+            throws BallerinaOpenApiException {
         TypeDefinitionNode configRecord = ballerinaAuthConfigGenerator.getConfigRecord(openAPI);
         if (configRecord != null) {
             typeDefinitionNodeListWithAuth.add(configRecord);

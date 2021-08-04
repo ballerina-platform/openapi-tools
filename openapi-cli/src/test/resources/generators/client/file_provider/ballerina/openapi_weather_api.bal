@@ -2,6 +2,9 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
+# Provides API key configurations needed when communicating with a remote HTTP endpoint.
+#
+# + apiKeys - API keys related to connector authentication
 public type ApiKeysConfig record {
     map<string> apiKeys;
 };
