@@ -406,7 +406,7 @@ public class BallerinaClientGenerator {
                 "URL of the target service");
         docs.add(serviceUrlAPI);
         MarkdownParameterDocumentationLineNode returnDoc = generatorUtils.createParamAPIDoc("return",
-                "An error at the failure of client initialization");
+                "An error if connector initialization failed");
         docs.add(returnDoc);
         MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));
         MetadataNode clientInit = createMetadataNode(clientInitDoc, createEmptyNodeList());
