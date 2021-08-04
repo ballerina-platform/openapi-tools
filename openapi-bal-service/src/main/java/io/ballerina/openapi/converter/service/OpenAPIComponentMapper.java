@@ -138,7 +138,7 @@ public class OpenAPIComponentMapper {
         Map<String, Schema> schemaProperties = new HashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
             String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
-            Schema property = ConverterUtils.getOpenApiSchema(type);
+            Schema property = ConverterCommonUtils.getOpenApiSchema(type);
             if (type.equals(Constants.TYPE_REFERENCE)) {
                 property.set$ref(field.getValue().typeDescriptor().getName().orElseThrow().trim());
                 TypeSymbol recordVariable =  field.getValue().typeDescriptor();
@@ -179,7 +179,7 @@ public class OpenAPIComponentMapper {
             symbol = arrayTypeSymbol.memberTypeDescriptor();
         }
         //handle record field has nested record array type ex: Tag[] tags
-        Schema symbolProperty  = ConverterUtils.getOpenApiSchema(symbol.typeKind().getName());
+        Schema symbolProperty  = ConverterCommonUtils.getOpenApiSchema(symbol.typeKind().getName());
         //Set the record model to the definition
         if (symbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
             symbolProperty.set$ref(symbol.getName().orElseThrow().trim());
