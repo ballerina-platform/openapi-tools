@@ -368,9 +368,13 @@ public class BallerinaClientGenerator {
         parameters.add(createToken(COMMA_TOKEN));
         // Client init api documentation
         List<Node> docs = new ArrayList<>();
+        MarkdownDocumentationLineNode initCommonDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN), createNodeList(
+                        createLiteralValueToken(null, "Gets invoked to initialize the `connector`.",
+                                createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+        docs.add(initCommonDescription);
         if (openAPI.getInfo().getExtensions() != null && !openAPI.getInfo().getExtensions().isEmpty()) {
             Map<String, Object> extensions = openAPI.getInfo().getExtensions();
-            boolean isInitExtentionGiven = false;
             for (Map.Entry<String, Object> extension: extensions.entrySet()) {
                 if (extension.getKey().trim().equals("x-init-description")) {
                     String[] docLines = extension.getValue().toString().split("\n");
@@ -381,25 +385,9 @@ public class BallerinaClientGenerator {
                                                 line, createEmptyMinutiaeList(), createEmptyMinutiaeList())));
                         docs.add(initDescription);
                     }
-                    isInitExtentionGiven = true;
                     break;
                 }
             }
-            if (!isInitExtentionGiven) {
-                MarkdownDocumentationLineNode initDescription =
-                        createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                                createNodeList(createLiteralValueToken(null,
-                                        "Client initialization.", createEmptyMinutiaeList(),
-                                        createEmptyMinutiaeList())));
-                docs.add(initDescription);
-            }
-        } else {
-            MarkdownDocumentationLineNode initDescription =
-                    createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                            createNodeList(createLiteralValueToken(null,
-                                    "Client initialization.", createEmptyMinutiaeList(),
-                                    createEmptyMinutiaeList())));
-            docs.add(initDescription);
         }
 
         MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
@@ -412,10 +400,10 @@ public class BallerinaClientGenerator {
         }
         // Create method description
         MarkdownParameterDocumentationLineNode clientConfig = generatorUtils.createParamAPIDoc("clientConfig",
-                "Client configuration details");
+                "The configurations to be used when initializing the `connector`");
         docs.add(clientConfig);
         MarkdownParameterDocumentationLineNode serviceUrlAPI = generatorUtils.createParamAPIDoc("serviceUrl",
-                "Connector server URL");
+                "URL of the target service");
         docs.add(serviceUrlAPI);
         MarkdownParameterDocumentationLineNode returnDoc = generatorUtils.createParamAPIDoc("return",
                 "An error at the failure of client initialization");

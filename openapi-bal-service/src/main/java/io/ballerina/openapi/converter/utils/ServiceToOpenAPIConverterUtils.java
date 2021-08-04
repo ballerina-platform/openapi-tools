@@ -29,6 +29,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
@@ -90,7 +91,7 @@ public class ServiceToOpenAPIConverterUtils {
 
             // Generating for the services
             for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
-                String serviceNodeName = OpenAPIEndpointMapperUtils.getServiceBasePath(serviceNode);
+                String serviceNodeName = new OpenAPIEndpointMapper().getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
                 String openApiSource = generateOASDefinition(serviceNode, serviceNodeName, needJson, endpoints,
                         semanticModel);
@@ -134,7 +135,7 @@ public class ServiceToOpenAPIConverterUtils {
 
         if (serviceName != null) {
             // Filtering by service name
-            String service = OpenAPIEndpointMapperUtils.getServiceBasePath(serviceNode);
+            String service = new OpenAPIEndpointMapper().getServiceBasePath(serviceNode);
             availableService.add(service);
             if (serviceName.equals(service)) {
                 servicesToGenerate.add(serviceNode);
@@ -167,7 +168,7 @@ public class ServiceToOpenAPIConverterUtils {
                                          ServiceDeclarationNode serviceDefinition, SemanticModel semanticModel) {
         //Take base path of service
         OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
-        String currentServiceName = OpenAPIEndpointMapperUtils.getServiceBasePath(serviceDefinition);
+        String currentServiceName = new OpenAPIEndpointMapper().getServiceBasePath(serviceDefinition);
         if (openapi.getServers() == null) {
             openapi = setServerURLInOAS(openapi, endpoints, serviceDefinition);
             // Generate openApi string for the mentioned service name.
@@ -190,11 +191,11 @@ public class ServiceToOpenAPIConverterUtils {
                                       ServiceDeclarationNode serviceDefinition) {
 
         SeparatedNodeList<ExpressionNode> expressions = serviceDefinition.expressions();
-        openapi = OpenAPIEndpointMapperUtils.extractServerForExpressionNode(openapi, expressions,
+        openapi = new OpenAPIEndpointMapper().extractServerForExpressionNode(openapi, expressions,
                 serviceDefinition);
         // Handle outbound listeners
         if (!endpoints.isEmpty()) {
-            openapi = OpenAPIEndpointMapperUtils.convertListenerEndPointToOpenAPI(openapi, endpoints,
+            openapi = new OpenAPIEndpointMapper().convertListenerEndPointToOpenAPI(openapi, endpoints,
                     serviceDefinition);
         }
         return openapi;
