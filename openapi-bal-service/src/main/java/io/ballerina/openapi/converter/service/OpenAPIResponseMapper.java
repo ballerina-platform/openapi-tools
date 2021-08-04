@@ -36,7 +36,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.converter.Constants;
-import io.ballerina.openapi.converter.utils.ConverterUtils;
+import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -96,7 +96,7 @@ public class OpenAPIResponseMapper {
                 } else if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
                     ApiResponse apiResponse = new ApiResponse();
                     String type =  typeNode.toString().toLowerCase(Locale.ENGLISH).trim();
-                    Schema schema = ConverterUtils.getOpenApiSchema(type);
+                    Schema schema = ConverterCommonUtils.getOpenApiSchema(type);
                     io.swagger.v3.oas.models.media.MediaType mediaType =
                             new io.swagger.v3.oas.models.media.MediaType();
                     String media = generateMIMETypeForBallerinaType(type);
@@ -189,7 +189,7 @@ public class OpenAPIResponseMapper {
                                 SimpleNameReferenceNode nameRefNode =  (SimpleNameReferenceNode) type;
                                 handleReferenceInResponse(operationAdaptor, nameRefNode, schemas, apiResponses);
                             } else {
-                                schema = ConverterUtils.getOpenApiSchema(nodeType);
+                                schema = ConverterCommonUtils.getOpenApiSchema(nodeType);
                             }
                         }
                     }
@@ -219,7 +219,7 @@ public class OpenAPIResponseMapper {
                         String type =
                                 array.memberTypeDesc().kind().toString().trim().split("_")[0].
                                         toLowerCase(Locale.ENGLISH);
-                        Schema openApiSchema = ConverterUtils.getOpenApiSchema(type);
+                        Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(type);
                         String mimeType = generateMIMETypeForBallerinaType(type);
                         arraySchema.setItems(openApiSchema);
                         mediaType.setSchema(arraySchema);
