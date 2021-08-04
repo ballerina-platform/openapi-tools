@@ -70,8 +70,14 @@ public class GeneratorConstants {
 
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
     public static final String TYPE_FILE_NAME = "types.bal";
+    public static final String CLIENT_FILE_NAME = "client.bal";
     public static final String TEST_FILE_NAME = "test.bal";
     public static final String CONFIG_FILE_NAME = "Config.toml";
+    public static final String BALLERINA_TOML = "Ballerina.toml";
+    public static final String BALLERINA_TOML_CONTENT = "[package]\n" +
+            "org= \"ballerina\"\n" +
+            "name= \"testopenapi\"\n" +
+            "version= \"0.0.0\"\n";
 
     public static final String TEMPLATES_SUFFIX = ".mustache";
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";
@@ -125,6 +131,8 @@ public class GeneratorConstants {
     public static final String STRING = "string";
     public static final String SERVICE_URL = "serviceUrl";
     public static final String RECORD = "record";
+    public static final String IDENTIFIER = "identifier";
+    public static final String TYPE_NAME = "typeName";
     // auth related constants
     public static final String API_KEY = "apikey";
     public static final String API_KEY_CONFIG = "ApiKeysConfig";
@@ -154,4 +162,5 @@ public class GeneratorConstants {
     public static final String CONNECT = "connect";
     public static final String OPTIONS = "options";
     public static final String TRACE = "trace";
+
 }

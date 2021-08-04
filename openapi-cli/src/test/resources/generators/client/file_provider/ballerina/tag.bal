@@ -3,10 +3,10 @@ import  ballerina/http;
 #Here you can find documentation for COVID-19 REST API.
 public isolated client class Client {
     final http:Client clientEp;
-    # Client initialization.
+    # Gets invoked to initialize the `connector`.
     #
-    # + clientConfig - Client configuration details
-    # + serviceUrl - Connector server URL
+    # + clientConfig - The configurations to be used when initializing the `connector`
+    # + serviceUrl - URL of the target service
     # + return -  An error at the failure of client initialization
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://api-cov19.now.sh/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
