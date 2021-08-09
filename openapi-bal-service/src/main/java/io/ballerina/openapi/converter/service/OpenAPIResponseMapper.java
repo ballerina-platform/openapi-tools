@@ -37,7 +37,9 @@ import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
+import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.utils.ConverterUtils;
@@ -92,154 +94,7 @@ public class OpenAPIResponseMapper {
                 apiResponses.put("202", apiResponse);
 
             } else {
-                if (typeNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
-                    QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) typeNode;
-                    if (qNode.modulePrefix().toString().trim().equals("http")) {
-                        ApiResponse apiResponse = new ApiResponse();
-                        String code = generateApiResponseCode(qNode.identifier().toString().trim());
-                        apiResponse.description(qNode.identifier().toString().trim());
-                        apiResponses.put(code, apiResponse);
-                    }
-                } else if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
-                    ApiResponse apiResponse = new ApiResponse();
-                    String type =  typeNode.toString().toLowerCase(Locale.ENGLISH).trim();
-                    Schema schema = ConverterUtils.getOpenApiSchema(type);
-                    io.swagger.v3.oas.models.media.MediaType mediaType =
-                            new io.swagger.v3.oas.models.media.MediaType();
-                    String media = generateMIMETypeForBallerinaType(type);
-                    mediaType.setSchema(schema);
-                    apiResponse.description("Successful");
-                    apiResponse.content(new Content().addMediaType(media, mediaType));
-                    apiResponses.put("200", apiResponse);
-                } else if (typeNode.kind().equals(SyntaxKind.JSON_TYPE_DESC)) {
-                    ApiResponse apiResponse = new ApiResponse();
-                    io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
-                    Schema schema = new ObjectSchema();
-                    mediaType.setSchema(schema);
-                    apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, mediaType));
-                    apiResponse.description("Ok");
-                    apiResponses.put("200", apiResponse);
-                } else if (typeNode.kind().equals(SyntaxKind.XML_TYPE_DESC)) {
-                    ApiResponse apiResponse = new ApiResponse();
-                    io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
-                    Schema schema = new ObjectSchema();
-                    mediaType.setSchema(schema);
-                    apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_XML, mediaType));
-                    apiResponse.description("Ok");
-                    apiResponses.put("200", apiResponse);
-                } else if (typeNode instanceof SimpleNameReferenceNode) {
-                    SimpleNameReferenceNode recordNode  = (SimpleNameReferenceNode) typeNode;
-                    Map<String, Schema> schema = components.getSchemas();
-                    handleReferenceInResponse(operationAdaptor, recordNode, schema, apiResponses);
-                } else if (typeNode.kind().equals(SyntaxKind.UNION_TYPE_DESC)) {
-                    //line-No 304 - 330 commented due to handle advance response scenario in further implementation.
-                    //check until right typeDec empty
-//                    UnionTypeDescriptorNode unionNode = (UnionTypeDescriptorNode) typeNode;
-//                    TypeDescriptorNode rightNode = unionNode.rightTypeDesc();
-//                    TypeDescriptorNode leftNode = unionNode.leftTypeDesc();
-
-//                    if (rightNode instanceof UnionTypeDescriptorNode) {
-//                        UnionTypeDescriptorNode traversRightNode = (UnionTypeDescriptorNode) rightNode;
-//                        while (traversRightNode.rightTypeDesc() != null) {
-//                            if (leftNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
-//                                String identifier = ((QualifiedNameReferenceNode)
-//                                leftNode).identifier().text().trim();
-//                                String code = generateApiResponseCode(identifier);
-//                                ApiResponse apiResponse = new ApiResponse();
-//                                apiResponse.description(identifier);
-//                                apiResponses.put(code, apiResponse);
-//// casting exception return.
-////                                rightNode = ((UnionTypeDescriptorNode) rightNode).rightTypeDesc();
-////                                leftNode = ((UnionTypeDescriptorNode) rightNode).leftTypeDesc();
-//                            }
-//                        }
-//                    }
-//                    if (rightNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
-//                        String identifier = ((QualifiedNameReferenceNode) rightNode).identifier().text().trim();
-//                        String code = generateApiResponseCode(identifier);
-//                        ApiResponse apiResponse = new ApiResponse();
-//                        apiResponse.description(identifier);
-//                        apiResponses.put(code, apiResponse);
-//                    }
-                    //Return type is union type  generate 200 response with text/plain
-                    ApiResponse apiResponse = new ApiResponse();
-                    apiResponse.description("Ok");
-                    apiResponse.content(new Content().addMediaType("text/plain",
-                            new io.swagger.v3.oas.models.media.MediaType().schema(new StringSchema())));
-                    apiResponses.put("200", apiResponse);
-
-                } else if (typeNode.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
-                    ApiResponse apiResponse = new ApiResponse();
-                    RecordTypeDescriptorNode record  = (RecordTypeDescriptorNode) typeNode;
-                    NodeList<Node> fields = record.fields();
-                    String identifier = null;
-                    Schema schema = null;
-                    String mediaType = null;
-                    for (Node field: fields) {
-                        if (field.kind().equals(SyntaxKind.TYPE_REFERENCE)) {
-                            TypeReferenceNode typeFieldNode = (TypeReferenceNode) field;
-                            if (typeFieldNode.typeName().kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
-                                QualifiedNameReferenceNode identifierNode =
-                                        (QualifiedNameReferenceNode) typeFieldNode.typeName();
-                                identifier = generateApiResponseCode(identifierNode.identifier().text().trim());
-                                apiResponse.description(identifierNode.identifier().text().trim());
-                            }
-                        }
-                        if (field.kind().equals(SyntaxKind.RECORD_FIELD)) {
-                            RecordFieldNode recordField = (RecordFieldNode) field;
-                            Node type = recordField.typeName();
-                            String nodeType = type.toString().toLowerCase(Locale.ENGLISH).trim();
-                            mediaType = generateMIMETypeForBallerinaType(nodeType);
-                            if (type.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
-                                Map<String, Schema> schemas = components.getSchemas();
-                                mediaType = MediaType.APPLICATION_JSON;
-                                SimpleNameReferenceNode nameRefNode =  (SimpleNameReferenceNode) type;
-                                handleReferenceInResponse(operationAdaptor, nameRefNode, schemas, apiResponses);
-                            } else {
-                                schema = ConverterUtils.getOpenApiSchema(nodeType);
-                            }
-                        }
-                    }
-                    io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
-                    media.setSchema(schema);
-                    apiResponse.content(new Content().addMediaType(mediaType, media));
-                    apiResponses.put(identifier, apiResponse);
-
-                } else if (typeNode.toString().trim().equals("error") || typeNode.toString().trim().equals("error?")) {
-                    //Return type is not given as error or error? in ballerina it will generate 500 response.
-                    ApiResponse apiResponse = new ApiResponse();
-                    apiResponse.description("Found unexpected output");
-                    apiResponse.content(new Content().addMediaType("text/plain",
-                            new io.swagger.v3.oas.models.media.MediaType().schema(new StringSchema())));
-                    apiResponses.put("500", apiResponse);
-                } else if (typeNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
-                    ArrayTypeDescriptorNode array = (ArrayTypeDescriptorNode) typeNode;
-                    Map<String, Schema> schemas = components.getSchemas();
-                    if (array.memberTypeDesc().kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
-                        handleReferenceInResponse(operationAdaptor, (SimpleNameReferenceNode) array.memberTypeDesc(),
-                                schemas, apiResponses);
-                    } else {
-                        ApiResponse apiResponse = new ApiResponse();
-                        ArraySchema arraySchema = new ArraySchema();
-                        io.swagger.v3.oas.models.media.MediaType mediaType =
-                                new io.swagger.v3.oas.models.media.MediaType();
-                        String type =
-                                array.memberTypeDesc().kind().toString().trim().split("_")[0].
-                                        toLowerCase(Locale.ENGLISH);
-                        Schema openApiSchema = ConverterUtils.getOpenApiSchema(type);
-                        String mimeType = generateMIMETypeForBallerinaType(type);
-                        arraySchema.setItems(openApiSchema);
-                        mediaType.setSchema(arraySchema);
-                        apiResponse.description("Ok");
-                        apiResponse.content(new Content().addMediaType(mimeType, mediaType));
-                        apiResponses.put("200", apiResponse);
-
-                    }
-                } else {
-                    ApiResponse apiResponse = new ApiResponse();
-                    apiResponse.description("Ok");
-                    apiResponses.put("200", apiResponse);
-                }
+                handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, typeNode);
             }
         } else {
             //Return type is not given generate 200 response with text/plain
@@ -248,6 +103,168 @@ public class OpenAPIResponseMapper {
             apiResponses.put("202", apiResponse);
         }
         operation.setResponses(apiResponses);
+    }
+
+    /**
+     * This methods for handle the return type has non annotations.
+     *
+     * @return {@link io.swagger.v3.oas.models.responses.ApiResponses} for operation.
+     */
+    private ApiResponses handleResponseWithoutAnnotationType(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
+                                                             Node typeNode) throws OpenApiConverterException {
+
+        if (typeNode.kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
+            QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) typeNode;
+            if (qNode.modulePrefix().toString().trim().equals("http")) {
+                ApiResponse apiResponse = new ApiResponse();
+                String code = generateApiResponseCode(qNode.identifier().toString().trim());
+                apiResponse.description(qNode.identifier().toString().trim());
+                apiResponses.put(code, apiResponse);
+            }
+        } else if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
+            ApiResponse apiResponse = new ApiResponse();
+            String type =  typeNode.toString().toLowerCase(Locale.ENGLISH).trim();
+            Schema schema = ConverterUtils.getOpenApiSchema(type);
+            io.swagger.v3.oas.models.media.MediaType mediaType =
+                    new io.swagger.v3.oas.models.media.MediaType();
+            String media = generateMIMETypeForBallerinaType(type);
+            mediaType.setSchema(schema);
+            apiResponse.description("Successful");
+            apiResponse.content(new Content().addMediaType(media, mediaType));
+            apiResponses.put("200", apiResponse);
+        } else if (typeNode.kind().equals(SyntaxKind.JSON_TYPE_DESC)) {
+            ApiResponse apiResponse = new ApiResponse();
+            io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
+            Schema schema = new ObjectSchema();
+            mediaType.setSchema(schema);
+            apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, mediaType));
+            apiResponse.description("Ok");
+            apiResponses.put("200", apiResponse);
+        } else if (typeNode.kind().equals(SyntaxKind.XML_TYPE_DESC)) {
+            ApiResponse apiResponse = new ApiResponse();
+            io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
+            Schema schema = new ObjectSchema();
+            mediaType.setSchema(schema);
+            apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_XML, mediaType));
+            apiResponse.description("Ok");
+            apiResponses.put("200", apiResponse);
+        } else if (typeNode instanceof SimpleNameReferenceNode) {
+            SimpleNameReferenceNode recordNode  = (SimpleNameReferenceNode) typeNode;
+            Map<String, Schema> schema = components.getSchemas();
+            handleReferenceInResponse(operationAdaptor, recordNode, schema, apiResponses);
+        } else if (typeNode.kind().equals(SyntaxKind.UNION_TYPE_DESC)) {
+            apiResponses = getAPIResponsesForReturnUnionType(operationAdaptor, apiResponses,
+                    (UnionTypeDescriptorNode) typeNode);
+        } else if (typeNode.kind().equals(SyntaxKind.RECORD_TYPE_DESC)) {
+            ApiResponse apiResponse = new ApiResponse();
+            RecordTypeDescriptorNode record  = (RecordTypeDescriptorNode) typeNode;
+            NodeList<Node> fields = record.fields();
+            String identifier = null;
+            Schema schema = null;
+            String mediaType = null;
+            for (Node field: fields) {
+                if (field.kind().equals(SyntaxKind.TYPE_REFERENCE)) {
+                    TypeReferenceNode typeFieldNode = (TypeReferenceNode) field;
+                    if (typeFieldNode.typeName().kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
+                        QualifiedNameReferenceNode identifierNode =
+                                (QualifiedNameReferenceNode) typeFieldNode.typeName();
+                        identifier = generateApiResponseCode(identifierNode.identifier().text().trim());
+                        apiResponse.description(identifierNode.identifier().text().trim());
+                    }
+                }
+                if (field.kind().equals(SyntaxKind.RECORD_FIELD)) {
+                    RecordFieldNode recordField = (RecordFieldNode) field;
+                    Node type = recordField.typeName();
+                    String nodeType = type.toString().toLowerCase(Locale.ENGLISH).trim();
+                    mediaType = generateMIMETypeForBallerinaType(nodeType);
+                    if (type.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+                        Map<String, Schema> schemas = components.getSchemas();
+                        mediaType = MediaType.APPLICATION_JSON;
+                        SimpleNameReferenceNode nameRefNode =  (SimpleNameReferenceNode) type;
+                        handleReferenceInResponse(operationAdaptor, nameRefNode, schemas, apiResponses);
+                    } else {
+                        schema = ConverterUtils.getOpenApiSchema(nodeType);
+                    }
+                }
+            }
+            io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
+            media.setSchema(schema);
+            apiResponse.content(new Content().addMediaType(mediaType, media));
+            apiResponses.put(identifier, apiResponse);
+
+        } else if (typeNode.toString().trim().equals("error") || typeNode.toString().trim().equals("error?")) {
+            //Return type is not given as error or error? in ballerina it will generate 500 response.
+            ApiResponse apiResponse = new ApiResponse();
+            apiResponse.description("Found unexpected output");
+            apiResponse.content(new Content().addMediaType("text/plain",
+                    new io.swagger.v3.oas.models.media.MediaType().schema(new StringSchema())));
+            apiResponses.put("500", apiResponse);
+        } else if (typeNode.kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
+            ArrayTypeDescriptorNode array = (ArrayTypeDescriptorNode) typeNode;
+            Map<String, Schema> schemas = components.getSchemas();
+            if (array.memberTypeDesc().kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
+                handleReferenceInResponse(operationAdaptor, (SimpleNameReferenceNode) array.memberTypeDesc(),
+                        schemas, apiResponses);
+            } else {
+                ApiResponse apiResponse = new ApiResponse();
+                ArraySchema arraySchema = new ArraySchema();
+                io.swagger.v3.oas.models.media.MediaType mediaType =
+                        new io.swagger.v3.oas.models.media.MediaType();
+                String type =
+                        array.memberTypeDesc().kind().toString().trim().split("_")[0].
+                                toLowerCase(Locale.ENGLISH);
+                Schema openApiSchema = ConverterUtils.getOpenApiSchema(type);
+                String mimeType = generateMIMETypeForBallerinaType(type);
+                arraySchema.setItems(openApiSchema);
+                mediaType.setSchema(arraySchema);
+                apiResponse.description("Ok");
+                apiResponse.content(new Content().addMediaType(mimeType, mediaType));
+                apiResponses.put("200", apiResponse);
+
+            }
+        } else {
+            ApiResponse apiResponse = new ApiResponse();
+            apiResponse.description("Ok");
+            apiResponses.put("200", apiResponse);
+        }
+        return apiResponses;
+    }
+
+    /**
+     * Handle the response has union type.
+     *
+     * <per>
+     *     resource function post reservation(@http:Payload Reservation reservation)
+     *                 returns ReservationCreated|ReservationConflict {
+     *         ReservationCreated created = createReservation(reservation);
+     *         return created;
+     *     }
+     * </per>
+     */
+    private ApiResponses getAPIResponsesForReturnUnionType(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
+                                                           UnionTypeDescriptorNode typeNode)
+            throws OpenApiConverterException {
+
+        UnionTypeDescriptorNode unionNode = typeNode;
+        TypeDescriptorNode rightNode = unionNode.rightTypeDesc();
+        TypeDescriptorNode leftNode = unionNode.leftTypeDesc();
+        // Handle leftNode because it is main node
+        apiResponses = handleResponseWithoutAnnotationType(operationAdaptor, apiResponses,
+                leftNode);
+        // Handle rest of the union type
+        if (rightNode instanceof UnionTypeDescriptorNode) {
+            UnionTypeDescriptorNode traversRightNode = (UnionTypeDescriptorNode) rightNode;
+            while (traversRightNode.rightTypeDesc() != null) {
+                if (leftNode.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
+                    leftNode = ((UnionTypeDescriptorNode) rightNode).leftTypeDesc();
+                    apiResponses = handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, leftNode);
+                }
+            }
+        } else {
+            apiResponses = handleResponseWithoutAnnotationType(operationAdaptor, apiResponses,
+                    rightNode);
+        }
+        return apiResponses;
     }
 
     private String generateMIMETypeForBallerinaType(String type) {
@@ -388,10 +405,6 @@ public class OpenAPIResponseMapper {
                             RecordFieldSymbol body = fieldsOfRecord.get("body");
                             RecordFieldSymbol mediaType = fieldsOfRecord.get("mediaType");
                             switch (body.typeDescriptor().typeKind()) {
-                                case STRING:
-                                    apiResponse.content(new Content().addMediaType(MediaType.TEXT_PLAIN, media));
-                                    apiResponses.put(code, apiResponse);
-                                    break;
                                 case TYPE_REFERENCE:
                                     componentMapper.handleRecordNode(referenceNode, schema,
                                             (TypeReferenceTypeSymbol) body.typeDescriptor());
