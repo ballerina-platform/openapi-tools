@@ -25,6 +25,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +60,8 @@ public class OpenAPIServiceMapper {
      * @param basePath  - For string base path
      * @return OpenApi object which represent current service.
      */
-    public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi, String basePath) {
+    public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi, String basePath)
+            throws OpenApiConverterException {
         // Setting default values.
         openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(basePath.replace("/", " ")));
 

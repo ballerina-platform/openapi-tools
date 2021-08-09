@@ -19,6 +19,7 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
@@ -38,6 +39,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.converter.Constants;
+import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.utils.ConverterUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -55,7 +57,7 @@ import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
 
-import static io.ballerina.openapi.converter.Constants.STATUS_CODE_RESPONSE;
+import static io.ballerina.openapi.converter.Constants.HTTP;
 
 /**
  * This class uses to map the Ballerina return details to the OAS response.
@@ -72,7 +74,7 @@ public class OpenAPIResponseMapper {
     }
 
     public void parseResponsesAnnotationAttachment(FunctionDefinitionNode resource,
-                                                   OperationAdaptor operationAdaptor) {
+                                                   OperationAdaptor operationAdaptor) throws OpenApiConverterException {
 
         FunctionSignatureNode functionSignatureNode = resource.functionSignature();
         Optional<ReturnTypeDescriptorNode> returnTypeDescriptorNode = functionSignatureNode.returnTypeDesc();
@@ -263,16 +265,40 @@ public class OpenAPIResponseMapper {
         }
     }
 
-    private String generateApiResponseCode(String identifier) {
+    private String generateApiResponseCode(String identifier) throws OpenApiConverterException {
         switch (identifier) {
             case "Continue":
                 return "100";
+            case "SwitchingProtocols":
+                return "101";
             case "Ok":
                 return "200";
             case "Created":
                 return "201";
             case "Accepted":
                 return "202";
+            case "NonAuthoritativeInformation":
+                return "203";
+            case "NoContent":
+                return "204";
+            case "RestContent":
+                return "205";
+            case "PartialContent":
+                return "206";
+            case "MultipleChoices":
+                return "300";
+            case "MovedPermanently":
+                return "301";
+            case "Found":
+                return "302";
+            case "SeeOther":
+                return "303";
+            case "NotModified":
+                return "304";
+            case "UseProxy":
+                return "305";
+            case "TemporaryRedirect":
+                return "308";
             case "BadRequest":
                 return "400";
             case "Unauthorized":
@@ -285,74 +311,117 @@ public class OpenAPIResponseMapper {
                 return "404";
             case "MethodNotAllowed":
                 return "405";
-            case "500":
-                return "InternalServerError";
+            case "NotAccepted":
+                return "406";
+            case "ProxyAuthenticationRequires":
+                return "407";
+            case "RequestTimeOut":
+                return "408";
+            case "Conflict":
+                return "409";
+            case "Gone":
+                return "410";
+            case "LengthRequired":
+                return "411";
+            case "PreconditionFailed":
+                return "412";
+            case "UriTooLong":
+                return "413";
+            case "UnsupportedMediaType":
+                return "414";
+            case "RangeNotSatisfied":
+                return "415";
+            case "ExpectationFailed":
+                return "416";
+            case "UpgradeRequired":
+                return "426";
+            case "RequestHeaderFieldsTooLarge":
+                return "431";
             case "InternalServerError":
+                return "500";
+            case "NotImplemented":
                 return "501";
             case "BadGateway":
                 return "502";
             case "ServiceUnavailable":
                 return "503";
+            case "GatewayTimeOut":
+                return "504";
+            case "HttpVersionNotSupported":
+                return "505";
             default:
-                return "200";
+                throw new OpenApiConverterException("No related status code for :" + identifier);
         }
     }
 
-    private void handleReferenceInResponse(OperationAdaptor operationAdaptor, SimpleNameReferenceNode recordNode,
-                                           Map<String, Schema> schema, ApiResponses apiResponses) {
-
-        // Creating request body - required.
-        SimpleNameReferenceNode referenceNode = recordNode;
+    private void handleReferenceInResponse(OperationAdaptor operationAdaptor, SimpleNameReferenceNode referenceNode,
+                                           Map<String, Schema> schema, ApiResponses apiResponses)
+            throws OpenApiConverterException {
+        ApiResponse apiResponse = new ApiResponse();
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handel record for components
         OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
-        // Check typeInclusion is related to the http status code
-        if (typeSymbol.typeKind().getName().equals("typeReference")) {
-            TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) typeSymbol;
-            if (typeReferenceTypeSymbol.typeDescriptor().typeKind().getName().equals("record")) {
-                List<TypeSymbol> typeInclusions =
-                        ((RecordTypeSymbol) typeReferenceTypeSymbol.typeDescriptor()).typeInclusions();
-                for (TypeSymbol typeInSymbol : typeInclusions) {
-                    for (String status : STATUS_CODE_RESPONSE) {
-                        String[] statusCodes = typeInSymbol.toString().trim().split(":");
-                        if (statusCodes.length > 2) {
-                            if (status.equals(statusCodes[1])) {
-
-                            }
-                        }
-
-                    }
-                }
-//                if (STATUS_CODE_RESPONSE.stream().anyMatch(status -> typeInclusions.stream().anyMatch(key ->
-//                        ((key.toString().trim().split(":").length > 2) &&
-//                                (key.toString().trim().split(":")[1].equals(status)))))) {
-//
-//                }
-
-            }
-        }
-
-        componentMapper.handleRecordNode(recordNode, schema, typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
-        if (recordNode.parent().kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
+        // Check typeInclusion is related to the http status code
+        if (referenceNode.parent().kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {
             ArraySchema arraySchema = new ArraySchema();
-            ApiResponse apiResponse = new ApiResponse();
             arraySchema.setItems(new Schema().$ref(referenceNode.name().toString().trim()));
             media.setSchema(arraySchema);
             apiResponse.description("Ok");
             apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
             apiResponses.put("200", apiResponse);
 
-        } else {
-            media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
-            ApiResponse apiResponse = new ApiResponse();
-            apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
-            apiResponse.description("Ok");
-            apiResponses.put("200", apiResponse);
+        } else if (typeSymbol.typeKind().getName().equals("typeReference")) {
+            TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) typeSymbol;
+            if (typeReferenceTypeSymbol.typeDescriptor().typeKind().getName().equals("record")) {
+                RecordTypeSymbol returnRecord = (RecordTypeSymbol) typeReferenceTypeSymbol.typeDescriptor();
+                List<TypeSymbol> typeInclusions = returnRecord.typeInclusions();
+                if (!typeInclusions.isEmpty()) {
+                    boolean isHttpModule = false;
+                    for (TypeSymbol typeInSymbol : typeInclusions) {
+                        if (HTTP.equals(typeInSymbol.getModule().orElseThrow().getName().orElseThrow())) {
+                            isHttpModule = true;
+                            String code = generateApiResponseCode(typeInSymbol.getName().orElseThrow().trim());
+                            Map<String, RecordFieldSymbol> fieldsOfRecord = returnRecord.fieldDescriptors();
+                            // Handle the content of the response
+                            RecordFieldSymbol body = fieldsOfRecord.get("body");
+                            RecordFieldSymbol mediaType = fieldsOfRecord.get("mediaType");
+                            switch (body.typeDescriptor().typeKind()) {
+                                case STRING:
+                                    apiResponse.content(new Content().addMediaType(MediaType.TEXT_PLAIN, media));
+                                    apiResponses.put(code, apiResponse);
+                                    break;
+                                case TYPE_REFERENCE:
+                                    componentMapper.handleRecordNode(referenceNode, schema,
+                                            (TypeReferenceTypeSymbol) body.typeDescriptor());
+                                    media.setSchema(new Schema().$ref(body.typeDescriptor().getName().orElseThrow().trim()));
+                                    apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
+                                    apiResponses.put(code, apiResponse);
+                                    break;
+                                default:
+                                    apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
+                                    apiResponses.put(code, apiResponse);
+                                    break;
+                            }
+                        }
+                    }
+                    if (!isHttpModule) {
+                        componentMapper.handleRecordNode(referenceNode, schema, typeSymbol);
+                        media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
+                        apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
+                        apiResponse.description("Ok");
+                        apiResponses.put("200", apiResponse);
+                    }
+                } else {
+                    componentMapper.handleRecordNode(referenceNode, schema, typeSymbol);
+                    media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
+                    apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
+                    apiResponse.description("Ok");
+                    apiResponses.put("200", apiResponse);
+                }
+            }
         }
         operationAdaptor.getOperation().setResponses(apiResponses);
     }
-
-
 }

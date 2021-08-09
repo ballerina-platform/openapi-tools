@@ -33,4 +33,9 @@ public class OpenApiConverterException extends Exception {
     public OpenApiConverterException(Throwable cause) {
         super(cause);
     }
+
+    public OpenApiConverterException() {
+        
+
+    }
 }

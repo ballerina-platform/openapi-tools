@@ -150,7 +150,7 @@ public class ServiceToOpenAPIConverterUtils {
      */
     private static String generateOASDefinition(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
                                                Boolean needJson, List<ListenerDeclarationNode> endpoints,
-                                               SemanticModel semanticModel) {
+                                               SemanticModel semanticModel) throws OpenApiConverterException {
         OpenAPI openapi = getOpenAPIDefinition(new OpenAPI(), serviceName, endpoints, serviceDeclarationNode,
                 semanticModel);
         if (needJson) {
@@ -164,7 +164,8 @@ public class ServiceToOpenAPIConverterUtils {
      */
     private static OpenAPI getOpenAPIDefinition(OpenAPI openapi,
                                          String serviceName, List<ListenerDeclarationNode> endpoints,
-                                         ServiceDeclarationNode serviceDefinition, SemanticModel semanticModel) {
+                                         ServiceDeclarationNode serviceDefinition, SemanticModel semanticModel)
+            throws OpenApiConverterException {
         //Take base path of service
         OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
         String currentServiceName = OpenAPIEndpointMapperUtils.getServiceBasePath(serviceDefinition);
