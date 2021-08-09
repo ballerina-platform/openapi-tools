@@ -18,107 +18,18 @@
 
 package io.ballerina.openapi.generators.client;
 
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
-import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
-import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
-import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
-import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
-import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeFactory;
-import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ObjectFieldNode;
-import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
-import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
-import io.ballerina.compiler.syntax.tree.RecordFieldNode;
-import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
-import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.compiler.syntax.tree.*;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createAssignmentStatementNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createCheckExpressionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createImplicitNewExpressionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createIntersectionTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMapTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMethodCallExpressionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createNodeList;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createObjectFieldNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalFieldAccessExpressionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesizedArgList;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createPositionalArgumentNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSeparatedNodeList;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeParameterNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceTypeDescNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.BITWISE_AND_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CHECK_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.FINAL_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.GT_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.LT_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAP_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.READONLY_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
-import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY;
-import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG;
-import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
-import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_RECORD_FIELD;
-import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_MAP;
-import static io.ballerina.openapi.generators.GeneratorConstants.AUTH_CONFIG_FILED_NAME;
-import static io.ballerina.openapi.generators.GeneratorConstants.AuthConfigTypes;
-import static io.ballerina.openapi.generators.GeneratorConstants.BASIC;
-import static io.ballerina.openapi.generators.GeneratorConstants.BEARER;
-import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_CRED;
-import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG_RECORD_ARG;
-import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG_RECORD_NAME;
-import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
-import static io.ballerina.openapi.generators.GeneratorConstants.OAUTH2;
-import static io.ballerina.openapi.generators.GeneratorConstants.PASSWORD;
-import static io.ballerina.openapi.generators.GeneratorConstants.SSL_FIELD_NAME;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.*;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.*;
+import static io.ballerina.openapi.generators.GeneratorConstants.*;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 
 /**
@@ -436,13 +347,12 @@ public class BallerinaAuthConfigGenerator {
             RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null,
                     fieldTypeNode, authFieldName, null, semicolonToken);
             recordFieldNodes.add(recordFieldNode);
-            // add socket config
-            IdentifierToken sslFieldNameNode = AbstractNodeFactory.createIdentifierToken(SSL_FIELD_NAME);
-            TypeDescriptorNode sslfieldTypeNode = createBuiltinSimpleNameReferenceNode(null,
-                    AbstractNodeFactory.createIdentifierToken("http:ClientSecureSocket"));
-            RecordFieldNode sslRecordFieldNode = NodeFactory.createRecordFieldNode(null, null,
-                    sslfieldTypeNode, sslFieldNameNode, createToken(QUESTION_MARK_TOKEN), semicolonToken);
-            recordFieldNodes.add(sslRecordFieldNode);
+            recordFieldNodes.addAll(Arrays.asList(
+                    getHttpVersionField(), getHttp1Settings(), getHttp2Settings(),
+                    getTimeOutField(), getForwardedField(), getFollowRedirectsField(),
+                    getPoolConfigurationField(), getCacheConfigField(), getCompressionField(),
+                    getCircuitBreakerConfigField(), getRetryConfigField(), getCookieConfigField(),
+                    getResponseLimitConfigsField(), getSSLField()));
         } else if (isAPIKey) {
 
             Token apiKeyMap = AbstractNodeFactory.createIdentifierToken(API_KEY_MAP);
@@ -454,7 +364,198 @@ public class BallerinaAuthConfigGenerator {
         }
         return recordFieldNodes;
     }
+    private RecordFieldWithDefaultValueNode getCacheConfigField() {
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("HTTP caching related configurations")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = createIdentifierToken("cache");
+        TypeDescriptorNode fieldTypeNode = createSimpleNameReferenceNode(createIdentifierToken("http:CacheConfig"));
+        ExpressionNode emptyExpression = createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(), createToken(CLOSE_BRACE_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), emptyExpression, createToken(SEMICOLON_TOKEN));
+    }
+    private RecordFieldWithDefaultValueNode getPoolConfigurationField (){
+        NilLiteralNode nilLiteralNode =
+                createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("Configurations associated with request pooling")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = AbstractNodeFactory.createIdentifierToken("poolConfig");
+        TypeDescriptorNode fieldTypeNode = createOptionalTypeDescriptorNode(
+                createIdentifierToken("http:PoolConfiguration"), createToken(QUESTION_MARK_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), nilLiteralNode, createToken(SEMICOLON_TOKEN));
+    }
 
+    private RecordFieldWithDefaultValueNode getCircuitBreakerConfigField (){
+        NilLiteralNode nilLiteralNode =
+                createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("Configurations associated with the behaviour of the Circuit Breaker")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = AbstractNodeFactory.createIdentifierToken("circuitBreaker");
+        TypeDescriptorNode fieldTypeNode = createOptionalTypeDescriptorNode(
+                createIdentifierToken("http:CircuitBreakerConfig"), createToken(QUESTION_MARK_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), nilLiteralNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getRetryConfigField (){
+        NilLiteralNode nilLiteralNode =
+                createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("Configurations associated with retrying")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = AbstractNodeFactory.createIdentifierToken("retryConfig");
+        TypeDescriptorNode fieldTypeNode = createOptionalTypeDescriptorNode(
+                createIdentifierToken("http:RetryConfig"), createToken(QUESTION_MARK_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), nilLiteralNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getCookieConfigField (){
+        NilLiteralNode nilLiteralNode =
+                createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("Configurations associated with cookies")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = AbstractNodeFactory.createIdentifierToken("cookieConfig");
+        TypeDescriptorNode fieldTypeNode = createOptionalTypeDescriptorNode(
+                createIdentifierToken("http:CookieConfig"), createToken(QUESTION_MARK_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), nilLiteralNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getResponseLimitConfigsField() {
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("Configurations associated with inbound response size limits")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = createIdentifierToken("responseLimits");
+        TypeDescriptorNode fieldTypeNode = createSimpleNameReferenceNode(createIdentifierToken("http:ResponseLimitConfigs"));
+        ExpressionNode emptyExpression = createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(), createToken(CLOSE_BRACE_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), emptyExpression, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getCompressionField () {
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("Specifies the way of handling compression (`accept-encoding`) header")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = createIdentifierToken("compression");
+        TypeDescriptorNode fieldTypeNode = createSimpleNameReferenceNode(createIdentifierToken("http:Compression"));
+        ExpressionNode decimalLiteralNode = createRequiredExpressionNode(createIdentifierToken("http:COMPRESSION_AUTO"));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), decimalLiteralNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getFollowRedirectsField (){
+        NilLiteralNode nilLiteralNode =
+                createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("Configurations associated with Redirection")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = AbstractNodeFactory.createIdentifierToken("followRedirects");
+        TypeDescriptorNode fieldTypeNode = createOptionalTypeDescriptorNode(
+                createIdentifierToken("http:FollowRedirects"), createToken(QUESTION_MARK_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), nilLiteralNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getForwardedField () {
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("The choice of setting `forwarded`/`x-forwarded` header")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = createIdentifierToken("forwarded");
+        TypeDescriptorNode fieldTypeNode = createSimpleNameReferenceNode(createToken(STRING_KEYWORD));
+        ExpressionNode decimalLiteralNode = createRequiredExpressionNode(createIdentifierToken("\"disable\""));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), decimalLiteralNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getTimeOutField () {
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("The maximum time to wait (in seconds) for a response before closing the connection")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = createIdentifierToken("timeout");
+        TypeDescriptorNode fieldTypeNode = createSimpleNameReferenceNode(createToken(DECIMAL_KEYWORD));
+        ExpressionNode decimalLiteralNode = createRequiredExpressionNode(createIdentifierToken("60"));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), decimalLiteralNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getHttp2Settings() {
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("Configurations related to HTTP/2 protocol")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = createIdentifierToken("http2Settings");
+        TypeDescriptorNode fieldTypeNode = createSimpleNameReferenceNode(createIdentifierToken("http:ClientHttp2Settings"));
+        ExpressionNode emptyExpression = createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(), createToken(CLOSE_BRACE_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), emptyExpression, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getHttp1Settings() {
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("Configurations related to HTTP/1.x protocol")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = createIdentifierToken("http1Settings");
+        TypeDescriptorNode fieldTypeNode = createSimpleNameReferenceNode(createIdentifierToken("http:ClientHttp1Settings"));
+        ExpressionNode emptyExpression = createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(), createToken(CLOSE_BRACE_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN), emptyExpression, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getSSLField (){
+        NilLiteralNode nilLiteralNode =
+                createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN), createNodeList(createIdentifierToken("SSL/TLS-related options")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken sslFieldNameNode = AbstractNodeFactory.createIdentifierToken(SSL_FIELD_NAME);
+        TypeDescriptorNode sslfieldTypeNode = createOptionalTypeDescriptorNode(
+                createIdentifierToken("http:ClientSecureSocket"), createToken(QUESTION_MARK_TOKEN));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, sslfieldTypeNode, sslFieldNameNode, createToken(EQUAL_TOKEN), nilLiteralNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    private RecordFieldWithDefaultValueNode getHttpVersionField (){
+        MarkdownDocumentationLineNode fieldDescription =
+                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                        createNodeList(createIdentifierToken("The HTTP version understood by the client")));
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(fieldDescription));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        IdentifierToken fieldNameNode = createIdentifierToken("httpVersion");
+        TypeDescriptorNode fieldTypeNode = createSimpleNameReferenceNode(createToken(STRING_KEYWORD));
+        RequiredExpressionNode requiredExpressionNode = createRequiredExpressionNode(createIdentifierToken("1.1"));
+        return NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, fieldTypeNode, fieldNameNode, createToken(EQUAL_TOKEN),
+                requiredExpressionNode, createToken(SEMICOLON_TOKEN));
+    }
     /**
      * Travers through the security schemas of the given open api spec.
      * Store api key names which needs to send in the query string and as a request header separately.
@@ -559,4 +660,6 @@ public class BallerinaAuthConfigGenerator {
     public String getApiKeyDescription () {
         return apiKeyDescription;
     }
+
+
 }
