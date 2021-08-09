@@ -11,7 +11,7 @@ public isolated client class Client {
     #
     # + clientConfig - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
-    # + return -  An error at the failure of client initialization
+    # + return - An error if connector initialization failed
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://api-cov19.now.sh/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
