@@ -65,6 +65,7 @@ import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
@@ -86,7 +87,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
@@ -109,7 +109,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionDefini
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignatureNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIfElseStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createListBindingPatternNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createLiteralValueToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
@@ -162,8 +161,6 @@ public class BallerinaClientGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeListWithAuth;
     private OpenAPI openAPI;
     private BallerinaSchemaGenerator ballerinaSchemaGenerator;
-    private DocCommentsGenerator docCommentsGenerator;
-    private GeneratorUtils generatorUtils;
     private List<String> remoteFunctionNameList;
     private String serverURL;
     private BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
@@ -208,8 +205,6 @@ public class BallerinaClientGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.typeDefinitionNodeListWithAuth =  new ArrayList<>();
-        this.docCommentsGenerator = new DocCommentsGenerator();
-        this.generatorUtils = new GeneratorUtils();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator();
@@ -225,8 +220,6 @@ public class BallerinaClientGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, nullable);
         this.typeDefinitionNodeListWithAuth =  new ArrayList<>();
-        this.docCommentsGenerator = new DocCommentsGenerator();
-        this.generatorUtils = new GeneratorUtils();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
@@ -299,13 +292,12 @@ public class BallerinaClientGenerator {
                 }
             }
         }
-        GeneratorUtils generatorUtils = new GeneratorUtils();
         if (selectedServer.getUrl() == null) {
             serverURL = "http://localhost:9090/v1";
         } else if (selectedServer.getVariables() != null) {
             ServerVariables variables = selectedServer.getVariables();
             URL url;
-            String resolvedUrl = generatorUtils.buildUrl(selectedServer.getUrl(), variables);
+            String resolvedUrl = GeneratorUtils.buildUrl(selectedServer.getUrl(), variables);
             try {
                 url = new URL(resolvedUrl);
                 serverURL = url.toString();
@@ -368,44 +360,30 @@ public class BallerinaClientGenerator {
         parameters.add(createToken(COMMA_TOKEN));
         // Client init api documentation
         List<Node> docs = new ArrayList<>();
-        MarkdownDocumentationLineNode initCommonDescription =
-                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN), createNodeList(
-                        createLiteralValueToken(null, "Gets invoked to initialize the `connector`.",
-                                createEmptyMinutiaeList(), createEmptyMinutiaeList())));
-        docs.add(initCommonDescription);
+        String clientInitDocCommentLines = "Gets invoked to initialize the `connector`.\n";
         if (openAPI.getInfo().getExtensions() != null && !openAPI.getInfo().getExtensions().isEmpty()) {
             Map<String, Object> extensions = openAPI.getInfo().getExtensions();
             for (Map.Entry<String, Object> extension: extensions.entrySet()) {
                 if (extension.getKey().trim().equals("x-init-description")) {
-                    String[] docLines = extension.getValue().toString().split("\n");
-                    for (String line : docLines) {
-                        MarkdownDocumentationLineNode initDescription =
-                                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                                        createNodeList(createLiteralValueToken(null,
-                                                line, createEmptyMinutiaeList(), createEmptyMinutiaeList())));
-                        docs.add(initDescription);
-                    }
+                    clientInitDocCommentLines = clientInitDocCommentLines.concat(extension.getValue().toString());
                     break;
                 }
             }
         }
-
-        MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
-                createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
-        docs.add(hashNewLine);
+        docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(clientInitDocCommentLines, true));
         if (ballerinaAuthConfigGenerator.isAPIKey()) {
-            MarkdownParameterDocumentationLineNode apiKeyConfig = generatorUtils.createParamAPIDoc(
+            MarkdownParameterDocumentationLineNode apiKeyConfig = DocCommentsGenerator.createAPIParamDoc(
                     "apiKeyConfig", ballerinaAuthConfigGenerator.getApiKeyDescription());
             docs.add(apiKeyConfig);
         }
         // Create method description
-        MarkdownParameterDocumentationLineNode clientConfig = generatorUtils.createParamAPIDoc("clientConfig",
+        MarkdownParameterDocumentationLineNode clientConfig = DocCommentsGenerator.createAPIParamDoc("clientConfig",
                 "The configurations to be used when initializing the `connector`");
         docs.add(clientConfig);
-        MarkdownParameterDocumentationLineNode serviceUrlAPI = generatorUtils.createParamAPIDoc("serviceUrl",
+        MarkdownParameterDocumentationLineNode serviceUrlAPI = DocCommentsGenerator.createAPIParamDoc("serviceUrl",
                 "URL of the target service");
         docs.add(serviceUrlAPI);
-        MarkdownParameterDocumentationLineNode returnDoc = generatorUtils.createParamAPIDoc("return",
+        MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
                 "An error at the failure of client initialization");
         docs.add(returnDoc);
         MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));
@@ -478,7 +456,7 @@ public class BallerinaClientGenerator {
             if (!extensions.isEmpty()) {
                 for (Map.Entry<String, Object> extension: extensions.entrySet()) {
                     if (extension.getKey().trim().equals("x-display")) {
-                        metadataNode = docCommentsGenerator.getMetadataNodeForDisplayAnnotation(extension);
+                        metadataNode = DocCommentsGenerator.getMetadataNodeForDisplayAnnotation(extension);
                     }
                 }
             }
@@ -486,14 +464,8 @@ public class BallerinaClientGenerator {
         // Generate api doc
         List<Node> documentationLines = new ArrayList<>();
         if (openAPI.getInfo().getDescription() != null) {
-            String[] descriptionLines = openAPI.getInfo().getDescription().split("\n");
-            for (String line : descriptionLines) {
-                MarkdownDocumentationLineNode documentationLineNode =
-                        createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                                createNodeList(createLiteralValueToken(null, line,
-                                        createEmptyMinutiaeList(), createEmptyMinutiaeList())));
-                documentationLines.add(documentationLineNode);
-            }
+            documentationLines.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                    openAPI.getInfo().getDescription(), false));
         }
         MarkdownDocumentationNode apiDoc = createMarkdownDocumentationNode(createNodeList(documentationLines));
         metadataNode = metadataNode.modify(apiDoc, metadataNode.annotations());
@@ -556,7 +528,7 @@ public class BallerinaClientGenerator {
                     if (extensions != null) {
                         for (Map.Entry<String, Object> extension: extensions.entrySet()) {
                             if (extension.getKey().trim().equals("x-display")) {
-                                metadataNode = docCommentsGenerator.getMetadataNodeForDisplayAnnotation(extension);
+                                metadataNode = DocCommentsGenerator.getMetadataNodeForDisplayAnnotation(extension);
                             }
                         }
                     }
@@ -564,7 +536,7 @@ public class BallerinaClientGenerator {
                     if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
                         if (operationTags != null || ((!filterOperations.isEmpty())
                                 && (operation.getValue().getOperationId() != null))) {
-                            if (generatorUtils.hasTags(operationTags, filterTags) ||
+                            if (GeneratorUtils.hasTags(operationTags, filterTags) ||
                                     ((operation.getValue().getOperationId() != null) &&
                                             filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                                 // function call for generate function definition node.
@@ -602,14 +574,11 @@ public class BallerinaClientGenerator {
         // Create api doc for function
         List<Node> remoteFunctionDocs = new ArrayList<>();
         if (operation.getValue().getSummary() != null) {
-            MarkdownDocumentationLineNode clientDescription =
-                    createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                            createNodeList(createLiteralValueToken(null, operation.getValue().getSummary(),
-                                    createEmptyMinutiaeList(), createEmptyMinutiaeList())));
-            remoteFunctionDocs.add(clientDescription);
-            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
-                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
-            remoteFunctionDocs.add(newLine);
+            remoteFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                    operation.getValue().getSummary(), true));
+        } else if (operation.getValue().getDescription() != null) {
+            remoteFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                    operation.getValue().getDescription(), true));
         } else {
             MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
                     createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
@@ -669,20 +638,13 @@ public class BallerinaClientGenerator {
     private  FunctionDefinitionNode generateFunctionForHeaderMap() {
         // API doc for function
         List<Node> docs = new ArrayList<>();
-        MarkdownDocumentationLineNode functionDescription =
-                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                        createNodeList(createLiteralValueToken(null,
-                                "Generate header map for given header values.",
-                                createEmptyMinutiaeList(), createEmptyMinutiaeList())));
-        docs.add(functionDescription);
-        MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
-                createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
-        docs.add(hashNewLine);
+        docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                "Generate header map for given header values.", true));
         // Create client init description
-        MarkdownParameterDocumentationLineNode queryParam = generatorUtils.createParamAPIDoc("headerParam",
+        MarkdownParameterDocumentationLineNode queryParam = DocCommentsGenerator.createAPIParamDoc("headerParam",
                 "Headers  map");
         docs.add(queryParam);
-        MarkdownParameterDocumentationLineNode returnDoc = generatorUtils.createParamAPIDoc("return",
+        MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
                 "Returns generated map or error at failure of client initialization");
         docs.add(returnDoc);
 
@@ -701,7 +663,7 @@ public class BallerinaClientGenerator {
                                 null, createIdentifierToken("map<string|string[]>"))));
 
         List<StatementNode> statementNodes = new ArrayList<>();
-        VariableDeclarationNode headerMap = generatorUtils.getSimpleStatement("map<string|string[]>",
+        VariableDeclarationNode headerMap = GeneratorUtils.getSimpleStatement("map<string|string[]>",
                 "headerMap", "{}");
         statementNodes.add(headerMap);
         // Create foreach loop
@@ -744,7 +706,7 @@ public class BallerinaClientGenerator {
 
         BinaryExpressionNode mainCondition = createBinaryExpressionNode(null, lhdCondition,
                 createToken(LOGICAL_OR_TOKEN), rhdCondition);
-        ExpressionStatementNode assignStatement = generatorUtils.getSimpleExpressionStatementNode("headerMap[key] = " +
+        ExpressionStatementNode assignStatement = GeneratorUtils.getSimpleExpressionStatementNode("headerMap[key] = " +
                 "value");
         BlockStatementNode ifBlockStatementMain = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 createNodeList(assignStatement), createToken(CLOSE_BRACE_TOKEN));
@@ -760,7 +722,7 @@ public class BallerinaClientGenerator {
         statementNodes.add(forEachStatementNode);
 
         // return statement
-        ExpressionStatementNode returnHeaderMap = generatorUtils.getSimpleExpressionStatementNode("return headerMap");
+        ExpressionStatementNode returnHeaderMap = GeneratorUtils.getSimpleExpressionStatementNode("return headerMap");
         statementNodes.add(returnHeaderMap);
 
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
@@ -779,20 +741,13 @@ public class BallerinaClientGenerator {
     private FunctionDefinitionNode getQueryParamPath() {
         //Create API doc
         List<Node> docs = new ArrayList<>();
-        MarkdownDocumentationLineNode functionDescription =
-                createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                        createNodeList(createLiteralValueToken(null,
-                                "Generate query path with query parameter.",
-                                createEmptyMinutiaeList(), createEmptyMinutiaeList())));
-        docs.add(functionDescription);
-        MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
-                createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
-        docs.add(hashNewLine);
+        docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                "Generate query path with query parameter.", true));
         // Create method description
-        MarkdownParameterDocumentationLineNode queryParam = generatorUtils.createParamAPIDoc("queryParam",
+        MarkdownParameterDocumentationLineNode queryParam = DocCommentsGenerator.createAPIParamDoc("queryParam",
                 "Query parameter map");
         docs.add(queryParam);
-        MarkdownParameterDocumentationLineNode returnDoc = generatorUtils.createParamAPIDoc("return",
+        MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
                 "Returns generated Path or error at failure of client initialization");
         docs.add(returnDoc);
 
@@ -811,10 +766,10 @@ public class BallerinaClientGenerator {
 
         // FunctionBody
         List<StatementNode> statementNodes = new ArrayList<>();
-        VariableDeclarationNode variable = generatorUtils.getSimpleStatement("string[]", "param",
+        VariableDeclarationNode variable = GeneratorUtils.getSimpleStatement("string[]", "param",
                 "[]");
         statementNodes.add(variable);
-        ExpressionStatementNode assign = generatorUtils.getSimpleExpressionStatementNode(
+        ExpressionStatementNode assign = GeneratorUtils.getSimpleExpressionStatementNode(
                 "param[param.length()] = \"?\"");
         statementNodes.add(assign);
 
@@ -850,7 +805,7 @@ public class BallerinaClientGenerator {
         TypeTestExpressionNode mainCondition = createTypeTestExpressionNode(expression, isKeyWord,
                 typeCondition);
         // If body
-        ExpressionStatementNode assignStatement = generatorUtils.getSimpleExpressionStatementNode(
+        ExpressionStatementNode assignStatement = GeneratorUtils.getSimpleExpressionStatementNode(
                 "_ = queryParam.remove(key)");
         BlockStatementNode ifBlockStatementMain = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 createNodeList(assignStatement), createToken(CLOSE_BRACE_TOKEN));
@@ -865,7 +820,7 @@ public class BallerinaClientGenerator {
                                 createIdentifierToken("\"'\""))), createToken(CLOSE_PAREN_TOKEN));
         List<StatementNode> statements = new ArrayList<>();
         // if body-02
-        ExpressionStatementNode ifBody02Statement = generatorUtils.getSimpleExpressionStatementNode(
+        ExpressionStatementNode ifBody02Statement = GeneratorUtils.getSimpleExpressionStatementNode(
                 " param[param.length()] = string:substring(key, 1, key.length())");
 
         NodeList<StatementNode> statementNodesForIf02 = createNodeList(ifBody02Statement);
@@ -875,7 +830,7 @@ public class BallerinaClientGenerator {
         // else block-02
         // else body 02
 
-        ExpressionStatementNode elseBody02Statement = generatorUtils.getSimpleExpressionStatementNode
+        ExpressionStatementNode elseBody02Statement = GeneratorUtils.getSimpleExpressionStatementNode
                 ("param[param.length()] = key");
         NodeList<StatementNode> statementNodesForElse02 = createNodeList(elseBody02Statement);
         BlockStatementNode elseBlockNode02 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
@@ -886,7 +841,7 @@ public class BallerinaClientGenerator {
                 elseBlock02);
         statements.add(ifElseStatementNode02);
 
-        ExpressionStatementNode assignment = generatorUtils
+        ExpressionStatementNode assignment = GeneratorUtils
                 .getSimpleExpressionStatementNode("param[param.length()] = \"=\"");
         statements.add(assignment);
 
@@ -896,22 +851,22 @@ public class BallerinaClientGenerator {
                 createIdentifierToken(" string"));
         TypeTestExpressionNode condition03 = createTypeTestExpressionNode(exprIf03, isKeyWord, typeCondition03);
 
-        ExpressionStatementNode variableIf03 = generatorUtils.getSimpleExpressionStatementNode(
+        ExpressionStatementNode variableIf03 = GeneratorUtils.getSimpleExpressionStatementNode(
                 "string updateV =  check url:encode(value, \"UTF-8\")");
-        ExpressionStatementNode assignIf03 = generatorUtils
+        ExpressionStatementNode assignIf03 = GeneratorUtils
                 .getSimpleExpressionStatementNode("param[param.length()] = updateV");
 
         BlockStatementNode ifBody03 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 createNodeList(variableIf03, assignIf03), createToken(CLOSE_BRACE_TOKEN));
         BlockStatementNode elseBodyBlock03 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN), createNodeList(
-                generatorUtils.getSimpleExpressionStatementNode("param[param.length()] = value.toString()")),
+                        GeneratorUtils.getSimpleExpressionStatementNode("param[param.length()] = value.toString()")),
                 createToken(CLOSE_BRACE_TOKEN));
         ElseBlockNode elseBody03 = createElseBlockNode(elseKeyWord, elseBodyBlock03);
         IfElseStatementNode ifElse03 = createIfElseStatementNode(ifKeyWord, condition03, ifBody03, elseBody03);
 
         statements.add(ifElse03);
 
-        ExpressionStatementNode andStatement = generatorUtils
+        ExpressionStatementNode andStatement = GeneratorUtils
                 .getSimpleExpressionStatementNode("param[param.length()] = \"&\"");
         statements.add(andStatement);
 
@@ -935,7 +890,7 @@ public class BallerinaClientGenerator {
         statementNodes.add(forEachStatementNode);
 
         //Remove last `&` statement
-        ExpressionStatementNode assignLine02 = generatorUtils.getSimpleExpressionStatementNode(
+        ExpressionStatementNode assignLine02 = GeneratorUtils.getSimpleExpressionStatementNode(
                 "_ = param.remove(param.length()-1)");
         statementNodes.add(assignLine02);
 
@@ -947,7 +902,7 @@ public class BallerinaClientGenerator {
         TypeTestExpressionNode conditionForIfElse = createTypeTestExpressionNode(lhs, equalToken, rhs);
         //if body block
 
-        ExpressionStatementNode newAssign = generatorUtils.getSimpleExpressionStatementNode("_ = param.remove(0)");
+        ExpressionStatementNode newAssign = GeneratorUtils.getSimpleExpressionStatementNode("_ = param.remove(0)");
         BlockStatementNode ifBlock = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 createNodeList(newAssign), createToken(CLOSE_BRACE_TOKEN));
         IfElseStatementNode ifElseStatementNode = createIfElseStatementNode(ifKeyWord, conditionForIfElse, ifBlock,
@@ -955,8 +910,8 @@ public class BallerinaClientGenerator {
         statementNodes.add(ifElseStatementNode);
 
         statementNodes.add(
-                generatorUtils.getSimpleExpressionStatementNode("string restOfPath = string:'join(\"\", ...param)"));
-        statementNodes.add(generatorUtils.getSimpleExpressionStatementNode("return restOfPath"));
+                GeneratorUtils.getSimpleExpressionStatementNode("string restOfPath = string:'join(\"\", ...param)"));
+        statementNodes.add(GeneratorUtils.getSimpleExpressionStatementNode("return restOfPath"));
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, createNodeList(statementNodes), createToken(CLOSE_BRACE_TOKEN));
 

@@ -37,6 +37,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -94,11 +95,8 @@ public class FunctionSignatureGenerator {
     private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
     private FunctionReturnType functionReturnType;
-    private DocCommentsGenerator docCommentsGenerator;
-    private GeneratorUtils generatorUtils;
 
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
-
         return typeDefinitionNodeList;
     }
 
@@ -109,8 +107,6 @@ public class FunctionSignatureGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.typeDefinitionNodeList = typeDefinitionNodeList;
-        this.docCommentsGenerator = new DocCommentsGenerator();
-        this.generatorUtils = new GeneratorUtils();
         this.functionReturnType =  new FunctionReturnType(openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
 
     }
@@ -140,8 +136,8 @@ public class FunctionSignatureGenerator {
         Iterator<ApiResponse> iteratorRes = values.iterator();
         ApiResponse next = iteratorRes.next();
         if (next.getDescription() != null) {
-            MarkdownParameterDocumentationLineNode returnDoc = generatorUtils.createParamAPIDoc("return",
-                    next.getDescription().split("\n")[0]);
+            MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
+                    next.getDescription());
             remoteFunctionDoc.add(returnDoc);
         }
 
@@ -173,9 +169,9 @@ public class FunctionSignatureGenerator {
                         parameterList.add(comma);
                         if (parameter.getDescription() != null) {
                             MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                    generatorUtils.createParamAPIDoc(escapeIdentifier(getValidName(
+                                    DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(getValidName(
                                             parameter.getName(), false)),
-                                            parameter.getDescription().split("\n")[0]);
+                                            parameter.getDescription());
                             remoteFunctionDoc.add(paramAPIDoc);
                         }
                         break;
@@ -186,18 +182,19 @@ public class FunctionSignatureGenerator {
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        generatorUtils.createParamAPIDoc(escapeIdentifier(
+                                        DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(
                                                 getValidName(parameter.getName(), false)),
-                                                parameter.getDescription().split("\n")[0]);
+                                                parameter.getDescription());
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
                             defaultable.add(paramq);
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc = generatorUtils.createParamAPIDoc(
+                                MarkdownParameterDocumentationLineNode paramAPIDoc = DocCommentsGenerator.
+                                        createAPIParamDoc(
                                                 escapeIdentifier(getValidName(parameter.getName(),
-                                                false)), parameter.getDescription().split("\n")[0]);
+                                                false)), parameter.getDescription());
                                 defaultParam.add(paramAPIDoc);
                             }
                         }
@@ -208,18 +205,20 @@ public class FunctionSignatureGenerator {
                             parameterList.add(paramh);
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc = generatorUtils.createParamAPIDoc(
+                                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                        DocCommentsGenerator.createAPIParamDoc(
                                                 escapeIdentifier(getValidName(parameter.getName(),
-                                                false)), parameter.getDescription().split("\n")[0]);
+                                                false)), parameter.getDescription());
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
                             defaultable.add(paramh);
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc = generatorUtils.createParamAPIDoc(
+                                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                        DocCommentsGenerator.createAPIParamDoc(
                                                 escapeIdentifier(getValidName(parameter.getName(),
-                                                false)), parameter.getDescription().split("\n")[0]);
+                                                false)), parameter.getDescription());
                                 defaultParam.add(paramAPIDoc);
                             }
                         }
@@ -265,7 +264,7 @@ public class FunctionSignatureGenerator {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         TypeDescriptorNode typeName;
         if (parameter.getExtensions() != null) {
-            annotationNodes = docCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
+            annotationNodes = DocCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
         }
 
         Schema parameterSchema = parameter.getSchema();
@@ -339,7 +338,7 @@ public class FunctionSignatureGenerator {
      */
     public Node getPathParameters(Parameter parameter) throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes =
-                docCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
+                DocCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
         IdentifierToken paramName = createIdentifierToken(escapeIdentifier(
                 getValidName(parameter.getName(), false)));
         String type = "";
@@ -366,7 +365,7 @@ public class FunctionSignatureGenerator {
      */
     private Node getHeaderParameter(Parameter parameter) throws BallerinaOpenApiException {
 
-        NodeList<AnnotationNode> annotationNodes = docCommentsGenerator
+        NodeList<AnnotationNode> annotationNodes = DocCommentsGenerator
                 .extractDisplayAnnotation(parameter.getExtensions());
         Schema schema = parameter.getSchema();
         if (parameter.getRequired()) {
@@ -457,17 +456,17 @@ public class FunctionSignatureGenerator {
                 paramType = generateRecordForInlineRequestBody(operationId, requestBody, schema.getProperties(),
                         schema.getRequired());
             } else {
-                paramType = generatorUtils.getBallerinaMediaType(next.getKey());
+                paramType = GeneratorUtils.getBallerinaMediaType(next.getKey());
             }
             if (!paramType.isBlank()) {
                 NodeList<AnnotationNode> annotationNodes =
-                        docCommentsGenerator.extractDisplayAnnotation(requestBody.getExtensions());
+                        DocCommentsGenerator.extractDisplayAnnotation(requestBody.getExtensions());
                 SimpleNameReferenceNode typeName = createSimpleNameReferenceNode(createIdentifierToken(paramType));
                 IdentifierToken paramName = createIdentifierToken("payload");
                 RequiredParameterNode payload = createRequiredParameterNode(annotationNodes, typeName, paramName);
                 if (requestBody.getDescription() != null) {
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            generatorUtils.createParamAPIDoc(escapeIdentifier("payload"),
+                            DocCommentsGenerator.createAPIParamDoc(escapeIdentifier("payload"),
                                     requestBody.getDescription().split("\n")[0]);
                     requestBodyDoc.add(paramAPIDoc);
                 }
@@ -510,7 +509,7 @@ public class FunctionSignatureGenerator {
                     createIdentifierToken(paramType), typeDescriptorNodeForArraySchema, createToken(SEMICOLON_TOKEN));
             functionReturnType.updateTypeDefinitionNodeList(paramType, arrayTypeNode);
         } else {
-            paramType = generatorUtils.getBallerinaMediaType(next.getKey().trim()) + "[]";
+            paramType = GeneratorUtils.getBallerinaMediaType(next.getKey().trim()) + "[]";
         }
         return paramType;
     }
@@ -520,9 +519,9 @@ public class FunctionSignatureGenerator {
             throws BallerinaOpenApiException {
 
         if (composedSchema.getOneOf() != null) {
-            paramType = generatorUtils.getOneOfUnionType(composedSchema.getOneOf());
+            paramType = GeneratorUtils.getOneOfUnionType(composedSchema.getOneOf());
         } else if (composedSchema.getAnyOf() != null) {
-            paramType = generatorUtils.getOneOfUnionType(composedSchema.getAnyOf());
+            paramType = GeneratorUtils.getOneOfUnionType(composedSchema.getAnyOf());
         } else if (composedSchema.getAllOf() != null) {
             paramType = "Compound" +  getValidName(operationId, true) + "Request";
             List<Schema> allOf = composedSchema.getAllOf();

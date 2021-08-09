@@ -606,9 +606,8 @@ public class CodeGenerator {
      * @throws BallerinaOpenApiException
      */
     public OpenAPI normalizeOpenAPI(Path openAPIPath) throws IOException, BallerinaOpenApiException {
-        GeneratorUtils generatorUtils = new GeneratorUtils();
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
-        generatorUtils.setOperationId(openAPI.getPaths());
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
+        GeneratorUtils.setOperationId(openAPI.getPaths());
         if (openAPI.getComponents() != null) {
             // Refactor schema name with valid name
             Components components = openAPI.getComponents();

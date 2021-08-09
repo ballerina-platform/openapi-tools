@@ -53,9 +53,8 @@ public class OAuth2Tests {
     public void testGetConfigRecord(String yamlFile, String configRecord) throws IOException,
             BallerinaOpenApiException {
 
-        GeneratorUtils generatorUtils = new GeneratorUtils();
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2/" + yamlFile);
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedConfigRecord = configRecord;
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();

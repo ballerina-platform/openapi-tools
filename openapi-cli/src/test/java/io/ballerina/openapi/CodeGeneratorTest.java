@@ -360,12 +360,11 @@ public class CodeGeneratorTest {
 
     @Test
     public void escapeIdentifierTest() {
-        GeneratorUtils generatorUtils = new GeneratorUtils();
-        Assert.assertEquals(generatorUtils.escapeIdentifier("abc"), "abc");
-        Assert.assertEquals(generatorUtils.escapeIdentifier("string"), "'string");
-        Assert.assertEquals(generatorUtils.escapeIdentifier("int"), "'int");
-        Assert.assertEquals(generatorUtils.escapeIdentifier("io.foo.bar"), "'io\\.foo\\.bar");
-        Assert.assertEquals(generatorUtils.escapeIdentifier("getV1CoreVersion"), "getV1CoreVersion");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("abc"), "abc");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("string"), "'string");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("int"), "'int");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("io.foo.bar"), "'io\\.foo\\.bar");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("getV1CoreVersion"), "getV1CoreVersion");
 //        Assert.assertEquals(GeneratorUtils.escapeIdentifier
 //        ("sample_service_\\ \\!\\:\\[\\;"), "'sample_service_\\ \\!\\:\\[\\;");
 //        Assert.assertEquals(GeneratorUtils.escapeIdentifier
@@ -374,12 +373,11 @@ public class CodeGeneratorTest {
 
     @Test
     public void escapeTypeTest() {
-        GeneratorUtils generatorUtils = new GeneratorUtils();
-        Assert.assertEquals(generatorUtils.escapeType("abc"), "abc");
-        Assert.assertEquals(generatorUtils.escapeType("string"), "string");
-        Assert.assertEquals(generatorUtils.escapeType("int"), "int");
-        Assert.assertEquals(generatorUtils.escapeType("io.foo.bar"), "'io\\.foo\\.bar");
-        Assert.assertEquals(generatorUtils.escapeType("getV1CoreVersion"), "getV1CoreVersion");
+        Assert.assertEquals(GeneratorUtils.escapeType("abc"), "abc");
+        Assert.assertEquals(GeneratorUtils.escapeType("string"), "string");
+        Assert.assertEquals(GeneratorUtils.escapeType("int"), "int");
+        Assert.assertEquals(GeneratorUtils.escapeType("io.foo.bar"), "'io\\.foo\\.bar");
+        Assert.assertEquals(GeneratorUtils.escapeType("getV1CoreVersion"), "getV1CoreVersion");
     }
 
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {

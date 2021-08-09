@@ -16,11 +16,14 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.client;
+package io.ballerina.openapi.generators;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationLineNode;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
+import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -43,12 +46,16 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createAnnotationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationLineNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownParameterDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOCUMENTATION_DESCRIPTION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 
@@ -62,7 +69,7 @@ public class DocCommentsGenerator {
      * @param extensions    - openapi extension.
      * @return Annotation node list.
      * */
-    public NodeList<AnnotationNode> extractDisplayAnnotation(Map<String, Object> extensions) {
+    public static NodeList<AnnotationNode> extractDisplayAnnotation(Map<String, Object> extensions) {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         if (extensions != null) {
             for (Map.Entry<String, Object> extension: extensions.entrySet()) {
@@ -75,7 +82,7 @@ public class DocCommentsGenerator {
         return annotationNodes;
     }
 
-    private AnnotationNode getAnnotationNode(Map.Entry<String, Object> extension) {
+    private static AnnotationNode getAnnotationNode(Map.Entry<String, Object> extension) {
 
         LinkedHashMap<String, String> extFields = (LinkedHashMap<String, String>) extension.getValue();
         List<Node> annotFields = new ArrayList<>();
@@ -113,7 +120,7 @@ public class DocCommentsGenerator {
     /**
      * Generate metaDataNode with display annotation.
      */
-    public MetadataNode getMetadataNodeForDisplayAnnotation(Map.Entry<String, Object> extension) {
+    public static MetadataNode getMetadataNodeForDisplayAnnotation(Map.Entry<String, Object> extension) {
 
         MetadataNode metadataNode;
         AnnotationNode annotationNode = getAnnotationNode(extension);
@@ -121,4 +128,41 @@ public class DocCommentsGenerator {
         return metadataNode;
     }
 
+    public static List<MarkdownDocumentationLineNode> createAPIDescriptionDoc(
+            String description, boolean addExtraLine) {
+        String[] descriptionLines = description.split("\n");
+        List<MarkdownDocumentationLineNode> documentElements = new ArrayList<>();
+        for (String line : descriptionLines) {
+            if (!line.isBlank()) {
+                MarkdownDocumentationLineNode documentationLineNode =
+                        createMarkdownDocumentationLineNode(DOCUMENTATION_DESCRIPTION,
+                                createToken(SyntaxKind.HASH_TOKEN), createNodeList(createIdentifierToken(line)));
+                documentElements.add(documentationLineNode);
+            }
+        }
+        if (addExtraLine) {
+            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
+                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+            documentElements.add(newLine);
+        }
+        return documentElements;
+    }
+
+    public static MarkdownParameterDocumentationLineNode createAPIParamDoc(String paramName, String description) {
+        String[] paramDescriptionLines = description.split("\n");
+        List<Node> documentElements = new ArrayList<>();
+        for (String line : paramDescriptionLines) {
+            if (!line.isBlank()) {
+                documentElements.add(createIdentifierToken(line));
+            }
+        }
+        return createMarkdownParameterDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                createToken(SyntaxKind.PLUS_TOKEN), createIdentifierToken(paramName),
+                createToken(SyntaxKind.MINUS_TOKEN), createNodeList(documentElements));
+    }
+
+    public static MetadataNode createAPIDocMetadataNode(List<Node> docs) {
+        MarkdownDocumentationNode functionDoc = createMarkdownDocumentationNode(createNodeList(docs));
+        return createMetadataNode(functionDoc, createEmptyNodeList());
+    }
 }
