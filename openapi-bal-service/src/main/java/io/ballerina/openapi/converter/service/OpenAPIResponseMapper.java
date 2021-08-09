@@ -42,7 +42,7 @@ import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.OpenApiConverterException;
-import io.ballerina.openapi.converter.utils.ConverterUtils;
+import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -145,7 +145,7 @@ public class OpenAPIResponseMapper {
             case STRING_TYPE_DESC:
             case BOOLEAN_TYPE_DESC:
                 String type =  typeNode.toString().toLowerCase(Locale.ENGLISH).trim();
-                Schema schema = ConverterUtils.getOpenApiSchema(type);
+                Schema schema = ConverterCommonUtils.getOpenApiSchema(type);
                 String media = convertBallerinaMIMEToOASMIMETypes(type);
                 mediaType.setSchema(schema);
                 apiResponse.description(HTTP_200_DESCRIPTION);
@@ -209,7 +209,7 @@ public class OpenAPIResponseMapper {
             ArraySchema arraySchema = new ArraySchema();
             String type02 = array.memberTypeDesc().kind().toString().trim().split("_")[0].
                             toLowerCase(Locale.ENGLISH);
-            Schema openApiSchema = ConverterUtils.getOpenApiSchema(type02);
+            Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(type02);
             String mimeType = convertBallerinaMIMEToOASMIMETypes(type02);
             arraySchema.setItems(openApiSchema);
             mediaType.setSchema(arraySchema);
@@ -267,7 +267,8 @@ public class OpenAPIResponseMapper {
                 } else {
                     //TODO array fields handling
                     mediaTypeResponse = convertBallerinaMIMEToOASMIMETypes(recordField.typeName().toString().trim());
-                    Schema propertySchema = ConverterUtils.getOpenApiSchema(recordField.typeName().toString().trim());
+                    Schema propertySchema = ConverterCommonUtils.getOpenApiSchema(
+                            recordField.typeName().toString().trim());
                     properties.put(recordField.fieldName().text(), propertySchema);
                 }
             }
