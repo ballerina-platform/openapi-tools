@@ -71,7 +71,6 @@ public class ConverterUtils {
      */
     public static Schema getOpenApiSchema(String type) {
         Schema schema;
-
         switch (type) {
             case Constants.STRING:
             case Constants.PLAIN:

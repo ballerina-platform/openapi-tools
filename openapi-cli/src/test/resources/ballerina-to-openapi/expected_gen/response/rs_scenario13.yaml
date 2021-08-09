@@ -3,7 +3,7 @@ info:
   title: ' payloadV'
   version: 1.0.0
 servers:
-  - url: http://petstore.openapi.io:80/payloadV
+  - url: localhost:9090/payloadV
 paths:
   /pets:
     get:
@@ -13,6 +13,5 @@ paths:
           description: Ok
           content:
             text/plain:
-              schema:
-                type: string
+              schema: {}
 components: {}

@@ -3,11 +3,11 @@ info:
   title: ' payloadV'
   version: 1.0.0
 servers:
-  - url: http://petstore.openapi.io:80/payloadV
+  - url: localhost:9090/payloadV
 paths:
-  /pets:
-    get:
-      operationId: operation1_get_/pets
+  /hi:
+    post:
+      operationId: operation1_post_/hi
       responses:
         "200":
           description: Ok

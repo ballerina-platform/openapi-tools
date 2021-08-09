@@ -20,7 +20,9 @@ package io.ballerina.openapi.converter;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Ballerina To OpenApi Service Constants.
@@ -116,17 +118,66 @@ public class Constants {
     }
 
     /**
-     * Http response statuscode
+     * Http response status code.
      */
     public static final List<String> STATUS_CODE_RESPONSE = Collections.unmodifiableList(
             Arrays.asList(
-            "Continue","SwitchingProtocols","Ok","Created","Accepted","NonAuthoritativeInformation","NoContent",
-    "ResetContent","PartialContent","MultipleChoices","MovedPermanently","Found","SeeOther","NotModified","UseProxy","TemporaryRedirect",
-    "PermanentRedirect","BadRequest","Unauthorized","PaymentRequired","Forbidden","NotFound","MethodNotAllowed","NotAcceptable",
-    "ProxyAuthenticationRequired","RequestTimeout","Conflict","Gone","LengthRequired","PreconditionFailed","PayloadTooLarge",
-    "UriTooLong","UnsupportedMediaType","RangeNotSatisfiable","ExpectationFailed","UpgradeRequired","RequestHeaderFieldsTooLarge",
-    "InternalServerError","NotImplemented","BadGateway","ServiceUnavailable","GatewayTimeout",
+            "Continue", "SwitchingProtocols", "Ok", "Created", "Accepted", "NonAuthoritativeInformation", "NoContent",
+    "ResetContent", "PartialContent", "MultipleChoices", "MovedPermanently", "Found", "SeeOther", "NotModified",
+                    "UseProxy", "TemporaryRedirect", "PermanentRedirect", "BadRequest", "Unauthorized",
+                    "PaymentRequired", "Forbidden", "NotFound", "MethodNotAllowed", "NotAcceptable",
+                    "ProxyAuthenticationRequired", "RequestTimeout", "Conflict", "Gone", "LengthRequired",
+                    "PreconditionFailed", "PayloadTooLarge", "UriTooLong", "UnsupportedMediaType",
+                    "RangeNotSatisfiable", "ExpectationFailed", "UpgradeRequired", "RequestHeaderFieldsTooLarge",
+                    "InternalServerError", "NotImplemented", "BadGateway", "ServiceUnavailable", "GatewayTimeout",
                     "HttpVersionNotSupported"));
 
-
+    public static final Map<String, String> HTTP_CODES;
+    static {
+        Map<String, String> aMap = new HashMap<>();
+        aMap.put("Continue", "100");
+        aMap.put("SwitchingProtocols", "101");
+        aMap.put("Ok", "200");
+        aMap.put("Created", "201");
+        aMap.put("Accepted", "202");
+        aMap.put("NonAuthoritativeInformation", "203");
+        aMap.put("NoContent", "204");
+        aMap.put("RestContent", "205");
+        aMap.put("PartialContent", "206");
+        aMap.put("MultipleChoices", "300");
+        aMap.put("MovedPermanently", "301");
+        aMap.put("Found", "302");
+        aMap.put("SeeOther", "303");
+        aMap.put("NotModified", "304");
+        aMap.put("UseProxy", "305");
+        aMap.put("TemporaryRedirect", "308");
+        aMap.put("BadRequest", "400");
+        aMap.put("Unauthorized", "401");
+        aMap.put("PaymentRequired", "402");
+        aMap.put("Forbidden", "403");
+        aMap.put("NotFound", "404");
+        aMap.put("MethodNotAllowed", "405");
+        aMap.put("NotAccepted", "406");
+        aMap.put("ProxyAuthenticationRequires", "407");
+        aMap.put("RequestTimeOut", "408");
+        aMap.put("Conflict", "409");
+        aMap.put("Gone", "410");
+        aMap.put("LengthRequired", "411");
+        aMap.put("PreconditionFailed", "412");
+        aMap.put("UriTooLong", "413");
+        aMap.put("UnsupportedMediaType", "414");
+        aMap.put("RangeNotSatisfied", "415");
+        aMap.put("ExpectationFailed", "416");
+        aMap.put("UpgradeRequired", "426");
+        aMap.put("RequestHeaderFieldsTooLarge", "431");
+        aMap.put("InternalServerError", "500");
+        aMap.put("NotImplemented", "501");
+        aMap.put("BadGateway", "502");
+        aMap.put("ServiceUnavailable", "503");
+        aMap.put("GatewayTimeOut", "504");
+        aMap.put("HttpVersionNotSupported", "505");
+        HTTP_CODES = Collections.unmodifiableMap(aMap);
+    }
+    public static final String HTTP_200 = "200";
+    public static final String HTTP_200_DESCRIPTION = "Ok";
 }
