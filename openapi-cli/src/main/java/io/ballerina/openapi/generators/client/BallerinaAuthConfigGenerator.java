@@ -20,6 +20,7 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.*;
 import io.ballerina.openapi.generators.GeneratorConstants;
+import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
@@ -42,15 +43,17 @@ public class BallerinaAuthConfigGenerator {
     private boolean isHttpOROAuth = false;
     private final Set<String> authTypes = new LinkedHashSet<>();
     private String apiKeyDescription;
+    private final GeneratorUtils generatorUtils;
 
     public BallerinaAuthConfigGenerator(boolean isAPIKey, boolean isHttpOROAuth) {
 
         this.isAPIKey = isAPIKey;
         this.isHttpOROAuth = isHttpOROAuth;
+        this.generatorUtils = new GeneratorUtils();
     }
 
     public BallerinaAuthConfigGenerator() {
-
+        this.generatorUtils = new GeneratorUtils();
     }
     public boolean isHttpOROAuth() {
 
@@ -80,7 +83,7 @@ public class BallerinaAuthConfigGenerator {
      * @param openAPI                       OpenApi object received from swagger open-api parser
      * @return {@link TypeDefinitionNode}   Syntax tree node of config record
      */
-    public TypeDefinitionNode getConfigRecord(OpenAPI openAPI) {
+    public TypeDefinitionNode getConfigRecord(OpenAPI openAPI) throws BallerinaOpenApiException {
         if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
             List<Node> recordFieldList = addItemstoRecordFieldList(openAPI);
             if (!recordFieldList.isEmpty()) {
@@ -101,13 +104,50 @@ public class BallerinaAuthConfigGenerator {
                         NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
                                 fieldNodes, null, bodyEndDelimiter);
                 Token semicolon = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.SEMICOLON);
-                return NodeFactory.createTypeDefinitionNode(null,
+                return NodeFactory.createTypeDefinitionNode(this.getConfigRecordMetaDataNode(),
                         visibilityQualifierNode, typeKeyWord, typeName, recordTypeDescriptorNode, semicolon);
             }
         }
         return null;
     }
 
+    private MetadataNode getConfigRecordMetaDataNode () {
+        List<Node> docs = new ArrayList<>();
+        if (isAPIKey) {
+            MarkdownDocumentationLineNode recordDescription =
+                    createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                            createNodeList(createLiteralValueToken(null,
+                                    "Provides API key configurations needed when communicating with a " +
+                                            "remote HTTP endpoint.",
+                                    createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+            docs.add(recordDescription);
+            MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
+                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+            docs.add(hashNewLine);
+            MarkdownParameterDocumentationLineNode apiKeysParam = generatorUtils.createParamAPIDoc("apiKeys",
+                    "API keys related to connector authentication");
+            docs.add(apiKeysParam);
+        } else {
+            MarkdownDocumentationLineNode recordDescription =
+                    createMarkdownDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
+                            createNodeList(createLiteralValueToken(null,
+                                    "Provides a set of configurations for controlling the behaviours when " +
+                                            "communicating with a remote HTTP endpoint.",
+                                    createEmptyMinutiaeList(), createEmptyMinutiaeList())));
+            docs.add(recordDescription);
+            MarkdownDocumentationLineNode hashNewLine = createMarkdownDocumentationLineNode(null,
+                    createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
+            docs.add(hashNewLine);
+            MarkdownParameterDocumentationLineNode authConfigPath = generatorUtils.createParamAPIDoc(
+                    "authConfig", "Configurations related to client authentication");
+            docs.add(authConfigPath);
+            MarkdownParameterDocumentationLineNode sslParam = generatorUtils.createParamAPIDoc(
+                    "secureSocketConfig", "SSL/TLS-related configurations");
+            docs.add(sslParam);
+        }
+        MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));
+        return createMetadataNode(clientInitDoc, createEmptyNodeList());
+    }
     /**
      * Generate Class variable for api key map {@code map<string|string[]> apiKeys; }.
      *
@@ -332,7 +372,7 @@ public class BallerinaAuthConfigGenerator {
      *
      * @return  {@link List<Node>}  syntax tree node list of record fields
      */
-    private List<Node> addItemstoRecordFieldList (OpenAPI openAPI) {
+    private List<Node> addItemstoRecordFieldList (OpenAPI openAPI) throws BallerinaOpenApiException {
         List<Node> recordFieldNodes = new ArrayList<>();
 
         Token semicolonToken = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.SEMICOLON);
@@ -563,7 +603,8 @@ public class BallerinaAuthConfigGenerator {
      * @param securitySchemeMap     Map of security schemas of the given open api spec
      * @return {@link String}       Type name of the authConfig field in ClientConfig record
      */
-    private String getConfigRecordFieldTypeNames(Map<String, SecurityScheme> securitySchemeMap) {
+    private String getConfigRecordFieldTypeNames(Map<String, SecurityScheme> securitySchemeMap) throws
+            BallerinaOpenApiException {
         Set<String> httpFieldTypeNames = new HashSet<>();
         for (Map.Entry<String, SecurityScheme> securitySchemeEntry : securitySchemeMap.entrySet()) {
             SecurityScheme schemaValue = securitySchemeEntry.getValue();
@@ -620,6 +661,9 @@ public class BallerinaAuthConfigGenerator {
                 }
             }
         }
+        if (isAPIKey && isHttpOROAuth) {
+            throw new BallerinaOpenApiException("Unsupported combination of security schemes.");
+        }
         return buildConfigRecordFieldTypes(httpFieldTypeNames).toString();
     }
 
@@ -660,6 +704,4 @@ public class BallerinaAuthConfigGenerator {
     public String getApiKeyDescription () {
         return apiKeyDescription;
     }
-
-
 }

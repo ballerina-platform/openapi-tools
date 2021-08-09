@@ -4,17 +4,31 @@ package io.ballerina.openapi.generators.common;
  * Constants for openapi code generator unit test cases.
  */
 public class TestConstants {
+    private static String clientConfigRecordDoc = "" +
+            "# Provides a set of configurations for controlling the behaviours when communicating with a remote " +
+            "HTTP endpoint." +
+            "#" +
+            "# + authConfig - Configurations related to client authentication" +
+            "# + secureSocketConfig - SSL/TLS-related configurations";
+    private static String apiKeyConfigRecordDoc = "" +
+            "# Provides API key configurations needed when communicating with a remote HTTP endpoint." +
+            "#" +
+            "# + apiKeys - API keys related to connector authentication";
+
     public static final String HTTP_BASIC_AUTH_CONFIG_REC = "" +
+            clientConfigRecordDoc +
             "public type ClientConfig record {\n" +
             "    http:CredentialsConfig authConfig;\n" +
             "    http:ClientSecureSocket secureSocketConfig?;\n" +
             "};";
     public static final String HTTP_BEARER_AUTH_CONFIG_REC = "" +
+            clientConfigRecordDoc +
             "public type ClientConfig record {\n" +
             "    http:BearerTokenConfig authConfig;\n" +
             "    http:ClientSecureSocket secureSocketConfig?;\n" +
             "};";
     public static final String HTTP_MULTI_AUTH_CONFIG_REC = "" +
+            clientConfigRecordDoc +
             "public type ClientConfig record {\n" +
             "    http:BearerTokenConfig|http:CredentialsConfig authConfig;\n" +
             "    http:ClientSecureSocket secureSocketConfig?;\n" +
@@ -29,31 +43,38 @@ public class TestConstants {
             "   secureSocket: secureSocketConfig " +
             "});";
     public static final String OAUTH2_AUTHORIZATION_CODE_CONFIG_REC = "" +
+            clientConfigRecordDoc +
             "public type ClientConfig record {\n" +
             "    http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig authConfig;\n" +
             "    http:ClientSecureSocket secureSocketConfig?;\n" +
             "};";
     public static final String OAUTH2_IMPLICIT_CONFIG_REC = "" +
+            clientConfigRecordDoc +
             "public type ClientConfig record {\n" +
             "    http:BearerTokenConfig authConfig;\n" +
             "    http:ClientSecureSocket secureSocketConfig?;\n" +
             "};";
     public static final String OAUTH2_PASSWORD_CONFIG_REC = "" +
+            clientConfigRecordDoc +
             "public type ClientConfig record {\n" +
             "    http:OAuth2PasswordGrantConfig authConfig;\n" +
             "    http:ClientSecureSocket secureSocketConfig?;\n" +
             "};";
     public static final String OAUTH2_CLIENT_CRED_CONFIG_REC = "" +
+            clientConfigRecordDoc +
             "public type ClientConfig record {\n" +
             "    http:OAuth2ClientCredentialsGrantConfig authConfig;\n" +
             "    http:ClientSecureSocket secureSocketConfig?;\n" +
             "};";
     public static final String OAUTH2_MULTI_FLOWS_CONFIG_REC = "" +
+            clientConfigRecordDoc +
             "public type ClientConfig record {\n" +
             "  http:OAuth2PasswordGrantConfig|http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig authConfig;\n" +
             "  http:ClientSecureSocket secureSocketConfig?;\n" +
             "};";
-    public static final String API_KEY_CONFIG_REC = "public type ApiKeysConfig record {map<string> apiKeys;};";
+    public static final String API_KEY_CONFIG_REC = "" +
+            apiKeyConfigRecordDoc +
+            "public type ApiKeysConfig record {map<string> apiKeys;};";
     public static final String API_KEY_MAP_VAR  = "final readonly & map<string> apiKeys;";
     public static final String API_KEY_CONFIG_PARAM = "" +
             "ApiKeysConfig apiKeyConfig,http:ClientConfiguration clientConfig =  {}";
