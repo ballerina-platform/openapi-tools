@@ -3,11 +3,11 @@ import  ballerina/http;
 # refComponent
 public isolated client class Client {
     final http:Client clientEp;
-    # Client initialization.
+    # Gets invoked to initialize the `connector`.
     #
-    # + clientConfig - Client configuration details
-    # + serviceUrl - Connector server URL
-    # + return -  An error at the failure of client initialization
+    # + clientConfig - The configurations to be used when initializing the `connector`
+    # + serviceUrl - URL of the target service
+    # + return - An error if connector initialization failed
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;

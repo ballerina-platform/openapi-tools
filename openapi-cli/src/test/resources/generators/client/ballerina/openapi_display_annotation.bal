@@ -2,6 +2,9 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
+# Provides API key configurations needed when communicating with a remote HTTP endpoint.
+#
+# + apiKeys - API keys related to connector authentication
 public type ApiKeysConfig record {
     map<string> apiKeys;
 };
@@ -36,12 +39,12 @@ public isolated client class Client {
     final http:Client clientEp;
     final readonly & map<string> apiKeys;
 
-    # Client initialization.
+    # Gets invoked to initialize the `connector`.
     #
     # + apiKeyConfig - API key configuration detail
-    # + clientConfig - Client configuration details
-    # + serviceUrl - Connector server URL
-    # + return -  An error at the failure of client initialization
+    # + clientConfig - The configurations to be used when initializing the `connector`
+    # + serviceUrl - URL of the target service
+    # + return - An error if connector initialization failed
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
