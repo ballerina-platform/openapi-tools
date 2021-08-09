@@ -22,7 +22,6 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationLineNode;
-import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -47,7 +46,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createAnnotationNode
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationLineNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownParameterDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
@@ -159,10 +157,5 @@ public class DocCommentsGenerator {
         return createMarkdownParameterDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
                 createToken(SyntaxKind.PLUS_TOKEN), createIdentifierToken(paramName),
                 createToken(SyntaxKind.MINUS_TOKEN), createNodeList(documentElements));
-    }
-
-    public static MetadataNode createAPIDocMetadataNode(List<Node> docs) {
-        MarkdownDocumentationNode functionDoc = createMarkdownDocumentationNode(createNodeList(docs));
-        return createMetadataNode(functionDoc, createEmptyNodeList());
     }
 }
