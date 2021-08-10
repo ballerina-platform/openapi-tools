@@ -9,10 +9,6 @@ paths:
     post:
       operationId: operation1_post_/
       responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
+        "202":
+          description: Accepted
 components: {}

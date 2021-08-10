@@ -14,12 +14,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ReservationReceipt'
       responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
+        "202":
+          description: Accepted
 components:
   schemas:
     Links:
