@@ -85,8 +85,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.BASIC;
 import static io.ballerina.openapi.generators.GeneratorConstants.BEARER;
+import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_CRED;
 import static io.ballerina.openapi.generators.GeneratorConstants.PASSWORD;
+import static io.ballerina.openapi.generators.GeneratorConstants.REFRESH_TOKEN;
 
 /**
  * This class use for generating boilerplate codes for test cases.
@@ -212,10 +214,17 @@ public class BallerinaTestGenerator {
                     moduleVariableDeclarationNodes.add(getAuthConfigAssignmentNode());
                     configFileName = "password_config.toml";
                     break;
+                case REFRESH_TOKEN:
+                    typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
+                            createIdentifierToken("http:OAuth2RefreshTokenGrantConfig & readonly"));
+                    moduleVariableDeclarationNodes.add(getConfigurableVariable(typeBindingPattern));
+                    moduleVariableDeclarationNodes.add(getAuthConfigAssignmentNode());
+                    configFileName = "refresh_token_config.toml";
+                    break;
                 case API_KEY:
                     isHttpOrOAuth = false;
                     typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
-                            createIdentifierToken(GeneratorConstants.API_KEY_CONFIG + " & readonly"));
+                            createIdentifierToken(GeneratorConstants.API_KEYS_CONFIG + " & readonly"));
                     moduleVariableDeclarationNodes.add(getConfigurableVariable(typeBindingPattern));
                     moduleVariableDeclarationNodes.add(getClientInitializationNode
                             (GeneratorConstants.API_KEY_CONFIG_PARAM));
@@ -242,7 +251,7 @@ public class BallerinaTestGenerator {
     private ModuleVariableDeclarationNode getAuthConfigAssignmentNode () {
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(GeneratorConstants.CONFIG_RECORD_NAME));
+                createIdentifierToken(CLIENT_CONFIG));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
                 createIdentifierToken(GeneratorConstants.CONFIG_RECORD_ARG));
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(typeBindingPattern,

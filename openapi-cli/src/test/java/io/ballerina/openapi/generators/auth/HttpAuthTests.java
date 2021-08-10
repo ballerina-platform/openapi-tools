@@ -20,7 +20,6 @@ package io.ballerina.openapi.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.BallerinaAuthConfigGenerator;
@@ -33,7 +32,6 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,16 +40,13 @@ import java.util.Objects;
  */
 public class HttpAuthTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/auth").toAbsolutePath();
-    List<String> list1 = new ArrayList<>();
-    List<String> list2 = new ArrayList<>();
-    Filter filter = new Filter(list1, list2);
-    BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, true);
-
 
     @Test(description = "Generate config record for http basic auth", dataProvider = "httpAuthIOProvider")
     public void testGetConfigRecord(String yamlFile, String configRecord) throws IOException,
             BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("scenarios/http/" + yamlFile);
+        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(
+                false, true);
         GeneratorUtils generatorUtils = new GeneratorUtils();
         OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedConfigRecord = configRecord;
@@ -65,6 +60,8 @@ public class HttpAuthTests {
     @Test(description = "Test the generation of Config params in class init function signature",
             dependsOnMethods = {"testGetConfigRecord"})
     public void testGetConfigParamForClassInit() {
+        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(
+                false, true);
         String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
         List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
@@ -76,19 +73,11 @@ public class HttpAuthTests {
         Assert.assertEquals(expectedParams, generatedParamsStr);
     }
 
-    @Test(description = "Test the generation of SSL init node",
-            dependsOnMethods = {"testGetConfigRecord"})
-    public void testGetSecureSocketInitNode() {
-        String expectedParam = TestConstants.SSL_ASSIGNMENT;
-        VariableDeclarationNode generatedInitParamNode = ballerinaAuthConfigGenerator.getSecureSocketInitNode();
-        expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
-        String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
-        Assert.assertEquals(expectedParam, generatedParamsStr);
-    }
-
     @Test(description = "Test the generation of http:Client init node",
             dependsOnMethods = {"testGetConfigRecord"})
     public void testGetClientInitializationNode() {
+        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(
+                false, true);
         String expectedParam = TestConstants.HTTP_CLIENT_DECLARATION;
         VariableDeclarationNode generatedInitParamNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
@@ -100,9 +89,9 @@ public class HttpAuthTests {
     @DataProvider(name = "httpAuthIOProvider")
     public Object[][] dataProvider() {
         return new Object[][]{
-                {"basic_auth.yaml", TestConstants.HTTP_BASIC_AUTH_CONFIG_REC}
-//                {"bearer_auth.yaml", TestConstants.HTTP_BEARER_AUTH_CONFIG_REC},
-//                {"multiple_auth.yaml", TestConstants.HTTP_MULTI_AUTH_CONFIG_REC}
+                {"basic_auth.yaml", TestConstants.HTTP_BASIC_AUTH_CONFIG_REC},
+                {"bearer_auth.yaml", TestConstants.HTTP_BEARER_AUTH_CONFIG_REC},
+                {"multiple_auth.yaml", TestConstants.HTTP_MULTI_AUTH_CONFIG_REC}
         };
     }
 }

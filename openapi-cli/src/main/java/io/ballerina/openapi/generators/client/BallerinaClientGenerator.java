@@ -438,7 +438,6 @@ public class BallerinaClientGenerator {
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
                 createToken(OPEN_PAREN_TOKEN), parameterList, createToken(CLOSE_PAREN_TOKEN), returnNode);
 
-        VariableDeclarationNode sslDeclarationNode = ballerinaAuthConfigGenerator.getSecureSocketInitNode();
         //Create function body node client init
         VariableDeclarationNode clientInitializationNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
 
@@ -454,9 +453,6 @@ public class BallerinaClientGenerator {
                 getApiKeyAssignmentNode();
 
         List<StatementNode> assignmentNodes = new ArrayList<>();
-        if (sslDeclarationNode != null) {
-            assignmentNodes.add(sslDeclarationNode);
-        }
         assignmentNodes.add(clientInitializationNode);
         assignmentNodes.add(httpClientAssignmentStatementNode);
         if (assignmentStatementNodeApiKey != null) {
