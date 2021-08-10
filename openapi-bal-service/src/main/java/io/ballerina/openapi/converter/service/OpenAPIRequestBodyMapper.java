@@ -75,13 +75,22 @@ public class OpenAPIRequestBodyMapper {
      * @param annotation    - Payload annotation details from resource function
      */
     public void handlePayloadAnnotation(RequiredParameterNode payloadNode, Map<String, Schema> schema,
-                                        AnnotationNode annotation) {
+                                        AnnotationNode annotation, String[] apidocs) {
 
         if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
             // Creating request body - required.
             RequestBody bodyParameter = new RequestBody();
             MappingConstructorExpressionNode mapMime = annotation.annotValue().orElse(null);
             SeparatedNodeList<MappingFieldNode> fields = null;
+            // Add api doc  to request body description
+            if (apidocs != null) {
+                for (String doc: apidocs) {
+                    String normalizeDoc = doc.trim().replaceAll("#", "");
+                    if (normalizeDoc.startsWith(String.valueOf(payloadNode.paramName().orElse(null).text()))) {
+                        bodyParameter.setDescription(normalizeDoc.split("-", 2)[1]);
+                    }
+                }
+            }
             if (mapMime != null) {
                 fields = mapMime.fields();
             }

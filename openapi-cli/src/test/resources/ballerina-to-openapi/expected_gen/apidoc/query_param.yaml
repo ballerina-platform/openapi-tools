@@ -1,0 +1,34 @@
+openapi: 3.0.1
+info:
+  title: ' payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /locations/{id}/rooms:
+    get:
+      summary: Reperesents Snowpeak room collection resource
+      operationId: "operation1_get_/locations/{id}/rooms"
+      parameters:
+        - name: id
+          in: path
+          description: Unique identification of location
+          required: true
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          description: Start date in format yyyy-mm-dd
+          required: true
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          description: End date in format yyyy-mm-dd
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+components: {}

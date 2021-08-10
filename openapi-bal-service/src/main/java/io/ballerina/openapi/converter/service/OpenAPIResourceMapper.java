@@ -23,6 +23,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
@@ -46,6 +47,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -196,21 +198,37 @@ public class OpenAPIResourceMapper {
     private OperationAdaptor convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
                                                         int idIncrement) throws OpenApiConverterException {
         OperationAdaptor op = new OperationAdaptor();
-        if (resource != null) {
-
-            String generateRelativePath = generateRelativePath(resource);
-            op.setHttpOperation(httpMethod);
-            op.setPath(generateRelativePath);
-            String resName = (resource.functionName().text() + "_" + generateRelativePath)
-                    .replaceAll("\\{///\\}", "_");
-            op.getOperation().setOperationId(getOperationId(idIncrement, resName));
-            op.getOperation().setParameters(null);
-
-            this.addResourceParameters(resource, op);
-            OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
-            openAPIResponseMapper.parseResponsesAnnotationAttachment(resource, op);
-//            this.parseResponsesAnnotationAttachment(resource, op);
+        String generateRelativePath = generateRelativePath(resource);
+        op.setHttpOperation(httpMethod);
+        op.setPath(generateRelativePath);
+        // Set operation id
+        String resName = (resource.functionName().text() + "_" + generateRelativePath).replaceAll("\\{///\\}", "_");
+        op.getOperation().setOperationId(getOperationId(idIncrement, resName));
+        op.getOperation().setParameters(null);
+        // Set operation summary
+        String[] apidocs = null;
+        List<String> parameterDoc = new ArrayList<>();
+        if (resource.metadata().isPresent()) {
+            MetadataNode metadataNode = resource.metadata().get();
+            Optional<Node> apiString = metadataNode.documentationString();
+            if (apiString.isPresent()) {
+                Node resourceDescription = apiString.get();
+                //check the kind if need.
+                apidocs = resourceDescription.toString().trim().split("\\+");
+                // first line assign as summary
+                if (apidocs.length > 1) {
+                    op.getOperation().setSummary(apidocs[0].trim().replaceAll("#","").replaceAll("\\n", "").trim());
+                } else {
+                    op.getOperation().setSummary(resourceDescription.toString().trim().replaceAll("#", "").replaceAll("\\n", "").trim());
+                }
+                //filter parameter comments
+            }
         }
+
+        this.addResourceParameters(resource, op, apidocs);
+        OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
+        openAPIResponseMapper.parseResponsesAnnotationAttachment(resource, op);
+
         return op;
     }
 
@@ -230,10 +248,11 @@ public class OpenAPIResourceMapper {
      * @param resource         The ballerina resource definition.
      * @param operationAdaptor The openApi operation.
      */
-    private void addResourceParameters(FunctionDefinitionNode resource, OperationAdaptor operationAdaptor) {
+    private void addResourceParameters(FunctionDefinitionNode resource, OperationAdaptor operationAdaptor,
+                                       String[] apidocs) {
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource,
-                operationAdaptor.getOperation());
+                operationAdaptor.getOperation(), apidocs);
         openAPIParameterMapper.createParametersModel();
         // Need to check this since ballerina parser issue not generated when `GET` has requestBody
         if (!"GET".toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
@@ -249,7 +268,7 @@ public class OpenAPIResourceMapper {
                         for (AnnotationNode annotation: annotations) {
                             OpenAPIRequestBodyMapper openAPIRequestBodyMapper =
                                     new OpenAPIRequestBodyMapper(components, operationAdaptor, semanticModel);
-                            openAPIRequestBodyMapper.handlePayloadAnnotation(bodyParam, schema, annotation);
+                            openAPIRequestBodyMapper.handlePayloadAnnotation(bodyParam, schema, annotation, apidocs);
                         }
                     }
                 }
