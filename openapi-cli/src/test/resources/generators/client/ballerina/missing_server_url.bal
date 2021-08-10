@@ -3,11 +3,10 @@ import  ballerina/url;
 import  ballerina/lang.'string;
 
 # Provides API key configurations needed when communicating with a remote HTTP endpoint.
-#
-# + apiKeys - API keys related to connector authentication
-public type ApiKeysConfig record {
+public type ApiKeysConfig record {|
+    # API keys related to connector authentication
     map<string> apiKeys;
-};
+|};
 
 # Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city.
 @display {label: "Open Weather Client"}
