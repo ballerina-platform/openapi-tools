@@ -67,7 +67,7 @@ public class OpenAPIComponentMapper {
             TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
             // Handle record type request body
             if (typeRef.typeDescriptor() instanceof RecordTypeSymbol) {
-                // Handel typeInclusions with allOf type binding
+                // Handle typeInclusions with allOf type binding
                 RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeRef.typeDescriptor();
                 List<TypeSymbol> typeInclusions = recordTypeSymbol.typeInclusions();
                 Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
