@@ -70,6 +70,8 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * This class will do resource mapping from ballerina to openApi.
+ *
+ * @since 2.0.0
  */
 public class OpenAPIResourceMapper {
     private SemanticModel semanticModel;
@@ -466,7 +468,7 @@ public class OpenAPIResourceMapper {
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handel record for components
-        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, semanticModel);
+        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
         componentMapper.handleRecordNode(recordNode, schema, typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         if (recordNode.parent().kind().equals(SyntaxKind.ARRAY_TYPE_DESC)) {

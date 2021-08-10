@@ -91,7 +91,7 @@ public class ConverterCommonUtils {
             case Constants.TYPE_REFERENCE:
             case Constants.TYPEREFERENCE:
                 schema = new Schema();
-                schema.$ref("true");
+//                schema.$ref("true");
                 break;
             case Constants.BYTE_ARRAY:
             case Constants.OCTET_STREAM:
