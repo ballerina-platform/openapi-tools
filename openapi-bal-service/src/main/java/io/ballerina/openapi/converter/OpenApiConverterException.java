@@ -35,7 +35,5 @@ public class OpenApiConverterException extends Exception {
     }
 
     public OpenApiConverterException() {
-        
-
     }
 }

@@ -122,6 +122,14 @@ public class ResponseTests {
         //Compare generated yaml file with expected yaml content
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario14.yaml");
     }
+
+    @Test(description = "When the return type is inline record with non http typeInclusion fields", enabled = false)
+    public void testInlineRecordHasTypeInclusionReference() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario16.bal");
+        //Compare generated yaml file with expected yaml content
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario16.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

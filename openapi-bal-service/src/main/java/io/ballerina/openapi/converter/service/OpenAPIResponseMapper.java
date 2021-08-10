@@ -372,10 +372,10 @@ public class OpenAPIResponseMapper {
                 RecordTypeSymbol returnRecord = (RecordTypeSymbol) typeReferenceTypeSymbol.typeDescriptor();
                 List<TypeSymbol> typeInclusions = returnRecord.typeInclusions();
                 if (!typeInclusions.isEmpty()) {
-                    handleRecordHasHttpTypeInclusionField(referenceNode, schema, apiResponses, apiResponse, typeSymbol,
+                    handleRecordHasHttpTypeInclusionField(schema, apiResponses, apiResponse, typeSymbol,
                             componentMapper, media, returnRecord, typeInclusions);
                 } else {
-                    componentMapper.handleRecordNode(referenceNode, schema, typeSymbol);
+                    componentMapper.handleRecordNode(schema, typeSymbol);
                     media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
                     apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
                     apiResponse.description(HTTP_200_DESCRIPTION);
@@ -386,8 +386,7 @@ public class OpenAPIResponseMapper {
         operationAdaptor.getOperation().setResponses(apiResponses);
     }
 
-    private void handleRecordHasHttpTypeInclusionField(SimpleNameReferenceNode referenceNode,
-                                                       Map<String, Schema> schema, ApiResponses apiResponses,
+    private void handleRecordHasHttpTypeInclusionField(Map<String, Schema> schema, ApiResponses apiResponses,
                                                        ApiResponse apiResponse, TypeSymbol typeSymbol,
                                                        OpenAPIComponentMapper componentMapper,
                                                        io.swagger.v3.oas.models.media.MediaType media,
@@ -404,8 +403,7 @@ public class OpenAPIResponseMapper {
                 RecordFieldSymbol body = fieldsOfRecord.get("body");
                 switch (body.typeDescriptor().typeKind()) {
                     case TYPE_REFERENCE:
-                        componentMapper.handleRecordNode(referenceNode, schema,
-                                (TypeReferenceTypeSymbol) body.typeDescriptor());
+                        componentMapper.handleRecordNode(schema, (TypeReferenceTypeSymbol) body.typeDescriptor());
                         media.setSchema(new Schema().$ref(body.typeDescriptor().getName().orElseThrow().trim()));
                         apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
                         apiResponses.put(code, apiResponse);
@@ -418,8 +416,8 @@ public class OpenAPIResponseMapper {
             }
         }
         if (!isHttpModule) {
-            componentMapper.handleRecordNode(referenceNode, schema, typeSymbol);
-            media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
+            componentMapper.handleRecordNode(schema, typeSymbol);
+            media.setSchema(new Schema().$ref(typeSymbol.toString().trim()));
             apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
             apiResponse.description(HTTP_200_DESCRIPTION);
             apiResponses.put(HTTP_200, apiResponse);

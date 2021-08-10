@@ -24,7 +24,6 @@ import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
@@ -56,12 +55,10 @@ public class OpenAPIComponentMapper {
     /**
      * This function for doing the mapping with ballerina record to object schema.
      *
-     * @param recordNode     Record Node
      * @param schema         Map of current schemas
      * @param typeSymbol     Record Name as a TypeSymbol
      */
-    public void handleRecordNode(SimpleNameReferenceNode recordNode, Map<String, Schema> schema,
-                                 TypeSymbol typeSymbol) {
+    public void handleRecordNode(Map<String, Schema> schema, TypeSymbol typeSymbol) {
         String componentName = typeSymbol.getName().orElseThrow().trim();
         if (typeSymbol instanceof TypeReferenceTypeSymbol) {
             TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
@@ -74,9 +71,9 @@ public class OpenAPIComponentMapper {
                 HashSet<String> unionKeys = new HashSet(rfields.keySet());
                 if (typeInclusions.isEmpty()) {
                     // Handle like object
-                    mapReferenceNodeToObjectSchema(recordNode, schema, componentName, rfields);
+                    mapReferenceNodeToObjectSchema(schema, componentName, rfields);
                 } else {
-                    mapTypeInclusionToAllOfSchema(recordNode, schema, componentName, typeInclusions, rfields,
+                    mapTypeInclusionToAllOfSchema(schema, componentName, typeInclusions, rfields,
                             unionKeys);
                 }
             }
@@ -86,7 +83,7 @@ public class OpenAPIComponentMapper {
     /**
      * This function is to map the ballerina typeInclusion to OAS allOf composedSchema.
      */
-    private void mapTypeInclusionToAllOfSchema(SimpleNameReferenceNode recordNode, Map<String, Schema> schema,
+    private void mapTypeInclusionToAllOfSchema(Map<String, Schema> schema,
                                                String componentName, List<TypeSymbol> typeInclusions, Map<String,
             RecordFieldSymbol> rfields, HashSet<String> unionKeys) {
 
@@ -106,7 +103,7 @@ public class OpenAPIComponentMapper {
                     Map<String, RecordFieldSymbol> tInFields = typeInclusionRecord.fieldDescriptors();
                     unionKeys.addAll(tInFields.keySet());
                     unionKeys.removeAll(tInFields.keySet());
-                    mapReferenceNodeToObjectSchema(recordNode, schema, typeInclusionName, tInFields);
+                    mapReferenceNodeToObjectSchema(schema, typeInclusionName, tInFields);
                     //Update the schema value
                     schema = this.components.getSchemas();
                 }
@@ -115,7 +112,7 @@ public class OpenAPIComponentMapper {
         Map<String, RecordFieldSymbol> filteredField =
                 rfields.entrySet().stream().filter(field -> unionKeys.stream().allMatch(key ->
                         field.getKey().equals(key))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        ObjectSchema objectSchema = mapReferenceNodeToObjectSchema(recordNode, schema, null, filteredField);
+        ObjectSchema objectSchema = mapReferenceNodeToObjectSchema(schema, null, filteredField);
         allOfSchemaList.add(objectSchema);
         allOfSchema.setAllOf(allOfSchemaList);
         if (schema != null && !schema.containsKey(componentName)) {
@@ -132,7 +129,7 @@ public class OpenAPIComponentMapper {
     /**
      * This function is to map ballerina record type symbol to OAS objectSchema.
      */
-    private ObjectSchema mapReferenceNodeToObjectSchema(SimpleNameReferenceNode recordNode, Map<String, Schema> schema,
+    private ObjectSchema mapReferenceNodeToObjectSchema(Map<String, Schema> schema,
                                                         String componentName, Map<String, RecordFieldSymbol> rfields) {
         ObjectSchema componentSchema = new ObjectSchema();
         Map<String, Schema> schemaProperties = new HashMap<>();
@@ -143,11 +140,11 @@ public class OpenAPIComponentMapper {
                 property.set$ref(field.getValue().typeDescriptor().getName().orElseThrow().trim());
                 TypeSymbol recordVariable =  field.getValue().typeDescriptor();
                 TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
-                handleRecordNode(recordNode, schema, typeRecord);
+                handleRecordNode(schema, typeRecord);
                 schema = components.getSchemas();
             }
             if (property instanceof ArraySchema) {
-                mapArrayToArraySchema(recordNode, schema, field.getValue(), (ArraySchema) property);
+                mapArrayToArraySchema(schema, field.getValue(), (ArraySchema) property);
                 schema = components.getSchemas();
             }
             schemaProperties.put(field.getKey(), property);
@@ -168,8 +165,7 @@ public class OpenAPIComponentMapper {
     /**
      * Generate arraySchema for ballerina record  as array type.
      */
-    private void mapArrayToArraySchema(SimpleNameReferenceNode recordNode, Map<String, Schema> schema,
-                                       RecordFieldSymbol field, ArraySchema property) {
+    private void mapArrayToArraySchema(Map<String, Schema> schema, RecordFieldSymbol field, ArraySchema property) {
 
         TypeSymbol symbol = field.typeDescriptor();
         int arrayDimensions = 0;
@@ -184,7 +180,7 @@ public class OpenAPIComponentMapper {
         if (symbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
             symbolProperty.set$ref(symbol.getName().orElseThrow().trim());
             TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) symbol;
-            handleRecordNode(recordNode, schema, typeRecord);
+            handleRecordNode(schema, typeRecord);
         }
         //Handle nested array type
         if (arrayDimensions > 1) {
