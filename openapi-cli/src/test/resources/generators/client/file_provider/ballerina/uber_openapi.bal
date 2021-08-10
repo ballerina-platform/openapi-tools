@@ -3,11 +3,10 @@ import  ballerina/url;
 import  ballerina/lang.'string;
 
 # Provides API key configurations needed when communicating with a remote HTTP endpoint.
-#
-# + apiKeys - API keys related to connector authentication
-public type ApiKeysConfig record {
+public type ApiKeysConfig record {|
+    # API keys related to connector authentication
     map<string> apiKeys;
-};
+|};
 
 # Move your app forward with the Uber API
 
