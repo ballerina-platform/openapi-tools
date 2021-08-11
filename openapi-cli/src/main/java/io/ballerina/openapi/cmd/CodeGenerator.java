@@ -647,8 +647,8 @@ public class CodeGenerator {
                     String operationId = getValidName(operation.getOperationId(), false);
                     operation.setOperationId(operationId);
                 } else {
-                    throw new BallerinaOpenApiException("Operation Id is missing. " +
-                            "Please add Operation Id for each operation available. ");
+                    throw new BallerinaOpenApiException("OperationId is missing for the resource path: "
+                            + entry.getKey());
                 }
             }
         }

@@ -62,18 +62,6 @@ public class BallerinaDiagnosticTests {
         Assert.assertTrue(diagnostics.isEmpty());
     }
 
-    @Test(description = "When path parameter has given unmatch data type in ballerina",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Operation Id is missing. " +
-                    "Please add Operation Id for each operation available. ")
-    public void testMissionOperationId() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
-        Path definitionPath = RESDIR.resolve("petstore_without_operation_id.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        ballerinaClientGenerator.generateSyntaxTree();
-    }
-
 
     @DataProvider(name = "singleFileProviderForDiagnosticCheck")
     public Object[][] singleFileProviderForDiagnosticCheck() {
