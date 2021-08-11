@@ -55,18 +55,30 @@ public class BallerinaDiagnosticTests {
             FormatterException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve(yamlFile);
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
     }
 
+    @Test(description = "When path parameter has given unmatch data type in ballerina",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Operation Id is missing. " +
+                    "Please add Operation Id for each operation available. ")
+    public void testMissionOperationId() throws IOException, BallerinaOpenApiException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RESDIR.resolve("petstore_without_operation_id.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        ballerinaClientGenerator.generateSyntaxTree();
+    }
+
+
     @DataProvider(name = "singleFileProviderForDiagnosticCheck")
     public Object[][] singleFileProviderForDiagnosticCheck() {
         return new Object[][] {
                 {"petstore_server_with_base_path.yaml"},
-                {"petstore_without_operation_id.yaml"},
                 {"petstore_get.yaml"},
                 {"openapi_display_annotation.yaml"},
                 {"header_parameter.yaml"},

@@ -10,6 +10,7 @@ paths:
   /pet:
     post:
       description: Simple post function
+      operationId: postSimple
       responses:
         '200':
           description: Expected response to a valid request
@@ -45,6 +46,7 @@ paths:
   /pets/{petId}/Image/{imageId}:
     get:
       summary: Multiple path parameters
+      operationId: getMultiplePath
       tags:
         - pets
       parameters:

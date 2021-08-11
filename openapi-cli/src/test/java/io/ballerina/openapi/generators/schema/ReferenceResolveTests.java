@@ -38,7 +38,7 @@ public class ReferenceResolveTests {
 
     @Test(description = "Tests with object type include reference")
     public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"));
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"), true);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
 
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -48,7 +48,7 @@ public class ReferenceResolveTests {
     @Test(description = "Test for object data type when absent reference and properties fields")
     public void testWorldBank() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/object_without_fields_reference.yaml"));
+                "/object_without_fields_reference.yaml"), true);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
 
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -58,7 +58,7 @@ public class ReferenceResolveTests {
     @Test(description = "Test for type generation for query parameters with referenced schemas")
     public void testParameterSchemaReferences() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/schema_referenced_in_parameters.yaml"));
+                "/schema_referenced_in_parameters.yaml"), true);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
 
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();

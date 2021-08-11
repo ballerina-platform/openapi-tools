@@ -58,7 +58,7 @@ public class ComparedGeneratedFileTests {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/openapi_weather_api.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/jira_openapi.bal");
         CodeGenerator codeGenerator = new CodeGenerator();
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
@@ -73,7 +73,7 @@ public class ComparedGeneratedFileTests {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/" + yamlFile);
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/" + expectedFile);
         CodeGenerator codeGenerator = new CodeGenerator();
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);

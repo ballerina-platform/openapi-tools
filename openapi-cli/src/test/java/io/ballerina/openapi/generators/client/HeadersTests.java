@@ -48,7 +48,7 @@ public class HeadersTests {
         Path definitionPath = RES_DIR.resolve("swagger/header_parameter.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_parameter.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -60,7 +60,7 @@ public class HeadersTests {
         Path definitionPath = RES_DIR.resolve("swagger/header_without_parameter.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_without_parameter.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -71,7 +71,7 @@ public class HeadersTests {
         Path definitionPath = RES_DIR.resolve("swagger/header_param_with_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_param_with_default_value.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);

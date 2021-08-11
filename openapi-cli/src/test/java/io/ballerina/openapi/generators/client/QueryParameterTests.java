@@ -49,7 +49,7 @@ public class QueryParameterTests {
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_default_value.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -61,7 +61,7 @@ public class QueryParameterTests {
         Path definitionPath = RES_DIR.resolve("swagger/query_param_without_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_without_default_value.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -73,7 +73,7 @@ public class QueryParameterTests {
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_ref_schema.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_ref_schema.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -85,7 +85,7 @@ public class QueryParameterTests {
     public void invalidQueryParameter() throws IOException, BallerinaOpenApiException, FormatterException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/invalid_query_param.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
     }
