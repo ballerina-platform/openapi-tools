@@ -143,7 +143,7 @@ public class OpenAPIRequestBodyMapper {
             Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
             TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
             OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
-            componentMapper.handleRecordNode(schema, typeSymbol);
+            componentMapper.createComponentSchema(schema, typeSymbol);
             Schema itemSchema = new Schema();
             arraySchema.setItems(itemSchema.$ref(referenceNode.name().text().trim()));
             io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
@@ -233,8 +233,7 @@ public class OpenAPIRequestBodyMapper {
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handel record for components
         OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
-        componentMapper.handleRecordNode(schema, typeSymbol);
-
+        componentMapper.createComponentSchema(schema, typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
         if (bodyParameter.getContent() != null) {

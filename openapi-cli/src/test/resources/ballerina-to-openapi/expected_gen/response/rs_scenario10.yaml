@@ -29,4 +29,17 @@ paths:
                 type: array
                 items:
                   type: string
-components: {}
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+          format: int32
+        tag:
+          type: string
+        type:
+          type: string

@@ -140,7 +140,7 @@ type PaymentConflict record {|
     string body = "Error occurred while updating the payment";
 |};
 
-service /snowpeak on new http:Listener(9090) {
+service /payloadV on new http:Listener(9090) {
 
     # Represents Snowpeak location resource
     #

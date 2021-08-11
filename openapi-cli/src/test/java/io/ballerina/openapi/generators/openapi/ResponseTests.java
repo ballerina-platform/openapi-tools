@@ -130,6 +130,13 @@ public class ResponseTests {
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario16.yaml");
     }
 
+    @Test(description = "When the return type is array record ")
+    public void testArrayRecord() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/array_record.bal");
+        //Compare generated yaml file with expected yaml content
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario13.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

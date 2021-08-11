@@ -227,7 +227,7 @@ public class OpenAPIResourceMapper {
 
         this.addResourceParameters(resource, op, apidocs);
         OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
-        openAPIResponseMapper.parseResponsesAnnotationAttachment(resource, op);
+        openAPIResponseMapper.mapReturnToOASResponse(resource, op);
 
         return op;
     }

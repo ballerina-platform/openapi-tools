@@ -67,8 +67,21 @@ public class APIDocTests {
     @Test(description = "Request payload api doc mapped to OAS requestBody description")
     public void testsForRecord() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/record.bal");
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/record.yaml");
+    }
+
+    @Test(description = "TypeInclusion record api doc mapped to OAS description")
+    public void testsForRecordHasTypeInclusion() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("apidoc/typeInclusion.bal");
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/typeInclusion.yaml");
+    }
+
+    @Test(description = "TypeInclusion record api doc mapped to OAS description")
+    public void testsForReferenceScenario() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("apidoc/reference_scenario.bal");
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/path_param.yaml");
     }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

@@ -3,11 +3,10 @@ import  ballerina/url;
 import  ballerina/lang.'string;
 
 # Provides API key configurations needed when communicating with a remote HTTP endpoint.
-#
-# + apiKeys - API keys related to connector authentication
-public type ApiKeysConfig record {
+public type ApiKeysConfig record {|
+    # API keys related to connector authentication
     map<string> apiKeys;
-};
+|};
 
 # Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city. Helpful stats, graphics, and this day in history charts are available for your reference. Interactive maps show precipitation, clouds, pressure, wind around your location stations. Data is available in JSON, XML, or HTML format. **Note**: All parameters are optional, but you must select at least one parameter. Calling the API by city ID (using the `id` parameter) will provide the most precise location results.
 
