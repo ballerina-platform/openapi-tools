@@ -9,21 +9,13 @@ paths:
     get:
       operationId: operation2_get_/
       responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
+        "202":
+          description: Accepted
     post:
       operationId: operation2_post_/
       responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
+        "202":
+          description: Accepted
   /v1/{id}:
     get:
       operationId: "operation1_get_/v1/{id}"
@@ -35,10 +27,6 @@ paths:
             type: integer
             format: int32
       responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
+        "202":
+          description: Accepted
 components: {}

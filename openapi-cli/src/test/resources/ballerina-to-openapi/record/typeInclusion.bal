@@ -18,7 +18,7 @@ type ReservationReceipt record {|
 
 listener  http:Listener  ep0  = new (443, config  = {host: "petstore.swagger.io"});
 
- service  /v2  on  ep0  {
+ service  /payloadV  on  ep0  {
         resource  function  post  pet(@http:Payload ReservationReceipt payload) {
     }
 }

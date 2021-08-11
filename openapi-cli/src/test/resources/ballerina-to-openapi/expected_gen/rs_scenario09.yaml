@@ -9,12 +9,8 @@ paths:
     get:
       operationId: operation1_get_/
       responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
+        "202":
+          description: Accepted
   /hi:
     get:
       operationId: operation3_get_/hi
@@ -24,12 +20,8 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          description: Ok
-          content:
-            text/plain:
-              schema:
-                type: string
+        "202":
+          description: Accepted
     put:
       operationId: operation3_put_/hi
       responses:

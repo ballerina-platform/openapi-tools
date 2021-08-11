@@ -384,7 +384,7 @@ public class BallerinaClientGenerator {
                 "URL of the target service");
         docs.add(serviceUrlAPI);
         MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
-                "An error at the failure of client initialization");
+                "An error if connector initialization failed");
         docs.add(returnDoc);
         MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));
         MetadataNode clientInit = createMetadataNode(clientInitDoc, createEmptyNodeList());
@@ -416,7 +416,6 @@ public class BallerinaClientGenerator {
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
                 createToken(OPEN_PAREN_TOKEN), parameterList, createToken(CLOSE_PAREN_TOKEN), returnNode);
 
-        VariableDeclarationNode sslDeclarationNode = ballerinaAuthConfigGenerator.getSecureSocketInitNode();
         //Create function body node client init
         VariableDeclarationNode clientInitializationNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
 
@@ -432,9 +431,6 @@ public class BallerinaClientGenerator {
                 getApiKeyAssignmentNode();
 
         List<StatementNode> assignmentNodes = new ArrayList<>();
-        if (sslDeclarationNode != null) {
-            assignmentNodes.add(sslDeclarationNode);
-        }
         assignmentNodes.add(clientInitializationNode);
         assignmentNodes.add(httpClientAssignmentStatementNode);
         if (assignmentStatementNodeApiKey != null) {
@@ -927,7 +923,8 @@ public class BallerinaClientGenerator {
      * @param ballerinaAuthConfigGenerator - {@Link BallerinaAuthConfigGenerator}
      */
     private void addConfigRecordToTypeDefinitionNodeList(OpenAPI openAPI,
-                                                         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator) {
+                                                         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator)
+            throws BallerinaOpenApiException {
         TypeDefinitionNode configRecord = ballerinaAuthConfigGenerator.getConfigRecord(openAPI);
         if (configRecord != null) {
             typeDefinitionNodeListWithAuth.add(configRecord);

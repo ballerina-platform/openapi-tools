@@ -1,4 +1,5 @@
-import ballerina/http;
+import  ballerina/http;
+
 
 public isolated client class Client {
     final http:Client clientEp;
@@ -6,7 +7,7 @@ public isolated client class Client {
     #
     # + clientConfig - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
-    # + return - An error at the failure of client initialization
+    # + return - An error if connector initialization failed
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "localhost:9090/payloadV") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
