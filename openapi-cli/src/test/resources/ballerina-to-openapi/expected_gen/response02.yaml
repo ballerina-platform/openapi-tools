@@ -10,7 +10,7 @@ paths:
       operationId: operation1_post_/user
       responses:
         "200":
-          description: Successful
+          description: Ok
           content:
             text/plain:
               schema:

@@ -16,7 +16,7 @@ paths:
             type: integer
       responses:
         "200":
-          description: Successful
+          description: Ok
           content:
             application/json:
               example: Ok

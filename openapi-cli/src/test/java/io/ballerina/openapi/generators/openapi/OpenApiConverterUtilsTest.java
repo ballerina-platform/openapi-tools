@@ -171,53 +171,7 @@ public class OpenApiConverterUtilsTest {
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "header_scenario01.yaml");
     }
 
-    @Test(description = "Response scenario01 without return type")
-    public void testResponse01() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("rs_scenario01.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "rs_scenario01.yaml");
-    }
 
-    @Test(description = "Response scenario02 without return type")
-    public void testResponse02() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("rs_scenario02.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "rs_scenario02.yaml");
-    }
-
-    @Test(description = "Response scenario03 - return type with Record")
-    public void testResponse03() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("rs_scenario03.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "rs_scenario03.yaml");
-    }
-
-    @Test(description = "Response scenario 04 - Response has multiple responses without content type", enabled = false)
-    public void testResponse04() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("rs_scenario04.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "rs_scenario04.yaml");
-    }
-
-    @Test(description = "Response scenario 05 - Error response with a schema", enabled = false)
-    public void testResponse05() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("rs_scenario05.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "rs_scenario05.yaml");
-    }
-
-    @Test(description = "Response scenario 05 - Error response with a schema", enabled = false)
-    public void testResponse06() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("rs_scenario06.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "rs_scenario06.yaml");
-    }
-
-    @Test(description = "Response scenario 09 - Error response with a schema")
-    public void testResponse09() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("rs_scenario09.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "rs_scenario09.yaml");
-    }
-
-    @Test(description = "Response scenario 10 - Array type response with a schema")
-    public void testResponse10() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("rs_scenario10.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "rs_scenario10.yaml");
-    }
 
     @Test(description = "Generate OpenAPI spec for build project")
     public void testRecordFieldPayLoad() throws IOException, OpenApiConverterException {

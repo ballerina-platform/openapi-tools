@@ -33,6 +33,7 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
+import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -74,7 +75,7 @@ public class OpenAPIResourceMapper {
      * @param resources Resource list to be convert.
      * @return map of string and openApi path objects.
      */
-    protected Paths convertResourceToPath(List<FunctionDefinitionNode> resources) {
+    protected Paths convertResourceToPath(List<FunctionDefinitionNode> resources) throws OpenApiConverterException {
         for (FunctionDefinitionNode resource : resources) {
             List<String> methods = this.getHttpMethods(resource, false);
             useMultiResourceMapper(resource, methods);
@@ -92,7 +93,8 @@ public class OpenAPIResourceMapper {
      * Resource mapper when a resource has more than 1 http method.
      * @param resource The ballerina resource.
      */
-    private void useMultiResourceMapper(FunctionDefinitionNode resource, List<String> httpMethods) {
+    private void useMultiResourceMapper(FunctionDefinitionNode resource, List<String> httpMethods)
+            throws OpenApiConverterException {
         String path = this.getPath(resource);
         Operation operation;
         int i = 1;
@@ -192,7 +194,7 @@ public class OpenAPIResourceMapper {
      * @return Operation Adaptor object of given resource
      */
     private OperationAdaptor convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                        int idIncrement) {
+                                                        int idIncrement) throws OpenApiConverterException {
         OperationAdaptor op = new OperationAdaptor();
         if (resource != null) {
 
