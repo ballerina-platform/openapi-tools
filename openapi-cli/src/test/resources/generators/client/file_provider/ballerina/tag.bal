@@ -12,6 +12,7 @@ public isolated client class Client {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
+    # Returns information about all countries
     #
     #+return-A list of countries with all informtion included.
     remote isolated function getCovidinAllCountries() returns Countries[]|error {

@@ -12,6 +12,7 @@ public isolated client class Client {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
+    # op1
     #
     # + return - Ok
     remote isolated function operationId01() returns string|error {
@@ -28,6 +29,7 @@ public isolated client class Client {
         string response = check self.clientEp-> post(path, request, targetType = string);
         return response;
     }
+    # op2
     #
     # + id - id value
     # + return - Ok

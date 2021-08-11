@@ -36,7 +36,8 @@ import java.util.List;
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
- * All the tests related to AnyDataType handling the {@link BallerinaClientGenerator} util.
+ * All the tests related to AnyDataType handling the
+ * {@link io.ballerina.openapi.generators.client.BallerinaClientGenerator} util.
  */
 public class AnyOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();

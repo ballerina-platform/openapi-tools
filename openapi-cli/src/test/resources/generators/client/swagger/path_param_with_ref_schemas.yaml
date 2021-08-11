@@ -8,7 +8,6 @@ paths:
   /v1/{id}:
     get:
       operationId: operationId03
-      description: "op2"
       parameters:
         - name: id
           description: "id value"
