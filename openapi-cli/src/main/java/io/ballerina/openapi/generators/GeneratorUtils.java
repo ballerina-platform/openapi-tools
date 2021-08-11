@@ -397,14 +397,14 @@ public class GeneratorUtils {
         }
     }
 
-    public static boolean hasTags(List<String> tags, List<String> filterTags) {
+    public boolean hasTags(List<String> tags, List<String> filterTags) {
         return !Collections.disjoint(filterTags, tags);
     }
 
     /**
      * Util for take OpenApi spec from given yaml file.
      */
-    public static OpenAPI getOpenAPIFromOpenAPIV3Parser(Path definitionPath) throws
+    public OpenAPI getOpenAPIFromOpenAPIV3Parser(Path definitionPath) throws
             IOException, BallerinaOpenApiException {
 
         Path contractPath = java.nio.file.Paths.get(definitionPath.toString());
@@ -433,7 +433,7 @@ public class GeneratorUtils {
      * @param variables variable values to populate the url template
      * @return resolved url
      */
-    public static String buildUrl(String absUrl, ServerVariables variables) {
+    public String buildUrl(String absUrl, ServerVariables variables) {
         String url = absUrl;
         if (variables != null) {
             for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
@@ -451,7 +451,7 @@ public class GeneratorUtils {
      * @param type - type or method name
      * @return - escaped string
      */
-    public static String escapeType(String type) {
+    public String escapeType(String type) {
         if (!type.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") ||
                 (BAL_KEYWORDS.stream().anyMatch(type::equals) && BAL_TYPES.stream().noneMatch(type::equals))) {
             // TODO: Temporary fix(es) as identifier literals only support alphanumerics when writing this.
@@ -468,7 +468,7 @@ public class GeneratorUtils {
     /**
      * Generate BallerinaMediaType for all the mediaTypes.
      */
-    public static String getBallerinaMediaType(String mediaType) {
+    public String getBallerinaMediaType(String mediaType) {
         switch (mediaType) {
             case "*/*":
             case "application/json":
@@ -496,7 +496,7 @@ public class GeneratorUtils {
      * @return - UnionString
      * @throws BallerinaOpenApiException
      */
-    public static String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
+    public String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
 
         StringBuilder unionType = new StringBuilder();
         for (Schema oneOfSchema: oneOf) {
@@ -539,7 +539,7 @@ public class GeneratorUtils {
      * @param paths - swagger paths object
      * @return {@link io.swagger.v3.oas.models.Paths }
      */
-    public static Paths setOperationId(Paths paths) {
+    public Paths setOperationId(Paths paths) {
         Set<Map.Entry<String, PathItem>> entries = paths.entrySet();
         for (Map.Entry<String, PathItem> entry: entries) {
             PathItem pathItem = entry.getValue();
@@ -662,7 +662,7 @@ public class GeneratorUtils {
         return paths;
     }
 
-    private static  String getOperationId(String[] split, String method) {
+    private String getOperationId(String[] split, String method) {
         String operationId;
         String regEx = "\\{([^}]*)\\}";
         Matcher matcher = Pattern.compile(regEx).matcher(split[split.length - 1]);
@@ -677,7 +677,7 @@ public class GeneratorUtils {
     /*
      * Generate variableDeclarationNode.
      */
-    public static VariableDeclarationNode getSimpleStatement(String responseType, String variable,
+    public VariableDeclarationNode getSimpleStatement(String responseType, String variable,
                                                              String initializer) {
         SimpleNameReferenceNode resTypeBind = createSimpleNameReferenceNode(createIdentifierToken(responseType));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(createIdentifierToken(variable));
@@ -691,7 +691,7 @@ public class GeneratorUtils {
     /*
      * Generate expressionStatementNode.
      */
-    public static ExpressionStatementNode getSimpleExpressionStatementNode(String expression) {
+    public ExpressionStatementNode getSimpleExpressionStatementNode(String expression) {
         SimpleNameReferenceNode expressionNode = createSimpleNameReferenceNode(
                 createIdentifierToken(expression));
         return createExpressionStatementNode(null, expressionNode, createToken(SEMICOLON_TOKEN));

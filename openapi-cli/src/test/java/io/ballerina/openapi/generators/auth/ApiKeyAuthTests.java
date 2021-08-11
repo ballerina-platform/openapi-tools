@@ -49,8 +49,9 @@ public class ApiKeyAuthTests {
     @Test(description = "Generate config record for openweathermap api", dataProvider = "apiKeyAuthIOProvider")
     public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
         // generate ApiKeysConfig record
+        GeneratorUtils generatorUtils = new GeneratorUtils();
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/" + yamlFile);
-        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedConfigRecord = TestConstants.API_KEY_CONFIG_REC;
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
@@ -96,8 +97,9 @@ public class ApiKeyAuthTests {
 
     @Test(description = "Test the generation of api key documentation comment")
     public void testGetApiKeyDescription () throws IOException, BallerinaOpenApiException {
+        GeneratorUtils generatorUtils = new GeneratorUtils();
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/custome_api_key_doc.yaml");
-        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedApiKeyDescription = TestConstants.API_KEY_DOC_COMMENT;
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();

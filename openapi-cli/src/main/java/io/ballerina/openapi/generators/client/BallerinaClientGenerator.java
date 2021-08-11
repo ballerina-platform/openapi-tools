@@ -161,6 +161,7 @@ public class BallerinaClientGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeListWithAuth;
     private OpenAPI openAPI;
     private BallerinaSchemaGenerator ballerinaSchemaGenerator;
+    private GeneratorUtils generatorUtils;
     private List<String> remoteFunctionNameList;
     private String serverURL;
     private BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
@@ -204,6 +205,7 @@ public class BallerinaClientGenerator {
         this.typeDefinitionNodeList = typeDefinitionNodeList;
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
+        this.generatorUtils = new GeneratorUtils();
         this.typeDefinitionNodeListWithAuth =  new ArrayList<>();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
@@ -219,6 +221,7 @@ public class BallerinaClientGenerator {
         this.typeDefinitionNodeList = new ArrayList<>();
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, nullable);
+        this.generatorUtils = new GeneratorUtils();
         this.typeDefinitionNodeListWithAuth =  new ArrayList<>();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
@@ -281,7 +284,7 @@ public class BallerinaClientGenerator {
     /**
      * Generate serverUrl for client default value.
      */
-    private static String getServerURL(List<Server> servers) throws BallerinaOpenApiException {
+    private String getServerURL(List<Server> servers) throws BallerinaOpenApiException {
         String serverURL;
         Server selectedServer = servers.get(0);
         if (!selectedServer.getUrl().startsWith("https:") && servers.size() > 1) {
@@ -292,12 +295,13 @@ public class BallerinaClientGenerator {
                 }
             }
         }
+        GeneratorUtils generatorUtils = new GeneratorUtils();
         if (selectedServer.getUrl() == null) {
             serverURL = "http://localhost:9090/v1";
         } else if (selectedServer.getVariables() != null) {
             ServerVariables variables = selectedServer.getVariables();
             URL url;
-            String resolvedUrl = GeneratorUtils.buildUrl(selectedServer.getUrl(), variables);
+            String resolvedUrl = generatorUtils.buildUrl(selectedServer.getUrl(), variables);
             try {
                 url = new URL(resolvedUrl);
                 serverURL = url.toString();
@@ -532,7 +536,7 @@ public class BallerinaClientGenerator {
                     if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
                         if (operationTags != null || ((!filterOperations.isEmpty())
                                 && (operation.getValue().getOperationId() != null))) {
-                            if (GeneratorUtils.hasTags(operationTags, filterTags) ||
+                            if (generatorUtils.hasTags(operationTags, filterTags) ||
                                     ((operation.getValue().getOperationId() != null) &&
                                             filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                                 // function call for generate function definition node.
@@ -659,7 +663,7 @@ public class BallerinaClientGenerator {
                                 null, createIdentifierToken("map<string|string[]>"))));
 
         List<StatementNode> statementNodes = new ArrayList<>();
-        VariableDeclarationNode headerMap = GeneratorUtils.getSimpleStatement("map<string|string[]>",
+        VariableDeclarationNode headerMap = generatorUtils.getSimpleStatement("map<string|string[]>",
                 "headerMap", "{}");
         statementNodes.add(headerMap);
         // Create foreach loop
@@ -702,7 +706,7 @@ public class BallerinaClientGenerator {
 
         BinaryExpressionNode mainCondition = createBinaryExpressionNode(null, lhdCondition,
                 createToken(LOGICAL_OR_TOKEN), rhdCondition);
-        ExpressionStatementNode assignStatement = GeneratorUtils.getSimpleExpressionStatementNode("headerMap[key] = " +
+        ExpressionStatementNode assignStatement = generatorUtils.getSimpleExpressionStatementNode("headerMap[key] = " +
                 "value");
         BlockStatementNode ifBlockStatementMain = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 createNodeList(assignStatement), createToken(CLOSE_BRACE_TOKEN));
@@ -718,7 +722,7 @@ public class BallerinaClientGenerator {
         statementNodes.add(forEachStatementNode);
 
         // return statement
-        ExpressionStatementNode returnHeaderMap = GeneratorUtils.getSimpleExpressionStatementNode("return headerMap");
+        ExpressionStatementNode returnHeaderMap = generatorUtils.getSimpleExpressionStatementNode("return headerMap");
         statementNodes.add(returnHeaderMap);
 
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
@@ -762,10 +766,10 @@ public class BallerinaClientGenerator {
 
         // FunctionBody
         List<StatementNode> statementNodes = new ArrayList<>();
-        VariableDeclarationNode variable = GeneratorUtils.getSimpleStatement("string[]", "param",
+        VariableDeclarationNode variable = generatorUtils.getSimpleStatement("string[]", "param",
                 "[]");
         statementNodes.add(variable);
-        ExpressionStatementNode assign = GeneratorUtils.getSimpleExpressionStatementNode(
+        ExpressionStatementNode assign = generatorUtils.getSimpleExpressionStatementNode(
                 "param[param.length()] = \"?\"");
         statementNodes.add(assign);
 
@@ -801,7 +805,7 @@ public class BallerinaClientGenerator {
         TypeTestExpressionNode mainCondition = createTypeTestExpressionNode(expression, isKeyWord,
                 typeCondition);
         // If body
-        ExpressionStatementNode assignStatement = GeneratorUtils.getSimpleExpressionStatementNode(
+        ExpressionStatementNode assignStatement = generatorUtils.getSimpleExpressionStatementNode(
                 "_ = queryParam.remove(key)");
         BlockStatementNode ifBlockStatementMain = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 createNodeList(assignStatement), createToken(CLOSE_BRACE_TOKEN));
@@ -816,7 +820,7 @@ public class BallerinaClientGenerator {
                                 createIdentifierToken("\"'\""))), createToken(CLOSE_PAREN_TOKEN));
         List<StatementNode> statements = new ArrayList<>();
         // if body-02
-        ExpressionStatementNode ifBody02Statement = GeneratorUtils.getSimpleExpressionStatementNode(
+        ExpressionStatementNode ifBody02Statement = generatorUtils.getSimpleExpressionStatementNode(
                 " param[param.length()] = string:substring(key, 1, key.length())");
 
         NodeList<StatementNode> statementNodesForIf02 = createNodeList(ifBody02Statement);
@@ -826,7 +830,7 @@ public class BallerinaClientGenerator {
         // else block-02
         // else body 02
 
-        ExpressionStatementNode elseBody02Statement = GeneratorUtils.getSimpleExpressionStatementNode
+        ExpressionStatementNode elseBody02Statement = generatorUtils.getSimpleExpressionStatementNode
                 ("param[param.length()] = key");
         NodeList<StatementNode> statementNodesForElse02 = createNodeList(elseBody02Statement);
         BlockStatementNode elseBlockNode02 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
@@ -837,7 +841,7 @@ public class BallerinaClientGenerator {
                 elseBlock02);
         statements.add(ifElseStatementNode02);
 
-        ExpressionStatementNode assignment = GeneratorUtils
+        ExpressionStatementNode assignment = generatorUtils
                 .getSimpleExpressionStatementNode("param[param.length()] = \"=\"");
         statements.add(assignment);
 
@@ -847,22 +851,22 @@ public class BallerinaClientGenerator {
                 createIdentifierToken(" string"));
         TypeTestExpressionNode condition03 = createTypeTestExpressionNode(exprIf03, isKeyWord, typeCondition03);
 
-        ExpressionStatementNode variableIf03 = GeneratorUtils.getSimpleExpressionStatementNode(
+        ExpressionStatementNode variableIf03 = generatorUtils.getSimpleExpressionStatementNode(
                 "string updateV =  check url:encode(value, \"UTF-8\")");
-        ExpressionStatementNode assignIf03 = GeneratorUtils
+        ExpressionStatementNode assignIf03 = generatorUtils
                 .getSimpleExpressionStatementNode("param[param.length()] = updateV");
 
         BlockStatementNode ifBody03 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 createNodeList(variableIf03, assignIf03), createToken(CLOSE_BRACE_TOKEN));
         BlockStatementNode elseBodyBlock03 = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN), createNodeList(
-                        GeneratorUtils.getSimpleExpressionStatementNode("param[param.length()] = value.toString()")),
+                        generatorUtils.getSimpleExpressionStatementNode("param[param.length()] = value.toString()")),
                 createToken(CLOSE_BRACE_TOKEN));
         ElseBlockNode elseBody03 = createElseBlockNode(elseKeyWord, elseBodyBlock03);
         IfElseStatementNode ifElse03 = createIfElseStatementNode(ifKeyWord, condition03, ifBody03, elseBody03);
 
         statements.add(ifElse03);
 
-        ExpressionStatementNode andStatement = GeneratorUtils
+        ExpressionStatementNode andStatement = generatorUtils
                 .getSimpleExpressionStatementNode("param[param.length()] = \"&\"");
         statements.add(andStatement);
 
@@ -886,7 +890,7 @@ public class BallerinaClientGenerator {
         statementNodes.add(forEachStatementNode);
 
         //Remove last `&` statement
-        ExpressionStatementNode assignLine02 = GeneratorUtils.getSimpleExpressionStatementNode(
+        ExpressionStatementNode assignLine02 = generatorUtils.getSimpleExpressionStatementNode(
                 "_ = param.remove(param.length()-1)");
         statementNodes.add(assignLine02);
 
@@ -898,7 +902,7 @@ public class BallerinaClientGenerator {
         TypeTestExpressionNode conditionForIfElse = createTypeTestExpressionNode(lhs, equalToken, rhs);
         //if body block
 
-        ExpressionStatementNode newAssign = GeneratorUtils.getSimpleExpressionStatementNode("_ = param.remove(0)");
+        ExpressionStatementNode newAssign = generatorUtils.getSimpleExpressionStatementNode("_ = param.remove(0)");
         BlockStatementNode ifBlock = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
                 createNodeList(newAssign), createToken(CLOSE_BRACE_TOKEN));
         IfElseStatementNode ifElseStatementNode = createIfElseStatementNode(ifKeyWord, conditionForIfElse, ifBlock,
@@ -906,8 +910,8 @@ public class BallerinaClientGenerator {
         statementNodes.add(ifElseStatementNode);
 
         statementNodes.add(
-                GeneratorUtils.getSimpleExpressionStatementNode("string restOfPath = string:'join(\"\", ...param)"));
-        statementNodes.add(GeneratorUtils.getSimpleExpressionStatementNode("return restOfPath"));
+                generatorUtils.getSimpleExpressionStatementNode("string restOfPath = string:'join(\"\", ...param)"));
+        statementNodes.add(generatorUtils.getSimpleExpressionStatementNode("return restOfPath"));
         FunctionBodyNode functionBodyNode = createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, createNodeList(statementNodes), createToken(CLOSE_BRACE_TOKEN));
 

@@ -81,6 +81,7 @@ public class BallerinaSchemaGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private boolean nullable;
     private  OpenAPI openAPI;
+    private GeneratorUtils generatorUtils = new GeneratorUtils();
 
     public BallerinaSchemaGenerator(OpenAPI openAPI, boolean nullable) {
         this.openAPI = openAPI;
@@ -175,7 +176,7 @@ public class BallerinaSchemaGenerator {
                 typeDefinitionNodeList.add(typeDefNode);
             } else if (composedSchema.getOneOf() != null) {
                 List<Schema> oneOf = composedSchema.getOneOf();
-                String unionTypeCont = GeneratorUtils.getOneOfUnionType(oneOf);
+                String unionTypeCont = generatorUtils.getOneOfUnionType(oneOf);
                 String type  = escapeIdentifier(schema.getKey().trim());
                 MetadataNode metadataNode = createMetadataNode(
                         createMarkdownDocumentationNode(createNodeList(schemaDoc)), createEmptyNodeList());
@@ -187,7 +188,7 @@ public class BallerinaSchemaGenerator {
                 typeDefinitionNodeList.add(typeDefNode);
             } else if (composedSchema.getAnyOf() != null) {
                 List<Schema> anyOf = composedSchema.getAnyOf();
-                String unionTypeCont = GeneratorUtils.getOneOfUnionType(anyOf);
+                String unionTypeCont = generatorUtils.getOneOfUnionType(anyOf);
                 String type  = escapeIdentifier(schema.getKey().trim());
                 MetadataNode metadataNode = createMetadataNode(
                         createMarkdownDocumentationNode(createNodeList(schemaDoc)), createEmptyNodeList());
@@ -698,10 +699,10 @@ public class BallerinaSchemaGenerator {
             throws BallerinaOpenApiException {
 
         if (composedSchema.getOneOf() != null) {
-            String  oneOf = GeneratorUtils.getOneOfUnionType(composedSchema.getOneOf());
+            String  oneOf = generatorUtils.getOneOfUnionType(composedSchema.getOneOf());
             return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(oneOf));
         } else if (composedSchema.getAnyOf() != null) {
-            String  anyOf = GeneratorUtils.getOneOfUnionType(composedSchema.getAnyOf());
+            String  anyOf = generatorUtils.getOneOfUnionType(composedSchema.getAnyOf());
             return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(anyOf));
         } else if (composedSchema.getAllOf() != null) {
             return getAllOfRecordTypeDescriptorNode(openAPI, schemaDoc, composedSchema.getRequired(),

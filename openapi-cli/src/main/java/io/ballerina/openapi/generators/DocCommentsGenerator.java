@@ -131,12 +131,10 @@ public class DocCommentsGenerator {
         String[] descriptionLines = description.split("\n");
         List<MarkdownDocumentationLineNode> documentElements = new ArrayList<>();
         for (String line : descriptionLines) {
-            if (!line.isBlank()) {
-                MarkdownDocumentationLineNode documentationLineNode =
-                        createMarkdownDocumentationLineNode(DOCUMENTATION_DESCRIPTION,
-                                createToken(SyntaxKind.HASH_TOKEN), createNodeList(createIdentifierToken(line)));
-                documentElements.add(documentationLineNode);
-            }
+            MarkdownDocumentationLineNode documentationLineNode =
+                    createMarkdownDocumentationLineNode(DOCUMENTATION_DESCRIPTION,
+                            createToken(SyntaxKind.HASH_TOKEN), createNodeList(createIdentifierToken(line)));
+            documentElements.add(documentationLineNode);
         }
         if (addExtraLine) {
             MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
@@ -151,7 +149,7 @@ public class DocCommentsGenerator {
         List<Node> documentElements = new ArrayList<>();
         for (String line : paramDescriptionLines) {
             if (!line.isBlank()) {
-                documentElements.add(createIdentifierToken(line));
+                documentElements.add(createIdentifierToken(line + " "));
             }
         }
         return createMarkdownParameterDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),

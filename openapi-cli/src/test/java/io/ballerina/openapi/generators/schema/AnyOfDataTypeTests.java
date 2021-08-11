@@ -36,7 +36,8 @@ import java.util.List;
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
- * All the tests related to AnyDataType handling the {@link BallerinaClientGenerator} util.
+ * All the tests related to AnyDataType handling the
+ * {@link io.ballerina.openapi.generators.client.BallerinaClientGenerator} util.
  */
 public class AnyOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
@@ -47,10 +48,11 @@ public class AnyOfDataTypeTests {
     public void testAnyOfInSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        GeneratorUtils generatorUtils = new GeneratorUtils();
         Schema schema = openAPI.getComponents().getSchemas().get("AnyOF");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> anyOf = composedSchema.getAnyOf();
-        String anyOfUnionType = GeneratorUtils.getOneOfUnionType(anyOf);
+        String anyOfUnionType = generatorUtils.getOneOfUnionType(anyOf);
         Assert.assertEquals(anyOfUnionType, "User|Activity");
     }
 

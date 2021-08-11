@@ -47,7 +47,8 @@ public class HttpAuthTests {
         Path definitionPath = RES_DIR.resolve("scenarios/http/" + yamlFile);
         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(
                 false, true);
-        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedConfigRecord = configRecord;
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();

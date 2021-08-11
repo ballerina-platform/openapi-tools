@@ -41,6 +41,7 @@ import java.util.List;
 public class OneOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
     CodeGenerator codeGenerator = new CodeGenerator();
+    GeneratorUtils generatorUtils = new GeneratorUtils();
 
     @Test(description = "Generate record for schema has oneOF")
     public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException {
@@ -49,7 +50,7 @@ public class OneOfDataTypeTests {
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> oneOf = composedSchema.getOneOf();
-        String oneOfUnionType = GeneratorUtils.getOneOfUnionType(oneOf);
+        String oneOfUnionType = generatorUtils.getOneOfUnionType(oneOf);
         Assert.assertEquals(oneOfUnionType, "Activity|Profile");
     }
 
@@ -60,7 +61,7 @@ public class OneOfDataTypeTests {
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> oneOf = composedSchema.getOneOf();
-        String oneOfUnionType = GeneratorUtils.getOneOfUnionType(oneOf);
+        String oneOfUnionType = generatorUtils.getOneOfUnionType(oneOf);
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
     }
 

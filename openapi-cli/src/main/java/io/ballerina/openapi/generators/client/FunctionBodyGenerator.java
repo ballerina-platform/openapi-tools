@@ -114,6 +114,7 @@ public class FunctionBodyGenerator {
     private OpenAPI openAPI;
     private BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private FunctionReturnType functionReturnType;
+    private GeneratorUtils generatorUtils;
     private BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
 
     public List<ImportDeclarationNode> getImports() {
@@ -135,6 +136,7 @@ public class FunctionBodyGenerator {
         this.typeDefinitionNodeList = typeDefinitionNodeList;
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
+        this.generatorUtils = new GeneratorUtils();
         this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
     }
 
@@ -220,7 +222,7 @@ public class FunctionBodyGenerator {
                 statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
                         "queryParam", queryApiKeyNameList));
                 // Add updated path
-                ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
+                ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
                         "path = path + check getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
                 isQuery = true;
@@ -229,7 +231,7 @@ public class FunctionBodyGenerator {
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<any>",
                         "headerValues", headerApiKeyNameList));
-                statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
+                statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
             }
@@ -241,7 +243,7 @@ public class FunctionBodyGenerator {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
                         "queryParam", queryApiKeyNameList));
                 // Add updated path
-                ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
+                ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
                         "path = path + check getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
                 isQuery = true;
@@ -249,7 +251,7 @@ public class FunctionBodyGenerator {
             if (!headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<any>",
                         "headerValues", headerApiKeyNameList));
-                statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
+                statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
             }
@@ -300,10 +302,10 @@ public class FunctionBodyGenerator {
                 DELETE) || method.equals(EXECUTE);
         if (isHeader) {
             if (isMethod) {
-                ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
+                ExpressionStatementNode requestStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                         "http:Request request = new");
                 statementsList.add(requestStatementNode);
-                ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
+                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                         "//TODO: Update the request as needed");
                 statementsList.add(expressionStatementNode);
                 clientCallStatement = "check self.clientEp-> " + method + "(path, request, headers = " +
@@ -318,10 +320,10 @@ public class FunctionBodyGenerator {
                 }
             }
         } else if (isMethod) {
-            ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode requestStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                     "http:Request request = new");
             statementsList.add(requestStatementNode);
-            ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                     "//TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
             clientCallStatement =
@@ -333,7 +335,7 @@ public class FunctionBodyGenerator {
             clientCallStatement = "check self.clientEp-> " + method + "(path, targetType = " + targetType + ")";
         }
         //Return Variable
-        VariableDeclarationNode clientCall = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
+        VariableDeclarationNode clientCall = generatorUtils.getSimpleStatement(returnType, RESPONSE,
                 clientCallStatement);
         statementsList.add(clientCall);
         Token returnKeyWord = createIdentifierToken("return");
@@ -414,7 +416,7 @@ public class FunctionBodyGenerator {
 
         //Create Request statement
         Map.Entry<String, MediaType> next = iterator.next();
-        VariableDeclarationNode requestVariable = GeneratorUtils.getSimpleStatement("http:Request",
+        VariableDeclarationNode requestVariable = generatorUtils.getSimpleStatement("http:Request",
                 "request", "new");
         statementsList.add(requestVariable);
         if (next.getValue().getSchema() != null) {
@@ -422,18 +424,18 @@ public class FunctionBodyGenerator {
             // TODO:Fill with other mime type
         } else {
             // Add default value comment
-            ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                     "TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
         }
         // POST, PUT, PATCH, DELETE, EXECUTE
         VariableDeclarationNode requestStatement =
-                GeneratorUtils.getSimpleStatement(returnType, RESPONSE, "check self.clientEp->"
+                generatorUtils.getSimpleStatement(returnType, RESPONSE, "check self.clientEp->"
                         + method + "(path," + " request, targetType=" + targetType + ")");
         if (isHeader) {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
-                requestStatement = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
+                requestStatement = generatorUtils.getSimpleStatement(returnType, RESPONSE,
                         "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
                                 "targetType=" + targetType + ")");
                 statementsList.add(requestStatement);
@@ -463,29 +465,29 @@ public class FunctionBodyGenerator {
                                                   Map.Entry<String, MediaType> mediaTypeEntry) {
 
         if (mediaTypeEntry.getKey().contains("json")) {
-            VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json",
+            VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
                     "jsonBody", "check payload.cloneWithType(json)");
             statementsList.add(jsonVariable);
-            ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                     "request.setPayload(jsonBody)");
             statementsList.add(expressionStatementNode);
         } else if (mediaTypeEntry.getKey().contains("xml")) {
-            ImportDeclarationNode xmlImport = GeneratorUtils.getImportDeclarationNode(
+            ImportDeclarationNode xmlImport = generatorUtils.getImportDeclarationNode(
                     GeneratorConstants.BALLERINA, "xmldata");
             if (!checkImportDuplicate(imports, "xmldata")) {
                 imports.add(xmlImport);
             }
-            VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json",
+            VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
                     "jsonBody", "check payload.cloneWithType(json)");
             statementsList.add(jsonVariable);
-            VariableDeclarationNode xmlBody = GeneratorUtils.getSimpleStatement("xml?", "xmlBody",
+            VariableDeclarationNode xmlBody = generatorUtils.getSimpleStatement("xml?", "xmlBody",
                     "check xmldata:fromJson(jsonBody)");
             statementsList.add(xmlBody);
-            ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                     "request.setPayload(xmlBody)");
             statementsList.add(expressionStatementNode);
         } else if (mediaTypeEntry.getKey().contains("plain")) {
-            ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                     "request.setPayload(payload)");
             statementsList.add(expressionStatementNode);
         }
