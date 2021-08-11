@@ -71,7 +71,6 @@ public class ConverterCommonUtils {
      */
     public static Schema getOpenApiSchema(String type) {
         Schema schema;
-
         switch (type) {
             case Constants.STRING:
             case Constants.PLAIN:
@@ -91,7 +90,7 @@ public class ConverterCommonUtils {
             case Constants.TYPE_REFERENCE:
             case Constants.TYPEREFERENCE:
                 schema = new Schema();
-                schema.$ref("true");
+//                schema.$ref("true");
                 break;
             case Constants.BYTE_ARRAY:
             case Constants.OCTET_STREAM:

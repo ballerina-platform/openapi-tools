@@ -20,7 +20,6 @@ package io.ballerina.openapi.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.BallerinaAuthConfigGenerator;
@@ -33,7 +32,6 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,17 +40,13 @@ import java.util.Objects;
  */
 public class OAuth2Tests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/auth").toAbsolutePath();
-    List<String> list1 = new ArrayList<>();
-    List<String> list2 = new ArrayList<>();
-    Filter filter = new Filter(list1, list2);
-    BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false,
-            true);
 
     @Test(description = "Generate config record for OAuth 2.0 authorization code flow",
             dataProvider = "oAuth2IOProvider")
     public void testGetConfigRecord(String yamlFile, String configRecord) throws IOException,
             BallerinaOpenApiException {
-
+        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false,
+                true);
         GeneratorUtils generatorUtils = new GeneratorUtils();
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2/" + yamlFile);
         OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -68,6 +62,8 @@ public class OAuth2Tests {
     @Test(description = "Test the generation of Config params in class init function signature",
             dependsOnMethods = {"testGetConfigRecord"})
     public void testGetConfigParamForClassInit() {
+        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false,
+                true);
         String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
         List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
@@ -79,19 +75,11 @@ public class OAuth2Tests {
         Assert.assertEquals(expectedParams, generatedParamsStr);
     }
 
-    @Test(description = "Test the generation of SSL init node",
-            dependsOnMethods = {"testGetConfigRecord"})
-    public void testGetSecureSocketInitNode() {
-        String expectedParam = TestConstants.SSL_ASSIGNMENT;
-        VariableDeclarationNode generatedInitParamNode = ballerinaAuthConfigGenerator.getSecureSocketInitNode();
-        expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
-        String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
-        Assert.assertEquals(expectedParam, generatedParamsStr);
-    }
-
     @Test(description = "Test the generation of http:Client init node",
             dependsOnMethods = {"testGetConfigRecord"})
     public void testGetClientInitializationNode() {
+        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false,
+                true);
         String expectedParam = TestConstants.HTTP_CLIENT_DECLARATION;
         VariableDeclarationNode generatedInitParamNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
@@ -108,5 +96,19 @@ public class OAuth2Tests {
                 {"oauth2_password.yaml", TestConstants.OAUTH2_PASSWORD_CONFIG_REC},
                 {"oauth2_multipleflows.yaml", TestConstants.OAUTH2_MULTI_FLOWS_CONFIG_REC}
         };
+    }
+
+    @Test(description = "Generate Client with apiKey and OAuth security schemes",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp =
+                    "Unsupported combination of security schemes.")
+    public void unsupportedSecuritySchemaCombination() throws IOException, BallerinaOpenApiException {
+        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(true,
+                true);
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        Path definitionPath = RES_DIR.resolve("scenarios/oauth2/unsupported_security_schema.yaml");
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        String generatedConfigRecord = Objects.requireNonNull(
+                ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
     }
 }

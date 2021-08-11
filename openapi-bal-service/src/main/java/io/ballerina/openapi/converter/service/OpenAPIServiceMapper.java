@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -25,6 +25,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,8 @@ import java.util.List;
 /**
  * OpenAPIServiceMapper provides functionality for reading and writing OpenApi, either to and from ballerina service, or
  * to, as well as related functionality for performing conversions between openapi and ballerina.
+ *
+ * @since 2.0.0
  */
 public class OpenAPIServiceMapper {
     private static final Logger logger = LoggerFactory.getLogger(OpenAPIServiceMapper.class);
@@ -57,7 +60,8 @@ public class OpenAPIServiceMapper {
      * @param basePath  - For string base path
      * @return OpenApi object which represent current service.
      */
-    public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi, String basePath) {
+    public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi, String basePath)
+            throws OpenApiConverterException {
         // Setting default values.
         openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(basePath.replace("/", " ")));
 

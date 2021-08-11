@@ -1,0 +1,71 @@
+openapi: 3.0.1
+info:
+  title: ' payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /reservation:
+    post:
+      operationId: operation1_post_/reservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationReceipt'
+        "409":
+          description: Conflict
+components:
+  schemas:
+    ReserveRoom:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int32
+        id:
+          type: string
+    Reservation:
+      type: object
+      properties:
+        endDate:
+          type: string
+        reserveRooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReserveRoom'
+        startDate:
+          type: string
+    Links:
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+    ReservationReceipt:
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - type: object
+          properties: {}
+    Link:
+      type: object
+      properties:
+        mediaTypes:
+          type: array
+          items:
+            type: string
+        rel:
+          type: string
+        href:
+          type: string
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'

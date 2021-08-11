@@ -2,9 +2,11 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
-public type ApiKeysConfig record {
+# Provides API key configurations needed when communicating with a remote HTTP endpoint.
+public type ApiKeysConfig record {|
+    # API keys related to connector authentication
     map<string> apiKeys;
-};
+|};
 
 # Successful response
 type CurrentWeatherDataResponse record {
@@ -41,7 +43,7 @@ public isolated client class Client {
     # + apiKeyConfig - API key configuration detail
     # + clientConfig - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
-    # + return -  An error at the failure of client initialization
+    # + return - An error if connector initialization failed
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
