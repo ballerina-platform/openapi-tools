@@ -43,7 +43,7 @@ public class GeneratorUtilsTests {
 
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Couldn't read or parse the definition from file: .*")
+            expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
     public static void getIncorrectYamlContract() throws IOException, BallerinaOpenApiException {
         Path path = RES_DIR.resolve("swagger/invalid/petstore_without_info.yaml");
         OpenAPI ballerinaOpenApiType = generatorUtils.getOpenAPIFromOpenAPIV3Parser(path);
@@ -51,7 +51,7 @@ public class GeneratorUtilsTests {
 
     @Test(description = "Functionality tests for When info section null",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Couldn't read or parse the definition from file: .*")
+            expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
     public static void testForInfoNull() throws IOException, BallerinaOpenApiException {
         Path path = RES_DIR.resolve("swagger/invalid/petstore_without_info.yaml");
         OpenAPI ballerinaOpenApiType = generatorUtils.getOpenAPIFromOpenAPIV3Parser(path);
