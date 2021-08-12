@@ -53,6 +53,8 @@ import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -75,6 +77,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -435,7 +438,7 @@ public class CodeGenerator {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String srcFile = "client.bal";
         // Normalize OpenAPI definition
-        OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
+        OpenAPI openAPIDef = normalizeOpenAPI(openAPI, true);
         // Generate ballerina service and resources.
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
@@ -584,7 +587,7 @@ public class CodeGenerator {
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
-        OpenAPI openAPIDef = normalizeOpenAPI(openAPI);
+        OpenAPI openAPIDef = normalizeOpenAPI(openAPI, false);
         String mainContent = Formatter.format
                 (BallerinaServiceGenerator.generateSyntaxTree(openAPI, serviceName, filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
@@ -605,10 +608,15 @@ public class CodeGenerator {
      * @throws IOException
      * @throws BallerinaOpenApiException
      */
-    public OpenAPI normalizeOpenAPI(Path openAPIPath) throws IOException, BallerinaOpenApiException {
+    public OpenAPI normalizeOpenAPI(Path openAPIPath, boolean isClient) throws IOException, BallerinaOpenApiException {
         GeneratorUtils generatorUtils = new GeneratorUtils();
         OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
-        generatorUtils.setOperationId(openAPI.getPaths());
+        if (isClient) {
+            validateOperationIds(openAPI.getPaths().entrySet());
+        } else {
+            generatorUtils.setOperationId(openAPI.getPaths());
+        }
+
         if (openAPI.getComponents() != null) {
             // Refactor schema name with valid name
             Components components = openAPI.getComponents();
@@ -623,6 +631,27 @@ public class CodeGenerator {
             }
         }
         return openAPI;
+    }
+
+    /**
+     * Check whether an operationId has been defined in each path. If given rename the operationId to accepted format.
+     * -- ex: GetPetName -> getPetName
+     *
+     * @param paths                         List of paths given in the Open API definition
+     * @throws BallerinaOpenApiException    When operationId is missing in any path
+     */
+    private void validateOperationIds(Set<Map.Entry<String, PathItem>> paths) throws BallerinaOpenApiException {
+        for (Map.Entry<String, PathItem> entry: paths) {
+            for (Operation operation : entry.getValue().readOperations()) {
+                if (operation.getOperationId() != null) {
+                    String operationId = getValidName(operation.getOperationId(), false);
+                    operation.setOperationId(operationId);
+                } else {
+                    throw new BallerinaOpenApiException("OperationId is missing for the resource path: "
+                            + entry.getKey());
+                }
+            }
+        }
     }
 
     /**

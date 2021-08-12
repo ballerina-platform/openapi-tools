@@ -66,6 +66,7 @@ paths:
                 $ref: "#/components/schemas/Error"
     post:
       summary: Create a pet
+      operationId: createPet
       tags:
         - pets
       responses:

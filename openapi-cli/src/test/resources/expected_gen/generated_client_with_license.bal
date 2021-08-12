@@ -29,7 +29,7 @@ public isolated client class Client {
     # Create a pet
     #
     # + return - Null response
-    remote isolated function  pets() returns http:Response|error {
+    remote isolated function  createPet() returns http:Response|error {
         string  path = string `/pets`;
         http:Request request = new;
         //TODO: Update the request as needed;
