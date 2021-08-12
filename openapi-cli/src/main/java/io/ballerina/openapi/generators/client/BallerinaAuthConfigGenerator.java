@@ -127,7 +127,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEYS_CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_RECORD_FIELD;
-import static io.ballerina.openapi.generators.GeneratorConstants.AUTH_CONFIG_FILED_NAME;
+import static io.ballerina.openapi.generators.GeneratorConstants.AUTH;
 import static io.ballerina.openapi.generators.GeneratorConstants.AuthConfigTypes;
 import static io.ballerina.openapi.generators.GeneratorConstants.BASIC;
 import static io.ballerina.openapi.generators.GeneratorConstants.BEARER;
@@ -502,7 +502,7 @@ public class BallerinaAuthConfigGenerator {
         // add auth field
         MetadataNode authMetadataNode = getMetadataNode("Configurations related to client authentication");
         IdentifierToken authFieldName = AbstractNodeFactory.createIdentifierToken(escapeIdentifier(
-                AUTH_CONFIG_FILED_NAME));
+                AUTH));
         TypeDescriptorNode authFieldTypeNode =
                 createSimpleNameReferenceNode(createIdentifierToken(getAuthFieldTypeName()));
         RecordFieldNode authFieldNode = NodeFactory.createRecordFieldNode(authMetadataNode, null,
