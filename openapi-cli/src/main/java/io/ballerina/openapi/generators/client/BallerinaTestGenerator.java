@@ -258,7 +258,7 @@ public class BallerinaTestGenerator {
                 bindingPattern);
         NodeList<Token> nodeList = createEmptyNodeList();
         ExpressionNode expressionNode = createRequiredExpressionNode(createIdentifierToken(String.format("{%s : %s}",
-                GeneratorConstants.AUTH_CONFIG_FILED_NAME, GeneratorConstants.AUTH_CONFIG_FILED_NAME)));
+                GeneratorConstants.AUTH, GeneratorConstants.AUTH_CONFIG)));
         return createModuleVariableDeclarationNode(metadataNode, null, nodeList, typedBindingPatternNode,
                 createToken(EQUAL_TOKEN), expressionNode, createToken(SEMICOLON_TOKEN));
     }
@@ -281,7 +281,7 @@ public class BallerinaTestGenerator {
         CaptureBindingPatternNode bindingPattern;
         if (isHttpOrOAuth) {
             bindingPattern = createCaptureBindingPatternNode(
-                    createIdentifierToken(GeneratorConstants.AUTH_CONFIG_FILED_NAME));
+                    createIdentifierToken(GeneratorConstants.AUTH_CONFIG));
         } else {
             bindingPattern = createCaptureBindingPatternNode(
                     createIdentifierToken(GeneratorConstants.API_KEY_CONFIG_PARAM));
