@@ -9,6 +9,7 @@ paths:
   /products:
     get:
       summary: Product Types
+      operationId: getProducts
       description: The Products endpoint returns information about the Uber products
         offered at a given location. The response includes the display name and
         other details about each product, and lists the products in the proper
@@ -50,6 +51,7 @@ paths:
   /estimates/price:
     get:
       summary: Price Estimates
+      operationId: getPrice
       description: The Price Estimates endpoint returns an estimated price range for each
         product offered at a given location. The price estimate is provided as a
         formatted string with the full price range and the localized currency
@@ -107,6 +109,7 @@ paths:
   /estimates/time:
     get:
       summary: Time Estimates
+      operationId: getTimeEstimates
       description: The Time Estimates endpoint returns ETAs for all products offered at a
         given location, with the responses expressed as integers in seconds. We
         recommend that this endpoint be called every minute to provide the most
@@ -158,6 +161,7 @@ paths:
   /me:
     get:
       summary: User Profile
+      operationId: getUserProfile
       description: The User Profile endpoint returns information about the Uber user that
         has authorized with the application.
       tags:
@@ -178,6 +182,7 @@ paths:
   /history:
     get:
       summary: User Activity
+      operationId: getUserActivity
       description: The User Activity endpoint returns data about a user's lifetime activity
         with Uber. The response will include pickup locations and times, dropoff
         locations and times, the distance of past requests, and information

@@ -10,6 +10,7 @@ paths:
   /pets/{petId}:
     get:
       summary: Info for a specific pet
+      operationId: getPet
       tags:
         - pets
       parameters:

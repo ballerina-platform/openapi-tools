@@ -15,7 +15,7 @@ public isolated client class Client {
     # Creates a new user.
     #
     # + return - OK
-    remote isolated function  requestBody(User payload) returns http:Response|error {
+    remote isolated function createUser(User payload) returns http:Response|error {
         string  path = string `/requestBody`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
