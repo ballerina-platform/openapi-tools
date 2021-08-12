@@ -36,4 +36,16 @@ public class NoServerURLTest {
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
+
+    @Test(description = "Test for no server url with HTTP authentication mechanism")
+    public void getClientForNoServerURLWithHTTPAuth() throws IOException, BallerinaOpenApiException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RES_DIR.resolve("swagger/missing_server_url_http.yaml");
+        Path expectedPath = RES_DIR.resolve("ballerina/missing_server_url_http.bal");
+
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
 }

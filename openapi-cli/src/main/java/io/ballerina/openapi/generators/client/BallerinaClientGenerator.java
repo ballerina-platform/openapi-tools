@@ -398,7 +398,7 @@ public class BallerinaClientGenerator {
         IdentifierToken paramName = createIdentifierToken(GeneratorConstants.SERVICE_URL);
         List<Server> servers = openAPI.getServers();
         serverURL = getServerURL(servers);
-        if (serverURL.equals("/")) {
+        if (serverURL.equals("/") && !ballerinaAuthConfigGenerator.isAPIKey()) {
             RequiredParameterNode serviceUrl = createRequiredParameterNode(annotationNodes, typeName, paramName);
             parameters.add(serviceUrl);
         } else {

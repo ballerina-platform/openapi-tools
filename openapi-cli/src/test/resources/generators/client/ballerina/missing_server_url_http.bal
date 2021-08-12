@@ -2,27 +2,52 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
-# Provides API key configurations needed when communicating with a remote HTTP endpoint.
-public type ApiKeysConfig record {|
-    # API keys related to connector authentication
-    map<string> apiKeys;
+# Provides a set of configurations for controlling the behaviours when communicating with a remote HTTP endpoint.
+public type ClientConfig record {|
+    # Configurations related to client authentication
+    http:BearerTokenConfig auth;
+    # The HTTP version understood by the client
+    string httpVersion = "1.1";
+    # Configurations related to HTTP/1.x protocol
+    http:ClientHttp1Settings http1Settings = {};
+    # Configurations related to HTTP/2 protocol
+    http:ClientHttp2Settings http2Settings = {};
+    # The maximum time to wait (in seconds) for a response before closing the connection
+    decimal timeout = 60;
+    # The choice of setting `forwarded`/`x-forwarded` header
+    string forwarded = "disable";
+    # Configurations associated with Redirection
+    http:FollowRedirects? followRedirects = ();
+    # Configurations associated with request pooling
+    http:PoolConfiguration? poolConfig = ();
+    # HTTP caching related configurations
+    http:CacheConfig cache = {};
+    # Specifies the way of handling compression (`accept-encoding`) header
+    http:Compression compression = http:COMPRESSION_AUTO;
+    # Configurations associated with the behaviour of the Circuit Breaker
+    http:CircuitBreakerConfig? circuitBreaker = ();
+    # Configurations associated with retrying
+    http:RetryConfig? retryConfig = ();
+    # Configurations associated with cookies
+    http:CookieConfig? cookieConfig = ();
+    # Configurations associated with inbound response size limits
+    http:ResponseLimitConfigs responseLimits = {};
+    # SSL/TLS-related options
+    http:ClientSecureSocket? secureSocket = ();
 |};
 
 # Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city.
 @display {label: "Open Weather Client"}
 public isolated client class Client {
     final http:Client clientEp;
-    final readonly & map<string> apiKeys;
     # Gets invoked to initialize the `connector`.
     #
-    # + apiKeyConfig - API key configuration detail
     # + clientConfig - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "/") returns error? {
+    public isolated function init(ClientConfig clientConfig , string serviceUrl) returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
-        self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();
     }
     # Provide weather forecast for any geographical coordinates
     #
@@ -34,7 +59,7 @@ public isolated client class Client {
     @display {label: "Weather Forecast"}
     remote isolated function getWeatherForecast(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string? exclude = (), @display {label: "Units"} int? units = ()) returns WeatherForecast|error {
         string  path = string `/onecall`;
-        map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, "appid": self.apiKeys["appid"]};
+        map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units};
         path = path + check getPathForQueryParam(queryParam);
         WeatherForecast response = check self.clientEp-> get(path, targetType = WeatherForecast);
         return response;
