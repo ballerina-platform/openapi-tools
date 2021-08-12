@@ -75,7 +75,7 @@ public class OpenAPIRequestBodyMapper {
      * @param annotation    - Payload annotation details from resource function
      */
     public void handlePayloadAnnotation(RequiredParameterNode payloadNode, Map<String, Schema> schema,
-                                        AnnotationNode annotation, String[] apidocs) {
+                                        AnnotationNode annotation, Map<String, String> apiDocs) {
 
         if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
             // Creating request body - required.
@@ -83,13 +83,9 @@ public class OpenAPIRequestBodyMapper {
             MappingConstructorExpressionNode mapMime = annotation.annotValue().orElse(null);
             SeparatedNodeList<MappingFieldNode> fields = null;
             // Add api doc  to request body description
-            if (apidocs != null) {
-                for (String doc: apidocs) {
-                    String normalizeDoc = doc.trim().replaceAll("#", "");
-                    if (normalizeDoc.startsWith(String.valueOf(payloadNode.paramName().orElse(null).text()))) {
-                        bodyParameter.setDescription(normalizeDoc.split("-", 2)[1]);
-                    }
-                }
+            if (!apiDocs.isEmpty() && payloadNode.paramName().isPresent()
+                    && apiDocs.containsKey(payloadNode.paramName().get().text().trim())) {
+                bodyParameter.setDescription(apiDocs.get(payloadNode.paramName().get().text().trim()));
             }
             if (mapMime != null) {
                 fields = mapMime.fields();
@@ -117,10 +113,10 @@ public class OpenAPIRequestBodyMapper {
                         Node node = payloadNode.typeName();
                         if (node instanceof SimpleNameReferenceNode) {
                             SimpleNameReferenceNode record = (SimpleNameReferenceNode) node;
-                            handleReferencePayload(record, schema, MediaType.APPLICATION_JSON, new RequestBody());
+                            handleReferencePayload(record, schema, MediaType.APPLICATION_JSON, bodyParameter);
                         } else if (node instanceof ArrayTypeDescriptorNode) {
                             handleArrayTypePayload(schema, (ArrayTypeDescriptorNode) node,
-                                    MediaType.APPLICATION_JSON, new RequestBody());
+                                    MediaType.APPLICATION_JSON, bodyParameter);
                         }
                         break;
                 }

@@ -76,7 +76,7 @@ public class OpenAPIComponentMapper {
             HashSet<String> unionKeys = new HashSet(rfields.keySet());
             if (typeInclusions.isEmpty()) {
                 // Handle like object
-                mapReferenceNodeToObjectSchema(schema, componentName, rfields, apiDocs);
+                generateObjectSchemaFromRecordFields(schema, componentName, rfields, apiDocs);
             } else {
                 mapTypeInclusionToAllOfSchema(schema, componentName, typeInclusions, rfields,
                         unionKeys, apiDocs);
@@ -84,6 +84,9 @@ public class OpenAPIComponentMapper {
         }
     }
 
+    /**
+     * Creating API docs related to given record fields.
+     */
     private Map<String, String> getRecordFieldsAPIDocsMap(TypeReferenceTypeSymbol typeSymbol, String componentName) {
 
         Map<String, String> apiDocs =  new HashMap<>();
@@ -132,15 +135,16 @@ public class OpenAPIComponentMapper {
                     Map<String, RecordFieldSymbol> tInFields = typeInclusionRecord.fieldDescriptors();
                     unionKeys.addAll(tInFields.keySet());
                     unionKeys.removeAll(tInFields.keySet());
-                    mapReferenceNodeToObjectSchema(schema, typeInclusionName, tInFields, apiDocs);
+                    generateObjectSchemaFromRecordFields(schema, typeInclusionName, tInFields, apiDocs);
                     //Update the schema value
                     schema = this.components.getSchemas();
                 }
             }
         }
         Map<String, RecordFieldSymbol> filteredField = new HashMap<>();
-        rfields.forEach((key1, value) -> unionKeys.stream().filter(key -> key1.trim().equals(key)).forEach(key -> filteredField.put(key1, value)));
-        ObjectSchema objectSchema = mapReferenceNodeToObjectSchema(schema, null, filteredField, apiDocs);
+        rfields.forEach((key1, value) -> unionKeys.stream().filter(key -> key1.trim().equals(key)).forEach(key ->
+                filteredField.put(key1, value)));
+        ObjectSchema objectSchema = generateObjectSchemaFromRecordFields(schema, null, filteredField, apiDocs);
         allOfSchemaList.add(objectSchema);
         allOfSchema.setAllOf(allOfSchemaList);
         if (schema != null && !schema.containsKey(componentName)) {
@@ -157,9 +161,10 @@ public class OpenAPIComponentMapper {
     /**
      * This function is to map ballerina record type symbol to OAS objectSchema.
      */
-    private ObjectSchema mapReferenceNodeToObjectSchema(Map<String, Schema> schema,
-                                                        String componentName, Map<String, RecordFieldSymbol> rfields,
-                                                        Map<String, String> apiDocs) {
+    private ObjectSchema generateObjectSchemaFromRecordFields(Map<String, Schema> schema,
+                                                              String componentName, Map<String,
+                                                              RecordFieldSymbol> rfields,
+                                                              Map<String, String> apiDocs) {
         ObjectSchema componentSchema = new ObjectSchema();
         componentSchema.setDescription(apiDocs.get(componentName));
         Map<String, Schema> schemaProperties = new HashMap<>();

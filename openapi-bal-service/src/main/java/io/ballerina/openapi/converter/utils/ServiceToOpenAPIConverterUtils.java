@@ -93,7 +93,7 @@ public class ServiceToOpenAPIConverterUtils {
             for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
                 String serviceNodeName = new OpenAPIEndpointMapper().getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
-                String openApiSource = generateOASDefinition(serviceNode, serviceNodeName, needJson, endpoints,
+                String openApiSource = generateOASForGivenFormat(serviceNode, serviceNodeName, needJson, endpoints,
                         semanticModel);
                 //  Checked old generated file with same name
                 openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
@@ -149,10 +149,10 @@ public class ServiceToOpenAPIConverterUtils {
     /**
      * Generate openAPI definition according to the given format JSON or YAML.
      */
-    private static String generateOASDefinition(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
-                                               Boolean needJson, List<ListenerDeclarationNode> endpoints,
-                                               SemanticModel semanticModel) throws OpenApiConverterException {
-        OpenAPI openapi = getOpenAPIDefinition(new OpenAPI(), serviceName, endpoints, serviceDeclarationNode,
+    private static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
+                                                    Boolean needJson, List<ListenerDeclarationNode> endpoints,
+                                                    SemanticModel semanticModel) throws OpenApiConverterException {
+        OpenAPI openapi = generateOpenAPIDefinition(new OpenAPI(), serviceName, endpoints, serviceDeclarationNode,
                 semanticModel);
         if (needJson) {
             return Json.pretty(openapi);
@@ -163,9 +163,9 @@ public class ServiceToOpenAPIConverterUtils {
     /**
      * Generated OpenAPI specification with openAPI object.
      */
-    private static OpenAPI getOpenAPIDefinition(OpenAPI openapi,
-                                         String serviceName, List<ListenerDeclarationNode> endpoints,
-                                         ServiceDeclarationNode serviceDefinition, SemanticModel semanticModel)
+    private static OpenAPI generateOpenAPIDefinition(OpenAPI openapi,
+                                                     String serviceName, List<ListenerDeclarationNode> endpoints,
+                                                     ServiceDeclarationNode serviceDefinition, SemanticModel semanticModel)
             throws OpenApiConverterException {
         //Take base path of service
         OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
@@ -216,7 +216,7 @@ public class ServiceToOpenAPIConverterUtils {
             }
 
             // Replace rest of the path separators with hyphen
-            cleanedServiceName = serviceName.replaceAll("/", "-");
+            cleanedServiceName = serviceName.replaceAll("/", "_");
         }
         if (isJson) {
             return cleanedServiceName + Constants.OPENAPI_SUFFIX + Constants.JSON_EXTENSION;

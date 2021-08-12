@@ -43,20 +43,20 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.
  */
 public class OpenAPIParameterMapper {
-    private FunctionDefinitionNode functionDefinitionNode;
-    private Operation operation;
-    private String[] apidocs;
+    private final FunctionDefinitionNode functionDefinitionNode;
+    private final Operation operation;
+    private final Map<String, String> apidocs;
 
     public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode,
-                                  Operation operation, String[] apidocs) {
+                                  Operation operation, Map<String, String> apidocs) {
 
         this.functionDefinitionNode = functionDefinitionNode;
         this.operation = operation;
@@ -77,14 +77,11 @@ public class OpenAPIParameterMapper {
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
                 io.swagger.v3.oas.models.parameters.Parameter parameter = buildParameter(Constants.PATH, pathParam);
                 parameter.setName(pathParam.paramName().text());
-                //check the paramter has doc
-                if (apidocs != null) {
-                    Arrays.stream(apidocs).map(doc -> doc.trim().replaceAll("#", ""))
-                            .filter(normalizeDoc -> normalizeDoc.startsWith(pathParam.paramName().text()))
-                            .map(normalizeDoc -> normalizeDoc.split("-", 2)[1].trim())
-                            .forEach(parameter::setDescription);
+                // Check the parameter has doc
+                if (!apidocs.isEmpty() && apidocs.containsKey(pathParam.paramName().text().trim())) {
+                    parameter.setDescription(apidocs.get(pathParam.paramName().text().trim()));
                 }
-                //Set param description
+                // Set param description
                 parameter.setRequired(true);
                 parameters.add(parameter);
             }
@@ -102,19 +99,15 @@ public class OpenAPIParameterMapper {
                     io.swagger.v3.oas.models.parameters.Parameter
                             parameter = buildParameter(Constants.QUERY, queryParam);
                     parameter.setRequired(true);
-                    if (apidocs != null) {
-                        Arrays.stream(apidocs).map(doc -> doc.trim().replaceAll("#", ""))
-                                .filter(normalizeDoc -> normalizeDoc.startsWith(
-                                        String.valueOf(queryParam.paramName().orElse(null))))
-                                .map(normalizeDoc -> normalizeDoc.split("-", 2)[1].trim())
-                                .forEach(parameter::setDescription);
+                    if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParam.paramName().get().text())) {
+                        parameter.setDescription(apidocs.get(queryParam.paramName().get().text().trim()));
                     }
                     parameters.add(parameter);
                 } else if (queryParam.typeName() instanceof OptionalTypeDescriptorNode &&
                         !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
                         ((RequiredParameterNode) expr).annotations().isEmpty()) {
                     Node node = ((OptionalTypeDescriptorNode) queryParam.typeName()).typeDescriptor();
-                    setNullableQueryParameter(parameters, queryParam, node, apidocs);
+                    setNullableQueryParameter(parameters, queryParam, node);
                 } else if (queryParam.typeName() instanceof ArrayTypeDescriptorNode &&
                         !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
                         ((RequiredParameterNode) expr).annotations().isEmpty()) {
@@ -129,12 +122,8 @@ public class OpenAPIParameterMapper {
                             queryParameter.schema(arraySchema);
                             queryParameter.setName(queryParam.paramName().get().text());
                             queryParameter.setRequired(true);
-                            if (apidocs != null) {
-                                Arrays.stream(apidocs).map(doc -> doc.trim().replaceAll("#", ""))
-                                        .filter(normalizeDoc -> normalizeDoc.startsWith(
-                                                String.valueOf(queryParam.paramName().orElse(null))))
-                                        .map(normalizeDoc -> normalizeDoc.split("-", 2)[1].trim())
-                                        .forEach(queryParameter::setDescription);
+                            if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParam.paramName().get().text())) {
+                                queryParameter.setDescription(apidocs.get(queryParam.paramName().get().text().trim()));
                             }
                             parameters.add(queryParameter);
                         }
@@ -189,7 +178,7 @@ public class OpenAPIParameterMapper {
     }
 
     private void setNullableQueryParameter(List<Parameter> parameters, RequiredParameterNode queryParam,
-                                           Node node, String[] apidocs) {
+                                           Node node) {
 
         if (node instanceof ArrayTypeDescriptorNode) {
             ArraySchema arraySchema = new ArraySchema();
@@ -202,23 +191,16 @@ public class OpenAPIParameterMapper {
                 queryParameter.schema(arraySchema);
                 queryParameter.setName(queryParam.paramName().get().text());
                 queryParameter.setRequired(false);
-                if (apidocs != null) {
-                    Arrays.stream(apidocs).map(doc -> doc.trim().replaceAll("#\\n", ""))
-                            .filter(normalizeDoc -> normalizeDoc.startsWith(queryParam.paramName().toString()))
-                            .map(normalizeDoc -> normalizeDoc.split("-", 2)[1]).forEach(queryParameter::setDescription);
+                if (!apidocs.isEmpty() && apidocs.containsKey(queryParam.paramName())) {
+                    queryParameter.setDescription(apidocs.get(queryParam.paramName()));
                 }
                 parameters.add(queryParameter);
             }
         } else {
             Parameter parameter = buildParameter(Constants.QUERY, queryParam);
             parameter.setRequired(false);
-            if (apidocs != null) {
-                for (String doc: apidocs) {
-                    String normalizeDoc = doc.trim().replaceAll("#\\n", "");
-                    if (normalizeDoc.startsWith(queryParam.paramName().toString())) {
-                        parameter.setDescription(normalizeDoc.split("-", 2)[1]);
-                    }
-                }
+            if (!apidocs.isEmpty() && apidocs.containsKey(queryParam.paramName())) {
+                parameter.setDescription(apidocs.get(queryParam.paramName()));
             }
             parameters.add(parameter);
         }

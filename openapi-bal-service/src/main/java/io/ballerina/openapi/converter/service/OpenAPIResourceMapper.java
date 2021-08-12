@@ -20,10 +20,12 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.Documentable;
+import io.ballerina.compiler.api.symbols.Documentation;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
@@ -43,6 +45,7 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -57,9 +60,9 @@ import java.util.Set;
  * @since 2.0.0
  */
 public class OpenAPIResourceMapper {
-    private SemanticModel semanticModel;
-    private Paths pathObject = new Paths();
-    private Components components = new Components();
+    private final SemanticModel semanticModel;
+    private final Paths pathObject = new Paths();
+    private final Components components = new Components();
 
     /**
      * Initializes a resource parser for openApi.
@@ -206,26 +209,23 @@ public class OpenAPIResourceMapper {
         op.getOperation().setOperationId(getOperationId(idIncrement, resName));
         op.getOperation().setParameters(null);
         // Set operation summary
-        String[] apidocs = null;
-        List<String> parameterDoc = new ArrayList<>();
+        // Map API documentation
+        Map<String, String > apiDocs = new HashMap<>();
         if (resource.metadata().isPresent()) {
-            MetadataNode metadataNode = resource.metadata().get();
-            Optional<Node> apiString = metadataNode.documentationString();
-            if (apiString.isPresent()) {
-                Node resourceDescription = apiString.get();
-                //check the kind if need.
-                apidocs = resourceDescription.toString().trim().split("\\+");
-                // first line assign as summary
-                if (apidocs.length > 1) {
-                    op.getOperation().setSummary(apidocs[0].trim().replaceAll("#","").replaceAll("\\n", "").trim());
-                } else {
-                    op.getOperation().setSummary(resourceDescription.toString().trim().replaceAll("#", "").replaceAll("\\n", "").trim());
+            Optional<Symbol> resourceSymbol = semanticModel.symbol(resource);
+            if (resourceSymbol.isPresent()) {
+                Symbol symbol = resourceSymbol.get();
+                Optional<Documentation> documentation = ((Documentable) symbol).documentation();
+                if (documentation.isPresent()) {
+                    Documentation documentation1 = documentation.get();
+                    Optional<String> description = documentation1.description();
+                    String resourceFunctionAPI = description.get().trim();
+                    apiDocs = documentation1.parameterMap();
+                    op.getOperation().setSummary(resourceFunctionAPI);
                 }
-                //filter parameter comments
             }
         }
-
-        this.addResourceParameters(resource, op, apidocs);
+        addResourceParameters(resource, op, apiDocs);
         OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
         openAPIResponseMapper.mapReturnToOASResponse(resource, op);
 
@@ -249,10 +249,10 @@ public class OpenAPIResourceMapper {
      * @param operationAdaptor The openApi operation.
      */
     private void addResourceParameters(FunctionDefinitionNode resource, OperationAdaptor operationAdaptor,
-                                       String[] apidocs) {
+                                       Map<String, String> apiDocs) {
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource,
-                operationAdaptor.getOperation(), apidocs);
+                operationAdaptor.getOperation(), apiDocs);
         openAPIParameterMapper.createParametersModel();
         // Need to check this since ballerina parser issue not generated when `GET` has requestBody
         if (!"GET".toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
@@ -268,7 +268,7 @@ public class OpenAPIResourceMapper {
                         for (AnnotationNode annotation: annotations) {
                             OpenAPIRequestBodyMapper openAPIRequestBodyMapper =
                                     new OpenAPIRequestBodyMapper(components, operationAdaptor, semanticModel);
-                            openAPIRequestBodyMapper.handlePayloadAnnotation(bodyParam, schema, annotation, apidocs);
+                            openAPIRequestBodyMapper.handlePayloadAnnotation(bodyParam, schema, annotation, apiDocs);
                         }
                     }
                 }

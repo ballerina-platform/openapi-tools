@@ -48,6 +48,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.client.AllOfResponsesTests"/>
             <class name="io.ballerina.openapi.generators.client.QueryParameterTests"/>
             <class name="io.ballerina.openapi.generators.client.NoServerURLTest"/>
+            <class name="io.ballerina.openapi.generators.client.RemoteFunctionNameValidationTests"/>
             <class name="io.ballerina.openapi.generators.client.RequestBodyTests"></class>
             <class name="io.ballerina.openapi.generators.auth.HttpAuthTests"/>
             <class name="io.ballerina.openapi.generators.auth.OAuth2Tests"/>
