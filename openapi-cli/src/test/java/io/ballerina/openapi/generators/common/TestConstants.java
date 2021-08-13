@@ -53,7 +53,7 @@ public class TestConstants {
             "public type ClientConfig record {|\n" +
             "   # Configurations related to client authentication\n" +
             "   http:BearerTokenConfig|http:CredentialsConfig auth;\n" + commonClientConfigurationFields;
-    public static final String HTTP_CLIENT_CONFIG_PARAM = "ClientConfig clientConfig";
+    public static final String HTTP_CLIENT_CONFIG_PARAM = "ClientConfig clientConfig, string serviceUrl";
     public static final String HTTP_CLIENT_DECLARATION = "" +
             "http:Client httpEp = check new (serviceUrl, clientConfig);";
     public static final String OAUTH2_AUTHORIZATION_CODE_CONFIG_REC = "" +
@@ -90,7 +90,7 @@ public class TestConstants {
             "|};";
     public static final String API_KEY_MAP_VAR  = "final readonly & map<string> apiKeys;";
     public static final String API_KEY_CONFIG_PARAM = "" +
-            "ApiKeysConfig apiKeyConfig,http:ClientConfiguration clientConfig =  {}";
+            "ApiKeysConfig apiKeyConfig, string serviceUrl, http:ClientConfiguration clientConfig =  {}";
     public static final String API_KEY_ASSIGNMENT = "self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();";
     public static final String API_KEY_DOC_COMMENT =
             "Provide your API key as `appid` .Eg: `{\"appid\":\"<APIkey>\"}`";

@@ -20,12 +20,10 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
-import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BinaryExpressionNode;
 import io.ballerina.compiler.syntax.tree.BlockStatementNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
-import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ElseBlockNode;
 import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
@@ -51,7 +49,6 @@ import io.ballerina.compiler.syntax.tree.ObjectFieldNode;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -93,13 +90,11 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeLi
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createAssignmentStatementNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBinaryExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBlockStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createClassDefinitionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createElseBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createForEachStatementNode;
@@ -146,7 +141,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
 
 /**
@@ -359,9 +353,11 @@ public class BallerinaClientGenerator {
         //Add parameters
         List<Node> parameters  = new ArrayList<>();
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
+        // get service URL
+        serverURL = getServerURL(openAPI.getServers());
+
         //Get config parameters relevant to the auth mechanism used
-        parameters.addAll(ballerinaAuthConfigGenerator.getConfigParamForClassInit());
-        parameters.add(createToken(COMMA_TOKEN));
+        parameters.addAll(ballerinaAuthConfigGenerator.getConfigParamForClassInit(serverURL));
         // Client init api documentation
         List<Node> docs = new ArrayList<>();
         String clientInitDocCommentLines = "Gets invoked to initialize the `connector`.\n";
@@ -393,21 +389,6 @@ public class BallerinaClientGenerator {
         MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));
         MetadataNode clientInit = createMetadataNode(clientInitDoc, createEmptyNodeList());
 
-        BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken("string"));
-        IdentifierToken paramName = createIdentifierToken(GeneratorConstants.SERVICE_URL);
-        List<Server> servers = openAPI.getServers();
-        serverURL = getServerURL(servers);
-        if (serverURL.equals("/") && !ballerinaAuthConfigGenerator.isAPIKey()) {
-            RequiredParameterNode serviceUrl = createRequiredParameterNode(annotationNodes, typeName, paramName);
-            parameters.add(serviceUrl);
-        } else {
-            BasicLiteralNode expression = createBasicLiteralNode(STRING_LITERAL,
-                createIdentifierToken('"' + serverURL + '"'));
-            DefaultableParameterNode serviceUrl = createDefaultableParameterNode(annotationNodes, typeName,
-                    paramName, createIdentifierToken("="), expression);
-            parameters.add(serviceUrl);
-        }
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(parameters);
 
         //Create return type node for inti function

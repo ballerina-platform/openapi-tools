@@ -64,7 +64,7 @@ public class HttpAuthTests {
                 false, true);
         String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
+        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit("/");
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }

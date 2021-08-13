@@ -122,6 +122,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.READONLY_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEYS_CONFIG;
@@ -323,24 +324,33 @@ public class BallerinaAuthConfigGenerator {
     /**
      * Generate the config parameters of the client class init method.
      * -- ex: Config param for Http and OAuth 2.0 Authentication mechanisms.
-     *          {@code ClientConfig clientConfig }
+     *          {@code ClientConfig clientConfig, string serviceUrl = "https://petstore.swagger.io:443/v2" }
      * -- ex: Config param for API Key Authentication mechanism.
-     *          {@code ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig = {} }
-     * -- ex: Config param for API Key Authentication mechanism.
-     *          {@code http:ClientConfiguration clientConfig = {} }
+     *          {@code ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig = {},
+     *          string serviceUrl = "https://petstore.swagger.io:443/v2" }
+     *        Config param for API Key Authentication mechanism with no server URL given
+     *          {@code ApiKeysConfig apiKeyConfig, string serviceUrl; http:ClientConfiguration clientConfig = {}}
+     * -- ex: Config param when no authentication mechanism given.
+     *          {@code http:ClientConfiguration clientConfig = {},
+     *          string serviceUrl = "https://petstore.swagger.io:443/v2" }
+     *        Config param when no authentication mechanism given with no server URL
+     *          {@code string serviceUrl, http:ClientConfiguration clientConfig = {}}
      *
      * @return {@link List<Node>}  syntax tree node list of config parameters
      */
-    public List<Node> getConfigParamForClassInit() {
+    public List<Node> getConfigParamForClassInit(String serviceUrl) {
+        NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
+        Node serviceURLNode = getServiceURLNode(serviceUrl);
         List<Node> parameters = new ArrayList<>();
         IdentifierToken equalToken = createIdentifierToken(GeneratorConstants.EQUAL);
-        NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         if (isHttpOROAuth) {
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(CLIENT_CONFIG));
             IdentifierToken paramName = createIdentifierToken(CONFIG_RECORD_ARG);
             RequiredParameterNode authConfig = createRequiredParameterNode(annotationNodes, typeName, paramName);
             parameters.add(authConfig);
+            parameters.add(createToken(COMMA_TOKEN));
+            parameters.add(serviceURLNode);
         } else {
             if (isAPIKey) {
                 BuiltinSimpleNameReferenceNode apiKeyConfigTypeName = createBuiltinSimpleNameReferenceNode(null,
@@ -358,9 +368,41 @@ public class BallerinaAuthConfigGenerator {
             DefaultableParameterNode defaultHTTPConfig = createDefaultableParameterNode(annotationNodes,
                     httpClientConfigTypeName,
                     httpClientConfig, equalToken, emptyexpression);
-            parameters.add(defaultHTTPConfig);
+            if (serviceURLNode instanceof RequiredParameterNode) {
+                parameters.add(serviceURLNode);
+                parameters.add(createToken(COMMA_TOKEN));
+                parameters.add(defaultHTTPConfig);
+            } else {
+                parameters.add(defaultHTTPConfig);
+                parameters.add(createToken(COMMA_TOKEN));
+                parameters.add(serviceURLNode);
+            }
         }
         return parameters;
+    }
+
+    /**
+     * Generate the serviceUrl parameters of the client class init method.
+     * @param serviceUrl        service Url given in the OpenAPI file
+     * @return  {@link DefaultableParameterNode} when server URl is given in the OpenAPI file
+     *          {@link RequiredParameterNode} when server URL is not given in the OpenAPI file
+     */
+    private Node getServiceURLNode(String serviceUrl) {
+        Node serviceURLNode;
+        NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
+        BuiltinSimpleNameReferenceNode serviceURLType = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken("string"));
+        IdentifierToken serviceURLVarName = createIdentifierToken(GeneratorConstants.SERVICE_URL);
+
+        if (serviceUrl.equals("/")) {
+            serviceURLNode = createRequiredParameterNode(annotationNodes, serviceURLType, serviceURLVarName);
+        } else {
+            BasicLiteralNode expression = createBasicLiteralNode(STRING_LITERAL,
+                    createIdentifierToken('"' + serviceUrl + '"'));
+            serviceURLNode = createDefaultableParameterNode(annotationNodes, serviceURLType,
+                    serviceURLVarName, createIdentifierToken("="), expression);
+        }
+        return serviceURLNode;
     }
 
     /**
