@@ -50,7 +50,7 @@ public class SwaggerFileParserTests {
 
     @Test(description = "Test invalid swagger file ",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Couldn't read or parse the definition from file: .*")
+            expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
     public void testInvalidFile() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = parser.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/invalid.yaml"));
     }
