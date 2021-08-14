@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.generators.GeneratorConstants.USER_DIR;
 
 /**
@@ -357,6 +358,15 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Functionality tests when invalid OpenAPI definition is given",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
+    public void testForInvalidDefinition() throws IOException, BallerinaOpenApiException, FormatterException {
+        final String clientName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("invalid_petstore.yaml").toString();
+        CodeGenerator generator = new CodeGenerator();
+        generator.generateBalSource(GEN_CLIENT, definitionPath, clientName, filter, false);
+    }
 
     @Test
     public void escapeIdentifierTest() {

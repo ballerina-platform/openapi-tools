@@ -75,7 +75,8 @@ public class ApiKeyAuthTests {
     public void testGetConfigParamForClassInit() {
         String expectedParams = TestConstants.API_KEY_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
+        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit(
+                "https:localhost/8080");
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }

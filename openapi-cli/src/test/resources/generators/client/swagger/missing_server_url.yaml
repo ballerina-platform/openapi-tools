@@ -65,9 +65,6 @@ paths:
                 type: string
                 example: Not found
 
-security:
-  - app_id: []
-
 tags:
   - name: Current Weather Data
     description: "Get current weather details"
@@ -82,9 +79,3 @@ components:
           type: number
         lon:
           type: number
-  securitySchemes:
-    app_id:
-      type: apiKey
-      description: API key.
-      name: appid
-      in: query
