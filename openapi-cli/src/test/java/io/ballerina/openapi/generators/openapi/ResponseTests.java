@@ -134,7 +134,7 @@ public class ResponseTests {
     public void testArrayRecord() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/array_record.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario13.yaml");
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/array_record.yaml");
     }
 
     @AfterMethod

@@ -81,7 +81,7 @@ public class OpenAPIParameterMapper {
             if (parameterNode instanceof RequiredParameterNode) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
                 // Handle query parameter
-                createQueryParameter(parameters,requiredParameterNode);
+                createQueryParameter(parameters, requiredParameterNode);
                 // Handle header, payload parameter
                 if (requiredParameterNode.typeName() instanceof TypeDescriptorNode &&
                         !requiredParameterNode.annotations().isEmpty()) {
@@ -130,8 +130,7 @@ public class OpenAPIParameterMapper {
             Parameter parameter = buildParameter(Constants.QUERY, queryParam);
             parameter.setRequired(true);
             // Handle required query parameter
-            if (!apidocs.isEmpty() && queryParam.paramName().isPresent()
-                    && apidocs.containsKey(queryParamName)) {
+            if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
                 parameter.setDescription(apidocs.get(queryParamName.trim()));
             }
             parameters.add(parameter);

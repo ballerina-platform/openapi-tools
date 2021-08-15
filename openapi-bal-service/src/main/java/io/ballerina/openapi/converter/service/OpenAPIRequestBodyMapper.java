@@ -100,7 +100,7 @@ public class OpenAPIRequestBodyMapper {
     }
 
     /**
-     * This function is use to handle when payload has one mime type
+     * This function is use to handle when payload has one mime type.
      *<pre>
      *     resource function post pets(@http:Payload json payload){}
      *</pre>

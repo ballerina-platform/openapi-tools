@@ -61,7 +61,7 @@ public class APIDocTests {
     @Test(description = "Request payload api doc mapped to OAS requestBody description")
     public void testsForRequestPayload() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/resource_function_with_requestbody_scenario.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/path_param.yaml");
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/requestBody.yaml");
     }
 
     @Test(description = "Record api doc mapped to OAS record description")
@@ -80,12 +80,6 @@ public class APIDocTests {
     public void testsForReferenceScenario() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/reference_scenario.bal");
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/reference.yaml");
-    }
-
-    @Test(description = "Return description scenarios")
-    public void testReturnDescription() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("apidoc/return_type.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/path_param.yaml");
     }
 
     @AfterMethod

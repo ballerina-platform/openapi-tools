@@ -93,8 +93,8 @@ public class OpenApiConverterUtilsTest {
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null,
                 false);
 
-        Assert.assertTrue(Files.exists(this.tempDir.resolve("hello-foo-bar_openapi.yaml")));
-        Assert.assertTrue(Files.exists(this.tempDir.resolve("hello02-bar-baz_openapi.yaml")));
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("hello_foo_bar_openapi.yaml")));
+        Assert.assertTrue(Files.exists(this.tempDir.resolve("hello02_bar_baz_openapi.yaml")));
     }
 
     @Test(description = "Generate OpenAPI spec with no base path")

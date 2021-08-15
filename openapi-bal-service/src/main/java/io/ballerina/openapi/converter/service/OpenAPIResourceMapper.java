@@ -217,7 +217,7 @@ public class OpenAPIResourceMapper {
      */
     private Map<String, String> listAPIDocumentations(FunctionDefinitionNode resource, OperationAdaptor op) {
 
-        Map<String, String > apiDocs = new HashMap<>();
+        Map<String, String> apiDocs = new HashMap<>();
         if (resource.metadata().isPresent()) {
             Optional<Symbol> resourceSymbol = semanticModel.symbol(resource);
             if (resourceSymbol.isPresent()) {
@@ -306,6 +306,7 @@ public class OpenAPIResourceMapper {
     private String generateRelativePath(FunctionDefinitionNode resource) {
 
         StringBuilder relativePath = new StringBuilder();
+        relativePath.append("/");
         if (!resource.relativeResourcePath().isEmpty()) {
             for (Node node: resource.relativeResourcePath()) {
                 if (node instanceof ResourcePathParameterNode) {
@@ -314,14 +315,12 @@ public class OpenAPIResourceMapper {
                     relativePath.append(pathNode.paramName());
                     relativePath.append("}");
                 } else if ((resource.relativeResourcePath().size() == 1) && (node.toString().trim().equals("."))) {
-                    relativePath.append("/");
                     return relativePath.toString();
                 } else {
-                    relativePath.append(node.toString());
+                    relativePath.append(node.toString().trim());
                 }
             }
         }
-        relativePath.append("/");
         return relativePath.toString();
     }
 }
