@@ -1,22 +1,23 @@
 openapi: 3.0.1
 info:
-  title: 'snowpeak'
+  title: ' payloadV'
   version: 1.0.0
 servers:
-  - url: localhost:9090/snowpeak
+  - url: localhost:9090/payloadV
 paths:
   /reservation:
     post:
-      operationId: operation1_put_/reservation
+      summary: Represents Snowpeak reservation resource
+      operationId: operation1_post_/reservation
+      requestBody:
+        description: Reservation representation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Link'
       responses:
-        "204":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Link'
-        "409":
-          description: "Error occurred while updating the reservation"
+        "202":
+          description: Accepted
 components:
   schemas:
     Link:
@@ -27,11 +28,8 @@ components:
         actions:
           type: string
           enum:
-            - GET
-            - POST
-            - PUT
-            - DELETE
             - PATCH
-      required:
-        - rel
-        - href
+            - DELETE
+            - PUT
+            - POST
+            - GET

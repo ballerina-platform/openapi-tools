@@ -47,6 +47,13 @@ public class EnumTypeTests {
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "data_type/enum.yaml");
     }
 
+    @Test(description = "When the record field has reference to enum type array")
+    public void testEnumTypeInArray() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_array.bal");
+        //Compare generated yaml file with expected yaml content
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "data_type/enum.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

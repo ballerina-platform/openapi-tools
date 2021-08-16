@@ -66,6 +66,7 @@ public class TestUtils {
                     , false);
             if (Files.exists(this.tempDir.resolve("payloadV_openapi.yaml"))) {
                 String generatedYaml = getStringFromGivenBalFile(this.tempDir, "payloadV_openapi.yaml");
+                System.out.println(generatedYaml);
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
                 expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
