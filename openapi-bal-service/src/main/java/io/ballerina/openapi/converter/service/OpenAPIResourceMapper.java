@@ -100,7 +100,7 @@ public class OpenAPIResourceMapper {
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.
             if (resource.functionName().toString().trim().equals(httpMethod)) {
-                operation = convertResourceToOperation(resource, httpMethod, i).getOperation();
+                operation = convertResourceToOperation(resource, httpMethod, i, path).getOperation();
                 generatePathItem(httpMethod, pathObject, operation, path);
                 break;
             }
@@ -189,13 +189,11 @@ public class OpenAPIResourceMapper {
     /**
      * This method will convert ballerina @Resource to ballerina @OperationAdaptor.
      *
-     * @param resource Resource array to be convert.
      * @return Operation Adaptor object of given resource
      */
     private OperationAdaptor convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                        int idIncrement) throws OpenApiConverterException {
+                                                        int idIncrement, String generateRelativePath) throws OpenApiConverterException {
         OperationAdaptor op = new OperationAdaptor();
-        String generateRelativePath = generateRelativePath(resource);
         op.setHttpOperation(httpMethod);
         op.setPath(generateRelativePath);
         /* Set operation id */
@@ -275,12 +273,12 @@ public class OpenAPIResourceMapper {
         ServiceDeclarationNode parentNode = (ServiceDeclarationNode) resource.parent();
         NodeList<Node> siblings = parentNode.members();
         httpMethods.add(resource.functionName().text());
+        String relativePath = generateRelativePath(resource);
         for (Node function: siblings) {
             SyntaxKind kind = function.kind();
             if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                 FunctionDefinitionNode sibling = (FunctionDefinitionNode) function;
                 //need to build relative path
-                String relativePath = generateRelativePath(resource);
                 String siblingRelativePath = generateRelativePath(sibling);
                 if (relativePath.equals(siblingRelativePath)) {
                     httpMethods.add(sibling.functionName().text());

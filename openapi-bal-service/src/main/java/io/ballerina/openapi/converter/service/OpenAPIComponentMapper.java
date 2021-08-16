@@ -219,8 +219,8 @@ public class OpenAPIComponentMapper {
         List<String> enums = new ArrayList<>();
         List<ConstantSymbol> enumMembers = enumSymbol.members();
         for (ConstantSymbol enumMember : enumMembers) {
-            if (enumMember.constValue() == null) {
-                enums.add(((ConstantSymbol) enumMember).getName().get());
+            if (enumMember.typeDescriptor().typeKind() == TypeDescKind.SINGLETON) {
+                enums.add(enumMember.typeDescriptor().signature());
             } else {
                 enums.add(enumMember.constValue().toString().trim());
             }
