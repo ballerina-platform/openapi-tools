@@ -82,9 +82,8 @@ public class OpenApiConverter {
         }
         syntaxTree = doc.syntaxTree();
         semanticModel =  project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
-        Map<String, String> openAPIDefinitions =
-                ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree, semanticModel, serviceName,
-                        needJson, outPath);
+        Map<String, String> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
+                semanticModel, serviceName, needJson, outPath);
         if (!openAPIDefinitions.isEmpty()) {
             for (Map.Entry<String, String> definition: openAPIDefinitions.entrySet()) {
                 CodegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue());

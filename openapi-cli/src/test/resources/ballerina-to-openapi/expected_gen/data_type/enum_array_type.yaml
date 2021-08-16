@@ -1,0 +1,59 @@
+openapi: 3.0.1
+info:
+  title: 'snowpeak'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/snowpeak
+paths:
+  /reservation:
+    post:
+      operationId: operation1_put_/reservation
+      responses:
+        "204":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationReceipt'
+        "409":
+          description: "Error occurred while updating the reservation"
+
+
+components:
+  schemas:
+    Reservation:
+      type: object
+      properties:
+        roomId:
+          type: string
+        count:
+          type: integer
+        startDate:
+          type: string
+        endDate:
+          type: string
+
+    Link:
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+        mediaTypes:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            type: string
+            enum:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+      required:
+        - rel
+        - href
