@@ -47,13 +47,16 @@ public class OpenApiConverter {
     private  SemanticModel semanticModel;
     private  Project project;
 
+    /**
+     * Initialize constructor.
+     */
     public OpenApiConverter() {
     }
 
     /**
      * This util for generating OAS files.
      *
-     * @param servicePath The path to a single ballerina file
+     * @param servicePath The path to a single ballerina file.
      * @param outPath     The output directory to which the OpenAPI specifications should be generated to.
      * @param serviceName Filter the services to generate OpenAPI specification for service with this name.
      * @throws IOException               Error when writing the OpenAPI specification file.
@@ -63,8 +66,6 @@ public class OpenApiConverter {
             , Boolean needJson) throws IOException, ProjectException, OpenApiConverterException {
         // Load project instance for single ballerina file
         project = ProjectLoader.loadProject(servicePath);
-        //Travers and filter service
-        //Take package name for project
         Package packageName = project.currentPackage();
         DocumentId docId;
         Document doc;

@@ -16,14 +16,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Reservation'
       responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ReservationReceipt'
-        "409":
-          description: Conflict
+        "202":
+          description: Accepted
 components:
   schemas:
     ReserveRoom:
@@ -52,41 +46,3 @@ components:
           type: string
           description: Start date in yyyy-mm-dd
       description: Represents a reservation of rooms
-    Links:
-      type: object
-      properties:
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/Link'
-    ReservationReceipt:
-      allOf:
-        - $ref: '#/components/schemas/Links'
-        - type: object
-          properties:
-            expiryDate:
-              type: string
-              description: Expiry date in yyyy-mm-dd
-            lastUpdated:
-              type: string
-              description: Last updated time stamp
-            reservation:
-              $ref: '#/components/schemas/Reservation'
-            id:
-              type: string
-              description: Unique identification
-    Link:
-      type: object
-      properties:
-        mediaTypes:
-          type: array
-          items:
-            type: string
-        rel:
-          type: string
-        href:
-          type: string
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Action'
