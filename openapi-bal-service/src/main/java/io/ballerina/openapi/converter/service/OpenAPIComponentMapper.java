@@ -176,7 +176,8 @@ public class OpenAPIComponentMapper {
             String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
             Schema property = ConverterCommonUtils.getOpenApiSchema(type);
             if (type.equals(Constants.TYPE_REFERENCE)) {
-                if (((TypeReferenceTypeSymbol) field.getValue().typeDescriptor()).definition().kind() == SymbolKind.ENUM) {
+                if (((TypeReferenceTypeSymbol) field.getValue().typeDescriptor()).definition().kind()
+                        == SymbolKind.ENUM) {
                     TypeReferenceTypeSymbol typeRefEnum = (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
                     EnumSymbol enumSymbol = (EnumSymbol) typeRefEnum.definition();
                     property = mapEnumValues(enumSymbol);

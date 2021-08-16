@@ -8,7 +8,7 @@ paths:
   /reservation:
     post:
       summary: Represents Snowpeak reservation resource
-      operationId: operation1_post_/reservation
+      operationId: operation_post_/reservation
       requestBody:
         description: Reservation representation
         content:
@@ -89,4 +89,10 @@ components:
         actions:
           type: array
           items:
-            $ref: '#/components/schemas/Action'
+            type: string
+            enum:
+              - PATCH
+              - DELETE
+              - PUT
+              - POST
+              - GET

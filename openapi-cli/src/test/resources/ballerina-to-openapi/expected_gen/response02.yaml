@@ -7,7 +7,7 @@ servers:
 paths:
   /user:
     post:
-      operationId: operation1_post_/user
+      operationId: operation_post_/user
       responses:
         "200":
           description: Ok

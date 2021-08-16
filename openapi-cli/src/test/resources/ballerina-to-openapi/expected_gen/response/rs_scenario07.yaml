@@ -7,7 +7,7 @@ servers:
 paths:
   /pets:
     get:
-      operationId: operation1_get_/pets
+      operationId: operation_get_/pets
       responses:
         "404":
           description: NotFound

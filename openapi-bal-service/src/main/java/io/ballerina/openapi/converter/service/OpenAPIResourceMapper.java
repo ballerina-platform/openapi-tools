@@ -96,15 +96,13 @@ public class OpenAPIResourceMapper {
             throws OpenApiConverterException {
         String path = generateRelativePath(resource);
         Operation operation;
-        int i = 1;
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.
             if (resource.functionName().toString().trim().equals(httpMethod)) {
-                operation = convertResourceToOperation(resource, httpMethod, i, path).getOperation();
+                operation = convertResourceToOperation(resource, httpMethod, path).getOperation();
                 generatePathItem(httpMethod, pathObject, operation, path);
                 break;
             }
-            i++;
         }
     }
 
@@ -192,13 +190,18 @@ public class OpenAPIResourceMapper {
      * @return Operation Adaptor object of given resource
      */
     private OperationAdaptor convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                        int idIncrement, String generateRelativePath) throws OpenApiConverterException {
+                                                        String generateRelativePath)
+            throws OpenApiConverterException {
         OperationAdaptor op = new OperationAdaptor();
         op.setHttpOperation(httpMethod);
         op.setPath(generateRelativePath);
         /* Set operation id */
-        String resName = (resource.functionName().text() + "_" + generateRelativePath).replaceAll("\\{///\\}", "_");
-        op.getOperation().setOperationId(getOperationId(idIncrement, resName));
+        String resName = (resource.functionName().text() + "_" +
+                generateRelativePath).replaceAll("\\{///\\}", "_");
+        if (generateRelativePath.equals("/")) {
+            resName = resource.functionName().text();
+        }
+        op.getOperation().setOperationId(getOperationId(resName));
         op.getOperation().setParameters(null);
         // Set operation summary
         // Map API documentation
@@ -241,8 +244,8 @@ public class OpenAPIResourceMapper {
      * @param postFix string post fix to attach to ID
      * @return {@link String} generated UUID
      */
-    private String getOperationId(int idIncrement, String postFix) {
-        return "operation" + idIncrement + "_" + postFix;
+    private String getOperationId(String postFix) {
+        return "operation_" + postFix;
     }
 
     /**

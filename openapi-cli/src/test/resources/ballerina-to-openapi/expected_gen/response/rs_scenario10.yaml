@@ -7,7 +7,7 @@ servers:
 paths:
   /hi01:
     post:
-      operationId: operation1_post_/hi01
+      operationId: operation_post_/hi01
       responses:
         "200":
           description: Ok
@@ -19,7 +19,7 @@ paths:
                   $ref: '#/components/schemas/Pet'
   /hi:
     post:
-      operationId: operation1_post_/hi
+      operationId: operation_post_/hi
       responses:
         "200":
           description: Ok

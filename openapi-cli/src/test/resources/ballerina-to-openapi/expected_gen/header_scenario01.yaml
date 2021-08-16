@@ -7,7 +7,7 @@ servers:
 paths:
   /ping:
     get:
-      operationId: operation1_get_/ping
+      operationId: operation_get_/ping
       parameters:
         - name: X-Client
           in: header
@@ -18,7 +18,7 @@ paths:
           description: Ok
   /v1:
     get:
-      operationId: operation1_get_/v1
+      operationId: operation_get_/v1
       parameters:
         - name: XClient
           in: header
