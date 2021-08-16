@@ -60,6 +60,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -146,8 +147,8 @@ import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
  * This class is used to generate authentication related nodes of the ballerina connector client syntax tree.
  */
 public class BallerinaAuthConfigGenerator {
-    private final List<String> headerApiKeyNameList = new ArrayList<>();
-    private final List<String> queryApiKeyNameList = new ArrayList<>();
+    private final Map<String, String> headerApiKeyNameList = new HashMap<>();
+    private final Map<String, String> queryApiKeyNameList = new HashMap<>();
     private boolean isAPIKey = false;
     private boolean isHttpOROAuth = false;
     private final Set<String> authTypes = new LinkedHashSet<>();
@@ -183,7 +184,7 @@ public class BallerinaAuthConfigGenerator {
      *
      * @return {@link List<String>}    API key name list
      */
-    public List<String> getQueryApiKeyNameList() {
+    public Map<String, String> getQueryApiKeyNameList() {
         return queryApiKeyNameList;
     }
 
@@ -192,7 +193,7 @@ public class BallerinaAuthConfigGenerator {
      *
      * @return {@link List<String>}    API key name list
      */
-    public List<String> getHeaderApiKeyNameList() {
+    public Map<String, String> getHeaderApiKeyNameList() {
         return headerApiKeyNameList;
     }
 
@@ -756,10 +757,10 @@ public class BallerinaAuthConfigGenerator {
                         setApiKeyDescription(schemaValue);
                         switch (apiKeyType) {
                             case "query":
-                                queryApiKeyNameList.add(schemaValue.getName());
+                                queryApiKeyNameList.put(securitySchemeEntry.getKey(), schemaValue.getName());
                                 break;
                             case "header":
-                                headerApiKeyNameList.add(schemaValue.getName());
+                                headerApiKeyNameList.put(securitySchemeEntry.getKey(), schemaValue.getName());
                                 break;
                             default:
                                 break;
