@@ -3,7 +3,12 @@ info:
   title: ' payloadV'
   version: 1.0.0
 servers:
-  - url: http://petstore.openapi.io:80/payloadV
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "80"
 paths:
   /pets:
     get:

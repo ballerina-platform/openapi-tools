@@ -3,8 +3,18 @@ info:
   title: ' payloadV'
   version: 1.0.0
 servers:
-  - url: localhost:8080/payloadV
-  - url: http://petstore.openapi.io:443/payloadV
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        enum:
+          - http://petstore.openapi.io
+          - http://localhost
+        default: http://petstore.openapi.io
+      port:
+        enum:
+          - "443"
+          - "8080"
+        default: "443"
 paths:
   /pets:
     get:

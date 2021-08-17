@@ -3,7 +3,12 @@ info:
   title: ' payloadV'
   version: 1.0.0
 servers:
-  - url: petstore.swagger.io:443/payloadV
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: petstore.swagger.io
+      port:
+        default: "443"
 paths:
   /pet:
     post:

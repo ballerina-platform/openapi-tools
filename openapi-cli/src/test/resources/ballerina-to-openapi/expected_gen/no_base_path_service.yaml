@@ -3,7 +3,12 @@ info:
   title: _
   version: 1.0.0
 servers:
-  - url: //localhost:9090/
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /hi:
     post:
