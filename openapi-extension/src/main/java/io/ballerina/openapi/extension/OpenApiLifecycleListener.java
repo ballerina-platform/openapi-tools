@@ -16,16 +16,15 @@
 
 package io.ballerina.openapi.extension;
 
-import io.ballerina.projects.plugins.CompilerPlugin;
-import io.ballerina.projects.plugins.CompilerPluginContext;
+import io.ballerina.projects.plugins.CompilerLifecycleContext;
+import io.ballerina.projects.plugins.CompilerLifecycleListener;
 
 /**
- * {@code OpenApiCompilerPlugin} handles compile-time OpenAPI doc generation for Ballerina HTTP Services.
+ * {@code OpenApiLifecycleListener} initiates post compile tasks related to OpenAPI doc generation.
  */
-public class OpenApiCompilerPlugin extends CompilerPlugin {
+public class OpenApiLifecycleListener extends CompilerLifecycleListener {
     @Override
-    public void init(CompilerPluginContext context) {
-        context.addCodeAnalyzer(new OpenApiCodeAnalyzer());
-        context.addCompilerLifecycleListener(new OpenApiLifecycleListener());
+    public void init(CompilerLifecycleContext context) {
+        context.addCodeGenerationCompletedTask(new OpenApiDocPackagingTask());
     }
 }

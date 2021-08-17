@@ -26,7 +26,7 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.extension.doc.Generator;
+import io.ballerina.openapi.extension.doc.OpenApiDocGenerator;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -37,13 +37,10 @@ import java.util.Optional;
  * {@code HttpServiceAnalysisTask} analyses the HTTP service for which the OpenApi doc is generated.
  */
 public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
-    private static final String PACKAGE_ORG = "ballerina";
-    private static final String PACKAGE_NAME = "http";
-
-    private final Generator docGenerator;
+    private final OpenApiDocGenerator docGenerator;
 
     public HttpServiceAnalysisTask() {
-        this.docGenerator = new Generator();
+        this.docGenerator = new OpenApiDocGenerator();
     }
 
     @Override
@@ -53,12 +50,12 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         SemanticModel semanticModel = context.semanticModel();
         Optional<Symbol> serviceDeclarationOpt = semanticModel.symbol(serviceNode);
         if (serviceDeclarationOpt.isPresent()) {
-            ServiceDeclarationSymbol serviceDeclarationSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
-            if (!isHttpService(serviceDeclarationSymbol)) {
+            ServiceDeclarationSymbol serviceSymbol = (ServiceDeclarationSymbol) serviceDeclarationOpt.get();
+            if (!isHttpService(serviceSymbol)) {
                 return;
             }
             SyntaxTree syntaxTree = context.syntaxTree();
-            this.docGenerator.generate(currentProject.sourceRoot().toString(), semanticModel, syntaxTree);
+            this.docGenerator.generate(currentProject.sourceRoot(), semanticModel, syntaxTree, serviceSymbol);
         }
     }
 
@@ -92,7 +89,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
 
     private boolean isHttp(ModuleSymbol moduleSymbol) {
         Optional<String> moduleNameOpt = moduleSymbol.getName();
-        return moduleNameOpt.isPresent() && PACKAGE_NAME.equals(moduleNameOpt.get())
-                && PACKAGE_ORG.equals(moduleSymbol.id().orgName());
+        return moduleNameOpt.isPresent() && Constants.PACKAGE_NAME.equals(moduleNameOpt.get())
+                && Constants.PACKAGE_ORG.equals(moduleSymbol.id().orgName());
     }
 }

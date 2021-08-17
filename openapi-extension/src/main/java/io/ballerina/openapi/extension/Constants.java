@@ -16,16 +16,17 @@
 
 package io.ballerina.openapi.extension;
 
-import io.ballerina.projects.plugins.CompilerPlugin;
-import io.ballerina.projects.plugins.CompilerPluginContext;
-
 /**
- * {@code OpenApiCompilerPlugin} handles compile-time OpenAPI doc generation for Ballerina HTTP Services.
+ * {@code Constants} contains the common constants for the open-api extensions.
  */
-public class OpenApiCompilerPlugin extends CompilerPlugin {
-    @Override
-    public void init(CompilerPluginContext context) {
-        context.addCodeAnalyzer(new OpenApiCodeAnalyzer());
-        context.addCompilerLifecycleListener(new OpenApiLifecycleListener());
-    }
+public interface Constants {
+    // package details related constants
+    String PACKAGE_ORG = "ballerina";
+    String PACKAGE_NAME = "http";
+
+    // resource directory structure related constants
+    String TARGET_DIR_NAME = "target";
+    String BIN_DIR_NAME = "bin";
+    String RESOURCES_DIR_NAME = "resources";
+    String RESOURCE_DIR_NAME = "resource";
 }

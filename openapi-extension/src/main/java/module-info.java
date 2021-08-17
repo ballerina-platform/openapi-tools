@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module ballerina.openapi.openapi.extension {
+module ballerina.openapi.extension {
     requires io.ballerina.lang;
     requires io.ballerina.tools.api;
     requires io.ballerina.parser;

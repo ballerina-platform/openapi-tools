@@ -18,7 +18,8 @@ package io.ballerina.openapi.converter.utils;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Random;
@@ -47,7 +48,7 @@ public final class CodegenUtils {
      * @throws IOException when a file operation fails
      */
     public static void writeFile(Path filePath, String content, boolean append) throws IOException {
-        try (FileWriter writer = new FileWriter(filePath.toString(), StandardCharsets.UTF_8)) {
+        try (FileWriter writer = new FileWriter(filePath.toString(), StandardCharsets.UTF_8, append)) {
             writer.write(content);
         }
     }
@@ -69,5 +70,22 @@ public final class CodegenUtils {
                 .limit(stringLength)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
+    }
+
+    /**
+     * Copy content of a file/directory into another location.
+     *
+     * @param inputStream  stream from which the data is read
+     * @param outStream  stream to which the data is written
+     * @throws IOException if there is any error while reading from a file or writing to a file
+     */
+    public static <T extends InputStream, E extends OutputStream> void copyContent(T inputStream, E outStream)
+            throws IOException {
+        byte[] data = new byte[1024];
+        int bytesRead = inputStream.read(data);
+        while (bytesRead != -1) {
+            outStream.write(data, 0, bytesRead);
+            bytesRead = inputStream.read(data);
+        }
     }
 }
