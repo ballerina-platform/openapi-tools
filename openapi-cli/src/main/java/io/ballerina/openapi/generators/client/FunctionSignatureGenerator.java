@@ -20,8 +20,6 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.EnumDeclarationNode;
-import io.ballerina.compiler.syntax.tree.EnumMemberNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
@@ -39,7 +37,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorConstants;
+import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -59,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
@@ -70,21 +67,15 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSepara
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createEnumDeclarationNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createEnumMemberNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignatureNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createNilLiteralNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.ENUM_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
@@ -103,26 +94,20 @@ public class FunctionSignatureGenerator {
     private final OpenAPI openAPI;
     private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
-    private final List<EnumDeclarationNode> enumDeclarationNodeList;
     private FunctionReturnType functionReturnType;
-    private DocCommentsGenerator docCommentsGenerator;
     private GeneratorUtils generatorUtils;
 
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
-
         return typeDefinitionNodeList;
     }
 
     public FunctionSignatureGenerator(OpenAPI openAPI,
                                       BallerinaSchemaGenerator ballerinaSchemaGenerator,
-                                      List<TypeDefinitionNode> typeDefinitionNodeList, List<EnumDeclarationNode>
-                                              enumDeclarationNodeList) {
+                                      List<TypeDefinitionNode> typeDefinitionNodeList) {
 
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.typeDefinitionNodeList = typeDefinitionNodeList;
-        this.enumDeclarationNodeList = enumDeclarationNodeList;
-        this.docCommentsGenerator = new DocCommentsGenerator();
         this.generatorUtils = new GeneratorUtils();
         this.functionReturnType =  new FunctionReturnType(openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
 
@@ -153,8 +138,8 @@ public class FunctionSignatureGenerator {
         Iterator<ApiResponse> iteratorRes = values.iterator();
         ApiResponse next = iteratorRes.next();
         if (next.getDescription() != null) {
-            MarkdownParameterDocumentationLineNode returnDoc = generatorUtils.createParamAPIDoc("return",
-                    next.getDescription().split("\n")[0]);
+            MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
+                    next.getDescription());
             remoteFunctionDoc.add(returnDoc);
         }
 
@@ -162,7 +147,6 @@ public class FunctionSignatureGenerator {
         ReturnTypeDescriptorNode returnTypeDescriptorNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD),
                 createEmptyNodeList(), createBuiltinSimpleNameReferenceNode(null,
                         createIdentifierToken(returnType)));
-
         return createFunctionSignatureNode(createToken(OPEN_PAREN_TOKEN), parameters, createToken(CLOSE_PAREN_TOKEN),
                 returnTypeDescriptorNode);
     }
@@ -182,58 +166,61 @@ public class FunctionSignatureGenerator {
                 switch (in) {
                     case "path":
                         Node param = getPathParameters(parameter);
-                        // Path parameters are always required. 
+                        // Path parameters are always required.
                         parameterList.add(param);
                         parameterList.add(comma);
                         if (parameter.getDescription() != null) {
                             MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                    generatorUtils.createParamAPIDoc(escapeIdentifier(getValidName(
+                                    DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(getValidName(
                                             parameter.getName(), false)),
-                                            parameter.getDescription().split("\n")[0]);
+                                            parameter.getDescription());
                             remoteFunctionDoc.add(paramAPIDoc);
                         }
                         break;
                     case "query":
-                        Node paramq = getQueryParameters(operation.getOperationId(), parameter);
+                        Node paramq = getQueryParameters(parameter);
                         if (paramq instanceof RequiredParameterNode) {
                             parameterList.add(paramq);
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
                                 MarkdownParameterDocumentationLineNode paramAPIDoc =
-                                        generatorUtils.createParamAPIDoc(escapeIdentifier(
+                                        DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(
                                                 getValidName(parameter.getName(), false)),
-                                                parameter.getDescription().split("\n")[0]);
+                                                parameter.getDescription());
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
                             defaultable.add(paramq);
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc = generatorUtils.createParamAPIDoc(
+                                MarkdownParameterDocumentationLineNode paramAPIDoc = DocCommentsGenerator.
+                                        createAPIParamDoc(
                                                 escapeIdentifier(getValidName(parameter.getName(),
-                                                false)), parameter.getDescription().split("\n")[0]);
+                                                false)), parameter.getDescription());
                                 defaultParam.add(paramAPIDoc);
                             }
                         }
                         break;
                     case "header":
-                        Node paramh = getHeaderParameter(operation.getOperationId(), parameter);
+                        Node paramh = getHeaderParameter(parameter);
                         if (paramh instanceof RequiredParameterNode) {
                             parameterList.add(paramh);
                             parameterList.add(comma);
                             if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc = generatorUtils.createParamAPIDoc(
+                                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                        DocCommentsGenerator.createAPIParamDoc(
                                                 escapeIdentifier(getValidName(parameter.getName(),
-                                                false)), parameter.getDescription().split("\n")[0]);
+                                                false)), parameter.getDescription());
                                 remoteFunctionDoc.add(paramAPIDoc);
                             }
                         } else {
                             defaultable.add(paramh);
                             defaultable.add(comma);
                             if (parameter.getDescription() != null) {
-                                MarkdownParameterDocumentationLineNode paramAPIDoc = generatorUtils.createParamAPIDoc(
+                                MarkdownParameterDocumentationLineNode paramAPIDoc =
+                                        DocCommentsGenerator.createAPIParamDoc(
                                                 escapeIdentifier(getValidName(parameter.getName(),
-                                                false)), parameter.getDescription().split("\n")[0]);
+                                                false)), parameter.getDescription());
                                 defaultParam.add(paramAPIDoc);
                             }
                         }
@@ -275,11 +262,11 @@ public class FunctionSignatureGenerator {
      * type BasicType boolean|int|float|decimal|string;
      * public type QueryParamType ()|BasicType|BasicType[];
      */
-    public Node getQueryParameters(String operationId, Parameter parameter) throws BallerinaOpenApiException {
+    public Node getQueryParameters(Parameter parameter) throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         TypeDescriptorNode typeName;
         if (parameter.getExtensions() != null) {
-            annotationNodes = docCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
+            annotationNodes = DocCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
         }
 
         Schema parameterSchema = parameter.getSchema();
@@ -292,28 +279,23 @@ public class FunctionSignatureGenerator {
                 throw new BallerinaOpenApiException("Ballerina does not support object type query parameters.");
             }
         } else {
-            if (parameterSchema.getEnum() != null && parameterSchema.getType().equals(GeneratorConstants.STRING)) {
-                paramType = getValidName(operationId, true) + getValidName(parameter.getName(), true);
-                createEnums(paramType, parameterSchema);
-            } else {
-                paramType = convertOpenAPITypeToBallerina(parameterSchema.getType().trim());
-                if (parameterSchema.getType().equals("number")) {
-                    if (parameterSchema.getFormat() != null) {
-                        paramType = convertOpenAPITypeToBallerina(parameterSchema.getFormat().trim());
-                    }
+            paramType = convertOpenAPITypeToBallerina(parameterSchema.getType().trim());
+            if (parameterSchema.getType().equals("number")) {
+                if (parameterSchema.getFormat() != null) {
+                    paramType = convertOpenAPITypeToBallerina(parameterSchema.getFormat().trim());
                 }
+            }
 
-                if (parameterSchema instanceof ArraySchema) {
-                    ArraySchema arraySchema = (ArraySchema) parameterSchema;
-                    if (arraySchema.getItems().getType() != null) {
-                        String itemType = arraySchema.getItems().getType();
-                        if (itemType.equals("string") || itemType.equals("integer") || itemType.equals("boolean")
-                                || itemType.equals("number")) {
-                            paramType = convertOpenAPITypeToBallerina(itemType) + "[]";
-                        }
-                    } else if (arraySchema.getItems().get$ref() != null) {
-                        paramType = extractReferenceType(arraySchema.getItems().get$ref().trim()) + "[]";
+            if (parameterSchema instanceof ArraySchema) {
+                ArraySchema arraySchema = (ArraySchema) parameterSchema;
+                if (arraySchema.getItems().getType() != null) {
+                    String itemType = arraySchema.getItems().getType();
+                    if (itemType.equals("string") || itemType.equals("integer") || itemType.equals("boolean")
+                            || itemType.equals("number")) {
+                        paramType = convertOpenAPITypeToBallerina(itemType) + "[]";
                     }
+                } else if (arraySchema.getItems().get$ref() != null) {
+                    paramType = extractReferenceType(arraySchema.getItems().get$ref().trim()) + "[]";
                 }
             }
         }
@@ -358,7 +340,7 @@ public class FunctionSignatureGenerator {
      */
     public Node getPathParameters(Parameter parameter) throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes =
-                docCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
+                DocCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
         IdentifierToken paramName = createIdentifierToken(escapeIdentifier(
                 getValidName(parameter.getName(), false)));
         String type = "";
@@ -383,9 +365,9 @@ public class FunctionSignatureGenerator {
     /**
      * Create header when it comes under the parameter section in swagger.
      */
-    private Node getHeaderParameter(String operationId, Parameter parameter) throws BallerinaOpenApiException {
+    private Node getHeaderParameter(Parameter parameter) throws BallerinaOpenApiException {
 
-        NodeList<AnnotationNode> annotationNodes = docCommentsGenerator
+        NodeList<AnnotationNode> annotationNodes = DocCommentsGenerator
                 .extractDisplayAnnotation(parameter.getExtensions());
         Schema schema = parameter.getSchema();
         if (parameter.getRequired()) {
@@ -398,26 +380,17 @@ public class FunctionSignatureGenerator {
                 } else {
                     type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType().trim()) + "[]";
                 }
-            } else if (schema.getEnum() != null && schema.getType().equals(GeneratorConstants.STRING)) {
-                type = getValidName(operationId, true) + getValidName(parameter.getName(), true);
-                createEnums(type, schema);
             }
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(type));
             IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
             return createRequiredParameterNode(annotationNodes, typeName, paramName);
         } else {
-            String type = "";
-            if (schema.getEnum() != null && schema.getType().equals(GeneratorConstants.STRING)) {
-                type = getValidName(parameter.getName(), true);
-                createEnums(type, schema);
-            } else {
-                type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
-            }
             IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
             if (schema.getDefault() != null) {
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(type));
+                        createIdentifierToken(convertOpenAPITypeToBallerina(
+                                parameter.getSchema().getType().trim())));
                 LiteralValueToken literalValueToken;
                 if (schema.getType().equals("string")) {
                     literalValueToken = createLiteralValueToken(null,
@@ -434,46 +407,13 @@ public class FunctionSignatureGenerator {
                         literalValueToken);
             } else {
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(type + "?"));
+                        createIdentifierToken(convertOpenAPITypeToBallerina(
+                                parameter.getSchema().getType().trim()) + "?"));
                 NilLiteralNode nilLiteralNode =
                         createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
                 return createDefaultableParameterNode(annotationNodes, typeName, paramName, createToken(EQUAL_TOKEN),
                         nilLiteralNode);
             }
-        }
-    }
-
-    /*
-     * Create enum declaration node for string type enums.
-     */
-    private void createEnums(String paramType, Schema parameterSchema) {
-        boolean isExit = false;
-        if (!enumDeclarationNodeList.isEmpty()) {
-            for (EnumDeclarationNode enumNode : enumDeclarationNodeList) {
-                if (enumNode.identifier().toString().trim().equals(paramType)) {
-                    isExit = true;
-                    // Todo: Will there be a scenario same param name -> different values in the enum
-                }
-            }
-        }
-        if (!isExit) {
-            List<Node> enumMemberNodeNodeList =  new ArrayList<>();
-            Iterator<String> iterator = parameterSchema.getEnum().iterator();
-            while (iterator.hasNext()) {
-                String enumValue = iterator.next();
-                String enumName = paramType.toUpperCase(Locale.ROOT) + "_" +
-                        getValidName(enumValue, false).toUpperCase(Locale.ROOT);
-                EnumMemberNode memberNode = createEnumMemberNode(null, createIdentifierToken
-                                (enumName), createToken(EQUAL_TOKEN),
-                        createRequiredExpressionNode(createIdentifierToken("\"" + enumValue + "\"")));
-                enumMemberNodeNodeList.add(memberNode);
-                enumMemberNodeNodeList.add(createToken(COMMA_TOKEN));
-            }
-            EnumDeclarationNode enumDeclarationNode = createEnumDeclarationNode(null,
-                    createIdentifierToken("public"), createToken(ENUM_KEYWORD),
-                    createIdentifierToken(paramType), createToken(OPEN_BRACE_TOKEN),
-                    createSeparatedNodeList(enumMemberNodeNodeList), createToken(CLOSE_BRACE_TOKEN));
-            enumDeclarationNodeList.add(enumDeclarationNode);
         }
     }
 
@@ -522,13 +462,13 @@ public class FunctionSignatureGenerator {
             }
             if (!paramType.isBlank()) {
                 NodeList<AnnotationNode> annotationNodes =
-                        docCommentsGenerator.extractDisplayAnnotation(requestBody.getExtensions());
+                        DocCommentsGenerator.extractDisplayAnnotation(requestBody.getExtensions());
                 SimpleNameReferenceNode typeName = createSimpleNameReferenceNode(createIdentifierToken(paramType));
                 IdentifierToken paramName = createIdentifierToken("payload");
                 RequiredParameterNode payload = createRequiredParameterNode(annotationNodes, typeName, paramName);
                 if (requestBody.getDescription() != null) {
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            generatorUtils.createParamAPIDoc(escapeIdentifier("payload"),
+                            DocCommentsGenerator.createAPIParamDoc(escapeIdentifier("payload"),
                                     requestBody.getDescription().split("\n")[0]);
                     requestBodyDoc.add(paramAPIDoc);
                 }
@@ -564,7 +504,7 @@ public class FunctionSignatureGenerator {
         } else if (arrayItems instanceof ComposedSchema) {
             paramType = "CompoundArrayItem" +  getValidName(operationId, true) + "Request";
             TypeDescriptorNode typeDescriptorNodeForArraySchema = ballerinaSchemaGenerator
-                    .getTypeDescriptorNodeForArraySchema(openAPI, arraySchema, createIdentifierToken(paramType));
+                    .getTypeDescriptorNodeForArraySchema(openAPI, arraySchema);
             // TODO - Add API doc by checking requestBody
             TypeDefinitionNode arrayTypeNode = NodeFactory.createTypeDefinitionNode(null, null,
                     createIdentifierToken("public type"),

@@ -32,7 +32,6 @@ import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
@@ -78,15 +77,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLiteralValueToken;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createExpressionStatementNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownParameterDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
@@ -409,7 +404,8 @@ public class GeneratorUtils {
     /**
      * Util for take OpenApi spec from given yaml file.
      */
-    public OpenAPI getOpenAPIFromOpenAPIV3Parser(Path definitionPath) throws IOException, BallerinaOpenApiException {
+    public OpenAPI getOpenAPIFromOpenAPIV3Parser(Path definitionPath) throws
+            IOException, BallerinaOpenApiException {
 
         Path contractPath = java.nio.file.Paths.get(definitionPath.toString());
         if (!Files.exists(contractPath)) {
@@ -425,7 +421,11 @@ public class GeneratorUtils {
         parseOptions.setFlatten(true);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
-            throw new BallerinaOpenApiException("Couldn't read or parse the definition from file: " + definitionPath);
+            StringBuilder errorMessage = new StringBuilder("OpenAPI file has errors: \n\n");
+            for (String message: parseResult.getMessages()) {
+                errorMessage.append(message);
+            }
+            throw new BallerinaOpenApiException(errorMessage.toString());
         }
         return parseResult.getOpenAPI();
     }
@@ -472,7 +472,7 @@ public class GeneratorUtils {
     /**
      * Generate BallerinaMediaType for all the mediaTypes.
      */
-    public  String getBallerinaMediaType(String mediaType) {
+    public String getBallerinaMediaType(String mediaType) {
         switch (mediaType) {
             case "*/*":
             case "application/json":
@@ -537,21 +537,13 @@ public class GeneratorUtils {
         return unionTypeCont;
     }
 
-    public  MarkdownParameterDocumentationLineNode createParamAPIDoc(String paramName, String description) {
-
-        return createMarkdownParameterDocumentationLineNode(null, createToken(SyntaxKind.HASH_TOKEN),
-                createToken(SyntaxKind.PLUS_TOKEN), createIdentifierToken(paramName),
-                createToken(SyntaxKind.MINUS_TOKEN), createNodeList(createLiteralValueToken(null
-                        , description,  createEmptyMinutiaeList(), createEmptyMinutiaeList())));
-    }
-
     /**
      * Generate remote function method name , when operation ID is not available for given operation.
      *
      * @param paths - swagger paths object
      * @return {@link io.swagger.v3.oas.models.Paths }
      */
-    public  Paths setOperationId(Paths paths) {
+    public Paths setOperationId(Paths paths) {
         Set<Map.Entry<String, PathItem>> entries = paths.entrySet();
         for (Map.Entry<String, PathItem> entry: entries) {
             PathItem pathItem = entry.getValue();
@@ -674,7 +666,7 @@ public class GeneratorUtils {
         return paths;
     }
 
-    private  String getOperationId(String[] split, String method) {
+    private String getOperationId(String[] split, String method) {
         String operationId;
         String regEx = "\\{([^}]*)\\}";
         Matcher matcher = Pattern.compile(regEx).matcher(split[split.length - 1]);
@@ -689,7 +681,7 @@ public class GeneratorUtils {
     /*
      * Generate variableDeclarationNode.
      */
-    public  VariableDeclarationNode getSimpleStatement(String responseType, String variable,
+    public VariableDeclarationNode getSimpleStatement(String responseType, String variable,
                                                              String initializer) {
         SimpleNameReferenceNode resTypeBind = createSimpleNameReferenceNode(createIdentifierToken(responseType));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(createIdentifierToken(variable));
@@ -703,7 +695,7 @@ public class GeneratorUtils {
     /*
      * Generate expressionStatementNode.
      */
-    public  ExpressionStatementNode getSimpleExpressionStatementNode(String expression) {
+    public ExpressionStatementNode getSimpleExpressionStatementNode(String expression) {
         SimpleNameReferenceNode expressionNode = createSimpleNameReferenceNode(
                 createIdentifierToken(expression));
         return createExpressionStatementNode(null, expressionNode, createToken(SEMICOLON_TOKEN));

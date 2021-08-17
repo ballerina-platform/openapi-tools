@@ -75,7 +75,8 @@ public class ApiKeyAuthTests {
     public void testGetConfigParamForClassInit() {
         String expectedParams = TestConstants.API_KEY_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
+        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit(
+                "https:localhost/8080");
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }
@@ -93,6 +94,20 @@ public class ApiKeyAuthTests {
         generatedAssignmentNode = (generatedAssignmentNode.trim()).replaceAll("\\s+", "");
         expectedAssignmentNode = (expectedAssignmentNode.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedAssignmentNode, generatedAssignmentNode);
+    }
+
+    @Test(description = "Test the generation of api key documentation comment")
+    public void testGetApiKeyDescription () throws IOException, BallerinaOpenApiException {
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/custome_api_key_doc.yaml");
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        String expectedApiKeyDescription = TestConstants.API_KEY_DOC_COMMENT;
+        String generatedConfigRecord = Objects.requireNonNull(
+                ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
+        String generateApiKeyDescription = ballerinaAuthConfigGenerator.getApiKeyDescription();
+        generateApiKeyDescription = (generateApiKeyDescription.trim()).replaceAll("\\s+", "");
+        expectedApiKeyDescription = (expectedApiKeyDescription.trim()).replaceAll("\\s+", "");
+        Assert.assertEquals(expectedApiKeyDescription, generateApiKeyDescription);
     }
 
     @DataProvider(name = "apiKeyAuthIOProvider")

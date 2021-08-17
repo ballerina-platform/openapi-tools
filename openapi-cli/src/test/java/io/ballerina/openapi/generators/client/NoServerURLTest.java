@@ -1,10 +1,13 @@
 package io.ballerina.openapi.generators.client;
 
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.common.TestConstants;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -25,15 +28,47 @@ public class NoServerURLTest {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    @Test(description = "Test for no server url")
+    @Test(description = "Test for no server url with no security schema given")
     public void getClientForNoServerURL() throws IOException, BallerinaOpenApiException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/missing_server_url.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/missing_server_url.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Test for no server url with HTTP authentication mechanism")
+    public void getClientForNoServerURLWithHTTPAuth() {
+        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(
+                false, true);
+        String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM_NO_URL;
+        StringBuilder generatedParams = new StringBuilder();
+        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit(
+                "/");
+        for (Node param: generatedInitParamNodes) {
+            generatedParams.append(param.toString());
+        }
+        expectedParams = (expectedParams.trim()).replaceAll("\\s+", "");
+        String generatedParamsStr = (generatedParams.toString().trim()).replaceAll("\\s+", "");
+        Assert.assertEquals(expectedParams, generatedParamsStr);
+    }
+
+    @Test(description = "Test for no server url with API key authentication mechanism")
+    public void getClientForNoServerURLWithAPIKeyAuth() {
+        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(
+                true, false);
+        String expectedParams = TestConstants.API_KEY_CONFIG_PARAM_NO_URL;
+        StringBuilder generatedParams = new StringBuilder();
+        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit(
+                "/");
+        for (Node param: generatedInitParamNodes) {
+            generatedParams.append(param.toString());
+        }
+        expectedParams = (expectedParams.trim()).replaceAll("\\s+", "");
+        String generatedParamsStr = (generatedParams.toString().trim()).replaceAll("\\s+", "");
+        Assert.assertEquals(expectedParams, generatedParamsStr);
     }
 }

@@ -49,7 +49,7 @@ public class AdvanceRecordTypeTests {
     @Test(description = "Generate record for schema has not type", enabled = false)
     public void generateSchemaHasNotType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario10.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema10.bal", syntaxTree);
@@ -59,7 +59,7 @@ public class AdvanceRecordTypeTests {
     public void generateSchemaHasInlineRecord() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario11.yaml");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema11.bal", syntaxTree);
@@ -69,7 +69,7 @@ public class AdvanceRecordTypeTests {
     public void generateOpenAPIWeatherAPI() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/openapi_weather_api.yaml");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/openapi_weather_api_schema.bal", syntaxTree);
@@ -78,7 +78,7 @@ public class AdvanceRecordTypeTests {
     @Test(description = "Generate record for schema has object type only")
     public void generateForSchemaHasObjectTypeOnly() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario14.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ObjectSchema objectSchema = (ObjectSchema) schema;
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);

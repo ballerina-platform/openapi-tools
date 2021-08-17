@@ -2,9 +2,11 @@ import  ballerina/http;
 import  ballerina/url;
 import  ballerina/lang.'string;
 
-public type ApiKeysConfig record {
+# Provides API key configurations needed when communicating with a remote HTTP endpoint.
+public type ApiKeysConfig record {|
+    # API keys related to connector authentication
     map<string> apiKeys;
-};
+|};
 
 # Successful response
 type CurrentWeatherDataResponse record {
@@ -31,23 +33,21 @@ type CurrentWeatherDataResponse record {
 };
 
 # Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city. Helpful stats, graphics, and this day in history charts are available for your reference. Interactive maps show precipitation, clouds, pressure, wind around your location stations. Data is available in JSON, XML, or HTML format. **Note**: This sample Swagger file covers the `current` endpoint only from the OpenWeatherMap API. <br/><br/> **Note**: All parameters are optional, but you must select at least one parameter. Calling the API by city ID (using the `id` parameter) will provide the most precise location results.
-#
-# + clientEp - Connector http endpoint
 @display {label: "Current Weather Details", iconPath: "Path"}
-public client class Client {
-    http:Client clientEp;
-    map<string> apiKeys;
+public isolated client class Client {
+    final http:Client clientEp;
+    final readonly & map<string> apiKeys;
 
-    # Client initialization.
+    # Gets invoked to initialize the `connector`.
     #
     # + apiKeyConfig - API key configuration detail
-    # + clientConfig - Client configuration details
-    # + serviceUrl - Connector server URL
-    # + return -  Returns error at failure of client initialization
+    # + clientConfig - The configurations to be used when initializing the `connector`
+    # + serviceUrl - URL of the target service
+    # + return - An error if connector initialization failed
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
-        self.apiKeys = apiKeyConfig.apiKeys;
+        self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();
     }
     # Call current weather data for one location
     #

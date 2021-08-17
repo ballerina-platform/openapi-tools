@@ -40,7 +40,7 @@ public class AllOfDataTypeTests {
     @Test(description = "Generate record for schema has allOf reference")
     public void generateAllOf() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario09.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema09.bal", syntaxTree);
@@ -49,7 +49,7 @@ public class AllOfDataTypeTests {
     @Test(description = "Generate record for schema has allOf reference in record field")
     public void generateAllOfInRecordField() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/allOf.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/allOf.bal", syntaxTree);

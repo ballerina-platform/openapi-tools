@@ -9,6 +9,7 @@ paths:
   /requestBody:
     post:
       summary: Creates a new user.
+      operationId: createUser
       responses:
         200:
           description: OK

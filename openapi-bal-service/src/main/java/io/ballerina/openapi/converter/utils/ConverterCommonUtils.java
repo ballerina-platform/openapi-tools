@@ -29,7 +29,7 @@ import io.swagger.v3.oas.models.media.StringSchema;
 /**
  * Utilities used in Ballerina  to OpenAPI converter.
  */
-public class ConverterUtils {
+public class ConverterCommonUtils {
 
     /**
      * This util function is for converting ballerina type to openapi type.
@@ -71,7 +71,6 @@ public class ConverterUtils {
      */
     public static Schema getOpenApiSchema(String type) {
         Schema schema;
-
         switch (type) {
             case Constants.STRING:
             case Constants.PLAIN:
@@ -91,7 +90,7 @@ public class ConverterUtils {
             case Constants.TYPE_REFERENCE:
             case Constants.TYPEREFERENCE:
                 schema = new Schema();
-                schema.$ref("true");
+//                schema.$ref("true");
                 break;
             case Constants.BYTE_ARRAY:
             case Constants.OCTET_STREAM:
@@ -104,7 +103,6 @@ public class ConverterUtils {
                 schema = new ObjectSchema();
                 break;
         }
-
         return schema;
     }
 }

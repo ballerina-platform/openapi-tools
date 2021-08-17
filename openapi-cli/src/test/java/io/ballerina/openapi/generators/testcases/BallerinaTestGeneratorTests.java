@@ -66,11 +66,10 @@ public class BallerinaTestGeneratorTests {
         Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
         CodeGenerator codeGenerator = new CodeGenerator();
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         BallerinaSchemaGenerator schemaGenerator = new BallerinaSchemaGenerator(openAPI);
         schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
-        schemaGenerator.setEnumDeclarationNodeList(ballerinaClientGenerator.getEnumDeclarationNodeList());
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
         SyntaxTree syntaxTreeClient = ballerinaClientGenerator.generateSyntaxTree();
         SyntaxTree syntaxTreeTest = ballerinaTestGenerator.generateSyntaxTree();

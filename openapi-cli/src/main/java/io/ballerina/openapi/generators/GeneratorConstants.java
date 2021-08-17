@@ -70,8 +70,14 @@ public class GeneratorConstants {
 
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
     public static final String TYPE_FILE_NAME = "types.bal";
+    public static final String CLIENT_FILE_NAME = "client.bal";
     public static final String TEST_FILE_NAME = "test.bal";
     public static final String CONFIG_FILE_NAME = "Config.toml";
+    public static final String BALLERINA_TOML = "Ballerina.toml";
+    public static final String BALLERINA_TOML_CONTENT = "[package]\n" +
+            "org= \"ballerina\"\n" +
+            "name= \"testopenapi\"\n" +
+            "version= \"0.0.0\"\n";
 
     public static final String TEMPLATES_SUFFIX = ".mustache";
     public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";
@@ -103,20 +109,14 @@ public class GeneratorConstants {
     public static final String MODULE_TEST  = "test";
     public static final String BALLERINA = "ballerina";
     public static final String PUBLIC = "public";
-    public static final String TYPE = "type";
     public static final String PUBLIC_ISOLATED = "public isolated";
     public static final String CLIENT = "client";
     public static final String CLIENT_CLASS = "Client";
     public static final String CLIENT_EP = "clientEp";
     public static final String CLASS = "class";
-    public static final String OPEN_BRACE = "{";
-    public static final String CLOSE_BRACE = "}";
     public static final String EQUAL = "=";
-    public static final String OPEN_PRAN = "(";
     public static final String COLON = ":";
-    public static final String PERIOD = ".";
     public static final String CONFIG = "config";
-    public static final String SEMICOLON = ";";
     public static final String FUNCTION = "function";
     public static final String RETURN = "returns";
     public static final String PREFIX_TEST = " test";
@@ -125,21 +125,25 @@ public class GeneratorConstants {
     public static final String STRING = "string";
     public static final String SERVICE_URL = "serviceUrl";
     public static final String RECORD = "record";
+    public static final String IDENTIFIER = "identifier";
+    public static final String TYPE_NAME = "typeName";
     // auth related constants
     public static final String API_KEY = "apikey";
-    public static final String API_KEY_CONFIG = "ApiKeysConfig";
+    public static final String API_KEYS_CONFIG = "ApiKeysConfig";
     public static final String API_KEY_CONFIG_PARAM = "apiKeyConfig";
     public static final String API_KEY_CONFIG_RECORD_FIELD = "apiKeys";
-    public static final String API_KEY_MAP = "map<string>";
-    public static final String AUTH_CONFIG_FILED_NAME = "authConfig";
+    public static final String AUTH = "auth";
+    public static final String AUTH_CONFIG = "authConfig";
     public static final String BASIC = "basic";
     public static final String BEARER = "bearer";
+    public static final String REFRESH_TOKEN = "refresh_token";
     public static final String CLIENT_CRED = "client_cred";
     public static final String PASSWORD = "password";
     public static final String CONFIG_RECORD_ARG = "clientConfig";
-    public static final String CONFIG_RECORD_NAME = "ClientConfig";
+    public static final String CLIENT_CONFIG = "ClientConfig";
     public static final String OAUTH2 = "oauth2";
-    public static final String SSL_FIELD_NAME = "secureSocketConfig";
+    public static final String SSL_FIELD_NAME = "secureSocket";
+
 
     public static final String RESPONSE = "response";
 
@@ -154,4 +158,5 @@ public class GeneratorConstants {
     public static final String CONNECT = "connect";
     public static final String OPTIONS = "options";
     public static final String TRACE = "trace";
+
 }

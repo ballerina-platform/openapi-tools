@@ -17,7 +17,7 @@
  */
 
 
-package io.ballerina.openapi.converter.utils;
+package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -45,7 +45,7 @@ import java.util.Optional;
 /**
  * Extract OpenApi server information from and Ballerina endpoint.
  */
-public class OpenAPIEndpointMapperUtils {
+public class OpenAPIEndpointMapper {
 
     /**
      * Convert endpoints bound to {@code service} openapi server information.
@@ -55,7 +55,7 @@ public class OpenAPIEndpointMapperUtils {
      * @param service   service node with bound endpoints
      * @return openapi definition with Server information
      */
-    public static OpenAPI convertListenerEndPointToOpenAPI (OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
+    public OpenAPI convertListenerEndPointToOpenAPI (OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
                                                      ServiceDeclarationNode service) {
         List<Server> servers = new ArrayList<>();
         for (ListenerDeclarationNode ep : endpoints) {
@@ -96,7 +96,7 @@ public class OpenAPIEndpointMapperUtils {
         return openAPI;
     }
 
-    private static Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
+    private Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
         Optional<ParenthesizedArgList> list;
         if (ep.initializer().kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
            ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) ep.initializer();
@@ -110,7 +110,7 @@ public class OpenAPIEndpointMapperUtils {
     }
 
     //Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
-    public static OpenAPI extractServerForExpressionNode(OpenAPI openAPI,
+    public OpenAPI extractServerForExpressionNode(OpenAPI openAPI,
                                                                     SeparatedNodeList<ExpressionNode> bTypeExplicit,
                                                                     ServiceDeclarationNode service) {
         if (openAPI == null) {
@@ -137,7 +137,7 @@ public class OpenAPIEndpointMapperUtils {
     }
 
     //Assign host and port values
-    private static Server getServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
+    private Server getServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
 
         String port = null;
         String host = null;
@@ -167,7 +167,7 @@ public class OpenAPIEndpointMapperUtils {
     }
 
     // Extract host value for creating URL.
-    private static String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
+    private String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
         String host = null;
         MappingConstructorExpressionNode recordConfig = bLangRecordLiteral;
         if (recordConfig.fields() != null && !recordConfig.fields().isEmpty()) {
@@ -196,7 +196,7 @@ public class OpenAPIEndpointMapperUtils {
      * @param serviceDefinition The service definition node.
      * @return The base path.
      */
-    public static String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
+    public String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
         StringBuilder currentServiceName = new StringBuilder();
         NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
         for (Node serviceBasedPathNode : serviceNameNodes) {

@@ -1,19 +1,18 @@
 import  ballerina/http;
 
 #Here you can find documentation for COVID-19 REST API.
-#
-#+clientEp-Connector http endpoint
-public client class Client {
-    http:Client clientEp;
-    # Client initialization.
+public isolated client class Client {
+    final http:Client clientEp;
+    # Gets invoked to initialize the `connector`.
     #
-    # + clientConfig - Client configuration details
-    # + serviceUrl - Connector server URL
-    # + return -  Returns error at failure of client initialization
+    # + clientConfig - The configurations to be used when initializing the `connector`
+    # + serviceUrl - URL of the target service
+    # + return - An error if connector initialization failed
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://api-cov19.now.sh/") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
     }
+    # List of all countries with COVID-19 cases
     #
     #+return-Default response with array of strings
     remote isolated function getCountryList() returns CountryInfo[]|error {

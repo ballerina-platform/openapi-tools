@@ -53,7 +53,7 @@ public class PathParameterTests {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_valid.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_parameter_valid.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -65,7 +65,7 @@ public class PathParameterTests {
         Path definitionPath = RESDIR.resolve("swagger/path_param_with_ref_schemas.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_param_with_ref_schema.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -76,7 +76,7 @@ public class PathParameterTests {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_special_name.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_parameter_with_special_name.bal");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -89,7 +89,7 @@ public class PathParameterTests {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid.yaml");
         // int, string, boolean, decimal, float,
         CodeGenerator codeGenerator = new CodeGenerator();
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         ballerinaClientGenerator.generateSyntaxTree();
     }
@@ -101,7 +101,7 @@ public class PathParameterTests {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid02.yaml");
         // int, string, boolean, decimal, float,
         CodeGenerator codeGenerator = new CodeGenerator();
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath);
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         ballerinaClientGenerator.generateSyntaxTree();
     }

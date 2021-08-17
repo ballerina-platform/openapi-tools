@@ -3,56 +3,46 @@ info:
   title: ' payloadV'
   version: 1.0.0
 servers:
-  - url: http://petstore.openapi.io:443/v2
+  - url: petstore.swagger.io:443/payloadV
 paths:
-  /pets:
-    get:
-      operationId: operation1_post_/pets
+  /pet:
+    post:
+      operationId: operation1_post_/pet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationReceipt'
       responses:
-        "200":
-          description: Successful
-          content:
-            text/plain:
-              schema:
-                type: string
+        "202":
+          description: Accepted
 components:
   schemas:
-    Link:
-      type: object
-      properties:
-        rel:
-          type: string
-        href:
-          type: string
-        mediaTypes:
-          type: array
-          items:
-            type: string
-        actions:
-          type: array
-          items:
-            type: string
-            enum:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-      required:
-        - rel
-        - href
     Links:
       type: object
       properties:
+        linkid:
+          type: integer
+          format: int32
         links:
           type: array
           items:
-            $ref: "#/components/schemas/Link"
+            $ref: '#/components/schemas/Link'
     ReservationReceipt:
       allOf:
-        - $ref: "#/components/schemas/Links"
+        - $ref: '#/components/schemas/Links'
         - type: object
           properties:
             id:
               type: string
-
+    Link:
+      type: object
+      properties:
+        mediaTypes:
+          type: array
+          items:
+            type: string
+        rel:
+          type: string
+        href:
+          type: string

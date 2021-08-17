@@ -1,15 +1,13 @@
 import  ballerina/http;
 
 # Title
-#
-# + clientEp - Connector http endpoint
-public client class Client {
-    http:Client clientEp;
-    # Client initialization.
+public isolated client class Client {
+    final http:Client clientEp;
+    # Gets invoked to initialize the `connector`.
     #
-    # + clientConfig - Client configuration details
-    # + serviceUrl - Connector server URL
-    # + return -  Returns error at failure of client initialization
+    # + clientConfig - The configurations to be used when initializing the `connector`
+    # + serviceUrl - URL of the target service
+    # + return - An error if connector initialization failed
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
