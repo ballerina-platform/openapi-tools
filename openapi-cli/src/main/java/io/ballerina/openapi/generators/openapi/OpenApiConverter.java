@@ -88,7 +88,7 @@ public class OpenApiConverter {
                 outPath);
         if (!openAPIDefinitions.isEmpty()) {
             for (Map.Entry<String, String> definition: openAPIDefinitions.entrySet()) {
-                CodegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue());
+                CodegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue(), false);
             }
         }
     }

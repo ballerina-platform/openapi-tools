@@ -16,8 +16,10 @@
 
 package io.ballerina.openapi.converter.utils;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Random;
 
@@ -39,19 +41,14 @@ public final class CodegenUtils {
     /**
      * Writes a file with content to specified {@code filePath}.
      *
-     * @param filePath valid file path to write the content
+     * @param filePath  valid file path to write the content
      * @param content  content of the file
+     * @param append  flag to notify whether to append content or not
      * @throws IOException when a file operation fails
      */
-    public static void writeFile(Path filePath, String content) throws IOException {
-        PrintWriter writer = null;
-        try {
-            writer = new PrintWriter(filePath.toString(), "UTF-8");
-            writer.print(content);
-        } finally {
-            if (writer != null) {
-                writer.close();
-            }
+    public static void writeFile(Path filePath, String content, boolean append) throws IOException {
+        try (FileWriter writer = new FileWriter(filePath.toString(), StandardCharsets.UTF_8)) {
+            writer.write(content);
         }
     }
 

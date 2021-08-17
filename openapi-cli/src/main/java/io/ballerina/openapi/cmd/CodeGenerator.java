@@ -355,7 +355,7 @@ public class CodeGenerator {
             if (!file.getType().isOverwritable()) {
                 filePath = implPath.resolve(file.getFileName());
                 if (Files.notExists(filePath)) {
-                    CodegenUtils.writeFile(filePath, file.getContent());
+                    CodegenUtils.writeFile(filePath, file.getContent(), false);
                 }
             } else {
                 if (file.getFileName().equals(TEST_FILE_NAME) || file.getFileName().equals(CONFIG_FILE_NAME)) {
@@ -367,7 +367,7 @@ public class CodeGenerator {
                     filePath = Paths.get(srcPath.resolve(file.getFileName()).toFile().getCanonicalPath());
                 }
 
-                CodegenUtils.writeFile(filePath, file.getContent());
+                CodegenUtils.writeFile(filePath, file.getContent(), false);
             }
         }
 
