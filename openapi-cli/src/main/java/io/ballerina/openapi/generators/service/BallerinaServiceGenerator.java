@@ -234,11 +234,7 @@ public class BallerinaServiceGenerator {
                                     List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation);
                                     // function call
                                     getFunctionDefinitionNode(functions, operation, functionRelativeResourcePath);
-                                } else {
-//                                    skip
                                 }
-                            } else {
-//                                skip
                             }
                         } else {
                             // getRelative resource path
