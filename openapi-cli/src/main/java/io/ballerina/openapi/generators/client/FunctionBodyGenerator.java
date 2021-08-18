@@ -334,8 +334,7 @@ public class FunctionBodyGenerator {
         String clientCallStatement;
 
         // This condition for several methods.
-        boolean isMethod = method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(
-                DELETE) || method.equals(EXECUTE);
+        boolean isMethod = method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(EXECUTE);
         if (isHeader) {
             if (isMethod) {
                 ExpressionStatementNode requestStatementNode = generatorUtils.getSimpleExpressionStatementNode(
