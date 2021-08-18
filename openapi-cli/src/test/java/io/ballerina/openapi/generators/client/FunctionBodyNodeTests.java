@@ -83,7 +83,17 @@ public class FunctionBodyNodeTests {
                         "map<any>headerValues={\"x-ms-client-request-id\":xMsClientRequestId," +
                         "\"x-ms-date\":xMsDate,\"x-ms-version\":xMsVersion};map<string|string[]> " +
                         "accHeaders = getMapForHeaders(headerValues);" +
-                        "http:Responseresponse=check self.clientEp-> head(path, accHeaders);returnresponse;}"}
+                        "http:Responseresponse=check self.clientEp-> head(path, accHeaders);returnresponse;}"},
+                {"diagnostic_files/json_payload.yaml", "/pets", "{string  path = string `/pets`;" +
+                        "http:Request request = new; request.setPayload(payload); " +
+                        "http:Response response = check self.clientEp->" +
+                        "post(path, request, targetType=http:Response); " +
+                        "return response;}"},
+                {"diagnostic_files/xml_payload.yaml", "/pets", "{string  path = string `/pets`; " +
+                        "http:Request request = new; xml? xmlBody = check xmldata:fromJson(payload); " +
+                        "request.setPayload(xmlBody); " +
+                        "http:Response response = check self.clientEp->post(path, request, targetType=http:Response);" +
+                        "return response;}"}
 
         };
     }

@@ -50,6 +50,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
@@ -464,25 +465,40 @@ public class FunctionBodyGenerator {
     private void genStatementsForRequestMediaType(List<StatementNode> statementsList,
                                                   Map.Entry<String, MediaType> mediaTypeEntry) {
 
+        Schema requestBodySchema = mediaTypeEntry.getValue().getSchema();
         if (mediaTypeEntry.getKey().contains("json")) {
-            VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
-                    "jsonBody", "check payload.cloneWithType(json)");
-            statementsList.add(jsonVariable);
-            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
-                    "request.setPayload(jsonBody)");
-            statementsList.add(expressionStatementNode);
+            if (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
+                    || requestBodySchema.getProperties() != null) {
+                VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
+                        "jsonBody", "check payload.cloneWithType(json)");
+                statementsList.add(jsonVariable);
+                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+                        "request.setPayload(jsonBody)");
+                statementsList.add(expressionStatementNode);
+            } else {
+                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+                        "request.setPayload(payload)");
+                statementsList.add(expressionStatementNode);
+            }
         } else if (mediaTypeEntry.getKey().contains("xml")) {
             ImportDeclarationNode xmlImport = generatorUtils.getImportDeclarationNode(
                     GeneratorConstants.BALLERINA, "xmldata");
             if (!checkImportDuplicate(imports, "xmldata")) {
                 imports.add(xmlImport);
             }
-            VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
-                    "jsonBody", "check payload.cloneWithType(json)");
-            statementsList.add(jsonVariable);
-            VariableDeclarationNode xmlBody = generatorUtils.getSimpleStatement("xml?", "xmlBody",
-                    "check xmldata:fromJson(jsonBody)");
-            statementsList.add(xmlBody);
+            if (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
+                    || requestBodySchema.getProperties() != null) {
+                VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
+                        "jsonBody", "check payload.cloneWithType(json)");
+                statementsList.add(jsonVariable);
+                VariableDeclarationNode xmlBody = generatorUtils.getSimpleStatement("xml?", "xmlBody",
+                        "check xmldata:fromJson(jsonBody)");
+                statementsList.add(xmlBody);
+            } else {
+                VariableDeclarationNode xmlBody = generatorUtils.getSimpleStatement("xml?", "xmlBody",
+                        "check xmldata:fromJson(payload)");
+                statementsList.add(xmlBody);
+            }
             ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                     "request.setPayload(xmlBody)");
             statementsList.add(expressionStatementNode);
