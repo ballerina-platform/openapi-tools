@@ -25,6 +25,7 @@ include(':openapi-cli')
 include(':openapi-ls-extension')
 include(':openapi-validator')
 include('openapi-extension')
+include('openapi-extension-tests')
 //include(':openapi-tests')
 
 gradleEnterprise {
