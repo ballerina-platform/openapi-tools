@@ -53,17 +53,20 @@ public class OpenApiDocGenerator {
             Path resourcePath = retrieveResourcePath(projectRoot, serviceSymbol);
             File resourceDirectory = resourcePath.toFile();
             if (!resourceDirectory.exists()) {
-                resourceDirectory.mkdirs();
+                boolean resourceCreatingSuccessful = resourceDirectory.mkdirs();
+                if (!resourceCreatingSuccessful) {
+                    ERR.println("error [open-api extension]: could not create resources directory");
+                    return;
+                }
             }
 
             // generate open-api doc and add it to resource directory
-            Path openApiDocPath = resourcePath.resolve(openApiDocName);
             Map<String, String> openAPIDefinitions = ServiceToOpenAPIConverterUtils
-                    .generateOAS3Definition(syntaxTree, semanticModel, "", true, openApiDocPath);
+                    .generateOAS3Definition(syntaxTree, semanticModel, null, true, resourcePath);
             if (!openAPIDefinitions.isEmpty()) {
-                for (Map.Entry<String, String> definition: openAPIDefinitions.entrySet()) {
-                        CodegenUtils.writeFile(
-                                openApiDocPath.resolve(definition.getKey()), definition.getValue(), false);
+                for (Map.Entry<String, String> definition : openAPIDefinitions.entrySet()) {
+                    CodegenUtils.writeFile(
+                            resourcePath.resolve(openApiDocName), definition.getValue(), false);
                 }
             }
 

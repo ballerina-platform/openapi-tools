@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
@@ -36,13 +37,16 @@ import java.util.zip.ZipOutputStream;
  */
 public class ResourcePackagingService {
     private static final String TARGET_FILE_NAME = "target_exec.jar";
+    private static final PrintStream ERR = System.err;
 
     public void updateExecutableJar(Path targetBinPath, String srcFileName) throws IOException {
         Path srcFile = targetBinPath.resolve(srcFileName);
         Path targetFile = targetBinPath.resolve(TARGET_FILE_NAME);
         generateUpdatedJar(srcFile, targetFile, targetBinPath);
-        deleteOldFile(srcFile);
-        renameGeneratedFile(targetFile, srcFile);
+        boolean successful = deleteOldFile(srcFile);
+        if (successful) {
+            renameGeneratedFile(targetFile, srcFile);
+        }
     }
 
     private void generateUpdatedJar(Path srcFile, Path targetFile, Path targetBinPath) throws IOException {
@@ -66,16 +70,20 @@ public class ResourcePackagingService {
         }
     }
 
-    private void deleteOldFile(Path sourceFilePath) {
+    private boolean deleteOldFile(Path sourceFilePath) {
         // delete old jar file
         File sourceFile = sourceFilePath.toFile();
         if (sourceFile.exists()) {
-            sourceFile.delete();
+            return sourceFile.delete();
         }
+        return true;
     }
 
     private void renameGeneratedFile(Path targetFilePath, Path sourceFilePath) {
         File targetFile = targetFilePath.toFile();
         boolean success = targetFile.renameTo(sourceFilePath.toFile());
+        if (!success) {
+            ERR.println("error [open-api extension]: could not rename the generated executable jar");
+        }
     }
 }
