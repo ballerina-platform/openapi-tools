@@ -63,8 +63,8 @@ public class OpenAPIEndpointMapper {
      */
     public OpenAPI getServers(OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
                               ServiceDeclarationNode service) {
-        List<Server> servers = new ArrayList<>();
         openAPI = new OpenAPIEndpointMapper().extractServerForExpressionNode(openAPI, service.expressions(), service);
+        List<Server> servers = openAPI.getServers();
         if (!endpoints.isEmpty()) {
             for (ListenerDeclarationNode ep : endpoints) {
                 SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
@@ -76,11 +76,12 @@ public class OpenAPIEndpointMapper {
                     }
                 }
             }
+
         }
-        Server mainServer = addEnumValues(servers);
-        // Handle server with existing server urls.
-        handleExistingServerInOAS(openAPI, mainServer);
-        openAPI.setServers(Collections.singletonList(mainServer));
+        if (servers.size() > 1) {
+            Server mainServer = addEnumValues(servers);
+            openAPI.setServers(Collections.singletonList(mainServer));
+        }
         return openAPI;
     }
 
@@ -106,27 +107,6 @@ public class OpenAPIEndpointMapper {
         return mainServer;
     }
 
-    private void handleExistingServerInOAS(OpenAPI openAPI, Server mainServer) {
-
-        if (!openAPI.getServers().isEmpty()) {
-            List<Server> oldServers = openAPI.getServers();
-            ServerVariables mainVariable = mainServer.getVariables();
-            ServerVariable hostVariable = mainVariable.get(SERVER);
-            hostVariable.addEnumItem(hostVariable.getDefault());
-            ServerVariable portVariable = mainVariable.get(PORT);
-            portVariable.addEnumItem(portVariable.getDefault());
-            for (Server server: oldServers) {
-                ServerVariables variables = server.getVariables();
-                if (variables.get(SERVER) != null) {
-                    hostVariable.addEnumItem(variables.get(SERVER).getDefault());
-                }
-                if (variables.get(PORT) != null) {
-                    portVariable.addEnumItem(variables.get(PORT).getDefault());
-                }
-            }
-        }
-    }
-
     /**
      * Extract server URL from given listener node.
      */
@@ -146,9 +126,6 @@ public class OpenAPIEndpointMapper {
     // Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
     private OpenAPI extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
                                                                     ServiceDeclarationNode service) {
-        if (openAPI == null) {
-            return new OpenAPI();
-        }
         String serviceBasePath = getServiceBasePath(service);
         Optional<ParenthesizedArgList> list;
         List<Server> servers = new ArrayList<>();

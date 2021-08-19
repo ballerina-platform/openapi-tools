@@ -198,6 +198,7 @@ public class OpenAPIResourceMapper {
         /* Set operation id */
         String resName = (resource.functionName().text() + "_" +
                 generateRelativePath).replaceAll("\\{///\\}", "_");
+
         if (generateRelativePath.equals("/")) {
             resName = resource.functionName().text();
         }
@@ -249,20 +250,6 @@ public class OpenAPIResourceMapper {
     private String getOperationId(String postFix) {
         return "operation_" + postFix;
     }
-
-    /**
-     * Creates parameters in the openApi operation using the parameters in the ballerina resource definition.
-     *
-     * @param resource         The ballerina resource definition.
-     * @param operationAdaptor The openApi operation.
-     */
-    private void addResourceParameters(FunctionDefinitionNode resource, OperationAdaptor operationAdaptor,
-                                       Map<String, String> apiDocs) {
-
-
-    }
-
-
 
     /**
      * Gets the http methods of a resource.

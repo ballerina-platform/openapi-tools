@@ -44,6 +44,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
+
 /**
  * The ServiceToOpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
  *
@@ -89,7 +91,7 @@ public class ServiceToOpenAPIConverterUtils {
                 String serviceNodeName = new OpenAPIEndpointMapper().getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
                 String openApiSource = generateOASForGivenFormat(serviceNode, serviceNodeName, needJson, endpoints,
-                        semanticModel);
+                        semanticModel, openApiName);
                 //  Checked old generated file with same name
                 openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
                 openAPIDefinitions.put(openApiName, openApiSource);
@@ -146,9 +148,13 @@ public class ServiceToOpenAPIConverterUtils {
      */
     private static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
                                                     boolean needJson, List<ListenerDeclarationNode> endpoints,
-                                                    SemanticModel semanticModel) throws OpenApiConverterException {
+                                                    SemanticModel semanticModel, String openApiName)
+            throws OpenApiConverterException {
         OpenAPI openapi = generateOpenAPIDefinition(new OpenAPI(), serviceName, endpoints, serviceDeclarationNode,
                 semanticModel);
+        if (openapi.getInfo().getTitle() == null) {
+            openapi = getInfo(openapi, openApiName);
+        }
         if (needJson) {
             return Json.pretty(openapi);
         }
@@ -167,7 +173,7 @@ public class ServiceToOpenAPIConverterUtils {
         OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
         String currentServiceName = new OpenAPIEndpointMapper().getServiceBasePath(serviceDefinition);
         // 01. Set openAPI inFor section wit details
-        openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(currentServiceName.replace("/", "")));
+        openapi = getInfo(openapi, currentServiceName);
         // 02. Filter and set the ServerURLs according to endpoints. Complete the servers section in OAS
         openapi = new OpenAPIEndpointMapper().getServers(openapi, endpoints, serviceDefinition);
         // 03. Filter path and component sections in OAS.
@@ -179,6 +185,27 @@ public class ServiceToOpenAPIConverterUtils {
             openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
                     currentServiceName.trim());
         }
+        return openapi;
+    }
+
+    //Set the OAS info section details
+    private static OpenAPI getInfo(OpenAPI openapi, String currentServiceName) {
+
+        String[] splits = (currentServiceName.replaceFirst("/", "")).split(SPLIT_PATTERN);
+        StringBuilder stringBuilder = new StringBuilder();
+        String title = null;
+        if (splits.length > 1) {
+            for (String piece: splits) {
+                stringBuilder.append(piece.substring(0, 1).toUpperCase(Locale.ENGLISH) + piece.substring(1));
+                stringBuilder.append(" ");
+            }
+            title = stringBuilder.toString().trim();
+        } else if (splits.length == 1 && !splits[0].isBlank()) {
+            stringBuilder.append(splits[0].substring(0, 1).toUpperCase(Locale.ENGLISH) + splits[0].substring(1));
+            title = stringBuilder.toString().trim();
+        }
+
+        openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(title));
         return openapi;
     }
 

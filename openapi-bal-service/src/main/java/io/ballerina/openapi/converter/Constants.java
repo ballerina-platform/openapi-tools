@@ -70,6 +70,7 @@ public class Constants {
     public static final String OPENAPI_SUFFIX = "_openapi";
     public static final String SERVER = "server";
     public static final String PORT = "port";
+    public static final String SPLIT_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
 
     /**
      * Enum to select the Ballerina Type.

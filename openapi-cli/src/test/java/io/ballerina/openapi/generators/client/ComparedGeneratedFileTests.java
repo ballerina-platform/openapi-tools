@@ -44,7 +44,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
  * All the tests related to the {@link BallerinaClientGenerator} util.
  */
 public class ComparedGeneratedFileTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/generators/swagger/references").toAbsolutePath();
+    private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     SyntaxTree syntaxTree;
@@ -52,7 +52,7 @@ public class ComparedGeneratedFileTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    @Test(description = "Generate Client for path parameter has parameter name as key word", enabled = true)
+    @Test(description = "Generate Client for path parameter has parameter name as key word", enabled = false)
     public void generateClientForJira() throws IOException, BallerinaOpenApiException, FormatterException {
 //        Path definitionPath = RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml");
         Path definitionPath = RES_DIR.resolve("openapi.yaml");
