@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/openapi;
 
 @openapi:ServiceInfo{
     contract: "service_openapi.json"
