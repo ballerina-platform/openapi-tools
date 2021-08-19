@@ -61,19 +61,31 @@ public class OpenAPIEndpointMapper {
      * @param service   service node with bound endpoints
      * @return openapi definition with Server information
      */
-    public OpenAPI convertListenerEndPointToOpenAPI (OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
-                                                     ServiceDeclarationNode service) {
+    public OpenAPI getServers(OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
+                              ServiceDeclarationNode service) {
         List<Server> servers = new ArrayList<>();
-        for (ListenerDeclarationNode ep : endpoints) {
-            SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
-            for (ExpressionNode node : exprNodes) {
-                if (node.toString().trim().equals(ep.variableName().text().trim())) {
-                    String serviceBasePath = getServiceBasePath(service);
-                    Server server = extractServer(ep, serviceBasePath);
-                    servers.add(server);
+        openAPI = new OpenAPIEndpointMapper().extractServerForExpressionNode(openAPI, service.expressions(), service);
+        if (!endpoints.isEmpty()) {
+            for (ListenerDeclarationNode ep : endpoints) {
+                SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
+                for (ExpressionNode node : exprNodes) {
+                    if (node.toString().trim().equals(ep.variableName().text().trim())) {
+                        String serviceBasePath = getServiceBasePath(service);
+                        Server server = extractServer(ep, serviceBasePath);
+                        servers.add(server);
+                    }
                 }
             }
         }
+        Server mainServer = addEnumValues(servers);
+        // Handle server with existing server urls.
+        handleExistingServerInOAS(openAPI, mainServer);
+        openAPI.setServers(Collections.singletonList(mainServer));
+        return openAPI;
+    }
+
+    private Server addEnumValues(List<Server> servers) {
+
         Server mainServer = servers.get(0);
         if (servers.size() > 1) {
             List<Server> rotated = new ArrayList<>(servers);
@@ -91,10 +103,7 @@ public class OpenAPIEndpointMapper {
                 }
             }
         }
-        // Handle server with existing server urls.
-        handleExistingServerInOAS(openAPI, mainServer);
-        openAPI.setServers(Collections.singletonList(mainServer));
-        return openAPI;
+        return mainServer;
     }
 
     private void handleExistingServerInOAS(OpenAPI openAPI, Server mainServer) {
@@ -131,11 +140,11 @@ public class OpenAPIEndpointMapper {
             list = bTypeInit.parenthesizedArgList();
         }
 
-        return getServer(serviceBasePath, list);
+        return generateServer(serviceBasePath, list);
     }
 
     // Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
-    public OpenAPI extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
+    private OpenAPI extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
                                                                     ServiceDeclarationNode service) {
         if (openAPI == null) {
             return new OpenAPI();
@@ -147,12 +156,12 @@ public class OpenAPIEndpointMapper {
             if (expressionNode.kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
                 ExplicitNewExpressionNode explicit = (ExplicitNewExpressionNode) expressionNode;
                 list = Optional.ofNullable(explicit.parenthesizedArgList());
-                Server server = getServer(serviceBasePath, list);
+                Server server = generateServer(serviceBasePath, list);
                 servers.add(server);
             } else if (expressionNode.kind().equals(SyntaxKind.IMPLICIT_NEW_EXPRESSION)) {
                 ImplicitNewExpressionNode implicit = (ImplicitNewExpressionNode) expressionNode;
                 list = implicit.parenthesizedArgList();
-                Server server = getServer(serviceBasePath, list);
+                Server server = generateServer(serviceBasePath, list);
                 servers.add(server);
             }
         }
@@ -161,7 +170,7 @@ public class OpenAPIEndpointMapper {
     }
 
     //Assign host and port values
-    private Server getServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
+    private Server generateServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
 
         String port = null;
         String host = null;

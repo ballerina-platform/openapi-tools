@@ -19,11 +19,9 @@
 package io.ballerina.openapi.converter.utils;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -168,34 +166,18 @@ public class ServiceToOpenAPIConverterUtils {
         // Take base path of service
         OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
         String currentServiceName = new OpenAPIEndpointMapper().getServiceBasePath(serviceDefinition);
-        if (openapi.getServers() == null) {
-            openapi = setServerURLInOAS(openapi, endpoints, serviceDefinition);
-            // Generate openApi string for the mentioned service name.
-            if (!serviceName.isBlank() && currentServiceName.trim().equals(serviceName)) {
-                openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
-                        serviceName);
-            } else {
-                // If no service name mentioned, then generate openApi definition for the first service.
-                openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
-                        currentServiceName.trim());
-            }
-        }
-        return openapi;
-    }
-
-    /**
-     * Filter and set the ServerURLs according to endpoints.
-     */
-    private static OpenAPI setServerURLInOAS(OpenAPI openapi, List<ListenerDeclarationNode> endpoints,
-                                      ServiceDeclarationNode serviceDefinition) {
-
-        SeparatedNodeList<ExpressionNode> expressions = serviceDefinition.expressions();
-        openapi = new OpenAPIEndpointMapper().extractServerForExpressionNode(openapi, expressions,
-                serviceDefinition);
-        // Handle outbound listeners
-        if (!endpoints.isEmpty()) {
-            openapi = new OpenAPIEndpointMapper().convertListenerEndPointToOpenAPI(openapi, endpoints,
-                    serviceDefinition);
+        // 01. Set openAPI inFor section wit details
+        openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(currentServiceName.replace("/", "")));
+        // 02. Filter and set the ServerURLs according to endpoints. Complete the servers section in OAS
+        openapi = new OpenAPIEndpointMapper().getServers(openapi, endpoints, serviceDefinition);
+        // 03. Filter path and component sections in OAS.
+        // Generate openApi string for the mentioned service name.
+        if (!serviceName.isBlank() && currentServiceName.trim().equals(serviceName)) {
+            openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi, serviceName);
+        } else {
+            // If no service name mentioned, then generate openApi definition for the first service.
+            openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
+                    currentServiceName.trim());
         }
         return openapi;
     }

@@ -73,10 +73,10 @@ public class OpenAPIResourceMapper {
      * @param resources Resource list to be convert.
      * @return map of string and openApi path objects.
      */
-    protected Paths convertResourceToPath(List<FunctionDefinitionNode> resources) throws OpenApiConverterException {
+    public Paths getPaths(List<FunctionDefinitionNode> resources) throws OpenApiConverterException {
         for (FunctionDefinitionNode resource : resources) {
             List<String> methods = this.getHttpMethods(resource, false);
-            useMultiResourceMapper(resource, methods);
+            getResourcePath(resource, methods);
 //            if (!methods.isEmpty()) {
 //                useMultiResourceMapper(resource, methods);
 //            }
@@ -92,7 +92,7 @@ public class OpenAPIResourceMapper {
      * @param resource The ballerina resource.
      * @param httpMethods   Sibling methods related to operation.
      */
-    private void useMultiResourceMapper(FunctionDefinitionNode resource, List<String> httpMethods)
+    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods)
             throws OpenApiConverterException {
         String path = generateRelativePath(resource);
         Operation operation;
@@ -206,9 +206,11 @@ public class OpenAPIResourceMapper {
         // Set operation summary
         // Map API documentation
         Map<String, String> apiDocs = listAPIDocumentations(resource, op);
-        addResourceParameters(resource, op, apiDocs);
+        //Add path parameters if in path and query parameters
+        OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs);
+        openAPIParameterMapper.getResourceInputs(components, semanticModel);
         OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
-        openAPIResponseMapper.mapReturnToOASResponse(resource, op);
+        openAPIResponseMapper.getResourceOutput(resource, op);
 
         return op;
     }
@@ -256,9 +258,7 @@ public class OpenAPIResourceMapper {
      */
     private void addResourceParameters(FunctionDefinitionNode resource, OperationAdaptor operationAdaptor,
                                        Map<String, String> apiDocs) {
-        //Add path parameters if in path and query parameters
-        OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, operationAdaptor, apiDocs);
-        openAPIParameterMapper.createParameterSchemas(components, semanticModel);
+
 
     }
 

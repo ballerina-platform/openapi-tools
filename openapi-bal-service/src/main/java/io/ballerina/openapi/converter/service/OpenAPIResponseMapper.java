@@ -90,8 +90,8 @@ public class OpenAPIResponseMapper {
      * @param operationAdaptor  OperationAdaptor model for holding operation details specific to HTTP operation.
      * @throws OpenApiConverterException    when the mapping process fail.
      */
-    public void mapReturnToOASResponse(FunctionDefinitionNode resource,
-                                       OperationAdaptor operationAdaptor) throws OpenApiConverterException {
+    public void getResourceOutput(FunctionDefinitionNode resource,
+                                  OperationAdaptor operationAdaptor) throws OpenApiConverterException {
 
         FunctionSignatureNode functionSignatureNode = resource.functionSignature();
         Optional<ReturnTypeDescriptorNode> returnTypeDescriptorNode = functionSignatureNode.returnTypeDesc();
