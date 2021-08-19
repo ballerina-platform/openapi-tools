@@ -1,6 +1,5 @@
 import  ballerina/http;
 import  ballerina/url;
-import  ballerina/lang.'string;
 
 # Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city.
 @display {label: "Open Weather Client"}
