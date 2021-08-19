@@ -48,6 +48,7 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
@@ -406,6 +407,11 @@ public class OpenAPIResponseMapper {
                     componentMapper.createComponentSchema(schema, (TypeReferenceTypeSymbol) body.typeDescriptor());
                     media.setSchema(new Schema().$ref(body.typeDescriptor().getName().orElseThrow().trim()));
                     apiResponse.content(new Content().addMediaType(MediaType.APPLICATION_JSON, media));
+                    apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
+                    apiResponses.put(code, apiResponse);
+                } else if (body.typeDescriptor().typeKind() == TypeDescKind.STRING) {
+                    media.setSchema(new StringSchema());
+                    apiResponse.content(new Content().addMediaType(MediaType.TEXT_PLAIN, media));
                     apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
                     apiResponses.put(code, apiResponse);
                 } else {
