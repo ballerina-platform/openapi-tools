@@ -80,7 +80,8 @@ public class OpenApiDocGenerator {
                 AnnotationNode serviceInfoAnnotation = serviceInfoAnnotationOpt.get();
                 Optional<Path> openApiContractOpt = this.contractResolver.resolve(serviceInfoAnnotation, projectRoot);
                 if (openApiContractOpt.isEmpty()) {
-                    // could not find the open-api contract file, hence not proceeding
+                    // could not find the open-api contract file, hence will not proceed
+                    ERR.println("error [open-api extension]: could not find the provided `contract` file");
                     return;
                 }
                 try (FileOutputStream outStream = new FileOutputStream(openApiDoc.toFile())) {
@@ -89,25 +90,25 @@ public class OpenApiDocGenerator {
                     }
                 }
             } else {
-                generateOpenApiDoc(semanticModel, syntaxTree, serviceNode, openApiDoc);
+                // generate open-api doc and add it to resource directory
+                String openApiDefinition = generateOpenApiDoc(semanticModel, syntaxTree, serviceNode);
+                if (null != openApiDefinition && !openApiDefinition.isBlank()) {
+                    CodegenUtils.writeFile(openApiDoc, openApiDefinition, false);
+                }
             }
         } catch (IOException | OpenApiConverterException e) {
             ERR.println("error [open-api extension]: " + e.getLocalizedMessage());
         }
     }
 
-    // generate open-api doc and add it to resource directory
-    private void generateOpenApiDoc(SemanticModel semanticModel, SyntaxTree syntaxTree,
-                                    ServiceDeclarationNode serviceNode, Path openApiDocPath)
+    private String generateOpenApiDoc(SemanticModel semanticModel, SyntaxTree syntaxTree,
+                                      ServiceDeclarationNode serviceNode)
             throws OpenApiConverterException, IOException {
         ModulePartNode modulePartNode = syntaxTree.rootNode();
         List<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
         String serviceBasePath = getServiceBasePath(serviceNode);
-        String openApiDefinition = ServiceToOpenAPIConverterUtils
+        return ServiceToOpenAPIConverterUtils
                 .generateOASDefinition(serviceNode, serviceBasePath, true, listenerNodes, semanticModel);
-        if (null != openApiDefinition && !openApiDefinition.isBlank()) {
-            CodegenUtils.writeFile(openApiDocPath, openApiDefinition, false);
-        }
     }
 
     private Optional<AnnotationNode> getServiceInfoAnnotation(ServiceDeclarationNode serviceNode) {
