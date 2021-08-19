@@ -16,7 +16,6 @@
 
 package io.ballerina.openapi.extension;
 
-import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.ProjectEnvironmentBuilder;
@@ -26,8 +25,14 @@ import io.ballerina.projects.environment.EnvironmentBuilder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class includes tests for Ballerina WebSub compiler plugin.
@@ -39,11 +44,43 @@ public class OpenApiExtensionTest {
             .get("build", "target", "ballerina-distribution").toAbsolutePath();
 
     @Test
-    public void testValidServiceDeclaration() {
+    public void testDocGenerationForBallerinaProject() throws IOException {
+        deleteTarget("sample_1");
         Package currentPackage = loadPackage("sample_1");
         PackageCompilation compilation = currentPackage.getCompilation();
-        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.diagnostics().size(), 0);
+        testGeneratedResources("sample_1", 1);
+    }
+
+    @Test
+    public void testDocGenerationForBallerinaProjectWithMultipleServices() throws IOException {
+        deleteTarget("sample_2");
+        Package currentPackage = loadPackage("sample_2");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        testGeneratedResources("sample_2", 2);
+    }
+
+    @Test
+    public void testDocGenerationForBallerinaProjectWithMultipleModules() throws IOException {
+        deleteTarget("sample_3");
+        Package currentPackage = loadPackage("sample_3");
+        PackageCompilation compilation = currentPackage.getCompilation();
+//        testGeneratedResources("sample_3", 3);
+    }
+
+    private void testGeneratedResources(String projectName, int serviceCount) throws IOException {
+        Path resourceRelativePath = Paths
+                .get(projectName, "target",
+                        "bin", "resources", "openapi_extension_test", projectName, "0.1.0", "resource");
+        Path resources = RESOURCE_DIRECTORY.resolve(resourceRelativePath);
+        if (Files.isDirectory(resources)) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(resources)) {
+                List<String> files = new ArrayList<>();
+                stream.forEach(p -> files.add(p.toString()));
+                Assert.assertEquals(files.size(), serviceCount);
+            }
+        } else {
+            Assert.fail("Resource directory has not been created");
+        }
     }
 
     private Package loadPackage(String path) {
@@ -55,5 +92,19 @@ public class OpenApiExtensionTest {
     private static ProjectEnvironmentBuilder getEnvironmentBuilder() {
         Environment environment = EnvironmentBuilder.getBuilder().setBallerinaHome(DISTRIBUTION_PATH).build();
         return ProjectEnvironmentBuilder.getBuilder(environment);
+    }
+
+    private void deleteTarget(String projectName) throws IOException {
+        Path targetRelativePath = Paths.get(projectName, "target");
+        Path target = RESOURCE_DIRECTORY.resolve(targetRelativePath);
+        if (Files.isDirectory(target)) {
+            deleteDirectory(target);
+        }
+    }
+
+    private void deleteDirectory(Path directory) throws IOException {
+        Files.walk(directory)
+                .map(Path::toFile)
+                .forEach(File::delete);
     }
 }

@@ -28,6 +28,9 @@ dependencies {
     testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
+    testRuntime group: 'commons-io', name: 'commons-io', version: "${ballerinaLangVersion}"
+    testRuntime project(':openapi-bal-service')
+    testRuntime project(':openapi-extension')
     testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
 }
 
@@ -36,21 +39,9 @@ task copyDistribution(type: Copy) {
     into ballerinaDist
 }
 
-task copyExtensionPlugin {
-    doLast {
-        copy {
-            from openApiExtensionJar
-            from openApiServiceJar
-            into file("${ballerinaDist}/bre/lib/")
-        }
-    }
-}
-
 test {
     systemProperty "ballerina.offline.flag", "true"
     useTestNG()
 }
 
-copyDistribution.dependsOn ":openapi-extension:build"
-copyExtensionPlugin.dependsOn copyDistribution
-test.dependsOn copyExtensionPlugin
+test.dependsOn copyDistribution
