@@ -1,6 +1,5 @@
 import  ballerina/http;
 import  ballerina/url;
-import  ballerina/lang.'string;
 
 public isolated client class Client {
     final http:Client clientEp;

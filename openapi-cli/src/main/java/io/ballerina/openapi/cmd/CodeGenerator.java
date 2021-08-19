@@ -457,8 +457,10 @@ public class CodeGenerator {
             // Remove unused records and enums when generating the client by the tags given.
             schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent);
         }
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
-                schemaContent));
+        if (!schemaContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
+                    schemaContent));
+        }
 
         // Generate test boilerplate code for test cases
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);

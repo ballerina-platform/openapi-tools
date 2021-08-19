@@ -71,7 +71,8 @@ public class BallerinaDiagnosticTests {
                 {"openapi_display_annotation.yaml"},
                 {"header_parameter.yaml"},
                 {"petstore_post.yaml"},
-                {"petstore_with_oneOf_response.yaml"}
+                {"petstore_with_oneOf_response.yaml"},
+                {"response_nested_array.yaml"}
         };
     }
 }

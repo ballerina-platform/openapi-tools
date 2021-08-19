@@ -1,0 +1,330 @@
+openapi: 3.0.1
+info:
+  title: Central Organization Registry
+  description: This is the swagger definition of the WSO2 Central Organization Registry
+    service.
+  termsOfService: https://wso2.com/cloud/terms-of-use/
+  contact:
+    email: dileesha@wso2.com
+  version: 1.0.0
+servers:
+  - url: https://localhost:8081/v1
+paths:
+  /registry/reservations/findByNameAndOwner:
+    get:
+      tags:
+        - Reservations
+      summary: Get an organization name reservation by name and owner
+      description: This endpoint retrieves an organization name reservation.
+      operationId: getOrgByNameAndOwner
+      parameters:
+        - name: ownermail
+          in: query
+          description: The owner's email address
+          required: true
+          schema:
+            type: string
+        - name: orgname
+          in: query
+          description: The organization name
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: organization name
+          content: {}
+        400:
+          description: 'Required parameters missing: organization name and owner''s
+            email'
+          content: {}
+        403:
+          description: Unauthorised user
+          content: {}
+        404:
+          description: No reservations found under the given organization name or
+            owner email
+          content: {}
+        500:
+          description: Internal server error - <error_description>
+          content: {}
+  /registry/reservations/findByOwner:
+    get:
+      tags:
+        - Reservations
+      summary: Get an organization name reservation by owner's email
+      description: This endpoint retrieves an organization name reservation.
+      operationId: getOrg
+      parameters:
+        - name: ownermail
+          in: query
+          description: The owner's email address
+          required: true
+          schema:
+            type: string
+        - name: include
+          in: query
+          description: The owner's email address
+          schema:
+            type: string
+            enum:
+              - cloud-mappings
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrgNameArray'
+            application/text:
+              schema:
+                $ref: '#/components/schemas/OrgNameArray'
+        400:
+          description: 'Required parameters missing: organization name and owner''s
+            email'
+          content: {}
+        403:
+          description: Unauthorised user
+          content: {}
+        404:
+          description: 'No reservations found under the given ownership: <owner''s
+            Email>'
+          content: {}
+        500:
+          description: Internal server error - <error_description>
+          content: {}
+    put:
+      tags:
+        - Reservations
+      summary: Update an organization name reservation
+      description: This endpoint updates an organization name reservation. This can
+        be used to change the owner of a reservation
+      operationId: updateOrg
+      parameters:
+        - name: ownermail
+          in: query
+          description: The owner's email address
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: 'Organization '
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationUpdateRequest'
+        required: true
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+            application/text:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        403:
+          description: Unauthorised user
+          content: {}
+        404:
+          description: 'Cannot find a reservation with org name <ORG_NAME> under the
+            owner: <OWNER_EMAIL>'
+          content: {}
+        500:
+          description: Internal server error - <error_description>
+          content: {}
+      x-codegen-request-body-name: body
+    post:
+      tags:
+        - Reservations
+      summary: Create an organization name reservation
+      description: This endpoint creates an organization name reservation.
+      operationId: createOrg
+      requestBody:
+        description: Organization object that needs to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationRequest'
+        required: true
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+            application/text:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        403:
+          description: Unauthorised user
+          content: {}
+        409:
+          description: 'Organization name not available to be reserved | Organization
+            already registered under the owner <OWNER_EMAIL> for the cloud: <CLOUD_TYPE>'
+          content: {}
+        500:
+          description: Internal server error - <error_description>
+          content: {}
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+        - Reservations
+      summary: Delete an organization name reservation
+      description: This endpoint deletes an organization name reservation in a given
+        cloud.
+      operationId: deleteOrg
+      parameters:
+        - name: ownermail
+          in: query
+          description: The owner's email address
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful
+          content: {}
+        403:
+          description: Unauthorised user
+          content: {}
+        404:
+          description: Organization name not found
+          content: {}
+        500:
+          description: Internal server error - <error_description>
+          content: {}
+      x-codegen-request-body-name: body
+  /registry/reservations/checkAvailability:
+    get:
+      tags:
+        - Reservations
+      summary: Check for an organization's availability.
+      description: This endpoint checks for the availability of an organization name..
+      operationId: checkAvailability
+      parameters:
+        - name: ownermail
+          in: query
+          description: The owner's email address
+          required: true
+          schema:
+            type: string
+        - name: orgname
+          in: query
+          description: The organization name
+          required: true
+          schema:
+            type: string
+        - name: cloudservice
+          in: query
+          description: The type of the cloud
+          required: true
+          schema:
+            type: string
+            enum:
+              - cloud-mappings
+      responses:
+        200:
+          description: organization name is available
+          content: {}
+        400:
+          description: 'Required parameters missing: <missing_parameter>'
+          content: {}
+        403:
+          description: Unauthorised user
+          content: {}
+        409:
+          description: organization name not available
+          content: {}
+        500:
+          description: Internal server error - <error_description>
+          content: {}
+components:
+  schemas:
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: string
+        orgName:
+          type: string
+        owner:
+          $ref: '#/components/schemas/Owner'
+        cloudMapping:
+          $ref: '#/components/schemas/CloudMapping'
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      xml:
+        name: Reservation
+    Owner:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+      xml:
+        name: Owner
+    CloudMapping:
+      type: object
+      properties:
+        id:
+          type: string
+        choreoCloud:
+          type: boolean
+        asgardioCloud:
+          type: boolean
+        ballerinaCloud:
+          type: boolean
+      xml:
+        name: CloudMapping
+    ReservationRequest:
+      type: object
+      properties:
+        orgName:
+          type: string
+        ownerEmail:
+          type: string
+        cloudService:
+          type: string
+          description: Cloud type
+          enum:
+            - CH
+            - BL
+            - AG
+      xml:
+        name: ReservationRequest
+    ReservationUpdateRequest:
+      type: object
+      properties:
+        orgName:
+          type: string
+        newEmail:
+          type: string
+      xml:
+        name: ReservationRequest
+    DeleteReservationRequest:
+      type: object
+      properties:
+        orgName:
+          type: string
+        cloudService:
+          type: string
+          description: Cloud type
+          enum:
+            - CH
+            - BL
+            - AG
+      xml:
+        name: DeleteReservationRequest
+    OrgNameArray:
+      type: array
+      example:
+        - org01
+        - org02
+      items:
+        type: string

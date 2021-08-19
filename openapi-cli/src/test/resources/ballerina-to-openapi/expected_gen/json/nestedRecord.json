@@ -10,7 +10,7 @@
   "paths" : {
     "/hi" : {
       "post" : {
-        "operationId" : "operation1_post_/hi",
+        "operationId" : "operation_post_/hi",
         "requestBody" : {
           "content" : {
             "application/json" : {

@@ -7,7 +7,7 @@ servers:
 paths:
   /pets:
     put:
-      operationId: operation1_put_/pets
+      operationId: operation_put_/pets
       requestBody:
         content:
           application/json:

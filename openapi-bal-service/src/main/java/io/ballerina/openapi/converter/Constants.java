@@ -180,4 +180,6 @@ public class Constants {
     }
     public static final String HTTP_200 = "200";
     public static final String HTTP_200_DESCRIPTION = "Ok";
+    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
+
 }

@@ -245,10 +245,7 @@ public class BallerinaClientGenerator {
         if (isQuery) {
             ImportDeclarationNode url = GeneratorUtils.getImportDeclarationNode(
                     GeneratorConstants.BALLERINA, "url");
-            ImportDeclarationNode string = GeneratorUtils.getImportDeclarationNode(
-                    GeneratorConstants.BALLERINA, "lang.'string");
             imports.add(url);
-            imports.add(string);
             NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
             FunctionDefinitionNode queryParamFunction = getQueryParamPath();
 
