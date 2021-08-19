@@ -30,6 +30,7 @@ import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
+import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
@@ -144,8 +145,13 @@ public class OpenAPIEndpointMapper {
         if (list != null && list.isPresent()) {
             SeparatedNodeList<FunctionArgumentNode> arg = (list.get()).arguments();
             port = arg.get(0).toString();
+            ExpressionNode bLangRecordLiteral = null;
             if (arg.size() > 1) {
-                ExpressionNode bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
+                if (arg.get(1) instanceof NamedArgumentNode) {
+                    bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
+                } else if (arg.get(1) instanceof PositionalArgumentNode) {
+                    bLangRecordLiteral = ((PositionalArgumentNode) arg.get(1)).expression();
+                }
                 if (bLangRecordLiteral instanceof MappingConstructorExpressionNode) {
                     host = extractHost((MappingConstructorExpressionNode) bLangRecordLiteral);
                 }
