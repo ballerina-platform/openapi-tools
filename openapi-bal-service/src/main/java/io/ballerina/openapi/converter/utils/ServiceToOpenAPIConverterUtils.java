@@ -149,7 +149,7 @@ public class ServiceToOpenAPIConverterUtils {
     /**
      * Generate openAPI definition according to the given format JSON or YAML.
      */
-    private static String generateOASDefinition(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
+    public static String generateOASDefinition(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
                                                Boolean needJson, List<ListenerDeclarationNode> endpoints,
                                                SemanticModel semanticModel) throws OpenApiConverterException {
         OpenAPI openapi = getOpenAPIDefinition(new OpenAPI(), serviceName, endpoints, serviceDeclarationNode,

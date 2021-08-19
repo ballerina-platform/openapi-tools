@@ -55,7 +55,8 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 return;
             }
             SyntaxTree syntaxTree = context.syntaxTree();
-            this.docGenerator.generate(currentProject.sourceRoot(), semanticModel, syntaxTree, serviceSymbol);
+            this.docGenerator.generate(
+                    currentProject.sourceRoot(), semanticModel, syntaxTree, serviceSymbol, serviceNode);
         }
     }
 

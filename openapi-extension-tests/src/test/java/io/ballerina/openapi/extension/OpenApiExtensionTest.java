@@ -68,9 +68,7 @@ public class OpenApiExtensionTest {
     }
 
     private void testGeneratedResources(String projectName, int serviceCount) throws IOException {
-        Path resourceRelativePath = Paths
-                .get(projectName, "target",
-                        "bin", "resources", "openapi_extension_test", projectName, "0.1.0", "resource");
+        Path resourceRelativePath = Paths.get(projectName, "target", "bin", "resources", "ballerina", "http");
         Path resources = RESOURCE_DIRECTORY.resolve(resourceRelativePath);
         if (Files.isDirectory(resources)) {
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(resources)) {
