@@ -358,6 +358,26 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test code generation when no schemas given")
+    public void testCodeGenerationWithoutSchemas() {
+        final String clientName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("no_schema.yaml").toString();
+        CodeGenerator generator = new CodeGenerator();
+        try {
+            generator.generateClient(definitionPath, clientName, resourcePath.toString(), filter, false);
+            if (Files.exists(resourcePath.resolve("client.bal")) &&
+                    Files.notExists(resourcePath.resolve("types.bal"))) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.fail("Empty types.bal file has been generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
     @Test(description = "Functionality tests when invalid OpenAPI definition is given",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")

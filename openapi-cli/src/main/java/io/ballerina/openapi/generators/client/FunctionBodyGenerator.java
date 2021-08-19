@@ -53,9 +53,11 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -204,6 +206,23 @@ public class FunctionBodyGenerator {
     private void handleParameterSchemaInOperation(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                   List<StatementNode> statementsList) {
 
+        List<String> queryApiKeyNameList = new ArrayList<>();
+        List<String> headerApiKeyNameList = new ArrayList<>();
+
+        Set<String> securitySchemesAvailable = getSecurityRequirementForOperation(operation.getValue());
+
+        if (securitySchemesAvailable.size() > 0) {
+            Map<String, String> queryApiKeyMap = ballerinaAuthConfigGenerator.getQueryApiKeyNameList();
+            Map<String, String> headerApiKeyMap = ballerinaAuthConfigGenerator.getHeaderApiKeyNameList();
+            for (String schemaName : securitySchemesAvailable) {
+                if (queryApiKeyMap.containsKey(schemaName)) {
+                    queryApiKeyNameList.add(queryApiKeyMap.get(schemaName));
+                } else if (headerApiKeyMap.containsKey(schemaName)) {
+                    headerApiKeyNameList.add(headerApiKeyMap.get(schemaName));
+                }
+            }
+        }
+
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
             List<Parameter> queryParameters = new ArrayList<>();
@@ -215,9 +234,6 @@ public class FunctionBodyGenerator {
                     headerParameters.add(parameter);
                 }
             }
-
-            List<String> queryApiKeyNameList = ballerinaAuthConfigGenerator.getQueryApiKeyNameList();
-            List<String> headerApiKeyNameList = ballerinaAuthConfigGenerator.getHeaderApiKeyNameList();
 
             if (!queryParameters.isEmpty() || !queryApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
@@ -237,8 +253,6 @@ public class FunctionBodyGenerator {
                 isHeader = true;
             }
         } else {
-            List<String> queryApiKeyNameList = ballerinaAuthConfigGenerator.getQueryApiKeyNameList();
-            List<String> headerApiKeyNameList = ballerinaAuthConfigGenerator.getHeaderApiKeyNameList();
 
             if (!queryApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
@@ -258,6 +272,28 @@ public class FunctionBodyGenerator {
             }
 
         }
+    }
+
+    /**
+     * Provides the list of security schemes available for the given operation.
+     * @param operation     Current operation
+     * @return              Security schemes that can be used to authorize the given operation
+     */
+    private Set<String> getSecurityRequirementForOperation(Operation operation) {
+        Set<String> securitySchemasAvailable = new LinkedHashSet<>();
+        List<SecurityRequirement> securityRequirements = new ArrayList<>();
+        if (operation.getSecurity() != null) {
+            securityRequirements = operation.getSecurity();
+        } else if (openAPI.getSecurity() != null) {
+            securityRequirements = openAPI.getSecurity();
+        }
+
+        if (securityRequirements.size() > 0) {
+            for (SecurityRequirement requirement: securityRequirements) {
+                securitySchemasAvailable.addAll(requirement.keySet());
+            }
+        }
+        return securitySchemasAvailable;
     }
 
     /**
@@ -299,8 +335,7 @@ public class FunctionBodyGenerator {
         String clientCallStatement;
 
         // This condition for several methods.
-        boolean isMethod = method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(
-                DELETE) || method.equals(EXECUTE);
+        boolean isMethod = method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(EXECUTE);
         if (isHeader) {
             if (isMethod) {
                 ExpressionStatementNode requestStatementNode = generatorUtils.getSimpleExpressionStatementNode(

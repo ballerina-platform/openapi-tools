@@ -84,6 +84,9 @@ public class FunctionBodyNodeTests {
                         "\"x-ms-date\":xMsDate,\"x-ms-version\":xMsVersion};map<string|string[]> " +
                         "accHeaders = getMapForHeaders(headerValues);" +
                         "http:Responseresponse=check self.clientEp-> head(path, accHeaders);returnresponse;}"},
+                {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string  path = string `/pets/${petId}`;" +
+                        "http:Response response = check self.clientEp-> delete(path, targetType = http:Response);" +
+                        "return response;}"},
                 {"diagnostic_files/json_payload.yaml", "/pets", "{string  path = string `/pets`;" +
                         "http:Request request = new; request.setPayload(payload); " +
                         "http:Response response = check self.clientEp->" +
@@ -94,7 +97,6 @@ public class FunctionBodyNodeTests {
                         "request.setPayload(xmlBody); " +
                         "http:Response response = check self.clientEp->post(path, request, targetType=http:Response);" +
                         "return response;}"}
-
         };
     }
     //TODO:Different mediaType
