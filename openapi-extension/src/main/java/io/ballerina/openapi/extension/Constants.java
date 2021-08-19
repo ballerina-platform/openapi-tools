@@ -29,4 +29,8 @@ public interface Constants {
     String BIN_DIR_NAME = "bin";
     String RESOURCES_DIR_NAME = "resources";
     String RESOURCE_DIR_NAME = "resource";
+
+    // open-api module related constants
+    String SERVICE_INFO_ANNOTATION = "openapi:ServiceInfo";
+    String CONTRACT = "contract";
 }

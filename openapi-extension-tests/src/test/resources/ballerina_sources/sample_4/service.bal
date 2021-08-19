@@ -1,0 +1,11 @@
+import ballerina/http;
+
+@openapi:ServiceInfo{
+    contract: "service_openapi.json"
+}
+service / on new http:Listener(9090) {
+    resource function get greeting() returns string {
+        return "Hello, World!";
+    }
+}
+

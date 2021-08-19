@@ -67,6 +67,14 @@ public class OpenApiExtensionTest {
 //        testGeneratedResources("sample_3", 3);
     }
 
+    @Test
+    public void testDocGenerationForBallerinaProjectWithAnnotation() throws IOException {
+        deleteTarget("sample_4");
+        Package currentPackage = loadPackage("sample_4");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        testGeneratedResources("sample_4", 1);
+    }
+
     private void testGeneratedResources(String projectName, int serviceCount) throws IOException {
         Path resourceRelativePath = Paths.get(projectName, "target", "bin", "resources", "ballerina", "http");
         Path resources = RESOURCE_DIRECTORY.resolve(resourceRelativePath);
