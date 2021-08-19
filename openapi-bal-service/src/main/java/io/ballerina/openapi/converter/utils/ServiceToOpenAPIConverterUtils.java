@@ -65,9 +65,7 @@ public class ServiceToOpenAPIConverterUtils {
      * @throws OpenApiConverterException when code generation is fail
      */
     public static Map<String, String> generateOAS3Definition(SyntaxTree syntaxTree, SemanticModel semanticModel,
-                                                             String serviceName,
-                                                             Boolean needJson,
-                                                             Path outPath)
+                                                             String serviceName, Boolean needJson, Path outPath)
             throws OpenApiConverterException {
         Map<String, String> openAPIDefinitions = new HashMap<>();
         List<ListenerDeclarationNode> endpoints = new ArrayList<>();
@@ -106,8 +104,8 @@ public class ServiceToOpenAPIConverterUtils {
      * Filter all the end points and service nodes.
      */
     private static void extractListenersAndServiceNodes(String serviceName, List<String> availableService,
-                                                 List<ServiceDeclarationNode> servicesToGenerate,
-                                                 ModulePartNode modulePartNode,
+                                                        List<ServiceDeclarationNode> servicesToGenerate,
+                                                        ModulePartNode modulePartNode,
                                                         List<ListenerDeclarationNode> endpoints) {
 
         for (Node node : modulePartNode.members()) {
@@ -167,7 +165,7 @@ public class ServiceToOpenAPIConverterUtils {
                                                      ServiceDeclarationNode serviceDefinition,
                                                      SemanticModel semanticModel)
             throws OpenApiConverterException {
-        //Take base path of service
+        // Take base path of service
         OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
         String currentServiceName = new OpenAPIEndpointMapper().getServiceBasePath(serviceDefinition);
         if (openapi.getServers() == null) {

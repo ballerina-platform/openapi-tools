@@ -7,7 +7,7 @@ servers:
 paths:
   /:
     post:
-      operationId: operation1_post_/
+      operationId: operation_post
       responses:
         "202":
           description: Accepted

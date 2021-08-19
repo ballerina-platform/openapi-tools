@@ -7,7 +7,7 @@ servers:
 paths:
   /hi:
     post:
-      operationId: operation1_post_hi
+      operationId: operation_post_hi
       parameters:
         - name: id
           in: query

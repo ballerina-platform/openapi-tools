@@ -19,11 +19,14 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
+import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
+import io.ballerina.compiler.api.symbols.EnumSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
@@ -35,6 +38,7 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -172,11 +176,19 @@ public class OpenAPIComponentMapper {
             String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
             Schema property = ConverterCommonUtils.getOpenApiSchema(type);
             if (type.equals(Constants.TYPE_REFERENCE)) {
-                property.set$ref(field.getValue().typeDescriptor().getName().orElseThrow().trim());
-                TypeSymbol recordVariable =  field.getValue().typeDescriptor();
-                TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
-                createComponentSchema(schema, typeRecord);
-                schema = components.getSchemas();
+                if (((TypeReferenceTypeSymbol) field.getValue().typeDescriptor()).definition().kind()
+                        == SymbolKind.ENUM) {
+                    TypeReferenceTypeSymbol typeRefEnum = (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
+                    EnumSymbol enumSymbol = (EnumSymbol) typeRefEnum.definition();
+                    property = mapEnumValues(enumSymbol);
+
+                } else {
+                    property.set$ref(field.getValue().typeDescriptor().getName().orElseThrow().trim());
+                    TypeSymbol recordVariable =  field.getValue().typeDescriptor();
+                    TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
+                    createComponentSchema(schema, typeRecord);
+                    schema = components.getSchemas();
+                }
             }
             if (property instanceof ArraySchema) {
                 mapArrayToArraySchema(schema, field.getValue(), (ArraySchema) property);
@@ -201,6 +213,23 @@ public class OpenAPIComponentMapper {
         return componentSchema;
     }
 
+    private Schema mapEnumValues(EnumSymbol enumSymbol) {
+
+        Schema property;
+        property = new StringSchema();
+        List<String> enums = new ArrayList<>();
+        List<ConstantSymbol> enumMembers = enumSymbol.members();
+        for (ConstantSymbol enumMember : enumMembers) {
+            if (enumMember.typeDescriptor().typeKind() == TypeDescKind.SINGLETON) {
+                enums.add(enumMember.typeDescriptor().signature());
+            } else {
+                enums.add(enumMember.constValue().toString().trim());
+            }
+        }
+        property.setEnum(enums);
+        return property;
+    }
+
     /**
      * Generate arraySchema for ballerina record  as array type.
      */
@@ -217,9 +246,15 @@ public class OpenAPIComponentMapper {
         Schema symbolProperty  = ConverterCommonUtils.getOpenApiSchema(symbol.typeKind().getName());
         //Set the record model to the definition
         if (symbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
-            symbolProperty.set$ref(symbol.getName().orElseThrow().trim());
-            TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) symbol;
-            createComponentSchema(schema, typeRecord);
+            if (((TypeReferenceTypeSymbol) symbol).definition().kind() == SymbolKind.ENUM) {
+                TypeReferenceTypeSymbol typeRefEnum = (TypeReferenceTypeSymbol) symbol;
+                EnumSymbol enumSymbol = (EnumSymbol) typeRefEnum.definition();
+                symbolProperty = mapEnumValues(enumSymbol);
+            } else {
+                symbolProperty.set$ref(symbol.getName().orElseThrow().trim());
+                TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) symbol;
+                createComponentSchema(schema, typeRecord);
+            }
         }
         //Handle nested array type
         if (arrayDimensions > 1) {

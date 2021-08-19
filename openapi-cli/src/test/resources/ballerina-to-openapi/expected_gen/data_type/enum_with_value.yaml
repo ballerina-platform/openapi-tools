@@ -5,27 +5,31 @@ info:
 servers:
   - url: localhost:9090/payloadV
 paths:
-  /hi:
+  /reservation:
     post:
-      operationId: operation_post_/hi
+      summary: Represents Snowpeak reservation resource
+      operationId: operation_post_/reservation
       requestBody:
+        description: Reservation representation
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: '#/components/schemas/Link'
       responses:
         "202":
           description: Accepted
 components:
   schemas:
-    Pet:
+    Link:
       type: object
       properties:
-        name:
+        rel:
           type: string
-        id:
-          type: integer
-          format: int32
-        tag:
+        actions:
           type: string
-
+          enum:
+            - patch
+            - delete
+            - put
+            - post
+            - get

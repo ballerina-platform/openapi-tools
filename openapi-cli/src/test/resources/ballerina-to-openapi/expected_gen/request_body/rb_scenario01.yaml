@@ -7,7 +7,7 @@ servers:
 paths:
   /v1:
     post:
-      operationId: operation1_post_/v1
+      operationId: operation_post_/v1
       requestBody:
         content:
           application/json:

@@ -26,6 +26,8 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
+import java.util.Locale;
+
 /**
  * Utilities used in Ballerina  to OpenAPI converter.
  */
@@ -104,5 +106,31 @@ public class ConverterCommonUtils {
                 break;
         }
         return schema;
+    }
+
+    /**
+     * Generate operationId by removing special characters.
+     *
+     * @param identifier input function name, record name or operation Id
+     * @return string with new generated name
+     */
+    public static String getValidName(String identifier) {
+        //For the flatten enable we need to remove first Part of valid name check
+        // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
+        if (!identifier.matches("\\b[0-9]*\\b")) {
+            String[] split = identifier.split(Constants.ESCAPE_PATTERN);
+            StringBuilder validName = new StringBuilder();
+            for (String part: split) {
+                if (!part.isBlank()) {
+                    if (split.length > 1) {
+                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+                                part.substring(1).toLowerCase(Locale.ENGLISH);
+                    }
+                    validName.append(part);
+                }
+            }
+            identifier = validName.toString();
+        }
+        return identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1);
     }
 }

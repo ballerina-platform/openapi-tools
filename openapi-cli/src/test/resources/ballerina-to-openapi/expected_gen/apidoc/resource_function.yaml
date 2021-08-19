@@ -8,7 +8,7 @@ paths:
   /locations:
     get:
       summary: Represents Snowpeak location resource
-      operationId: operation1_get_/locations
+      operationId: operation_get_/locations
       responses:
         "202":
           description: Accepted

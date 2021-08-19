@@ -7,7 +7,7 @@ servers:
 paths:
   /:
     get:
-      operationId: operation2_get_/
+      operationId: operation_get
       responses:
         "200":
           description: Successful
@@ -15,7 +15,7 @@ paths:
             application/json:
               example: Ok
     post:
-      operationId: operation1_get_/
+      operationId: operation_get
       responses:
         "200":
           description: Successful
@@ -24,7 +24,7 @@ paths:
               example: Ok
   /v1/{id}:
     get:
-      operationId: "operation1_get_v1/{id}"
+      operationId: "operation_get_v1/{id}"
       parameters:
         - name: id
           in: path
