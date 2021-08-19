@@ -1,0 +1,15 @@
+openapi: 3.0.1
+info:
+  title: ' payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /locations:
+    get:
+      summary: Represents Snowpeak location resource
+      operationId: operation1_get_/locations
+      responses:
+        "202":
+          description: Accepted
+components: {}
