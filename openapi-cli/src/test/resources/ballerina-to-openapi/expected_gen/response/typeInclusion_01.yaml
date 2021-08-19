@@ -29,6 +29,10 @@ paths:
                 $ref: '#/components/schemas/ReservationReceipt'
         "409":
           description: Conflict
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   schemas:
     ReserveRoom:

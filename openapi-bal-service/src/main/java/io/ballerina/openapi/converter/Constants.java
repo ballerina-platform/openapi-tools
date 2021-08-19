@@ -103,7 +103,7 @@ public class Constants {
     public enum OpenAPIType {
         INTEGER("integer"),
         STRING("string"),
-        DECIMAL("decimal"),
+        NUMBER("number"),
         BOOLEAN("boolean"),
         RECORD("object"),
         ARRAY("array");

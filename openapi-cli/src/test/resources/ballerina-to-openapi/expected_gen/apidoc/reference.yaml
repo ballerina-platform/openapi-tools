@@ -180,8 +180,9 @@ components:
           type: string
           description: Last updated time stamp
         total:
-          type: object
+          type: number
           description: Total amount paid
+          format: double
         rooms:
           type: array
           description: Booked rooms
@@ -221,8 +222,9 @@ components:
           type: boolean
           description: Availability of wifi
         price:
-          type: object
+          type: number
           description: Cost for the room
+          format: double
         count:
           type: integer
           description: Number of rooms as per the status
