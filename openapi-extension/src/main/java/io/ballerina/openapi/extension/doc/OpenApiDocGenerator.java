@@ -108,7 +108,7 @@ public class OpenApiDocGenerator {
         List<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
         String serviceBasePath = getServiceBasePath(serviceNode);
         return ServiceToOpenAPIConverterUtils
-                .generateOASDefinition(serviceNode, serviceBasePath, true, listenerNodes, semanticModel);
+                .generateOASForGivenFormat(serviceNode, serviceBasePath, true, listenerNodes, semanticModel);
     }
 
     private Optional<AnnotationNode> getServiceInfoAnnotation(ServiceDeclarationNode serviceNode) {
