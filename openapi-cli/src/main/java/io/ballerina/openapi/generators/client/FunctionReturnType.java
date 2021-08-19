@@ -21,6 +21,7 @@ package io.ballerina.openapi.generators.client;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
@@ -42,6 +43,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -204,10 +206,24 @@ public class FunctionReturnType {
                 type = generateCustomTypeDefine(type, typeName, isSignature);
             }
         } else {
-            String typeName = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) +
-                    "Arr";
-            type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
-            type = generateCustomTypeDefine(type, typeName, isSignature);
+            String schemaType = arraySchema.getItems().getType();
+            String typeName;
+            if (schemaType.equals(Constants.ARRAY) && (arraySchema.getItems() != null)) {
+                Schema nestedSchema = arraySchema.getItems();
+                if (nestedSchema instanceof ArraySchema) {
+                    ArraySchema nestedArraySchema = (ArraySchema) nestedSchema;
+                    String inlineArrayType = convertOpenAPITypeToBallerina(nestedArraySchema.getItems().getType());
+                    typeName =  inlineArrayType + "NestedArr";
+                    type = inlineArrayType + "[][]";
+                } else {
+                    throw new BallerinaOpenApiException("Invalid two dimensional array found as response schema");
+                }
+            } else {
+                typeName = convertOpenAPITypeToBallerina(Objects.requireNonNull(arraySchema.getItems()).getType()) +
+                        "Arr";
+                type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType()) + "[]";
+            }
+            type = generateCustomTypeDefine(type, getValidName(typeName, true), isSignature);
         }
         return type;
     }
