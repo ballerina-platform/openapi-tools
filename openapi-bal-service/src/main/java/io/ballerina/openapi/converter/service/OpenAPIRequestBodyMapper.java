@@ -42,7 +42,6 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -181,9 +180,7 @@ public class OpenAPIRequestBodyMapper {
         for (MappingFieldNode fieldNode: fields) {
             if (fieldNode.children() != null) {
                 ChildNodeList nodeList = fieldNode.children();
-                Iterator<Node> itNode = nodeList.iterator();
-                while (itNode.hasNext()) {
-                    Node nextNode = itNode.next();
+                for (Node nextNode : nodeList) {
                     if (nextNode instanceof ListConstructorExpressionNode) {
                         SeparatedNodeList mimeList = ((ListConstructorExpressionNode) nextNode).expressions();
                         if (mimeList.size() != 0) {

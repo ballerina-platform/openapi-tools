@@ -1,11 +1,19 @@
 {
   "openapi" : "3.0.1",
   "info" : {
-    "title" : " payloadV",
+    "title" : "PayloadV",
     "version" : "1.0.0"
   },
   "servers" : [ {
-    "url" : "localhost:9090/payloadV"
+    "url" : "{server}:{port}/payloadV",
+    "variables" : {
+      "server" : {
+        "default" : "http://localhost"
+      },
+      "port" : {
+        "default" : "9090"
+      }
+    }
   } ],
   "paths" : {
     "/hi" : {
