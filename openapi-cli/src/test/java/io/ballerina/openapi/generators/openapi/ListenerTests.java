@@ -33,7 +33,7 @@ import java.nio.file.Paths;
  * {@link io.ballerina.openapi.converter.service.OpenAPIEndpointMapper}.
  */
 public class ListenerTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
+    private final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
     private Path tempDir;
 
     @BeforeMethod

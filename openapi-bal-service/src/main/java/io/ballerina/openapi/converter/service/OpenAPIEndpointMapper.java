@@ -88,12 +88,12 @@ public class OpenAPIEndpointMapper {
     private Server addEnumValues(List<Server> servers) {
 
         Server mainServer = servers.get(0);
+        List<Server> rotated = new ArrayList<>(servers);
+        ServerVariables mainVariable = mainServer.getVariables();
+        ServerVariable hostVariable = mainVariable.get(SERVER);
+        ServerVariable portVariable = mainVariable.get(PORT);
         if (servers.size() > 1) {
-            List<Server> rotated = new ArrayList<>(servers);
             Collections.rotate(rotated, servers.size() - 1);
-            ServerVariables mainVariable = mainServer.getVariables();
-            ServerVariable hostVariable = mainVariable.get(SERVER);
-            ServerVariable portVariable = mainVariable.get(PORT);
             for (Server server: rotated) {
                 ServerVariables variables = server.getVariables();
                 if (variables.get(SERVER) != null) {
