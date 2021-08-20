@@ -53,25 +53,6 @@ public final class CodegenUtils {
     }
 
     /**
-     * Generates a random alphanumeric string with the provided length.
-     *
-     * @param stringLength length of the generated string
-     * @return random alphanumeric string
-     */
-    public static String generateRandomAlphaNumericString(int stringLength) {
-        int leftLimit = 48; // numeral '0'
-        int rightLimit = 122; // letter 'z'
-        Random random = new Random();
-        return random.ints(leftLimit, rightLimit + 1)
-                // character literals from 48 - 57 are numbers | 65 - 90 are capital letters |
-                // 97 - 122 are simple letters
-                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-                .limit(stringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
-    }
-
-    /**
      * Copy content of a file/directory into another location.
      *
      * @param inputStream  stream from which the data is read
