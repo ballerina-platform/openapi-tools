@@ -91,7 +91,7 @@ public class OpenApiDocGenerator {
                 }
             } else {
                 // generate open-api doc and add it to resource directory
-                String openApiDefinition = generateOpenApiDoc(semanticModel, syntaxTree, serviceNode);
+                String openApiDefinition = generateOpenApiDoc(semanticModel, syntaxTree, serviceNode, openApiDocName);
                 if (null != openApiDefinition && !openApiDefinition.isBlank()) {
                     CodegenUtils.writeFile(openApiDoc, openApiDefinition);
                 }
@@ -102,13 +102,13 @@ public class OpenApiDocGenerator {
     }
 
     private String generateOpenApiDoc(SemanticModel semanticModel, SyntaxTree syntaxTree,
-                                      ServiceDeclarationNode serviceNode)
+                                      ServiceDeclarationNode serviceNode, String outputFileName)
             throws OpenApiConverterException, IOException {
         ModulePartNode modulePartNode = syntaxTree.rootNode();
         List<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
         String serviceBasePath = getServiceBasePath(serviceNode);
-        return ServiceToOpenAPIConverterUtils
-                .generateOASForGivenFormat(serviceNode, serviceBasePath, true, listenerNodes, semanticModel);
+        return ServiceToOpenAPIConverterUtils.generateOASForGivenFormat(
+                serviceNode, serviceBasePath, true, listenerNodes, semanticModel, outputFileName);
     }
 
     private Optional<AnnotationNode> getServiceInfoAnnotation(ServiceDeclarationNode serviceNode) {

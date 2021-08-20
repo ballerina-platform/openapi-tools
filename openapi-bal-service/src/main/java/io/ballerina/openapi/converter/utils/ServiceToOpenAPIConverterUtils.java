@@ -196,6 +196,9 @@ public class ServiceToOpenAPIConverterUtils {
         String title = null;
         if (splits.length > 1) {
             for (String piece: splits) {
+                if (piece.isBlank()) {
+                    continue;
+                }
                 stringBuilder.append(piece.substring(0, 1).toUpperCase(Locale.ENGLISH) + piece.substring(1));
                 stringBuilder.append(" ");
             }
