@@ -76,7 +76,7 @@ public class APIDocTests {
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/typeInclusion.yaml");
     }
 
-    @Test(description = "Reference scenarios", enabled = false)
+    @Test(description = "Reference scenarios")
     public void testsForReferenceScenario() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/reference_scenario.bal");
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/reference.yaml");

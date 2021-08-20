@@ -1,9 +1,14 @@
 openapi: 3.0.1
 info:
-  title: ' payloadV'
+  title: PayloadV
   version: 1.0.0
 servers:
-  - url: localhost:9090/payloadV
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /reservation:
     post:
@@ -24,6 +29,10 @@ paths:
                 $ref: '#/components/schemas/ReservationReceipt'
         "409":
           description: Conflict
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   schemas:
     ReserveRoom:
