@@ -93,7 +93,7 @@ public class OpenApiDocGenerator {
                 // generate open-api doc and add it to resource directory
                 String openApiDefinition = generateOpenApiDoc(semanticModel, syntaxTree, serviceNode);
                 if (null != openApiDefinition && !openApiDefinition.isBlank()) {
-                    CodegenUtils.writeFile(openApiDoc, openApiDefinition, false);
+                    CodegenUtils.writeFile(openApiDoc, openApiDefinition);
                 }
             }
         } catch (IOException | OpenApiConverterException e) {

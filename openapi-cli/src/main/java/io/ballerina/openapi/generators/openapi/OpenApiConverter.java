@@ -87,7 +87,7 @@ public class OpenApiConverter {
                 semanticModel, serviceName, needJson, outPath);
         if (!openAPIDefinitions.isEmpty()) {
             for (Map.Entry<String, String> definition: openAPIDefinitions.entrySet()) {
-                CodegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue(), false);
+                CodegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue());
             }
         }
     }

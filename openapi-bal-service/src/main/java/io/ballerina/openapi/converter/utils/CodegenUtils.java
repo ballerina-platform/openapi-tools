@@ -44,11 +44,10 @@ public final class CodegenUtils {
      *
      * @param filePath  valid file path to write the content
      * @param content  content of the file
-     * @param append  flag to notify whether to append content or not
      * @throws IOException when a file operation fails
      */
-    public static void writeFile(Path filePath, String content, boolean append) throws IOException {
-        try (FileWriter writer = new FileWriter(filePath.toString(), StandardCharsets.UTF_8, append)) {
+    public static void writeFile(Path filePath, String content) throws IOException {
+        try (FileWriter writer = new FileWriter(filePath.toString(), StandardCharsets.UTF_8)) {
             writer.write(content);
         }
     }

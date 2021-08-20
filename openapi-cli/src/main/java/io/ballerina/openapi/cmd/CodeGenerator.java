@@ -377,7 +377,7 @@ public class CodeGenerator {
                 if (Files.notExists(filePath)) {
                     String fileContent = file.getFileName().endsWith(".bal") ?
                             (licenseHeader + file.getContent()) : file.getContent();
-                    CodegenUtils.writeFile(filePath, fileContent, false);
+                    CodegenUtils.writeFile(filePath, fileContent);
                 }
             } else {
                 if (file.getFileName().equals(TEST_FILE_NAME) || file.getFileName().equals(CONFIG_FILE_NAME)) {
@@ -390,7 +390,7 @@ public class CodeGenerator {
                 }
                 String fileContent = file.getFileName().endsWith(".bal") ?
                         (licenseHeader + file.getContent()) : file.getContent();
-                CodegenUtils.writeFile(filePath, fileContent, false);
+                CodegenUtils.writeFile(filePath, fileContent);
             }
         }
 

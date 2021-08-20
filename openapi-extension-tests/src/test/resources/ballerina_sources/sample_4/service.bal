@@ -20,6 +20,7 @@ import ballerina/openapi;
 @openapi:ServiceInfo{
     contract: "service_openapi.json"
 }
+@http:ServiceConfig {compression: {enable: http:COMPRESSION_AUTO}}
 service / on new http:Listener(9090) {
     resource function get greeting() returns string {
         return "Hello, World!";
