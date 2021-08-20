@@ -1,29 +1,29 @@
 openapi: 3.0.1
-  info:
-    title: PayloadV
-    version: 1.0.0
-  servers:
-    - url: "{server}:{port}/payloadV"
-      variables:
-        server:
-          default: http://localhost
-          enum:
-            - http://petstore.openapi.io
-            - http://localhost
-        port:
-          default: "80"
-          enum:
-            - "443"
-            - "80"
-  paths:
-    /pets:
-      get:
-        operationId: operation_get_/pets
-        responses:
-          "200":
-            description: Ok
-            content:
-              text/plain:
-                schema:
-                  type: string
-  components: {}
+info:
+  title: PayloadV
+  version: 1.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        enum:
+          - http://petstore.openapi.io
+          - http://localhost
+        default: http://localhost
+      port:
+        enum:
+          - "443"
+          - "80"
+        default: "80"
+paths:
+  /pets:
+    get:
+      operationId: operation_get_/pets
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}
