@@ -19,10 +19,17 @@ package io.ballerina.openapi.extension.doc;
 import io.ballerina.projects.ProjectKind;
 
 /**
- * {@code Generator} generates open-api related docs for HTTP service.
+ * {@code SingleFileOpenApiDocGenerator} generates open-api related docs for HTTP service defined in single ballerina
+ * file.
  */
-public interface OpenApiDocGenerator {
-    void generate(OpenApiDocConfig config);
+public class SingleFileOpenApiDocGenerator implements OpenApiDocGenerator {
+    @Override
+    public void generate(OpenApiDocConfig config) {
 
-    boolean isSupported(ProjectKind projectType);
+    }
+
+    @Override
+    public boolean isSupported(ProjectKind projectType) {
+        return ProjectKind.SINGLE_FILE_PROJECT.equals(projectType);
+    }
 }
