@@ -17,6 +17,7 @@
 package io.ballerina.openapi.extension;
 
 import io.ballerina.openapi.extension.doc.ResourcePackagingService;
+import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.plugins.CompilerLifecycleEventContext;
 import io.ballerina.projects.plugins.CompilerLifecycleTask;
 
@@ -40,11 +41,14 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
 
     @Override
     public void perform(CompilerLifecycleEventContext context) {
+        ProjectKind projectType = context.currentPackage().project().kind();
         Optional<Path> executablePath = context.getGeneratedArtifactPath();
-        executablePath.ifPresent(this::updateResources);
+        executablePath.ifPresent(exec ->
+                updateResources(exec, ProjectKind.SINGLE_FILE_PROJECT.equals(projectType))
+        );
     }
 
-    private void updateResources(Path executablePath) {
+    private void updateResources(Path executablePath, boolean isSingleFile) {
         Path executableJarAbsPath = executablePath.toAbsolutePath();
         // get the path for `target/bin`
         Path targetBinPath = executableJarAbsPath.getParent();
@@ -55,6 +59,23 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
             } catch (IOException e) {
                 ERR.println("error [open-api extension]: " + e.getLocalizedMessage());
             }
+
+            // clean up created intermediate resources if current project is a single-ballerina-file  project
+            if (isSingleFile) {
+                execCleanup(targetBinPath);
+            }
+        }
+    }
+
+    private void execCleanup(Path targetPath) {
+        Path resourcesDirectory = targetPath.resolve(Constants.RESOURCES_DIR_NAME);
+        try {
+            if (Files.exists(resourcesDirectory)) {
+                Files.delete(resourcesDirectory);
+            }
+        } catch (IOException e) {
+            ERR.println("error [open-api extension]: resource cleanup failed for single-file ballerina project"
+                    + e.getLocalizedMessage());
         }
     }
 }
