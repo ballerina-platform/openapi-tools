@@ -52,6 +52,7 @@ import static io.ballerina.openapi.converter.Constants.SERVER;
  * Extract OpenApi server information from and Ballerina endpoint.
  */
 public class OpenAPIEndpointMapper {
+    public static final OpenAPIEndpointMapper ENDPOINT_MAPPER = new OpenAPIEndpointMapper();
 
     /**
      * Convert endpoints bound to {@code service} openapi server information.
@@ -63,7 +64,7 @@ public class OpenAPIEndpointMapper {
      */
     public OpenAPI getServers(OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
                               ServiceDeclarationNode service) {
-        openAPI = new OpenAPIEndpointMapper().extractServerForExpressionNode(openAPI, service.expressions(), service);
+        openAPI = extractServerForExpressionNode(openAPI, service.expressions(), service);
         List<Server> servers = openAPI.getServers();
         if (!endpoints.isEmpty()) {
             for (ListenerDeclarationNode ep : endpoints) {

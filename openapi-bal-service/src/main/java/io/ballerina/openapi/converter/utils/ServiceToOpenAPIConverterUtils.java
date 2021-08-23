@@ -88,7 +88,7 @@ public class ServiceToOpenAPIConverterUtils {
 
             // Generating for the services
             for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
-                String serviceNodeName = new OpenAPIEndpointMapper().getServiceBasePath(serviceNode);
+                String serviceNodeName = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
                 String openApiSource = generateOASForGivenFormat(serviceNode, serviceNodeName, needJson, endpoints,
                         semanticModel, openApiName);
@@ -132,7 +132,7 @@ public class ServiceToOpenAPIConverterUtils {
 
         if (serviceName != null) {
             // Filtering by service name
-            String service = new OpenAPIEndpointMapper().getServiceBasePath(serviceNode);
+            String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
             availableService.add(service);
             if (serviceName.equals(service)) {
                 servicesToGenerate.add(serviceNode);
@@ -171,11 +171,11 @@ public class ServiceToOpenAPIConverterUtils {
             throws OpenApiConverterException {
         // Take base path of service
         OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
-        String currentServiceName = new OpenAPIEndpointMapper().getServiceBasePath(serviceDefinition);
+        String currentServiceName = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceDefinition);
         // 01. Set openAPI inFor section wit details
         openapi = getInfo(openapi, currentServiceName);
         // 02. Filter and set the ServerURLs according to endpoints. Complete the servers section in OAS
-        openapi = new OpenAPIEndpointMapper().getServers(openapi, endpoints, serviceDefinition);
+        openapi = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServers(openapi, endpoints, serviceDefinition);
         // 03. Filter path and component sections in OAS.
         // Generate openApi string for the mentioned service name.
         if (!serviceName.isBlank() && currentServiceName.trim().equals(serviceName)) {
