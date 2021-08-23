@@ -42,7 +42,6 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -75,13 +74,18 @@ public class OpenAPIRequestBodyMapper {
      * @param annotation    - Payload annotation details from resource function
      */
     public void handlePayloadAnnotation(RequiredParameterNode payloadNode, Map<String, Schema> schema,
-                                        AnnotationNode annotation) {
+                                        AnnotationNode annotation, Map<String, String> apiDocs) {
 
         if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
             // Creating request body - required.
             RequestBody bodyParameter = new RequestBody();
             MappingConstructorExpressionNode mapMime = annotation.annotValue().orElse(null);
             SeparatedNodeList<MappingFieldNode> fields = null;
+            // Add api doc to request body description
+            if (!apiDocs.isEmpty() && payloadNode.paramName().isPresent()
+                    && apiDocs.containsKey(payloadNode.paramName().get().text().trim())) {
+                bodyParameter.setDescription(apiDocs.get(payloadNode.paramName().get().text().trim()));
+            }
             if (mapMime != null) {
                 fields = mapMime.fields();
             }
@@ -89,33 +93,45 @@ public class OpenAPIRequestBodyMapper {
                 handleMultipleMIMETypes(bodyParameter, fields, payloadNode, schema);
             }  else {
                 //TODO : fill with rest of media types
-                String consumes = "application/" + payloadNode.typeName().toString().trim();
-                switch (consumes) {
-                    case MediaType.APPLICATION_JSON:
-                        addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_JSON);
-                        break;
-                    case MediaType.APPLICATION_XML:
-                        addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_XML);
-                        break;
-                    case MediaType.TEXT_PLAIN:
-                    case "application/string":
-                        addConsumes(operationAdaptor, bodyParameter, MediaType.TEXT_PLAIN);
-                        break;
-                    case "application/byte[]":
-                        addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_OCTET_STREAM);
-                        break;
-                    default:
-                        Node node = payloadNode.typeName();
-                        if (node instanceof SimpleNameReferenceNode) {
-                            SimpleNameReferenceNode record = (SimpleNameReferenceNode) node;
-                            handleReferencePayload(record, schema, MediaType.APPLICATION_JSON, new RequestBody());
-                        } else if (node instanceof ArrayTypeDescriptorNode) {
-                            handleArrayTypePayload(schema, (ArrayTypeDescriptorNode) node,
-                                    MediaType.APPLICATION_JSON, new RequestBody());
-                        }
-                        break;
-                }
+                handleSinglePayloadType(payloadNode, schema, bodyParameter);
             }
+        }
+    }
+
+    /**
+     * This function is use to handle when payload has one mime type.
+     *<pre>
+     *     resource function post pets(@http:Payload json payload){}
+     *</pre>
+     */
+    private void handleSinglePayloadType(RequiredParameterNode payloadNode, Map<String, Schema> schema,
+                                         RequestBody bodyParameter) {
+
+        String consumes = "application/" + payloadNode.typeName().toString().trim();
+        switch (consumes) {
+            case MediaType.APPLICATION_JSON:
+                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_JSON);
+                break;
+            case MediaType.APPLICATION_XML:
+                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_XML);
+                break;
+            case MediaType.TEXT_PLAIN:
+            case "application/string":
+                addConsumes(operationAdaptor, bodyParameter, MediaType.TEXT_PLAIN);
+                break;
+            case "application/byte[]":
+                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_OCTET_STREAM);
+                break;
+            default:
+                Node node = payloadNode.typeName();
+                if (node instanceof SimpleNameReferenceNode) {
+                    SimpleNameReferenceNode record = (SimpleNameReferenceNode) node;
+                    handleReferencePayload(record, schema, MediaType.APPLICATION_JSON, bodyParameter);
+                } else if (node instanceof ArrayTypeDescriptorNode) {
+                    handleArrayTypePayload(schema, (ArrayTypeDescriptorNode) node,
+                            MediaType.APPLICATION_JSON, bodyParameter);
+                }
+                break;
         }
     }
 
@@ -134,7 +150,7 @@ public class OpenAPIRequestBodyMapper {
             Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
             TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
             OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
-            componentMapper.handleRecordNode(schema, typeSymbol);
+            componentMapper.createComponentSchema(schema, typeSymbol);
             Schema itemSchema = new Schema();
             arraySchema.setItems(itemSchema.$ref(referenceNode.name().text().trim()));
             io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
@@ -164,51 +180,47 @@ public class OpenAPIRequestBodyMapper {
         for (MappingFieldNode fieldNode: fields) {
             if (fieldNode.children() != null) {
                 ChildNodeList nodeList = fieldNode.children();
-                Iterator<Node> itNode = nodeList.iterator();
-                while (itNode.hasNext()) {
-                    Node nextNode = itNode.next();
+                for (Node nextNode : nodeList) {
                     if (nextNode instanceof ListConstructorExpressionNode) {
                         SeparatedNodeList mimeList = ((ListConstructorExpressionNode) nextNode).expressions();
                         if (mimeList.size() != 0) {
                             RequestBody requestBody = new RequestBody();
                             for (Object mime : mimeList) {
                                 if (mime instanceof BasicLiteralNode) {
-                                    String mimeType = ((BasicLiteralNode) mime).literalToken().text().
-                                            replaceAll("\"", "");
-                                    if (payloadNode.typeName() instanceof SimpleNameReferenceNode) {
-                                        SimpleNameReferenceNode record =
-                                                (SimpleNameReferenceNode) payloadNode.typeName();
-                                        handleReferencePayload(record, schema, mimeType, requestBody);
-                                    } else if (payloadNode.typeName() instanceof ArrayTypeDescriptorNode) {
-                                        ArrayTypeDescriptorNode arrayTypeDescriptorNode =
-                                                (ArrayTypeDescriptorNode) payloadNode.typeName();
-                                        handleArrayTypePayload(schema, arrayTypeDescriptorNode, mimeType, requestBody);
-                                    } else {
-
-                                        io.swagger.v3.oas.models.media.MediaType media =
-                                                new io.swagger.v3.oas.models.media.MediaType();
-                                        Schema mimeSchema;
-                                        if (bodyParameter.getContent() != null) {
-                                            media = new io.swagger.v3.oas.models.media.MediaType();
-                                            mimeSchema = ConverterCommonUtils.getOpenApiSchema(mimeType.split("/")[1]
-                                                    .toLowerCase(Locale.ENGLISH));
-                                            media.setSchema(mimeSchema);
-                                            Content content = bodyParameter.getContent();
-                                            content.addMediaType(mimeType, media);
-                                        } else {
-                                            mimeSchema = ConverterCommonUtils.getOpenApiSchema(mimeType.split("/")[1].
-                                                    toLowerCase(Locale.ENGLISH));
-                                            media.setSchema(mimeSchema);
-                                            bodyParameter.setContent(new Content().addMediaType(mimeType,
-                                                    media));
-                                            operationAdaptor.getOperation().setRequestBody(bodyParameter);
-                                        }
-                                    }
+                                    createRequestBody(bodyParameter, payloadNode, schema, requestBody,
+                                            (BasicLiteralNode) mime);
                                 }
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private void createRequestBody(RequestBody bodyParameter, RequiredParameterNode payloadNode,
+                                   Map<String, Schema> schema, RequestBody requestBody, BasicLiteralNode mime) {
+
+        String mimeType = mime.literalToken().text().
+                replaceAll("\"", "");
+        if (payloadNode.typeName() instanceof SimpleNameReferenceNode) {
+            SimpleNameReferenceNode record = (SimpleNameReferenceNode) payloadNode.typeName();
+            handleReferencePayload(record, schema, mimeType, requestBody);
+        } else if (payloadNode.typeName() instanceof ArrayTypeDescriptorNode) {
+            ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) payloadNode.typeName();
+            handleArrayTypePayload(schema, arrayTypeDescriptorNode, mimeType, requestBody);
+        } else {
+
+            io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
+            Schema mimeSchema = ConverterCommonUtils.getOpenApiSchema(mimeType.split("/")[1]
+                    .toLowerCase(Locale.ENGLISH));
+            media.setSchema(mimeSchema);
+            if (bodyParameter.getContent() != null) {
+                Content content = bodyParameter.getContent();
+                content.addMediaType(mimeType, media);
+            } else {
+                bodyParameter.setContent(new Content().addMediaType(mimeType, media));
+                operationAdaptor.getOperation().setRequestBody(bodyParameter);
             }
         }
     }
@@ -224,8 +236,7 @@ public class OpenAPIRequestBodyMapper {
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handel record for components
         OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
-        componentMapper.handleRecordNode(schema, typeSymbol);
-
+        componentMapper.createComponentSchema(schema, typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
         if (bodyParameter.getContent() != null) {
@@ -241,7 +252,6 @@ public class OpenAPIRequestBodyMapper {
         }
     }
 
-
     private void addConsumes(OperationAdaptor operationAdaptor, RequestBody bodyParameter, String applicationType) {
         String type = applicationType.split("/")[1];
         Schema schema = ConverterCommonUtils.getOpenApiSchema(type);
@@ -250,5 +260,4 @@ public class OpenAPIRequestBodyMapper {
         bodyParameter.setContent(new Content().addMediaType(applicationType, mediaType));
         operationAdaptor.getOperation().setRequestBody(bodyParameter);
     }
-
 }

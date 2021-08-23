@@ -1,24 +1,29 @@
 openapi: 3.0.1
 info:
-  title: ' payloadV'
+  title: PayloadV
   version: 1.0.0
 servers:
-  - url: localhost:9090/payloadV
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /:
     get:
-      operationId: operation2_get_/
+      operationId: operation_get
       responses:
         "202":
           description: Accepted
     post:
-      operationId: operation2_post_/
+      operationId: operation_post
       responses:
         "202":
           description: Accepted
   /v1/{id}:
     get:
-      operationId: "operation1_get_/v1/{id}"
+      operationId: "operation_get_/v1/{id}"
       parameters:
         - name: id
           in: path

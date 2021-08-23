@@ -1,0 +1,3 @@
+enum:
+  - http://petstore.openapi.io
+  - http://localhost

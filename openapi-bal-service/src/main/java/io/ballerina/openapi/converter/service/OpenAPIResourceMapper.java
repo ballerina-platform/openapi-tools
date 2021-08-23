@@ -20,32 +20,30 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.api.symbols.Documentable;
+import io.ballerina.compiler.api.symbols.Documentation;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -55,9 +53,9 @@ import java.util.Set;
  * @since 2.0.0
  */
 public class OpenAPIResourceMapper {
-    private SemanticModel semanticModel;
-    private Paths pathObject = new Paths();
-    private Components components = new Components();
+    private final SemanticModel semanticModel;
+    private final Paths pathObject = new Paths();
+    private final Components components = new Components();
 
     /**
      * Initializes a resource parser for openApi.
@@ -75,10 +73,10 @@ public class OpenAPIResourceMapper {
      * @param resources Resource list to be convert.
      * @return map of string and openApi path objects.
      */
-    protected Paths convertResourceToPath(List<FunctionDefinitionNode> resources) throws OpenApiConverterException {
+    public Paths getPaths(List<FunctionDefinitionNode> resources) throws OpenApiConverterException {
         for (FunctionDefinitionNode resource : resources) {
             List<String> methods = this.getHttpMethods(resource, false);
-            useMultiResourceMapper(resource, methods);
+            getResourcePath(resource, methods);
 //            if (!methods.isEmpty()) {
 //                useMultiResourceMapper(resource, methods);
 //            }
@@ -92,20 +90,19 @@ public class OpenAPIResourceMapper {
     /**
      * Resource mapper when a resource has more than 1 http method.
      * @param resource The ballerina resource.
+     * @param httpMethods   Sibling methods related to operation.
      */
-    private void useMultiResourceMapper(FunctionDefinitionNode resource, List<String> httpMethods)
+    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods)
             throws OpenApiConverterException {
-        String path = this.getPath(resource);
+        String path = generateRelativePath(resource);
         Operation operation;
-        int i = 1;
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.
             if (resource.functionName().toString().trim().equals(httpMethod)) {
-                operation = this.convertResourceToOperation(resource, httpMethod, i).getOperation();
+                operation = convertResourceToOperation(resource, httpMethod, path).getOperation();
                 generatePathItem(httpMethod, pathObject, operation, path);
                 break;
             }
-            i++;
         }
     }
 
@@ -190,28 +187,58 @@ public class OpenAPIResourceMapper {
     /**
      * This method will convert ballerina @Resource to ballerina @OperationAdaptor.
      *
-     * @param resource Resource array to be convert.
      * @return Operation Adaptor object of given resource
      */
     private OperationAdaptor convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                        int idIncrement) throws OpenApiConverterException {
+                                                        String generateRelativePath)
+            throws OpenApiConverterException {
         OperationAdaptor op = new OperationAdaptor();
-        if (resource != null) {
+        op.setHttpOperation(httpMethod);
+        op.setPath(generateRelativePath);
+        /* Set operation id */
+        String resName = (resource.functionName().text() + "_" +
+                generateRelativePath).replaceAll("\\{///\\}", "_");
 
-            String generateRelativePath = generateRelativePath(resource);
-            op.setHttpOperation(httpMethod);
-            op.setPath(generateRelativePath);
-            String resName = (resource.functionName().text() + "_" + generateRelativePath)
-                    .replaceAll("\\{///\\}", "_");
-            op.getOperation().setOperationId(getOperationId(idIncrement, resName));
-            op.getOperation().setParameters(null);
-
-            this.addResourceParameters(resource, op);
-            OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
-            openAPIResponseMapper.parseResponsesAnnotationAttachment(resource, op);
-//            this.parseResponsesAnnotationAttachment(resource, op);
+        if (generateRelativePath.equals("/")) {
+            resName = resource.functionName().text();
         }
+        op.getOperation().setOperationId(getOperationId(resName));
+        op.getOperation().setParameters(null);
+        // Set operation summary
+        // Map API documentation
+        Map<String, String> apiDocs = listAPIDocumentations(resource, op);
+        //Add path parameters if in path and query parameters
+        OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs);
+        openAPIParameterMapper.getResourceInputs(components, semanticModel);
+        OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
+        openAPIResponseMapper.getResourceOutput(resource, op);
+
         return op;
+    }
+
+    /**
+     * Filter the API documentations from resource function node.
+     */
+    private Map<String, String> listAPIDocumentations(FunctionDefinitionNode resource, OperationAdaptor op) {
+
+        Map<String, String> apiDocs = new HashMap<>();
+        if (resource.metadata().isPresent()) {
+            Optional<Symbol> resourceSymbol = semanticModel.symbol(resource);
+            if (resourceSymbol.isPresent()) {
+                Symbol symbol = resourceSymbol.get();
+                Optional<Documentation> documentation = ((Documentable) symbol).documentation();
+                if (documentation.isPresent()) {
+                    Documentation documentation1 = documentation.get();
+                    Optional<String> description = documentation1.description();
+                    if (description.isPresent()) {
+                        String resourceFunctionAPI = description.get().trim();
+                        apiDocs = documentation1.parameterMap();
+                        op.getOperation().setSummary(resourceFunctionAPI);
+                    }
+                }
+            }
+        }
+        return apiDocs;
     }
 
     /**
@@ -220,43 +247,9 @@ public class OpenAPIResourceMapper {
      * @param postFix string post fix to attach to ID
      * @return {@link String} generated UUID
      */
-    private String getOperationId(int idIncrement, String postFix) {
-        return "operation" + idIncrement + "_" + postFix;
+    private String getOperationId(String postFix) {
+        return "operation_" + postFix;
     }
-
-    /**
-     * Creates parameters in the openApi operation using the parameters in the ballerina resource definition.
-     *
-     * @param resource         The ballerina resource definition.
-     * @param operationAdaptor The openApi operation.
-     */
-    private void addResourceParameters(FunctionDefinitionNode resource, OperationAdaptor operationAdaptor) {
-        //Add path parameters if in path and query parameters
-        OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource,
-                operationAdaptor.getOperation());
-        openAPIParameterMapper.createParametersModel();
-        // Need to check this since ballerina parser issue not generated when `GET` has requestBody
-        if (!"GET".toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation())) {
-            // set body parameter
-            FunctionSignatureNode functionSignature = resource.functionSignature();
-            SeparatedNodeList<ParameterNode> paramExprs = functionSignature.parameters();
-            for (ParameterNode expr : paramExprs) {
-                if (expr instanceof RequiredParameterNode) {
-                    RequiredParameterNode bodyParam = (RequiredParameterNode) expr;
-                    if (bodyParam.typeName() instanceof TypeDescriptorNode && !bodyParam.annotations().isEmpty()) {
-                        NodeList<AnnotationNode> annotations = bodyParam.annotations();
-                        Map<String, Schema> schema = components.getSchemas();
-                        for (AnnotationNode annotation: annotations) {
-                            OpenAPIRequestBodyMapper openAPIRequestBodyMapper =
-                                    new OpenAPIRequestBodyMapper(components, operationAdaptor, semanticModel);
-                            openAPIRequestBodyMapper.handlePayloadAnnotation(bodyParam, schema, annotation);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 
     /**
      * Gets the http methods of a resource.
@@ -270,12 +263,12 @@ public class OpenAPIResourceMapper {
         ServiceDeclarationNode parentNode = (ServiceDeclarationNode) resource.parent();
         NodeList<Node> siblings = parentNode.members();
         httpMethods.add(resource.functionName().text());
+        String relativePath = generateRelativePath(resource);
         for (Node function: siblings) {
             SyntaxKind kind = function.kind();
             if (kind.equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                 FunctionDefinitionNode sibling = (FunctionDefinitionNode) function;
                 //need to build relative path
-                String relativePath = generateRelativePath(resource);
                 String siblingRelativePath = generateRelativePath(sibling);
                 if (relativePath.equals(siblingRelativePath)) {
                     httpMethods.add(sibling.functionName().text());
@@ -300,30 +293,22 @@ public class OpenAPIResourceMapper {
 
     private String generateRelativePath(FunctionDefinitionNode resource) {
 
-        String relativePath = "";
+        StringBuilder relativePath = new StringBuilder();
+        relativePath.append("/");
         if (!resource.relativeResourcePath().isEmpty()) {
             for (Node node: resource.relativeResourcePath()) {
                 if (node instanceof ResourcePathParameterNode) {
                     ResourcePathParameterNode pathNode = (ResourcePathParameterNode) node;
-                    relativePath = relativePath + "{" + pathNode.paramName() + "}";
+                    relativePath.append("{");
+                    relativePath.append(pathNode.paramName());
+                    relativePath.append("}");
                 } else if ((resource.relativeResourcePath().size() == 1) && (node.toString().trim().equals("."))) {
-                    return relativePath + "/";
+                    return relativePath.toString();
                 } else {
-                    relativePath = relativePath + node.toString();
+                    relativePath.append(node.toString().trim());
                 }
             }
         }
-        return "/" + relativePath.trim();
-    }
-
-    /**
-     * Gets the path value of the @http:resourceConfig.
-     *
-     * @param resource The ballerina resource.
-     * @return The path value.
-     */
-    private String getPath(FunctionDefinitionNode resource) {
-        String path = generateRelativePath(resource);
-        return path;
+        return relativePath.toString();
     }
 }

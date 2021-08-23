@@ -79,6 +79,28 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(returnTypeNode.type().toString(), "Product[]|error");
     }
 
+    @Test(description = "Test for generate function signature with nested array return type")
+    public void getFunctionSignatureForNestedArrayResponse() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/response_nested_array.yaml"));
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaSchemaGenerator(openAPI), new ArrayList<>());
+        FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/timestags").getGet(), new ArrayList<>());
+        ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(returnTypeNode.type().toString(), "string[][]|error");
+    }
+
+    @Test(description = "Test for generate function signature with string array return type")
+    public void getFunctionSignatureForStringArrayResponse() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/response_string_array.yaml"));
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaSchemaGenerator(openAPI), new ArrayList<>());
+        FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/timestags").getGet(), new ArrayList<>());
+        ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(returnTypeNode.type().toString(), "string[]|error");
+    }
+
     @AfterTest
     private void deleteGeneratedFiles() {
         try {

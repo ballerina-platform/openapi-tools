@@ -726,10 +726,6 @@ public class BallerinaClientGenerator {
         ImportDeclarationNode url = GeneratorUtils.getImportDeclarationNode(
                 GeneratorConstants.BALLERINA, "url");
         imports.add(url);
-        // Add `import ballerina/lang.'string;` to the import declaration node list
-        ImportDeclarationNode string = GeneratorUtils.getImportDeclarationNode(
-                GeneratorConstants.BALLERINA, "lang.'string");
-        imports.add(string);
         //Create API doc
         List<Node> docs = new ArrayList<>();
         docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
