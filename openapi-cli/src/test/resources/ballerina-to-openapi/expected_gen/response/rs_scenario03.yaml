@@ -25,8 +25,8 @@ components:
     User:
       type: object
       properties:
-        name:
-          type: string
         id:
           type: integer
           format: int32
+        name:
+          type: string
