@@ -503,19 +503,24 @@ public class OpenAPIResponseMapper {
             MetadataNode metadataNode = serviceDefNode.metadata().get();
             NodeList<AnnotationNode> annotations = metadataNode.annotations();
             if (!annotations.isEmpty()) {
-                for (AnnotationNode annotation: annotations) {
-                    Node annotReference = annotation.annotReference();
-                    if (annotReference.toString().trim().equals("http:ServiceConfig")
-                            && annotation.annotValue().isPresent()) {
-                        MappingConstructorExpressionNode listOfannotValue = annotation.annotValue().get();
-                        for (MappingFieldNode field : listOfannotValue.fields()) {
-                            SpecificFieldNode media = (SpecificFieldNode) field;
-                            if ((media).fieldName().toString().trim().equals("mediaTypeSubtypePrefix")
-                                    && media.valueExpr().isPresent()) {
-                                ExpressionNode expressionNode = media.valueExpr().get();
-                                mediaType = expressionNode.toString().trim().replaceAll("\"", "");
-                            }
-                        }
+                mediaType = extractAnnotationDetails(mediaType, annotations);
+            }
+        }
+        return mediaType;
+    }
+
+    private String extractAnnotationDetails(String mediaType, NodeList<AnnotationNode> annotations) {
+
+        for (AnnotationNode annotation: annotations) {
+            Node annotReference = annotation.annotReference();
+            if (annotReference.toString().trim().equals("http:ServiceConfig") && annotation.annotValue().isPresent()) {
+                MappingConstructorExpressionNode listOfannotValue = annotation.annotValue().get();
+                for (MappingFieldNode field : listOfannotValue.fields()) {
+                    SpecificFieldNode media = (SpecificFieldNode) field;
+                    if ((media).fieldName().toString().trim().equals("mediaTypeSubtypePrefix")
+                            && media.valueExpr().isPresent()) {
+                        ExpressionNode expressionNode = media.valueExpr().get();
+                        mediaType = expressionNode.toString().trim().replaceAll("\"", "");
                     }
                 }
             }
