@@ -20,6 +20,7 @@ import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.ProjectEnvironmentBuilder;
 import io.ballerina.projects.directory.BuildProject;
+import io.ballerina.projects.directory.SingleFileProject;
 import io.ballerina.projects.environment.Environment;
 import io.ballerina.projects.environment.EnvironmentBuilder;
 import org.testng.Assert;
@@ -46,7 +47,7 @@ public class OpenApiExtensionTest {
     @Test
     public void testDocGenerationForBallerinaProject() throws IOException {
         deleteTarget("sample_1");
-        Package currentPackage = loadPackage("sample_1");
+        Package currentPackage = loadPackage("sample_1", false);
         PackageCompilation compilation = currentPackage.getCompilation();
         testGeneratedResources("sample_1", 1);
     }
@@ -54,7 +55,7 @@ public class OpenApiExtensionTest {
     @Test
     public void testDocGenerationForBallerinaProjectWithMultipleServices() throws IOException {
         deleteTarget("sample_2");
-        Package currentPackage = loadPackage("sample_2");
+        Package currentPackage = loadPackage("sample_2", false);
         PackageCompilation compilation = currentPackage.getCompilation();
         testGeneratedResources("sample_2", 2);
     }
@@ -62,7 +63,7 @@ public class OpenApiExtensionTest {
     @Test
     public void testDocGenerationForBallerinaProjectWithMultipleModules() throws IOException {
         deleteTarget("sample_3");
-        Package currentPackage = loadPackage("sample_3");
+        Package currentPackage = loadPackage("sample_3", false);
         PackageCompilation compilation = currentPackage.getCompilation();
 //        testGeneratedResources("sample_3", 3);
     }
@@ -70,9 +71,21 @@ public class OpenApiExtensionTest {
     @Test
     public void testDocGenerationForBallerinaProjectWithAnnotation() throws IOException {
         deleteTarget("sample_4");
-        Package currentPackage = loadPackage("sample_4");
+        Package currentPackage = loadPackage("sample_4", false);
         PackageCompilation compilation = currentPackage.getCompilation();
         testGeneratedResources("sample_4", 1);
+    }
+
+    @Test
+    public void testDocGenerationForSingleBalFile() {
+        Package currentPackage = loadPackage("sample_5/service.bal", true);
+        PackageCompilation compilation = currentPackage.getCompilation();
+    }
+
+    @Test
+    public void testDocGenerationForSingleBalFileWithAnnotation() {
+        Package currentPackage = loadPackage("sample_6/service.bal", true);
+        PackageCompilation compilation = currentPackage.getCompilation();
     }
 
     private void testGeneratedResources(String projectName, int serviceCount) throws IOException {
@@ -89,8 +102,11 @@ public class OpenApiExtensionTest {
         }
     }
 
-    private Package loadPackage(String path) {
+    private Package loadPackage(String path, boolean isSingleFile) {
         Path projectDirPath = RESOURCE_DIRECTORY.resolve(path);
+        if (isSingleFile) {
+            return SingleFileProject.load(getEnvironmentBuilder(), projectDirPath).currentPackage();
+        }
         BuildProject project = BuildProject.load(getEnvironmentBuilder(), projectDirPath);
         return project.currentPackage();
     }
