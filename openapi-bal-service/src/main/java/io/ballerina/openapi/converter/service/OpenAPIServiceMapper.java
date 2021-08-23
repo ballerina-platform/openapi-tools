@@ -27,8 +27,6 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +38,7 @@ import java.util.List;
  * @since 2.0.0
  */
 public class OpenAPIServiceMapper {
-    private static final Logger logger = LoggerFactory.getLogger(OpenAPIServiceMapper.class);
     private final SemanticModel semanticModel;
-
 
     /**
      * Initializes a service parser for OpenApi.
@@ -62,9 +58,6 @@ public class OpenAPIServiceMapper {
      */
     public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi, String basePath)
             throws OpenApiConverterException {
-        // Setting default values.
-        openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(basePath.replace("/", " ")));
-
         NodeList<Node> functions = service.members();
         List<FunctionDefinitionNode> resource = new ArrayList<>();
         for (Node function: functions) {
@@ -74,9 +67,9 @@ public class OpenAPIServiceMapper {
             }
         }
         OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(this.semanticModel);
-        openapi.setPaths(resourceMapper.convertResourceToPath(resource));
+        //
+        openapi.setPaths(resourceMapper.getPaths(resource));
         openapi.setComponents(resourceMapper.getComponents());
         return openapi;
     }
-
 }

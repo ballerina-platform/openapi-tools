@@ -1,13 +1,18 @@
 openapi: 3.0.1
 info:
-  title: ' payloadV'
+  title: PayloadV
   version: 1.0.0
 servers:
-  - url: localhost:9090/payloadV
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /hi01:
     post:
-      operationId: operation1_post_/hi01
+      operationId: operation_post_/hi01
       responses:
         "200":
           description: Ok
@@ -19,7 +24,7 @@ paths:
                   $ref: '#/components/schemas/Pet'
   /hi:
     post:
-      operationId: operation1_post_/hi
+      operationId: operation_post_/hi
       responses:
         "200":
           description: Ok
@@ -29,4 +34,17 @@ paths:
                 type: array
                 items:
                   type: string
-components: {}
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+          format: int32
+        tag:
+          type: string
+        type:
+          type: string

@@ -1,13 +1,18 @@
 openapi: 3.0.1
 info:
-  title: ' payloadV'
+  title: PayloadV
   version: 1.0.0
 servers:
-  - url: petstore.swagger.io:443/payloadV
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: petstore.swagger.io
+      port:
+        default: "443"
 paths:
   /pet:
     post:
-      operationId: operation1_post_/pet
+      operationId: operation_post_/pet
       requestBody:
         content:
           application/json:
