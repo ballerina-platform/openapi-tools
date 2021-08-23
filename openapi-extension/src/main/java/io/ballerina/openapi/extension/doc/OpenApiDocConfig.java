@@ -36,8 +36,8 @@ public class OpenApiDocConfig {
     private final ProjectKind projectType;
 
     public OpenApiDocConfig(Path projectRoot, SemanticModel semanticModel, SyntaxTree syntaxTree,
-                             ServiceDeclarationSymbol serviceSymbol, ServiceDeclarationNode serviceNode,
-                             ProjectKind projectType) {
+                            ServiceDeclarationSymbol serviceSymbol, ServiceDeclarationNode serviceNode,
+                            ProjectKind projectType) {
         this.projectRoot = projectRoot;
         this.semanticModel = semanticModel;
         this.syntaxTree = syntaxTree;

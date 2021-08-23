@@ -16,20 +16,39 @@
 
 package io.ballerina.openapi.extension.doc;
 
+import io.ballerina.openapi.extension.Constants;
 import io.ballerina.projects.ProjectKind;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * {@code SingleFileOpenApiDocGenerator} generates open-api related docs for HTTP service defined in single ballerina
  * file.
  */
-public class SingleFileOpenApiDocGenerator implements OpenApiDocGenerator {
-    @Override
-    public void generate(OpenApiDocConfig config) {
-
-    }
-
+public class SingleFileOpenApiDocGenerator extends AbstractOpenApiDocGenerator {
     @Override
     public boolean isSupported(ProjectKind projectType) {
         return ProjectKind.SINGLE_FILE_PROJECT.equals(projectType);
+    }
+
+    @Override
+    protected Path retrieveProjectRoot(Path projectRoot) {
+        // For single ballerina file, project root will be the absolute path for that particular ballerina file
+        // hence project root should be updated to the directory which contains the ballerina file
+        Path parentDirectory = projectRoot.getParent();
+        if (Objects.nonNull(parentDirectory) && Files.exists(parentDirectory)) {
+            return parentDirectory;
+        }
+        return projectRoot;
+    }
+
+    // for ballerina-project, intermediate `resources` directory will be created inside the current directory
+    @Override
+    protected Path retrieveResourcePath(Path projectRoot) {
+        return projectRoot
+                .resolve(Constants.RESOURCES_DIR_NAME)
+                .resolve(Constants.PACKAGE_ORG).resolve(Constants.PACKAGE_NAME);
     }
 }

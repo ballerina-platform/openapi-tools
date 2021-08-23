@@ -32,6 +32,7 @@ public class BalProjectOpenApiDocGenerator extends AbstractOpenApiDocGenerator {
     }
 
     // for ballerina-project, intermediate `resources` directory will be created inside `<project-root>/target/bin`
+    @Override
     protected Path retrieveResourcePath(Path projectRoot) {
         return projectRoot
                 .resolve(Constants.TARGET_DIR_NAME)

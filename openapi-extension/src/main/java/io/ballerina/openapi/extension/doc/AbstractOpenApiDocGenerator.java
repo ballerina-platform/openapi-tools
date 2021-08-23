@@ -99,8 +99,6 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             }
         } catch (IOException | OpenApiConverterException e) {
             ERR.println("error [open-api extension]: " + e.getLocalizedMessage());
-        } finally {
-            executeCleanup();
         }
     }
 
@@ -156,9 +154,5 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 .resolve(Constants.TARGET_DIR_NAME)
                 .resolve(Paths.get(Constants.BIN_DIR_NAME, Constants.RESOURCES_DIR_NAME))
                 .resolve(Constants.PACKAGE_ORG).resolve(Constants.PACKAGE_NAME);
-    }
-
-    // execute any clean up required after OpenAPI doc generation
-    protected void executeCleanup() {
     }
 }

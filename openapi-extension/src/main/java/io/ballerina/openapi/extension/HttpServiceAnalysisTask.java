@@ -26,9 +26,8 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.extension.doc.BalProjectOpenApiDocGenerator;
 import io.ballerina.openapi.extension.doc.OpenApiDocConfig;
-import io.ballerina.openapi.extension.doc.OpenApiDocGenerator;
+import io.ballerina.openapi.extension.doc.OpenApiManager;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -39,10 +38,10 @@ import java.util.Optional;
  * {@code HttpServiceAnalysisTask} analyses the HTTP service for which the OpenApi doc is generated.
  */
 public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
-    private final OpenApiDocGenerator docGenerator;
+    private final OpenApiManager docGenerator;
 
     public HttpServiceAnalysisTask() {
-        this.docGenerator = new BalProjectOpenApiDocGenerator();
+        this.docGenerator = new OpenApiManager();
     }
 
     @Override
