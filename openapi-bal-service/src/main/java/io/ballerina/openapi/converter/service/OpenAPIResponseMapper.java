@@ -496,6 +496,14 @@ public class OpenAPIResponseMapper {
         }
     }
 
+    /**
+     * This function for taking the specific media-type subtype prefix from http service configuration annotation.
+     * <pre>
+     *     @http:ServiceConfig {
+     *          mediaTypeSubtypePrefix : "vnd.exm.sales"
+     *  }
+     * </pre>
+     */
     private String extractCustomMediaType(FunctionDefinitionNode functionDefNode) {
         String mediaType = "";
         ServiceDeclarationNode serviceDefNode = (ServiceDeclarationNode) functionDefNode.parent();
@@ -527,5 +535,4 @@ public class OpenAPIResponseMapper {
         }
         return mediaType;
     }
-
 }
