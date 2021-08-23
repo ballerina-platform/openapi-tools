@@ -28,7 +28,6 @@ paths:
         content:
           application/xml:
             schema: {}
-        description: Pet data
         required: true
       responses:
         '201':

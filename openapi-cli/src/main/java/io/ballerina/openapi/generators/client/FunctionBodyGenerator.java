@@ -516,27 +516,29 @@ public class FunctionBodyGenerator {
                 statementsList.add(expressionStatementNode);
             }
         } else if (mediaTypeEntry.getKey().contains("xml")) {
-            ImportDeclarationNode xmlImport = generatorUtils.getImportDeclarationNode(
-                    GeneratorConstants.BALLERINA, "xmldata");
-            if (!checkImportDuplicate(imports, "xmldata")) {
-                imports.add(xmlImport);
-            }
+
             if (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
                     || requestBodySchema.getProperties() != null) {
+                ImportDeclarationNode xmlImport = GeneratorUtils.getImportDeclarationNode(
+                        GeneratorConstants.BALLERINA, "xmldata");
+                if (!checkImportDuplicate(imports, "xmldata")) {
+                    imports.add(xmlImport);
+                }
                 VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
                         "jsonBody", "check payload.cloneWithType(json)");
                 statementsList.add(jsonVariable);
                 VariableDeclarationNode xmlBody = generatorUtils.getSimpleStatement("xml?", "xmlBody",
                         "check xmldata:fromJson(jsonBody)");
                 statementsList.add(xmlBody);
+                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+                        "request.setPayload(xmlBody)");
+                statementsList.add(expressionStatementNode);
             } else {
-                VariableDeclarationNode xmlBody = generatorUtils.getSimpleStatement("xml?", "xmlBody",
-                        "check xmldata:fromJson(payload)");
-                statementsList.add(xmlBody);
+                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+                        "request.setPayload(payload)");
+                statementsList.add(expressionStatementNode);
             }
-            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
-                    "request.setPayload(xmlBody)");
-            statementsList.add(expressionStatementNode);
+
         } else if (mediaTypeEntry.getKey().contains("plain")) {
             ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                     "request.setPayload(payload)");

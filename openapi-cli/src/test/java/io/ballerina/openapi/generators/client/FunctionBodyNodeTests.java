@@ -93,8 +93,15 @@ public class FunctionBodyNodeTests {
                         "post(path, request, targetType=http:Response); " +
                         "return response;}"},
                 {"diagnostic_files/xml_payload.yaml", "/pets", "{string  path = string `/pets`; " +
-                        "http:Request request = new; xml? xmlBody = check xmldata:fromJson(payload); " +
-                        "request.setPayload(xmlBody); " +
+                        "http:Request request = new;" +
+                        "request.setPayload(payload); " +
+                        "http:Response response = check self.clientEp->post(path, request, targetType=http:Response);" +
+                        "return response;}"},
+                {"diagnostic_files/xml_payload_with_ref.yaml", "/pets", "{string  path = string `/pets`;" +
+                        "http:Request request = new;" +
+                        "json jsonBody = check payload.cloneWithType(json);" +
+                        "xml? xmlBody = check xmldata:fromJson(jsonBody);" +
+                        "request.setPayload(xmlBody);" +
                         "http:Response response = check self.clientEp->post(path, request, targetType=http:Response);" +
                         "return response;}"}
         };

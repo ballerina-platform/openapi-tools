@@ -26,9 +26,8 @@ paths:
         - pets
       requestBody:
         content:
-          application/xml:
+          application/json:
             schema: {}
-        description: Pet data
         required: true
       responses:
         '201':
