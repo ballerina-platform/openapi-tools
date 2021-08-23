@@ -137,6 +137,17 @@ public class ResponseTests {
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/array_record.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for service configuration annotation in resource")
+    public void testWithAnnotation() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario17.bal");
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario17.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for service configuration annotation in resource")
+    public void testWithAnnotationForAllType() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario18.bal");
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario18.yaml");
+    }
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
