@@ -68,6 +68,9 @@ public class Constants {
     public static final String YAML_EXTENSION = ".yaml";
     public static final String JSON_EXTENSION = ".json";
     public static final String OPENAPI_SUFFIX = "_openapi";
+    public static final String SERVER = "server";
+    public static final String PORT = "port";
+    public static final String SPLIT_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
 
     /**
      * Enum to select the Ballerina Type.
@@ -100,7 +103,7 @@ public class Constants {
     public enum OpenAPIType {
         INTEGER("integer"),
         STRING("string"),
-        DECIMAL("decimal"),
+        NUMBER("number"),
         BOOLEAN("boolean"),
         RECORD("object"),
         ARRAY("array");
@@ -180,4 +183,6 @@ public class Constants {
     }
     public static final String HTTP_200 = "200";
     public static final String HTTP_200_DESCRIPTION = "Ok";
+    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
+
 }

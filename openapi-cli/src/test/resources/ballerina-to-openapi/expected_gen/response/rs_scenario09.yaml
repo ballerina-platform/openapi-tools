@@ -1,19 +1,24 @@
 openapi: 3.0.1
 info:
-  title: ' payloadV'
+  title: PayloadV
   version: 1.0.0
 servers:
-  - url: localhost:9090/payloadV
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /:
     get:
-      operationId: operation1_get_/
+      operationId: operation_get
       responses:
         "202":
           description: Accepted
   /hi:
     get:
-      operationId: operation3_get_/hi
+      operationId: operation_get_/hi
       parameters:
         - name: X-client
           in: header
@@ -23,12 +28,12 @@ paths:
         "202":
           description: Accepted
     put:
-      operationId: operation3_put_/hi
+      operationId: operation_put_/hi
       responses:
         "200":
           description: Ok
     post:
-      operationId: operation3_post_/hi
+      operationId: operation_post_/hi
       responses:
         "200":
           description: Ok
@@ -38,7 +43,7 @@ paths:
                 $ref: '#/components/schemas/Pet'
   /hi/{id}:
     get:
-      operationId: "operation1_get_/hi/{id}"
+      operationId: "operation_get_/hi/{id}"
       parameters:
         - name: id
           in: path
@@ -57,7 +62,7 @@ paths:
           description: Found unexpected output
   /v1:
     post:
-      operationId: operation1_post_/v1
+      operationId: operation_post_/v1
       requestBody:
         content:
           application/json:
@@ -71,11 +76,11 @@ components:
     Pet:
       type: object
       properties:
-        name:
-          type: string
         id:
           type: integer
           format: int32
+        name:
+          type: string
         tag:
           type: string
         type:

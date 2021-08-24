@@ -195,7 +195,7 @@ public class BallerinaServiceGenerator {
         List<Node> nodeList = new ArrayList<>();
         for (String node: basePathNode) {
             if (!node.isBlank()) {
-                Token pathNode = createIdentifierToken("/" + node);
+                Token pathNode = createIdentifierToken("/" + escapeIdentifier(node));
                 nodeList.add(pathNode);
             }
         }

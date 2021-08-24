@@ -1,0 +1,63 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 1.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /locations:
+    get:
+      summary: Represents Snowpeak location resource
+      operationId: operation_get_/locations
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+components:
+  schemas:
+    Link:
+      type: object
+      properties:
+        rel:
+          type: string
+          description: linnk rel
+        href:
+          type: string
+          description: link href
+        mediaTypes:
+          type: array
+          description: link mediatype
+          items:
+            type: string
+      description: Link details
+    Links:
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+    Location:
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: Name of the location
+            id:
+              type: string
+              description: Unique identification
+            address:
+              type: string
+              description: Address of the location

@@ -1,13 +1,18 @@
 openapi: 3.0.1
 info:
-  title: ' payloadV'
+  title: PayloadV
   version: 1.0.0
 servers:
-  - url: localhost:9090/payloadV
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /hi:
     post:
-      operationId: operation1_post_/hi
+      operationId: operation_post_/hi
       requestBody:
         content:
           application/json:
@@ -18,6 +23,16 @@ paths:
           description: Accepted
 components:
   schemas:
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        tag:
+          type: string
     Dog:
       type: object
       properties:
@@ -29,13 +44,3 @@ components:
               $ref: '#/components/schemas/Pet'
         bark:
           type: boolean
-    Pet:
-      type: object
-      properties:
-        name:
-          type: string
-        id:
-          type: integer
-          format: int32
-        tag:
-          type: string

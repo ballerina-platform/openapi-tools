@@ -1,6 +1,5 @@
 import  ballerina/http;
 import  ballerina/url;
-import  ballerina/lang.'string;
 
 # Provides API key configurations needed when communicating with a remote HTTP endpoint.
 public type ApiKeysConfig record {|
@@ -45,7 +44,7 @@ public isolated client class Client {
     # + return - An array of price estimates by product
     remote isolated function getPrice(float startLatitude, float startLongitude, float endLatitude, float endLongitude) returns PriceEstimate[]|error {
         string  path = string `/estimates/price`;
-        map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude, "server_token": self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude};
         path = path + check getPathForQueryParam(queryParam);
         PriceEstimate[] response = check self.clientEp-> get(path, targetType = PriceEstimateArr);
         return response;
@@ -59,7 +58,7 @@ public isolated client class Client {
     # + return - An array of products
     remote isolated function getTimeEstimates(float startLatitude, float startLongitude, string? customerUuid = (), string? productId = ()) returns Product[]|error {
         string  path = string `/estimates/time`;
-        map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId, "server_token": self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId};
         path = path + check getPathForQueryParam(queryParam);
         Product[] response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
@@ -69,8 +68,6 @@ public isolated client class Client {
     # + return - Profile information for a user
     remote isolated function getUserProfile() returns Profile|error {
         string  path = string `/me`;
-        map<anydata> queryParam = {"server_token": self.apiKeys["server_token"]};
-        path = path + check getPathForQueryParam(queryParam);
         Profile response = check self.clientEp-> get(path, targetType = Profile);
         return response;
     }
@@ -81,7 +78,7 @@ public isolated client class Client {
     # + return - History information for the given user
     remote isolated function getUserActivity(int? offset = (), int? 'limit = ()) returns Activities|error {
         string  path = string `/history`;
-        map<anydata> queryParam = {"offset": offset, "limit": 'limit, "server_token": self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"offset": offset, "limit": 'limit};
         path = path + check getPathForQueryParam(queryParam);
         Activities response = check self.clientEp-> get(path, targetType = Activities);
         return response;
