@@ -204,7 +204,7 @@ public class GeneratorUtils {
         if (pathNodes.length >= 2) {
             for (String pathNode: pathNodes) {
                 if (pathNode.contains("{")) {
-                    String pathParam = pathNode.replaceAll("[{}]", "");
+                    String pathParam = escapeIdentifier(pathNode.replaceAll("[{}]", ""));
                     if (operation.getValue().getParameters() != null) {
                         for (Parameter parameter: operation.getValue().getParameters()) {
                             if (parameter.getIn() == null) {
@@ -242,7 +242,7 @@ public class GeneratorUtils {
                     }
                 } else if (!pathNode.isBlank()) {
                     IdentifierToken idToken =
-                            AbstractNodeFactory.createIdentifierToken(pathNode.trim());
+                            AbstractNodeFactory.createIdentifierToken(escapeIdentifier(pathNode.trim()));
                     functionRelativeResourcePath.add(idToken);
                     functionRelativeResourcePath.add(slash);
                 }
