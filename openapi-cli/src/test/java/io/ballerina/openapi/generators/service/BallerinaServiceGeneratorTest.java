@@ -317,6 +317,13 @@ public class BallerinaServiceGeneratorTest {
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("petstore_default.bal");
     }
 
+    @Test(description = "Path with special characters ")
+    public void testWithSpecialCharacters() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/path_with_special_characters.yaml");
+        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("path_with_special_characters.bal");
+    }
     //Get string as a content of ballerina file
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
@@ -327,13 +334,11 @@ public class BallerinaServiceGeneratorTest {
 
     private void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String s) throws IOException {
 
-        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("generators/ballerina"),
-                s);
+        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("generators/ballerina"), s);
         String generatedSyntaxTree = syntaxTree.toString();
 
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
     }
-
 }
