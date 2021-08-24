@@ -28,14 +28,14 @@ components:
     Link:
       type: object
       properties:
-        mediaTypes:
-          type: array
-          items:
-            type: string
         rel:
           type: string
         href:
           type: string
+        mediaTypes:
+          type: array
+          items:
+            type: string
         actions:
           type: array
           items:

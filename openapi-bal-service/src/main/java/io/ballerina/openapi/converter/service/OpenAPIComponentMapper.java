@@ -41,8 +41,8 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -93,7 +93,7 @@ public class OpenAPIComponentMapper {
      */
     private Map<String, String> getRecordFieldsAPIDocsMap(TypeReferenceTypeSymbol typeSymbol, String componentName) {
 
-        Map<String, String> apiDocs =  new HashMap<>();
+        Map<String, String> apiDocs =  new LinkedHashMap<>();
         Symbol recordSymbol = typeSymbol.definition();
         Optional<Documentation> documentation = ((Documentable) recordSymbol).documentation();
         if (documentation.isPresent() && documentation.get().description().isPresent()) {
@@ -145,7 +145,7 @@ public class OpenAPIComponentMapper {
                 }
             }
         }
-        Map<String, RecordFieldSymbol> filteredField = new HashMap<>();
+        Map<String, RecordFieldSymbol> filteredField = new LinkedHashMap<>();
         rfields.forEach((key1, value) -> unionKeys.stream().filter(key -> key1.trim().equals(key)).forEach(key ->
                 filteredField.put(key1, value)));
         ObjectSchema objectSchema = generateObjectSchemaFromRecordFields(schema, null, filteredField, apiDocs);
@@ -156,7 +156,7 @@ public class OpenAPIComponentMapper {
             schema.put(componentName, allOfSchema);
             this.components.setSchemas(schema);
         } else if (schema == null) {
-            schema = new HashMap<>();
+            schema = new LinkedHashMap<>();
             schema.put(componentName, allOfSchema);
             this.components.setSchemas(schema);
         }
@@ -171,7 +171,7 @@ public class OpenAPIComponentMapper {
                                                               Map<String, String> apiDocs) {
         ObjectSchema componentSchema = new ObjectSchema();
         componentSchema.setDescription(apiDocs.get(componentName));
-        Map<String, Schema> schemaProperties = new HashMap<>();
+        Map<String, Schema> schemaProperties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
             String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
             Schema property = ConverterCommonUtils.getOpenApiSchema(type);
@@ -206,7 +206,7 @@ public class OpenAPIComponentMapper {
             schema.put(componentName, componentSchema);
             this.components.setSchemas(schema);
         } else if (schema == null && componentName != null) {
-            schema = new HashMap<>();
+            schema = new LinkedHashMap<>();
             schema.put(componentName, componentSchema);
             this.components.setSchemas(schema);
         }

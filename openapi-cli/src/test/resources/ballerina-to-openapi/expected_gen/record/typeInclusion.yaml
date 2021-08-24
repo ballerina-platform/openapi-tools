@@ -23,16 +23,27 @@ paths:
           description: Accepted
 components:
   schemas:
+    Link:
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+        mediaTypes:
+          type: array
+          items:
+            type: string
     Links:
       type: object
       properties:
-        linkid:
-          type: integer
-          format: int32
         links:
           type: array
           items:
             $ref: '#/components/schemas/Link'
+        linkid:
+          type: integer
+          format: int32
     ReservationReceipt:
       allOf:
         - $ref: '#/components/schemas/Links'
@@ -40,14 +51,3 @@ components:
           properties:
             id:
               type: string
-    Link:
-      type: object
-      properties:
-        mediaTypes:
-          type: array
-          items:
-            type: string
-        rel:
-          type: string
-        href:
-          type: string

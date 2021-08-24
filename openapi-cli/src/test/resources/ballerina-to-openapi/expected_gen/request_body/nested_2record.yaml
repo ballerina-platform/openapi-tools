@@ -26,25 +26,25 @@ components:
     Tag:
       type: object
       properties:
-        name:
-          type: string
         id:
           type: integer
           format: int32
-    Dog:
-      type: object
-      properties:
-        bark:
-          type: boolean
-        perant:
-          $ref: '#/components/schemas/Pet'
+        name:
+          type: string
     Pet:
       type: object
       properties:
-        name:
-          type: string
         id:
           type: integer
           format: int32
+        name:
+          type: string
         tag:
           $ref: '#/components/schemas/Tag'
+    Dog:
+      type: object
+      properties:
+        perant:
+          $ref: '#/components/schemas/Pet'
+        bark:
+          type: boolean
