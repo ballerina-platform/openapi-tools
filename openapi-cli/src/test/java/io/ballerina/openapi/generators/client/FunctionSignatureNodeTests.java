@@ -79,6 +79,42 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(returnTypeNode.type().toString(), "Product[]|error");
     }
 
+    @Test(description = "Test for generate function signature for xml request body")
+    public void testFunctionSignatureNodeForXMLPayload() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/xml_request_payload.yaml"));
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaSchemaGenerator(openAPI), new ArrayList<>());
+        FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/pets").getPost(), new ArrayList<>());
+        SeparatedNodeList<ParameterNode> parameters = signature.parameters();
+        Assert.assertFalse(parameters.isEmpty());
+        RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
+
+        Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
+        Assert.assertEquals(param01.typeName().toString(), "xml");
+
+        ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(returnTypeNode.type().toString(), "http:Response|error");
+    }
+
+    @Test(description = "Test for generate function signature for json request body")
+    public void testFunctionSignatureNodeForJSONPayload() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/json_request_payload.yaml"));
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaSchemaGenerator(openAPI), new ArrayList<>());
+        FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/pets").getPost(), new ArrayList<>());
+        SeparatedNodeList<ParameterNode> parameters = signature.parameters();
+        Assert.assertFalse(parameters.isEmpty());
+        RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
+
+        Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
+        Assert.assertEquals(param01.typeName().toString(), "json");
+
+        ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(returnTypeNode.type().toString(), "http:Response|error");
+    }
+
     @Test(description = "Test for generate function signature with nested array return type")
     public void getFunctionSignatureForNestedArrayResponse() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/response_nested_array.yaml"));
