@@ -356,7 +356,7 @@ public class BallerinaSchemaGenerator {
             if (allOfSchema.getType() == null && allOfSchema.get$ref() != null) {
                 //Generate typeReferenceNode
                 getAllOfRecordFieldForReference(schemaDoc, recordFieldList, allOfSchema);
-            } else if (allOfSchema instanceof ObjectSchema && (allOfSchema.getProperties() != null)) {
+            } else if (allOfSchema.getProperties() != null) {
                 if (allOfSchema.getDescription() != null) {
                     schemaDoc.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                             allOfSchema.getDescription(), false));
