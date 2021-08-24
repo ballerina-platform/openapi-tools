@@ -89,6 +89,6 @@ public class GeneratorUtilsTests {
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         Path expectedPath = RES_DIR.resolve("schema/ballerina/recordName.bal");
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree.toString());
     }
 }

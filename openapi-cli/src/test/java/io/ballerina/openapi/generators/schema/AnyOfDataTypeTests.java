@@ -63,6 +63,6 @@ public class AnyOfDataTypeTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree.toString());
     }
 }

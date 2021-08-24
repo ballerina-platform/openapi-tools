@@ -62,13 +62,13 @@ public class TestUtils {
     Filter filter = new Filter(list1, list2);
 
     // Get diagnostics
-    public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree, OpenAPI openAPI,
+    public static List<Diagnostic> getDiagnostics(String syntaxTree, OpenAPI openAPI,
                                                   BallerinaClientGenerator ballerinaClientGenerator)
             throws FormatterException, IOException, BallerinaOpenApiException {
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree();
-        writeFile(clientPath, Formatter.format(syntaxTree).toString());
+        writeFile(clientPath, Formatter.format(syntaxTree));
         writeFile(schemaPath, Formatter.format(schemaSyntax).toString());
         SemanticModel semanticModel = getSemanticModel(clientPath);
         return semanticModel.diagnostics();
@@ -82,11 +82,11 @@ public class TestUtils {
         return expectedServiceContent.replaceAll("\n", "");
     }
 
-    public static void compareGeneratedSyntaxTreeWithExpectedSyntaxTree(Path path, SyntaxTree syntaxTree)
+    public static void compareGeneratedSyntaxTreeWithExpectedSyntaxTree(Path path, String syntaxTree)
             throws IOException {
 
         String expectedBallerinaContent = getStringFromGivenBalFile(path);
-        String generatedSyntaxTree = syntaxTree.toString();
+        String generatedSyntaxTree = syntaxTree;
         generatedSyntaxTree = generatedSyntaxTree.replaceAll("\n", "");
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");

@@ -18,11 +18,11 @@
 
 package io.ballerina.openapi.generators.client;
 
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
@@ -43,42 +43,41 @@ public class RequestBodyTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
-    SyntaxTree syntaxTree;
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Test for generate request body payload when operation has request body")
-    public void testForRequestBody() throws IOException, BallerinaOpenApiException {
+    public void testForRequestBody() throws IOException, BallerinaOpenApiException, FormatterException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_basic_scenarios.bal");
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_basic_scenarios.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        String clientSyntaxTree = ballerinaClientGenerator.getClient();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, clientSyntaxTree);
     }
 
     @Test(description = "Test for generate request body payload when operation has request body with AllOf scenarios")
-    public void testForRequestBodyWithAllOf() throws IOException, BallerinaOpenApiException {
+    public void testForRequestBodyWithAllOf() throws IOException, BallerinaOpenApiException, FormatterException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_allOf_scenarios.bal");
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_allOf_scenarios.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        String clientSyntaxTree = ballerinaClientGenerator.getClient();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, clientSyntaxTree);
     }
 
     @Test(description = "Test for generate request body payload when operation has request body OneOf scenarios")
-    public void testForRequestBodyWithOneOf() throws IOException, BallerinaOpenApiException {
+    public void testForRequestBodyWithOneOf() throws IOException, BallerinaOpenApiException, FormatterException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_oneOf_scenarios.bal");
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        String clientSyntaxTree = ballerinaClientGenerator.getClient();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, clientSyntaxTree);
     }
 
     @AfterTest

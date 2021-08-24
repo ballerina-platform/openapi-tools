@@ -60,10 +60,10 @@ public class ComparedGeneratedFileTests {
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
+        String clientSyntaxTree = ballerinaClientGenerator.getClient();
+        List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree.toString());
     }
 
     @Test(description = "Test openAPI definition to ballerina client source code generation",
@@ -75,10 +75,10 @@ public class ComparedGeneratedFileTests {
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
+        String clientSyntaxTree = ballerinaClientGenerator.getClient();
+        List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, clientSyntaxTree);
     }
 
     @DataProvider(name = "fileProviderForFilesComparison")

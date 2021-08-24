@@ -445,7 +445,7 @@ public class CodeGenerator {
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI, true);
         // Generate ballerina service and resources.
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable);
-        String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
+        String mainContent = ballerinaClientGenerator.getClient();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         // Generate ballerina records to represent schemas.

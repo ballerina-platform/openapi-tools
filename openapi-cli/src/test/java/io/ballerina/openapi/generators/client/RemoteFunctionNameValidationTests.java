@@ -1,10 +1,10 @@
 package io.ballerina.openapi.generators.client;
 
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -23,7 +23,6 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 public class RemoteFunctionNameValidationTests {
     private static final Path RESDIR =
             Paths.get("src/test/resources/generators/client/swagger").toAbsolutePath();
-    SyntaxTree syntaxTree;
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
@@ -31,12 +30,12 @@ public class RemoteFunctionNameValidationTests {
     @Test(description = "When path parameter has given unmatch data type in ballerina",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OperationId is missing for the resource path: .*")
-    public void testMissionOperationId() throws IOException, BallerinaOpenApiException {
+    public void testMissionOperationId() throws IOException, BallerinaOpenApiException, FormatterException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve("petstore_without_operation_id.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        ballerinaClientGenerator.generateSyntaxTree();
+        ballerinaClientGenerator.getClient();
     }
 
     @Test(description = "Check whether the formatted function namee are meeting ballerina coding conventions",

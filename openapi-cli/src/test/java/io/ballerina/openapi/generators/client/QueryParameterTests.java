@@ -51,32 +51,33 @@ public class QueryParameterTests {
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        String clientSyntaxTree = ballerinaClientGenerator.getClient();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, clientSyntaxTree);
     }
 
     @Test(description = "Generate Client for query parameter without default value")
-    public void generateQueryParamWithOutDefault() throws IOException, BallerinaOpenApiException {
+    public void generateQueryParamWithOutDefault() throws IOException, BallerinaOpenApiException, FormatterException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/query_param_without_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_without_default_value.bal");
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        String clientSyntaxTree = ballerinaClientGenerator.getClient();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, clientSyntaxTree);
     }
 
     @Test(description = "Generate Client for query parameter with referenced schema")
-    public void generateQueryParamWithReferencedSchema() throws IOException, BallerinaOpenApiException {
+    public void generateQueryParamWithReferencedSchema() throws IOException, BallerinaOpenApiException,
+            FormatterException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_ref_schema.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_ref_schema.bal");
 
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        String clientSyntaxTree = ballerinaClientGenerator.getClient();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, clientSyntaxTree);
     }
 
     @Test(description = "Generate Client for query parameter without default value",
@@ -87,6 +88,6 @@ public class QueryParameterTests {
         Path definitionPath = RES_DIR.resolve("swagger/invalid_query_param.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        ballerinaClientGenerator.getClient();
     }
 }

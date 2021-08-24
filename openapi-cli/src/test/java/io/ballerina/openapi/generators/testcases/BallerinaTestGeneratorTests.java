@@ -71,7 +71,7 @@ public class BallerinaTestGeneratorTests {
         BallerinaSchemaGenerator schemaGenerator = new BallerinaSchemaGenerator(openAPI);
         schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
-        SyntaxTree syntaxTreeClient = ballerinaClientGenerator.generateSyntaxTree();
+        String syntaxTreeClient = ballerinaClientGenerator.getClient();
         SyntaxTree syntaxTreeTest = ballerinaTestGenerator.generateSyntaxTree();
         SyntaxTree syntaxTreeSchema = schemaGenerator.generateSyntaxTree();
         String configFile = ballerinaTestGenerator.getConfigTomlFile();
@@ -79,10 +79,10 @@ public class BallerinaTestGeneratorTests {
         Assert.assertTrue(diagnostics.isEmpty());
     }
 
-    public List<Diagnostic> getDiagnostics(SyntaxTree clientSyntaxTree, SyntaxTree testSyntaxTree,
+    public List<Diagnostic> getDiagnostics(String clientSyntaxTree, SyntaxTree testSyntaxTree,
                                            SyntaxTree schemaSyntaxTree, String configContent)
             throws FormatterException, IOException {
-        TestUtils.writeFile(clientPath, Formatter.format(clientSyntaxTree).toString());
+        TestUtils.writeFile(clientPath, Formatter.format(clientSyntaxTree));
         TestUtils.writeFile(schemaPath, Formatter.format(schemaSyntaxTree).toString());
         TestUtils.writeFile(testPath, Formatter.format(testSyntaxTree).toString());
         TestUtils.writeFile(configPath, configContent);

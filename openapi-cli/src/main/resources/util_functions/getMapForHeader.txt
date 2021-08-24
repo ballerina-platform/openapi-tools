@@ -1,0 +1,14 @@
+
+# Generate header map for given header values.
+#
+# + headerParam - Headers  map
+# + return - Returns generated map or error at failure of client initialization
+isolated function  getMapForHeaders(map<any> headerParam)  returns  map<string|string[]> {
+    map<string|string[]> headerMap = {};
+    foreach  var [key, value] in  headerParam.entries() {
+        if  value  is  string ||  value  is  string[] {
+            headerMap[key] = value;
+        }
+    }
+    return headerMap;
+}

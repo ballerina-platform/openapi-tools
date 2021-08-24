@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.generators.client;
 
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -44,7 +43,6 @@ import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
 public class BallerinaDiagnosticTests {
     private static final Path RESDIR =
             Paths.get("src/test/resources/generators/client/diagnostic_files").toAbsolutePath();
-    SyntaxTree syntaxTree;
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
@@ -57,8 +55,8 @@ public class BallerinaDiagnosticTests {
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
+        String clientSyntaxTreeString = ballerinaClientGenerator.getClient();
+        List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTreeString, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
     }
 

@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.generators.client;
 
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -39,13 +38,12 @@ import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedS
  */
 public class FilterTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
-    SyntaxTree syntaxTree;
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
 
 
     @Test(description = "With tag filter")
-    public void testWithTag() throws IOException, BallerinaOpenApiException {
+    public void testWithTag() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/tag.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/tag.bal");
         list1.clear();
@@ -55,8 +53,8 @@ public class FilterTests {
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        String clientSyntaxTree = ballerinaClientGenerator.getClient();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, clientSyntaxTree);
     }
 
     @Test(description = "With Operation filter")
@@ -70,8 +68,8 @@ public class FilterTests {
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        String clientSyntaxTree = ballerinaClientGenerator.getClient();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, clientSyntaxTree);
     }
 
 }
