@@ -37,13 +37,19 @@ public class SingleFileOpenApiDocGenerator extends AbstractOpenApiDocGenerator {
     protected Path retrieveProjectRoot(Path projectRoot) {
         // For single ballerina file, project root will be the absolute path for that particular ballerina file
         // hence project root should be updated to the directory which contains the ballerina file
-        if (!projectRoot.isAbsolute()) {
-            Path parentDirectory = projectRoot.toAbsolutePath().getParent();
-            if (Objects.nonNull(parentDirectory) && Files.exists(parentDirectory)) {
-                return parentDirectory;
-            }
+        Path parentDirectory = retrieveParentDirectory(projectRoot);
+        if (Objects.nonNull(parentDirectory) && Files.exists(parentDirectory)) {
+            return parentDirectory;
         }
-        return projectRoot;
+        return projectRoot.isAbsolute() ? projectRoot : projectRoot.toAbsolutePath();
+    }
+
+    private Path retrieveParentDirectory(Path projectRoot) {
+        if (projectRoot.isAbsolute()) {
+            return projectRoot.getParent();
+        } else {
+            return projectRoot.toAbsolutePath().getParent();
+        }
     }
 
     // for ballerina-project, intermediate `resources` directory will be created inside the current directory
