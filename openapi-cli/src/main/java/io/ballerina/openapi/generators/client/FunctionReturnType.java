@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
@@ -154,7 +155,7 @@ public class FunctionReturnType {
                 TypeDefinitionNode typeDefinitionNode =
                         ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(
                                 required, typeKeyWord, createIdentifierToken(type), recordFieldList,
-                                properties, description, openAPI);
+                                properties, description, openAPI, createEmptyNodeList());
                 updateTypeDefinitionNodeList(type, typeDefinitionNode);
             }
         } else if (schema instanceof ArraySchema) {
@@ -286,7 +287,8 @@ public class FunctionReturnType {
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
                         createIdentifierToken("public type"),
-                        createIdentifierToken(type), recordFieldList, properties, description, openAPI);
+                        createIdentifierToken(type), recordFieldList, properties, description,
+                        openAPI, createEmptyNodeList());
                 updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {
@@ -318,7 +320,8 @@ public class FunctionReturnType {
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
                         createIdentifierToken("public type"),
-                        createIdentifierToken(type), recordFieldList, properties, description, openAPI);
+                        createIdentifierToken(type), recordFieldList, properties, description,
+                        openAPI, createEmptyNodeList());
                 updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {

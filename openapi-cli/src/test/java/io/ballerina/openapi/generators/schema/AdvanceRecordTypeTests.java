@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree;
 
 /**
@@ -85,7 +86,7 @@ public class AdvanceRecordTypeTests {
         TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(null,
                         AbstractNodeFactory.createIdentifierToken("public type"),
                         AbstractNodeFactory.createIdentifierToken("Error"),
-                        null, objectSchema.getProperties(), "", openAPI);
+                        null, objectSchema.getProperties(), "", openAPI, createEmptyNodeList());
         Assert.assertTrue(((RecordTypeDescriptorNode) recordNode.typeDescriptor()).fields().isEmpty());
     }
 }

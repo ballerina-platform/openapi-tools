@@ -89,6 +89,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createAnnotationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createAssignmentStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBinaryExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBlockStatementNode;
@@ -117,6 +118,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDesc
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeTestExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLIENT_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
@@ -428,16 +430,10 @@ public class BallerinaClientGenerator {
         memberNodeList.add(initFunctionNode);
         // Generate remote function Nodes -- check the null of info and path
         memberNodeList.addAll(createRemoteFunctions(openAPI.getPaths(), filters));
-        MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
+        List<AnnotationNode> classLevelAnnotationNodes  = new ArrayList<>();
         if (openAPI.getInfo().getExtensions() != null) {
             Map<String, Object> extensions = openAPI.getInfo().getExtensions();
-            if (!extensions.isEmpty()) {
-                for (Map.Entry<String, Object> extension: extensions.entrySet()) {
-                    if (extension.getKey().trim().equals("x-display")) {
-                        metadataNode = DocCommentsGenerator.getMetadataNodeForDisplayAnnotation(extension);
-                    }
-                }
-            }
+            classLevelAnnotationNodes.add(DocCommentsGenerator.extractDisplayAnnotation(extensions));
         }
         // Generate api doc
         List<Node> documentationLines = new ArrayList<>();
@@ -446,7 +442,7 @@ public class BallerinaClientGenerator {
                     openAPI.getInfo().getDescription(), false));
         }
         MarkdownDocumentationNode apiDoc = createMarkdownDocumentationNode(createNodeList(documentationLines));
-        metadataNode = metadataNode.modify(apiDoc, metadataNode.annotations());
+        MetadataNode metadataNode = createMetadataNode(apiDoc, createNodeList(classLevelAnnotationNodes));
         return createClassDefinitionNode(metadataNode, visibilityQualifier, classTypeQualifiers,
                 classKeyWord, className, openBrace, createNodeList(memberNodeList),
                 createToken(CLOSE_BRACE_TOKEN));
@@ -501,14 +497,11 @@ public class BallerinaClientGenerator {
                     List<String> operationTags = operation.getValue().getTags();
                     List<String> filterOperations = filter.getOperations();
                     // Handle the display annotations
-                    MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
-                    Map<String, Object> extensions = operation.getValue().getExtensions();
-                    if (extensions != null) {
-                        for (Map.Entry<String, Object> extension: extensions.entrySet()) {
-                            if (extension.getKey().trim().equals("x-display")) {
-                                metadataNode = DocCommentsGenerator.getMetadataNodeForDisplayAnnotation(extension);
-                            }
-                        }
+                    List<AnnotationNode> functionLevelAnnotationNodes  = new ArrayList<>();
+                    if (operation.getValue().getExtensions() != null) {
+                        Map<String, Object> extensions = operation.getValue().getExtensions();
+                        functionLevelAnnotationNodes.add(
+                                DocCommentsGenerator.extractDisplayAnnotation(extensions));
                     }
 
                     if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
@@ -519,15 +512,14 @@ public class BallerinaClientGenerator {
                                             filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                                 // function call for generate function definition node.
                                 FunctionDefinitionNode functionDefinitionNode =
-                                        getFunctionDefinitionNode(metadataNode, path.getKey()
+                                        getFunctionDefinitionNode(functionLevelAnnotationNodes, path.getKey()
                                                 , operation);
                                 functionDefinitionNodeList.add(functionDefinitionNode);
                             }
                         }
                     } else {
-                        FunctionDefinitionNode functionDefinitionNode = getFunctionDefinitionNode(metadataNode,
-                                path.getKey(),
-                                operation);
+                        FunctionDefinitionNode functionDefinitionNode = getFunctionDefinitionNode(
+                                functionLevelAnnotationNodes, path.getKey(), operation);
                         functionDefinitionNodeList.add(functionDefinitionNode);
                     }
                 }
@@ -546,7 +538,7 @@ public class BallerinaClientGenerator {
      *    }
      * </pre>
      */
-    private  FunctionDefinitionNode getFunctionDefinitionNode(MetadataNode metadataNode, String path,
+    private  FunctionDefinitionNode getFunctionDefinitionNode(List<AnnotationNode> annotationNodes, String path,
                                                               Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
         // Create api doc for function
@@ -576,9 +568,17 @@ public class BallerinaClientGenerator {
                 functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
                         remoteFunctionDocs);
         typeDefinitionNodeList = functionSignatureGenerator.getTypeDefinitionNodeList();
+        // Create `Deprecated` annotation if an operation has mentioned as `deprecated:true`
+        if (operation.getValue().getDeprecated() != null && operation.getValue().getDeprecated()) {
+            remoteFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                    "\n# Deprecated", false));
+            annotationNodes.add(createAnnotationNode(createToken(AT_TOKEN),
+                    createSimpleNameReferenceNode(createIdentifierToken("deprecated")), null));
+
+        }
         // Create metadataNode add documentation string
-        metadataNode = metadataNode.modify(createMarkdownDocumentationNode(createNodeList(remoteFunctionDocs)),
-                metadataNode.annotations());
+        MetadataNode metadataNode = createMetadataNode(createMarkdownDocumentationNode(
+                createNodeList(remoteFunctionDocs)), createNodeList(annotationNodes));
 
         // Create Function Body
         FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(imports, isQuery, isHeader,
@@ -619,8 +619,8 @@ public class BallerinaClientGenerator {
         docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                 "Generate header map for given header values.", true));
         // Create client init description
-        MarkdownParameterDocumentationLineNode queryParam = DocCommentsGenerator.createAPIParamDoc("headerParam",
-                "Headers  map");
+        MarkdownParameterDocumentationLineNode queryParam = DocCommentsGenerator.
+                createAPIParamDoc("headerParam", "Headers  map");
         docs.add(queryParam);
         MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
                 "Returns generated map or error at failure of client initialization");

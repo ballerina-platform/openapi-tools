@@ -23,9 +23,7 @@ import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -47,7 +45,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNo
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownParameterDocumentationLineNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
@@ -67,17 +64,15 @@ public class DocCommentsGenerator {
      * @param extensions    - openapi extension.
      * @return Annotation node list.
      * */
-    public static NodeList<AnnotationNode> extractDisplayAnnotation(Map<String, Object> extensions) {
-        NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
+    public static AnnotationNode extractDisplayAnnotation(Map<String, Object> extensions) {
         if (extensions != null) {
             for (Map.Entry<String, Object> extension: extensions.entrySet()) {
                 if (extension.getKey().trim().equals("x-display")) {
-                    AnnotationNode annotationNode = getAnnotationNode(extension);
-                    annotationNodes = createNodeList(annotationNode);
+                    return getAnnotationNode(extension);
                 }
             }
         }
-        return annotationNodes;
+        return null;
     }
 
     private static AnnotationNode getAnnotationNode(Map.Entry<String, Object> extension) {
@@ -112,18 +107,6 @@ public class DocCommentsGenerator {
 
         return createAnnotationNode(createToken(SyntaxKind.AT_TOKEN)
                 , annotateReference, annotValue);
-    }
-
-
-    /**
-     * Generate metaDataNode with display annotation.
-     */
-    public static MetadataNode getMetadataNodeForDisplayAnnotation(Map.Entry<String, Object> extension) {
-
-        MetadataNode metadataNode;
-        AnnotationNode annotationNode = getAnnotationNode(extension);
-        metadataNode = createMetadataNode(null, createNodeList(annotationNode));
-        return metadataNode;
     }
 
     public static List<MarkdownDocumentationLineNode> createAPIDescriptionDoc(

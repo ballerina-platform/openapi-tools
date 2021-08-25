@@ -19,7 +19,6 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -49,10 +48,10 @@ public class DisplayAnnotationTests {
                 display.getPaths().get("/weather").getGet().getParameters().get(0).getExtensions();
         Map<String, Object> param02 =
                 display.getPaths().get("/weather").getGet().getParameters().get(1).getExtensions();
-        NodeList<AnnotationNode> annotationNodes01 = docCommentsGenerator.extractDisplayAnnotation(param01);
-        NodeList<AnnotationNode> annotationNodes02 = docCommentsGenerator.extractDisplayAnnotation(param02);
-        Assert.assertEquals(annotationNodes01.get(0).annotValue().orElseThrow().toString().trim(),
+        AnnotationNode annotationNodes01 = docCommentsGenerator.extractDisplayAnnotation(param01);
+        AnnotationNode annotationNodes02 = docCommentsGenerator.extractDisplayAnnotation(param02);
+        Assert.assertEquals(annotationNodes01.annotValue().orElseThrow().toString().trim(),
                 "{label:\"City name\"}");
-        Assert.assertTrue(annotationNodes02.isEmpty());
+        Assert.assertTrue(annotationNodes02 == null);
     }
 }
