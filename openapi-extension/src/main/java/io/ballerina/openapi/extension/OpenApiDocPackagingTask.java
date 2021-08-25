@@ -60,7 +60,7 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
                 ERR.println("error [open-api extension]: " + e.getLocalizedMessage());
             }
 
-            // clean up created intermediate resources if current project is a single-ballerina-file  project
+            // clean up created intermediate resources if current project is a single-ballerina-file project
             if (isSingleFile) {
                 execCleanup(targetBinPath);
             }

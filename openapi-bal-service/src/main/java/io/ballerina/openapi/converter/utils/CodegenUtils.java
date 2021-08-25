@@ -41,7 +41,7 @@ public final class CodegenUtils {
     /**
      * Writes a file with content to specified {@code filePath}.
      *
-     * @param filePath  valid file path to write the content
+     * @param filePath valid file path to write the content
      * @param content  content of the file
      * @throws IOException when a file operation fails
      */
@@ -54,8 +54,8 @@ public final class CodegenUtils {
     /**
      * Copy content of a file/directory into another location.
      *
-     * @param inputStream  stream from which the data is read
-     * @param outStream  stream to which the data is written
+     * @param inputStream stream from which the data is read
+     * @param outStream stream to which the data is written
      * @throws IOException if there is any error while reading from a file or writing to a file
      */
     public static <T extends InputStream, E extends OutputStream> void copyContent(T inputStream, E outStream)
