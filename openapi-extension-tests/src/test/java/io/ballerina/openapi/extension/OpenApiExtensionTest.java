@@ -60,12 +60,12 @@ public class OpenApiExtensionTest {
         testGeneratedResources("sample_2", 2);
     }
 
-    @Test
+//    @Test
     public void testDocGenerationForBallerinaProjectWithMultipleModules() throws IOException {
         deleteTarget("sample_3");
         Package currentPackage = loadPackage("sample_3", false);
         PackageCompilation compilation = currentPackage.getCompilation();
-//        testGeneratedResources("sample_3", 3);
+        testGeneratedResources("sample_3", 3);
     }
 
     @Test
