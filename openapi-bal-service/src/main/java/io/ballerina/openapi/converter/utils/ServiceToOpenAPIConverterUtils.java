@@ -146,7 +146,7 @@ public class ServiceToOpenAPIConverterUtils {
     /**
      * Generate openAPI definition according to the given format JSON or YAML.
      */
-    private static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
+    public static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
                                                     boolean needJson, List<ListenerDeclarationNode> endpoints,
                                                     SemanticModel semanticModel, String openApiName)
             throws OpenApiConverterException {
@@ -196,6 +196,9 @@ public class ServiceToOpenAPIConverterUtils {
         String title = null;
         if (splits.length > 1) {
             for (String piece: splits) {
+                if (piece.isBlank()) {
+                    continue;
+                }
                 stringBuilder.append(piece.substring(0, 1).toUpperCase(Locale.ENGLISH) + piece.substring(1));
                 stringBuilder.append(" ");
             }

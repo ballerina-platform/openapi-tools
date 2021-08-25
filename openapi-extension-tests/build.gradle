@@ -1,0 +1,47 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+description = 'Ballerina - OpenAPI Extension Tests'
+
+def ballerinaOpenApiModulePath = "${project.rootDir}/module-ballerina-openapi/"
+def openApiExtensionJar = "${project.rootDir}/openapi-extension/build/libs/openapi-extension-${version}.jar"
+def openApiServiceJar = "${project.rootDir}/openapi-bal-service/build/libs/openapi-bal-service-${version}.jar"
+def ballerinaDistPath = "${ballerinaOpenApiModulePath}/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
+def ballerinaDist = "${buildDir}/target/ballerina-distribution"
+
+dependencies {
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
+    testRuntime group: 'commons-io', name: 'commons-io', version: "${ballerinaLangVersion}"
+    testRuntime project(':openapi-bal-service')
+    testRuntime project(':openapi-extension')
+    testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
+}
+
+task copyDistribution(type: Copy) {
+    from ballerinaDistPath
+    into ballerinaDist
+}
+
+test {
+    systemProperty "ballerina.offline.flag", "true"
+    useTestNG()
+}
+
+test.dependsOn copyDistribution
