@@ -19,11 +19,9 @@
 package io.ballerina.openapi.converter.utils;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -45,6 +43,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+
+import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
 
 /**
  * The ServiceToOpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
@@ -88,10 +88,10 @@ public class ServiceToOpenAPIConverterUtils {
 
             // Generating for the services
             for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
-                String serviceNodeName = new OpenAPIEndpointMapper().getServiceBasePath(serviceNode);
+                String serviceNodeName = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
                 String openApiSource = generateOASForGivenFormat(serviceNode, serviceNodeName, needJson, endpoints,
-                        semanticModel);
+                        semanticModel, openApiName);
                 //  Checked old generated file with same name
                 openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
                 openAPIDefinitions.put(openApiName, openApiSource);
@@ -132,7 +132,7 @@ public class ServiceToOpenAPIConverterUtils {
 
         if (serviceName != null) {
             // Filtering by service name
-            String service = new OpenAPIEndpointMapper().getServiceBasePath(serviceNode);
+            String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
             availableService.add(service);
             if (serviceName.equals(service)) {
                 servicesToGenerate.add(serviceNode);
@@ -148,9 +148,13 @@ public class ServiceToOpenAPIConverterUtils {
      */
     private static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
                                                     boolean needJson, List<ListenerDeclarationNode> endpoints,
-                                                    SemanticModel semanticModel) throws OpenApiConverterException {
+                                                    SemanticModel semanticModel, String openApiName)
+            throws OpenApiConverterException {
         OpenAPI openapi = generateOpenAPIDefinition(new OpenAPI(), serviceName, endpoints, serviceDeclarationNode,
                 semanticModel);
+        if (openapi.getInfo().getTitle() == null) {
+            openapi = getInfo(openapi, openApiName);
+        }
         if (needJson) {
             return Json.pretty(openapi);
         }
@@ -167,36 +171,41 @@ public class ServiceToOpenAPIConverterUtils {
             throws OpenApiConverterException {
         // Take base path of service
         OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
-        String currentServiceName = new OpenAPIEndpointMapper().getServiceBasePath(serviceDefinition);
-        if (openapi.getServers() == null) {
-            openapi = setServerURLInOAS(openapi, endpoints, serviceDefinition);
-            // Generate openApi string for the mentioned service name.
-            if (!serviceName.isBlank() && currentServiceName.trim().equals(serviceName)) {
-                openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
-                        serviceName);
-            } else {
-                // If no service name mentioned, then generate openApi definition for the first service.
-                openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
-                        currentServiceName.trim());
-            }
+        String currentServiceName = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceDefinition);
+        // 01. Set openAPI inFor section wit details
+        openapi = getInfo(openapi, currentServiceName);
+        // 02. Filter and set the ServerURLs according to endpoints. Complete the servers section in OAS
+        openapi = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServers(openapi, endpoints, serviceDefinition);
+        // 03. Filter path and component sections in OAS.
+        // Generate openApi string for the mentioned service name.
+        if (!serviceName.isBlank() && currentServiceName.trim().equals(serviceName)) {
+            openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi, serviceName);
+        } else {
+            // If no service name mentioned, then generate openApi definition for the first service.
+            openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
+                    currentServiceName.trim());
         }
         return openapi;
     }
 
-    /**
-     * Filter and set the ServerURLs according to endpoints.
-     */
-    private static OpenAPI setServerURLInOAS(OpenAPI openapi, List<ListenerDeclarationNode> endpoints,
-                                      ServiceDeclarationNode serviceDefinition) {
+    //Set the OAS info section details
+    private static OpenAPI getInfo(OpenAPI openapi, String currentServiceName) {
 
-        SeparatedNodeList<ExpressionNode> expressions = serviceDefinition.expressions();
-        openapi = new OpenAPIEndpointMapper().extractServerForExpressionNode(openapi, expressions,
-                serviceDefinition);
-        // Handle outbound listeners
-        if (!endpoints.isEmpty()) {
-            openapi = new OpenAPIEndpointMapper().convertListenerEndPointToOpenAPI(openapi, endpoints,
-                    serviceDefinition);
+        String[] splits = (currentServiceName.replaceFirst("/", "")).split(SPLIT_PATTERN);
+        StringBuilder stringBuilder = new StringBuilder();
+        String title = null;
+        if (splits.length > 1) {
+            for (String piece: splits) {
+                stringBuilder.append(piece.substring(0, 1).toUpperCase(Locale.ENGLISH) + piece.substring(1));
+                stringBuilder.append(" ");
+            }
+            title = stringBuilder.toString().trim();
+        } else if (splits.length == 1 && !splits[0].isBlank()) {
+            stringBuilder.append(splits[0].substring(0, 1).toUpperCase(Locale.ENGLISH) + splits[0].substring(1));
+            title = stringBuilder.toString().trim();
         }
+
+        openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(title));
         return openapi;
     }
 

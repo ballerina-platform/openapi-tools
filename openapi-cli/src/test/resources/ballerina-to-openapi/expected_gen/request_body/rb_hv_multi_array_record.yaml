@@ -1,9 +1,14 @@
 openapi: 3.0.1
 info:
-  title: ' payloadV'
+  title: PayloadV
   version: 1.0.0
 servers:
-  - url: localhost:9090/payloadV
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /pets:
     put:
@@ -38,22 +43,22 @@ components:
     Tag:
       type: object
       properties:
+        id:
+          type: integer
+          format: int32
         name:
           type: string
         tagType:
           type: array
           items:
             $ref: '#/components/schemas/TagType'
-        id:
-          type: integer
-          format: int32
     Pet:
       type: object
       properties:
-        name:
-          type: string
         id:
           type: integer
           format: int32
+        name:
+          type: string
         tag:
           $ref: '#/components/schemas/Tag'

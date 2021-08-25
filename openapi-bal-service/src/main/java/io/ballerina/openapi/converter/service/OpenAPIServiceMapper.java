@@ -58,9 +58,6 @@ public class OpenAPIServiceMapper {
      */
     public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi, String basePath)
             throws OpenApiConverterException {
-        // Setting default values.
-        openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(basePath.replace("/", " ")));
-
         NodeList<Node> functions = service.members();
         List<FunctionDefinitionNode> resource = new ArrayList<>();
         for (Node function: functions) {
@@ -70,9 +67,9 @@ public class OpenAPIServiceMapper {
             }
         }
         OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(this.semanticModel);
-        openapi.setPaths(resourceMapper.convertResourceToPath(resource));
+        //
+        openapi.setPaths(resourceMapper.getPaths(resource));
         openapi.setComponents(resourceMapper.getComponents());
         return openapi;
     }
-
 }

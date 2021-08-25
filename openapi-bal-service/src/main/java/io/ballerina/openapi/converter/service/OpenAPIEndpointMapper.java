@@ -37,15 +37,22 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.servers.ServerVariable;
+import io.swagger.v3.oas.models.servers.ServerVariables;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static io.ballerina.openapi.converter.Constants.PORT;
+import static io.ballerina.openapi.converter.Constants.SERVER;
 
 /**
  * Extract OpenApi server information from and Ballerina endpoint.
  */
 public class OpenAPIEndpointMapper {
+    public static final OpenAPIEndpointMapper ENDPOINT_MAPPER = new OpenAPIEndpointMapper();
 
     /**
      * Convert endpoints bound to {@code service} openapi server information.
@@ -55,47 +62,55 @@ public class OpenAPIEndpointMapper {
      * @param service   service node with bound endpoints
      * @return openapi definition with Server information
      */
-    public OpenAPI convertListenerEndPointToOpenAPI (OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
-                                                     ServiceDeclarationNode service) {
-        List<Server> servers = new ArrayList<>();
-        for (ListenerDeclarationNode ep : endpoints) {
-            SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
-            for (ExpressionNode node : exprNodes) {
-                if (node.toString().trim().equals(ep.variableName().text().trim())) {
-                    String serviceBasePath = getServiceBasePath(service);
-                    Server server = extractServer(ep, serviceBasePath);
-                    servers.add(server);
-                }
-            }
-        }
-        if (openAPI == null) {
-            OpenAPI openapi = new OpenAPI();
-            openapi.setServers(servers);
-            return openapi;
-        }
-        if (!openAPI.getServers().isEmpty()) {
-            List<Server> oldServers = openAPI.getServers();
-            List<Server> filterServer = new ArrayList<>();
-            for (Server newS: servers) {
-                boolean isExit = false;
-                for (Server old: oldServers) {
-                    if (old.getUrl().trim().equals(newS.getUrl().trim())) {
-                        isExit = true;
-                        break;
+    public OpenAPI getServers(OpenAPI openAPI, List<ListenerDeclarationNode> endpoints,
+                              ServiceDeclarationNode service) {
+        openAPI = extractServerForExpressionNode(openAPI, service.expressions(), service);
+        List<Server> servers = openAPI.getServers();
+        if (!endpoints.isEmpty()) {
+            for (ListenerDeclarationNode ep : endpoints) {
+                SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
+                for (ExpressionNode node : exprNodes) {
+                    if (node.toString().trim().equals(ep.variableName().text().trim())) {
+                        String serviceBasePath = getServiceBasePath(service);
+                        Server server = extractServer(ep, serviceBasePath);
+                        servers.add(server);
                     }
                 }
-                if (!isExit) {
-                    filterServer.add(newS);
-                }
             }
-            oldServers.addAll(filterServer);
-            openAPI.setServers(oldServers);
-        } else {
-            openAPI.setServers(servers);
+
+        }
+        if (servers.size() > 1) {
+            Server mainServer = addEnumValues(servers);
+            openAPI.setServers(Collections.singletonList(mainServer));
         }
         return openAPI;
     }
 
+    private Server addEnumValues(List<Server> servers) {
+
+        Server mainServer = servers.get(0);
+        List<Server> rotated = new ArrayList<>(servers);
+        ServerVariables mainVariable = mainServer.getVariables();
+        ServerVariable hostVariable = mainVariable.get(SERVER);
+        ServerVariable portVariable = mainVariable.get(PORT);
+        if (servers.size() > 1) {
+            Collections.rotate(rotated, servers.size() - 1);
+            for (Server server: rotated) {
+                ServerVariables variables = server.getVariables();
+                if (variables.get(SERVER) != null) {
+                    hostVariable.addEnumItem(variables.get(SERVER).getDefault());
+                }
+                if (variables.get(PORT) != null) {
+                    portVariable.addEnumItem(variables.get(PORT).getDefault());
+                }
+            }
+        }
+        return mainServer;
+    }
+
+    /**
+     * Extract server URL from given listener node.
+     */
     private Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
         Optional<ParenthesizedArgList> list;
         if (ep.initializer().kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
@@ -106,29 +121,25 @@ public class OpenAPIEndpointMapper {
             list = bTypeInit.parenthesizedArgList();
         }
 
-        return getServer(serviceBasePath, list);
+        return generateServer(serviceBasePath, list);
     }
 
-    //Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
-    public OpenAPI extractServerForExpressionNode(OpenAPI openAPI,
-                                                                    SeparatedNodeList<ExpressionNode> bTypeExplicit,
+    // Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
+    private OpenAPI extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
                                                                     ServiceDeclarationNode service) {
-        if (openAPI == null) {
-            return new OpenAPI();
-        }
         String serviceBasePath = getServiceBasePath(service);
-        Optional<ParenthesizedArgList> list = null;
+        Optional<ParenthesizedArgList> list;
         List<Server> servers = new ArrayList<>();
         for (ExpressionNode expressionNode: bTypeExplicit) {
             if (expressionNode.kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
                 ExplicitNewExpressionNode explicit = (ExplicitNewExpressionNode) expressionNode;
                 list = Optional.ofNullable(explicit.parenthesizedArgList());
-                Server server = getServer(serviceBasePath, list);
+                Server server = generateServer(serviceBasePath, list);
                 servers.add(server);
             } else if (expressionNode.kind().equals(SyntaxKind.IMPLICIT_NEW_EXPRESSION)) {
                 ImplicitNewExpressionNode implicit = (ImplicitNewExpressionNode) expressionNode;
                 list = implicit.parenthesizedArgList();
-                Server server = getServer(serviceBasePath, list);
+                Server server = generateServer(serviceBasePath, list);
                 servers.add(server);
             }
         }
@@ -137,11 +148,14 @@ public class OpenAPIEndpointMapper {
     }
 
     //Assign host and port values
-    private Server getServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
+    private Server generateServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
 
         String port = null;
         String host = null;
-        if (list != null && list.isPresent()) {
+        ServerVariables serverVariables = new ServerVariables();
+        Server server = new Server();
+
+        if (list.isPresent()) {
             SeparatedNodeList<FunctionArgumentNode> arg = (list.get()).arguments();
             port = arg.get(0).toString();
             if (arg.size() > 1) {
@@ -152,40 +166,88 @@ public class OpenAPIEndpointMapper {
             }
         }
         // Set default values to host and port if values are not defined
-        if (host == null) {
-            host = Constants.ATTR_DEF_HOST;
-        }
-        if (port != null) {
-            host += ':' + port;
-        }
-        if (!serviceBasePath.isBlank()) {
-            host += serviceBasePath;
-        }
-        Server server = new Server();
-        server.setUrl(host);
+        setServerVariableValues(serviceBasePath, port, host, serverVariables, server);
         return server;
+    }
+
+    /**
+     * Set server variables port and server.
+     */
+    private void setServerVariableValues(String serviceBasePath, String port, String host,
+                                         ServerVariables serverVariables, Server server) {
+
+        String serverUrl;
+        if (host != null && port != null) {
+            ServerVariable serverUrlVariable = new ServerVariable();
+            serverUrlVariable._default(host);
+            ServerVariable portVariable =  new ServerVariable();
+            portVariable._default(port);
+
+            serverVariables.addServerVariable(SERVER, serverUrlVariable);
+            serverVariables.addServerVariable(PORT, portVariable);
+            serverUrl = String.format("{server}:{port}%s", serviceBasePath);
+            server.setUrl(serverUrl);
+            server.setVariables(serverVariables);
+        } else if (host != null) {
+            ServerVariable serverUrlVariable = new ServerVariable();
+            serverUrlVariable._default(host);
+
+            serverVariables.addServerVariable(SERVER, serverUrlVariable);
+            serverUrl = "{server}" + serviceBasePath;
+            server.setUrl(serverUrl);
+            server.setVariables(serverVariables);
+
+        } else if (port != null) {
+            if (port.equals("443")) {
+                ServerVariable serverUrlVariable = new ServerVariable();
+                serverUrlVariable._default("https://localhost");
+                ServerVariable portVariable =  new ServerVariable();
+                portVariable._default("443");
+
+                serverVariables.addServerVariable(SERVER, serverUrlVariable);
+                serverVariables.addServerVariable(PORT, portVariable);
+                serverUrl = "{server}:{port}" + serviceBasePath;
+                server.setUrl(serverUrl);
+                server.setVariables(serverVariables);
+            } else {
+                ServerVariable serverUrlVariable = new ServerVariable();
+                serverUrlVariable._default("http://localhost");
+                ServerVariable portVariable =  new ServerVariable();
+                portVariable._default(port);
+
+                serverVariables.addServerVariable(SERVER, serverUrlVariable);
+                serverVariables.addServerVariable(PORT, portVariable);
+                serverUrl = "{server}:{port}" + serviceBasePath;
+                server.setUrl(serverUrl);
+                server.setVariables(serverVariables);
+            }
+        }
     }
 
     // Extract host value for creating URL.
     private String extractHost(MappingConstructorExpressionNode bLangRecordLiteral) {
-        String host = null;
-        MappingConstructorExpressionNode recordConfig = bLangRecordLiteral;
-        if (recordConfig.fields() != null && !recordConfig.fields().isEmpty()) {
-            SeparatedNodeList<MappingFieldNode> recordFields = recordConfig.fields();
-            for (MappingFieldNode filed: recordFields) {
-                if (filed instanceof SpecificFieldNode) {
-                    Node fieldName = ((SpecificFieldNode) filed).fieldName();
-                    if (fieldName.toString().equals(Constants.ATTR_HOST)) {
-                        if (((SpecificFieldNode) filed).valueExpr().isPresent()) {
-                              host = ((SpecificFieldNode) filed).valueExpr().get().toString();
-                        }
+        String host = "";
+        if (bLangRecordLiteral.fields() != null && !bLangRecordLiteral.fields().isEmpty()) {
+            SeparatedNodeList<MappingFieldNode> recordFields = bLangRecordLiteral.fields();
+            host = concatenateServerURL(host, recordFields);
+        }
+        if (!host.equals("")) {
+           host = host.replaceAll("\"", "");
+        }
+        return host;
+    }
+
+    private String concatenateServerURL(String host, SeparatedNodeList<MappingFieldNode> recordFields) {
+
+        for (MappingFieldNode filed: recordFields) {
+            if (filed instanceof SpecificFieldNode) {
+                Node fieldName = ((SpecificFieldNode) filed).fieldName();
+                if (fieldName.toString().equals(Constants.ATTR_HOST)) {
+                    if (((SpecificFieldNode) filed).valueExpr().isPresent()) {
+                          host = ((SpecificFieldNode) filed).valueExpr().get().toString();
                     }
                 }
-
             }
-        }
-        if (host != null) {
-           host = host.replaceAll("\"", "");
         }
         return host;
     }

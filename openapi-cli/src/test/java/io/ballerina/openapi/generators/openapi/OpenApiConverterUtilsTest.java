@@ -194,51 +194,10 @@ public class OpenApiConverterUtilsTest {
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response02.yaml");
     }
 
-    //Listeners
-    @Test(description = "Generate OpenAPI spec for single listener")
-    public void testListeners01() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("listener_scenario01.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "listener_scenario01.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec for listner only have port")
-    public void testListeners02() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("listener_scenario02.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "listener_scenario02.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec for multiple listners")
-    public void testListeners03() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("listener_scenario03.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "listener_scenario03.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec for ExplicitNewExpressionNode listeners")
-    public void testListeners04() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("listener_scenario04.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "listener_scenario04.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec for multiple listeners")
-    public void testListeners05() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("listener_scenario05.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "listener_scenario05.yaml");
-    }
-
-    @Test(description = "When given ballerina file contain some compilation issue.",
-            expectedExceptions = OpenApiConverterException.class,
-            expectedExceptionsMessageRegExp = "Given ballerina file has syntax/compilation error.")
-    public void testListeners06() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("listener_scenario06.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "listener_scenario06.yaml");
-    }
-
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
     }
-
-
 
     @AfterTest
     public void clean() {

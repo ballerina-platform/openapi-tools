@@ -69,7 +69,7 @@ public class OpenAPIParameterMapper {
     /**
      * Create {@code Parameters} model for openAPI operation.
      */
-    public void createParameterSchemas(Components components, SemanticModel semanticModel) {
+    public void getResourceInputs(Components components, SemanticModel semanticModel) {
         List<Parameter> parameters = new LinkedList<>();
         //Set path parameters
         NodeList<Node> pathParams = functionDefinitionNode.relativeResourcePath();
