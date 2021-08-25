@@ -595,7 +595,7 @@ public class CodeGenerator {
         String srcFile = concatTitle + "_service.bal";
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI, false);
         String mainContent = Formatter.format
-                (BallerinaServiceGenerator.generateSyntaxTree(openAPI, serviceName, filter)).toString();
+                (BallerinaServiceGenerator.generateSyntaxTree(openAPIDef, filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);

@@ -20,26 +20,15 @@ package io.ballerina.openapi.generators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
-import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
-import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.Minutiae;
-import io.ballerina.compiler.syntax.tree.MinutiaeList;
-import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
-import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
@@ -125,74 +114,7 @@ public class GeneratorUtils {
     }
 
 
-    public static ListenerDeclarationNode getListenerDeclarationNode(Integer port, String host) {
 
-        // Take first server to Map
-        Token listenerKeyword = AbstractNodeFactory.createIdentifierToken("listener");
-        // Create type descriptor
-        Token modulePrefix = AbstractNodeFactory.createIdentifierToken(" http");
-        Token colon = AbstractNodeFactory.createIdentifierToken(":");
-        IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("Listener");
-        QualifiedNameReferenceNode typeDescriptor = NodeFactory.createQualifiedNameReferenceNode(modulePrefix,
-                colon, identifier);
-        // Create variable
-        Token variableName = AbstractNodeFactory.createIdentifierToken(" ep0 ");
-        MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
-        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
-        variableName.modify(leading, trailing);
-
-        Token equalsToken = AbstractNodeFactory.createIdentifierToken("=");
-
-        // Create initializer
-        Token newKeyword = AbstractNodeFactory.createIdentifierToken("new");
-
-        // Create parenthesizedArgList
-        Token openParenToken = AbstractNodeFactory.createIdentifierToken("(");
-        // Create arguments
-        // 1. Create port Node
-        Token literalToken = AbstractNodeFactory.createLiteralValueToken(SyntaxKind.DECIMAL_INTEGER_LITERAL_TOKEN
-                , String.valueOf(port), leading, trailing);
-        BasicLiteralNode expression = NodeFactory.createBasicLiteralNode(SyntaxKind.NUMERIC_LITERAL, literalToken);
-
-        PositionalArgumentNode portNode = NodeFactory.createPositionalArgumentNode(expression);
-        // 2. Create comma
-        Token comma = AbstractNodeFactory.createIdentifierToken(",");
-
-        // 3. Create host node
-        Token name = AbstractNodeFactory.createIdentifierToken("config ");
-        SimpleNameReferenceNode argumentName = NodeFactory.createSimpleNameReferenceNode(name);
-        // 3.3 create expression
-        Token openBrace = AbstractNodeFactory.createIdentifierToken("{");
-
-        Token fieldName = AbstractNodeFactory.createIdentifierToken("host");
-        Token literalHostToken = AbstractNodeFactory.createIdentifierToken('"' + host + '"', leading, trailing);
-        BasicLiteralNode valueExpr = NodeFactory.createBasicLiteralNode(SyntaxKind.STRING_LITERAL,
-                literalHostToken);
-        MappingFieldNode hostNode = NodeFactory.createSpecificFieldNode(null, fieldName, colon, valueExpr);
-        SeparatedNodeList<MappingFieldNode> fields = NodeFactory.createSeparatedNodeList(hostNode);
-        Token closeBrace = AbstractNodeFactory.createIdentifierToken("}");
-
-        MappingConstructorExpressionNode hostExpression =
-                NodeFactory.createMappingConstructorExpressionNode(openBrace, fields, closeBrace);
-
-        NamedArgumentNode namedArgumentNode =
-                NodeFactory.createNamedArgumentNode(argumentName, equalsToken, hostExpression);
-
-        SeparatedNodeList<FunctionArgumentNode> arguments = NodeFactory.createSeparatedNodeList(portNode,
-                comma, namedArgumentNode);
-
-        Token closeParenToken = AbstractNodeFactory.createIdentifierToken(")");
-
-        ParenthesizedArgList parenthesizedArgList =
-                NodeFactory.createParenthesizedArgList(openParenToken, arguments, closeParenToken);
-        ImplicitNewExpressionNode initializer =
-                NodeFactory.createImplicitNewExpressionNode(newKeyword, parenthesizedArgList);
-
-        Token semicolonToken = AbstractNodeFactory.createIdentifierToken(";");
-        return NodeFactory.createListenerDeclarationNode(null, null, listenerKeyword,
-                typeDescriptor, variableName, equalsToken, initializer, semicolonToken);
-    }
 
     public static List<Node> getRelativeResourcePath(Map.Entry<String, PathItem> path,
                                                      Map.Entry<PathItem.HttpMethod, Operation> operation)
@@ -403,7 +325,7 @@ public class GeneratorUtils {
     /**
      * Util for take OpenApi spec from given yaml file.
      */
-    public OpenAPI getOpenAPIFromOpenAPIV3Parser(Path definitionPath) throws
+    public static OpenAPI getOpenAPIFromOpenAPIV3Parser(Path definitionPath) throws
             IOException, BallerinaOpenApiException {
 
         Path contractPath = java.nio.file.Paths.get(definitionPath.toString());
@@ -429,24 +351,6 @@ public class GeneratorUtils {
         return parseResult.getOpenAPI();
     }
 
-    /**
-     * If there are template values in the {@code absUrl} derive resolved url using {@code variables}.
-     *
-     * @param absUrl abstract url with template values
-     * @param variables variable values to populate the url template
-     * @return resolved url
-     */
-    public String buildUrl(String absUrl, ServerVariables variables) {
-        String url = absUrl;
-        if (variables != null) {
-            for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
-                // According to the oas spec, default value must be specified
-                String replaceKey = "\\{" + entry.getKey() + '}';
-                url = url.replaceAll(replaceKey, entry.getValue().getDefault());
-            }
-        }
-        return url;
-    }
 
     /**
      * Generate BallerinaMediaType for all the mediaTypes.
@@ -678,5 +582,24 @@ public class GeneratorUtils {
         SimpleNameReferenceNode expressionNode = createSimpleNameReferenceNode(
                 createIdentifierToken(expression));
         return createExpressionStatementNode(null, expressionNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    /**
+     * If there are template values in the {@code absUrl} derive resolved url using {@code variables}.
+     *
+     * @param absUrl abstract url with template values
+     * @param variables variable values to populate the url template
+     * @return resolved url
+     */
+    public static String buildUrl(String absUrl, ServerVariables variables) {
+        String url = absUrl;
+        if (variables != null) {
+            for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
+                // According to the oas spec, default value must be specified
+                String replaceKey = "\\{" + entry.getKey() + '}';
+                url = url.replaceAll(replaceKey, entry.getValue().getDefault());
+            }
+        }
+        return url;
     }
 }

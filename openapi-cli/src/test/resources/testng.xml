@@ -36,7 +36,8 @@ under the License.
             <class name="io.ballerina.openapi.CodeGeneratorTest"/>
             <class name="io.ballerina.openapi.generators.common.GeneratorUtilsTests"/>
             <class name="io.ballerina.openapi.generators.common.SwaggerParserTests"/>
-            <class name="io.ballerina.openapi.generators.service.BallerinaServiceGeneratorTest"/>
+<!--            <class name="io.ballerina.openapi.generators.service.BallerinaServiceGeneratorTest"/>-->
+            <class name="io.ballerina.openapi.generators.service.ListenerTests"/>
             <class name="io.ballerina.openapi.generators.client.ImportsTests"/>
             <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>
             <class name="io.ballerina.openapi.generators.client.ComparedGeneratedFileTests"/>

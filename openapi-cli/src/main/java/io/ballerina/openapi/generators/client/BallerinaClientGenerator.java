@@ -286,13 +286,12 @@ public class BallerinaClientGenerator {
                 }
             }
         }
-        GeneratorUtils generatorUtils = new GeneratorUtils();
         if (selectedServer.getUrl() == null) {
             serverURL = "http://localhost:9090/v1";
         } else if (selectedServer.getVariables() != null) {
             ServerVariables variables = selectedServer.getVariables();
             URL url;
-            String resolvedUrl = generatorUtils.buildUrl(selectedServer.getUrl(), variables);
+            String resolvedUrl = GeneratorUtils.buildUrl(selectedServer.getUrl(), variables);
             try {
                 url = new URL(resolvedUrl);
                 serverURL = url.toString();
