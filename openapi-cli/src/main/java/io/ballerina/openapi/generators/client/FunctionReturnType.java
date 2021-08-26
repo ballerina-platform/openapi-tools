@@ -23,6 +23,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -148,14 +149,15 @@ public class FunctionReturnType {
                 Token typeKeyWord = createIdentifierToken("public type");
                 List<Node> recordFieldList = new ArrayList<>();
                 Map<String, Schema> properties = componentSchema.getProperties();
-                String description = "";
+                List<Node> responseDocs = new ArrayList<>();
                 if (response.getDescription() != null) {
-                    description = response.getDescription().split("\n")[0];
+                    responseDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                            response.getDescription(), false));
                 }
                 TypeDefinitionNode typeDefinitionNode =
                         ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(
                                 required, typeKeyWord, createIdentifierToken(type), recordFieldList,
-                                properties, description, openAPI, createEmptyNodeList());
+                                properties, responseDocs, openAPI, createEmptyNodeList());
                 updateTypeDefinitionNodeList(type, typeDefinitionNode);
             }
         } else if (schema instanceof ArraySchema) {
@@ -281,13 +283,15 @@ public class FunctionReturnType {
                 type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
             } else {
                 List<Node> recordFieldList = new ArrayList<>();
-                String description = "";
-                if (operation.getResponses().entrySet().iterator().next().getValue().getDescription() != null) {
-                    description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
+                List<Node> returnTypeDocs = new ArrayList<>();
+                String description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
+                if (description != null) {
+                    returnTypeDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                            description, false));
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
                         createIdentifierToken("public type"),
-                        createIdentifierToken(type), recordFieldList, properties, description,
+                        createIdentifierToken(type), recordFieldList, properties, returnTypeDocs,
                         openAPI, createEmptyNodeList());
                 updateTypeDefinitionNodeList(type, recordNode);
             }
@@ -314,13 +318,15 @@ public class FunctionReturnType {
                 type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
             } else {
                 List<Node> recordFieldList = new ArrayList<>();
-                String description = "";
-                if (operation.getResponses().entrySet().iterator().next().getValue().getDescription() != null) {
-                    description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
+                List<Node> schemaDocs = new ArrayList<>();
+                String description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
+                if (description != null) {
+                    schemaDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                            description, false));
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
                         createIdentifierToken("public type"),
-                        createIdentifierToken(type), recordFieldList, properties, description,
+                        createIdentifierToken(type), recordFieldList, properties, schemaDocs,
                         openAPI, createEmptyNodeList());
                 updateTypeDefinitionNodeList(type, recordNode);
             }

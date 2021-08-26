@@ -234,20 +234,24 @@ public class FunctionSignatureGenerator {
 
     private List<AnnotationNode> getParameterAnnotationNodeList(List<Node> remoteFunctionDoc, Parameter parameter) {
         List<AnnotationNode> parameterAnnotationNodeList = new ArrayList<>();
-        AnnotationNode displayAnnotationNode = DocCommentsGenerator.
-                extractDisplayAnnotation(parameter.getExtensions());
-        if (displayAnnotationNode != null) {
-            parameterAnnotationNodeList.add(displayAnnotationNode);
-        }
+        DocCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions(), parameterAnnotationNodeList);
         if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
             if (!this.deprecatedParamFound) {
                 remoteFunctionDoc.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                         "# Deprecated parameters", false));
                 this.deprecatedParamFound = true;
+
+            }
+            String deprecatedDescription = "";
+            for (Map.Entry<String, Object> extension: parameter.getExtensions().entrySet()) {
+                if (extension.getKey().trim().equals("x-deprecated-reason")) {
+                    deprecatedDescription = extension.getValue().toString();
+                    break;
+                }
             }
             MarkdownParameterDocumentationLineNode paramAPIDoc =
                     DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(getValidName(
-                            parameter.getName(), false)), "");
+                            parameter.getName(), false)), deprecatedDescription);
             remoteFunctionDoc.add(paramAPIDoc);
             parameterAnnotationNodeList.add(createAnnotationNode(createToken(AT_TOKEN),
                     createSimpleNameReferenceNode(createIdentifierToken("deprecated")), null));
@@ -456,15 +460,12 @@ public class FunctionSignatureGenerator {
                 paramType = generatorUtils.getBallerinaMediaType(next.getKey());
             }
             if (!paramType.isBlank()) {
-                NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-                AnnotationNode annotationNode = DocCommentsGenerator.extractDisplayAnnotation(
-                        requestBody.getExtensions());
-                if (annotationNode != null) {
-                    annotationNodes = createNodeList(annotationNode);
-                }
+                List<AnnotationNode> annotationNodes  = new ArrayList<>();
+                DocCommentsGenerator.extractDisplayAnnotation(requestBody.getExtensions(), annotationNodes);
                 SimpleNameReferenceNode typeName = createSimpleNameReferenceNode(createIdentifierToken(paramType));
                 IdentifierToken paramName = createIdentifierToken("payload");
-                RequiredParameterNode payload = createRequiredParameterNode(annotationNodes, typeName, paramName);
+                RequiredParameterNode payload = createRequiredParameterNode(
+                        createNodeList(annotationNodes), typeName, paramName);
                 if (requestBody.getDescription() != null) {
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
                             DocCommentsGenerator.createAPIParamDoc(escapeIdentifier("payload"),
@@ -546,13 +547,14 @@ public class FunctionSignatureGenerator {
         operationId = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1);
         String typeName = operationId + "Request";
         List<Node> fields = new ArrayList<>();
-        String description = "";
+        List<Node> requestBodyDocs = new ArrayList<>();
         if (requestBody.getDescription() != null) {
-            description = requestBody.getDescription().split("\n")[0];
+            requestBodyDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                    requestBody.getDescription(), false));
         }
         TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
                 createIdentifierToken("public type"), createIdentifierToken(typeName), fields,
-                properties, description, openAPI, createEmptyNodeList());
+                properties, requestBodyDocs, openAPI, createEmptyNodeList());
         functionReturnType.updateTypeDefinitionNodeList(typeName, recordNode);
         paramType = typeName;
         return paramType;

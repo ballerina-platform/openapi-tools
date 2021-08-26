@@ -86,7 +86,8 @@ public class ComparedGeneratedFileTests {
         return new Object[][]{
                 {"openapi_weather_api.yaml", "openapi_weather_api.bal"},
                 {"uber_openapi.yaml", "uber_openapi.bal"},
-                {"multiple_pathparam.yaml", "multiple_pathparam.bal"}
+                {"multiple_pathparam.yaml", "multiple_pathparam.bal"},
+                {"display_annotation.yaml", "display_annotation.bal"}
         };
     }
 

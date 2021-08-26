@@ -87,7 +87,6 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createAnnotationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createAssignmentStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBinaryExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBlockStatementNode;
@@ -117,8 +116,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeTestExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLASS_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLIENT_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
@@ -289,7 +286,7 @@ public class BallerinaClientGenerator {
         List<AnnotationNode> classLevelAnnotationNodes  = new ArrayList<>();
         if (openAPI.getInfo().getExtensions() != null) {
             Map<String, Object> extensions = openAPI.getInfo().getExtensions();
-            classLevelAnnotationNodes.add(DocCommentsGenerator.extractDisplayAnnotation(extensions));
+            DocCommentsGenerator.extractDisplayAnnotation(extensions, classLevelAnnotationNodes);
         }
         // Generate api doc
         List<Node> documentationLines = new ArrayList<>();
@@ -298,8 +295,7 @@ public class BallerinaClientGenerator {
                     openAPI.getInfo().getDescription(), false));
         }
         MarkdownDocumentationNode apiDoc = createMarkdownDocumentationNode(createNodeList(documentationLines));
-        MetadataNode metadataNode = createMetadataNode(apiDoc, createNodeList(classLevelAnnotationNodes));
-        return metadataNode;
+        return createMetadataNode(apiDoc, createNodeList(classLevelAnnotationNodes));
     }
 
     /**
@@ -473,8 +469,7 @@ public class BallerinaClientGenerator {
                     List<AnnotationNode> functionLevelAnnotationNodes  = new ArrayList<>();
                     if (operation.getValue().getExtensions() != null) {
                         Map<String, Object> extensions = operation.getValue().getExtensions();
-                        functionLevelAnnotationNodes.add(
-                                DocCommentsGenerator.extractDisplayAnnotation(extensions));
+                        DocCommentsGenerator.extractDisplayAnnotation(extensions, functionLevelAnnotationNodes);
                     }
                     List<String> operationTags = operation.getValue().getTags();
                     String operationId = operation.getValue().getOperationId();
@@ -485,14 +480,15 @@ public class BallerinaClientGenerator {
                                     ((operationId != null) && filterOperations.contains(operationId.trim()))) {
                                 // Generate remote function
                                 FunctionDefinitionNode functionDefinitionNode =
-                                        getRemoteFunctionDefinitionNode(functionLevelAnnotationNodes, path.getKey(), operation);
+                                        getRemoteFunctionDefinitionNode(
+                                                functionLevelAnnotationNodes, path.getKey(), operation);
                                 functionDefinitionNodeList.add(functionDefinitionNode);
                             }
                         }
                     } else {
                         // Generate remote function
-                        FunctionDefinitionNode functionDefinitionNode = getRemoteFunctionDefinitionNode(functionLevelAnnotationNodes,
-                                path.getKey(), operation);
+                        FunctionDefinitionNode functionDefinitionNode = getRemoteFunctionDefinitionNode(
+                                functionLevelAnnotationNodes, path.getKey(), operation);
                         functionDefinitionNodeList.add(functionDefinitionNode);
                     }
                 }
@@ -543,11 +539,8 @@ public class BallerinaClientGenerator {
         typeDefinitionNodeList = functionSignatureGenerator.getTypeDefinitionNodeList();
         // Create `Deprecated` annotation if an operation has mentioned as `deprecated:true`
         if (operation.getValue().getDeprecated() != null && operation.getValue().getDeprecated()) {
-            remoteFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
-                    "\n# Deprecated", false));
-            annotationNodes.add(createAnnotationNode(createToken(AT_TOKEN),
-                    createSimpleNameReferenceNode(createIdentifierToken("deprecated")), null));
-
+            DocCommentsGenerator.extractDeprecatedAnnotation(operation.getValue().getExtensions(),
+                    remoteFunctionDocs, annotationNodes);
         }
         // Create metadataNode add documentation string
         MetadataNode metadataNode = createMetadataNode(createMarkdownDocumentationNode(

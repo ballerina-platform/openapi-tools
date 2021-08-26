@@ -47,6 +47,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocume
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownParameterDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
@@ -61,18 +62,43 @@ public class DocCommentsGenerator {
     /**
      * Extract extension for find the display annotation.
      *
-     * @param extensions    - openapi extension.
-     * @return Annotation node list.
+     * @param extensions    OpenAPI extension.
      * */
-    public static AnnotationNode extractDisplayAnnotation(Map<String, Object> extensions) {
+    public static void extractDisplayAnnotation(Map<String, Object> extensions,
+                                                          List<AnnotationNode> annotationNodes) {
         if (extensions != null) {
             for (Map.Entry<String, Object> extension: extensions.entrySet()) {
                 if (extension.getKey().trim().equals("x-display")) {
-                    return getAnnotationNode(extension);
+                    annotationNodes.add(getAnnotationNode(extension));
                 }
             }
         }
-        return null;
+    }
+
+    /**
+     * Extract annotation and documentation related for deprecated records and schemas.
+     *
+     * @param extensions        OpenAPI extensions
+     * @param documentation     List of documentation nodes to be updated with documentation related to deprecation
+     * @param annotationNodes   List of annotation nodes to be updated with deprecated annotation
+     */
+    public static void extractDeprecatedAnnotation(Map<String, Object> extensions, List<Node> documentation,
+                                                   List<AnnotationNode> annotationNodes) {
+        AnnotationNode deprecatedAnnotation = createAnnotationNode(createToken(AT_TOKEN),
+                createSimpleNameReferenceNode(createIdentifierToken("deprecated")), null);
+        if (documentation.size() > 0) {
+            documentation.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                    "\n# Deprecated", false));
+            if (extensions != null && extensions.entrySet().size() > 0) {
+                for (Map.Entry<String, Object> next : extensions.entrySet()) {
+                    if (next.getKey().equals("x-deprecated-reason")) {
+                        documentation.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                                next.getValue().toString(), false));
+                    }
+                }
+            }
+        }
+        annotationNodes.add(deprecatedAnnotation);
     }
 
     private static AnnotationNode getAnnotationNode(Map.Entry<String, Object> extension) {
@@ -93,9 +119,7 @@ public class DocCommentsGenerator {
                 annotFields.add(fields);
                 annotFields.add(createToken(COMMA_TOKEN));
             }
-            if (annotFields.size() == 2) {
-                annotFields.remove(1);
-            }
+            annotFields.remove(annotFields.size() - 1);
         }
 
         MappingConstructorExpressionNode annotValue = createMappingConstructorExpressionNode(
