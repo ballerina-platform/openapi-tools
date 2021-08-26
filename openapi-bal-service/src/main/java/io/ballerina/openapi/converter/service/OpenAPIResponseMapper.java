@@ -115,6 +115,15 @@ public class OpenAPIResponseMapper {
                 ApiResponse apiResponse = new ApiResponse();
                 apiResponse.description("Accepted");
                 apiResponses.put("202", apiResponse);
+                for (AnnotationNode annotation : annotations) {
+                    if (annotation.annotReference().toString().equals("http:CacheConfig")) {
+                        if (annotation.annotValue().isPresent()) {
+                            MappingConstructorExpressionNode values = annotation.annotValue().get();
+                            SpecificFieldNode fields = (SpecificFieldNode) values.fields();
+                            fields.
+                        }
+                    }
+                }
 
             } else {
                 handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, typeNode, customMediaType);
