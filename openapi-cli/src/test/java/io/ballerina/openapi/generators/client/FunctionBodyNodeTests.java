@@ -86,6 +86,23 @@ public class FunctionBodyNodeTests {
                         "http:Responseresponse=check self.clientEp-> head(path, accHeaders);returnresponse;}"},
                 {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string  path = string `/pets/${petId}`;" +
                         "http:Response response = check self.clientEp-> delete(path, targetType = http:Response);" +
+                        "return response;}"},
+                {"diagnostic_files/json_payload.yaml", "/pets", "{string  path = string `/pets`;" +
+                        "http:Request request = new; request.setPayload(payload); " +
+                        "http:Response response = check self.clientEp->" +
+                        "post(path, request, targetType=http:Response); " +
+                        "return response;}"},
+                {"diagnostic_files/xml_payload.yaml", "/pets", "{string  path = string `/pets`; " +
+                        "http:Request request = new;" +
+                        "request.setPayload(payload); " +
+                        "http:Response response = check self.clientEp->post(path, request, targetType=http:Response);" +
+                        "return response;}"},
+                {"diagnostic_files/xml_payload_with_ref.yaml", "/pets", "{string  path = string `/pets`;" +
+                        "http:Request request = new;" +
+                        "json jsonBody = check payload.cloneWithType(json);" +
+                        "xml? xmlBody = check xmldata:fromJson(jsonBody);" +
+                        "request.setPayload(xmlBody);" +
+                        "http:Response response = check self.clientEp->post(path, request, targetType=http:Response);" +
                         "return response;}"}
         };
     }

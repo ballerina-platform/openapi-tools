@@ -25,6 +25,21 @@ paths:
                   $ref: '#/components/schemas/Location'
 components:
   schemas:
+    Link:
+      type: object
+      properties:
+        rel:
+          type: string
+          description: linnk rel
+        href:
+          type: string
+          description: link href
+        mediaTypes:
+          type: array
+          description: link mediatype
+          items:
+            type: string
+      description: Link details
     Links:
       type: object
       properties:
@@ -32,32 +47,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Link'
-    Link:
-      type: object
-      properties:
-        mediaTypes:
-          type: array
-          description: link mediatype
-          items:
-            type: string
-        rel:
-          type: string
-          description: linnk rel
-        href:
-          type: string
-          description: link href
-      description: Link details
     Location:
       allOf:
         - $ref: '#/components/schemas/Links'
         - type: object
           properties:
-            address:
-              type: string
-              description: Address of the location
             name:
               type: string
               description: Name of the location
             id:
               type: string
               description: Unique identification
+            address:
+              type: string
+              description: Address of the location

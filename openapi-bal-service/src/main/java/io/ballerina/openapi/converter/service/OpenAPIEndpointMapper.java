@@ -158,7 +158,7 @@ public class OpenAPIEndpointMapper {
         if (list.isPresent()) {
             SeparatedNodeList<FunctionArgumentNode> arg = (list.get()).arguments();
             port = arg.get(0).toString();
-            if (arg.size() > 1) {
+            if (arg.size() > 1 && (arg.get(1) instanceof NamedArgumentNode)) {
                 ExpressionNode bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
                 if (bLangRecordLiteral instanceof MappingConstructorExpressionNode) {
                     host = extractHost((MappingConstructorExpressionNode) bLangRecordLiteral);

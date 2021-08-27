@@ -26,12 +26,12 @@ components:
     Reservation:
       type: object
       properties:
-        endDate:
+        roomId:
           type: string
         count:
           type: integer
           format: int32
-        roomId:
-          type: string
         startDate:
+          type: string
+        endDate:
           type: string

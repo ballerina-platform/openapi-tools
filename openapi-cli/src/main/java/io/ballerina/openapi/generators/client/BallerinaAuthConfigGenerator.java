@@ -266,34 +266,32 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link TypeDefinitionNode}   Syntax tree node of config record
      */
     public TypeDefinitionNode getConfigRecord(OpenAPI openAPI) throws BallerinaOpenApiException {
-        if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
-            Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
-            setAuthTypes(securitySchemeMap);
-            Token typeName;
-            NodeList<Node> recordFieldList;
-            MetadataNode configRecordMetadataNode;
-            if (isAPIKey) {
-                configRecordMetadataNode = getMetadataNode(
-                        "Provides API key configurations needed when communicating " +
-                                "with a remote HTTP endpoint.");
-                typeName = AbstractNodeFactory.createIdentifierToken(API_KEYS_CONFIG);
-                recordFieldList = createNodeList(getApiKeysConfigRecordFields());
-            } else {
-                configRecordMetadataNode = getMetadataNode(
-                        "Provides a set of configurations for controlling the behaviours when communicating " +
-                                "with a remote HTTP endpoint.");
-                typeName = AbstractNodeFactory.createIdentifierToken(CLIENT_CONFIG);
-                recordFieldList = createNodeList(getClientConfigRecordFields());
-            }
-            RecordTypeDescriptorNode recordTypeDescriptorNode =
-                    NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                            createToken(OPEN_BRACE_PIPE_TOKEN), recordFieldList, null,
-                            createToken(CLOSE_BRACE_PIPE_TOKEN));
-            return NodeFactory.createTypeDefinitionNode(configRecordMetadataNode,
-                    createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName,
-                    recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+        Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
+        setAuthTypes(securitySchemeMap);
+        Token typeName;
+        NodeList<Node> recordFieldList;
+        MetadataNode configRecordMetadataNode;
+        if (isAPIKey) {
+            configRecordMetadataNode = getMetadataNode(
+                    "Provides API key configurations needed when communicating " +
+                            "with a remote HTTP endpoint.");
+            typeName = AbstractNodeFactory.createIdentifierToken(API_KEYS_CONFIG);
+            recordFieldList = createNodeList(getApiKeysConfigRecordFields());
+        } else {
+            configRecordMetadataNode = getMetadataNode(
+                    "Provides a set of configurations for controlling the behaviours when communicating " +
+                            "with a remote HTTP endpoint.");
+            typeName = AbstractNodeFactory.createIdentifierToken(CLIENT_CONFIG);
+            recordFieldList = createNodeList(getClientConfigRecordFields());
         }
-        return null;
+        RecordTypeDescriptorNode recordTypeDescriptorNode =
+                NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                        createToken(OPEN_BRACE_PIPE_TOKEN), recordFieldList, null,
+                        createToken(CLOSE_BRACE_PIPE_TOKEN));
+        return NodeFactory.createTypeDefinitionNode(configRecordMetadataNode,
+                createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName,
+                recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+
     }
 
     /**

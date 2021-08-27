@@ -23,16 +23,31 @@ paths:
           description: Accepted
 components:
   schemas:
+    Link:
+      type: object
+      properties:
+        rel:
+          type: string
+          description: link rel
+        href:
+          type: string
+          description: link href
+        mediaTypes:
+          type: array
+          description: link mediatype
+          items:
+            type: string
+      description: Link record
     Links:
       type: object
       properties:
-        linkid:
-          type: integer
-          format: int32
         links:
           type: array
           items:
             $ref: '#/components/schemas/Link'
+        linkid:
+          type: integer
+          format: int32
     ReservationReceipt:
       allOf:
         - $ref: '#/components/schemas/Links'
@@ -41,18 +56,3 @@ components:
             id:
               type: string
               description: Reservation receipt id
-    Link:
-      type: object
-      properties:
-        mediaTypes:
-          type: array
-          description: link mediatype
-          items:
-            type: string
-        rel:
-          type: string
-          description: link rel
-        href:
-          type: string
-          description: link href
-      description: Link record

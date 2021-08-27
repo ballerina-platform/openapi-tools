@@ -89,7 +89,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
-import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_TYPES;
 import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.generators.GeneratorConstants.GET;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
@@ -205,7 +204,7 @@ public class GeneratorUtils {
         if (pathNodes.length >= 2) {
             for (String pathNode: pathNodes) {
                 if (pathNode.contains("{")) {
-                    String pathParam = pathNode.replaceAll("[{}]", "");
+                    String pathParam = escapeIdentifier(pathNode.replaceAll("[{}]", ""));
                     if (operation.getValue().getParameters() != null) {
                         for (Parameter parameter: operation.getValue().getParameters()) {
                             if (parameter.getIn() == null) {
@@ -243,7 +242,7 @@ public class GeneratorUtils {
                     }
                 } else if (!pathNode.isBlank()) {
                     IdentifierToken idToken =
-                            AbstractNodeFactory.createIdentifierToken(pathNode.trim());
+                            AbstractNodeFactory.createIdentifierToken(escapeIdentifier(pathNode.trim()));
                     functionRelativeResourcePath.add(idToken);
                     functionRelativeResourcePath.add(slash);
                 }
@@ -447,26 +446,6 @@ public class GeneratorUtils {
             }
         }
         return url;
-    }
-
-    /**
-     * This method will escape special characters used in method names and identifiers.
-     *
-     * @param type - type or method name
-     * @return - escaped string
-     */
-    public String escapeType(String type) {
-        if (!type.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") ||
-                (BAL_KEYWORDS.stream().anyMatch(type::equals) && BAL_TYPES.stream().noneMatch(type::equals))) {
-            // TODO: Temporary fix(es) as identifier literals only support alphanumerics when writing this.
-            //  Refer - https://github.com/ballerina-platform/ballerina-lang/issues/18720
-            type = type.replace("-", "");
-            type = type.replace("$", "");
-
-            type = type.replaceAll("([\\\\?!<>*\\-=^+()_{}|.$])", "\\\\$1");
-            type = "'" + type;
-        }
-        return type;
     }
 
     /**
