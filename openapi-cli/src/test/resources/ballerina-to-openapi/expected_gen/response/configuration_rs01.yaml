@@ -1,0 +1,34 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 1.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /cachingBackEnd:
+    get:
+      operationId: operation_get_/cachingBackEnd
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,public,max-age=3600"
+            ETag:
+              schema:
+                type: string
+            Last-Modifier:
+              schema:
+                type: string
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}

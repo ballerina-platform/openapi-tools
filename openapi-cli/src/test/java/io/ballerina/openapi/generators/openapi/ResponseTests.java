@@ -150,9 +150,15 @@ public class ResponseTests {
     }
 
     @Test(description = "Generate OpenAPI spec for service configuration annotation in resource")
-    public void cscheConfigTests() throws OpenApiConverterException, IOException {
+    public void cacheConfigTests() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/configuration_rs.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario18.yaml");
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/configuration_rs01.yaml");
+    }
+
+    @Test(description = "When cache-config has custom value without ETag and Last-Modified.")
+    public void cacheConfigTests02() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/configuration_rs02.bal");
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/configuration_rs01.yaml");
     }
 
     @AfterMethod

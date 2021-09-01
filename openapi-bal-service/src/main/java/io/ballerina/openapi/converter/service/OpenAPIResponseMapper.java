@@ -40,6 +40,7 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
@@ -50,6 +51,7 @@ import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -59,6 +61,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -110,23 +113,41 @@ public class OpenAPIResponseMapper {
             ReturnTypeDescriptorNode returnNode = returnTypeDescriptorNode.orElseThrow();
             NodeList<AnnotationNode> annotations = returnNode.annotations();
             Node typeNode = returnNode.type();
+            Map<String, Header> headers = new LinkedHashMap<>();
             if (!annotations.isEmpty()) {
-               //TODO annotation handle
-                ApiResponse apiResponse = new ApiResponse();
-                apiResponse.description("Accepted");
-                apiResponses.put("202", apiResponse);
+               //TODO annotation handle rest of the annotations
+
                 for (AnnotationNode annotation : annotations) {
                     if (annotation.annotReference().toString().equals("http:CacheConfig")) {
                         if (annotation.annotValue().isPresent()) {
-                            MappingConstructorExpressionNode values = annotation.annotValue().get();
-                            SpecificFieldNode fields = (SpecificFieldNode) values.fields();
-                            fields.
+                            SeparatedNodeList<MappingFieldNode> fields = annotation.annotValue().get().fields();
+                            if (fields.isEmpty()) {
+                                Header cacheHeader = new Header();
+                                StringSchema stringSchema = new StringSchema();
+                                stringSchema._default("must-revalidate,public,max-age=3600");
+                                cacheHeader.setSchema(stringSchema);
+                                headers.put("Cache-Control", cacheHeader);
+                                Header eTagHeader = new Header();
+                                eTagHeader.setSchema(new StringSchema());
+                                headers.put("ETag", eTagHeader);
+                                Header lmHeader = new Header();
+                                lmHeader.setSchema(new StringSchema());
+                                headers.put("Last-Modified", lmHeader);
+                            } else {
+                                // when field values has -- create a function for have the default values.
+                            }
+                            handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, typeNode,
+                                    customMediaType, headers);
                         }
+                    } else {
+                        ApiResponse apiResponse = new ApiResponse();
+                        apiResponse.description("Accepted");
+                        apiResponses.put("202", apiResponse);
                     }
                 }
 
             } else {
-                handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, typeNode, customMediaType);
+                handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, typeNode, customMediaType, headers);
             }
         } else {
             // When the return type is not mention in the resource function.
@@ -144,10 +165,15 @@ public class OpenAPIResponseMapper {
      */
     private ApiResponses handleResponseWithoutAnnotationType(OperationAdaptor operationAdaptor,
                                                              ApiResponses apiResponses,
-                                                             Node typeNode, String customMediaPrefix)
+                                                             Node typeNode, String customMediaPrefix,
+                                                             Map<String, Header> headers)
             throws OpenApiConverterException {
 
         ApiResponse apiResponse = new ApiResponse();
+        if (!headers.isEmpty()) {
+            apiResponse.setHeaders(headers);
+        }
+//        Map<String, Header> headers = apiResponse.getHeaders();
         io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
         String mediaTypeString;
         switch (typeNode.kind()) {
@@ -198,7 +224,7 @@ public class OpenAPIResponseMapper {
                 return apiResponses;
             case UNION_TYPE_DESC:
                 return getAPIResponsesForReturnUnionType(operationAdaptor, apiResponses,
-                        (UnionTypeDescriptorNode) typeNode, customMediaPrefix);
+                        (UnionTypeDescriptorNode) typeNode, customMediaPrefix, headers);
             case RECORD_TYPE_DESC:
                 return getApiResponsesForInlineRecords(operationAdaptor, apiResponses,
                         (RecordTypeDescriptorNode) typeNode, apiResponse, mediaType, customMediaPrefix);
@@ -212,7 +238,7 @@ public class OpenAPIResponseMapper {
                 return apiResponses;
             case OPTIONAL_TYPE_DESC:
                 return handleResponseWithoutAnnotationType(operationAdaptor, apiResponses,
-                        ((OptionalTypeDescriptorNode) typeNode).typeDescriptor(), customMediaPrefix);
+                        ((OptionalTypeDescriptorNode) typeNode).typeDescriptor(), customMediaPrefix, headers);
             default:
                 throw new OpenApiConverterException("Unexpected value: " + typeNode.kind());
         }
@@ -331,13 +357,15 @@ public class OpenAPIResponseMapper {
      * </pre>
      */
     private ApiResponses getAPIResponsesForReturnUnionType(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
-                                                           UnionTypeDescriptorNode typeNode, String customMediaPrefix)
+                                                           UnionTypeDescriptorNode typeNode, String customMediaPrefix
+            , Map<String, Header> headers)
             throws OpenApiConverterException {
 
         TypeDescriptorNode rightNode = typeNode.rightTypeDesc();
         TypeDescriptorNode leftNode = typeNode.leftTypeDesc();
         // Handle leftNode because it is main node
-        apiResponses = handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, leftNode, customMediaPrefix);
+        apiResponses = handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, leftNode,
+                customMediaPrefix, headers);
         // Handle rest of the union type
         if (rightNode instanceof UnionTypeDescriptorNode) {
             UnionTypeDescriptorNode traversRightNode = (UnionTypeDescriptorNode) rightNode;
@@ -345,12 +373,12 @@ public class OpenAPIResponseMapper {
                 if (leftNode.kind() == QUALIFIED_NAME_REFERENCE) {
                     leftNode = ((UnionTypeDescriptorNode) rightNode).leftTypeDesc();
                     apiResponses = handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, leftNode,
-                            customMediaPrefix);
+                            customMediaPrefix, headers);
                 }
             }
         } else {
             apiResponses = handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, rightNode,
-                    customMediaPrefix);
+                    customMediaPrefix, headers);
         }
         return apiResponses;
     }
