@@ -19,6 +19,7 @@
 
 package io.ballerina.openapi.converter.service;
 
+import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
@@ -113,15 +114,25 @@ public class OpenAPIEndpointMapper {
      */
     private Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
         Optional<ParenthesizedArgList> list;
-        if (ep.initializer().kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
-           ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) ep.initializer();
+        if (ep.initializer().kind().equals(SyntaxKind.CHECK_EXPRESSION)) {
+            ExpressionNode expression = ((CheckExpressionNode) ep.initializer()).expression();
+            list = extractListenerNodeType(expression);
+        } else {
+            list = extractListenerNodeType(ep.initializer());
+        }
+        return generateServer(serviceBasePath, list);
+    }
+
+    private Optional<ParenthesizedArgList> extractListenerNodeType(Node expression2) {
+        Optional<ParenthesizedArgList> list;
+        if (expression2.kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
+            ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) expression2;
             list = Optional.ofNullable(bTypeExplicit.parenthesizedArgList());
         } else {
-            ImplicitNewExpressionNode  bTypeInit = (ImplicitNewExpressionNode) ep.initializer();
+            ImplicitNewExpressionNode bTypeInit = (ImplicitNewExpressionNode) expression2;
             list = bTypeInit.parenthesizedArgList();
         }
-
-        return generateServer(serviceBasePath, list);
+        return list;
     }
 
     // Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.

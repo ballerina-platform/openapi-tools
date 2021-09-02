@@ -29,6 +29,7 @@ import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -71,8 +72,7 @@ public class ServiceToOpenAPIConverterUtils {
         List<ListenerDeclarationNode> endpoints = new ArrayList<>();
         List<ServiceDeclarationNode> servicesToGenerate = new ArrayList<>();
         List<String> availableService = new ArrayList<>();
-
-        if (!semanticModel.diagnostics().isEmpty()) {
+        if (!semanticModel.diagnostics().isEmpty() && isError(semanticModel.diagnostics())) {
             throw new OpenApiConverterException("Given ballerina file has syntax/compilation error.");
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
@@ -98,6 +98,16 @@ public class ServiceToOpenAPIConverterUtils {
             }
         }
         return openAPIDefinitions;
+    }
+
+    private static boolean isError(List<Diagnostic> diagnostics) {
+        boolean isError = false;
+        for (Diagnostic diagnostic: diagnostics) {
+            if (diagnostic.diagnosticInfo().severity().name().equals("ERROR")) {
+                isError = true;
+            }
+        }
+        return isError;
     }
 
     /**
