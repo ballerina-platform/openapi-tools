@@ -114,7 +114,7 @@ public class OpenAPIEndpointMapper {
      */
     private Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
         Optional<ParenthesizedArgList> list;
-        if (ep.initializer().kind().equals(SyntaxKind.CHECK_EXPRESSION)) {
+        if (ep.initializer().kind() == SyntaxKind.CHECK_EXPRESSION) {
             ExpressionNode expression = ((CheckExpressionNode) ep.initializer()).expression();
             list = extractListenerNodeType(expression);
         } else {
@@ -124,11 +124,11 @@ public class OpenAPIEndpointMapper {
     }
 
     private Optional<ParenthesizedArgList> extractListenerNodeType(Node expression2) {
-        Optional<ParenthesizedArgList> list;
-        if (expression2.kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
+        Optional<ParenthesizedArgList> list = null;
+        if (expression2.kind() == SyntaxKind.EXPLICIT_NEW_EXPRESSION) {
             ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) expression2;
             list = Optional.ofNullable(bTypeExplicit.parenthesizedArgList());
-        } else {
+        } else if (expression2.kind() == SyntaxKind.IMPLICIT_NEW_EXPRESSION) {
             ImplicitNewExpressionNode bTypeInit = (ImplicitNewExpressionNode) expression2;
             list = bTypeInit.parenthesizedArgList();
         }
