@@ -194,6 +194,12 @@ public class OpenApiConverterUtilsTest {
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response02.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for given ballerina file has only compiler warning")
+    public void testForCompilerWarning() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("compiler_warning.bal");
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
