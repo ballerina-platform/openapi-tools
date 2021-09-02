@@ -43,122 +43,122 @@ public class ResponseTests {
     @Test(description = "Response scenario01 without return type")
     public void testResponse01() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario01.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario01.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario01.yaml");
     }
 
     @Test(description = "Response scenario02 without return type")
     public void testResponse02() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario02.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario02.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario02.yaml");
     }
 
     @Test(description = "Response scenario03 - return type with Record")
     public void testResponse03() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario03.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario03.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario03.yaml");
     }
 
     @Test(description = "Response scenario 04 - Response has multiple responses without content type")
     public void testResponse04() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario04.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario04.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario04.yaml");
     }
 
     @Test(description = "Response scenario 05 - Error response with a schema", enabled = false)
     public void testResponse05() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("rs_scenario05.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "rs_scenario05.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "rs_scenario05.yaml");
     }
 
     @Test(description = "Response scenario 06 - Error response with a schema", enabled = false)
     public void testResponse06() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario06.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario06.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario06.yaml");
     }
 
     @Test(description = "Response scenario 09 - return has record, error, basic types")
     public void testResponse09() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario09.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario09.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario09.yaml");
     }
 
     @Test(description = "Response scenario 10 - Array type response with a schema")
     public void testResponse10() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario10.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario10.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario10.yaml");
     }
 
     @Test(description = "When the return type is record with typeInclusion field of http code ")
     public void testTypeInclusion() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/typeInclusion_01.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/typeInclusion_01.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/typeInclusion_01.yaml");
     }
 
     @Test(description = "When the return type is string")
     public void testStringReturn() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario11.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario11.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario11.yaml");
     }
 
     @Test(description = "When the return type is inline record")
     public void testInlineRecordReturn() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario12.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario12.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario12.yaml");
     }
 
     @Test(description = "When the return type is inline record")
     public void testInlineRecordHasHttpTypeInclusion() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario13.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario13.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario13.yaml");
     }
 
     @Test(description = "When the return type is inline record", enabled = false)
     public void testInlineRecordHasReference() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario14.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario14.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario14.yaml");
     }
 
     @Test(description = "When the return type is inline record with non http typeInclusion fields", enabled = false)
     public void testInlineRecordHasTypeInclusionReference() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario16.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario16.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario16.yaml");
     }
 
     @Test(description = "When the return type is array record ")
     public void testArrayRecord() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/array_record.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/array_record.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/array_record.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for service configuration annotation in resource")
     public void testWithAnnotation() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario17.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario17.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario17.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for service configuration annotation in resource")
     public void testWithAnnotationForAllType() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario18.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario18.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario18.yaml");
     }
 
-    @Test(description = "Generate OpenAPI spec for service configuration annotation in resource")
+    @Test(description = "Generate OpenAPI spec for service configuration annotation in resource without fields")
     public void cacheConfigTests() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/configuration_rs.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/configuration_rs01.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/configuration_rs01.yaml");
     }
 
     @Test(description = "When cache-config has custom value without ETag and Last-Modified.")
     public void cacheConfigTests02() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/configuration_rs02.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response/configuration_rs01.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/configuration_rs01.yaml");
     }
 
     @AfterMethod

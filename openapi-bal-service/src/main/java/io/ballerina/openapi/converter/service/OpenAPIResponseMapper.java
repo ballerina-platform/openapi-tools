@@ -44,6 +44,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
@@ -60,12 +61,14 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Spliterator;
 
 import javax.ws.rs.core.MediaType;
 
@@ -135,6 +138,47 @@ public class OpenAPIResponseMapper {
                                 headers.put("Last-Modified", lmHeader);
                             } else {
                                 // when field values has -- create a function for have the default values.
+                                Spliterator<MappingFieldNode> spliterator = fields.spliterator();
+                                spliterator.forEachRemaining(field-> {
+                                    List<String> directives = new ArrayList<>();
+                                    if (field.kind().equals(SyntaxKind.SPECIFIC_FIELD)) {
+                                        SpecificFieldNode specificFieldNode = (SpecificFieldNode) field;
+                                        // generate string
+                                        String name = specificFieldNode.fieldName().toString();
+                                        ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
+
+                                        switch (name) {
+                                            case "mustRevalidate":
+                                                if (expressionNode.toString().equals("true")) {
+                                                    directives.add("must-revalidate");
+                                                }
+                                                break;
+                                            case "noCache":
+                                                if (expressionNode.toString().equals("true")) {
+                                                    directives.add("no-cache");
+                                                }
+                                                break;
+                                            case "noStore":
+                                            case "noTransform":
+                                            case "isPrivate":
+                                            case "proxyRevalidate":
+                                            case "maxAge":
+                                                String maxAge = expressionNode.toString();
+                                                try {
+                                                    int maxA = Integer.parseInt(maxAge);
+                                                } catch (NumberFormatException e) {
+                                                    break;
+                                                }
+                                                directives.add("max-age =" + maxAge);
+                                                break;
+                                            case "sMaxAge":
+                                            default:
+
+
+                                        }
+
+                                    }
+                                });
                             }
                             handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, typeNode,
                                     customMediaType, headers);
@@ -156,6 +200,15 @@ public class OpenAPIResponseMapper {
             apiResponses.put("202", apiResponse);
         }
         operation.setResponses(apiResponses);
+    }
+    private String appendFields(List<String> fields) {
+        if (!fields.isEmpty()) {
+
+        }
+    }
+
+    private String buildCommaSeparatedString(List<String> fields) {
+
     }
 
     /**
