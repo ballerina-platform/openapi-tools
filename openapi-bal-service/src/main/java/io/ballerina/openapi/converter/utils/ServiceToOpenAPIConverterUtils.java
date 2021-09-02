@@ -73,7 +73,7 @@ public class ServiceToOpenAPIConverterUtils {
         List<ListenerDeclarationNode> endpoints = new ArrayList<>();
         List<ServiceDeclarationNode> servicesToGenerate = new ArrayList<>();
         List<String> availableService = new ArrayList<>();
-        if (!semanticModel.diagnostics().isEmpty() && containErrors(semanticModel.diagnostics())) {
+        if (containErrors(semanticModel.diagnostics())) {
             throw new OpenApiConverterException("Given ballerina file has syntax/compilation error.");
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();

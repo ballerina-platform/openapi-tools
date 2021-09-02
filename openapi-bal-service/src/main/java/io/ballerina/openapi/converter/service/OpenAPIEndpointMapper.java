@@ -124,7 +124,7 @@ public class OpenAPIEndpointMapper {
     }
 
     private Optional<ParenthesizedArgList> extractListenerNodeType(Node expression2) {
-        Optional<ParenthesizedArgList> list = null;
+        Optional<ParenthesizedArgList> list = Optional.empty();
         if (expression2.kind() == SyntaxKind.EXPLICIT_NEW_EXPRESSION) {
             ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) expression2;
             list = Optional.ofNullable(bTypeExplicit.parenthesizedArgList());
