@@ -49,6 +49,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -82,6 +83,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatemen
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTemplateExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTupleTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.BACKTICK_TOKEN;
@@ -102,6 +104,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.generators.GeneratorConstants.POST;
 import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESPONSE;
+import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
@@ -111,14 +114,13 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  */
 public class FunctionBodyGenerator {
     private List<ImportDeclarationNode> imports;
-    private boolean isQuery;
     private boolean isHeader;
-    private List<TypeDefinitionNode> typeDefinitionNodeList;
-    private OpenAPI openAPI;
-    private BallerinaSchemaGenerator ballerinaSchemaGenerator;
-    private FunctionReturnType functionReturnType;
-    private GeneratorUtils generatorUtils;
-    private BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
+    private final List<TypeDefinitionNode> typeDefinitionNodeList;
+    private final OpenAPI openAPI;
+    private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
+    private final BallerinaUtilGenerator ballerinaUtilGenerator;
+    private final GeneratorUtils generatorUtils;
+    private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
 
     public List<ImportDeclarationNode> getImports() {
         return imports;
@@ -128,35 +130,23 @@ public class FunctionBodyGenerator {
         this.imports = imports;
     }
 
-    public FunctionBodyGenerator(List<ImportDeclarationNode> imports, boolean isQuery, boolean isHeader,
-                                 List<TypeDefinitionNode> typeDefinitionNodeList, OpenAPI openAPI,
-                                 BallerinaSchemaGenerator ballerinaSchemaGenerator,
-                                 BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator) {
+    public FunctionBodyGenerator(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
+                                 OpenAPI openAPI, BallerinaSchemaGenerator ballerinaSchemaGenerator,
+                                 BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator,
+                                 BallerinaUtilGenerator ballerinaUtilGenerator) {
 
         this.imports = imports;
-        this.isQuery = isQuery;
-        this.isHeader = isHeader;
+        this.isHeader = false;
         this.typeDefinitionNodeList = typeDefinitionNodeList;
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
+        this.ballerinaUtilGenerator = ballerinaUtilGenerator;
         this.generatorUtils = new GeneratorUtils();
         this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
     }
 
-    public boolean isQuery() {
-        return isQuery;
-    }
-
-    public void setQuery(boolean query) {
-        isQuery = query;
-    }
-
     public boolean isHeader() {
         return isHeader;
-    }
-
-    public void setHeader(boolean header) {
-        isHeader = header;
     }
 
     /**
@@ -170,7 +160,8 @@ public class FunctionBodyGenerator {
     public FunctionBodyNode getFunctionBodyNode(String path, Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        functionReturnType = new FunctionReturnType(openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
+        FunctionReturnType functionReturnType = new FunctionReturnType(
+                openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
         isHeader = false;
         // Create statements
         List<StatementNode> statementsList =  new ArrayList<>();
@@ -204,7 +195,7 @@ public class FunctionBodyGenerator {
      * Generate statements for query parameters and headers.
      */
     private void handleParameterSchemaInOperation(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                  List<StatementNode> statementsList) {
+                                                  List<StatementNode> statementsList) throws BallerinaOpenApiException {
 
         List<String> queryApiKeyNameList = new ArrayList<>();
         List<String> headerApiKeyNameList = new ArrayList<>();
@@ -234,23 +225,29 @@ public class FunctionBodyGenerator {
                     headerParameters.add(parameter);
                 }
             }
-
             if (!queryParameters.isEmpty() || !queryApiKeyNameList.isEmpty()) {
+                ballerinaUtilGenerator.setQueryParamsFound(true);
                 statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
                         "queryParam", queryApiKeyNameList));
-                // Add updated path
-                ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
-                        "path = path + check getPathForQueryParam(queryParam)");
-                statementsList.add(updatedPath);
-                isQuery = true;
+                VariableDeclarationNode queryParamEncodingMap = getQueryParameterEncodingMap(queryParameters);
+                if (queryParamEncodingMap != null) {
+                    statementsList.add(queryParamEncodingMap);
+                    ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
+                            "path = path + check getPathForQueryParam(queryParam, queryParamEncoding)");
+                    statementsList.add(updatedPath);
+                } else {
+                    ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
+                            "path = path + check getPathForQueryParam(queryParam)");
+                    statementsList.add(updatedPath);
+                }
             }
-
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<any>",
                         "headerValues", headerApiKeyNameList));
                 statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
+                ballerinaUtilGenerator.setHeadersFound(true);
             }
         } else {
 
@@ -261,7 +258,6 @@ public class FunctionBodyGenerator {
                 ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
                         "path = path + check getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
-                isQuery = true;
             }
             if (!headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<any>",
@@ -269,9 +265,69 @@ public class FunctionBodyGenerator {
                 statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
+                ballerinaUtilGenerator.setHeadersFound(true);
             }
 
         }
+    }
+
+    /**
+     * Generate VariableDeclarationNode for query parameter encoding map which includes the data related serialization
+     * mechanism that needs to be used with object or array type parameters. Parameters in primitive types will not be
+     * included to the map even when the serialization mechanisms are specified. These data is given in the `style` and
+     * `explode` sections of the OpenAPI definition. Style defines how multiple values are delimited and explode
+     * specifies whether arrays and objects should generate separate parameters
+     *
+     * --ex: {@code map<[string, boolean]> queryParamEncoding = {"expand": ["deepObject", true]};}
+     *
+     * @param queryParameters               List of query parameters defined in a particular function
+     * @return                              {@link VariableDeclarationNode}
+     * @throws BallerinaOpenApiException    When invalid referenced schema is given.
+     */
+    public VariableDeclarationNode getQueryParameterEncodingMap(List<Parameter> queryParameters)
+            throws BallerinaOpenApiException {
+        List<Node> filedOfMap = new ArrayList();
+        BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken("map<[string, boolean]>"));
+        CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
+                createIdentifierToken("queryParamEncoding"));
+        TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
+
+        for (Parameter parameter: queryParameters) {
+            Schema paramSchema = parameter.getSchema();
+            if (paramSchema.get$ref() != null) {
+                paramSchema  = openAPI.getComponents().getSchemas().get(extractReferenceType(paramSchema.get$ref()));
+            }
+            if (paramSchema != null && (paramSchema.getProperties() != null ||
+                    (paramSchema.getType() != null && paramSchema.getType().equals("array")))) {
+                if (parameter.getStyle() != null || parameter.getExplode() != null) {
+                    String style = parameter.getStyle() != null ? parameter.getStyle().toString() : "form";
+                    String explode = parameter.getExplode() != null ? parameter.getExplode().toString() : "true";
+                    IdentifierToken fieldName = createIdentifierToken('"' + (parameter.getName().trim()) + '"');
+                    Token colon = createToken(COLON_TOKEN);
+                    IdentifierToken styleNode = createIdentifierToken('"' + style + '"');
+                    IdentifierToken explodeNode = createIdentifierToken(explode);
+                    ExpressionNode expressionNode = createTupleTypeDescriptorNode(createToken(OPEN_BRACKET_TOKEN),
+                            createSeparatedNodeList(styleNode, createToken(COMMA_TOKEN), explodeNode),
+                            createToken(CLOSE_BRACKET_TOKEN));
+                    SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
+                            fieldName, colon, expressionNode);
+                    filedOfMap.add(specificFieldNode);
+                    filedOfMap.add(createToken(COMMA_TOKEN));
+                }
+            }
+        }
+        if (filedOfMap.size() > 0) {
+            filedOfMap.remove(filedOfMap.size() - 1);
+            MappingConstructorExpressionNode initialize = createMappingConstructorExpressionNode(
+                    createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(filedOfMap),
+                    createToken(CLOSE_BRACE_TOKEN));
+            return createVariableDeclarationNode(createEmptyNodeList(),
+                    null, bindingPatternNode, createToken(EQUAL_TOKEN), initialize,
+                    createToken(SEMICOLON_TOKEN));
+        }
+        return null;
+
     }
 
     /**
@@ -421,9 +477,12 @@ public class FunctionBodyGenerator {
             Pattern p = Pattern.compile("\\{[^\\}]*\\}");
             Matcher m = p.matcher(path);
             while (m.find()) {
-                String d = path.substring(m.start() + 1, m.end() - 1);
-                String replaceVariable = escapeIdentifier(getValidName(d, false));
-                refinedPath = refinedPath.replace(d, replaceVariable);
+                String pathVariable = path.substring(m.start(), m.end());
+                if (pathVariable.startsWith("{") && pathVariable.endsWith("}")) {
+                    String d = pathVariable.replace("{", "").replace("}", "");
+                    String replaceVariable = "{" + escapeIdentifier(getValidName(d, false)) + "}";
+                    refinedPath = refinedPath.replace(pathVariable, replaceVariable);
+                }
             }
             path = refinedPath.replaceAll("[{]", "\\${");
         }
@@ -448,7 +507,8 @@ public class FunctionBodyGenerator {
      */
     private  void createRequestBodyStatements(boolean isHeader, List<StatementNode> statementsList,
                                               String method, String returnType, String targetType,
-                                              Iterator<Map.Entry<String, MediaType>> iterator) {
+                                              Iterator<Map.Entry<String, MediaType>> iterator)
+            throws BallerinaOpenApiException {
 
         //Create Request statement
         Map.Entry<String, MediaType> next = iterator.next();
@@ -498,7 +558,8 @@ public class FunctionBodyGenerator {
      * @param mediaTypeEntry    - Media type entry
      */
     private void genStatementsForRequestMediaType(List<StatementNode> statementsList,
-                                                  Map.Entry<String, MediaType> mediaTypeEntry) {
+                                                  Map.Entry<String, MediaType> mediaTypeEntry)
+            throws BallerinaOpenApiException {
 
         Schema requestBodySchema = mediaTypeEntry.getValue().getSchema();
         if (mediaTypeEntry.getKey().contains("json")) {
@@ -538,12 +599,86 @@ public class FunctionBodyGenerator {
                         "request.setPayload(payload)");
                 statementsList.add(expressionStatementNode);
             }
-
         } else if (mediaTypeEntry.getKey().contains("plain")) {
             ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                     "request.setPayload(payload)");
             statementsList.add(expressionStatementNode);
+        } else if (mediaTypeEntry.getKey().contains("x-www-form-urlencoded")) {
+            ballerinaUtilGenerator.setRequestBodyEncodingFound(true);
+            ExpressionStatementNode setContentTypeExpression = generatorUtils.getSimpleExpressionStatementNode(
+                    "check request.setContentType(\"application/x-www-form-urlencoded\")");
+            statementsList.add(setContentTypeExpression);
+            VariableDeclarationNode requestBodyEncodingMap = getRequestBodyEncodingMap(
+                    mediaTypeEntry.getValue().getEncoding());
+            if (requestBodyEncodingMap != null) {
+                statementsList.add(requestBodyEncodingMap);
+                VariableDeclarationNode requestBodyVariable = generatorUtils.getSimpleStatement(STRING,
+                        "encodedRequestBody",
+                        "createFormURLEncodedRequestBody(payload, requestBodyEncoding)");
+                statementsList.add(requestBodyVariable);
+            } else {
+                VariableDeclarationNode requestBodyVariable = generatorUtils.getSimpleStatement(STRING,
+                        "encodedRequestBody", "createFormURLEncodedRequestBody(payload)");
+                statementsList.add(requestBodyVariable);
+            }
+            ExpressionStatementNode setPayloadExpression = generatorUtils.getSimpleExpressionStatementNode(
+                    "request.setPayload(encodedRequestBody)");
+            statementsList.add(setPayloadExpression);
+        } else {
+            throw new BallerinaOpenApiException("Unsupported media type is given in the request body");
         }
+    }
+
+    /**
+     * Generate VariableDeclarationNode for request body encoding map which includes the data related serialization
+     * mechanism that needs to be used in each array or object type property. These data is given in the `style` and
+     * `explode` sections under the requestBody encoding section of the OpenAPI definition. Style defines how multiple
+     * values are delimited and explode specifies whether arrays and objects should generate separate parameters.
+     *
+     * --ex: {@code map<[string, boolean]> requestBodyEncoding =
+     *                                      {"address": ["deepObject", true], "bank_account": ["deepObject", true]}}
+     *
+     * @param encodingMap   Encoding details of the `application/x-www-form-urlencoded` type request body
+     * @return              {@link VariableDeclarationNode}
+     */
+    public VariableDeclarationNode getRequestBodyEncodingMap(Map<String, Encoding> encodingMap) {
+        List<Node> filedOfMap = new ArrayList();
+        BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
+                createIdentifierToken("map<[string, boolean]>"));
+        CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
+                createIdentifierToken("requestBodyEncoding"));
+        TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
+        if (encodingMap != null && encodingMap.size() > 0) {
+            for (Map.Entry<String, Encoding> encoding : encodingMap.entrySet()) {
+                if (encoding.getValue().getStyle() != null || encoding.getValue().getExplode() != null) {
+                    String style = encoding.getValue().getStyle() != null ?
+                            encoding.getValue().getStyle().toString() : "form";
+                    String explode = encoding.getValue().getExplode() != null ?
+                            encoding.getValue().getExplode().toString() : "true";
+                    IdentifierToken fieldName = createIdentifierToken('"' + encoding.getKey() + '"');
+                    Token colon = createToken(COLON_TOKEN);
+                    IdentifierToken styleNode = createIdentifierToken('"' + style + '"');
+                    IdentifierToken explodeNode = createIdentifierToken(explode);
+                    ExpressionNode expressionNode = createTupleTypeDescriptorNode(createToken(OPEN_BRACKET_TOKEN),
+                            createSeparatedNodeList(styleNode, createToken(COMMA_TOKEN), explodeNode),
+                            createToken(CLOSE_BRACKET_TOKEN));
+                    SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
+                            fieldName, colon, expressionNode);
+                    filedOfMap.add(specificFieldNode);
+                    filedOfMap.add(createToken(COMMA_TOKEN));
+                }
+            }
+            if (filedOfMap.size() > 0) {
+                filedOfMap.remove(filedOfMap.size() - 1);
+                MappingConstructorExpressionNode initialize = createMappingConstructorExpressionNode(
+                        createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(filedOfMap),
+                        createToken(CLOSE_BRACE_TOKEN));
+                return createVariableDeclarationNode(createEmptyNodeList(),
+                        null, bindingPatternNode, createToken(EQUAL_TOKEN), initialize,
+                        createToken(SEMICOLON_TOKEN));
+            }
+        }
+        return null;
     }
 
     /**

@@ -1,5 +1,5 @@
 import  ballerina/http;
-import  ballerina/url;
+
 
 public type ApplicationPropertyArr ApplicationProperty[];
 

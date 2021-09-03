@@ -1,0 +1,31 @@
+openapi: 3.0.1
+info:
+  title: 'payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /v1/{version}/version-name/{version-name}:
+    get:
+      operationId: operationId04
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Version Id
+        - name: version-name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version Name
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}

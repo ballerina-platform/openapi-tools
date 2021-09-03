@@ -30,6 +30,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,7 +71,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -85,7 +86,6 @@ public class CodeGeneratorTest {
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generate_client.bal");
             generator.generateClient(definitionPath, clientName, resourcePath.toString(), filter, false);
-
             if (Files.exists(resourcePath.resolve("client.bal"))) {
                 String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
                 generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
@@ -94,7 +94,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Client was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -118,7 +118,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Client was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -142,7 +142,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Types were not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -169,7 +169,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Client was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -194,7 +194,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Client was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_client.bal");
@@ -219,7 +219,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -244,7 +244,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -268,7 +268,7 @@ public class CodeGeneratorTest {
                         (expectedContent.trim()).replaceAll("\\s+", ""),
                         "expected content and actual generated content is mismatched for: " + yamlFile);
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the ballerina content for the openapi definition: "
                     + yamlFile + " " + e.getMessage());
         }
@@ -292,7 +292,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -321,7 +321,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -351,7 +351,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Service was not generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("openapipetstore_service.bal");
@@ -371,7 +371,7 @@ public class CodeGeneratorTest {
             } else {
                 Assert.fail("Empty types.bal file has been generated");
             }
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("client.bal");
@@ -381,7 +381,8 @@ public class CodeGeneratorTest {
     @Test(description = "Functionality tests when invalid OpenAPI definition is given",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
-    public void testForInvalidDefinition() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testForInvalidDefinition() throws IOException, BallerinaOpenApiException,
+            FormatterException, URISyntaxException {
         final String clientName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("invalid_petstore.yaml").toString();
         CodeGenerator generator = new CodeGenerator();

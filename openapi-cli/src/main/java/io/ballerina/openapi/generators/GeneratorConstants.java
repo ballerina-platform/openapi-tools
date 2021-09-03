@@ -71,6 +71,7 @@ public class GeneratorConstants {
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
     public static final String TYPE_FILE_NAME = "types.bal";
     public static final String CLIENT_FILE_NAME = "client.bal";
+    public static final String UTIL_FILE_NAME = "utils.bal";
     public static final String TEST_FILE_NAME = "test.bal";
     public static final String CONFIG_FILE_NAME = "Config.toml";
     public static final String BALLERINA_TOML = "Ballerina.toml";
@@ -106,6 +107,7 @@ public class GeneratorConstants {
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
+    public static final String URL = "url";
     public static final String MODULE_TEST  = "test";
     public static final String BALLERINA = "ballerina";
     public static final String PUBLIC = "public";

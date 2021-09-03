@@ -268,16 +268,10 @@ public class FunctionSignatureGenerator {
         if (parameter.getExtensions() != null) {
             annotationNodes = DocCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions());
         }
-
         Schema parameterSchema = parameter.getSchema();
-
         String paramType = "";
         if (parameterSchema.get$ref() != null) {
             paramType = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
-            Schema schema = openAPI.getComponents().getSchemas().get(paramType.trim());
-            if (schema instanceof ObjectSchema) {
-                throw new BallerinaOpenApiException("Ballerina does not support object type query parameters.");
-            }
         } else {
             paramType = convertOpenAPITypeToBallerina(parameterSchema.getType().trim());
             if (parameterSchema.getType().equals("number")) {
@@ -285,7 +279,6 @@ public class FunctionSignatureGenerator {
                     paramType = convertOpenAPITypeToBallerina(parameterSchema.getFormat().trim());
                 }
             }
-
             if (parameterSchema instanceof ArraySchema) {
                 ArraySchema arraySchema = (ArraySchema) parameterSchema;
                 if (arraySchema.getItems().getType() != null) {
@@ -295,7 +288,8 @@ public class FunctionSignatureGenerator {
                         paramType = convertOpenAPITypeToBallerina(itemType) + "[]";
                     }
                 } else if (arraySchema.getItems().get$ref() != null) {
-                    paramType = extractReferenceType(arraySchema.getItems().get$ref().trim()) + "[]";
+                    paramType = getValidName(extractReferenceType(
+                            arraySchema.getItems().get$ref().trim()), true) + "[]";
                 }
             }
         }

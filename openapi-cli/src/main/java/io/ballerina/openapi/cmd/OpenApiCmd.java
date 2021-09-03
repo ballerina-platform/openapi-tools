@@ -29,6 +29,7 @@ import picocli.CommandLine;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -280,7 +281,7 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             generator.generateClient(resourcePath.toString(), clientName, targetOutputPath.toString(), filter,
                     nullable);
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             if (e.getLocalizedMessage() != null) {
                 outStream.println(e.getLocalizedMessage());
                 exitError(this.exitWhenFinish);
@@ -303,7 +304,7 @@ public class OpenApiCmd implements BLauncherCmd {
             assert resourcePath != null;
             generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
                     nullable);
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
                     ". " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);
@@ -322,7 +323,7 @@ public class OpenApiCmd implements BLauncherCmd {
             assert resourcePath != null;
             generator.generateBothFiles(GeneratorConstants.GenType.GEN_BOTH,
                     resourcePath.toString(), fileName, targetOutputPath.toString(), filter, nullable);
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | BallerinaOpenApiException | FormatterException | URISyntaxException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
                     " " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);

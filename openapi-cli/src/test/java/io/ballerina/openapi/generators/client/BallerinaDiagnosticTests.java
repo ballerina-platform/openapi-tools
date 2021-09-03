@@ -30,6 +30,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class BallerinaDiagnosticTests {
     @Test(description = "Test openAPI definition to ballerina client source code generation with diagnostic issue",
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException {
+            FormatterException, URISyntaxException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);

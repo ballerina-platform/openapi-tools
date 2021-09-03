@@ -36,6 +36,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,6 +53,7 @@ public class BallerinaTestGeneratorTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/test_cases/").toAbsolutePath();
     private static final Path PROJECT_DIR = RES_DIR.resolve("ballerina_project");
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
+    private static final Path utilPath = RES_DIR.resolve("ballerina_project/utils.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     private static final Path testPath = RES_DIR.resolve("ballerina_project/tests/test.bal");
     private static final Path configPath = RES_DIR.resolve("ballerina_project/tests/Config.toml");
@@ -62,7 +64,7 @@ public class BallerinaTestGeneratorTests {
 
     @Test(description = "Generate Client with test skelotins", dataProvider = "httpAuthIOProvider")
     public void generateclientWithTestSkel(String yamlFile) throws IOException, BallerinaOpenApiException,
-            FormatterException, BallerinaOpenApiException {
+            FormatterException, BallerinaOpenApiException, URISyntaxException {
         Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
         CodeGenerator codeGenerator = new CodeGenerator();
@@ -74,15 +76,18 @@ public class BallerinaTestGeneratorTests {
         SyntaxTree syntaxTreeClient = ballerinaClientGenerator.generateSyntaxTree();
         SyntaxTree syntaxTreeTest = ballerinaTestGenerator.generateSyntaxTree();
         SyntaxTree syntaxTreeSchema = schemaGenerator.generateSyntaxTree();
+        SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
         String configFile = ballerinaTestGenerator.getConfigTomlFile();
-        List<Diagnostic> diagnostics = getDiagnostics(syntaxTreeClient, syntaxTreeTest, syntaxTreeSchema, configFile);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTreeClient, syntaxTreeTest,
+                syntaxTreeSchema, configFile, utilSyntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
     }
 
     public List<Diagnostic> getDiagnostics(SyntaxTree clientSyntaxTree, SyntaxTree testSyntaxTree,
-                                           SyntaxTree schemaSyntaxTree, String configContent)
+                                           SyntaxTree schemaSyntaxTree, String configContent, SyntaxTree utilSyntaxTree)
             throws FormatterException, IOException {
         TestUtils.writeFile(clientPath, Formatter.format(clientSyntaxTree).toString());
+        TestUtils.writeFile(utilPath, Formatter.format(utilSyntaxTree).toString());
         TestUtils.writeFile(schemaPath, Formatter.format(schemaSyntaxTree).toString());
         TestUtils.writeFile(testPath, Formatter.format(testSyntaxTree).toString());
         TestUtils.writeFile(configPath, configContent);
