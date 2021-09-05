@@ -69,6 +69,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Spliterator;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.MediaType;
 
@@ -77,10 +78,27 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERE
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_FIELD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_REFERENCE;
+import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
+import static io.ballerina.openapi.converter.Constants.BODY;
+import static io.ballerina.openapi.converter.Constants.CACHE_CONTROL;
+import static io.ballerina.openapi.converter.Constants.ETAG;
+import static io.ballerina.openapi.converter.Constants.FALSE;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.HTTP_200;
 import static io.ballerina.openapi.converter.Constants.HTTP_200_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
+import static io.ballerina.openapi.converter.Constants.JSON_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.LAST_MODIFIED;
+import static io.ballerina.openapi.converter.Constants.MAX_AGE;
+import static io.ballerina.openapi.converter.Constants.MUST_REVALIDATE;
+import static io.ballerina.openapi.converter.Constants.NO_CACHE;
+import static io.ballerina.openapi.converter.Constants.NO_STORE;
+import static io.ballerina.openapi.converter.Constants.NO_TRANSFORM;
+import static io.ballerina.openapi.converter.Constants.PRIVATE;
+import static io.ballerina.openapi.converter.Constants.PROXY_REVALIDATE;
+import static io.ballerina.openapi.converter.Constants.PUBLIC;
+import static io.ballerina.openapi.converter.Constants.S_MAX_AGE;
+import static io.ballerina.openapi.converter.Constants.TRUE;
 
 /**
  * This class uses to map the Ballerina return details to the OAS response.
@@ -89,7 +107,7 @@ import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
  */
 public class OpenAPIResponseMapper {
     private final SemanticModel semanticModel;
-    private Components components = new Components();
+    private final Components components;
 
     public OpenAPIResponseMapper(SemanticModel semanticModel, Components components) {
         this.semanticModel = semanticModel;
@@ -106,92 +124,24 @@ public class OpenAPIResponseMapper {
     public void getResourceOutput(FunctionDefinitionNode resource,
                                   OperationAdaptor operationAdaptor) throws OpenApiConverterException {
 
-        FunctionSignatureNode functionSignatureNode = resource.functionSignature();
-        Optional<ReturnTypeDescriptorNode> returnTypeDescriptorNode = functionSignatureNode.returnTypeDesc();
+        FunctionSignatureNode functionSignature = resource.functionSignature();
+        Optional<ReturnTypeDescriptorNode> returnTypeDescriptor = functionSignature.returnTypeDesc();
         io.swagger.v3.oas.models.Operation operation = operationAdaptor.getOperation();
         // Handle response with custom prefix subtype
         String customMediaType = extractCustomMediaType(resource);
         ApiResponses apiResponses = new ApiResponses();
-        if (returnTypeDescriptorNode.isPresent()) {
-            ReturnTypeDescriptorNode returnNode = returnTypeDescriptorNode.orElseThrow();
+        if (returnTypeDescriptor.isPresent()) {
+            ReturnTypeDescriptorNode returnNode = returnTypeDescriptor.get();
             NodeList<AnnotationNode> annotations = returnNode.annotations();
-            Node typeNode = returnNode.type();
+            Node returnType = returnNode.type();
             Map<String, Header> headers = new LinkedHashMap<>();
             if (!annotations.isEmpty()) {
-               //TODO annotation handle rest of the annotations
-
                 for (AnnotationNode annotation : annotations) {
-                    if (annotation.annotReference().toString().equals("http:CacheConfig")) {
-                        if (annotation.annotValue().isPresent()) {
-                            SeparatedNodeList<MappingFieldNode> fields = annotation.annotValue().get().fields();
-                            if (fields.isEmpty()) {
-                                Header cacheHeader = new Header();
-                                StringSchema stringSchema = new StringSchema();
-                                stringSchema._default("must-revalidate,public,max-age=3600");
-                                cacheHeader.setSchema(stringSchema);
-                                headers.put("Cache-Control", cacheHeader);
-                                Header eTagHeader = new Header();
-                                eTagHeader.setSchema(new StringSchema());
-                                headers.put("ETag", eTagHeader);
-                                Header lmHeader = new Header();
-                                lmHeader.setSchema(new StringSchema());
-                                headers.put("Last-Modified", lmHeader);
-                            } else {
-                                // when field values has -- create a function for have the default values.
-                                Spliterator<MappingFieldNode> spliterator = fields.spliterator();
-                                spliterator.forEachRemaining(field-> {
-                                    List<String> directives = new ArrayList<>();
-                                    if (field.kind().equals(SyntaxKind.SPECIFIC_FIELD)) {
-                                        SpecificFieldNode specificFieldNode = (SpecificFieldNode) field;
-                                        // generate string
-                                        String name = specificFieldNode.fieldName().toString();
-                                        ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
-
-                                        switch (name) {
-                                            case "mustRevalidate":
-                                                if (expressionNode.toString().equals("true")) {
-                                                    directives.add("must-revalidate");
-                                                }
-                                                break;
-                                            case "noCache":
-                                                if (expressionNode.toString().equals("true")) {
-                                                    directives.add("no-cache");
-                                                }
-                                                break;
-                                            case "noStore":
-                                            case "noTransform":
-                                            case "isPrivate":
-                                            case "proxyRevalidate":
-                                            case "maxAge":
-                                                String maxAge = expressionNode.toString();
-                                                try {
-                                                    int maxA = Integer.parseInt(maxAge);
-                                                } catch (NumberFormatException e) {
-                                                    break;
-                                                }
-                                                directives.add("max-age =" + maxAge);
-                                                break;
-                                            case "sMaxAge":
-                                            default:
-
-
-                                        }
-
-                                    }
-                                });
-                            }
-                            handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, typeNode,
-                                    customMediaType, headers);
-                        }
-                    } else {
-                        ApiResponse apiResponse = new ApiResponse();
-                        apiResponse.description("Accepted");
-                        apiResponses.put("202", apiResponse);
-                    }
+                    extractReturnAnnotationDetails(operationAdaptor, customMediaType, apiResponses, returnType, headers,
+                            annotation);
                 }
-
             } else {
-                handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, typeNode, customMediaType, headers);
+                getAPIResponses(operationAdaptor, apiResponses, returnType, customMediaType, headers);
             }
         } else {
             // When the return type is not mention in the resource function.
@@ -201,32 +151,167 @@ public class OpenAPIResponseMapper {
         }
         operation.setResponses(apiResponses);
     }
-    private String appendFields(List<String> fields) {
-        if (!fields.isEmpty()) {
 
+    /**
+     * Extract annotation details for generate headers.
+     *
+     * @param operationAdaptor  - Operation model
+     * @param customMediaType   - Prefix media type for response
+     * @param apiResponses      - OAS response
+     * @param typeNode          - Return node
+     * @param headers           - OAS header
+     * @param annotation        - Annotation node
+     * @throws OpenApiConverterException when failed happen during the header generation process.
+     */
+    private void extractReturnAnnotationDetails(OperationAdaptor operationAdaptor, String customMediaType,
+                                                ApiResponses apiResponses, Node typeNode, Map<String, Header> headers,
+                                                AnnotationNode annotation) throws OpenApiConverterException {
+
+        if (annotation.annotReference().toString().equals("http:CacheConfig")) {
+            SeparatedNodeList<MappingFieldNode> fields = annotation.annotValue().get().fields();
+            CacheConfigAnnotation cacheConfigAnn = setCacheConfigValues(fields);
+            // Update headers with cache annotation details.
+            updateResponseHeaderWithCacheValues(headers, fields, cacheConfigAnn);
+            getAPIResponses(operationAdaptor, apiResponses, typeNode,
+                    customMediaType, headers);
+        } else {
+            ApiResponse apiResponse = new ApiResponse();
+            apiResponse.description("Accepted");
+            apiResponses.put("202", apiResponse);
         }
     }
 
-    private String buildCommaSeparatedString(List<String> fields) {
-
+    /**
+     * Update all the {@CacheConfigAnnotation} details with annotation fields.
+     */
+    private CacheConfigAnnotation setCacheConfigValues(SeparatedNodeList<MappingFieldNode> fields) {
+        CacheConfigAnnotation cacheConfig = new CacheConfigAnnotation();
+        // when field values has -- create a function for have the default values.
+        Spliterator<MappingFieldNode> spliterator = fields.spliterator();
+        spliterator.forEachRemaining(field-> {
+            if (field.kind() == SyntaxKind.SPECIFIC_FIELD) {
+                SpecificFieldNode specificFieldNode = (SpecificFieldNode) field;
+                // generate string
+                String name = specificFieldNode.fieldName().toString();
+                ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
+                setCacheConfigField(cacheConfig, name, expressionNode);
+            }
+        });
+        return cacheConfig;
     }
+
+    private void updateResponseHeaderWithCacheValues(Map<String, Header> headers,
+                                                     SeparatedNodeList<MappingFieldNode> fields,
+                                                     CacheConfigAnnotation cache) {
+
+        Header cacheHeader = new Header();
+        StringSchema stringSchema = new StringSchema();
+        if (fields.isEmpty()) {
+            stringSchema._default("must-revalidate,public,max-age=3600");
+            cacheHeader.setSchema(stringSchema);
+            headers.put(CACHE_CONTROL, cacheHeader);
+            Header eTag = new Header();
+            eTag.setSchema(new StringSchema());
+            headers.put(ETAG, eTag);
+            Header lmHeader = new Header();
+            lmHeader.setSchema(new StringSchema());
+            headers.put(LAST_MODIFIED, lmHeader);
+
+        } else if (!cache.isSetETag() && !cache.isSetLastModified()){
+            stringSchema._default(generateCacheControlString(cache));
+            cacheHeader.setSchema(stringSchema);
+            headers.put(CACHE_CONTROL, cacheHeader);
+        } else if (!cache.isSetETag() && cache.isSetLastModified()) {
+            stringSchema._default(generateCacheControlString(cache));
+            cacheHeader.setSchema(stringSchema);
+            headers.put(CACHE_CONTROL, cacheHeader);
+            Header lmHeader = new Header();
+            lmHeader.setSchema(new StringSchema());
+            headers.put(LAST_MODIFIED, lmHeader);
+
+        } else if (!cache.isSetLastModified() && cache.isSetETag()) {
+            stringSchema._default(generateCacheControlString(cache));
+            cacheHeader.setSchema(stringSchema);
+            headers.put(CACHE_CONTROL, cacheHeader);
+            Header eTag = new Header();
+            eTag.setSchema(new StringSchema());
+            headers.put(ETAG, eTag);
+        } else {
+            stringSchema._default(generateCacheControlString(cache));
+            cacheHeader.setSchema(stringSchema);
+            headers.put(CACHE_CONTROL, cacheHeader);
+
+            Header eTag = new Header();
+            eTag.setSchema(new StringSchema());
+            headers.put(ETAG, eTag);
+            Header lmHeader = new Header();
+            lmHeader.setSchema(new StringSchema());
+            headers.put(LAST_MODIFIED, lmHeader);
+        }
+    }
+
+
+    private void setCacheConfigField(CacheConfigAnnotation cacheConfig, String fieldName,
+                                     ExpressionNode expressionNode) {
+        if (expressionNode.toString().equals(TRUE)) {
+            switch (fieldName) {
+                case "mustRevalidate":
+                    cacheConfig.setMustRevalidate(true);
+                    break;
+                case "noCache":
+                    cacheConfig.setNoCache(true);
+                    break;
+                case "noStore":
+                    cacheConfig.setNoStore(true);
+                    break;
+                case "noTransform":
+                    cacheConfig.setNoTransform(true);
+                    break;
+                case "isPrivate":
+                    cacheConfig.setPrivate(true);
+                    break;
+                case "proxyRevalidate":
+                    cacheConfig.setProxyRevalidate(true);
+                    break;
+                default:
+                    break;
+            }
+        } else if ("maxAge".equals(fieldName)) {
+            String maxAge = expressionNode.toString();
+            try {
+                int maxA = Integer.parseInt(maxAge);
+                cacheConfig.setMaxAge(maxA);
+            } catch (NumberFormatException ignored) {
+            }
+        } else if ("sMaxAge".equals(fieldName)) {
+            String smaxAge = expressionNode.toString();
+            try {
+                int maxA = Integer.parseInt(smaxAge);
+                cacheConfig.setsMaxAge(maxA);
+            } catch (NumberFormatException ignored) {
+            }
+        } else if ("setETag".equals(fieldName) && (expressionNode.toString().equals(FALSE))) {
+            cacheConfig.setSetETag(false);
+        } else if ("setLastModified".equals(fieldName) && (expressionNode.toString().equals(
+                FALSE))) {
+            cacheConfig.setSetLastModified(false);
+        }
+    }
+
 
     /**
      * This methods for handle the return type has non annotations.
      *
      * @return {@link io.swagger.v3.oas.models.responses.ApiResponses} for operation.
      */
-    private ApiResponses handleResponseWithoutAnnotationType(OperationAdaptor operationAdaptor,
-                                                             ApiResponses apiResponses,
-                                                             Node typeNode, String customMediaPrefix,
-                                                             Map<String, Header> headers)
+    private ApiResponses getAPIResponses(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
+                                         Node typeNode, String customMediaPrefix, Map<String, Header> headers)
             throws OpenApiConverterException {
 
         ApiResponse apiResponse = new ApiResponse();
         if (!headers.isEmpty()) {
             apiResponse.setHeaders(headers);
         }
-//        Map<String, Header> headers = apiResponse.getHeaders();
         io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
         String mediaTypeString;
         switch (typeNode.kind()) {
@@ -254,7 +339,7 @@ public class OpenAPIResponseMapper {
                 mediaType.setSchema(new ObjectSchema());
                 mediaTypeString = MediaType.APPLICATION_JSON;
                 if (!customMediaPrefix.isBlank()) {
-                    mediaTypeString = "application/" + customMediaPrefix + "+json";
+                    mediaTypeString = APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
                 }
                 apiResponse.content(new Content().addMediaType(mediaTypeString, mediaType));
                 apiResponse.description(HTTP_200_DESCRIPTION);
@@ -264,7 +349,7 @@ public class OpenAPIResponseMapper {
                 mediaType.setSchema(new ObjectSchema());
                 mediaTypeString = MediaType.APPLICATION_XML;
                 if (!customMediaPrefix.isBlank()) {
-                    mediaTypeString = "application/" + customMediaPrefix + "+xml";
+                    mediaTypeString = APPLICATION_PREFIX + customMediaPrefix + "+xml";
                 }
                 apiResponse.content(new Content().addMediaType(mediaTypeString, mediaType));
                 apiResponse.description(HTTP_200_DESCRIPTION);
@@ -276,10 +361,10 @@ public class OpenAPIResponseMapper {
                 handleReferenceResponse(operationAdaptor, recordNode, schemas, apiResponses, customMediaPrefix);
                 return apiResponses;
             case UNION_TYPE_DESC:
-                return getAPIResponsesForReturnUnionType(operationAdaptor, apiResponses,
+                return mapUnionReturns(operationAdaptor, apiResponses,
                         (UnionTypeDescriptorNode) typeNode, customMediaPrefix, headers);
             case RECORD_TYPE_DESC:
-                return getApiResponsesForInlineRecords(operationAdaptor, apiResponses,
+                return mapInlineRecordInReturn(operationAdaptor, apiResponses,
                         (RecordTypeDescriptorNode) typeNode, apiResponse, mediaType, customMediaPrefix);
             case ARRAY_TYPE_DESC:
                 return getApiResponsesForArrayTypes(operationAdaptor, apiResponses,
@@ -290,7 +375,7 @@ public class OpenAPIResponseMapper {
                 apiResponses.put("500", apiResponse);
                 return apiResponses;
             case OPTIONAL_TYPE_DESC:
-                return handleResponseWithoutAnnotationType(operationAdaptor, apiResponses,
+                return getAPIResponses(operationAdaptor, apiResponses,
                         ((OptionalTypeDescriptorNode) typeNode).typeDescriptor(), customMediaPrefix, headers);
             default:
                 throw new OpenApiConverterException("Unexpected value: " + typeNode.kind());
@@ -302,14 +387,11 @@ public class OpenAPIResponseMapper {
      * Handle return has array types.
      */
     private ApiResponses getApiResponsesForArrayTypes(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
-                                                      ArrayTypeDescriptorNode typeNode, ApiResponse apiResponse,
+                                                      ArrayTypeDescriptorNode array, ApiResponse apiResponse,
                                                       io.swagger.v3.oas.models.media.MediaType mediaType,
-                                                      String customMediaPrefix)
-            throws OpenApiConverterException {
-
-        ArrayTypeDescriptorNode array = typeNode;
+                                                      String customMediaPrefix) throws OpenApiConverterException {
         Map<String, Schema> schemas02 = components.getSchemas();
-        if (array.memberTypeDesc().kind().equals(SIMPLE_NAME_REFERENCE)) {
+        if (array.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
             handleReferenceResponse(operationAdaptor, (SimpleNameReferenceNode) array.memberTypeDesc(),
                     schemas02, apiResponses, customMediaPrefix);
         } else {
@@ -330,10 +412,10 @@ public class OpenAPIResponseMapper {
     /**
      * Handle response has inline record as return type.
      */
-    private ApiResponses getApiResponsesForInlineRecords(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
-                                                         RecordTypeDescriptorNode typeNode, ApiResponse apiResponse,
-                                                         io.swagger.v3.oas.models.media.MediaType mediaType,
-                                                         String customMediaPrefix)
+    private ApiResponses mapInlineRecordInReturn(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
+                                                 RecordTypeDescriptorNode typeNode, ApiResponse apiResponse,
+                                                 io.swagger.v3.oas.models.media.MediaType mediaType,
+                                                 String customMediaPrefix)
             throws OpenApiConverterException {
 
         NodeList<Node> fields = typeNode.fields();
@@ -343,7 +425,7 @@ public class OpenAPIResponseMapper {
         String mediaTypeResponse = MediaType.APPLICATION_JSON;
         boolean ishttpTypeInclusion = false;
         Map<String , Schema> properties = new HashMap<>();
-        if (fields.stream().anyMatch(module -> module.kind().equals(TYPE_REFERENCE))) {
+        if (fields.stream().anyMatch(module -> module.kind() == TYPE_REFERENCE)) {
             ishttpTypeInclusion = true;
         }
         // 1- scenarios returns record {| *http:Ok; Person body;|}
@@ -353,7 +435,7 @@ public class OpenAPIResponseMapper {
 
         for (Node field: fields) {
             // TODO Handle http typeInclusion, check it comes from http module
-            if (field.kind().equals(TYPE_REFERENCE)) {
+            if (field.kind() == TYPE_REFERENCE) {
                 TypeReferenceNode typeFieldNode = (TypeReferenceNode) field;
                 if (typeFieldNode.typeName().kind() == QUALIFIED_NAME_REFERENCE) {
                     QualifiedNameReferenceNode identifierNode = (QualifiedNameReferenceNode) typeFieldNode.typeName();
@@ -362,7 +444,7 @@ public class OpenAPIResponseMapper {
                     apiResponse.description(identifierNode.identifier().text().trim());
                 }
             }
-            if (field.kind().equals(RECORD_FIELD)) {
+            if (field.kind() == RECORD_FIELD) {
                 RecordFieldNode recordField = (RecordFieldNode) field;
                 Node type01 = recordField.typeName();
                 if (recordField.typeName().kind() == SIMPLE_NAME_REFERENCE) {
@@ -388,7 +470,7 @@ public class OpenAPIResponseMapper {
             inlineSchema.setProperties(properties);
             mediaTypeResponse = MediaType.APPLICATION_JSON;
             if (!customMediaPrefix.isBlank()) {
-                mediaTypeResponse = "application/" + customMediaPrefix + "+json";
+                mediaTypeResponse = APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
             }
         }
         mediaType.setSchema(inlineSchema);
@@ -409,15 +491,15 @@ public class OpenAPIResponseMapper {
      *     }
      * </pre>
      */
-    private ApiResponses getAPIResponsesForReturnUnionType(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
-                                                           UnionTypeDescriptorNode typeNode, String customMediaPrefix
+    private ApiResponses mapUnionReturns(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
+                                         UnionTypeDescriptorNode typeNode, String customMediaPrefix
             , Map<String, Header> headers)
             throws OpenApiConverterException {
 
         TypeDescriptorNode rightNode = typeNode.rightTypeDesc();
         TypeDescriptorNode leftNode = typeNode.leftTypeDesc();
         // Handle leftNode because it is main node
-        apiResponses = handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, leftNode,
+        apiResponses = getAPIResponses(operationAdaptor, apiResponses, leftNode,
                 customMediaPrefix, headers);
         // Handle rest of the union type
         if (rightNode instanceof UnionTypeDescriptorNode) {
@@ -425,12 +507,12 @@ public class OpenAPIResponseMapper {
             while (traversRightNode.rightTypeDesc() != null) {
                 if (leftNode.kind() == QUALIFIED_NAME_REFERENCE) {
                     leftNode = ((UnionTypeDescriptorNode) rightNode).leftTypeDesc();
-                    apiResponses = handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, leftNode,
+                    apiResponses = getAPIResponses(operationAdaptor, apiResponses, leftNode,
                             customMediaPrefix, headers);
                 }
             }
         } else {
-            apiResponses = handleResponseWithoutAnnotationType(operationAdaptor, apiResponses, rightNode,
+            apiResponses = getAPIResponses(operationAdaptor, apiResponses, rightNode,
                     customMediaPrefix, headers);
         }
         return apiResponses;
@@ -449,17 +531,17 @@ public class OpenAPIResponseMapper {
             case Constants.DECIMAL:
             case Constants.BOOLEAN:
                 if (!customMediaPrefix.isBlank()) {
-                    return "application/" + customMediaPrefix + "+json";
+                    return APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
                 }
                 return MediaType.APPLICATION_JSON;
             case Constants.XML:
                 if (!customMediaPrefix.isBlank()) {
-                    return "application/" + customMediaPrefix + "+xml";
+                    return APPLICATION_PREFIX + customMediaPrefix + "+xml";
                 }
                 return MediaType.APPLICATION_XML;
             case Constants.BYTE_ARRAY:
                 if (!customMediaPrefix.isBlank()) {
-                    return  "application/" + customMediaPrefix + "+octet-stream";
+                    return  APPLICATION_PREFIX + customMediaPrefix + "+octet-stream";
                 }
                 return MediaType.APPLICATION_OCTET_STREAM;
             case Constants.STRING:
@@ -503,7 +585,7 @@ public class OpenAPIResponseMapper {
             apiResponse.description(HTTP_200_DESCRIPTION);
             mediaTypeString = MediaType.APPLICATION_JSON;
             if (!customMediaPrefix.isBlank()) {
-                mediaTypeString = "application/" + customMediaPrefix + "+json";
+                mediaTypeString = APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
             }
             apiResponse.content(new Content().addMediaType(mediaTypeString, media));
             apiResponses.put(HTTP_200, apiResponse);
@@ -521,7 +603,7 @@ public class OpenAPIResponseMapper {
                     media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
                     mediaTypeString = MediaType.APPLICATION_JSON;
                     if (!customMediaPrefix.isBlank()) {
-                        mediaTypeString = "application/" + customMediaPrefix + "+json";
+                        mediaTypeString = APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
                     }
                     apiResponse.content(new Content().addMediaType(mediaTypeString, media));
                     apiResponse.description(HTTP_200_DESCRIPTION);
@@ -547,13 +629,13 @@ public class OpenAPIResponseMapper {
                 String code = generateApiResponseCode(typeInSymbol.getName().orElseThrow().trim());
                 Map<String, RecordFieldSymbol> fieldsOfRecord = returnRecord.fieldDescriptors();
                 // Handle the content of the response
-                RecordFieldSymbol body = fieldsOfRecord.get("body");
+                RecordFieldSymbol body = fieldsOfRecord.get(BODY);
                 if (body.typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
-                    componentMapper.createComponentSchema(schema, (TypeReferenceTypeSymbol) body.typeDescriptor());
+                    componentMapper.createComponentSchema(schema, body.typeDescriptor());
                     media.setSchema(new Schema().$ref(body.typeDescriptor().getName().orElseThrow().trim()));
                     mediaTypeString = MediaType.APPLICATION_JSON;
                     if (!customMediaPrefix.isBlank()) {
-                        mediaTypeString = "application/" + customMediaPrefix + "+json";
+                        mediaTypeString = APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
                     }
                     apiResponse.content(new Content().addMediaType(mediaTypeString, media));
                     apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
@@ -578,7 +660,7 @@ public class OpenAPIResponseMapper {
             media.setSchema(new Schema().$ref(typeSymbol.getName().get()));
             mediaTypeString = MediaType.APPLICATION_JSON;
             if (!customMediaPrefix.isBlank()) {
-                mediaTypeString = "application/" + customMediaPrefix + "+json";
+                mediaTypeString = APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
             }
             apiResponse.content(new Content().addMediaType(mediaTypeString, media));
             apiResponse.description(HTTP_200_DESCRIPTION);
@@ -601,13 +683,13 @@ public class OpenAPIResponseMapper {
             MetadataNode metadataNode = serviceDefNode.metadata().get();
             NodeList<AnnotationNode> annotations = metadataNode.annotations();
             if (!annotations.isEmpty()) {
-                mediaType = extractAnnotationDetails(mediaType, annotations);
+                mediaType = extractServiceAnnotationDetails(mediaType, annotations);
             }
         }
         return mediaType;
     }
 
-    private String extractAnnotationDetails(String mediaType, NodeList<AnnotationNode> annotations) {
+    private String extractServiceAnnotationDetails(String mediaType, NodeList<AnnotationNode> annotations) {
 
         for (AnnotationNode annotation: annotations) {
             Node annotReference = annotation.annotReference();
@@ -624,5 +706,51 @@ public class OpenAPIResponseMapper {
             }
         }
         return mediaType;
+    }
+
+    /**
+     * Cache configuration utils.
+     */
+    public String generateCacheControlString(CacheConfigAnnotation cacheConfig) {
+        List<String> directives = new ArrayList<>();
+        // when field values has -- create a function for have the default values.
+        if (cacheConfig.isMustRevalidate()) {
+            directives.add(MUST_REVALIDATE);
+        }
+        if (cacheConfig.isNoCache()) {
+            directives.add(NO_CACHE + appendFields(cacheConfig.getNoCacheFields()));
+        }
+        if (cacheConfig.isNoStore()) {
+            directives.add(NO_STORE);
+        }
+        if (cacheConfig.isNoTransform()) {
+            directives.add(NO_TRANSFORM);
+        }
+        if (cacheConfig.isPrivate()) {
+            directives.add(PRIVATE + appendFields(cacheConfig.getPrivateFields()));
+        } else {
+            directives.add(PUBLIC);
+        }
+        if (cacheConfig.isProxyRevalidate()) {
+            directives.add(PROXY_REVALIDATE);
+        }
+
+        if (cacheConfig.getMaxAge() > -1) {
+            directives.add(MAX_AGE + "=" + cacheConfig.getMaxAge());
+        }
+        if (cacheConfig.getsMaxAge() > -1) {
+            directives.add(S_MAX_AGE + "=" + cacheConfig.getMaxAge());
+        }
+        return String.join(",", directives);
+    }
+
+    private String appendFields(List<String> fields) {
+        return  ( "=\"" + buildCommaSeparatedString(fields) + "\"");
+    }
+
+    private String buildCommaSeparatedString(List<String> fields) {
+        String stringValue = fields.stream().map(field -> field + ",").collect(Collectors.joining());
+        String genString = stringValue;
+        return genString.replaceAll(", $", "").trim();
     }
 }
