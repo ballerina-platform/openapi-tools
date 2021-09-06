@@ -81,6 +81,17 @@ public class RequestBodyTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
+    @Test(description = "Test client generation for unsupported request body media type",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Unsupported media type is given in the request body")
+    public void testRequestBodyWithUnsupportedMediaType() throws IOException, BallerinaOpenApiException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RES_DIR.resolve("swagger/unsupported_request_body.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        ballerinaClientGenerator.generateSyntaxTree();
+    }
+
     @AfterTest
     private void deleteGeneratedFiles() {
         try {

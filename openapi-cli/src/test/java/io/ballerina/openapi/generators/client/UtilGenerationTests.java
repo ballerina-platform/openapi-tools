@@ -102,9 +102,37 @@ public class UtilGenerationTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<String> invalidFunctionNames = Arrays.asList(getMapForHeaders);
+        List<String> invalidFunctionNames = Arrays.asList(getPathForQueryParam, getMapForHeaders);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
+        List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
+        Assert.assertTrue(diagnostics.isEmpty());
+    }
+
+    @Test(description = "Validate the util functions generated for OpenAPI definition with URL encoded " +
+            "request body with encoding styles specified")
+    public void testUtilFileGenURLEncodedRequestWithEncoding() throws IOException, BallerinaOpenApiException,
+            FormatterException, URISyntaxException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RESDIR.resolve("swagger/url_encoded_with_map.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        List<String> invalidFunctionNames = Arrays.asList(getPathForQueryParam, getMapForHeaders);
+        Assert.assertTrue(checkUtil(invalidFunctionNames,
+                ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
+        List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
+        Assert.assertTrue(diagnostics.isEmpty());
+    }
+
+    @Test(description = "Validate the util functions generated for OpenAPI definition when all the scenarios are given")
+    public void testCompleteUtilFileGen() throws IOException, BallerinaOpenApiException,
+            FormatterException, URISyntaxException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RESDIR.resolve("swagger/complete_util_gen.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
     }
