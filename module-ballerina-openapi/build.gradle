@@ -29,6 +29,7 @@ dependencies {
     implementation project(':openapi-validator')
     implementation project(':openapi-cli')
     implementation project(':openapi-ls-extension')
+    implementation project(':openapi-extension')
 }
 
 clean {
@@ -55,6 +56,7 @@ def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def targetNativeJar = file("""$project.rootDir/${packageName}-validator/build/libs/${packageName}-validator-${project.version}.jar""")
 def targetOpenApiCommonJar = file("$project.rootDir/openapi-bal-service/build/libs/openapi-bal-service-${project.version}.jar")
 def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
+def targetOpenApiBuiltInExtensionJar = file("$project.rootDir/openapi-extension/build/libs/openapi-extension-${project.version}.jar")
 def targetOpenApiLSJar = file("$project.rootDir/openapi-ls-extension/build/libs/openapi-ls-extension-${project.version}.jar")
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
@@ -201,6 +203,7 @@ task ballerinaBuild {
             from targetNativeJar
             into file("$artifactLibParent/libs")
         }
+
         copy {
             from targetOpenApiCommonJar
             into file("$artifactLibParent/libs")
@@ -208,6 +211,11 @@ task ballerinaBuild {
 
         copy {
             from targetOpenApiCliJar
+            into file("$artifactLibParent/libs")
+        }
+
+        copy {
+            from targetOpenApiBuiltInExtensionJar
             into file("$artifactLibParent/libs")
         }
 
@@ -304,6 +312,7 @@ ballerinaBuild.dependsOn ":${packageName}-bal-service:build"
 ballerinaBuild.dependsOn ":${packageName}-cli:build"
 ballerinaBuild.dependsOn ":${packageName}-ls-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-validator:build"
+ballerinaBuild.dependsOn ":${packageName}-extension:build"
 ballerinaBuild.dependsOn updateCompilerTomlFile
 ballerinaBuild.dependsOn initializeVariables
 ballerinaBuild.finalizedBy revertTomlFile

@@ -19,6 +19,7 @@
 
 package io.ballerina.openapi.converter.service;
 
+import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
@@ -113,15 +114,25 @@ public class OpenAPIEndpointMapper {
      */
     private Server extractServer(ListenerDeclarationNode ep, String serviceBasePath) {
         Optional<ParenthesizedArgList> list;
-        if (ep.initializer().kind().equals(SyntaxKind.EXPLICIT_NEW_EXPRESSION)) {
-           ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) ep.initializer();
-            list = Optional.ofNullable(bTypeExplicit.parenthesizedArgList());
+        if (ep.initializer().kind() == SyntaxKind.CHECK_EXPRESSION) {
+            ExpressionNode expression = ((CheckExpressionNode) ep.initializer()).expression();
+            list = extractListenerNodeType(expression);
         } else {
-            ImplicitNewExpressionNode  bTypeInit = (ImplicitNewExpressionNode) ep.initializer();
+            list = extractListenerNodeType(ep.initializer());
+        }
+        return generateServer(serviceBasePath, list);
+    }
+
+    private Optional<ParenthesizedArgList> extractListenerNodeType(Node expression2) {
+        Optional<ParenthesizedArgList> list = Optional.empty();
+        if (expression2.kind() == SyntaxKind.EXPLICIT_NEW_EXPRESSION) {
+            ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) expression2;
+            list = Optional.ofNullable(bTypeExplicit.parenthesizedArgList());
+        } else if (expression2.kind() == SyntaxKind.IMPLICIT_NEW_EXPRESSION) {
+            ImplicitNewExpressionNode bTypeInit = (ImplicitNewExpressionNode) expression2;
             list = bTypeInit.parenthesizedArgList();
         }
-
-        return generateServer(serviceBasePath, list);
+        return list;
     }
 
     // Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
@@ -158,7 +169,7 @@ public class OpenAPIEndpointMapper {
         if (list.isPresent()) {
             SeparatedNodeList<FunctionArgumentNode> arg = (list.get()).arguments();
             port = arg.get(0).toString();
-            if (arg.size() > 1) {
+            if (arg.size() > 1 && (arg.get(1) instanceof NamedArgumentNode)) {
                 ExpressionNode bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
                 if (bLangRecordLiteral instanceof MappingConstructorExpressionNode) {
                     host = extractHost((MappingConstructorExpressionNode) bLangRecordLiteral);
