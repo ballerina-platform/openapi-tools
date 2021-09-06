@@ -62,12 +62,10 @@ public class CacheConfigAnnotation {
     }
 
     public void setMustRevalidate(boolean mustRevalidate) {
-
         this.mustRevalidate = mustRevalidate;
     }
 
     public boolean isNoCache() {
-
         return noCache;
     }
 
