@@ -30,6 +30,7 @@ import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -192,7 +193,7 @@ public class OpenAPIResponseMapper {
             if (field.kind() == SyntaxKind.SPECIFIC_FIELD) {
                 SpecificFieldNode specificFieldNode = (SpecificFieldNode) field;
                 // generate string
-                String name = specificFieldNode.fieldName().toString();
+                String name = specificFieldNode.fieldName().toString().trim();
                 ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
                 setCacheConfigField(cacheConfig, name, expressionNode);
             }
@@ -217,7 +218,7 @@ public class OpenAPIResponseMapper {
             lmHeader.setSchema(new StringSchema());
             headers.put(LAST_MODIFIED, lmHeader);
 
-        } else if (!cache.isSetETag() && !cache.isSetLastModified()){
+        } else if (!cache.isSetETag() && !cache.isSetLastModified()) {
             stringSchema._default(generateCacheControlString(cache));
             cacheHeader.setSchema(stringSchema);
             headers.put(CACHE_CONTROL, cacheHeader);
@@ -295,6 +296,16 @@ public class OpenAPIResponseMapper {
         } else if ("setLastModified".equals(fieldName) && (expressionNode.toString().equals(
                 FALSE))) {
             cacheConfig.setSetLastModified(false);
+        } else if ("privateFields".equals(fieldName)) {
+            List<String> privateFields = new ArrayList<>();
+            SeparatedNodeList<Node> fields = ((ListConstructorExpressionNode) expressionNode).expressions();
+            fields.stream().forEach(field -> privateFields.add(field.toString().trim()));
+            cacheConfig.setPrivateFields(privateFields);
+        } else if ("noCacheFields".equals(fieldName)) {
+            List<String> noCacheFields = new ArrayList<>();
+            SeparatedNodeList<Node> fields = ((ListConstructorExpressionNode) expressionNode).expressions();
+            fields.stream().forEach(field -> noCacheFields.add(field.toString().trim()));
+            cacheConfig.setNoCacheFields(noCacheFields);
         }
     }
 
@@ -745,12 +756,11 @@ public class OpenAPIResponseMapper {
     }
 
     private String appendFields(List<String> fields) {
-        return  ( "=\"" + buildCommaSeparatedString(fields) + "\"");
+        return ("=\"" + buildCommaSeparatedString(fields) + "\"");
     }
 
     private String buildCommaSeparatedString(List<String> fields) {
-        String stringValue = fields.stream().map(field -> field + ",").collect(Collectors.joining());
-        String genString = stringValue;
-        return genString.replaceAll(", $", "").trim();
+        String genString = fields.stream().map(field -> field.replaceAll("\"", "") + ",").collect(Collectors.joining());
+        return genString.substring(0, genString.length() - 1);
     }
 }

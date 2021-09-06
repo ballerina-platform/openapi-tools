@@ -9,7 +9,7 @@ paths:
             Cache-Control:
               schema:
                 type: string
-                default: "must-revalidate,public,max-age=3600"
+                default: "no-cache=\"field03,fields04\",private=\"field1,filed2\"\,max-age=5"
             ETag:
               schema:
                 type: string

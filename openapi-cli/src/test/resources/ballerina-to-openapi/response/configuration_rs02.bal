@@ -3,8 +3,17 @@ import ballerina/http;
 listener http:Listener helloEp = new (9090);
 
 service /payloadV on helloEp {
-    resource function get cachingBackEnd(http:Request req) returns @http:CacheConfig{mustRevalidate: true, maxAge : 5}
-    string {
-        return "Hello, World!!";
-    }
+    //With both etag and last-modified false
+    resource function get cachingBackEnd01(http:Request req) returns @http:CacheConfig{maxAge : 5, setETag : false,
+    setLastModified : false} string {
+           return "Hello, World!!";}
+    //With last-modified false
+    resource function get cachingBackEnd02(http:Request req) returns @http:CacheConfig{maxAge : 5,
+    setLastModified : false} string {
+               return "Hello, World!!";}
+    //With etag false
+    resource function get cachingBackEnd03(http:Request req) returns @http:CacheConfig{maxAge : 5, setETag : false}
+     string {
+               return "Hello, World!!";}
+
 }

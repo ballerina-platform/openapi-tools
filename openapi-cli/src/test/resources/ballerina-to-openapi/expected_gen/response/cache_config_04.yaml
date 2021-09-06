@@ -1,7 +1,7 @@
 paths:
-  /cachingBackEnd:
+  /cachingBackEnd01:
     get:
-      operationId: operation_get_/cachingBackEnd
+      operationId: operation_get_/cachingBackEnd01
       responses:
         "200":
           description: Ok
@@ -9,7 +9,7 @@ paths:
             Cache-Control:
               schema:
                 type: string
-                default: "must-revalidate,public,max-age=3600"
+                default: public
             ETag:
               schema:
                 type: string
@@ -20,4 +20,3 @@ paths:
             text/plain:
               schema:
                 type: string
-components: {}
