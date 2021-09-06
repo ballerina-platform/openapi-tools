@@ -750,7 +750,7 @@ public class OpenAPIResponseMapper {
             directives.add(MAX_AGE + "=" + cacheConfig.getMaxAge());
         }
         if (cacheConfig.getsMaxAge() > -1) {
-            directives.add(S_MAX_AGE + "=" + cacheConfig.getMaxAge());
+            directives.add(S_MAX_AGE + "=" + cacheConfig.getsMaxAge());
         }
         return String.join(",", directives);
     }

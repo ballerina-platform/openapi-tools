@@ -8,4 +8,8 @@ service /payloadV on helloEp {
     noTransform:true, proxyRevalidate: true} string {
            return "Hello, World!!";}
 
+    resource function get cachingBackEnd02(http:Request req) returns @http:CacheConfig{mustRevalidate: true, sMaxAge: 5,
+     noStore: true, noTransform:true, proxyRevalidate: true} string {
+               return "Hello, World!!";}
+
 }
