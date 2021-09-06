@@ -46,6 +46,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG;
+import static io.ballerina.openapi.generators.GeneratorConstants.HOST;
+import static io.ballerina.openapi.generators.GeneratorConstants.NEW;
+
 /**
  * This util class for processing the mapping in between openAPI server section with ballerina listeners.
  *
@@ -64,6 +68,13 @@ public class ListenerGenerator {
         return basePath;
     }
 
+    /**
+     * Generate listener accoring to the given server details.
+     *
+     * @param servers  OAS server details
+     * @return         {@link ListenerDeclarationNode} for server.
+     * @throws BallerinaOpenApiException when process break with exception
+     */
     public ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers) throws BallerinaOpenApiException {
         // Assign host port value to listeners
 
@@ -116,7 +127,7 @@ public class ListenerGenerator {
         // Create variable
         Token variableName = AbstractNodeFactory.createIdentifierToken(ep);
         // Create initializer
-        Token newKeyword = AbstractNodeFactory.createIdentifierToken("new");
+        Token newKeyword = AbstractNodeFactory.createIdentifierToken(NEW);
         MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
         Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
         MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
@@ -127,10 +138,10 @@ public class ListenerGenerator {
 
         PositionalArgumentNode portNode = NodeFactory.createPositionalArgumentNode(expression);
 
-        Token name = AbstractNodeFactory.createIdentifierToken("config ");
+        Token name = AbstractNodeFactory.createIdentifierToken(CONFIG);
         SimpleNameReferenceNode argumentName = NodeFactory.createSimpleNameReferenceNode(name);
 
-        Token fieldName = AbstractNodeFactory.createIdentifierToken("host");
+        Token fieldName = AbstractNodeFactory.createIdentifierToken(HOST);
         Token literalHostToken = AbstractNodeFactory.createIdentifierToken('"' + host + '"', leading, trailing);
         BasicLiteralNode valueExpr = NodeFactory.createBasicLiteralNode(SyntaxKind.STRING_LITERAL,
                 literalHostToken);

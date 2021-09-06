@@ -158,5 +158,8 @@ public class GeneratorConstants {
     public static final String CONNECT = "connect";
     public static final String OPTIONS = "options";
     public static final String TRACE = "trace";
+    //Service related
+    public static final String HOST = "host";
+    public static final String NEW = "new";
 
 }
