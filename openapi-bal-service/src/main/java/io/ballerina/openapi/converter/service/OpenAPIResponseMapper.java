@@ -251,7 +251,6 @@ public class OpenAPIResponseMapper {
         }
     }
 
-
     private void setCacheConfigField(CacheConfigAnnotation cacheConfig, String fieldName,
                                      ExpressionNode expressionNode) {
         if (expressionNode.toString().equals(TRUE)) {
@@ -308,7 +307,6 @@ public class OpenAPIResponseMapper {
             cacheConfig.setNoCacheFields(noCacheFields);
         }
     }
-
 
     /**
      * This methods for handle the return type has non annotations.
@@ -532,7 +530,6 @@ public class OpenAPIResponseMapper {
     /**
      * Convert ballerina MIME types to OAS MIME types.
      */
-
     private String convertBallerinaMIMEToOASMIMETypes(String type, String customMediaPrefix)
             throws OpenApiConverterException {
         switch (type) {
@@ -701,7 +698,6 @@ public class OpenAPIResponseMapper {
     }
 
     private String extractServiceAnnotationDetails(String mediaType, NodeList<AnnotationNode> annotations) {
-
         for (AnnotationNode annotation: annotations) {
             Node annotReference = annotation.annotReference();
             if (annotReference.toString().trim().equals("http:ServiceConfig") && annotation.annotValue().isPresent()) {
@@ -724,7 +720,6 @@ public class OpenAPIResponseMapper {
      */
     public String generateCacheControlString(CacheConfigAnnotation cacheConfig) {
         List<String> directives = new ArrayList<>();
-        // when field values has -- create a function for have the default values.
         if (cacheConfig.isMustRevalidate()) {
             directives.add(MUST_REVALIDATE);
         }

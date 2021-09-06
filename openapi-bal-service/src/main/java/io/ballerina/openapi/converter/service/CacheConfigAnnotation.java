@@ -39,31 +39,25 @@ public class CacheConfigAnnotation {
     private boolean setLastModified = true;
 
     public CacheConfigAnnotation() {
-
     }
 
     public boolean isSetETag() {
-
         return setETag;
     }
 
     public void setSetETag(boolean setETag) {
-
         this.setETag = setETag;
     }
 
     public boolean isSetLastModified() {
-
         return setLastModified;
     }
 
     public void setSetLastModified(boolean setLastModified) {
-
         this.setLastModified = setLastModified;
     }
 
     public boolean isMustRevalidate() {
-
         return mustRevalidate;
     }
 
@@ -78,87 +72,70 @@ public class CacheConfigAnnotation {
     }
 
     public void setNoCache(boolean noCache) {
-
         this.noCache = noCache;
     }
 
     public boolean isNoStore() {
-
         return noStore;
     }
 
     public void setNoStore(boolean noStore) {
-
         this.noStore = noStore;
     }
 
     public boolean isNoTransform() {
-
         return noTransform;
     }
 
     public void setNoTransform(boolean noTransform) {
-
         this.noTransform = noTransform;
     }
 
     public boolean isPrivate() {
-
         return isPrivate;
     }
 
     public void setPrivate(boolean aPrivate) {
-
         isPrivate = aPrivate;
     }
 
     public boolean isProxyRevalidate() {
-
         return proxyRevalidate;
     }
 
     public void setProxyRevalidate(boolean proxyRevalidate) {
-
         this.proxyRevalidate = proxyRevalidate;
     }
 
     public int getMaxAge() {
-
         return maxAge;
     }
 
     public void setMaxAge(int maxAge) {
-
         this.maxAge = maxAge;
     }
 
     public int getsMaxAge() {
-
         return sMaxAge;
     }
 
     public void setsMaxAge(int sMaxAge) {
-
         this.sMaxAge = sMaxAge;
     }
 
     public List<String> getNoCacheFields() {
-
         return noCacheFields;
     }
 
     public void setNoCacheFields(List<String> noCacheFields) {
-
         this.noCacheFields = noCacheFields;
     }
 
     public List<String> getPrivateFields() {
-
         return privateFields;
     }
 
     public void setPrivateFields(List<String> privateFields) {
-
         this.privateFields = privateFields;
     }
 }
