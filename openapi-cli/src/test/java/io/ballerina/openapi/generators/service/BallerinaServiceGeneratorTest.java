@@ -112,13 +112,7 @@
 //        compareGeneratedSyntaxTreewithExpectedSyntaxTree("query_parameters.bal");
 //
 //    }
-//    //Scenario 03 - Header parameters.
-//    @Test(description = "Generate functionDefinitionNode for Header parameters")
-//    public void generateHeaderParameter() throws IOException, BallerinaOpenApiException, FormatterException {
-//        Path definitionPath = RES_DIR.resolve("generators/swagger/multiHeaderParam.yaml");
-//        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(definitionPath, "listeners", filter);
-//        compareGeneratedSyntaxTreewithExpectedSyntaxTree("header_parameters.bal");
-//    }
+
 //
 //    @Test(description = "Generate functionDefinitionNode for paramter for content instead of schema")
 //    public void generateParameterHasContent() throws IOException, BallerinaOpenApiException, FormatterException {

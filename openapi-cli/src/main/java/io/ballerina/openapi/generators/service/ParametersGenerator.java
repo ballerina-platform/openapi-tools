@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
@@ -36,9 +53,16 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescr
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
+import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
+import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
 
+/**
+ * This class uses for generating all resource function parameters.
+ *
+ * @since 2.0.0
+ */
 public class ParametersGenerator {
 
     public List<Node> generateResourcesInputs(Map.Entry<PathItem.HttpMethod, Operation> operation)
@@ -50,13 +74,12 @@ public class ParametersGenerator {
             List<Parameter> parameters = operation.getValue().getParameters();
             for (Parameter parameter: parameters) {
                 if (parameter.getIn().trim().equals("header")) {
-                    // Handle header parameters
-                    // type string
-                    createNodeForHeaderParameter(params, comma, parameter);
+                    RequiredParameterNode param = handleHeader(parameter);
+                    params.add(param);
+                    params.add(comma);
                 } else {
-                    // Handle query parameter
                     // type​ ​ BasicType​ ​ boolean|int|float|decimal|string​ ;
-                    //public​ ​ type​ ​ QueryParamType​ ()​ |BasicType|BasicType​ [];
+                    //public​ ​ type​ ​​ ()​ |BasicType|BasicType​ [];
                     createNodeForQueryParam(params, comma, parameter);
                 }
             }
@@ -76,22 +99,22 @@ public class ParametersGenerator {
         return params;
     }
 
-    private void createNodeForHeaderParameter(List<Node> params, Token comma, Parameter parameter)
-            throws BallerinaOpenApiException {
-
+    private RequiredParameterNode handleHeader(Parameter parameter)throws BallerinaOpenApiException {
         Schema schema = parameter.getSchema();
         String type = "string";
         TypeDescriptorNode headerTypeName;
-        IdentifierToken parameterName =
-                createIdentifierToken(" " + escapeIdentifier(parameter.getName().toLowerCase(
+        IdentifierToken parameterName = createIdentifierToken(" " + escapeIdentifier(parameter.getName().toLowerCase(
                         Locale.ENGLISH)));
 
         if (schema == null || parameter.getContent() != null) {
-            RequiredParameterNode param =
-                    createRequiredParameterNode(createEmptyNodeList(),
-                            createIdentifierToken("string"), parameterName);
-            params.add(param);
-            //Diagnostic for null schema
+            /**
+             *01.<pre>in: header
+             *       name: X-Request-ID
+             *       schema: {}
+             * </pre>
+             *
+             */
+            return createRequiredParameterNode(createEmptyNodeList(), createIdentifierToken(STRING), parameterName);
         } else {
             if (!schema.getType().equals(type) && !(schema instanceof ArraySchema)) {
                 //TO-DO: Generate diagnostic about to error type
@@ -116,10 +139,9 @@ public class ParametersGenerator {
             AnnotationNode headerNode = getAnnotationNode("Header", annotValue);
             NodeList<AnnotationNode> headerAnnotations = NodeFactory.createNodeList(headerNode);
 
-            RequiredParameterNode param =  createRequiredParameterNode(headerAnnotations,
+            return createRequiredParameterNode(headerAnnotations,
                     headerTypeName, parameterName);
-            params.add(param);
-            params.add(comma);
+
         }
     }
 

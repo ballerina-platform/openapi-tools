@@ -115,7 +115,6 @@ public class GeneratorConstants {
     public static final String CLIENT_EP = "clientEp";
     public static final String CLASS = "class";
     public static final String EQUAL = "=";
-    public static final String COLON = ":";
     public static final String CONFIG = "config";
     public static final String FUNCTION = "function";
     public static final String RETURN = "returns";
@@ -161,5 +160,5 @@ public class GeneratorConstants {
     //Service related
     public static final String HOST = "host";
     public static final String NEW = "new";
-
+    public static final String RESOURCE = "resource";
 }

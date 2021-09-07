@@ -25,23 +25,20 @@ import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * All the tests related to the {@code io.ballerina.openapi.generators.service.ListenerGenerator} util.
  */
 public class ListenerTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
+    BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator();
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
@@ -50,44 +47,26 @@ public class ListenerTests {
 
     @Test(description = "Generate importors")
     public void generateImports() throws IOException, BallerinaOpenApiException, FormatterException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/petstore_listeners.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
         System.out.println(Formatter.format(syntaxTree));
-        compareGeneratedSyntaxTreewithExpectedSyntaxTree("importors.bal");
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("importors.bal", syntaxTree);
     }
 
     @Test(description = "Generate listeners")
     public void generatelisteners() throws IOException, BallerinaOpenApiException, FormatterException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/petstore_listeners02.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners02.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
-        compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners.bal");
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners.bal", syntaxTree);
     }
 
     @Test(description = "Generate listeners")
     public void generatelisteners02() throws IOException, BallerinaOpenApiException, FormatterException {
-        Path definitionPath = RES_DIR.resolve("generators/swagger/petstore_listeners03.yaml");
+        Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners03.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = BallerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
-        compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners03.bal");
-    }
-
-    //Get string as a content of ballerina file
-    private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
-        Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
-        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
-        expectedServiceLines.close();
-        return expectedServiceContent;
-    }
-
-    private void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String s) throws IOException {
-
-        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("generators/ballerina"), s);
-        String generatedSyntaxTree = syntaxTree.toString();
-
-        generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
-        expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
-        Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners03.bal", syntaxTree);
     }
 }
