@@ -178,8 +178,8 @@ public class BallerinaServiceGenerator {
                         // getRelative resource path
                         List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation);
                         // function call
-                        FunctionDefinitionNode functionDefinitionNode =
-                                getResourceFunction(operation, functionRelativeResourcePath);
+                        FunctionDefinitionNode functionDefinitionNode = getResourceFunction(operation,
+                                functionRelativeResourcePath);
                         functions.add(functionDefinitionNode);
                     }
                 }
@@ -220,8 +220,7 @@ public class BallerinaServiceGenerator {
         // Generate return type is node
         ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
-                createEmptyNodeList(),
-                createIdentifierToken(RETURN));
+                createEmptyNodeList(), createIdentifierToken(RETURN));
 
         FunctionSignatureNode functionSignatureNode = NodeFactory.createFunctionSignatureNode(
                 createToken(SyntaxKind.OPEN_PAREN_TOKEN), parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN),
@@ -233,7 +232,7 @@ public class BallerinaServiceGenerator {
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         return NodeFactory.createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
-                        qualifiersList, functionKeyWord, functionName, relativeResourcePath,
-                        functionSignatureNode, functionBodyBlockNode);
+                qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
+                functionBodyBlockNode);
     }
 }

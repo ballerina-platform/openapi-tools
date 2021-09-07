@@ -161,4 +161,5 @@ public class GeneratorConstants {
     public static final String HOST = "host";
     public static final String NEW = "new";
     public static final String RESOURCE = "resource";
+    public static final String QUERY = "query";
 }
