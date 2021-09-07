@@ -37,8 +37,6 @@ import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnosti
  * {@code HttpDocGeneratedTask} handles post compile tasks related to OpenAPI doc generation.
  */
 public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLifecycleEventContext> {
-    private static final PrintStream ERR = System.err;
-
     private final ResourcePackagingService packagingService;
 
     public OpenApiDocPackagingTask() {
