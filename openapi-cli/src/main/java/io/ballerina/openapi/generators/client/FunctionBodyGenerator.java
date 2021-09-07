@@ -79,11 +79,11 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExp
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIndexedExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTemplateExpressionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createTupleTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.BACKTICK_TOKEN;
@@ -98,13 +98,16 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
+import static io.ballerina.openapi.generators.GeneratorConstants.ENCODING;
 import static io.ballerina.openapi.generators.GeneratorConstants.EXECUTE;
+import static io.ballerina.openapi.generators.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.generators.GeneratorConstants.POST;
 import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESPONSE;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
+import static io.ballerina.openapi.generators.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
@@ -278,7 +281,7 @@ public class FunctionBodyGenerator {
      * `explode` sections of the OpenAPI definition. Style defines how multiple values are delimited and explode
      * specifies whether arrays and objects should generate separate parameters
      *
-     * --ex: {@code map<[string, boolean]> queryParamEncoding = {"expand": ["deepObject", true]};}
+     * --ex: {@code map<Encoding> queryParamEncoding = {"expand": ["deepObject", true]};}
      *
      * @param queryParameters               List of query parameters defined in a particular function
      * @return                              {@link VariableDeclarationNode}
@@ -288,7 +291,7 @@ public class FunctionBodyGenerator {
             throws BallerinaOpenApiException {
         List<Node> filedOfMap = new ArrayList();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken("map<[string, boolean]>"));
+                createIdentifierToken("map<" + ENCODING + ">"));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
                 createIdentifierToken("queryParamEncoding"));
         TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
@@ -301,19 +304,8 @@ public class FunctionBodyGenerator {
             if (paramSchema != null && (paramSchema.getProperties() != null ||
                     (paramSchema.getType() != null && paramSchema.getType().equals("array")))) {
                 if (parameter.getStyle() != null || parameter.getExplode() != null) {
-                    String style = parameter.getStyle() != null ? parameter.getStyle().toString() : "form";
-                    String explode = parameter.getExplode() != null ? parameter.getExplode().toString() : "true";
-                    IdentifierToken fieldName = createIdentifierToken('"' + (parameter.getName().trim()) + '"');
-                    Token colon = createToken(COLON_TOKEN);
-                    IdentifierToken styleNode = createIdentifierToken('"' + style + '"');
-                    IdentifierToken explodeNode = createIdentifierToken(explode);
-                    ExpressionNode expressionNode = createTupleTypeDescriptorNode(createToken(OPEN_BRACKET_TOKEN),
-                            createSeparatedNodeList(styleNode, createToken(COMMA_TOKEN), explodeNode),
-                            createToken(CLOSE_BRACKET_TOKEN));
-                    SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
-                            fieldName, colon, expressionNode);
-                    filedOfMap.add(specificFieldNode);
-                    filedOfMap.add(createToken(COMMA_TOKEN));
+                    createEncodingMap(filedOfMap, parameter.getStyle().toString(),
+                            parameter.getExplode(), parameter.getName().trim());
                 }
             }
         }
@@ -329,6 +321,34 @@ public class FunctionBodyGenerator {
         return null;
 
     }
+
+    /**
+     * Create each item of the encoding map.
+     *
+     * @param filedOfMap    Includes all the items in the encoding map
+     * @param style         Defines how multiple values are delimited and explode
+     * @param explode       Specifies whether arrays and objects should generate separate parameters
+     * @param key           Key of the item in the map
+     */
+    private void createEncodingMap(List<Node> filedOfMap, String style, Boolean explode, String key) {
+        IdentifierToken fieldName = createIdentifierToken('"' + key + '"');
+        Token colon = createToken(COLON_TOKEN);
+        SpecificFieldNode styleField = createSpecificFieldNode(null,
+                createIdentifierToken(STYLE), createToken(COLON_TOKEN),
+                createRequiredExpressionNode(createIdentifierToken(style.toUpperCase(Locale.ROOT))));
+        SpecificFieldNode explodeField = createSpecificFieldNode(null,
+                createIdentifierToken(EXPLODE), createToken(COLON_TOKEN),
+                createRequiredExpressionNode(createIdentifierToken(explode.toString())));
+        ExpressionNode expressionNode = createMappingConstructorExpressionNode(
+                createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(styleField, createToken(COMMA_TOKEN),
+                        explodeField),
+                createToken(CLOSE_BRACE_TOKEN));
+        SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
+                fieldName, colon, expressionNode);
+        filedOfMap.add(specificFieldNode);
+        filedOfMap.add(createToken(COMMA_TOKEN));
+    }
+
 
     /**
      * Provides the list of security schemes available for the given operation.
@@ -644,28 +664,15 @@ public class FunctionBodyGenerator {
     public VariableDeclarationNode getRequestBodyEncodingMap(Map<String, Encoding> encodingMap) {
         List<Node> filedOfMap = new ArrayList();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken("map<[string, boolean]>"));
+                createIdentifierToken("map<" + ENCODING + ">"));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
                 createIdentifierToken("requestBodyEncoding"));
         TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
         if (encodingMap != null && encodingMap.size() > 0) {
             for (Map.Entry<String, Encoding> encoding : encodingMap.entrySet()) {
                 if (encoding.getValue().getStyle() != null || encoding.getValue().getExplode() != null) {
-                    String style = encoding.getValue().getStyle() != null ?
-                            encoding.getValue().getStyle().toString() : "form";
-                    String explode = encoding.getValue().getExplode() != null ?
-                            encoding.getValue().getExplode().toString() : "true";
-                    IdentifierToken fieldName = createIdentifierToken('"' + encoding.getKey() + '"');
-                    Token colon = createToken(COLON_TOKEN);
-                    IdentifierToken styleNode = createIdentifierToken('"' + style + '"');
-                    IdentifierToken explodeNode = createIdentifierToken(explode);
-                    ExpressionNode expressionNode = createTupleTypeDescriptorNode(createToken(OPEN_BRACKET_TOKEN),
-                            createSeparatedNodeList(styleNode, createToken(COMMA_TOKEN), explodeNode),
-                            createToken(CLOSE_BRACKET_TOKEN));
-                    SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
-                            fieldName, colon, expressionNode);
-                    filedOfMap.add(specificFieldNode);
-                    filedOfMap.add(createToken(COMMA_TOKEN));
+                    createEncodingMap(filedOfMap, encoding.getValue().getStyle().toString(),
+                            encoding.getValue().getExplode(), encoding.getKey());
                 }
             }
             if (filedOfMap.size() > 0) {

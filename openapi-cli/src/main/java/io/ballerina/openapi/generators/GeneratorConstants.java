@@ -48,7 +48,7 @@ public class GeneratorConstants {
         }
     }
     /**
-     * Enum to select the relavant ballerina http auth record.
+     * Enum to select the relevant ballerina http auth record.
      */
     public enum AuthConfigTypes {
         BASIC("http:CredentialsConfig"),
@@ -160,5 +160,15 @@ public class GeneratorConstants {
     public static final String CONNECT = "connect";
     public static final String OPTIONS = "options";
     public static final String TRACE = "trace";
+
+    //Encoding related constants
+    public static final String DEEP_OBJECT = "DEEPOBJECT";
+    public static final String FORM = "FORM";
+    public static final String SPACE_DELIMITED = "SPACEDELIMITED";
+    public static final String PIPE_DELIMITED = "PIPEDELIMITED";
+    public static final String ENCODING = "Encoding";
+    public static final String ENCODING_STYLE = "EncodingStyle";
+    public static final String STYLE = "style";
+    public static final String EXPLODE = "explode";
 
 }
