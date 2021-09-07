@@ -33,6 +33,7 @@ import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.openapi.extension.Constants;
 import io.ballerina.openapi.extension.OpenApiDiagnosticCode;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.Diagnostic;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,7 +45,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.ballerina.openapi.extension.doc.DocGenerationUtils.updateContext;
+import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnostics;
 
 /**
  * {@code AbstractOpenApiDocGenerator} contains the basic utilities required for OpenAPI doc generation.
@@ -71,7 +72,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 boolean resourceCreatingSuccessful = resourceDirectory.mkdirs();
                 if (!resourceCreatingSuccessful) {
                     OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_100;
-                    updateContext(context, errorCode, location);
+                    updateContext(context, location, errorCode);
                     return;
                 }
             }
@@ -86,7 +87,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 if (openApiContractOpt.isEmpty()) {
                     // could not find the open-api contract file, hence will not proceed
                     OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_101;
-                    updateContext(context, errorCode, location);
+                    updateContext(context, location, errorCode);
                     return;
                 }
                 try (FileOutputStream outStream = new FileOutputStream(openApiDoc.toFile())) {
@@ -104,11 +105,18 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             }
         } catch (IOException | OpenApiConverterException e) {
             OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_102;
-            updateContext(context, errorCode, location, e.getMessage());
+            updateContext(context, location, errorCode);
         } catch (Exception e) {
             OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_103;
-            updateContext(context, errorCode, location, e.getMessage());
+            updateContext(context, location, errorCode);
         }
+    }
+
+    private void updateContext(SyntaxNodeAnalysisContext context,
+                               NodeLocation location,
+                               OpenApiDiagnosticCode errorCode) {
+        Diagnostic diagnostic = getDiagnostics(errorCode, location);
+        context.reportDiagnostic(diagnostic);
     }
 
     private Optional<AnnotationNode> getServiceInfoAnnotation(ServiceDeclarationNode serviceNode) {

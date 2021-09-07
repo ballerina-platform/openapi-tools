@@ -16,22 +16,20 @@
 
 package io.ballerina.openapi.extension.doc;
 
-import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.openapi.extension.OpenApiDiagnosticCode;
-import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
+import io.ballerina.tools.diagnostics.Location;
 
 /**
  * {@code DocGenerationUtils} contains common utilities related to doc generation and resource packaging.
  */
 public final class DocGenerationUtils {
-    public static void updateContext(SyntaxNodeAnalysisContext context, OpenApiDiagnosticCode errorCode,
-                                     NodeLocation location, Object... args) {
+    public static Diagnostic getDiagnostics(OpenApiDiagnosticCode errorCode,
+                                            Location location, Object... args) {
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
                 errorCode.getCode(), errorCode.getDescription(), errorCode.getSeverity());
-        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location, args);
-        context.reportDiagnostic(diagnostic);
+        return DiagnosticFactory.createDiagnostic(diagnosticInfo, location, args);
     }
 }

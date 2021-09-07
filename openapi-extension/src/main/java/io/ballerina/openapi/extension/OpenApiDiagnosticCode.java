@@ -28,6 +28,12 @@ public enum OpenApiDiagnosticCode {
     OPENAPI_102("OPENAPI_102", "error occurred when generating open-api doc : {0}",
             DiagnosticSeverity.WARNING),
     OPENAPI_103("OPENAPI_103", "unknown error occurred when generating open-api doc : {0}",
+            DiagnosticSeverity.WARNING),
+    OPENAPI_104("OPENAPI_104", "error occurred while packing generated resources : {0}",
+            DiagnosticSeverity.WARNING),
+    OPENAPI_105("OPENAPI_105", "unknown error occurred while packing generated resources : {0}",
+            DiagnosticSeverity.WARNING),
+    OPENAPI_106("OPENAPI_106", "error occurred while cleaning-up generated resources : {0}",
             DiagnosticSeverity.WARNING);
 
     private final String code;

@@ -20,12 +20,19 @@ import io.ballerina.openapi.extension.doc.ResourcePackagingService;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.plugins.CompilerLifecycleEventContext;
 import io.ballerina.projects.plugins.CompilerLifecycleTask;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.Location;
+import io.ballerina.tools.text.LinePosition;
+import io.ballerina.tools.text.LineRange;
+import io.ballerina.tools.text.TextRange;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+
+import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnostics;
 
 /**
  * {@code HttpDocGeneratedTask} handles post compile tasks related to OpenAPI doc generation.
@@ -44,42 +51,63 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
         ProjectKind projectType = context.currentPackage().project().kind();
         Optional<Path> executablePath = context.getGeneratedArtifactPath();
         executablePath.ifPresent(exec ->
-                updateResources(exec, ProjectKind.SINGLE_FILE_PROJECT.equals(projectType))
+                updateResources(exec, context)
         );
     }
 
-    private void updateResources(Path executablePath, boolean isSingleFile) {
-        Path executableJarAbsPath = executablePath.toAbsolutePath();
-        // get the path for `target/bin`
-        Path targetBinPath = executableJarAbsPath.getParent();
-        if (null != targetBinPath && Files.exists(targetBinPath)) {
-            if (!Files.exists(targetBinPath.resolve(Constants.RESOURCES_DIR_NAME))) {
-                return;
-            }
+    private void updateResources(Path executablePath, CompilerLifecycleEventContext context) {
+        try {
+            Path executableJarAbsPath = executablePath.toAbsolutePath();
+            // get the path for `target/bin`
+            Path targetBinPath = executableJarAbsPath.getParent();
+            if (null != targetBinPath && Files.exists(targetBinPath)) {
+                // do not proceed if `resources` directory is not there
+                if (!Files.exists(targetBinPath.resolve(Constants.RESOURCES_DIR_NAME))) {
+                    return;
+                }
 
-            String executableJarFileName = executableJarAbsPath.toFile().getName();
-            try {
-                this.packagingService.updateExecutableJar(targetBinPath, executableJarFileName);
-            } catch (IOException e) {
-                ERR.println("error [open-api extension]: " + e.getLocalizedMessage());
-            }
+                String executableJarFileName = executableJarAbsPath.toFile().getName();
+                try {
+                    this.packagingService.updateExecutableJar(targetBinPath, executableJarFileName);
+                } catch (IOException e) {
+                    OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_104;
+                    Diagnostic diagnostic = getDiagnostics(errorCode, new NullLocation(), e.getMessage());
+                    context.reportDiagnostic(diagnostic);
+                }
 
-            // clean up created intermediate resources if current project is a single-ballerina-file project
-            if (isSingleFile) {
-                execCleanup(targetBinPath);
+                // clean up created intermediate resources
+                execCleanup(targetBinPath, context);
             }
+        } catch (Exception e) {
+            OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_105;
+            Diagnostic diagnostic = getDiagnostics(errorCode, new NullLocation(), e.getMessage());
+            context.reportDiagnostic(diagnostic);
         }
     }
 
-    private void execCleanup(Path targetPath) {
+    private void execCleanup(Path targetPath, CompilerLifecycleEventContext context) {
         Path resourcesDirectory = targetPath.resolve(Constants.RESOURCES_DIR_NAME);
         try {
             if (Files.exists(resourcesDirectory)) {
                 Files.delete(resourcesDirectory);
             }
         } catch (IOException e) {
-            ERR.println("error [open-api extension]: resource cleanup failed for single-file ballerina project"
-                    + e.getLocalizedMessage());
+            OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_106;
+            Diagnostic diagnostic = getDiagnostics(errorCode, new NullLocation(), e.getMessage());
+            context.reportDiagnostic(diagnostic);
+        }
+    }
+
+    private static class NullLocation implements Location {
+        @Override
+        public LineRange lineRange() {
+            LinePosition from = LinePosition.from(0, 0);
+            return LineRange.from("", from, from);
+        }
+
+        @Override
+        public TextRange textRange() {
+            return TextRange.from(0, 0);
         }
     }
 }
