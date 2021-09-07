@@ -17,7 +17,6 @@
 package io.ballerina.openapi.extension;
 
 import io.ballerina.openapi.extension.doc.ResourcePackagingService;
-import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.plugins.CompilerLifecycleEventContext;
 import io.ballerina.projects.plugins.CompilerLifecycleTask;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -48,7 +47,6 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
 
     @Override
     public void perform(CompilerLifecycleEventContext context) {
-        ProjectKind projectType = context.currentPackage().project().kind();
         Optional<Path> executablePath = context.getGeneratedArtifactPath();
         executablePath.ifPresent(exec ->
                 updateResources(exec, context)
