@@ -34,6 +34,8 @@ public enum OpenApiDiagnosticCode {
     OPENAPI_105("OPENAPI_105", "unknown error occurred while packing generated resources : {0}",
             DiagnosticSeverity.WARNING),
     OPENAPI_106("OPENAPI_106", "error occurred while cleaning-up generated resources : {0}",
+            DiagnosticSeverity.WARNING),
+    OPENAPI_107("OPENAPI_107", "generated open-api definition is empty",
             DiagnosticSeverity.WARNING);
 
     private final String code;

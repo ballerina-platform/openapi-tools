@@ -28,23 +28,23 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.OpenApiConverterException;
-import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.openapi.extension.Constants;
 import io.ballerina.openapi.extension.OpenApiDiagnosticCode;
+import io.ballerina.openapi.extension.context.OpenApiDocContext;
+import io.ballerina.projects.Package;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.extension.context.OpenApiDocContextHandler.getContextHandler;
 import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnostics;
 
 /**
@@ -64,20 +64,12 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         try {
             String openApiDocName = String.format(OPEN_API_DOC_NAME_FORMAT, config.getServiceSymbol().hashCode());
 
-            // construct resource directory structure if not already exists
-            Path projectRoot = retrieveProjectRoot(config.getProjectRoot());
-            Path resourcePath = retrieveResourcePath(projectRoot);
-            File resourceDirectory = resourcePath.toFile();
-            if (!resourceDirectory.exists()) {
-                boolean resourceCreatingSuccessful = resourceDirectory.mkdirs();
-                if (!resourceCreatingSuccessful) {
-                    OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_100;
-                    updateContext(context, location, errorCode);
-                    return;
-                }
-            }
+            Package currentPackage = config.getCurrentPackage();
+            Path srcRoot = currentPackage.project().sourceRoot();
 
-            Path openApiDoc = resourcePath.resolve(openApiDocName);
+            // find the project root path
+            Path projectRoot = retrieveProjectRoot(srcRoot);
+
             ServiceDeclarationNode serviceNode = config.getServiceNode();
             Optional<AnnotationNode> serviceInfoAnnotationOpt = getServiceInfoAnnotation(serviceNode);
             if (serviceInfoAnnotationOpt.isPresent()) {
@@ -87,34 +79,40 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 if (openApiContractOpt.isEmpty()) {
                     // could not find the open-api contract file, hence will not proceed
                     OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_101;
-                    updateContext(context, location, errorCode);
+                    updateCompilerContext(context, location, errorCode);
                     return;
                 }
-                try (FileOutputStream outStream = new FileOutputStream(openApiDoc.toFile())) {
-                    try (FileInputStream inputStream = new FileInputStream(openApiContractOpt.get().toFile())) {
-                        CodegenUtils.copyContent(inputStream, outStream);
-                    }
-                }
+                String openApiDefinition = Files.readString(openApiContractOpt.get());
+                updateOpenApiContext(currentPackage, srcRoot, openApiDocName, openApiDefinition);
             } else {
                 // generate open-api doc and add it to resource directory
                 String openApiDefinition = generateOpenApiDoc(
                         config.getSemanticModel(), config.getSyntaxTree(), serviceNode, openApiDocName);
                 if (null != openApiDefinition && !openApiDefinition.isBlank()) {
-                    CodegenUtils.writeFile(openApiDoc, openApiDefinition);
+                    updateOpenApiContext(currentPackage, srcRoot, openApiDocName, openApiDefinition);
+                } else {
+                    OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
+                    updateCompilerContext(context, location, errorCode);
                 }
             }
         } catch (IOException | OpenApiConverterException e) {
             OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_102;
-            updateContext(context, location, errorCode);
+            updateCompilerContext(context, location, errorCode);
         } catch (Exception e) {
             OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_103;
-            updateContext(context, location, errorCode);
+            updateCompilerContext(context, location, errorCode);
         }
     }
 
-    private void updateContext(SyntaxNodeAnalysisContext context,
-                               NodeLocation location,
-                               OpenApiDiagnosticCode errorCode) {
+    private void updateOpenApiContext(Package currentPackage, Path srcRoot, String openApiDocName,
+                                      String openApiDefinition) {
+        OpenApiDocContext.OpenApiDefinition openApiDef = new OpenApiDocContext
+                .OpenApiDefinition(openApiDocName, openApiDefinition);
+        getContextHandler().updateContext(currentPackage.packageId(), srcRoot, openApiDef);
+    }
+
+    private void updateCompilerContext(SyntaxNodeAnalysisContext context, NodeLocation location,
+                                       OpenApiDiagnosticCode errorCode) {
         Diagnostic diagnostic = getDiagnostics(errorCode, location);
         context.reportDiagnostic(diagnostic);
     }

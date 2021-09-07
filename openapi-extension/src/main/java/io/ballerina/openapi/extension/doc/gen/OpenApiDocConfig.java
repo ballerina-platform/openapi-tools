@@ -20,25 +20,27 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.projects.Package;
 import io.ballerina.projects.ProjectKind;
-
-import java.nio.file.Path;
 
 /**
  * {@code OpenApiDocConfig} contains the configurations related to generate OpenAPI doc.
  */
 public class OpenApiDocConfig {
-    private final Path projectRoot;
+    private final Package currentPackage;
     private final SemanticModel semanticModel;
     private final SyntaxTree syntaxTree;
     private final ServiceDeclarationSymbol serviceSymbol;
     private final ServiceDeclarationNode serviceNode;
     private final ProjectKind projectType;
 
-    public OpenApiDocConfig(Path projectRoot, SemanticModel semanticModel, SyntaxTree syntaxTree,
-                            ServiceDeclarationSymbol serviceSymbol, ServiceDeclarationNode serviceNode,
+    public OpenApiDocConfig(Package currentPackage,
+                            SemanticModel semanticModel,
+                            SyntaxTree syntaxTree,
+                            ServiceDeclarationSymbol serviceSymbol,
+                            ServiceDeclarationNode serviceNode,
                             ProjectKind projectType) {
-        this.projectRoot = projectRoot;
+        this.currentPackage = currentPackage;
         this.semanticModel = semanticModel;
         this.syntaxTree = syntaxTree;
         this.serviceSymbol = serviceSymbol;
@@ -46,8 +48,8 @@ public class OpenApiDocConfig {
         this.projectType = projectType;
     }
 
-    public Path getProjectRoot() {
-        return projectRoot;
+    public Package getCurrentPackage() {
+        return currentPackage;
     }
 
     public SemanticModel getSemanticModel() {

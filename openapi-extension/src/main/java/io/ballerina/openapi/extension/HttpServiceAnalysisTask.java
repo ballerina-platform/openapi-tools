@@ -56,7 +56,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 return;
             }
             SyntaxTree syntaxTree = context.syntaxTree();
-            OpenApiDocConfig docConfig = new OpenApiDocConfig(currentProject.sourceRoot(),
+            OpenApiDocConfig docConfig = new OpenApiDocConfig(context.currentPackage(),
                     semanticModel, syntaxTree, serviceSymbol, serviceNode, currentProject.kind());
             this.docGenerator.generate(docConfig, context, serviceNode.location());
         }
