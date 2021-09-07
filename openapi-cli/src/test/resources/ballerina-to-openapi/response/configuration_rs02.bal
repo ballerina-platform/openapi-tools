@@ -12,8 +12,8 @@ service /payloadV on helloEp {
     setLastModified : false} string {
                return "Hello, World!!";}
     //With etag false
-    resource function get cachingBackEnd03(http:Request req) returns @http:CacheConfig{maxAge : 5, setETag : false}
-     string {
+    resource function get cachingBackEnd03(http:Request req) returns @http:CacheConfig{setETag : false,
+    mustRevalidate:false} string {
                return "Hello, World!!";}
 
 }

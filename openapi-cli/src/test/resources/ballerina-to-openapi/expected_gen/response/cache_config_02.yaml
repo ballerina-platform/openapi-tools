@@ -9,7 +9,7 @@ paths:
             Cache-Control:
               schema:
                 type: string
-                default: "public,max-age=5"
+                default: "must-revalidate,public,max-age=5"
           content:
             text/plain:
               schema:
@@ -24,7 +24,7 @@ paths:
             Cache-Control:
               schema:
                 type: string
-                default: "public,max-age=5"
+                default: "must-revalidate,public,max-age=5"
             ETag:
               schema:
                 type: string
@@ -42,7 +42,7 @@ paths:
             Cache-Control:
               schema:
                 type: string
-                default: "public,max-age=5"
+                default: "public,max-age=3600"
             Last-Modified:
               schema:
                 type: string

@@ -9,7 +9,7 @@ paths:
             Cache-Control:
               schema:
                 type: string
-                default: public
+                default: "must-revalidate,public"
             ETag:
               schema:
                 type: string
@@ -20,3 +20,4 @@ paths:
             text/plain:
               schema:
                 type: string
+components: {}

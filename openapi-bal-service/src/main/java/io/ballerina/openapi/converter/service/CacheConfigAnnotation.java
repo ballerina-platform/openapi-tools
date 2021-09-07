@@ -25,13 +25,13 @@ import java.util.List;
  * @since 2.0.0
  */
 public class CacheConfigAnnotation {
-    private boolean mustRevalidate = false;
+    private boolean mustRevalidate = true;
     private boolean noCache = false;
     private boolean noStore = false;
     private boolean noTransform = false;
     private boolean isPrivate = false;
     private boolean proxyRevalidate = false;
-    private int maxAge = -1;
+    private int maxAge = 3600;
     private int sMaxAge = -1;
     private List<String> noCacheFields = new ArrayList<>();
     private List<String>  privateFields = new ArrayList<>();

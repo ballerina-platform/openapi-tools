@@ -9,7 +9,7 @@ paths:
             Cache-Control:
               schema:
                 type: string
-                default: "no-store,no-transform,public,proxy-revalidate"
+                default: "must-revalidate,no-store,no-transform,public,proxy-revalidate,max-age=3600"
             ETag:
               schema:
                 type: string
@@ -30,7 +30,7 @@ paths:
             Cache-Control:
               schema:
                 type: string
-                default: "must-revalidate,no-store,no-transform,public,proxy-revalidate,s-maxage=5"
+                default: "must-revalidate,no-store,no-transform,public,proxy-revalidate,max-age=3600,s-maxage=5"
             ETag:
               schema:
                 type: string
@@ -41,3 +41,4 @@ paths:
             text/plain:
               schema:
                 type: string
+components: {}

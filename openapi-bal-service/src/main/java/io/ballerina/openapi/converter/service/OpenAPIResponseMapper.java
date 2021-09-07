@@ -255,9 +255,6 @@ public class OpenAPIResponseMapper {
                                      ExpressionNode expressionNode) {
         if (expressionNode.toString().equals(TRUE)) {
             switch (fieldName) {
-                case "mustRevalidate":
-                    cacheConfig.setMustRevalidate(true);
-                    break;
                 case "noCache":
                     cacheConfig.setNoCache(true);
                     break;
@@ -290,11 +287,20 @@ public class OpenAPIResponseMapper {
                 cacheConfig.setsMaxAge(maxA);
             } catch (NumberFormatException ignored) {
             }
-        } else if ("setETag".equals(fieldName) && (expressionNode.toString().equals(FALSE))) {
-            cacheConfig.setSetETag(false);
-        } else if ("setLastModified".equals(fieldName) && (expressionNode.toString().equals(
-                FALSE))) {
-            cacheConfig.setSetLastModified(false);
+        } else if ((expressionNode.toString().equals(FALSE))) {
+            switch (fieldName) {
+                case "setETag":
+                    cacheConfig.setSetETag(false);
+                    break;
+                case "setLastModified":
+                    cacheConfig.setSetLastModified(false);
+                    break;
+                case "mustRevalidate":
+                    cacheConfig.setMustRevalidate(false);
+                    break;
+                default:
+                    break;
+            }
         } else if ("privateFields".equals(fieldName)) {
             List<String> privateFields = new ArrayList<>();
             SeparatedNodeList<Node> fields = ((ListConstructorExpressionNode) expressionNode).expressions();
