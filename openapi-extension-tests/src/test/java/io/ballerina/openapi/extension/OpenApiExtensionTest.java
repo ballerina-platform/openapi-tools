@@ -23,17 +23,14 @@ import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.directory.SingleFileProject;
 import io.ballerina.projects.environment.Environment;
 import io.ballerina.projects.environment.EnvironmentBuilder;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * This class includes tests for Ballerina WebSub compiler plugin.
@@ -46,66 +43,51 @@ public class OpenApiExtensionTest {
 
     @Test
     public void testDocGenerationForBallerinaProject() throws IOException {
-        deleteTarget("sample_1");
         Package currentPackage = loadPackage("sample_1", false);
         PackageCompilation compilation = currentPackage.getCompilation();
-        testGeneratedResources("sample_1", 1);
+        Assert.assertTrue(noOpenApiWarningAvailable(compilation));
     }
 
     @Test
     public void testDocGenerationForBallerinaProjectWithMultipleServices() throws IOException {
-        deleteTarget("sample_2");
         Package currentPackage = loadPackage("sample_2", false);
         PackageCompilation compilation = currentPackage.getCompilation();
-        testGeneratedResources("sample_2", 2);
+        Assert.assertTrue(noOpenApiWarningAvailable(compilation));
     }
 
-//    @Test
+    @Test
     public void testDocGenerationForBallerinaProjectWithMultipleModules() throws IOException {
-        deleteTarget("sample_3");
         Package currentPackage = loadPackage("sample_3", false);
         PackageCompilation compilation = currentPackage.getCompilation();
-        testGeneratedResources("sample_3", 3);
+        Assert.assertTrue(noOpenApiWarningAvailable(compilation));
     }
 
     @Test
     public void testDocGenerationForBallerinaProjectWithAnnotation() throws IOException {
-        deleteTarget("sample_4");
         Package currentPackage = loadPackage("sample_4", false);
         PackageCompilation compilation = currentPackage.getCompilation();
-        testGeneratedResources("sample_4", 1);
+        Assert.assertTrue(noOpenApiWarningAvailable(compilation));
     }
 
     @Test
     public void testDocGenerationForSingleBalFile() {
         Package currentPackage = loadPackage("sample_5/service.bal", true);
         PackageCompilation compilation = currentPackage.getCompilation();
+        Assert.assertTrue(noOpenApiWarningAvailable(compilation));
     }
 
     @Test
     public void testDocGenerationForSingleBalFileWithAnnotation() {
         Package currentPackage = loadPackage("sample_6/service.bal", true);
         PackageCompilation compilation = currentPackage.getCompilation();
+        Assert.assertTrue(noOpenApiWarningAvailable(compilation));
     }
 
     @Test
     public void testDocGenerationForHttpLoadBalance() {
         Package currentPackage = loadPackage("sample_7/service.bal", true);
         PackageCompilation compilation = currentPackage.getCompilation();
-    }
-
-    private void testGeneratedResources(String projectName, int serviceCount) throws IOException {
-        Path resourceRelativePath = Paths.get(projectName, "target", "bin", "resources", "ballerina", "http");
-        Path resources = RESOURCE_DIRECTORY.resolve(resourceRelativePath);
-        if (Files.isDirectory(resources)) {
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(resources)) {
-                List<String> files = new ArrayList<>();
-                stream.forEach(p -> files.add(p.toString()));
-                Assert.assertEquals(files.size(), serviceCount);
-            }
-        } else {
-            Assert.fail("Resource directory has not been created");
-        }
+        Assert.assertTrue(noOpenApiWarningAvailable(compilation));
     }
 
     private Package loadPackage(String path, boolean isSingleFile) {
@@ -122,17 +104,11 @@ public class OpenApiExtensionTest {
         return ProjectEnvironmentBuilder.getBuilder(environment);
     }
 
-    private void deleteTarget(String projectName) throws IOException {
-        Path targetRelativePath = Paths.get(projectName, "target");
-        Path target = RESOURCE_DIRECTORY.resolve(targetRelativePath);
-        if (Files.isDirectory(target)) {
-            deleteDirectory(target);
-        }
-    }
-
-    private void deleteDirectory(Path directory) throws IOException {
-        Files.walk(directory)
-                .map(Path::toFile)
-                .forEach(File::delete);
+    private boolean noOpenApiWarningAvailable(PackageCompilation compilation) {
+        return compilation.diagnosticResult().diagnostics().stream()
+                .filter(d -> DiagnosticSeverity.WARNING.equals(d.diagnosticInfo().severity()))
+                .noneMatch(d ->
+                        Objects.nonNull(d.diagnosticInfo().code())
+                                && d.diagnosticInfo().code().startsWith("OPENAPI_10"));
     }
 }

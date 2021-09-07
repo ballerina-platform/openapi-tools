@@ -17,6 +17,7 @@
 package io.ballerina.openapi.extension;
 
 import io.ballerina.openapi.extension.doc.ResourcePackagingService;
+import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.plugins.CompilerLifecycleEventContext;
 import io.ballerina.projects.plugins.CompilerLifecycleTask;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -26,7 +27,6 @@ import io.ballerina.tools.text.LineRange;
 import io.ballerina.tools.text.TextRange;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -82,7 +82,7 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
     }
 
     private void execCleanup(Path targetPath, CompilerLifecycleEventContext context) {
-        Path resourcesDirectory = targetPath.resolve(Constants.RESOURCES_DIR_NAME);
+        Path resourcesDirectory = getResourcesPath(targetPath, context);
         try {
             if (Files.exists(resourcesDirectory)) {
                 Files.delete(resourcesDirectory);
@@ -92,6 +92,14 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
             Diagnostic diagnostic = getDiagnostics(errorCode, new NullLocation(), e.getMessage());
             context.reportDiagnostic(diagnostic);
         }
+    }
+
+    private Path getResourcesPath(Path targetPath, CompilerLifecycleEventContext context) {
+        ProjectKind projectType = context.currentPackage().project().kind();
+        if (ProjectKind.BUILD_PROJECT.equals(projectType)) {
+            return targetPath.resolve(Constants.RESOURCES_DIR_NAME);
+        }
+        return targetPath.resolve(Constants.TARGET_DIR_NAME);
     }
 
     private static class NullLocation implements Location {

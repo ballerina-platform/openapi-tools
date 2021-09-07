@@ -57,6 +57,7 @@ public class SingleFileOpenApiDocGenerator extends AbstractOpenApiDocGenerator {
     @Override
     protected Path retrieveResourcePath(Path projectRoot) {
         return projectRoot
+                .resolve(Constants.TARGET_DIR_NAME)
                 .resolve(Constants.RESOURCES_DIR_NAME)
                 .resolve(Constants.PACKAGE_ORG).resolve(Constants.PACKAGE_NAME);
     }
