@@ -17,6 +17,7 @@
 package io.ballerina.openapi.extension.doc;
 
 import io.ballerina.openapi.extension.Constants;
+import io.ballerina.openapi.extension.doc.gen.AbstractOpenApiDocGenerator;
 import io.ballerina.projects.ProjectKind;
 
 import java.nio.file.Files;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.extension.doc;
+package io.ballerina.openapi.extension.doc.gen;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
@@ -23,6 +23,7 @@ import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -30,6 +31,8 @@ import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.openapi.extension.Constants;
+import io.ballerina.openapi.extension.OpenApiDiagnosticCode;
+import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,12 +45,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.extension.doc.DocGenerationUtils.updateContext;
+
 /**
  * {@code AbstractOpenApiDocGenerator} contains the basic utilities required for OpenAPI doc generation.
  */
 public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator {
     private static final String OPEN_API_DOC_NAME_FORMAT = "%d.json";
-    private static final PrintStream ERR = System.err;
 
     private final OpenApiContractResolver contractResolver;
 
@@ -56,7 +60,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
     }
 
     @Override
-    public void generate(OpenApiDocConfig config) {
+    public void generate(OpenApiDocConfig config, SyntaxNodeAnalysisContext context, NodeLocation location) {
         try {
             String openApiDocName = String.format(OPEN_API_DOC_NAME_FORMAT, config.getServiceSymbol().hashCode());
 
@@ -67,7 +71,8 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             if (!resourceDirectory.exists()) {
                 boolean resourceCreatingSuccessful = resourceDirectory.mkdirs();
                 if (!resourceCreatingSuccessful) {
-                    ERR.println("error [open-api extension]: could not create resources directory");
+                    OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_100;
+                    updateContext(context, errorCode, location);
                     return;
                 }
             }
@@ -81,7 +86,8 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 Optional<Path> openApiContractOpt = this.contractResolver.resolve(serviceInfoAnnotation, projectRoot);
                 if (openApiContractOpt.isEmpty()) {
                     // could not find the open-api contract file, hence will not proceed
-                    ERR.println("error [open-api extension]: could not find the provided `contract` file");
+                    OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_101;
+                    updateContext(context, errorCode, location);
                     return;
                 }
                 try (FileOutputStream outStream = new FileOutputStream(openApiDoc.toFile())) {
@@ -98,7 +104,11 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 }
             }
         } catch (IOException | OpenApiConverterException e) {
-            ERR.println("error [open-api extension]: " + e.getLocalizedMessage());
+            OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_102;
+            updateContext(context, errorCode, location, e.getMessage());
+        } catch (Exception e) {
+            OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_103;
+            updateContext(context, errorCode, location, e.getMessage());
         }
     }
 

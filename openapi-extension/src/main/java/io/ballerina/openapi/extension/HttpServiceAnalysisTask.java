@@ -26,8 +26,8 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.extension.doc.OpenApiDocConfig;
-import io.ballerina.openapi.extension.doc.OpenApiManager;
+import io.ballerina.openapi.extension.doc.gen.OpenApiDocConfig;
+import io.ballerina.openapi.extension.doc.gen.DocGeneratorManager;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -38,10 +38,10 @@ import java.util.Optional;
  * {@code HttpServiceAnalysisTask} analyses the HTTP service for which the OpenApi doc is generated.
  */
 public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
-    private final OpenApiManager docGenerator;
+    private final DocGeneratorManager docGenerator;
 
     public HttpServiceAnalysisTask() {
-        this.docGenerator = new OpenApiManager();
+        this.docGenerator = new DocGeneratorManager();
     }
 
     @Override
@@ -58,7 +58,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             SyntaxTree syntaxTree = context.syntaxTree();
             OpenApiDocConfig docConfig = new OpenApiDocConfig(currentProject.sourceRoot(),
                     semanticModel, syntaxTree, serviceSymbol, serviceNode, currentProject.kind());
-            this.docGenerator.generate(docConfig);
+            this.docGenerator.generate(docConfig, context, serviceNode.location());
         }
     }
 
