@@ -445,7 +445,7 @@ public class OpenAPIResponseMapper {
     }
 
     private ApiResponses handleRecordTypeSymbol(String referenceName, Map<String, Schema> schema,
-                                                String customMediaPrefix,TypeSymbol typeSymbol,
+                                                String customMediaPrefix, TypeSymbol typeSymbol,
                                                 OpenAPIComponentMapper componentMapper,
                                                 RecordTypeSymbol returnRecord) {
         ApiResponses apiResponses = new ApiResponses();
