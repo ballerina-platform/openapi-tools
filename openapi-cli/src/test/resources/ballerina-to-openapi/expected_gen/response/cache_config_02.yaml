@@ -1,0 +1,53 @@
+paths:
+  /cachingBackEnd01:
+    get:
+      operationId: operation_get_/cachingBackEnd01
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,public,max-age=5"
+          content:
+            text/plain:
+              schema:
+                type: string
+  /cachingBackEnd02:
+    get:
+      operationId: operation_get_/cachingBackEnd02
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,public,max-age=5"
+            ETag:
+              schema:
+                type: string
+          content:
+            text/plain:
+              schema:
+                type: string
+  /cachingBackEnd03:
+    get:
+      operationId: operation_get_/cachingBackEnd03
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "public,max-age=3600"
+            Last-Modified:
+              schema:
+                type: string
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}

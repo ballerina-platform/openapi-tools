@@ -21,13 +21,13 @@ import 'service.mock;
 # A fake mountain resort
 service /payloadV on new http:Listener(9090) {
 
-    //# Represents Snowpeak location resource
-    //#
-    //# + return - `Location` representation
-    //resource function get locations() returns @CacheControl rep:Locations {
-    //    rep:Locations locations = mock:getLocations();
-    //    return locations;
-    //}
+    # Represents Snowpeak location resource
+    #
+    # + return - `Location` representation
+    resource function get locations() returns @http:Cache rep:Locations {
+        rep:Locations locations = mock:getLocations();
+        return locations;
+    }
 
     # Reperesents Snowpeak room collection resource
     #
@@ -46,7 +46,7 @@ service /payloadV on new http:Listener(9090) {
     # + reservation - Reservation representation
     # + return - `ReservationCreated` or ReservationConflict representation
     resource function post reservation(@http:Payload rep:Reservation reservation)
-                returns rep:ReservationCreated|rep:ReservationConflict {
+                returns @http:Cache{} rep:ReservationCreated|rep:ReservationConflict {
         rep:ReservationCreated created = mock:createReservation(reservation);
         return created;
     }
