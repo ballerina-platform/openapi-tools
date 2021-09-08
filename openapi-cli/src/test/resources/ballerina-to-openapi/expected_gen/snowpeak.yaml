@@ -10,6 +10,28 @@ servers:
       port:
         default: "9090"
 paths:
+  /locations:
+    get:
+      summary: Represents Snowpeak location resource
+      operationId: operation_get_/locations
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,public,max-age=3600"
+            ETag:
+              schema:
+                type: string
+            Last-Modified:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Locations'
   /locations/{id}/rooms:
     get:
       summary: Reperesents Snowpeak room collection resource
@@ -63,12 +85,34 @@ paths:
       responses:
         "201":
           description: Created
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,public,max-age=3600"
+            ETag:
+              schema:
+                type: string
+            Last-Modified:
+              schema:
+                type: string
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReservationReceipt'
         "409":
           description: Conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,public,max-age=3600"
+            ETag:
+              schema:
+                type: string
+            Last-Modified:
+              schema:
+                type: string
           content:
             text/plain:
               schema:
@@ -135,6 +179,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Link'
+    Location:
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: Name of the location
+            id:
+              type: string
+              description: Unique identification
+            address:
+              type: string
+              description: Address of the location
+    Locations:
+      type: object
+      properties:
+        locations:
+          type: array
+          description: collection of locations
+          items:
+            $ref: '#/components/schemas/Location'
+      description: Represents a collection of locations
     Room:
       type: object
       properties:
