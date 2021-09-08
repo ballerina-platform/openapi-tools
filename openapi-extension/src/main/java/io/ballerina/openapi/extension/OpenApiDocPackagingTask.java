@@ -16,11 +16,13 @@
 
 package io.ballerina.openapi.extension;
 
+import io.ballerina.openapi.extension.context.OpenApiDocContext;
 import io.ballerina.openapi.extension.doc.ResourcePackagingService;
-import io.ballerina.projects.ProjectKind;
+import io.ballerina.projects.Package;
 import io.ballerina.projects.plugins.CompilerLifecycleEventContext;
 import io.ballerina.projects.plugins.CompilerLifecycleTask;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.ballerina.tools.text.LinePosition;
 import io.ballerina.tools.text.LineRange;
@@ -31,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
+import static io.ballerina.openapi.extension.context.OpenApiDocContextHandler.getContextHandler;
 import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnostics;
 
 /**
@@ -44,62 +47,63 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
     }
 
     @Override
-    public void perform(CompilerLifecycleEventContext context) {
-        Optional<Path> executablePath = context.getGeneratedArtifactPath();
-        executablePath.ifPresent(exec ->
-                updateResources(exec, context)
-        );
+    public void perform(CompilerLifecycleEventContext compilationContext) {
+        // if the compilation contains errors or compilation contains warnings related to open-api doc generation
+        // do not proceed
+        if (isErroneousCompilation(compilationContext)) {
+            return;
+        }
+
+        // if the shared open-api doc context is not found, do not proceed
+        Package currentPackage = compilationContext.currentPackage();
+        Optional<OpenApiDocContext> openApiDocContextOpt = getContextHandler()
+                .retrieveContext(currentPackage.packageId(), currentPackage.project().sourceRoot());
+        if (openApiDocContextOpt.isEmpty()) {
+            return;
+        }
+
+        compilationContext.getGeneratedArtifactPath()
+                .ifPresent(execPath -> {
+                    OpenApiDocContext context = openApiDocContextOpt.get();
+                    updateResources(context, execPath, compilationContext);
+                });
     }
 
-    private void updateResources(Path executablePath, CompilerLifecycleEventContext context) {
+    private boolean isErroneousCompilation(CompilerLifecycleEventContext compilationContext) {
+        return compilationContext.compilation().diagnosticResult()
+                .diagnostics().stream()
+                .anyMatch(d ->
+                        DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity())
+                                || d.diagnosticInfo().code().startsWith("OPENAPI")
+                );
+    }
+
+    private void updateResources(OpenApiDocContext context, Path executablePath,
+                                 CompilerLifecycleEventContext compilationContext) {
         try {
             Path executableJarAbsPath = executablePath.toAbsolutePath();
             // get the path for `target/bin`
             Path targetBinPath = executableJarAbsPath.getParent();
             if (null != targetBinPath && Files.exists(targetBinPath)) {
-                // do not proceed if `resources` directory is not there
-                if (!Files.exists(targetBinPath.resolve(Constants.RESOURCES_DIR_NAME))) {
+                // if generated open-api definitions are empty, do not proceed
+                if (context.getOpenApiDetails().isEmpty()) {
                     return;
                 }
 
                 String executableJarFileName = executableJarAbsPath.toFile().getName();
                 try {
-                    this.packagingService.updateExecutableJar(targetBinPath, executableJarFileName);
+                    this.packagingService.updateExecutableJar(targetBinPath, executableJarFileName, context);
                 } catch (IOException e) {
                     OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_104;
                     Diagnostic diagnostic = getDiagnostics(errorCode, new NullLocation(), e.getMessage());
-                    context.reportDiagnostic(diagnostic);
+                    compilationContext.reportDiagnostic(diagnostic);
                 }
-
-                // clean up created intermediate resources
-                execCleanup(targetBinPath, context);
             }
         } catch (Exception e) {
             OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_105;
             Diagnostic diagnostic = getDiagnostics(errorCode, new NullLocation(), e.getMessage());
-            context.reportDiagnostic(diagnostic);
+            compilationContext.reportDiagnostic(diagnostic);
         }
-    }
-
-    private void execCleanup(Path targetPath, CompilerLifecycleEventContext context) {
-        Path resourcesDirectory = getResourcesPath(targetPath, context);
-        try {
-            if (Files.exists(resourcesDirectory)) {
-                Files.delete(resourcesDirectory);
-            }
-        } catch (IOException e) {
-            OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_106;
-            Diagnostic diagnostic = getDiagnostics(errorCode, new NullLocation(), e.getMessage());
-            context.reportDiagnostic(diagnostic);
-        }
-    }
-
-    private Path getResourcesPath(Path targetPath, CompilerLifecycleEventContext context) {
-        ProjectKind projectType = context.currentPackage().project().kind();
-        if (ProjectKind.BUILD_PROJECT.equals(projectType)) {
-            return targetPath.resolve(Constants.RESOURCES_DIR_NAME);
-        }
-        return targetPath.resolve(Constants.TARGET_DIR_NAME);
     }
 
     private static class NullLocation implements Location {
