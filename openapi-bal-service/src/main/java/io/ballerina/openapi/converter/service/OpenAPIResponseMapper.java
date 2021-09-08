@@ -168,7 +168,7 @@ public class OpenAPIResponseMapper {
                                                 ApiResponses apiResponses, Node typeNode, Map<String, Header> headers,
                                                 AnnotationNode annotation) throws OpenApiConverterException {
 
-        if (annotation.annotReference().toString().equals("http:CacheConfig")) {
+        if (annotation.annotReference().toString().equals("http:Cache")) {
             SeparatedNodeList<MappingFieldNode> fields = annotation.annotValue().get().fields();
             CacheConfigAnnotation cacheConfigAnn = setCacheConfigValues(fields);
             // Update headers with cache annotation details.
