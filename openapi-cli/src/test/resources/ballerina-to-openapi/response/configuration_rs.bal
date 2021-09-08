@@ -7,4 +7,8 @@ service /payloadV on helloEp {
     resource function get cachingBackEnd(http:Request req) returns @http:Cache{} string {
         return "Hello, World!!";
     }
+
+    resource function get cachingBackEnd01(http:Request req) returns @http:Cache string {
+            return "Hello, World!!";
+        }
 }

@@ -34,6 +34,6 @@ public class ModuleReferenceTests {
     @Test(description = "Response with separate modules")
     public void testResponse01() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("snowpeak.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "snowpeak.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak.yaml");
     }
 }

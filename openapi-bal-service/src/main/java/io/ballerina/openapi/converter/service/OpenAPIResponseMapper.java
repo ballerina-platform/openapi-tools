@@ -169,11 +169,18 @@ public class OpenAPIResponseMapper {
                                                 ApiResponses apiResponses, Node typeNode, Map<String, Header> headers,
                                                 AnnotationNode annotation) throws OpenApiConverterException {
 
-        if (annotation.annotReference().toString().equals("http:Cache")) {
-            SeparatedNodeList<MappingFieldNode> fields = annotation.annotValue().get().fields();
-            CacheConfigAnnotation cacheConfigAnn = setCacheConfigValues(fields);
+        if (annotation.annotReference().toString().trim().equals("http:Cache")) {
+            CacheConfigAnnotation cacheConfigAnn = new CacheConfigAnnotation();
+            annotation.annotValue().ifPresentOrElse(
+                    (value) -> {
+                        updateResponseHeaderWithCacheValues(headers, setCacheConfigValues(value.fields()));
+                        },
+                    ()-> {
+                        updateResponseHeaderWithCacheValues(headers, cacheConfigAnn);
+                    }
+            );
+
             // Update headers with cache annotation details.
-            updateResponseHeaderWithCacheValues(headers, fields, cacheConfigAnn);
             getAPIResponses(operationAdaptor, apiResponses, typeNode,
                     customMediaType, headers);
         } else {
@@ -203,23 +210,11 @@ public class OpenAPIResponseMapper {
     }
 
     private void updateResponseHeaderWithCacheValues(Map<String, Header> headers,
-                                                     SeparatedNodeList<MappingFieldNode> fields,
                                                      CacheConfigAnnotation cache) {
 
         Header cacheHeader = new Header();
         StringSchema stringSchema = new StringSchema();
-        if (fields.isEmpty()) {
-            stringSchema._default("must-revalidate,public,max-age=3600");
-            cacheHeader.setSchema(stringSchema);
-            headers.put(CACHE_CONTROL, cacheHeader);
-            Header eTag = new Header();
-            eTag.setSchema(new StringSchema());
-            headers.put(ETAG, eTag);
-            Header lmHeader = new Header();
-            lmHeader.setSchema(new StringSchema());
-            headers.put(LAST_MODIFIED, lmHeader);
-
-        } else if (!cache.isSetETag() && !cache.isSetLastModified()) {
+        if (!cache.isSetETag() && !cache.isSetLastModified()) {
             stringSchema._default(generateCacheControlString(cache));
             cacheHeader.setSchema(stringSchema);
             headers.put(CACHE_CONTROL, cacheHeader);
@@ -239,17 +234,22 @@ public class OpenAPIResponseMapper {
             eTag.setSchema(new StringSchema());
             headers.put(ETAG, eTag);
         } else {
-            stringSchema._default(generateCacheControlString(cache));
-            cacheHeader.setSchema(stringSchema);
-            headers.put(CACHE_CONTROL, cacheHeader);
-
-            Header eTag = new Header();
-            eTag.setSchema(new StringSchema());
-            headers.put(ETAG, eTag);
-            Header lmHeader = new Header();
-            lmHeader.setSchema(new StringSchema());
-            headers.put(LAST_MODIFIED, lmHeader);
+            cacheHeaderForEmptyValues(headers, cacheHeader, stringSchema, generateCacheControlString(cache));
         }
+    }
+
+    private void cacheHeaderForEmptyValues(Map<String, Header> headers, Header cacheHeader, StringSchema stringSchema,
+                                           String s) {
+
+        stringSchema._default(s);
+        cacheHeader.setSchema(stringSchema);
+        headers.put(CACHE_CONTROL, cacheHeader);
+        Header eTag = new Header();
+        eTag.setSchema(new StringSchema());
+        headers.put(ETAG, eTag);
+        Header lmHeader = new Header();
+        lmHeader.setSchema(new StringSchema());
+        headers.put(LAST_MODIFIED, lmHeader);
     }
 
     private void setCacheConfigField(CacheConfigAnnotation cacheConfig, String fieldName,
@@ -346,7 +346,8 @@ public class OpenAPIResponseMapper {
                         if (typeSymbol.typeKind() == TypeDescKind.RECORD) {
                             RecordTypeSymbol recordType = (RecordTypeSymbol) typeSymbol;
                             return handleRecordTypeSymbol(qNode.identifier().text().trim(), components.getSchemas(),
-                                    customMediaPrefix, typeRef, new OpenAPIComponentMapper(components), recordType);
+                                    customMediaPrefix, typeRef, new OpenAPIComponentMapper(components), recordType,
+                                    headers);
                         }
                     }
                 }
@@ -385,17 +386,17 @@ public class OpenAPIResponseMapper {
             case SIMPLE_NAME_REFERENCE:
                 SimpleNameReferenceNode recordNode  = (SimpleNameReferenceNode) typeNode;
                 Map<String, Schema> schemas = components.getSchemas();
-                handleReferenceResponse(operationAdaptor, recordNode, schemas, apiResponses, customMediaPrefix);
+                handleReferenceResponse(operationAdaptor, recordNode, schemas, apiResponses, customMediaPrefix, headers);
                 return apiResponses;
             case UNION_TYPE_DESC:
                 return mapUnionReturns(operationAdaptor, apiResponses,
                         (UnionTypeDescriptorNode) typeNode, customMediaPrefix, headers);
             case RECORD_TYPE_DESC:
                 return mapInlineRecordInReturn(operationAdaptor, apiResponses,
-                        (RecordTypeDescriptorNode) typeNode, apiResponse, mediaType, customMediaPrefix);
+                        (RecordTypeDescriptorNode) typeNode, apiResponse, mediaType, customMediaPrefix, headers);
             case ARRAY_TYPE_DESC:
                 return getApiResponsesForArrayTypes(operationAdaptor, apiResponses,
-                        (ArrayTypeDescriptorNode) typeNode, apiResponse, mediaType, customMediaPrefix);
+                        (ArrayTypeDescriptorNode) typeNode, apiResponse, mediaType, customMediaPrefix, headers);
             case ERROR_TYPE_DESC:
                 // Return type is not given as error or error? in ballerina it will generate 500 response.
                 apiResponse.description("Found unexpected output");
@@ -416,11 +417,11 @@ public class OpenAPIResponseMapper {
     private ApiResponses getApiResponsesForArrayTypes(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
                                                       ArrayTypeDescriptorNode array, ApiResponse apiResponse,
                                                       io.swagger.v3.oas.models.media.MediaType mediaType,
-                                                      String customMediaPrefix) throws OpenApiConverterException {
+                                                      String customMediaPrefix, Map<String, Header> headers) throws OpenApiConverterException {
         Map<String, Schema> schemas02 = components.getSchemas();
         if (array.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
             handleReferenceResponse(operationAdaptor, (SimpleNameReferenceNode) array.memberTypeDesc(),
-                    schemas02, apiResponses, customMediaPrefix);
+                    schemas02, apiResponses, customMediaPrefix, headers);
         } else {
             ArraySchema arraySchema = new ArraySchema();
             String type02 = array.memberTypeDesc().kind().toString().trim().split("_")[0].
@@ -442,7 +443,7 @@ public class OpenAPIResponseMapper {
     private ApiResponses mapInlineRecordInReturn(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
                                                  RecordTypeDescriptorNode typeNode, ApiResponse apiResponse,
                                                  io.swagger.v3.oas.models.media.MediaType mediaType,
-                                                 String customMediaPrefix)
+                                                 String customMediaPrefix, Map<String, Header> headers)
             throws OpenApiConverterException {
 
         NodeList<Node> fields = typeNode.fields();
@@ -478,7 +479,7 @@ public class OpenAPIResponseMapper {
                     Map<String, Schema> componentsSchemas = components.getSchemas();
                     SimpleNameReferenceNode nameRefNode =  (SimpleNameReferenceNode) type01;
                     handleReferenceResponse(operationAdaptor, nameRefNode, componentsSchemas, apiResponses,
-                            customMediaPrefix);
+                            customMediaPrefix, headers);
                     Schema referenceSchema = new Schema();
                     referenceSchema.set$ref(recordField.typeName().toString().trim());
                     properties.put(recordField.fieldName().text(), referenceSchema);
@@ -593,8 +594,11 @@ public class OpenAPIResponseMapper {
 
     private void handleReferenceResponse(OperationAdaptor operationAdaptor, SimpleNameReferenceNode referenceNode,
                                          Map<String, Schema> schema, ApiResponses apiResponses,
-                                         String customMediaPrefix) {
+                                         String customMediaPrefix, Map<String, Header> headers) {
         ApiResponse apiResponse = new ApiResponse();
+        if (!headers.isEmpty()) {
+            apiResponse.setHeaders(headers);
+        }
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handel record for components
@@ -621,7 +625,7 @@ public class OpenAPIResponseMapper {
                 RecordTypeSymbol returnRecord = (RecordTypeSymbol) typeReferenceTypeSymbol.typeDescriptor();
                 String referenceName = referenceNode.name().toString().trim();
                 ApiResponses responses = handleRecordTypeSymbol(referenceName, schema, customMediaPrefix,
-                        typeSymbol, componentMapper, returnRecord);
+                        typeSymbol, componentMapper, returnRecord, headers);
                 apiResponses.putAll(responses);
             }
         }
@@ -631,28 +635,31 @@ public class OpenAPIResponseMapper {
     private ApiResponses handleRecordTypeSymbol(String referenceName, Map<String, Schema> schema,
                                                 String customMediaPrefix, TypeSymbol typeSymbol,
                                                 OpenAPIComponentMapper componentMapper,
-                                                RecordTypeSymbol returnRecord) {
+                                                RecordTypeSymbol returnRecord,
+                                                Map<String, Header> headers) {
         ApiResponses apiResponses = new ApiResponses();
+
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         List<TypeSymbol> typeInclusions = returnRecord.typeInclusions();
         if (!typeInclusions.isEmpty()) {
             try {
                 apiResponses = handleRecordHasHttpTypeInclusionField(schema, typeSymbol,
-                        componentMapper, returnRecord, typeInclusions, customMediaPrefix);
+                        componentMapper, returnRecord, typeInclusions, customMediaPrefix, headers);
             } catch (OpenApiConverterException ope) {
                 createResponseForRecord(referenceName, schema, customMediaPrefix, typeSymbol, componentMapper,
-                        apiResponses, media);
+                        apiResponses, media, headers);
             }
         } else {
             createResponseForRecord(referenceName, schema, customMediaPrefix, typeSymbol, componentMapper, apiResponses,
-                    media);
+                    media, headers);
         }
         return apiResponses;
     }
 
     private void createResponseForRecord(String referenceName, Map<String, Schema> schema, String customMediaPrefix,
                                          TypeSymbol typeSymbol, OpenAPIComponentMapper componentMapper,
-                                         ApiResponses apiResponses, io.swagger.v3.oas.models.media.MediaType media) {
+                                         ApiResponses apiResponses, io.swagger.v3.oas.models.media.MediaType media,
+                                         Map<String, Header> headers) {
 
         String mediaTypeString;
         componentMapper.createComponentSchema(schema, typeSymbol);
@@ -662,6 +669,9 @@ public class OpenAPIResponseMapper {
             mediaTypeString = APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
         }
         ApiResponse apiResponse = new ApiResponse();
+        if (!headers.isEmpty()) {
+            apiResponse.setHeaders(headers);
+        }
         apiResponse.content(new Content().addMediaType(mediaTypeString, media));
         apiResponse.description(HTTP_200_DESCRIPTION);
         apiResponses.put(HTTP_200, apiResponse);
@@ -670,9 +680,12 @@ public class OpenAPIResponseMapper {
     private ApiResponses handleRecordHasHttpTypeInclusionField(Map<String, Schema> schema, TypeSymbol typeSymbol,
                                                        OpenAPIComponentMapper componentMapper,
                                                        RecordTypeSymbol returnRecord, List<TypeSymbol> typeInclusions
-            , String customMediaPrefix) throws OpenApiConverterException {
+            , String customMediaPrefix, Map<String, Header> headers) throws OpenApiConverterException {
         ApiResponses apiResponses = new ApiResponses();
         ApiResponse apiResponse = new ApiResponse();
+        if (!headers.isEmpty()) {
+            apiResponse.setHeaders(headers);
+        }
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         boolean isHttpModule = false;
         String mediaTypeString;
