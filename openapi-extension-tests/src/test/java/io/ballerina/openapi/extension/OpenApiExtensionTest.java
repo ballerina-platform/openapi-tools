@@ -23,6 +23,8 @@ import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.directory.SingleFileProject;
 import io.ballerina.projects.environment.Environment;
 import io.ballerina.projects.environment.EnvironmentBuilder;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -30,7 +32,9 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * This class includes tests for Ballerina WebSub compiler plugin.
@@ -88,6 +92,21 @@ public class OpenApiExtensionTest {
         Package currentPackage = loadPackage("sample_7/service.bal", true);
         PackageCompilation compilation = currentPackage.getCompilation();
         Assert.assertTrue(noOpenApiWarningAvailable(compilation));
+    }
+
+//    @Test
+    public void testInvalidOpenApiContractForBalProject() {
+        Package currentPackage = loadPackage("sample_8", false);
+        PackageCompilation compilation = currentPackage.getCompilation();
+        List<Diagnostic> openApiDiagnostics = compilation.diagnosticResult().diagnostics().stream()
+                .filter(d ->
+                        Objects.nonNull(d.diagnosticInfo().code())
+                                && d.diagnosticInfo().code().startsWith("OPENAPI_10")).collect(Collectors.toList());
+        Assert.assertEquals(openApiDiagnostics.size(), 1);
+        Diagnostic diagnostic = openApiDiagnostics.get(0);
+        DiagnosticInfo info = diagnostic.diagnosticInfo();
+        Assert.assertEquals(info.code(), "OPENAPI_101");
+        Assert.assertEquals(info.messageFormat(), "could not find the provided contract file");
     }
 
     private Package loadPackage(String path, boolean isSingleFile) {
