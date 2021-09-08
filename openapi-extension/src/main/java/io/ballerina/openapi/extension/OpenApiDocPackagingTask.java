@@ -53,6 +53,10 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
         // get the path for `target/bin`
         Path targetBinPath = executableJarAbsPath.getParent();
         if (null != targetBinPath && Files.exists(targetBinPath)) {
+            if (!Files.exists(targetBinPath.resolve(Constants.RESOURCES_DIR_NAME))) {
+                return;
+            }
+
             String executableJarFileName = executableJarAbsPath.toFile().getName();
             try {
                 this.packagingService.updateExecutableJar(targetBinPath, executableJarFileName);
