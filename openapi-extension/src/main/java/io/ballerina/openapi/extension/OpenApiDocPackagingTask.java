@@ -18,6 +18,10 @@ package io.ballerina.openapi.extension;
 
 import io.ballerina.openapi.extension.context.OpenApiDocContext;
 import io.ballerina.openapi.extension.doc.ResourcePackagingService;
+import io.ballerina.projects.JBallerinaBackend;
+import io.ballerina.projects.JarLibrary;
+import io.ballerina.projects.JarResolver;
+import io.ballerina.projects.JvmTarget;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.plugins.CompilerLifecycleEventContext;
 import io.ballerina.projects.plugins.CompilerLifecycleTask;
@@ -92,7 +96,18 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
 
                 String executableJarFileName = executableJarAbsPath.toFile().getName();
                 try {
-                    this.packagingService.updateExecutableJar(targetBinPath, executableJarFileName, context);
+                    // update the executable jar
+                    this.packagingService.updateJarFile(targetBinPath, executableJarFileName, context);
+
+                    // update the thin-jar | this is required for dockerized applications
+                    Optional<JarLibrary> thinJarOpt = getThinJar(compilationContext, executablePath);
+                    if (thinJarOpt.isPresent()) {
+                        JarLibrary thinJar = thinJarOpt.get();
+                        Path thinJarLocation = thinJar.path().toAbsolutePath();
+                        Path parenDirectory = thinJarLocation.getParent();
+                        String thinJarName = thinJarLocation.toFile().getName();
+                        this.packagingService.updateJarFile(parenDirectory, thinJarName, context);
+                    }
                 } catch (IOException e) {
                     OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_104;
                     Diagnostic diagnostic = getDiagnostics(errorCode, new NullLocation(), e.getMessage());
@@ -104,6 +119,23 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
             Diagnostic diagnostic = getDiagnostics(errorCode, new NullLocation(), e.getMessage());
             compilationContext.reportDiagnostic(diagnostic);
         }
+    }
+
+    private Optional<JarLibrary> getThinJar(CompilerLifecycleEventContext compilationContext, Path executablePath) {
+        JBallerinaBackend jBallerinaBackend = JBallerinaBackend
+                .from(compilationContext.compilation(), JvmTarget.JAVA_11);
+        JarResolver jarResolver = jBallerinaBackend.jarResolver();
+
+        Package currentPackage = compilationContext.currentPackage();
+        String thinJarName = "$anon".equals(currentPackage.packageOrg().value())
+                ? executablePath.getFileName().toString()
+                : currentPackage.packageOrg().value() + "-" + currentPackage.packageName().value() +
+                        "-" + currentPackage.packageVersion().value() + ".jar";
+
+        return jarResolver
+                .getJarFilePathsRequiredForExecution().stream()
+                .filter(jarLibrary -> jarLibrary.path().getFileName().toString().endsWith(thinJarName))
+                .findFirst();
     }
 
     private static class NullLocation implements Location {

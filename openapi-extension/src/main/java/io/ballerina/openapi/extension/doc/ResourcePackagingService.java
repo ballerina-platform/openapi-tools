@@ -42,10 +42,9 @@ public class ResourcePackagingService {
     private static final String TARGET_FILE_NAME = "target_exec.jar";
     private static final PrintStream ERR = System.err;
 
-    public void updateExecutableJar(Path targetBinPath, String srcFileName,
-                                    OpenApiDocContext context) throws IOException {
-        Path srcFile = targetBinPath.resolve(srcFileName);
-        Path targetFile = targetBinPath.resolve(TARGET_FILE_NAME);
+    public void updateJarFile(Path targetPath, String srcFileName, OpenApiDocContext context) throws IOException {
+        Path srcFile = targetPath.resolve(srcFileName);
+        Path targetFile = targetPath.resolve(TARGET_FILE_NAME);
         generateUpdatedJar(srcFile, targetFile, context);
         boolean successful = deleteOldFile(srcFile);
         if (successful) {
