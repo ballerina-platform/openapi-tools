@@ -17,7 +17,6 @@
 package io.ballerina.openapi.extension.doc.gen;
 
 import io.ballerina.compiler.syntax.tree.NodeLocation;
-import io.ballerina.openapi.extension.doc.SingleFileOpenApiDocGenerator;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 
 import java.util.List;
