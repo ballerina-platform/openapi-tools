@@ -191,7 +191,6 @@ isolated function getEncodedUri(string value) returns string {
 # + return - Returns generated Path or error at failure of client initialization
 isolated function getPathForQueryParam(map<anydata> queryParam, map<Encoding> encodingMap = {}) returns string|error {
     string[] param = [];
-    param[param.length()] = "?";
     if (queryParam.length() > 0) {
         param.push("?");
         foreach var [key, value] in queryParam.entries() {

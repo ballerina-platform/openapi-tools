@@ -160,9 +160,8 @@ public class BallerinaUtilGenerator {
         List<ModuleMemberDeclarationNode> memberDeclarationNodes = new ArrayList<>();
         getUtilTypeDeclarationNodes(memberDeclarationNodes);
 
-        URI uri = ClassLoader.getSystemResource("templates/").toURI();
-        String mainPath = Paths.get(uri).toString();
-        Path path = Paths.get(mainPath, "utils.bal");
+        URI uri = ClassLoader.getSystemResource("templates/utils.bal").toURI();
+        Path path = Paths.get(uri);
 
         Project project = ProjectLoader.loadProject(path);
         Package currentPackage = project.currentPackage();
@@ -243,7 +242,7 @@ public class BallerinaUtilGenerator {
                 createToken(EQUAL_TOKEN), explodeExpressionNode, createToken(SEMICOLON_TOKEN));
         // Assemble the TypeDefinitionNode
         List<Node> typeDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
-                "# Represents encoding mechanism details.", false));
+                "Represents encoding mechanism details.", false));
         MarkdownDocumentationNode typeDocumentationNode = createMarkdownDocumentationNode(createNodeList(typeDoc));
         MetadataNode typeMetadataNode = createMetadataNode(typeDocumentationNode, createEmptyNodeList());
         NodeList<Node> fieldNodes = createNodeList(styleFieldNode, explodeFieldNode);
