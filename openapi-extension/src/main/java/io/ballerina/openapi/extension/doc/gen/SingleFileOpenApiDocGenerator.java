@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.extension.doc;
+package io.ballerina.openapi.extension.doc.gen;
 
 import io.ballerina.openapi.extension.Constants;
 import io.ballerina.projects.ProjectKind;
@@ -56,6 +56,7 @@ public class SingleFileOpenApiDocGenerator extends AbstractOpenApiDocGenerator {
     @Override
     protected Path retrieveResourcePath(Path projectRoot) {
         return projectRoot
+                .resolve(Constants.TARGET_DIR_NAME)
                 .resolve(Constants.RESOURCES_DIR_NAME)
                 .resolve(Constants.PACKAGE_ORG).resolve(Constants.PACKAGE_NAME);
     }

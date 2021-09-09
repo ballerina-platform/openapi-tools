@@ -18,18 +18,21 @@ package io.ballerina.openapi.extension.doc;
 
 import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.extension.Constants;
+import io.ballerina.openapi.extension.context.OpenApiDocContext;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -39,23 +42,22 @@ public class ResourcePackagingService {
     private static final String TARGET_FILE_NAME = "target_exec.jar";
     private static final PrintStream ERR = System.err;
 
-    public void updateExecutableJar(Path targetBinPath, String srcFileName) throws IOException {
-        Path srcFile = targetBinPath.resolve(srcFileName);
-        Path targetFile = targetBinPath.resolve(TARGET_FILE_NAME);
-        generateUpdatedJar(srcFile, targetFile, targetBinPath);
+    public void updateJarFile(Path targetPath, String srcFileName, OpenApiDocContext context) throws IOException {
+        Path srcFile = targetPath.resolve(srcFileName);
+        Path targetFile = targetPath.resolve(TARGET_FILE_NAME);
+        generateUpdatedJar(srcFile, targetFile, context);
         boolean successful = deleteOldFile(srcFile);
         if (successful) {
             renameGeneratedFile(targetFile, srcFile);
         }
     }
 
-    private void generateUpdatedJar(Path srcFile, Path targetFile, Path targetBinPath) throws IOException {
+    private void generateUpdatedJar(Path srcFile, Path targetFile, OpenApiDocContext context) throws IOException {
         try (JarFile srcJar = new JarFile(srcFile.toString())) {
             try (ZipOutputStream outStream = new ZipOutputStream(new BufferedOutputStream(
                     new FileOutputStream(targetFile.toString())))) {
                 // add generated open-api doc related resources to target jar
-                Path resources = targetBinPath.resolve(Constants.RESOURCES_DIR_NAME);
-                Files.walkFileTree(resources, new ZipUpdater(outStream, resources));
+                addOpenApiResources(outStream, context);
 
                 // copy all the content in the src-jar to the new jar
                 for (Enumeration<JarEntry> entries = srcJar.entries(); entries.hasMoreElements();) {
@@ -66,6 +68,19 @@ public class ResourcePackagingService {
                         outStream.closeEntry();
                     }
                 }
+            }
+        }
+    }
+
+    private void addOpenApiResources(ZipOutputStream outStream, OpenApiDocContext context) throws IOException {
+        Path resourcesDirectory = Paths.get(
+                Constants.RESOURCES_DIR_NAME, Constants.PACKAGE_ORG, Constants.PACKAGE_NAME);
+        for (OpenApiDocContext.OpenApiDefinition definition: context.getOpenApiDetails()) {
+            try (InputStream inputStream = new ByteArrayInputStream(definition.getDefinition().getBytes())) {
+                Path targetFile = resourcesDirectory.resolve(definition.getFileName());
+                outStream.putNextEntry(new ZipEntry(targetFile.toString()));
+                CodegenUtils.copyContent(inputStream, outStream);
+                outStream.closeEntry();
             }
         }
     }

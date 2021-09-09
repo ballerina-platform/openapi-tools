@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.extension.doc;
+package io.ballerina.openapi.extension.doc.gen;
 
 import io.ballerina.openapi.extension.Constants;
 import io.ballerina.projects.ProjectKind;
