@@ -88,6 +88,12 @@ public class OpenApiExtensionTest {
         PackageCompilation compilation = currentPackage.getCompilation();
     }
 
+    @Test
+    public void testDocGenerationForHttpLoadBalance() {
+        Package currentPackage = loadPackage("sample_7/service.bal", true);
+        PackageCompilation compilation = currentPackage.getCompilation();
+    }
+
     private void testGeneratedResources(String projectName, int serviceCount) throws IOException {
         Path resourceRelativePath = Paths.get(projectName, "target", "bin", "resources", "ballerina", "http");
         Path resources = RESOURCE_DIRECTORY.resolve(resourceRelativePath);

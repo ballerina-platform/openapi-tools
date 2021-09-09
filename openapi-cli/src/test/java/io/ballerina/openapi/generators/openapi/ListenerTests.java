@@ -79,6 +79,12 @@ public class ListenerTests {
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario06.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for http load balancer listeners")
+    public void testListeners07() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_http_load_balancer.bal");
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "listeners/with_check_key_word.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
