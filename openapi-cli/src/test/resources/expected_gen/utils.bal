@@ -19,34 +19,6 @@ type SimpleBasicType string|boolean|int|float|decimal;
 
 final Encoding & readonly defaultEncoding = {};
 
-# Generate client request when the media type is given as application/x-www-form-urlencoded.
-#
-# + encodingMap - Includes the information about the encoding mechanism
-# + anyRecord - Record to be serialized
-# + return - Serialized request body or query parameter as a string
-isolated function createFormURLEncodedRequestBody(record {|anydata...; |} anyRecord, map<Encoding> encodingMap = {}) returns string {
-    string[] payload = [];
-    foreach [string, anydata] [key, value] in anyRecord.entries() {
-        Encoding encodingData = encodingMap.hasKey(key) ? encodingMap.get(key) : defaultEncoding;
-        if value is SimpleBasicType {
-            payload.push(key, "=", getEncodedUri(value.toString()));
-        } else if value is SimpleBasicType[] {
-            payload.push(getSerializedArray(key, value, encodingData.style, encodingData.explode));
-        } else if (value is record {}) {
-            if encodingData.style == DEEPOBJECT {
-                payload.push(getDeepObjectStyleRequest(key, value));
-            } else {
-                payload.push(getFormStyleRequest(key, value));
-            }
-        } else if (value is record {}[]) {
-            payload.push(getSerializedRecordArray(key, value, encodingData.style, encodingData.explode));
-        }
-        payload.push("&");
-    }
-    _ = payload.pop();
-    return string:'join("", ...payload);
-}
-
 # Serialize the record according to the deepObject style.
 #
 # + parent - Parent record name
@@ -225,16 +197,3 @@ isolated function getPathForQueryParam(map<anydata> queryParam, map<Encoding> en
     return restOfPath;
 }
 
-# Generate header map for given header values.
-#
-# + headerParam - Headers  map
-# + return - Returns generated map or error at failure of client initialization
-isolated function getMapForHeaders(map<any> headerParam) returns map<string|string[]> {
-    map<string|string[]> headerMap = {};
-    foreach var [key, value] in headerParam.entries() {
-        if value is string || value is string[] {
-            headerMap[key] = value;
-        }
-    }
-    return headerMap;
-}

@@ -48,6 +48,8 @@ public class ComparedGeneratedFileTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
+    private static final Path utilsPath = RES_DIR.resolve("ballerina_project/utils.bal");
+
     SyntaxTree syntaxTree;
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
@@ -97,6 +99,7 @@ public class ComparedGeneratedFileTests {
         try {
             Files.deleteIfExists(clientPath);
             Files.deleteIfExists(schemaPath);
+            Files.deleteIfExists(utilsPath);
         } catch (IOException e) {
             //Ignore the exception
         }

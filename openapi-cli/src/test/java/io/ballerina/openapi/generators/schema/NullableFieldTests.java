@@ -107,4 +107,15 @@ public class NullableFieldTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/nullable_anyof_schema.bal",
                 syntaxTree);
     }
+
+    @Test(description = "Test for union type generation for nullable anyOf schema with array schema")
+    public void testNullableArrayUnionType() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/nullable_anyof_array_schema.yaml"), true);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/" +
+                        "nullable_anyof_array_schema.bal",
+                syntaxTree);
+    }
 }

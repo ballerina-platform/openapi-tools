@@ -41,6 +41,7 @@ import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
 import io.ballerina.openapi.generators.service.BallerinaServiceGenerator;
 import io.ballerina.projects.DocumentId;
@@ -61,12 +62,13 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -113,6 +115,7 @@ public class CodeGenerator {
     private String licenseHeader = "";
 
     private static final PrintStream outStream = System.err;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
 
     /**
      * Generates ballerina source for provided Open API Definition in {@code definitionPath}.
@@ -133,7 +136,7 @@ public class CodeGenerator {
      */
     private void generate(GeneratorConstants.GenType type, String definitionPath, String serviceName, String outPath,
                           Filter filter, boolean nullable)
-            throws IOException, BallerinaOpenApiException, FormatterException, URISyntaxException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
 
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
@@ -143,7 +146,7 @@ public class CodeGenerator {
 
     public void generateBothFiles(GeneratorConstants.GenType type, String definitionPath, String serviceName,
                                   String outPath , Filter filter, boolean nullable)
-            throws IOException, BallerinaOpenApiException, FormatterException, URISyntaxException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
         List<GenSrcFile> genFiles =  new ArrayList<>();
@@ -176,7 +179,7 @@ public class CodeGenerator {
      */
     public void generateClient(String definitionPath, String serviceName, String outPath, Filter filter,
                                boolean nullable)
-            throws IOException, BallerinaOpenApiException, FormatterException, URISyntaxException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         generate(GEN_CLIENT, definitionPath, serviceName, outPath, filter, nullable);
     }
 
@@ -194,7 +197,7 @@ public class CodeGenerator {
      */
     public void generateService(String definitionPath, String serviceName, String outPath, Filter filter,
                                 boolean nullable)
-            throws IOException, BallerinaOpenApiException, FormatterException, URISyntaxException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         generate(GEN_SERVICE,  definitionPath, serviceName, outPath, filter, nullable);
     }
 
@@ -218,7 +221,7 @@ public class CodeGenerator {
                                               String definitionPath,
                                               String serviceName, Filter filter,
                                               boolean nullable)
-            throws IOException, BallerinaOpenApiException, FormatterException, URISyntaxException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         String openAPIFileContent = Files.readString(Paths.get(definitionPath));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
         if (parseResult.getMessages().size() > 0) {
@@ -437,7 +440,7 @@ public class CodeGenerator {
      * @throws IOException when code generation with specified templates fails
      */
     private List<GenSrcFile> generateClient(Path openAPI, Filter filter, boolean nullable)
-            throws IOException, BallerinaOpenApiException, FormatterException, URISyntaxException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage =  DEFAULT_CLIENT_PKG;
         }
@@ -543,7 +546,7 @@ public class CodeGenerator {
             try {
                 FileUtils.deleteDirectory(tmpDir.toFile());
             } catch (IOException ex) {
-                ex.printStackTrace();
+                LOGGER.error("Unable to delete the temporary directory : " + tmpDir, ex);
             }
         }));
         return unusedTypeDefinitionNameList;

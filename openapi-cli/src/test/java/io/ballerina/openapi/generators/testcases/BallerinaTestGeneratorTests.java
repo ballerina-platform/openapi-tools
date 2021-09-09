@@ -100,6 +100,7 @@ public class BallerinaTestGeneratorTests {
         try {
             Files.deleteIfExists(clientPath);
             Files.deleteIfExists(schemaPath);
+            Files.deleteIfExists(utilPath);
             Files.deleteIfExists(testPath);
             Files.deleteIfExists(configPath);
         } catch (IOException e) {

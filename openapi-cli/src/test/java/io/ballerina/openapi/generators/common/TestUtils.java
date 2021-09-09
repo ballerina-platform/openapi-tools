@@ -41,7 +41,6 @@ import org.testng.Assert;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,7 +65,7 @@ public class TestUtils {
     // Get diagnostics
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree, OpenAPI openAPI,
                                                   BallerinaClientGenerator ballerinaClientGenerator)
-            throws FormatterException, IOException, BallerinaOpenApiException, URISyntaxException {
+            throws FormatterException, IOException, BallerinaOpenApiException {
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree();

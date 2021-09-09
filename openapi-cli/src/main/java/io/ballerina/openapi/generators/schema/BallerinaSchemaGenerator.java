@@ -230,19 +230,23 @@ public class BallerinaSchemaGenerator {
                             createMarkdownDocumentationNode(createNodeList(schemaDoc));
                     MetadataNode metadataNode =
                             createMetadataNode(documentationNode, createEmptyNodeList());
-                    String fieldTypeNameArr = fieldTypeName.toString().trim() + "[]";
-                    if (arraySchema.getNullable() != null) {
-                        if (arraySchema.getNullable()) {
-                            fieldTypeNameArr = fieldTypeNameArr + "?";
-                        }
+                    String fieldTypeNameStr = fieldTypeName.toString().trim();
+                    if (fieldTypeName.toString().endsWith("?")) {
+                        fieldTypeNameStr = fieldTypeNameStr.substring(0, fieldTypeNameStr.length() - 1);
                     }
-                    if (nullable) {
-                        fieldTypeNameArr = fieldTypeNameArr + "?";
+                    if (schemaValue.getNullable() != null) {
+                        if (schemaValue.getNullable()) {
+                            fieldTypeNameStr = fieldTypeNameStr + "[]?";
+                        }
+                    } else if (nullable) {
+                        fieldTypeNameStr = fieldTypeNameStr + "[]?";
+                    } else {
+                        fieldTypeNameStr = fieldTypeNameStr + "[]";
                     }
                     typeDefNode = createTypeDefinitionNode(metadataNode, null,
                             createIdentifierToken("public type"),
                             createIdentifierToken(escapeIdentifier(schema.getKey())),
-                            createSimpleNameReferenceNode(createIdentifierToken(fieldTypeNameArr)),
+                            createSimpleNameReferenceNode(createIdentifierToken(fieldTypeNameStr)),
                             createToken(SEMICOLON_TOKEN));
                     typeDefinitionNodeList.add(typeDefNode);
                 }
@@ -587,7 +591,7 @@ public class BallerinaSchemaGenerator {
         }  else if (schema instanceof ComposedSchema) {
             //TODO: API doc generator
             ComposedSchema composedSchema = (ComposedSchema) schema;
-            return getTypeDescriptorNodeForComposedSchema(openApi, composedSchema, new ArrayList<>());
+            return getTypeDescriptorNodeForComposedSchema(openApi, composedSchema, new ArrayList<>(), false);
         } else if (schema.getType() == null) {
             //This contains a fallback to Ballerina common type `anydata` if the OpenApi specification type is not
             // defined.
@@ -659,7 +663,8 @@ public class BallerinaSchemaGenerator {
         } else if (schemaItem instanceof ComposedSchema) {
             // TODO: API Doc generator
             ComposedSchema composedSchema = (ComposedSchema) schemaItem;
-            memberTypeDesc = getTypeDescriptorNodeForComposedSchema(openApi, composedSchema, new ArrayList<>());
+            memberTypeDesc = getTypeDescriptorNodeForComposedSchema(openApi, composedSchema,
+                    new ArrayList<>(), true);
             return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                     null, closeSBracketToken);
         } else if (schemaItem.getType() != null) {
@@ -692,7 +697,7 @@ public class BallerinaSchemaGenerator {
     }
 
     private TypeDescriptorNode getTypeDescriptorNodeForComposedSchema(OpenAPI openAPI, ComposedSchema composedSchema,
-                                                                      List<Node> schemaDoc)
+                                                                      List<Node> schemaDoc, boolean isArray)
             throws BallerinaOpenApiException {
 
         TypeDescriptorNode memberTypeDesc;
@@ -721,7 +726,7 @@ public class BallerinaSchemaGenerator {
         } else {
             throw new BallerinaOpenApiException("Unsupported OAS data type.");
         }
-        if (nullableComposedSchema) {
+        if (nullableComposedSchema && !isArray) {
             typeName = typeName + "?";
             return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(typeName));
         } else {

@@ -29,11 +29,17 @@ import io.ballerina.projects.Project;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -94,6 +100,7 @@ public class BallerinaUtilGenerator {
     private boolean headersFound = false;
     private boolean queryParamsFound = false;
     private boolean requestBodyEncodingFound = false;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
 
     private static final String createFormURLEncodedRequestBody = "createFormURLEncodedRequestBody";
     private static final String getDeepObjectStyleRequest = "getDeepObjectStyleRequest";
@@ -103,6 +110,7 @@ public class BallerinaUtilGenerator {
     private static final String getOriginalKey = "getOriginalKey";
     private static final String getPathForQueryParam = "getPathForQueryParam";
     private static final String getMapForHeaders = "getMapForHeaders";
+    private static final String getSerializedRecordArray = "getSerializedRecordArray";
 
 
     /**
@@ -136,20 +144,19 @@ public class BallerinaUtilGenerator {
      * Generates util file syntax tree.
      *
      * @return                      Syntax tree of the util.bal file
-     * @throws URISyntaxException   When utils.bal file template is not found in the `resources/templates` directory.
      */
-    public SyntaxTree generateUtilSyntaxTree() throws URISyntaxException {
+    public SyntaxTree generateUtilSyntaxTree() throws IOException {
         Set<String> functionNameList = new LinkedHashSet<>();
         if (requestBodyEncodingFound) {
             functionNameList.addAll(Arrays.asList(
                     createFormURLEncodedRequestBody, getDeepObjectStyleRequest, getFormStyleRequest,
-                    getEncodedUri, getOriginalKey, getSerializedArray
+                    getEncodedUri, getOriginalKey, getSerializedArray, getSerializedRecordArray
             ));
         }
         if (queryParamsFound) {
             functionNameList.addAll(Arrays.asList(
                     getDeepObjectStyleRequest, getFormStyleRequest,
-                    getEncodedUri, getOriginalKey, getSerializedArray, getPathForQueryParam
+                    getEncodedUri, getOriginalKey, getSerializedArray, getPathForQueryParam, getSerializedRecordArray
             ));
         }
 
@@ -160,9 +167,7 @@ public class BallerinaUtilGenerator {
         List<ModuleMemberDeclarationNode> memberDeclarationNodes = new ArrayList<>();
         getUtilTypeDeclarationNodes(memberDeclarationNodes);
 
-        URI uri = ClassLoader.getSystemResource("templates/").toURI();
-        String mainPath = Paths.get(uri).toString();
-        Path path = Paths.get(mainPath, "utils.bal");
+        Path path = getResourceFilePath();
 
         Project project = ProjectLoader.loadProject(path);
         Package currentPackage = project.currentPackage();
@@ -243,7 +248,7 @@ public class BallerinaUtilGenerator {
                 createToken(EQUAL_TOKEN), explodeExpressionNode, createToken(SEMICOLON_TOKEN));
         // Assemble the TypeDefinitionNode
         List<Node> typeDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
-                "# Represents encoding mechanism details.", false));
+                "Represents encoding mechanism details.", false));
         MarkdownDocumentationNode typeDocumentationNode = createMarkdownDocumentationNode(createNodeList(typeDoc));
         MetadataNode typeMetadataNode = createMetadataNode(typeDocumentationNode, createEmptyNodeList());
         NodeList<Node> fieldNodes = createNodeList(styleFieldNode, explodeFieldNode);
@@ -318,5 +323,27 @@ public class BallerinaUtilGenerator {
         return createModuleVariableDeclarationNode(null,
                 null, createNodeList(createToken(FINAL_KEYWORD)), bindingPatternNode,
                 createToken(EQUAL_TOKEN), expressionNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    private Path getResourceFilePath() throws IOException {
+        Path path = null;
+        ClassLoader classLoader = getClass().getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream("templates/utils.bal");
+        if (inputStream != null) {
+            String clientSyntaxTreeString = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            Path tmpDir = Files.createTempDirectory(".util-tmp" + System.nanoTime());
+            path = tmpDir.resolve("utils.bal");
+            try (PrintWriter writer = new PrintWriter(path.toString(), StandardCharsets.UTF_8)) {
+                writer.print(clientSyntaxTreeString);
+            }
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    FileUtils.deleteDirectory(tmpDir.toFile());
+                } catch (IOException ex) {
+                    LOGGER.error("Unable to delete the temporary directory : " + tmpDir, ex);
+                }
+            }));
+        }
+        return path;
     }
 }

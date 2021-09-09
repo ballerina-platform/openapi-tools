@@ -148,10 +148,6 @@ public class FunctionBodyGenerator {
         this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
     }
 
-    public boolean isHeader() {
-        return isHeader;
-    }
-
     /**
      * Generate function body node for the remote function.
      *
@@ -645,7 +641,8 @@ public class FunctionBodyGenerator {
                     "request.setPayload(encodedRequestBody)");
             statementsList.add(setPayloadExpression);
         } else {
-            throw new BallerinaOpenApiException("Unsupported media type is given in the request body");
+            throw new BallerinaOpenApiException("Unsupported media type '" + mediaTypeEntry.getKey() +
+                    "' is given in the request body");
         }
     }
 

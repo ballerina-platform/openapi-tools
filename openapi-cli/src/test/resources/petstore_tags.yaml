@@ -29,12 +29,8 @@ tags:
     description: Pets Tag
   - name: list
     description: List Tag
-security:
-  - petstore_auth:
-      - write:pets
-      - read:pets
-  - user_auth:
-      - read:user
+  - name: dogs
+    description: Dogs
 
 paths:
   /pets:
@@ -111,6 +107,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /pets/dogs/{dog_id}:
+    get:
+      summary: Info for a specific pet
+      operationId: getDogs
+      tags:
+        - dogs
+      parameters:
+        - name: dog_id
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dog"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /action:
     x-MULTI:
       operationId: getAction
@@ -150,22 +172,10 @@ components:
           properties:
             bark:
               type: boolean
-        - $ref: "#/components/schemas/Owner"
     Pets:
       type: array
       items:
         $ref: "#/components/schemas/Pet"
-    Owner:
-      properties:
-        Name:
-          type: string
-        Address:
-          type: string
-          enum:
-            - admin
-            - contributor
-            - member
-            - owner
     Error:
       required:
         - code
