@@ -1,3 +1,7 @@
+public type ProjectGidProjectStatusesBody record {
+    ProjectStatusRequest data?;
+};
+
 public type ProjectStatusBase record {
     *ProjectStatusCompact;
     UserCompact author?;
@@ -27,10 +31,6 @@ public type AsanaResource record {
     string gid?;
     # The base type of this resource.
     string resource_type?;
-};
-
-public type Body record {
-    ProjectStatusRequest data?;
 };
 
 # A project status is an update on the progress of a particular project, and is sent out to all project followers when created.

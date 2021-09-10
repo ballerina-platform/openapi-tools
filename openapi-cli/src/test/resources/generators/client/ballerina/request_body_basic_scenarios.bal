@@ -1,5 +1,5 @@
-import  ballerina/http;
-import  ballerina/xmldata;
+import ballerina/http;
+import ballerina/xmldata;
 
 # refComponent
 public isolated client class Client {
@@ -16,12 +16,12 @@ public isolated client class Client {
     # 02 Example for rb has inline requestbody.
     #
     # + return - OK
-    remote isolated function updateUser(Body payload) returns http:Response|error {
+    remote isolated function updateUser(Path01Body payload) returns http:Response|error {
         string  path = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp-> put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->put(path, request, targetType=http:Response);
         return response;
     }
     # 01 Request body with reference.
@@ -32,7 +32,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
         return response;
     }
     # 04 Example for rb has inline requestbody.
@@ -44,7 +44,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp-> put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->put(path, request, targetType=http:Response);
         return response;
     }
     # 03 Request body with record reference.
@@ -55,43 +55,43 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
         return response;
     }
     # 06 Example for rb has array inline requestbody.
     #
     # + return - OK
-    remote isolated function updateXMLUser(Body1 payload) returns http:Response|error {
+    remote isolated function updateXMLUser(Path03Body payload) returns http:Response|error {
         string  path = string `/path03`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp-> put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->put(path, request, targetType=http:Response);
         return response;
     }
     # 05 Example for rb has array inline requestbody.
     #
     # + return - OK
-    remote isolated function postXMLUser(Body2 payload) returns http:Response|error {
+    remote isolated function postXMLUser(Path03Body1 payload) returns http:Response|error {
         string  path = string `/path03`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
         return response;
     }
     # 07 Example for rb has array inline requestbody.
     #
     # + return - OK
-    remote isolated function postXMLUserInLineArray(Body3[] payload) returns http:Response|error {
+    remote isolated function postXMLUserInLineArray(Path04Body[] payload) returns http:Response|error {
         string  path = string `/path04`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
         return response;
     }
 }

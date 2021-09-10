@@ -31,6 +31,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,13 +48,16 @@ public class ComparedGeneratedFileTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
+    private static final Path utilsPath = RES_DIR.resolve("ballerina_project/utils.bal");
+
     SyntaxTree syntaxTree;
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
     @Test(description = "Generate Client for path parameter has parameter name as key word", enabled = false)
-    public void generateClientForJira() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateClientForJira() throws IOException, BallerinaOpenApiException,
+            FormatterException, URISyntaxException {
 //        Path definitionPath = RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml");
         Path definitionPath = RES_DIR.resolve("openapi.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/jira_openapi.bal");
@@ -69,7 +73,7 @@ public class ComparedGeneratedFileTests {
     @Test(description = "Test openAPI definition to ballerina client source code generation",
             dataProvider = "fileProviderForFilesComparison")
     public void  openApiToBallerinaCodeGenTestForClient(String yamlFile, String expectedFile) throws IOException,
-            BallerinaOpenApiException, FormatterException {
+            BallerinaOpenApiException, FormatterException, URISyntaxException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/" + yamlFile);
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/" + expectedFile);
         CodeGenerator codeGenerator = new CodeGenerator();
@@ -96,6 +100,7 @@ public class ComparedGeneratedFileTests {
         try {
             Files.deleteIfExists(clientPath);
             Files.deleteIfExists(schemaPath);
+            Files.deleteIfExists(utilsPath);
         } catch (IOException e) {
             //Ignore the exception
         }

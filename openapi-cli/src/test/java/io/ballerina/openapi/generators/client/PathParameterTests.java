@@ -52,7 +52,6 @@ public class PathParameterTests {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_valid.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_parameter_valid.bal");
-
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
@@ -64,7 +63,6 @@ public class PathParameterTests {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/path_param_with_ref_schemas.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/path_param_with_ref_schema.bal");
-
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
@@ -82,12 +80,22 @@ public class PathParameterTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
+    @Test(description = "Generate Client with duplicated path parameter name in the path")
+    public void generateFormattedDuplicatedPathParamName() throws IOException, BallerinaOpenApiException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RESDIR.resolve("swagger/path_param_duplicated_name.yaml");
+        Path expectedPath = RESDIR.resolve("ballerina/path_param_duplicated_name.bal");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
     @Test(description = "When path parameter has given unmatch data type in ballerina",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Invalid path parameter data type for the parameter: .*")
     public void testInvalidPathParameterType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid.yaml");
-        // int, string, boolean, decimal, float,
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
@@ -99,7 +107,6 @@ public class PathParameterTests {
             expectedExceptionsMessageRegExp = "Unsupported OAS data type .*")
     public void testInvalidDataType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/path_parameter_invalid02.yaml");
-        // int, string, boolean, decimal, float,
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);

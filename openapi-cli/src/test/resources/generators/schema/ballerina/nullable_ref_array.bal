@@ -1,4 +1,4 @@
-public type Pets Pe[]?;
+public type Pets Pet[]?;
 
 public type Error record {
     int code;
