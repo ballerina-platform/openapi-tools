@@ -148,6 +148,30 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test Ballerina types generation when nullable option is given in the cmd and definition both")
+    public void generateTypesWithNullableFieldsAndGlobalNullableTrue() {
+        final String clientName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("petstore_nullable_false.yaml").toString();
+        CodeGenerator generator = new CodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "nullable_false_types.bal");
+            generator.generateClient(definitionPath, clientName, resourcePath.toString(), filter, true);
+
+            if (Files.exists(resourcePath.resolve("types.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "types.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+            } else {
+                Assert.fail("Types were not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
     @Test(description = "Test Ballerina utils file generation")
     public void generateUtilsFile() {
         final String clientName = "openapipetstore";
@@ -179,6 +203,7 @@ public class CodeGeneratorTest {
         CodeGenerator generator = new CodeGenerator();
         List<String> listTags = new ArrayList<>();
         listTags.add("pets");
+        listTags.add("dogs");
         Filter filterCustom = new Filter(listTags, list2);
         try {
             String expectedSchemaContent = getStringFromGivenBalFile(expectedServiceFile, "type_filtered_by_tags.bal");
