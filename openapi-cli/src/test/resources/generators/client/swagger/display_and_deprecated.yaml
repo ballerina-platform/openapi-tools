@@ -37,7 +37,7 @@ paths:
       operationId: listPets
       deprecated: true
       x-deprecated-reason: This methods has deprecated since the Pet has deprecated
-      x-display:
+      x-ballerina-display:
         label: List Pets
       tags:
         - pets
@@ -104,7 +104,7 @@ paths:
             type: string
           deprecated: true
           x-deprecated-reason: Limit is deprecated from v2
-          x-display:
+          x-ballerina-display:
             label: Result limit
       responses:
         '200':

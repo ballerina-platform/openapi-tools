@@ -71,6 +71,8 @@ public class Constants {
     public static final String SERVER = "server";
     public static final String PORT = "port";
     public static final String SPLIT_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
+    public static final String APPLICATION_PREFIX = "application/";
+    public static final String JSON_POSTFIX = "+json";
 
     /**
      * Enum to select the Ballerina Type.
@@ -184,5 +186,22 @@ public class Constants {
     public static final String HTTP_200 = "200";
     public static final String HTTP_200_DESCRIPTION = "Ok";
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
+
+    //Cache config constant
+    public static final String CACHE_CONTROL = "Cache-Control";
+    public static final String ETAG = "ETag";
+    public static final String LAST_MODIFIED = "Last-Modified";
+    public static final String MUST_REVALIDATE = "must-revalidate";
+    public static final String NO_CACHE = "no-cache";
+    public static final String NO_STORE = "no-store";
+    public static final String NO_TRANSFORM = "no-transform";
+    public static final String PRIVATE = "private";
+    public static final String PUBLIC = "public";
+    public static final String PROXY_REVALIDATE = "proxy-revalidate";
+    public static final String MAX_AGE = "max-age";
+    public static final String S_MAX_AGE = "s-maxage";
+
+    public static final String TRUE = "true";
+    public static final String FALSE = "false";
 
 }

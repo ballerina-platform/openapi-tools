@@ -29,6 +29,8 @@ import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -71,8 +73,7 @@ public class ServiceToOpenAPIConverterUtils {
         List<ListenerDeclarationNode> endpoints = new ArrayList<>();
         List<ServiceDeclarationNode> servicesToGenerate = new ArrayList<>();
         List<String> availableService = new ArrayList<>();
-
-        if (!semanticModel.diagnostics().isEmpty()) {
+        if (containErrors(semanticModel.diagnostics())) {
             throw new OpenApiConverterException("Given ballerina file has syntax/compilation error.");
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
@@ -98,6 +99,11 @@ public class ServiceToOpenAPIConverterUtils {
             }
         }
         return openAPIDefinitions;
+    }
+
+    private static boolean containErrors(List<Diagnostic> diagnostics) {
+        return diagnostics != null && diagnostics.stream().anyMatch(diagnostic ->
+                diagnostic.diagnosticInfo().severity() == DiagnosticSeverity.ERROR);
     }
 
     /**
@@ -146,7 +152,7 @@ public class ServiceToOpenAPIConverterUtils {
     /**
      * Generate openAPI definition according to the given format JSON or YAML.
      */
-    private static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
+    public static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
                                                     boolean needJson, List<ListenerDeclarationNode> endpoints,
                                                     SemanticModel semanticModel, String openApiName)
             throws OpenApiConverterException {
@@ -196,6 +202,9 @@ public class ServiceToOpenAPIConverterUtils {
         String title = null;
         if (splits.length > 1) {
             for (String piece: splits) {
+                if (piece.isBlank()) {
+                    continue;
+                }
                 stringBuilder.append(piece.substring(0, 1).toUpperCase(Locale.ENGLISH) + piece.substring(1));
                 stringBuilder.append(" ");
             }

@@ -141,6 +141,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.OAUTH2;
 import static io.ballerina.openapi.generators.GeneratorConstants.PASSWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.REFRESH_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.SSL_FIELD_NAME;
+import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_APIKEY_DESCRIPTION;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 
 /**
@@ -206,8 +207,8 @@ public class BallerinaAuthConfigGenerator {
         return authTypes;
     }
     /**
-     * Returns the `x-apikey-description` given when the authentication mechanism is API key. This value will be
-     * mapped to connector init function `apiKeyConfig` parameter doc comment.
+     * Returns the `x-ballerina-apikey-description` given when the authentication mechanism is API key.
+     * This value will be mapped to connector init function `apiKeyConfig` parameter doc comment.
      *
      * @return {@link String}   Api key description
      */
@@ -829,7 +830,7 @@ public class BallerinaAuthConfigGenerator {
     /**
      * This method is used set the apiKeyDescription when API key security schema is given.
      *
-     * @param scheme    SecurityScheme to get the value of x-apikey-description extension
+     * @param scheme    SecurityScheme to get the value of x-ballerina-apikey-description extension
      */
     private void setApiKeyDescription(SecurityScheme scheme) {
         apiKeyDescription = "API key configuration detail";
@@ -837,7 +838,7 @@ public class BallerinaAuthConfigGenerator {
             Map<String, Object> extensions = scheme.getExtensions();
             if (!extensions.isEmpty()) {
                 for (Map.Entry<String, Object> extension : extensions.entrySet()) {
-                    if (extension.getKey().trim().equals("x-apikey-description")) {
+                    if (extension.getKey().trim().equals(X_BALLERINA_APIKEY_DESCRIPTION)) {
                         apiKeyDescription = extension.getValue().toString();
                     }
                 }

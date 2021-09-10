@@ -82,8 +82,7 @@ public class OpenAPIComponentMapper {
                 // Handle like object
                 generateObjectSchemaFromRecordFields(schema, componentName, rfields, apiDocs);
             } else {
-                mapTypeInclusionToAllOfSchema(schema, componentName, typeInclusions, rfields,
-                        unionKeys, apiDocs);
+                mapTypeInclusionToAllOfSchema(schema, componentName, typeInclusions, rfields, unionKeys, apiDocs);
             }
         }
     }

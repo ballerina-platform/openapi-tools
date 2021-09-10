@@ -54,6 +54,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOCUMENTATION_DESCRIPTION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
+import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DISPLAY;
 
 /**
  * This class util for maintain the API doc comment related functions.
@@ -68,7 +69,7 @@ public class DocCommentsGenerator {
                                                           List<AnnotationNode> annotationNodes) {
         if (extensions != null) {
             for (Map.Entry<String, Object> extension: extensions.entrySet()) {
-                if (extension.getKey().trim().equals("x-display")) {
+                if (extension.getKey().trim().equals(X_BALLERINA_DISPLAY)) {
                     annotationNodes.add(getAnnotationNode(extension));
                 }
             }

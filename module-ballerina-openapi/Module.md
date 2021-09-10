@@ -67,8 +67,8 @@ If you need to document an OpenAPI contract for only one given service, then use
     bal openapi -i hello.yaml
 ```
 
-This will generate a Ballerina service and client stub for the `hello.yaml` OpenAPI contract named `hello-service
-` and client named `hello-client`. The above command can be run from within anywhere on the execution path. 
+This will generate a Ballerina service and client stub for the `hello.yaml` OpenAPI contract named `hello-service`
+and client named `hello-client`. The above command can be run from within anywhere on the execution path.
 It is not mandatory to run it from inside the Ballerina project.
 
 Output:
@@ -121,7 +121,7 @@ service greet on new http:Listener(9090) {
 ```
 #### Annotation Support for the Following Attributes:
 - **Contract** (Required) : **string**  :
-Here, you can provide a path to the OpenAPI contract as a string and the OpenAPI file can either be `.yaml` or `.json`
+Here, you can provide a path to the OpenAPI contract as a string and the OpenAPI file can either be `.yaml` or `.json`.
 This is a required attribute.
 
 - **Tag** (Optional) : **string[]?**     :

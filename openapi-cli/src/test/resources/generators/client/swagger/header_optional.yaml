@@ -4,7 +4,7 @@ info:
   title: "OpenWeather Map API for Query parameter"
   description: "Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city."
   version: "2.5.2"
-  x-display:
+  x-ballerina-display:
     label: Open Weather Client
 
 servers:
@@ -25,7 +25,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: Latitude
         - description: "Longtitude"
           in: query
@@ -33,7 +33,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: Longtitude
         - description: "test"
           in: header
@@ -41,7 +41,7 @@ paths:
           required: false
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: Exclude
         - description: 'tests'
           in: header
@@ -49,9 +49,9 @@ paths:
           required: false
           schema:
             type: integer
-          x-display:
+          x-ballerina-display:
             label: Units
-      x-display:
+      x-ballerina-display:
         label: "Weather Forecast"
       responses:
         200:
