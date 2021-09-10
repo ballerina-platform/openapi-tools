@@ -5,7 +5,7 @@ info:
     Get current weather, daily forecast for 16 days, and 3-hourly forecast 5
     days for your city.
   version: 1.0.0-oas3
-  x-display:
+  x-ballerina-display:
     label: Open Weather Client
 servers:
   - url: 'http://api.openweathermap.org/data/2.5/'

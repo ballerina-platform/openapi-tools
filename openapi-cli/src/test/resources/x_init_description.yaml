@@ -10,7 +10,7 @@ info:
   termsOfService: http://developer.nytimes.com/tou
   title: Movie Reviews API
   version: 2.0.0
-  x-init-description: >
+  x-ballerina-init-description: >
     Client initialization required API credentials and service URL.
 
     The service URL may set to the default value. You can override if required.

@@ -317,6 +317,6 @@ components:
     app_id:
       type: apiKey
       description: API key to authorize requests.
-      x-apikey-description: "Provide your API key as `appid`. Eg: `{\"appid\" : \"<API key>\"}`"
+      x-ballerina-apikey-description: "Provide your API key as `appid`. Eg: `{\"appid\" : \"<API key>\"}`"
       name: appid
       in: query

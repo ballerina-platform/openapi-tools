@@ -24,7 +24,7 @@ paths:
         - SendEmail
       description: "Send an email to given recipient"
       operationId: sendEmail
-      x-display:
+      x-ballerina-display:
         label: "Send Email"
       requestBody:
         content:
@@ -34,23 +34,23 @@ paths:
                 recipient:
                   type: string
                   description: "The recipient of the mail"
-                  x-display: "Recipient"
+                  x-ballerina-display: "Recipient"
                 subject:
                   type: string
                   description: "The subject of the mail"
-                  x-display:  "Subject"
+                  x-ballerina-display:  "Subject"
                 body:
                   type: string
                   description: "The message body of the mail"
-                  x-display: "Message Body"
+                  x-ballerina-display: "Message Body"
                 cc:
                   type: string
                   description: "The cc recipient of the mail. Optional"
-                  x-display: "Cc"
+                  x-ballerina-display: "Cc"
                 bcc:
                   type: string
                   description: "The bcc recipient of the mail. Optional"
-                  x-display: "Bcc"
+                  x-ballerina-display: "Bcc"
               required:
                 - recipient
                 - subject
