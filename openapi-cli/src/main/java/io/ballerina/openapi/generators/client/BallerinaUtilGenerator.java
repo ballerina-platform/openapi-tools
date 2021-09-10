@@ -204,6 +204,11 @@ public class BallerinaUtilGenerator {
         return utilSyntaxTree.modifyWith(utilModulePartNode);
     }
 
+    /**
+     * Set the type definition nodes related to the util functions generated.
+     *
+     * @param memberDeclarationNodes    {@link ModuleMemberDeclarationNode}
+     */
     private void getUtilTypeDeclarationNodes(List<ModuleMemberDeclarationNode> memberDeclarationNodes) {
         if (requestBodyEncodingFound || queryParamsFound) {
             memberDeclarationNodes.addAll(Arrays.asList(
@@ -325,6 +330,12 @@ public class BallerinaUtilGenerator {
                 createToken(EQUAL_TOKEN), expressionNode, createToken(SEMICOLON_TOKEN));
     }
 
+    /**
+     * Gets the path of the utils.bal template at the time of execution.
+     *
+     * @return  Path to utils.bal file in the temporary directory created
+     * @throws  IOException     When failed to get the templates/utils.bal file from resources
+     */
     private Path getResourceFilePath() throws IOException {
         Path path = null;
         ClassLoader classLoader = getClass().getClassLoader();
