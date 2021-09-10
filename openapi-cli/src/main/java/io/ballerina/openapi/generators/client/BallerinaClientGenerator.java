@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.generators.client;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
 import io.ballerina.compiler.syntax.tree.BinaryExpressionNode;
 import io.ballerina.compiler.syntax.tree.BlockStatementNode;
@@ -143,7 +144,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
-import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DISPLAY;
 import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_INIT_DESCRIPTION;
 
 /**
@@ -284,26 +284,19 @@ public class BallerinaClientGenerator {
      * @return  {@link MetadataNode}    Metadata node of the client class
      */
     private MetadataNode getClassMetadataNode() {
-        MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
+        List<AnnotationNode> classLevelAnnotationNodes  = new ArrayList<>();
         if (openAPI.getInfo().getExtensions() != null) {
             Map<String, Object> extensions = openAPI.getInfo().getExtensions();
-            if (!extensions.isEmpty()) {
-                for (Map.Entry<String, Object> extension: extensions.entrySet()) {
-                    if (extension.getKey().trim().equals(X_BALLERINA_DISPLAY)) {
-                        metadataNode = DocCommentsGenerator.getMetadataNodeForDisplayAnnotation(extension);
-                    }
-                }
-            }
+            DocCommentsGenerator.extractDisplayAnnotation(extensions, classLevelAnnotationNodes);
         }
-        // Get client class documentation
+        // Generate api doc
         List<Node> documentationLines = new ArrayList<>();
         if (openAPI.getInfo().getDescription() != null) {
             documentationLines.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                     openAPI.getInfo().getDescription(), false));
         }
         MarkdownDocumentationNode apiDoc = createMarkdownDocumentationNode(createNodeList(documentationLines));
-        metadataNode = metadataNode.modify(apiDoc, metadataNode.annotations());
-        return metadataNode;
+        return createMetadataNode(apiDoc, createNodeList(classLevelAnnotationNodes));
     }
 
     /**
@@ -474,15 +467,10 @@ public class BallerinaClientGenerator {
                 for (Map.Entry<PathItem.HttpMethod, Operation> operation :
                         path.getValue().readOperationsMap().entrySet()) {
                     // create display annotation of the operation
-                    MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
-                    Map<String, Object> extensions = operation.getValue().getExtensions();
-                    if (extensions != null) {
-                        for (Map.Entry<String, Object> extension : extensions.entrySet()) {
-                            if (extension.getKey().trim().equals(X_BALLERINA_DISPLAY)) {
-                                metadataNode = DocCommentsGenerator.getMetadataNodeForDisplayAnnotation(extension);
-                                break;
-                            }
-                        }
+                    List<AnnotationNode> functionLevelAnnotationNodes  = new ArrayList<>();
+                    if (operation.getValue().getExtensions() != null) {
+                        Map<String, Object> extensions = operation.getValue().getExtensions();
+                        DocCommentsGenerator.extractDisplayAnnotation(extensions, functionLevelAnnotationNodes);
                     }
                     List<String> operationTags = operation.getValue().getTags();
                     String operationId = operation.getValue().getOperationId();
@@ -493,14 +481,15 @@ public class BallerinaClientGenerator {
                                     ((operationId != null) && filterOperations.contains(operationId.trim()))) {
                                 // Generate remote function
                                 FunctionDefinitionNode functionDefinitionNode =
-                                        getRemoteFunctionDefinitionNode(metadataNode, path.getKey(), operation);
+                                        getRemoteFunctionDefinitionNode(
+                                                functionLevelAnnotationNodes, path.getKey(), operation);
                                 functionDefinitionNodeList.add(functionDefinitionNode);
                             }
                         }
                     } else {
                         // Generate remote function
-                        FunctionDefinitionNode functionDefinitionNode = getRemoteFunctionDefinitionNode(metadataNode,
-                                path.getKey(), operation);
+                        FunctionDefinitionNode functionDefinitionNode = getRemoteFunctionDefinitionNode(
+                                functionLevelAnnotationNodes, path.getKey(), operation);
                         functionDefinitionNodeList.add(functionDefinitionNode);
                     }
                 }
@@ -519,7 +508,7 @@ public class BallerinaClientGenerator {
      *    }
      * </pre>
      */
-    private  FunctionDefinitionNode getRemoteFunctionDefinitionNode(MetadataNode metadataNode, String path,
+    private  FunctionDefinitionNode getRemoteFunctionDefinitionNode(List<AnnotationNode> annotationNodes, String path,
                                                                     Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
         // Create api doc for function
@@ -549,9 +538,14 @@ public class BallerinaClientGenerator {
                 functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
                         remoteFunctionDocs);
         typeDefinitionNodeList = functionSignatureGenerator.getTypeDefinitionNodeList();
+        // Create `Deprecated` annotation if an operation has mentioned as `deprecated:true`
+        if (operation.getValue().getDeprecated() != null && operation.getValue().getDeprecated()) {
+            DocCommentsGenerator.extractDeprecatedAnnotation(operation.getValue().getExtensions(),
+                    remoteFunctionDocs, annotationNodes);
+        }
         // Create metadataNode add documentation string
-        metadataNode = metadataNode.modify(createMarkdownDocumentationNode(createNodeList(remoteFunctionDocs)),
-                metadataNode.annotations());
+        MetadataNode metadataNode = createMetadataNode(createMarkdownDocumentationNode(
+                createNodeList(remoteFunctionDocs)), createNodeList(annotationNodes));
 
         // Create Function Body
         FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(imports, isQuery, isHeader,
@@ -626,8 +620,8 @@ public class BallerinaClientGenerator {
         docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                 "Generate header map for given header values.", true));
         // Create client init description
-        MarkdownParameterDocumentationLineNode queryParam = DocCommentsGenerator.createAPIParamDoc("headerParam",
-                "Headers  map");
+        MarkdownParameterDocumentationLineNode queryParam = DocCommentsGenerator.
+                createAPIParamDoc("headerParam", "Headers  map");
         docs.add(queryParam);
         MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
                 "Returns generated map or error at failure of client initialization");
