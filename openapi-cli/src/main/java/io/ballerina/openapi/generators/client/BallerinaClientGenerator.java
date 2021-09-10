@@ -108,6 +108,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
+import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DISPLAY;
+import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_INIT_DESCRIPTION;
 
 /**
  * This class is used to generate ballerina client file according to given yaml file.
@@ -246,7 +248,7 @@ public class BallerinaClientGenerator {
             Map<String, Object> extensions = openAPI.getInfo().getExtensions();
             if (!extensions.isEmpty()) {
                 for (Map.Entry<String, Object> extension: extensions.entrySet()) {
-                    if (extension.getKey().trim().equals("x-display")) {
+                    if (extension.getKey().trim().equals(X_BALLERINA_DISPLAY)) {
                         metadataNode = DocCommentsGenerator.getMetadataNodeForDisplayAnnotation(extension);
                     }
                 }
@@ -357,7 +359,7 @@ public class BallerinaClientGenerator {
         if (openAPI.getInfo().getExtensions() != null && !openAPI.getInfo().getExtensions().isEmpty()) {
             Map<String, Object> extensions = openAPI.getInfo().getExtensions();
             for (Map.Entry<String, Object> extension: extensions.entrySet()) {
-                if (extension.getKey().trim().equals("x-init-description")) {
+                if (extension.getKey().trim().equals(X_BALLERINA_INIT_DESCRIPTION)) {
                     clientInitDocComment = clientInitDocComment.concat(extension.getValue().toString());
                     break;
                 }
@@ -435,7 +437,7 @@ public class BallerinaClientGenerator {
                     Map<String, Object> extensions = operation.getValue().getExtensions();
                     if (extensions != null) {
                         for (Map.Entry<String, Object> extension : extensions.entrySet()) {
-                            if (extension.getKey().trim().equals("x-display")) {
+                            if (extension.getKey().trim().equals(X_BALLERINA_DISPLAY)) {
                                 metadataNode = DocCommentsGenerator.getMetadataNodeForDisplayAnnotation(extension);
                                 break;
                             }

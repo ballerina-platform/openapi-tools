@@ -171,4 +171,9 @@ public class GeneratorConstants {
     public static final String STYLE = "style";
     public static final String EXPLODE = "explode";
 
+    //OpenAPI Ballerina extensions
+    public static final String X_BALLERINA_INIT_DESCRIPTION = "x-ballerina-init-description";
+    public static final String X_BALLERINA_DISPLAY = "x-ballerina-display";
+    public static final String X_BALLERINA_APIKEY_DESCRIPTION = "x-ballerina-apikey-description";
+
 }

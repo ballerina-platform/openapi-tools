@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0018;
 import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019;
 import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0020;
 
@@ -139,7 +140,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                             if (!validations.isEmpty()) {
                                 // when the contract has empty string
                                 for (Diagnostic diagnostic: validations) {
-                                    if (diagnostic.diagnosticInfo().code().equals(BAL_OPENAPI_VALIDATOR_0019) ||
+                                    if (diagnostic.diagnosticInfo().code().equals(BAL_OPENAPI_VALIDATOR_0018) ||
                                             diagnostic.diagnosticInfo().code().equals(BAL_OPENAPI_VALIDATOR_0020)) {
                                         isAnnotationExist = false;
                                     }
@@ -150,6 +151,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                     e.getMessage(), DiagnosticSeverity.ERROR);
                             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location);
                             validations.add(diagnostic);
+                            isAnnotationExist = false;
                         }
                     }
                 }
