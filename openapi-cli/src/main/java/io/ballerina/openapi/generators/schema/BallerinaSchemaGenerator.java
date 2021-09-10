@@ -19,6 +19,7 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
@@ -156,16 +157,22 @@ public class BallerinaSchemaGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
-    private TypeDefinitionNode getTypeDefinitionNode(OpenAPI openAPI,
+    private void getTypeDefinitionNode(OpenAPI openAPI,
                                                           List<TypeDefinitionNode> typeDefinitionNodeList,
                                        Map.Entry<String, Schema> schema, List<Node> schemaDoc, List<String> required,
                                        String recordName) throws BallerinaOpenApiException {
 
         IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(recordName);
         Token typeKeyWord = AbstractNodeFactory.createIdentifierToken("public type");
+        Schema schemaValue = schema.getValue();
+
+        List<AnnotationNode> typeAnnotations = new ArrayList<>();
+        if (schema.getValue().getDeprecated() != null && schema.getValue().getDeprecated()) {
+            DocCommentsGenerator.extractDeprecatedAnnotation(schemaValue.getExtensions(),
+                    schemaDoc, typeAnnotations);
+        }
         //Generate RecordFiled
         List<Node> recordFieldList = new ArrayList<>();
-        Schema schemaValue = schema.getValue();
         TypeDefinitionNode typeDefNode = null;
         if (schemaValue instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schemaValue;
@@ -179,7 +186,7 @@ public class BallerinaSchemaGenerator {
                 String unionTypeCont = generatorUtils.getOneOfUnionType(oneOf);
                 String type  = escapeIdentifier(schema.getKey().trim());
                 MetadataNode metadataNode = createMetadataNode(
-                        createMarkdownDocumentationNode(createNodeList(schemaDoc)), createEmptyNodeList());
+                        createMarkdownDocumentationNode(createNodeList(schemaDoc)), createNodeList(typeAnnotations));
                 typeDefNode = createTypeDefinitionNode(metadataNode, null,
                         createIdentifierToken("public type "),
                         createIdentifierToken(type),
@@ -191,7 +198,7 @@ public class BallerinaSchemaGenerator {
                 String unionTypeCont = generatorUtils.getOneOfUnionType(anyOf);
                 String type  = escapeIdentifier(schema.getKey().trim());
                 MetadataNode metadataNode = createMetadataNode(
-                        createMarkdownDocumentationNode(createNodeList(schemaDoc)), createEmptyNodeList());
+                        createMarkdownDocumentationNode(createNodeList(schemaDoc)), createNodeList(typeAnnotations));
                 typeDefNode = createTypeDefinitionNode(metadataNode, null,
                         createIdentifierToken("public type "),
                         createIdentifierToken(type),
@@ -201,14 +208,8 @@ public class BallerinaSchemaGenerator {
             }
         } else if (schema.getValue().getProperties() != null || (schema.getValue() instanceof ObjectSchema)) {
             Map<String, Schema> fields = schema.getValue().getProperties();
-            String description;
-            if (schema.getValue().getDescription() != null) {
-                description = schema.getValue().getDescription();
-            } else {
-                description = "";
-            }
-            typeDefNode = getTypeDefinitionNodeForObjectSchema(required,
-                    typeKeyWord, typeName, recordFieldList, fields, description, openAPI);
+            typeDefNode = getTypeDefinitionNodeForObjectSchema(required, typeKeyWord, typeName, recordFieldList, fields,
+                    schemaDoc, openAPI, createNodeList(typeAnnotations));
             typeDefinitionNodeList.add(typeDefNode);
         } else if (schema.getValue().getType() != null) {
             if (schema.getValue().getType().equals("array")) {
@@ -229,7 +230,7 @@ public class BallerinaSchemaGenerator {
                     MarkdownDocumentationNode documentationNode =
                             createMarkdownDocumentationNode(createNodeList(schemaDoc));
                     MetadataNode metadataNode =
-                            createMetadataNode(documentationNode, createEmptyNodeList());
+                            createMetadataNode(documentationNode, createNodeList(typeAnnotations));
                     String fieldTypeNameStr = fieldTypeName.toString().trim();
                     if (fieldTypeName.toString().endsWith("?")) {
                         fieldTypeNameStr = fieldTypeNameStr.substring(0, fieldTypeNameStr.length() - 1);
@@ -247,7 +248,7 @@ public class BallerinaSchemaGenerator {
                 MarkdownDocumentationNode documentationNode =
                         createMarkdownDocumentationNode(createNodeList(schemaDoc));
                 MetadataNode metadataNode =
-                        createMetadataNode(documentationNode, createEmptyNodeList());
+                        createMetadataNode(documentationNode, createNodeList(typeAnnotations));
                 if (value.getType() != null) {
                     String typedescriptorName = convertOpenAPITypeToBallerina(value.getType().trim());
                     typedescriptorName = getNullableType(value, typedescriptorName);
@@ -274,7 +275,7 @@ public class BallerinaSchemaGenerator {
                             createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             MarkdownDocumentationNode documentationNode =
                     createMarkdownDocumentationNode(createNodeList(schemaDoc));
-            MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+            MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
             typeDefNode = NodeFactory.createTypeDefinitionNode(metadataNode,
                     null, typeKeyWord, typeName, recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
             typeDefinitionNodeList.add(typeDefNode);
@@ -284,7 +285,7 @@ public class BallerinaSchemaGenerator {
             MarkdownDocumentationNode documentationNode =
                     createMarkdownDocumentationNode(createNodeList(schemaDoc));
             MetadataNode metadataNode =
-                    createMetadataNode(documentationNode, createEmptyNodeList());
+                    createMetadataNode(documentationNode, createNodeList(typeAnnotations));
             String anyType = "any";
             anyType = getNullableType(schemaValue, anyType);
             typeDefNode = createTypeDefinitionNode(metadataNode,
@@ -298,7 +299,6 @@ public class BallerinaSchemaGenerator {
         } else {
             throw new BallerinaOpenApiException("Unsupported OAS schema type.");
         }
-        return typeDefNode;
     }
 
     /**
@@ -313,8 +313,9 @@ public class BallerinaSchemaGenerator {
      * @return                  TypeDefinitionNode for allOf
      * @throws BallerinaOpenApiException
      */
-    public TypeDefinitionNode getAllOfTypeDefinitionNode(OpenAPI openApi, List<Node> schemaDoc, List<String> required
-            , IdentifierToken typeName, List<Node> recordFieldList, List<Schema> allOf)
+    public TypeDefinitionNode getAllOfTypeDefinitionNode(OpenAPI openApi, List<Node> schemaDoc, List<String> required,
+                                                         IdentifierToken typeName, List<Node> recordFieldList,
+                                                         List<Schema> allOf)
             throws BallerinaOpenApiException {
 
         RecordTypeDescriptorNode recordTypeDescriptorNode =
@@ -400,12 +401,9 @@ public class BallerinaSchemaGenerator {
                                                                            IdentifierToken typeName,
                                                                            List<Node> recordFieldList,
                                                                            Map<String, Schema> fields,
-                                                                           String description, OpenAPI openApi)
+                                                                           List<Node> schemaDoc, OpenAPI openApi,
+                                                                           NodeList<AnnotationNode> annotationNodes)
             throws BallerinaOpenApiException {
-        List<Node> schemaDoc = new ArrayList<>();
-        if (!description.isBlank()) {
-            schemaDoc.addAll(DocCommentsGenerator.createAPIDescriptionDoc(description, false));
-        }
         TypeDefinitionNode typeDefinitionNode;
         if (fields != null) {
             for (Map.Entry<String, Schema> field : fields.entrySet()) {
@@ -418,7 +416,7 @@ public class BallerinaSchemaGenerator {
                             createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             MarkdownDocumentationNode documentationNode =
                     createMarkdownDocumentationNode(createNodeList(schemaDoc));
-            MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+            MetadataNode metadataNode = createMetadataNode(documentationNode, annotationNodes);
             typeDefinitionNode = NodeFactory.createTypeDefinitionNode(metadataNode,
                     null, typeKeyWord, typeName, recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
         } else {
@@ -428,7 +426,7 @@ public class BallerinaSchemaGenerator {
                             createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             MarkdownDocumentationNode documentationNode =
                     createMarkdownDocumentationNode(createNodeList(schemaDoc));
-            MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+            MetadataNode metadataNode = createMetadataNode(documentationNode, annotationNodes);
             typeDefinitionNode = NodeFactory.createTypeDefinitionNode(metadataNode,
                     null, typeKeyWord, typeName, recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
         }

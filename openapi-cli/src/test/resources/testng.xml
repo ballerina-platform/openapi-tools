@@ -41,7 +41,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.client.ImportsTests"/>
             <class name="io.ballerina.openapi.generators.client.BallerinaDiagnosticTests"/>
             <class name="io.ballerina.openapi.generators.client.ComparedGeneratedFileTests"/>
-            <class name="io.ballerina.openapi.generators.client.DisplayAnnotationTests"/>
+            <class name="io.ballerina.openapi.generators.client.AnnotationTests"/>
             <class name="io.ballerina.openapi.generators.client.FunctionBodyNodeTests"/>
             <class name="io.ballerina.openapi.generators.client.FunctionSignatureNodeTests"/>
             <class name="io.ballerina.openapi.generators.client.FunctionSignatureReturnTypeTests"/>
@@ -70,6 +70,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.schema.SwaggerFileParserTests"/>
             <class name="io.ballerina.openapi.generators.schema.NestedRecordInclusionTests"/>
             <class name="io.ballerina.openapi.generators.schema.FieldGenWithNullableOption"/>
+            <class name="io.ballerina.openapi.generators.schema.AnnotationTests"/>
             <class name="io.ballerina.openapi.generators.testcases.BallerinaTestGeneratorTests"/>
             <class name="io.ballerina.openapi.generators.client.OneOfResponsesTests"/>
             <!--            <class name="io.ballerina.openapi.generators.schema.SwaggerParserTests"/>-->
