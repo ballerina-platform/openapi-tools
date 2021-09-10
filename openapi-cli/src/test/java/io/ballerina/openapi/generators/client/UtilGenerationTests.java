@@ -34,14 +34,16 @@ public class UtilGenerationTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    private static final String createFormURLEncodedRequestBody = "createFormURLEncodedRequestBody";
-    private static final String getDeepObjectStyleRequest = "getDeepObjectStyleRequest";
-    private static final String getFormStyleRequest = "getFormStyleRequest";
-    private static final String getSerializedArray = "getSerializedArray";
-    private static final String getEncodedUri = "getEncodedUri";
-    private static final String getOriginalKey = "getOriginalKey";
-    private static final String getPathForQueryParam = "getPathForQueryParam";
-    private static final String getMapForHeaders = "getMapForHeaders";
+    private static final String CREATE_FORM_URLENCODED_REQUEST_BODY = "createFormURLEncodedRequestBody";
+    private static final String GET_DEEP_OBJECT_STYLE_REQUEST = "getDeepObjectStyleRequest";
+    private static final String GET_FORM_STYLE_REQUEST = "getFormStyleRequest";
+    private static final String GET_SERIALIZED_ARRAY = "getSerializedArray";
+    private static final String GET_ENCODED_URI = "getEncodedUri";
+    private static final String GET_ORIGINAL_KEY = "getOriginalKey";
+    private static final String GET_PATH_FOR_QUERY_PARAM = "getPathForQueryParam";
+    private static final String GET_MAP_FOR_HEADERS = "getMapForHeaders";
+    private static final String GET_SERIALIZED_RECORD_ARRAY = "getSerializedRecordArray";
+
 
     @Test(description = "Test empty util file generation")
     public void testEmptyUtilFileGen() throws IOException, BallerinaOpenApiException,
@@ -65,7 +67,7 @@ public class UtilGenerationTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<String> invalidFunctionNames = Arrays.asList(createFormURLEncodedRequestBody, getMapForHeaders);
+        List<String> invalidFunctionNames = Arrays.asList(CREATE_FORM_URLENCODED_REQUEST_BODY, GET_MAP_FOR_HEADERS);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
@@ -80,9 +82,9 @@ public class UtilGenerationTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<String> invalidFunctionNames = Arrays.asList(createFormURLEncodedRequestBody, getDeepObjectStyleRequest,
-                getFormStyleRequest, getSerializedArray, getEncodedUri, getOriginalKey,
-                getPathForQueryParam);
+        List<String> invalidFunctionNames = Arrays.asList(CREATE_FORM_URLENCODED_REQUEST_BODY,
+                GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST, GET_SERIALIZED_ARRAY, GET_ENCODED_URI,
+                GET_ORIGINAL_KEY, GET_PATH_FOR_QUERY_PARAM, GET_SERIALIZED_RECORD_ARRAY);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
@@ -97,7 +99,7 @@ public class UtilGenerationTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<String> invalidFunctionNames = Arrays.asList(getPathForQueryParam, getMapForHeaders);
+        List<String> invalidFunctionNames = Arrays.asList(GET_PATH_FOR_QUERY_PARAM, GET_MAP_FOR_HEADERS);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
@@ -113,7 +115,7 @@ public class UtilGenerationTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<String> invalidFunctionNames = Arrays.asList(getPathForQueryParam, getMapForHeaders);
+        List<String> invalidFunctionNames = Arrays.asList(GET_PATH_FOR_QUERY_PARAM, GET_MAP_FOR_HEADERS);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);

@@ -102,15 +102,15 @@ public class BallerinaUtilGenerator {
     private boolean requestBodyEncodingFound = false;
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
 
-    private static final String createFormURLEncodedRequestBody = "createFormURLEncodedRequestBody";
-    private static final String getDeepObjectStyleRequest = "getDeepObjectStyleRequest";
-    private static final String getFormStyleRequest = "getFormStyleRequest";
-    private static final String getSerializedArray = "getSerializedArray";
-    private static final String getEncodedUri = "getEncodedUri";
-    private static final String getOriginalKey = "getOriginalKey";
-    private static final String getPathForQueryParam = "getPathForQueryParam";
-    private static final String getMapForHeaders = "getMapForHeaders";
-    private static final String getSerializedRecordArray = "getSerializedRecordArray";
+    private static final String CREATE_FORM_URLENCODED_REQUEST_BODY = "createFormURLEncodedRequestBody";
+    private static final String GET_DEEP_OBJECT_STYLE_REQUEST = "getDeepObjectStyleRequest";
+    private static final String GET_FORM_STYLE_REQUEST = "getFormStyleRequest";
+    private static final String GET_SERIALIZED_ARRAY = "getSerializedArray";
+    private static final String GET_ENCODED_URI = "getEncodedUri";
+    private static final String GET_ORIGINAL_KEY = "getOriginalKey";
+    private static final String GET_PATH_FOR_QUERY_PARAM = "getPathForQueryParam";
+    private static final String GET_MAP_FOR_HEADERS = "getMapForHeaders";
+    private static final String GET_SERIALIZED_RECORD_ARRAY = "getSerializedRecordArray";
 
 
     /**
@@ -143,25 +143,26 @@ public class BallerinaUtilGenerator {
     /**
      * Generates util file syntax tree.
      *
-     * @return                      Syntax tree of the util.bal file
+     * @return  Syntax tree of the util.bal file
      */
     public SyntaxTree generateUtilSyntaxTree() throws IOException {
         Set<String> functionNameList = new LinkedHashSet<>();
         if (requestBodyEncodingFound) {
             functionNameList.addAll(Arrays.asList(
-                    createFormURLEncodedRequestBody, getDeepObjectStyleRequest, getFormStyleRequest,
-                    getEncodedUri, getOriginalKey, getSerializedArray, getSerializedRecordArray
+                    CREATE_FORM_URLENCODED_REQUEST_BODY, GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST,
+                    GET_ENCODED_URI, GET_ORIGINAL_KEY, GET_SERIALIZED_ARRAY, GET_SERIALIZED_RECORD_ARRAY
             ));
         }
         if (queryParamsFound) {
             functionNameList.addAll(Arrays.asList(
-                    getDeepObjectStyleRequest, getFormStyleRequest,
-                    getEncodedUri, getOriginalKey, getSerializedArray, getPathForQueryParam, getSerializedRecordArray
+                    GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST,
+                    GET_ENCODED_URI, GET_ORIGINAL_KEY, GET_SERIALIZED_ARRAY, GET_PATH_FOR_QUERY_PARAM,
+                    GET_SERIALIZED_RECORD_ARRAY
             ));
         }
 
         if (headersFound) {
-            functionNameList.add(getMapForHeaders);
+            functionNameList.add(GET_MAP_FOR_HEADERS);
         }
 
         List<ModuleMemberDeclarationNode> memberDeclarationNodes = new ArrayList<>();
@@ -190,7 +191,7 @@ public class BallerinaUtilGenerator {
 
         List<ImportDeclarationNode> imports = new ArrayList<>();
         if (!(functionNameList.size() == 0 ||
-                (functionNameList.size() == 1 && functionNameList.contains(getMapForHeaders)))) {
+                (functionNameList.size() == 1 && functionNameList.contains(GET_MAP_FOR_HEADERS)))) {
             ImportDeclarationNode importForHttp =
                     GeneratorUtils.getImportDeclarationNode(BALLERINA, URL);
             imports.add(importForHttp);

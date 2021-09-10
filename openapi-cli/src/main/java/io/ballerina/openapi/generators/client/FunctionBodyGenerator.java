@@ -285,7 +285,7 @@ public class FunctionBodyGenerator {
      */
     public VariableDeclarationNode getQueryParameterEncodingMap(List<Parameter> queryParameters)
             throws BallerinaOpenApiException {
-        List<Node> filedOfMap = new ArrayList();
+        List<Node> filedOfMap = new ArrayList<>();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken("map<" + ENCODING + ">"));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
@@ -305,7 +305,7 @@ public class FunctionBodyGenerator {
                 }
             }
         }
-        if (filedOfMap.size() > 0) {
+        if (!filedOfMap.isEmpty()) {
             filedOfMap.remove(filedOfMap.size() - 1);
             MappingConstructorExpressionNode initialize = createMappingConstructorExpressionNode(
                     createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(filedOfMap),
@@ -659,7 +659,7 @@ public class FunctionBodyGenerator {
      * @return              {@link VariableDeclarationNode}
      */
     public VariableDeclarationNode getRequestBodyEncodingMap(Map<String, Encoding> encodingMap) {
-        List<Node> filedOfMap = new ArrayList();
+        List<Node> filedOfMap = new ArrayList<>();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken("map<" + ENCODING + ">"));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
@@ -672,7 +672,7 @@ public class FunctionBodyGenerator {
                             encoding.getValue().getExplode(), encoding.getKey());
                 }
             }
-            if (filedOfMap.size() > 0) {
+            if (!filedOfMap.isEmpty()) {
                 filedOfMap.remove(filedOfMap.size() - 1);
                 MappingConstructorExpressionNode initialize = createMappingConstructorExpressionNode(
                         createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(filedOfMap),
