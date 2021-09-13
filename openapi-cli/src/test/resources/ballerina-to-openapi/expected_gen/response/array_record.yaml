@@ -26,6 +26,9 @@ paths:
 components:
   schemas:
     Link:
+      required:
+        - href
+        - rel
       type: object
       properties:
         rel:
@@ -41,6 +44,8 @@ components:
             type: string
       description: Link details
     Links:
+      required:
+        - links
       type: object
       properties:
         links:
@@ -50,7 +55,11 @@ components:
     Location:
       allOf:
         - $ref: '#/components/schemas/Links'
-        - type: object
+        - required:
+            - address
+            - id
+            - name
+          type: object
           properties:
             name:
               type: string

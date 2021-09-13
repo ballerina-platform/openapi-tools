@@ -39,6 +39,7 @@
   "components" : {
     "schemas" : {
       "Pet" : {
+        "required" : [ "id", "name" ],
         "type" : "object",
         "properties" : {
           "id" : {
@@ -54,6 +55,7 @@
         }
       },
       "Dog" : {
+        "required" : [ "bark", "perant" ],
         "type" : "object",
         "properties" : {
           "perant" : {

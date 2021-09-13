@@ -77,7 +77,7 @@ public class OpenAPIComponentMapper {
             RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeRef.typeDescriptor();
             List<TypeSymbol> typeInclusions = recordTypeSymbol.typeInclusions();
             Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
-            HashSet<String> unionKeys = new HashSet(rfields.keySet());
+            HashSet<String> unionKeys = new HashSet<>(rfields.keySet());
             if (typeInclusions.isEmpty()) {
                 // Handle like object
                 generateObjectSchemaFromRecordFields(schema, componentName, rfields, apiDocs);
@@ -169,9 +169,13 @@ public class OpenAPIComponentMapper {
                                                               RecordFieldSymbol> rfields,
                                                               Map<String, String> apiDocs) {
         ObjectSchema componentSchema = new ObjectSchema();
+        List<String> required = new ArrayList<>();
         componentSchema.setDescription(apiDocs.get(componentName));
         Map<String, Schema> schemaProperties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
+            if (!field.getValue().isOptional()) {
+                required.add(field.getKey().trim());
+            }
             String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
             Schema property = ConverterCommonUtils.getOpenApiSchema(type);
             if (type.equals(Constants.TYPE_REFERENCE)) {
@@ -200,6 +204,7 @@ public class OpenAPIComponentMapper {
             schemaProperties.put(field.getKey(), property);
         }
         componentSchema.setProperties(schemaProperties);
+        componentSchema.setRequired(required);
         if (componentName != null && schema != null && !schema.containsKey(componentName)) {
             //Set properties for the schema
             schema.put(componentName, componentSchema);

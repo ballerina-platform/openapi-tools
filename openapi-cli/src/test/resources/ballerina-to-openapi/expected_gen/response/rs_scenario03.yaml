@@ -23,6 +23,9 @@ paths:
 components:
   schemas:
     User:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:

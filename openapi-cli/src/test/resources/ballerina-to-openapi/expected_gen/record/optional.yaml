@@ -1,0 +1,27 @@
+components:
+  schemas:
+    Pet:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+    Link:
+      required:
+        - href
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+        mediaTypes:
+          type: array
+          items:
+            type: string
+        pet:
+          $ref: '#/components/schemas/Pet'

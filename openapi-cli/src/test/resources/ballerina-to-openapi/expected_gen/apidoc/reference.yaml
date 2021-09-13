@@ -131,6 +131,9 @@ paths:
 components:
   schemas:
     Link:
+      required:
+        - href
+        - rel
       type: object
       properties:
         rel:
@@ -152,6 +155,8 @@ components:
               - POST
               - GET
     Links:
+      required:
+        - links
       type: object
       properties:
         links:
@@ -161,7 +166,11 @@ components:
     Location:
       allOf:
         - $ref: '#/components/schemas/Links'
-        - type: object
+        - required:
+            - address
+            - id
+            - name
+          type: object
           properties:
             name:
               type: string
@@ -173,6 +182,15 @@ components:
               type: string
               description: Address of the location
     Room:
+      required:
+        - capacity
+        - category
+        - count
+        - currency
+        - id
+        - price
+        - status
+        - wifi
       type: object
       properties:
         id:
@@ -214,7 +232,9 @@ components:
     Rooms:
       allOf:
         - $ref: '#/components/schemas/Links'
-        - type: object
+        - required:
+            - rooms
+          type: object
           properties:
             rooms:
               type: array
@@ -222,6 +242,9 @@ components:
               items:
                 $ref: '#/components/schemas/Room'
     ReserveRoom:
+      required:
+        - count
+        - id
       type: object
       properties:
         id:
@@ -233,6 +256,10 @@ components:
           format: int32
       description: Represents rooms be reserved
     Reservation:
+      required:
+        - endDate
+        - reserveRooms
+        - startDate
       type: object
       properties:
         reserveRooms:
@@ -250,7 +277,12 @@ components:
     ReservationReceipt:
       allOf:
         - $ref: '#/components/schemas/Links'
-        - type: object
+        - required:
+            - expiryDate
+            - id
+            - lastUpdated
+            - reservation
+          type: object
           properties:
             id:
               type: string
@@ -264,6 +296,11 @@ components:
             reservation:
               $ref: '#/components/schemas/Reservation'
     Payment:
+      required:
+        - cardNumber
+        - cardholderName
+        - expiryMonth
+        - expiryYear
       type: object
       properties:
         cardholderName:
@@ -281,6 +318,11 @@ components:
           description: Expiaration year of the card in yyyy
       description: Reperesents payement for rooms
     PaymentReceipt:
+      required:
+        - id
+        - lastUpdated
+        - rooms
+        - total
       type: object
       properties:
         id:
