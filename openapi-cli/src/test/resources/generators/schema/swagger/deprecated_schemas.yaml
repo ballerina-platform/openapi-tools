@@ -130,7 +130,7 @@ components:
         type:
           type: string
       deprecated: true
-      x-deprecated-reason: Pet object is deprecated from version 2
+      x-ballerina-deprecated-reason: Pet object is deprecated from version 2
     Dog:
       allOf:
         - $ref: "#/components/schemas/Pet"

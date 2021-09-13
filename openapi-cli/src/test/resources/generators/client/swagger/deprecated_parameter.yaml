@@ -48,7 +48,15 @@ paths:
             type: integer
             format: int32
           deprecated: true
-          x-deprecated-reason: This parameter has been deprecated since version 2
+          x-ballerina-deprecated-reason: This parameter has been deprecated since version 2
+        - name: count
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+          deprecated: true
       responses:
         '200':
           description: An paged array of pets

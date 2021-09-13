@@ -36,7 +36,7 @@ paths:
       description: Show a list of pets in the system
       operationId: listPets
       deprecated: true
-      x-deprecated-reason: This methods has deprecated since the Pet has deprecated
+      x-ballerina-deprecated-reason: This methods has deprecated since the Pet has deprecated
       tags:
         - pets
         - list
@@ -101,7 +101,7 @@ paths:
           schema:
             type: string
           deprecated: true
-          x-deprecated-reason: Limit is deprecated from v2
+          x-ballerina-deprecated-reason: Limit is deprecated from v2
       responses:
         '200':
           description: Expected response to a valid request
@@ -134,7 +134,7 @@ components:
         type:
           type: string
       deprecated: true
-      x-deprecated-reason: Pet object is deprecated from version 2
+      x-ballerina-deprecated-reason: Pet object is deprecated from version 2
     Dog:
       allOf:
         - $ref: "#/components/schemas/Pet"
