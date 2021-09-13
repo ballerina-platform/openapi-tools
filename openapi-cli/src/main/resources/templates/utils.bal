@@ -156,20 +156,19 @@ isolated function getSerializedArray(string arrayName, anydata[] anyArray, strin
 # + explode - Specifies whether arrays and objects should generate separate parameters
 # + return - Serialized record as a string
 isolated function getSerializedRecordArray(string parent, record {}[] value, string style = FORM, boolean explode = true) returns string{
-    int arayIndex = 0;
     string[] serializedArray = [];
     if style == DEEPOBJECT {
+        int arayIndex = 0;
         foreach var recordItem in value {
             serializedArray.push(getDeepObjectStyleRequest(parent + "[" + arayIndex.toString() + "]", recordItem), "&");
             arayIndex = arayIndex + 1;
         }
     } else {
-        if (!explode && arayIndex == 0) {
+        if (!explode) {
             serializedArray.push(parent, "=");
         }
         foreach var recordItem in value {
             serializedArray.push(getFormStyleRequest(parent, recordItem, explode), ",");
-            arayIndex = arayIndex + 1;
         }
     }
     _ = serializedArray.pop();
