@@ -23,6 +23,7 @@ import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -43,13 +44,39 @@ public class RequestBodyTests {
     SyntaxTree syntaxTree;
 
 
-    //Scenario 03 - Header parameters.
-    @Test(description = "Generate functionDefinitionNode for Header parameters")
-    public void generateHeaderParameter()throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/service/swagger/headers/multiHeaderParam.yaml");
+    @Test(description = "Scenario 01 - Request Body has single content type(application/json)")
+    public void generateJsonPayload() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/requestBody/scenario01_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("header_parameters.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_01_rb.bal",
+                syntaxTree);
     }
 
+    @Test(description = "Scenario 01.02 - Request Body has single content type(application/octet-stream)")
+    public void generateOtherPayload() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/requestBody/scenario01_02_rb.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_0102_rb.bal",
+                syntaxTree);
+    }
+
+    @Test(description = "Scenario 02 - Request Body has multiple content types with Same dataBind schema type.\n")
+    public void generateRBsameDataBindingPayload() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/requestBody/scenario02_rb.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_02_rb.bal",
+                syntaxTree);
+    }
+
+    @Test(description = "Scenario 03 - Request Body has multiple content types with Different dataBind schema types.")
+    public void generateMultipleContent() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/swagger/requestBody/scenario03_rb.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_03_rb.bal",
+                syntaxTree);
+    }
 }

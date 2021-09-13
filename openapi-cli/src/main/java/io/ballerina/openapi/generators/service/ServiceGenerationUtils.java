@@ -1,11 +1,36 @@
 package io.ballerina.openapi.generators.service;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createAnnotationNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
+import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 
 public class ServiceGenerationUtils {
     /**
@@ -60,6 +85,84 @@ public class ServiceGenerationUtils {
             throw new BallerinaOpenApiException("Invalid reference value : " + referenceVariable
                     + "\nBallerina only supports local reference values.");
         }
+    }
+
+    public static AnnotationNode getAnnotationNode(String identifier, MappingConstructorExpressionNode annotValue) {
+        // Create annotation
+        Token atToken = createIdentifierToken("@");
+        QualifiedNameReferenceNode annotReference = getQualifiedNameReferenceNode("http", identifier);
+        return createAnnotationNode(atToken, annotReference, annotValue);
+    }
+
+    public static UnionTypeDescriptorNode getUnionNodeForOneOf(Iterator<Schema> iterator)
+            throws BallerinaOpenApiException {
+
+        List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
+        Token pipeToken = createIdentifierToken("|");
+        while (iterator.hasNext()) {
+            Schema contentType = iterator.next();
+            TypeDescriptorNode node = getIdentifierTokenForJsonSchema(contentType);
+            qualifiedNodes.add((SimpleNameReferenceNode) node);
+
+        }
+        SimpleNameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
+        SimpleNameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
+        UnionTypeDescriptorNode traversUnion = createUnionTypeDescriptorNode(traversRight, pipeToken,
+                right);
+        if (qualifiedNodes.size() >= 3) {
+            for (int i = qualifiedNodes.size() - 3; i >= 0; i--) {
+                traversUnion = createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken,
+                        traversUnion);
+            }
+        }
+        return traversUnion;
+    }
+
+    /**
+     * Generate typeDescriptor for application/json type.
+     */
+    public static TypeDescriptorNode getIdentifierTokenForJsonSchema(Schema schema) throws BallerinaOpenApiException {
+        IdentifierToken identifierToken;
+        if (schema != null) {
+            if (schema.get$ref() != null) {
+                identifierToken = createIdentifierToken(extractReferenceType(schema.get$ref()));
+            } else if (schema.getType() != null) {
+                if (schema instanceof ObjectSchema) {
+                    ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
+                    return returnTypeGenerator.getRecordTypeDescriptorNode(schema);
+                } else if (schema instanceof ArraySchema) {
+                    TypeDescriptorNode member;
+                    if (((ArraySchema) schema).getItems().get$ref() != null) {
+                        member = createBuiltinSimpleNameReferenceNode(null,
+                                createIdentifierToken(extractReferenceType(((ArraySchema) schema).
+                                        getItems().get$ref())));
+                    } else if (!(((ArraySchema) schema).getItems() instanceof ArraySchema)) {
+                        member = createBuiltinSimpleNameReferenceNode(null,
+                                createIdentifierToken("string"));
+                    } else {
+                        member = createBuiltinSimpleNameReferenceNode(null,
+                                createIdentifierToken(convertOpenAPITypeToBallerina(
+                                        ((ArraySchema) schema).getItems().getType())));
+                    }
+                    return  createArrayTypeDescriptorNode(member, createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                            createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                } else {
+                    identifierToken =  createIdentifierToken(schema.getType() + " ");
+                }
+            } else if (schema instanceof ComposedSchema) {
+                if (((ComposedSchema) schema).getOneOf() != null) {
+                    Iterator<Schema> iterator = ((ComposedSchema) schema).getOneOf().iterator();
+                    return getUnionNodeForOneOf(iterator);
+                } else {
+                    identifierToken =  createIdentifierToken("json ");
+                }
+            } else {
+                identifierToken =  createIdentifierToken("json ");
+            }
+        } else {
+            identifierToken =  createIdentifierToken("json ");
+        }
+        return createSimpleNameReferenceNode(identifierToken);
     }
 
 }

@@ -94,7 +94,8 @@ public class ParametersGenerator {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGen = new RequestBodyGenerator();
-                List<Node> requestBodyNode = requestBodyGen.createNodeForRequestBody(requestBody);
+                params.add(requestBodyGen.createNodeForRequestBody(requestBody));
+                params.add(comma);
             }
         }
         if (params.size() > 1) {
