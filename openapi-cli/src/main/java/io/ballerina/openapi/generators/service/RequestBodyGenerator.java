@@ -37,7 +37,6 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
@@ -49,13 +48,12 @@ import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getIdentifierTokenForJsonSchema;
+import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
 
 public class RequestBodyGenerator {
     /**
@@ -178,32 +176,5 @@ public class RequestBodyGenerator {
         literals.add(comma);
 
         return next;
-    }
-    /**
-     * Generate TypeDescriptor for all the mediaTypes.
-     */
-    private TypeDescriptorNode getMediaTypeToken(Map.Entry<String, MediaType> mediaType)
-            throws BallerinaOpenApiException {
-        String mediaTypeContent = mediaType.getKey().trim();
-        MediaType value = mediaType.getValue();
-        Schema schema = value.getSchema();
-        IdentifierToken identifierToken;
-        switch (mediaTypeContent) {
-            case "application/json":
-                return getIdentifierTokenForJsonSchema(schema);
-            case "application/xml":
-                identifierToken = createIdentifierToken("xml");
-                return createSimpleNameReferenceNode(identifierToken);
-            case "text/plain":
-                identifierToken = createIdentifierToken("string");
-                return createSimpleNameReferenceNode(identifierToken);
-            case "application/octet-stream":
-                return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(
-                        null, createIdentifierToken("byte")), createToken(SyntaxKind.OPEN_BRACKET_TOKEN),
-                        null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-            default:
-                identifierToken = createIdentifierToken("json");
-                return createSimpleNameReferenceNode(identifierToken);
-        }
     }
 }

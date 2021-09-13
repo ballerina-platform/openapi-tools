@@ -116,7 +116,7 @@ public class GeneratorConstants {
     public static final String CLASS = "class";
     public static final String EQUAL = "=";
     public static final String CONFIG = "config";
-    public static final String FUNCTION = "function";
+    public static final String FUNCTION = "function ";
     public static final String RETURN = "returns";
     public static final String PREFIX_TEST = " test";
     public static final String ANNOT_TEST = "test:Config";
@@ -160,6 +160,6 @@ public class GeneratorConstants {
     //Service related
     public static final String HOST = "host";
     public static final String NEW = "new";
-    public static final String RESOURCE = "resource";
+    public static final String RESOURCE = "resource ";
     public static final String QUERY = "query";
 }

@@ -13,12 +13,14 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -164,5 +166,31 @@ public class ServiceGenerationUtils {
         }
         return createSimpleNameReferenceNode(identifierToken);
     }
-
+    /**
+     * Generate TypeDescriptor for all the mediaTypes.
+     */
+    public static TypeDescriptorNode getMediaTypeToken(Map.Entry<String, MediaType> mediaType)
+            throws BallerinaOpenApiException {
+        String mediaTypeContent = mediaType.getKey().trim();
+        MediaType value = mediaType.getValue();
+        Schema schema = value.getSchema();
+        IdentifierToken identifierToken;
+        switch (mediaTypeContent) {
+            case "application/json":
+                return getIdentifierTokenForJsonSchema(schema);
+            case "application/xml":
+                identifierToken = createIdentifierToken("xml");
+                return createSimpleNameReferenceNode(identifierToken);
+            case "text/plain":
+                identifierToken = createIdentifierToken("string");
+                return createSimpleNameReferenceNode(identifierToken);
+            case "application/octet-stream":
+                return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(
+                        null, createIdentifierToken("byte")), createToken(SyntaxKind.OPEN_BRACKET_TOKEN),
+                        null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+            default:
+                identifierToken = createIdentifierToken("json");
+                return createSimpleNameReferenceNode(identifierToken);
+        }
+    }
 }

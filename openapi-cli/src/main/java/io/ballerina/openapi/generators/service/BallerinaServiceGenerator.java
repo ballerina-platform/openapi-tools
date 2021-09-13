@@ -26,8 +26,6 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
-import io.ballerina.compiler.syntax.tree.Minutiae;
-import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -43,6 +41,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -63,11 +62,8 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyN
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.generators.GeneratorConstants.FUNCTION;
-import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
-import static io.ballerina.openapi.generators.GeneratorConstants.RETURN;
 import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
 
@@ -76,12 +72,7 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.esc
  */
 public class BallerinaServiceGenerator {
     // Add basicLiteralNode
-    private  final MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
-    private  final Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-    private  final MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
-    private  final Token questionMark = createIdentifierToken("?");
     private  GeneratorUtils generatorUtils = new GeneratorUtils();
-
 
     public SyntaxTree generateSyntaxTree(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {
         //1. create imports
@@ -129,8 +120,8 @@ public class BallerinaServiceGenerator {
     }
 
     private NodeList<ImportDeclarationNode> createImportDeclarationNodes() {
-
-        ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(BALLERINA, HTTP);
+        ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
+                , GeneratorConstants.HTTP);
         return AbstractNodeFactory.createNodeList(importForHttp);
     }
 
@@ -142,7 +133,7 @@ public class BallerinaServiceGenerator {
             for (Map.Entry<String, PathItem> path : pathsItems) {
                 if (!path.getValue().readOperationsMap().isEmpty()) {
                     Map<PathItem.HttpMethod, Operation> operationMap = path.getValue().readOperationsMap();
-                    functions = applyFiltersForOperations(filter, path, operationMap);
+                    functions.addAll(applyFiltersForOperations(filter, path, operationMap));
                 }
             }
         }
@@ -220,7 +211,7 @@ public class BallerinaServiceGenerator {
         // Generate return type is node
         ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
-                createEmptyNodeList(), createIdentifierToken(RETURN));
+                createEmptyNodeList());
 
         FunctionSignatureNode functionSignatureNode = NodeFactory.createFunctionSignatureNode(
                 createToken(SyntaxKind.OPEN_PAREN_TOKEN), parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN),
