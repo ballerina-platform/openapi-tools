@@ -24,6 +24,9 @@ paths:
 components:
   schemas:
     Pet:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:
@@ -40,6 +43,9 @@ components:
               items:
                 type: string
     Dog:
+      required:
+        - bark
+        - perant
       type: object
       properties:
         perant:

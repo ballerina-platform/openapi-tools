@@ -26,6 +26,9 @@ paths:
 components:
   schemas:
     ReserveRoom:
+      required:
+        - count
+        - id
       type: object
       properties:
         id:
@@ -37,6 +40,10 @@ components:
           format: int32
       description: Represents rooms be reserved
     Reservation:
+      required:
+        - endDate
+        - reserveRooms
+        - startDate
       type: object
       properties:
         reserveRooms:

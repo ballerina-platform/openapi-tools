@@ -24,6 +24,9 @@ paths:
 components:
   schemas:
     Tag:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:
@@ -32,6 +35,9 @@ components:
         name:
           type: string
     Pet:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:
@@ -42,6 +48,9 @@ components:
         tag:
           $ref: '#/components/schemas/Tag'
     Dog:
+      required:
+        - bark
+        - perant
       type: object
       properties:
         perant:

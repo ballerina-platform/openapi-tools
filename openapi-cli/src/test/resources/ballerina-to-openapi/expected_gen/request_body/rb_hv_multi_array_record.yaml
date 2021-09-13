@@ -31,6 +31,9 @@ paths:
 components:
   schemas:
     TagType:
+      required:
+        - category
+        - id
       type: object
       properties:
         id:
@@ -41,6 +44,10 @@ components:
           items:
             type: string
     Tag:
+      required:
+        - id
+        - name
+        - tagType
       type: object
       properties:
         id:
@@ -53,6 +60,10 @@ components:
           items:
             $ref: '#/components/schemas/TagType'
     Pet:
+      required:
+        - id
+        - name
+        - tag
       type: object
       properties:
         id:

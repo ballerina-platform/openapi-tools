@@ -59,6 +59,9 @@ paths:
 components:
   schemas:
     Pet:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:

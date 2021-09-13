@@ -24,6 +24,11 @@ paths:
 components:
   schemas:
     Reservation:
+      required:
+        - count
+        - endDate
+        - roomId
+        - startDate
       type: object
       properties:
         roomId:

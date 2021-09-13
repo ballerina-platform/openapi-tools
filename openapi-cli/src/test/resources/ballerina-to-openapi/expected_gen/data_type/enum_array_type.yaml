@@ -26,6 +26,9 @@ paths:
 components:
   schemas:
     Link:
+      required:
+        - href
+        - rel
       type: object
       properties:
         rel:
