@@ -36,7 +36,7 @@ paths:
       description: Show a list of pets in the system
       operationId: listPets
       deprecated: true
-      x-deprecated-reason: This methods has deprecated since the Pet has deprecated
+      x-ballerina-deprecated-reason: This methods has deprecated since the Pet has deprecated
       x-ballerina-display:
         label: List Pets
       tags:
@@ -103,7 +103,7 @@ paths:
           schema:
             type: string
           deprecated: true
-          x-deprecated-reason: Limit is deprecated from v2
+          x-ballerina-deprecated-reason: Limit is deprecated from v2
           x-ballerina-display:
             label: Result limit
       responses:

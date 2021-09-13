@@ -84,6 +84,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.ErrorMessages.invalidPathParamType;
+import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
@@ -243,10 +244,12 @@ public class FunctionSignatureGenerator {
 
             }
             String deprecatedDescription = "";
-            for (Map.Entry<String, Object> extension: parameter.getExtensions().entrySet()) {
-                if (extension.getKey().trim().equals("x-deprecated-reason")) {
-                    deprecatedDescription = extension.getValue().toString();
-                    break;
+            if (parameter.getExtensions() != null) {
+                for (Map.Entry<String, Object> extension: parameter.getExtensions().entrySet()) {
+                    if (extension.getKey().trim().equals(X_BALLERINA_DEPRECATED_REASON)) {
+                        deprecatedDescription = extension.getValue().toString();
+                        break;
+                    }
                 }
             }
             MarkdownParameterDocumentationLineNode paramAPIDoc =

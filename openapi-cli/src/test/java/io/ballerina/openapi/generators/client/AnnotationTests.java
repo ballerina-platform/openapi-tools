@@ -63,12 +63,24 @@ public class AnnotationTests {
         Assert.assertEquals(annotationNodes.size(), 1);
     }
 
-    @Test(description = "Deprecated Annotation tests for parameters")
-    public void extractDisplayAnnotationInParametersTest() throws IOException, BallerinaOpenApiException {
+    @Test(description = "Deprecated Annotation tests for parameters with x-ballerina-deprecated-reason")
+    public void extractDisplayAnnotationInParametersWithReasonTest() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/deprecated_parameter.yaml");
         OpenAPI openAPI = getOpenAPI(definitionPath);
         Map<String, Object> param01 =
                 openAPI.getPaths().get("/pets").getGet().getParameters().get(0).getExtensions();
+        List<AnnotationNode> annotationNodes  = new ArrayList<>();
+        List<Node> documentaion = new ArrayList<>();
+        DocCommentsGenerator.extractDeprecatedAnnotation(param01, documentaion, annotationNodes);
+        Assert.assertEquals(annotationNodes.get(0).annotReference().toString(), "deprecated");
+    }
+
+    @Test(description = "Deprecated Annotation tests for parameters without deprecated reason")
+    public void extractDisplayAnnotationInParametersTest() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RESDIR.resolve("swagger/deprecated_parameter.yaml");
+        OpenAPI openAPI = getOpenAPI(definitionPath);
+        Map<String, Object> param01 =
+                openAPI.getPaths().get("/pets").getGet().getParameters().get(1).getExtensions();
         List<AnnotationNode> annotationNodes  = new ArrayList<>();
         List<Node> documentaion = new ArrayList<>();
         DocCommentsGenerator.extractDeprecatedAnnotation(param01, documentaion, annotationNodes);

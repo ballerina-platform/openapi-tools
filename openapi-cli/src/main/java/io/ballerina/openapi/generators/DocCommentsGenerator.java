@@ -54,6 +54,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOCUMENTATION_DESCRIPTION;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
+import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
 import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DISPLAY;
 
 /**
@@ -92,7 +93,7 @@ public class DocCommentsGenerator {
                     "\n# Deprecated", false));
             if (extensions != null && extensions.entrySet().size() > 0) {
                 for (Map.Entry<String, Object> next : extensions.entrySet()) {
-                    if (next.getKey().equals("x-deprecated-reason")) {
+                    if (next.getKey().equals(X_BALLERINA_DEPRECATED_REASON)) {
                         documentation.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                                 next.getValue().toString(), false));
                     }
