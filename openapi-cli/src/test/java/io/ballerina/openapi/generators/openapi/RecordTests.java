@@ -44,14 +44,32 @@ public class RecordTests {
     public void testTypeInclusion() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("record/typeInclusion.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "record/typeInclusion.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/typeInclusion.yaml");
     }
     @Test(description = "When the record field has optional fields it map to optional fields in OAS")
     public void testRequiredField() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("record/optional.bal");
-        //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "record/optional.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/optional.yaml");
     }
+
+    @Test(description = "When the record field has nullable fields it enables nullable true in OAS")
+    public void testNullableFieldWithOptional() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/nullable01.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/nullable01.yaml");
+    }
+
+    @Test(description = "When the record field has nullable fields which is required")
+    public void testNullableFieldWithRequired() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/nullable02.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/nullable02.yaml");
+    }
+
+    @Test(description = "When the record field has nullable field , which has record type reference data type")
+    public void testNullableFieldWithTypeReference() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/nullable03.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/nullable03.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
