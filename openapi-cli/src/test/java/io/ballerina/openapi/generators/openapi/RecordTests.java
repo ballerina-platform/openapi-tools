@@ -44,13 +44,20 @@ public class RecordTests {
     public void testTypeInclusion() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("record/typeInclusion.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "record/typeInclusion.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/typeInclusion.yaml");
     }
     @Test(description = "When the record field has optional fields it map to optional fields in OAS")
     public void testRequiredField() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("record/optional.bal");
         //Compare generated yaml file with expected yaml content
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "record/optional.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/optional.yaml");
+    }
+
+    @Test(description = "When the record field has optional fields it map to optional fields in OAS")
+    public void testNullableField() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/optional.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/optional.yaml");
     }
     @AfterMethod
     public void cleanUp() {
