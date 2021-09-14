@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.extension.doc;
+package io.ballerina.openapi.extension.doc.gen;
 
+import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.projects.ProjectKind;
+import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 
 /**
  * {@code Generator} generates open-api related docs for HTTP service.
  */
 public interface OpenApiDocGenerator {
-    void generate(OpenApiDocConfig config);
+    void generate(OpenApiDocConfig config, SyntaxNodeAnalysisContext context, NodeLocation location);
 
     boolean isSupported(ProjectKind projectType);
 }

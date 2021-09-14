@@ -1,5 +1,5 @@
-import  ballerina/http;
-import  ballerina/xmldata;
+import ballerina/http;
+import ballerina/xmldata;
 
 # refComponent
 public isolated client class Client {
@@ -16,24 +16,24 @@ public isolated client class Client {
     # Request Body has allOf with specific properties.
     #
     # + return - OK
-    remote isolated function updateXMLUser(Body payload) returns http:Response|error {
+    remote isolated function updateXMLUser(Path01Body payload) returns http:Response|error {
         string  path = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp-> put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->put(path, request, targetType=http:Response);
         return response;
     }
     # Request Body has nested allOf.
     #
     # + return - OK
-    remote isolated function postXMLUser(Body1 payload) returns http:Response|error {
+    remote isolated function postXMLUser(Path01Body1 payload) returns http:Response|error {
         string  path = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
         return response;
     }
     # Request Body has Array type AllOf.
@@ -45,7 +45,7 @@ public isolated client class Client {
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
         return response;
     }
 }

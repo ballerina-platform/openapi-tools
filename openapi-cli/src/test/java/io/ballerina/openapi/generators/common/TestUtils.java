@@ -57,6 +57,7 @@ public class TestUtils {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/").toAbsolutePath();
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
+    private static final Path utilPath = RES_DIR.resolve("ballerina_project/utils.bal");
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
@@ -68,8 +69,10 @@ public class TestUtils {
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree();
+        SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
         writeFile(clientPath, Formatter.format(syntaxTree).toString());
         writeFile(schemaPath, Formatter.format(schemaSyntax).toString());
+        writeFile(utilPath, Formatter.format(utilSyntaxTree).toString());
         SemanticModel semanticModel = getSemanticModel(clientPath);
         return semanticModel.diagnostics();
     }

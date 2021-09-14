@@ -78,15 +78,4 @@ public class QueryParameterTests {
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
-
-    @Test(description = "Generate Client for query parameter without default value",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Ballerina does not support object type query parameters.")
-    public void invalidQueryParameter() throws IOException, BallerinaOpenApiException, FormatterException {
-        CodeGenerator codeGenerator = new CodeGenerator();
-        Path definitionPath = RES_DIR.resolve("swagger/invalid_query_param.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-    }
 }

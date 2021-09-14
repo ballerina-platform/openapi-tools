@@ -1,0 +1,172 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+        description: this value is assigned by the service provider
+  - url: https://{subdomain}.swagger.io:{port}/{basePath}
+    description: The production API server
+    variables:
+      subdomain:
+        default: petstore
+        description: this value is assigned by the service provider
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '443'
+      basePath:
+        default: v2
+tags:
+  - name: pets
+    description: Pets Tag
+  - name: list
+    description: List Tag
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      description: Show a list of pets in the system
+      operationId: listPets
+      deprecated: true
+      x-ballerina-deprecated-reason: This methods has deprecated since the Pet has deprecated
+      tags:
+        - pets
+        - list
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: An paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pets"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create a pet
+      operationId: createPet
+      tags:
+        - pets
+      responses:
+        '201':
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /pets/{petId}:
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
+      deprecated: true
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+          deprecated: true
+          x-ballerina-deprecated-reason: Limit is deprecated from v2
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pets"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Pet:
+      description: Pet Object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
+          deprecated: true
+        type:
+          type: string
+      deprecated: true
+      x-ballerina-deprecated-reason: Pet object is deprecated from version 2
+    Dog:
+      allOf:
+        - $ref: "#/components/schemas/Pet"
+        - type: object
+          properties:
+            bark:
+              type: boolean
+        - $ref: "#/components/schemas/Owner"
+    Pets:
+      type: array
+      items:
+        $ref: "#/components/schemas/Pet"
+      deprecated: true
+    Owner:
+      properties:
+        Name:
+          type: string
+        Address:
+          type: string
+          enum:
+            - admin
+            - contributor
+            - member
+            - owner
+      deprecated: true
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

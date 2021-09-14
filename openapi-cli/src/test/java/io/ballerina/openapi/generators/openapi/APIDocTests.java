@@ -43,43 +43,43 @@ public class APIDocTests {
     @Test(description = "Resource function api doc mapped to OAS operation summary")
     public void testsForResourceFunction() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/resource_function_scenario.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/resource_function.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "apidoc/resource_function.yaml");
     }
 
     @Test(description = "Resource function api doc mapped to OAS operation summary")
     public void testsForPathParameter() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/resource_function_with_pathparam_scenario.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/path_param.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "apidoc/path_param.yaml");
     }
 
     @Test(description = "Query parameter api doc mapped to OAS parameter description")
     public void testsForQueryParameter() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/resource_function_with_queryparam_scenario.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/query_param.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "apidoc/query_param.yaml");
     }
 
     @Test(description = "Request payload api doc mapped to OAS requestBody description")
     public void testsForRequestPayload() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/resource_function_with_requestbody_scenario.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/requestBody.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "apidoc/requestBody.yaml");
     }
 
     @Test(description = "Record api doc mapped to OAS record description")
     public void testsForRecord() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/record.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/record.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "apidoc/record.yaml");
     }
 
     @Test(description = "TypeInclusion record api doc mapped to OAS description")
     public void testsForRecordHasTypeInclusion() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/typeInclusion.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/typeInclusion.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "apidoc/typeInclusion.yaml");
     }
 
     @Test(description = "Reference scenarios")
     public void testsForReferenceScenario() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/reference_scenario.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "apidoc/reference.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "apidoc/reference.yaml");
     }
 
     @AfterMethod

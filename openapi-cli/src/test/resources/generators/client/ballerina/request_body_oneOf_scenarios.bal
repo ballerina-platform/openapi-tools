@@ -1,4 +1,4 @@
-import  ballerina/http;
+import ballerina/http;
 
 # refComponent
 public isolated client class Client {
@@ -16,12 +16,12 @@ public isolated client class Client {
     #
     # + payload - A JSON object containing pet information
     # + return - OK
-    remote isolated function postXMLUser(Body payload) returns http:Response|error {
+    remote isolated function postXMLUser(Path01Body payload) returns http:Response|error {
         string  path = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp-> post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
         return response;
     }
 }

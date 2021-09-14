@@ -24,6 +24,9 @@ paths:
 components:
   schemas:
     Pet:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:
@@ -34,6 +37,9 @@ components:
         tag:
           type: string
     Dog:
+      required:
+        - bark
+        - sibling
       type: object
       properties:
         sibling:

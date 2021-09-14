@@ -1,6 +1,5 @@
 import ballerina/http;
 
-
 public isolated client class Client {
     final http:Client clientEp;
     # Gets invoked to initialize the `connector`.
@@ -17,7 +16,7 @@ public isolated client class Client {
     # + versionName - Version Name
     # + return - Ok
     remote isolated function operationId04(int 'version, string versionName) returns string|error {
-        string  path = string `/v1/${'version}/v2/${'versionName}`;
+        string  path = string `/v1/${'version}/v2/${versionName}`;
         string response = check self.clientEp-> get(path, targetType = string);
         return response;
     }

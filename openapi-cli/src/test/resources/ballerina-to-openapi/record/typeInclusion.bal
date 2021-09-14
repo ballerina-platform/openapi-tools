@@ -1,19 +1,19 @@
 import  ballerina/http;
 
 type Link record {|
-   string rel;
-   string href;
+   string rel?;
+   string href?;
    string[] mediaTypes?;
 |};
 
 type Links record {|
-   Link[] links;
-   int linkid;
+   Link[] links?;
+   int linkid?;
 |};
 
 type ReservationReceipt record {|
    *Links;
-   string id;
+   string id?;
 |};
 
 listener  http:Listener  ep0  = new (443, config  = {host: "petstore.swagger.io"});

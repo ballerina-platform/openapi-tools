@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.extension.doc;
+package io.ballerina.openapi.extension.doc.gen;
+
+import io.ballerina.compiler.syntax.tree.NodeLocation;
+import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 
 import java.util.List;
 
 /**
- * {@code OpenApiManager} manages OpenAPI doc generation for HTTP services depending on whether the current project
+ * {@code DocGeneratorManager} manages OpenAPI doc generation for HTTP services depending on whether the current project
  * is a ballerina-project or a single ballerina file.
  */
-public final class OpenApiManager {
+public final class DocGeneratorManager {
     private final List<OpenApiDocGenerator> docGenerators;
 
-    public OpenApiManager() {
+    public DocGeneratorManager() {
         this.docGenerators = List.of(new SingleFileOpenApiDocGenerator(), new BalProjectOpenApiDocGenerator());
     }
 
-    public void generate(OpenApiDocConfig config) {
+    public void generate(OpenApiDocConfig config, SyntaxNodeAnalysisContext context, NodeLocation location) {
         docGenerators.stream()
                 .filter(dg -> dg.isSupported(config.getProjectType()))
                 .findFirst()
-                .ifPresent(dg -> dg.generate(config));
+                .ifPresent(dg -> dg.generate(config, context, location));
     }
 }

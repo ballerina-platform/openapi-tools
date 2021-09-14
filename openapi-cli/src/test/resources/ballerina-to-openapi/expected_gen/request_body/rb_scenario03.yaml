@@ -24,6 +24,9 @@ paths:
 components:
   schemas:
     Tag:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:
@@ -32,6 +35,10 @@ components:
         name:
           type: string
     Pet:
+      required:
+        - id
+        - name
+        - tag
       type: object
       properties:
         id:

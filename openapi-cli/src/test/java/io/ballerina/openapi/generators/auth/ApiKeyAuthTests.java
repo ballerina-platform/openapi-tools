@@ -116,6 +116,7 @@ public class ApiKeyAuthTests {
                 "header_api_key.yaml",
                 "query_api_key.yaml",
                 "multiple_api_keys.yaml",
+                "header_api_key_only.yaml"
         };
     }
 }

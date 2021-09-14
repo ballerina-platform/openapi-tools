@@ -405,7 +405,7 @@ public class GeneratorUtils {
                     unionType.append(type);
                 }
             } else if (oneOfSchema.get$ref() != null) {
-                String type = extractReferenceType(oneOfSchema.get$ref());
+                String type = getValidName(extractReferenceType(oneOfSchema.get$ref()), true);
                 unionType.append("|");
                 unionType.append(type);
             }

@@ -46,7 +46,12 @@ public class RecordTests {
         //Compare generated yaml file with expected yaml content
         new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "record/typeInclusion.yaml");
     }
-
+    @Test(description = "When the record field has optional fields it map to optional fields in OAS")
+    public void testRequiredField() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/optional.bal");
+        //Compare generated yaml file with expected yaml content
+        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "record/optional.yaml");
+    }
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

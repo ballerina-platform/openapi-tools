@@ -69,7 +69,7 @@ components:
       description: "**City name**. *Example: London*. You can call by city name, or by city name and country code. The API responds with a list of results that match a searching word. For the query value, type the city name and optionally the country code divided by comma; use ISO 3166 country codes."
       schema:
         type: string
-      x-display:
+      x-ballerina-display:
         label: "City name"
     id:
       name: id

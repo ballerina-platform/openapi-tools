@@ -41,6 +41,7 @@ import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
 import io.ballerina.openapi.generators.service.BallerinaServiceGenerator;
 import io.ballerina.projects.DocumentId;
@@ -61,6 +62,8 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -101,6 +104,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TEST_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.TYPE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.UNTITLED_SERVICE;
+import static io.ballerina.openapi.generators.GeneratorConstants.UTIL_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
 /**
@@ -111,6 +115,7 @@ public class CodeGenerator {
     private String licenseHeader = "";
 
     private static final PrintStream outStream = System.err;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
 
     /**
      * Generates ballerina source for provided Open API Definition in {@code definitionPath}.
@@ -440,13 +445,17 @@ public class CodeGenerator {
             srcPackage =  DEFAULT_CLIENT_PKG;
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        String srcFile = "client.bal";
         // Normalize OpenAPI definition
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI, true);
         // Generate ballerina service and resources.
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME, mainContent));
+        String utilContent = Formatter.format(
+                ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
+        if (!utilContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, UTIL_FILE_NAME, utilContent));
+        }
 
         // Generate ballerina records to represent schemas.
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
@@ -537,7 +546,7 @@ public class CodeGenerator {
             try {
                 FileUtils.deleteDirectory(tmpDir.toFile());
             } catch (IOException ex) {
-                ex.printStackTrace();
+                LOGGER.error("Unable to delete the temporary directory : " + tmpDir, ex);
             }
         }));
         return unusedTypeDefinitionNameList;

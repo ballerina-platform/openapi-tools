@@ -24,6 +24,9 @@ paths:
 components:
   schemas:
     Link:
+      required:
+        - href
+        - rel
       type: object
       properties:
         rel:
@@ -39,6 +42,9 @@ components:
             type: string
       description: Link record
     Links:
+      required:
+        - linkid
+        - links
       type: object
       properties:
         links:
@@ -51,7 +57,9 @@ components:
     ReservationReceipt:
       allOf:
         - $ref: '#/components/schemas/Links'
-        - type: object
+        - required:
+            - id
+          type: object
           properties:
             id:
               type: string

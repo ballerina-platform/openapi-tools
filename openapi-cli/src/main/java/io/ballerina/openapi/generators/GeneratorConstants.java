@@ -48,7 +48,7 @@ public class GeneratorConstants {
         }
     }
     /**
-     * Enum to select the relavant ballerina http auth record.
+     * Enum to select the relevant ballerina http auth record.
      */
     public enum AuthConfigTypes {
         BASIC("http:CredentialsConfig"),
@@ -71,6 +71,7 @@ public class GeneratorConstants {
     public static final String CLIENT_TEMPLATE_NAME = "client-ep";
     public static final String TYPE_FILE_NAME = "types.bal";
     public static final String CLIENT_FILE_NAME = "client.bal";
+    public static final String UTIL_FILE_NAME = "utils.bal";
     public static final String TEST_FILE_NAME = "test.bal";
     public static final String CONFIG_FILE_NAME = "Config.toml";
     public static final String BALLERINA_TOML = "Ballerina.toml";
@@ -106,6 +107,7 @@ public class GeneratorConstants {
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
+    public static final String URL = "url";
     public static final String MODULE_TEST  = "test";
     public static final String BALLERINA = "ballerina";
     public static final String PUBLIC = "public";
@@ -157,6 +159,23 @@ public class GeneratorConstants {
     public static final String CONNECT = "connect";
     public static final String OPTIONS = "options";
     public static final String TRACE = "trace";
+
+    //Encoding related constants
+    public static final String DEEP_OBJECT = "DEEPOBJECT";
+    public static final String FORM = "FORM";
+    public static final String SPACE_DELIMITED = "SPACEDELIMITED";
+    public static final String PIPE_DELIMITED = "PIPEDELIMITED";
+    public static final String ENCODING = "Encoding";
+    public static final String ENCODING_STYLE = "EncodingStyle";
+    public static final String STYLE = "style";
+    public static final String EXPLODE = "explode";
+
+    //OpenAPI Ballerina extensions
+    public static final String X_BALLERINA_INIT_DESCRIPTION = "x-ballerina-init-description";
+    public static final String X_BALLERINA_DISPLAY = "x-ballerina-display";
+    public static final String X_BALLERINA_APIKEY_DESCRIPTION = "x-ballerina-apikey-description";
+    public static final String X_BALLERINA_DEPRECATED_REASON = "x-ballerina-deprecated-reason";
+
     //Service related
     public static final String HOST = "host";
     public static final String NEW = "new";

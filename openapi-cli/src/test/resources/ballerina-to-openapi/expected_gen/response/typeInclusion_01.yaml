@@ -36,6 +36,9 @@ paths:
 components:
   schemas:
     ReserveRoom:
+      required:
+        - count
+        - id
       type: object
       properties:
         id:
@@ -47,6 +50,10 @@ components:
           format: int32
       description: Represents rooms be reserved
     Reservation:
+      required:
+        - endDate
+        - reserveRooms
+        - startDate
       type: object
       properties:
         reserveRooms:
@@ -62,6 +69,9 @@ components:
           description: End date in yyyy-mm-dd
       description: Represents a reservation of rooms
     Link:
+      required:
+        - href
+        - rel
       type: object
       properties:
         rel:
@@ -83,6 +93,8 @@ components:
               - POST
               - GET
     Links:
+      required:
+        - links
       type: object
       properties:
         links:
@@ -92,7 +104,12 @@ components:
     ReservationReceipt:
       allOf:
         - $ref: '#/components/schemas/Links'
-        - type: object
+        - required:
+            - expiryDate
+            - id
+            - lastUpdated
+            - reservation
+          type: object
           properties:
             id:
               type: string

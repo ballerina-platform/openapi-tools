@@ -34,6 +34,9 @@ paths:
 components:
   schemas:
     Pet:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:
@@ -42,6 +45,9 @@ components:
         name:
           type: string
     TagType:
+      required:
+        - category
+        - id
       type: object
       properties:
         id:
@@ -52,6 +58,10 @@ components:
           items:
             type: string
     Tag:
+      required:
+        - id
+        - name
+        - tagType
       type: object
       properties:
         id:

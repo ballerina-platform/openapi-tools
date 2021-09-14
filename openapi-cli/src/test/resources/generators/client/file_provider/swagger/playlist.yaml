@@ -4,7 +4,7 @@ servers:
 info:
   title: Spotify Web API
   version: 0.1.0
-  x-display:
+  x-ballerina-display:
     label: "Spotify Client"
 externalDocs:
   description: Find more info on the official Spotify Web API Reference
@@ -25,7 +25,7 @@ paths:
         description: Find more info on the official Spotify Web API Reference
         url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-get-a-list-of-current-users-playlists
       operationId: getMyPlaylists
-      x-display:
+      x-ballerina-display:
         label: "My Playlists"
       parameters:
         - description: "'The maximum number of playlists to return. Default: 20. Minimum: 1. Maximum: 50.'"
@@ -35,7 +35,7 @@ paths:
           schema:
             format: int32
             type: integer
-          x-display:
+          x-ballerina-display:
             label: "Limit"
         - description: "'The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with `limit` to get the next set of playlists.'"
           in: query
@@ -44,7 +44,7 @@ paths:
           schema:
             format: int32
             type: integer
-          x-display:
+          x-ballerina-display:
             label: "Offset"
       responses:
         "200":
@@ -69,7 +69,7 @@ paths:
         description: Find more info on the official Spotify Web API Reference
         url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-get-playlist
       operationId: getPlaylistById
-      x-display:
+      x-ballerina-display:
         label: "Playlist By Id"
       parameters:
         - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
@@ -78,7 +78,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Playlist Id"
         - description: |-
             An [ISO 3166-1 alpha-2 country code](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) or the string `from_token`. Provide this parameter if you want to apply [Track
@@ -89,7 +89,7 @@ paths:
           required: false
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Market"
         - description: "Filters for the query: a comma-separated list of the fields to return. If omitted, all fields are returned. For example, to get just the playlist''s description and URI: `fields=description,uri`. A dot separator can be used to specify non-reoccurring fields, while parentheses can be used to specify reoccurring fields within objects. For example, to get just the added date and user ID of the adder: `fields=tracks.items(added_at,added_by.id)`. Use multiple parentheses to drill down into nested objects, for example: `fields=tracks.items(track(name,href,album(name,href)))`. Fields can be excluded by prefixing them with an exclamation mark, for example: `fields=tracks.items(track(name,href,album(!name,href)))`"
           in: query
@@ -97,7 +97,7 @@ paths:
           required: false
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Fields to Return"
         - description: "A comma-separated list of item types that your client supports besides the default `track` type. Valid types are: `track` and `episode`. **Note** : This parameter was introduced to allow existing clients to maintain their current behaviour and might be deprecated in the future. In addition to providing this parameter, make sure that your client properly handles cases of new types in the future by checking against the `type` field of each object."
           in: query
@@ -105,7 +105,7 @@ paths:
           required: false
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Additional Types"
       responses:
         "200":
@@ -129,7 +129,7 @@ paths:
         description: Find more info on the official Spotify Web API Reference
         url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-change-playlist-details
       operationId: updatePlaylist
-      x-display:
+      x-ballerina-display:
         label: "Update Playlist"
       parameters:
         - description: "The content type of the request body: `application/json`"
@@ -138,7 +138,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Content Type"
         - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
           in: path
@@ -146,7 +146,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Playlist Id"
       requestBody:
         content:
@@ -178,7 +178,7 @@ paths:
         description: Find more info on the official Spotify Web API Reference
         url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-get-playlist-cover
       operationId: getPlaylistCover
-      x-display:
+      x-ballerina-display:
         label: "Playlist Cover"
       parameters:
         - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
@@ -187,7 +187,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Playlist Id"
       responses:
         "200":
@@ -213,7 +213,7 @@ paths:
         description: Find more info on the official Spotify Web API Reference
         url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-upload-custom-playlist-cover
       operationId: updatePlaylistCover
-      x-display:
+      x-ballerina-display:
         label: "Update Playlist Cover"
       parameters:
         - description: "The content type of the request body: `image/jpeg`"
@@ -222,7 +222,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Content Type"
         - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
           in: path
@@ -230,7 +230,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Playlist Id"
       responses:
         "202":
@@ -255,7 +255,7 @@ paths:
         description: Find more info on the official Spotify Web API Reference
         url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-get-playlists-tracks
       operationId: getPlaylistTracks
-      x-display:
+      x-ballerina-display:
         label: "Playlist Tracks"
       parameters:
         - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
@@ -264,7 +264,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Playlist Id"
         - description: |-
             An [ISO 3166-1 alpha-2 country code](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) or the string `from_token`. Provide this parameter if you want to apply [Track
@@ -275,7 +275,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Market"
         - description: |-
             Filters for the query: a comma-separated list of the fields to return. If omitted, all fields are returned. For example, to get just the total number of items and the request limit:
@@ -291,7 +291,7 @@ paths:
           required: false
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Fields to Return"
         - description: "The maximum number of items to return. Default: 100. Minimum: 1. Maximum: 100."
           in: query
@@ -300,7 +300,7 @@ paths:
           schema:
             format: int32
             type: integer
-          x-display:
+          x-ballerina-display:
             label: "Limit"
         - description: "The index of the first item to return. Default: 0 (the first object)."
           in: query
@@ -309,7 +309,7 @@ paths:
           schema:
             format: int32
             type: integer
-          x-display:
+          x-ballerina-display:
             label: "Offset"
         - description: "A comma-separated list of item types that your client supports besides the default `track` type. Valid types are: `track` and `episode`. **Note** : This parameter was introduced to allow existing clients to maintain their current behaviour and might be deprecated in the future. In addition to providing this parameter, make sure that your client properly handles cases of new types in the future by checking against the `type` field of each object."
           in: query
@@ -345,7 +345,7 @@ paths:
         description: Find more info on the official Spotify Web API Reference
         url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-reorder-or-replace-playlists-tracks
       operationId: reorderOrReplacePlaylistTracks
-      x-display:
+      x-ballerina-display:
         label: "Reorder or Replace Tracks"
       parameters:
         - description: The [Spotify ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) for the playlist.
@@ -354,7 +354,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Playlist Id"
         - description: |-
             A comma-separated list of [Spotify URIs](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids) to set, can be track or episode URIs. For example: `uris=spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:track:1301WleyT98MSxVHPZCA6M,spotify:episode:512ojhOuo1ktJprKbVcKyQ`
@@ -364,7 +364,7 @@ paths:
           required: false
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "Track URIs"
       requestBody:
         content:
@@ -420,7 +420,7 @@ paths:
         description: Find more info on the official Spotify Web API Reference
         url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-get-list-users-playlists
       operationId: getPlayslistsByUserID
-      x-display:
+      x-ballerina-display:
         label: "Playlist By User Id"
       parameters:
         - description: The user's [Spotify user ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids).
@@ -429,7 +429,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "User Id"
         - description: "The maximum number of playlists to return. Default: 20. Minimum: 1. Maximum: 50."
           in: query
@@ -438,7 +438,7 @@ paths:
           schema:
             format: int32
             type: integer
-          x-display:
+          x-ballerina-display:
             label: "Limit"
         - description: "The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with `limit` to get the next set of playlists."
           in: query
@@ -447,7 +447,7 @@ paths:
           schema:
             format: int32
             type: integer
-          x-display:
+          x-ballerina-display:
             label: "Offset"
       responses:
         "200":
@@ -473,7 +473,7 @@ paths:
         description: Find more info on the official Spotify Web API Reference
         url: https://developer.spotify.com/documentation/web-api/reference/#endpoint-create-playlist
       operationId: createPlaylist
-      x-display:
+      x-ballerina-display:
         label: "Create Playlist"
       parameters:
         - description: The user's [Spotify user ID](https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids).
@@ -482,7 +482,7 @@ paths:
           required: true
           schema:
             type: string
-          x-display:
+          x-ballerina-display:
             label: "User Id"
       requestBody:
         content:
