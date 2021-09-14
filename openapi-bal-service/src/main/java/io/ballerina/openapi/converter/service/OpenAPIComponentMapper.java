@@ -179,8 +179,8 @@ public class OpenAPIComponentMapper {
             String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
             Schema property = ConverterCommonUtils.getOpenApiSchema(type);
             if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
-                TypeSymbol typeReferenceSymbol = field.getValue().typeDescriptor();
-                property = handleTypeReference(schema, typeReferenceSymbol, property);
+                TypeReferenceTypeSymbol typeReference = (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
+                property = handleTypeReference(schema, typeReference, property);
                 schema = components.getSchemas();
             } else if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.UNION) {
                 property = handleUnionType(schema, field, property);
@@ -213,17 +213,14 @@ public class OpenAPIComponentMapper {
     /**
      * This function uses to handle the field datatype has TypeReference(ex: Record or Enum).
      */
-    private Schema handleTypeReference(Map<String, Schema> schema, TypeSymbol typeReferenceSymbol,
+    private Schema handleTypeReference(Map<String, Schema> schema, TypeReferenceTypeSymbol typeReferenceSymbol,
                                        Schema property) {
-        if (((TypeReferenceTypeSymbol) typeReferenceSymbol).definition().kind() == SymbolKind.ENUM) {
-            TypeReferenceTypeSymbol typeRefEnum = (TypeReferenceTypeSymbol) typeReferenceSymbol;
-            EnumSymbol enumSymbol = (EnumSymbol) typeRefEnum.definition();
+        if (typeReferenceSymbol.definition().kind() == SymbolKind.ENUM) {
+            EnumSymbol enumSymbol = (EnumSymbol) typeReferenceSymbol.definition();
             property = mapEnumValues(enumSymbol);
         } else {
             property.set$ref(typeReferenceSymbol.getName().orElseThrow().trim());
-            TypeSymbol recordVariable = typeReferenceSymbol;
-            TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) recordVariable;
-            createComponentSchema(schema, typeRecord);
+            createComponentSchema(schema, typeReferenceSymbol);
         }
         return property;
     }
@@ -247,7 +244,8 @@ public class OpenAPIComponentMapper {
                 nullable = true;
             } else if (union.typeKind() == TypeDescKind.TYPE_REFERENCE) {
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
-                property = handleTypeReference(schema, union, property);
+                TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) union;
+                property = handleTypeReference(schema, typeReferenceTypeSymbol, property);
                 componentName = union.getName().orElseThrow(null);
             } else {
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
