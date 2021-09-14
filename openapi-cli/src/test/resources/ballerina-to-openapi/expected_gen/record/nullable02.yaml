@@ -1,0 +1,18 @@
+components:
+  schemas:
+    Link:
+      required:
+        - href
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+          nullable: true
+        mediaTypes:
+          type: array
+          nullable: true
+          items:
+            type: object
