@@ -246,7 +246,7 @@ public class OpenAPIComponentMapper {
                 TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) union;
                 property = handleTypeReference(this.components.getSchemas(), typeReferenceTypeSymbol, property);
                 properties.add(property);
-                // commented due to known issue in ballerina lang union type handling
+                // TODO: uncomment after fixing ballerina lang union type handling issue
 //            } else if (union.typeKind() == TypeDescKind.UNION) {
 //                property = handleUnionType((UnionTypeSymbol) union, property, properties);
 //                properties.add(property);
@@ -255,9 +255,7 @@ public class OpenAPIComponentMapper {
                 properties.add(property);
             }
         }
-
         property = generateOneOfSchema(property, properties);
-
         if (nullable) {
             property.setNullable(true);
         }
@@ -268,11 +266,11 @@ public class OpenAPIComponentMapper {
      * This function generate oneOf composed schema for record fields.
      */
     private Schema generateOneOfSchema(Schema property, List<Schema> properties) {
-        boolean isTypeReference = (properties.size() == 1) && (properties.get(0).get$ref() == null);
+        boolean isTypeReference = false;
         if ((properties.size() == 1) && (properties.get(0).get$ref() == null)) {
             isTypeReference = true;
         }
-        if (!isTypeReference) {
+        if (isTypeReference) {
             ComposedSchema oneOf = new ComposedSchema();
             oneOf.setOneOf(properties);
             property = oneOf;
