@@ -182,8 +182,7 @@ public class OpenAPIComponentMapper {
                 TypeReferenceTypeSymbol typeReference = (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
                 property = handleTypeReference(schema, typeReference, property);
                 schema = components.getSchemas();
-            }
-            else if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.UNION) {
+            } else if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.UNION) {
                 property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property);
                 schema = components.getSchemas();
             }
@@ -236,7 +235,6 @@ public class OpenAPIComponentMapper {
      */
     private Schema handleUnionType(UnionTypeSymbol unionType, Schema property) {
         List<TypeSymbol> unionTypes = unionType.userSpecifiedMemberTypes();
-        List<String> componentNames = new ArrayList<>();
         //Set array size to 4 by assuming union type can have max 4 types.
         List<Schema> properties = new ArrayList<>(4);
         boolean nullable = false;
@@ -247,28 +245,37 @@ public class OpenAPIComponentMapper {
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
                 TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) union;
                 property = handleTypeReference(this.components.getSchemas(), typeReferenceTypeSymbol, property);
-                componentNames.add(union.getName().orElseThrow(null));
                 properties.add(property);
+                // commented due to known issue in ballerina lang union type handling
 //            } else if (union.typeKind() == TypeDescKind.UNION) {
 //                property = handleUnionType((UnionTypeSymbol) union, property, properties);
 //                properties.add(property);
-            }else {
+            } else {
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
                 properties.add(property);
             }
         }
 
-        boolean isTypeReference = false;
-        if ((properties.size() == 1) && (properties.get(0).get$ref() == null)){
+        property = generateOneOfSchema(property, properties);
+
+        if (nullable) {
+            property.setNullable(true);
+        }
+        return property;
+    }
+
+    /**
+     * This function generate oneOf composed schema for record fields.
+     */
+    private Schema generateOneOfSchema(Schema property, List<Schema> properties) {
+        boolean isTypeReference = (properties.size() == 1) && (properties.get(0).get$ref() == null);
+        if ((properties.size() == 1) && (properties.get(0).get$ref() == null)) {
             isTypeReference = true;
         }
         if (!isTypeReference) {
             ComposedSchema oneOf = new ComposedSchema();
             oneOf.setOneOf(properties);
             property = oneOf;
-        }
-        if (nullable) {
-            property.setNullable(true);
         }
         return property;
     }
