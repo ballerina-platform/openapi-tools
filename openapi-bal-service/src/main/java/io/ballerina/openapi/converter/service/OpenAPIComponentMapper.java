@@ -270,7 +270,7 @@ public class OpenAPIComponentMapper {
         if ((properties.size() == 1) && (properties.get(0).get$ref() == null)) {
             isTypeReference = true;
         }
-        if (isTypeReference) {
+        if (!isTypeReference) {
             ComposedSchema oneOf = new ComposedSchema();
             oneOf.setOneOf(properties);
             property = oneOf;
