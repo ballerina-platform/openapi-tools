@@ -70,6 +70,24 @@ public class RecordTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/nullable03.yaml");
     }
 
+    @Test(description = "When the record field has nullable field , which has record type reference data type")
+    public void testUnionTypeWithRecordType() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/union.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/union.yaml");
+    }
+
+    @Test(description = "When the record field has nullable field , which has record type reference data type")
+    public void testUnionTypeWithPrimitive() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/union_with_primitive.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/union_with_primitive.yaml");
+    }
+
+    @Test(description = "When the record field has nullable field , which has record type reference data type")
+    public void testUnionTypeWithNullable() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/union_with_nullable.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/union.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

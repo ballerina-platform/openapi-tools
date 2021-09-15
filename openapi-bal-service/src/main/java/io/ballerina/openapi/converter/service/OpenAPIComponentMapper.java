@@ -182,8 +182,9 @@ public class OpenAPIComponentMapper {
                 TypeReferenceTypeSymbol typeReference = (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
                 property = handleTypeReference(schema, typeReference, property);
                 schema = components.getSchemas();
-            } else if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.UNION) {
-                property = handleUnionType(schema, field, property);
+            }
+            else if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.UNION) {
+                property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property);
                 schema = components.getSchemas();
             }
             if (property instanceof ArraySchema) {
@@ -233,11 +234,11 @@ public class OpenAPIComponentMapper {
      *     };
      * </pre>
      */
-    private Schema handleUnionType(Map<String, Schema> schema, Map.Entry<String, RecordFieldSymbol> field,
-                                   Schema property) {
-
-        List<TypeSymbol> unionTypes = ((UnionTypeSymbol) field.getValue().typeDescriptor()).userSpecifiedMemberTypes();
-        String componentName = null;
+    private Schema handleUnionType(UnionTypeSymbol unionType, Schema property) {
+        List<TypeSymbol> unionTypes = unionType.userSpecifiedMemberTypes();
+        List<String> componentNames = new ArrayList<>();
+        //Set array size to 4 by assuming union type can have max 4 types.
+        List<Schema> properties = new ArrayList<>(4);
         boolean nullable = false;
         for (TypeSymbol union: unionTypes) {
             if (union.typeKind() == TypeDescKind.NIL) {
@@ -245,20 +246,29 @@ public class OpenAPIComponentMapper {
             } else if (union.typeKind() == TypeDescKind.TYPE_REFERENCE) {
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
                 TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) union;
-                property = handleTypeReference(schema, typeReferenceTypeSymbol, property);
-                componentName = union.getName().orElseThrow(null);
-            } else {
+                property = handleTypeReference(this.components.getSchemas(), typeReferenceTypeSymbol, property);
+                componentNames.add(union.getName().orElseThrow(null));
+                properties.add(property);
+//            } else if (union.typeKind() == TypeDescKind.UNION) {
+//                property = handleUnionType((UnionTypeSymbol) union, property, properties);
+//                properties.add(property);
+            }else {
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
+                properties.add(property);
             }
         }
+
+        boolean isTypeReference = false;
+        if ((properties.size() == 1) && (properties.get(0).get$ref() == null)){
+            isTypeReference = true;
+        }
+        if (!isTypeReference) {
+            ComposedSchema oneOf = new ComposedSchema();
+            oneOf.setOneOf(properties);
+            property = oneOf;
+        }
         if (nullable) {
-            if (this.components.getSchemas() != null && componentName != null) {
-                Schema nullableObject = this.components.getSchemas().get(componentName);
-                nullableObject.setNullable(true);
-                this.components.addSchemas(componentName, nullableObject);
-            } else {
-                property.setNullable(true);
-            }
+            property.setNullable(true);
         }
         return property;
     }
