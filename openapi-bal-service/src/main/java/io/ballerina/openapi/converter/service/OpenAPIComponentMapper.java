@@ -235,8 +235,7 @@ public class OpenAPIComponentMapper {
      */
     private Schema handleUnionType(UnionTypeSymbol unionType, Schema property) {
         List<TypeSymbol> unionTypes = unionType.userSpecifiedMemberTypes();
-        //Set array size to 4 by assuming union type can have max 4 types.
-        List<Schema> properties = new ArrayList<>(4);
+        List<Schema> properties = new ArrayList<>();
         boolean nullable = false;
         for (TypeSymbol union: unionTypes) {
             if (union.typeKind() == TypeDescKind.NIL) {
@@ -267,9 +266,6 @@ public class OpenAPIComponentMapper {
      */
     private Schema generateOneOfSchema(Schema property, List<Schema> properties) {
         boolean isTypeReference = properties.size() == 1 && properties.get(0).get$ref() == null;
-//        if ((properties.size() == 1) && (properties.get(0).get$ref() == null)) {
-//            isTypeReference = true;
-//        }
         if (!isTypeReference) {
             ComposedSchema oneOf = new ComposedSchema();
             oneOf.setOneOf(properties);
