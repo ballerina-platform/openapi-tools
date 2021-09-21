@@ -14,7 +14,7 @@ paths:
     get:
       operationId: operation_get_/ping
       parameters:
-        - name: X-Client
+        - name: x-item
           in: header
           required: true
           schema:
@@ -22,11 +22,11 @@ paths:
       responses:
         "200":
           description: Ok
-  /v1:
+  /ping02:
     get:
-      operationId: operation_get_/v1
+      operationId: operation_get_/ping02
       parameters:
-        - name: XClient
+        - name: x-item
           in: header
           required: true
           schema:

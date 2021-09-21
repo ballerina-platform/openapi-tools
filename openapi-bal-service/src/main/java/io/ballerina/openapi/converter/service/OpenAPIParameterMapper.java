@@ -19,20 +19,7 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.*;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
@@ -212,6 +199,13 @@ public class OpenAPIParameterMapper {
      */
     private void setHeaderParameter(List<Parameter> parameters, RequiredParameterNode queryParam) {
         //Handle with string current header a support with only string and string[]
+        String headerName = queryParam.paramName().get().text().replaceAll("\\\\", "");
+        HeaderParameter headerParameter = new HeaderParameter();
+        headerParameter.setRequired(true);
+        if (!queryParam.annotations().isEmpty()) {
+            AnnotationNode annotationNode = queryParam.annotations().get(0);
+            headerName = getHeaderName(headerName, annotationNode);
+        }
         if (queryParam.typeName() instanceof ArrayTypeDescriptorNode)  {
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) queryParam.typeName();
             if (arrayNode.memberTypeDesc().kind().equals(SyntaxKind.STRING_TYPE_DESC)) {
@@ -219,17 +213,29 @@ public class OpenAPIParameterMapper {
                 Schema itemSchema = ConverterCommonUtils.getOpenApiSchema(itemTypeNode.toString().trim());
                 ArraySchema arraySchema = new ArraySchema();
                 arraySchema.setItems(itemSchema);
-                io.swagger.v3.oas.models.parameters.HeaderParameter headerParameter =
-                        new io.swagger.v3.oas.models.parameters.HeaderParameter();
                 headerParameter.schema(arraySchema);
-                headerParameter.setName(queryParam.paramName().get().text().replaceAll("\\\\", ""));
+                headerParameter.setName(headerName.replaceAll("\\\\", ""));
                 parameters.add(headerParameter);
             }
         } else {
-            Parameter
-                    parameter = buildParameter(Constants.HEADER, queryParam);
-            parameters.add(parameter);
+            headerParameter.schema(new StringSchema());
+            headerParameter.setName(headerName.replaceAll("\\\\", ""));
+            parameters.add(headerParameter);
         }
+    }
+
+    private String getHeaderName(String headerName, AnnotationNode annotationNode) {
+        if (annotationNode.annotValue().isPresent()) {
+            MappingConstructorExpressionNode fieldNode = annotationNode.annotValue().get();
+            SeparatedNodeList<MappingFieldNode> fields = fieldNode.fields();
+            for (MappingFieldNode field: fields) {
+                SpecificFieldNode sField = (SpecificFieldNode) field;
+                if (sField.fieldName().toString().trim().equals("name") && sField.valueExpr().isPresent()) {
+                    headerName = sField.valueExpr().get().toString().trim().replaceAll("\"", "");
+                }
+            }
+        }
+        return headerName;
     }
 
     /**
@@ -253,12 +259,6 @@ public class OpenAPIParameterMapper {
                 type = ConverterCommonUtils.convertBallerinaTypeToOpenAPIType(queryParam.typeName().toString().trim());
                 qParam.schema(ConverterCommonUtils.getOpenApiSchema(type));
                 param = qParam;
-                break;
-            case Constants.HEADER:
-                param = new HeaderParameter();
-                RequiredParameterNode header = (RequiredParameterNode) paramAttributes;
-                param.schema(new StringSchema());
-                param.setName(header.paramName().get().text().replaceAll("\\\\", ""));
                 break;
             case Constants.COOKIE:
                 param = new CookieParameter();
@@ -287,8 +287,7 @@ public class OpenAPIParameterMapper {
 
         NodeList<AnnotationNode> annotations = requiredParameterNode.annotations();
         for (AnnotationNode annotation: annotations) {
-            if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER) &&
-                    annotation.annotValue().isPresent()) {
+            if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
                 setHeaderParameter(parameters, requiredParameterNode);
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
