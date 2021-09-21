@@ -22,6 +22,7 @@ paths:
       parameters:
         - name: X-client
           in: header
+          required: true
           schema:
             type: string
       responses:
