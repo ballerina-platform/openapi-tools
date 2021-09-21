@@ -266,10 +266,10 @@ public class OpenAPIComponentMapper {
      * This function generate oneOf composed schema for record fields.
      */
     private Schema generateOneOfSchema(Schema property, List<Schema> properties) {
-        boolean isTypeReference = false;
-        if ((properties.size() == 1) && (properties.get(0).get$ref() == null)) {
-            isTypeReference = true;
-        }
+        boolean isTypeReference = properties.size() == 1 && properties.get(0).get$ref() == null;
+//        if ((properties.size() == 1) && (properties.get(0).get$ref() == null)) {
+//            isTypeReference = true;
+//        }
         if (!isTypeReference) {
             ComposedSchema oneOf = new ComposedSchema();
             oneOf.setOneOf(properties);
