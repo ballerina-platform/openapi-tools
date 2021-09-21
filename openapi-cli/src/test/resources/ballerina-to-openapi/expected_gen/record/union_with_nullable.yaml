@@ -1,6 +1,6 @@
 components:
   schemas:
-    Pet:
+    Dog:
       required:
         - id
       type: object
@@ -8,18 +8,28 @@ components:
         id:
           type: integer
           format: int32
+          nullable: true
         name:
           type: string
-          nullable: true
+    Cat:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        eat:
+          type: string
     Link:
       required:
+        - pet
         - rel
       type: object
       properties:
         rel:
           type: string
-          nullable: true
         pet:
-          nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Pet'
+            - $ref: '#/components/schemas/Dog'
+            - $ref: '#/components/schemas/Cat'

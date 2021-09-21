@@ -183,7 +183,7 @@ public class OpenAPIComponentMapper {
                 property = handleTypeReference(schema, typeReference, property);
                 schema = components.getSchemas();
             } else if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.UNION) {
-                property = handleUnionType(schema, field, property);
+                property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property);
                 schema = components.getSchemas();
             }
             if (property instanceof ArraySchema) {
@@ -233,11 +233,9 @@ public class OpenAPIComponentMapper {
      *     };
      * </pre>
      */
-    private Schema handleUnionType(Map<String, Schema> schema, Map.Entry<String, RecordFieldSymbol> field,
-                                   Schema property) {
-
-        List<TypeSymbol> unionTypes = ((UnionTypeSymbol) field.getValue().typeDescriptor()).userSpecifiedMemberTypes();
-        String componentName = null;
+    private Schema handleUnionType(UnionTypeSymbol unionType, Schema property) {
+        List<TypeSymbol> unionTypes = unionType.userSpecifiedMemberTypes();
+        List<Schema> properties = new ArrayList<>();
         boolean nullable = false;
         for (TypeSymbol union: unionTypes) {
             if (union.typeKind() == TypeDescKind.NIL) {
@@ -245,20 +243,33 @@ public class OpenAPIComponentMapper {
             } else if (union.typeKind() == TypeDescKind.TYPE_REFERENCE) {
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
                 TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) union;
-                property = handleTypeReference(schema, typeReferenceTypeSymbol, property);
-                componentName = union.getName().orElseThrow(null);
+                property = handleTypeReference(this.components.getSchemas(), typeReferenceTypeSymbol, property);
+                properties.add(property);
+                // TODO: uncomment after fixing ballerina lang union type handling issue
+//            } else if (union.typeKind() == TypeDescKind.UNION) {
+//                property = handleUnionType((UnionTypeSymbol) union, property, properties);
+//                properties.add(property);
             } else {
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
+                properties.add(property);
             }
         }
+        property = generateOneOfSchema(property, properties);
         if (nullable) {
-            if (this.components.getSchemas() != null && componentName != null) {
-                Schema nullableObject = this.components.getSchemas().get(componentName);
-                nullableObject.setNullable(true);
-                this.components.addSchemas(componentName, nullableObject);
-            } else {
-                property.setNullable(true);
-            }
+            property.setNullable(true);
+        }
+        return property;
+    }
+
+    /**
+     * This function generate oneOf composed schema for record fields.
+     */
+    private Schema generateOneOfSchema(Schema property, List<Schema> properties) {
+        boolean isTypeReference = properties.size() == 1 && properties.get(0).get$ref() == null;
+        if (!isTypeReference) {
+            ComposedSchema oneOf = new ComposedSchema();
+            oneOf.setOneOf(properties);
+            property = oneOf;
         }
         return property;
     }
