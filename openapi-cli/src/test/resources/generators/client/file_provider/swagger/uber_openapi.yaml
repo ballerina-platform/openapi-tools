@@ -224,6 +224,7 @@ components:
       type: apiKey
       name: server_token
       in: query
+      description: Uber API Key
   schemas:
     Product:
       properties:

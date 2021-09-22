@@ -103,8 +103,7 @@ public class BallerinaTestGeneratorTests {
             Files.deleteIfExists(utilPath);
             Files.deleteIfExists(testPath);
             Files.deleteIfExists(configPath);
-        } catch (IOException e) {
-            //Ignore the exception
+        } catch (IOException ignored) {
         }
     }
 

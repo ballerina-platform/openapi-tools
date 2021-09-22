@@ -113,8 +113,7 @@ public class FunctionBodyNodeTests {
         try {
             Files.deleteIfExists(clientPath);
             Files.deleteIfExists(schemaPath);
-        } catch (IOException e) {
-            //Ignore the exception
+        } catch (IOException ignored) {
         }
     }
 

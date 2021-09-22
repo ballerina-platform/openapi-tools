@@ -84,21 +84,30 @@ public class TestConstants {
             "  # Configurations related to client authentication\n" +
             "  http:OAuth2PasswordGrantConfig|http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig auth;\n"
             + commonClientConfigurationFields;
-    public static final String API_KEY_CONFIG_REC = "" +
-            "# Provides API key configurations needed when communicating with a remote HTTP endpoint." +
-            "public type ApiKeysConfig record {|" +
-            "   # API keys related to connector authentication" +
-            "   map<string> apiKeys;" +
-            "|};";
-    public static final String API_KEY_MAP_VAR  = "final readonly & map<string> apiKeys;";
+    public static final String API_KEY_CONFIG_VAR = "final readonly & ApiKeysConfig apiKeyConfig;";
     public static final String API_KEY_CONFIG_PARAM = "" +
             "ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, " +
             "string serviceUrl = \"https:localhost/8080\"";
     public static final String API_KEY_CONFIG_PARAM_NO_URL = "" +
             "ApiKeysConfig apiKeyConfig, string serviceUrl, http:ClientConfiguration clientConfig =  {}";
+    public static final String API_KEYS_CONFIG_RECORD = "# Provides API key configurations needed when communicating " +
+            "with a remote HTTP endpoint.\n" +
+            "public type ApiKeysConfig record {|\n" +
+            "    # API key to authorize requests.\n" +
+            "    string appid;\n" +
+            "    # API key to authorize requests.\n" +
+            "    string apiXKey;\n" +
+            "|};";
+    public static final String API_KEY_ASSIGNMENT = "self.apiKeyConfig = apiKeyConfig.cloneReadOnly();";
+    public static final String DEFAULT_API_KEY_DOC_COMMENT = "API key configuration details";
+    public static final String MULTIPLE_API_KEY_RECORD = "# Provides API key configurations needed when " +
+            "communicating with a remote HTTP endpoint.\n" +
+            "public type ApiKeysConfig record {|\n" +
+            "    # API key to authorize GET requests.\n" +
+            "    string appid;\n" +
+            "    # API key to authorize POST requests.\n" +
+            "    string xApiKey;\n" +
+            "|};";
 
-    public static final String API_KEY_ASSIGNMENT = "self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();";
-    public static final String API_KEY_DOC_COMMENT =
-            "Provide your API key as `appid` .Eg: `{\"appid\":\"<APIkey>\"}`";
 
 }

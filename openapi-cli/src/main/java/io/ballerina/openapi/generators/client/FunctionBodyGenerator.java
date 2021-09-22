@@ -27,12 +27,10 @@ import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.compiler.syntax.tree.IndexedExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
@@ -77,7 +75,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleN
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createIndexedExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatementNode;
@@ -88,15 +85,14 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPa
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.BACKTICK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.generators.GeneratorConstants.ENCODING;
 import static io.ballerina.openapi.generators.GeneratorConstants.EXECUTE;
@@ -251,6 +247,7 @@ public class FunctionBodyGenerator {
         } else {
 
             if (!queryApiKeyNameList.isEmpty()) {
+                ballerinaUtilGenerator.setQueryParamsFound(true);
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
                         "queryParam", queryApiKeyNameList));
                 // Add updated path
@@ -490,7 +487,7 @@ public class FunctionBodyGenerator {
     public String generatePathWithPathParameter(String path) {
         if (path.contains("{")) {
             String refinedPath = path;
-            Pattern p = Pattern.compile("\\{[^\\}]*\\}");
+            Pattern p = Pattern.compile("\\{[^}]*}");
             Matcher m = p.matcher(path);
             while (m.find()) {
                 String pathVariable = path.substring(m.start(), m.end());
@@ -707,7 +704,7 @@ public class FunctionBodyGenerator {
      */
     private VariableDeclarationNode getMapForParameters(List<Parameter> parameters, String mapDataType,
                                                          String mapName, List<String> apiKeyNames) {
-        List<Node> filedOfMap = new ArrayList();
+        List<Node> filedOfMap = new ArrayList<>();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(mapDataType));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
@@ -732,13 +729,12 @@ public class FunctionBodyGenerator {
                 Token colon = createToken(COLON_TOKEN);
                 FieldAccessExpressionNode fieldExpr = createFieldAccessExpressionNode(
                         createSimpleNameReferenceNode(createIdentifierToken("self")), createToken(DOT_TOKEN),
-                        createSimpleNameReferenceNode(createIdentifierToken("apiKeys")));
-                SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
-                        createIdentifierToken('"' + apiKey + '"'));
+                        createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_PARAM)));
+                SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
+                        getValidName(getValidName(apiKey, false), false)));
                 SpecificFieldNode specificFieldNode;
-                SeparatedNodeList<ExpressionNode> expressions = createSeparatedNodeList(valueExpr);
-                IndexedExpressionNode apiKeyExpr = createIndexedExpressionNode(fieldExpr,
-                        createToken(OPEN_BRACKET_TOKEN), expressions, createToken(CLOSE_BRACKET_TOKEN));
+                ExpressionNode apiKeyExpr = createFieldAccessExpressionNode(
+                        fieldExpr, createToken(DOT_TOKEN), valueExpr);
                 specificFieldNode = createSpecificFieldNode(null, fieldName, colon, apiKeyExpr);
                 filedOfMap.add(specificFieldNode);
                 filedOfMap.add(createToken(COMMA_TOKEN));

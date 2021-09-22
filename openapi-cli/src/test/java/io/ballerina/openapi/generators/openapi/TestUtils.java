@@ -45,8 +45,7 @@ public class TestUtils {
         try {
             Files.deleteIfExists(tempDir.resolve(filename));
             Files.deleteIfExists(tempDir.resolve("schema.bal"));
-        } catch (IOException e) {
-            //Ignore the exception
+        } catch (IOException ignored) {
         }
     }
 
