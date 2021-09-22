@@ -17,11 +17,14 @@
  */
 package io.ballerina.openapi.generators.service;
 
+import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.Minutiae;
+import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -55,6 +58,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
+import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMinutiaes;
 
 /**
  * This class uses for generating all resource function parameters.
@@ -114,8 +118,8 @@ public class ParametersGenerator {
     private RequiredParameterNode handleHeader(Parameter parameter)throws BallerinaOpenApiException {
         Schema schema = parameter.getSchema();
         TypeDescriptorNode headerTypeName;
-        IdentifierToken parameterName = createIdentifierToken(" " + escapeIdentifier(parameter.getName()
-                .toLowerCase(Locale.ENGLISH)));
+        IdentifierToken parameterName = createIdentifierToken(escapeIdentifier(parameter.getName()
+                .toLowerCase(Locale.ENGLISH)), AbstractNodeFactory.createEmptyMinutiaeList(), getMinutiaes());
         if (schema == null) {
             /**
              *01.<pre>in: header
@@ -123,11 +127,13 @@ public class ParametersGenerator {
              *       schema: {}
              * </pre>
              */
-            return createRequiredParameterNode(createEmptyNodeList(), createIdentifierToken(STRING), parameterName);
+            return createRequiredParameterNode(createEmptyNodeList(), createIdentifierToken(STRING, getMinutiaes(),
+                            getMinutiaes()), parameterName);
         } else {
             if (!schema.getType().equals(STRING) && !(schema instanceof ArraySchema)) {
                 //TO-DO: Generate diagnostic about to error type
-                headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(STRING));
+                headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(STRING,
+                        getMinutiaes(), getMinutiaes()));
             } else if (schema instanceof ArraySchema) {
                 String arrayType = ((ArraySchema) schema).getItems().getType();
                 BuiltinSimpleNameReferenceNode headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(null,
@@ -137,7 +143,7 @@ public class ParametersGenerator {
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
             } else {
                 headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
-                        convertOpenAPITypeToBallerina(schema.getType().trim())));
+                        convertOpenAPITypeToBallerina(schema.getType().trim()), getMinutiaes(), getMinutiaes()));
             }
             // Create annotation for header
             MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
@@ -156,11 +162,12 @@ public class ParametersGenerator {
     private Node createNodeForQueryParam(Parameter parameter) throws BallerinaOpenApiException {
         Schema schema = parameter.getSchema();
         NodeList<AnnotationNode> annotations = createEmptyNodeList();
-        IdentifierToken parameterName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()));
+        IdentifierToken parameterName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()),
+                AbstractNodeFactory.createEmptyMinutiaeList(), getMinutiaes());
         if (schema == null || parameter.getContent() != null) {
             //TODO throw a error by mentioning support query type
-            return createRequiredParameterNode(createEmptyNodeList(), createIdentifierToken("string"),
-                    parameterName);
+            return createRequiredParameterNode(createEmptyNodeList(), createIdentifierToken(STRING, getMinutiaes(),
+                            getMinutiaes()), parameterName);
         } else {
             if (parameter.getRequired()) {
                 //Required typeDescriptor
@@ -186,7 +193,7 @@ public class ParametersGenerator {
             } else {
                 // handle in case swagger has nested array or record type
                 // TODO create diagnostic after checking with team or map to map<json>.
-                Token name = createIdentifierToken("map<json>");
+                Token name = createIdentifierToken("map<json>", getMinutiaes(), getMinutiaes());
                 BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
@@ -194,7 +201,7 @@ public class ParametersGenerator {
             }
         } else {
             Token name = createIdentifierToken(convertOpenAPITypeToBallerina(
-                    schema.getType().toLowerCase(Locale.ENGLISH).trim()));
+                    schema.getType().toLowerCase(Locale.ENGLISH).trim()), getMinutiaes(), getMinutiaes());
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
                     createToken(SyntaxKind.QUESTION_MARK_TOKEN));
@@ -210,7 +217,7 @@ public class ParametersGenerator {
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 return createRequiredParameterNode(annotations, arrayTypeName, parameterName);
             } else {
-                Token arrayName = createIdentifierToken("string");
+                Token arrayName = createIdentifierToken(STRING, getMinutiaes(), getMinutiaes());
                 BuiltinSimpleNameReferenceNode memberTypeDesc =
                         createBuiltinSimpleNameReferenceNode(null, arrayName);
                 ArrayTypeDescriptorNode arrayTypeName = createArrayTypeDescriptorNode(
@@ -221,8 +228,8 @@ public class ParametersGenerator {
                 return createRequiredParameterNode(annotations, optionalNode, parameterName);
             }
         } else {
-            Token name = createIdentifierToken(
-                    convertOpenAPITypeToBallerina(schema.getType().toLowerCase(Locale.ENGLISH).trim()));
+            Token name = createIdentifierToken(convertOpenAPITypeToBallerina(
+                    schema.getType().toLowerCase(Locale.ENGLISH).trim()), getMinutiaes(), getMinutiaes());
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             return createRequiredParameterNode(annotations, rTypeName, parameterName);
         }
@@ -230,7 +237,11 @@ public class ParametersGenerator {
 
     // Create ArrayTypeDescriptorNode using Schema
     private  ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) {
-        Token arrayName = createIdentifierToken(items.getType().trim());
+        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
+        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
+
+        Token arrayName = createIdentifierToken(items.getType().trim(), leading, trailing);
         BuiltinSimpleNameReferenceNode memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, arrayName);
         return createArrayTypeDescriptorNode(memberTypeDesc, createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));

@@ -66,6 +66,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.FUNCTION;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
 import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
+import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMinutiaes;
 
 /**
  * This Util class use for generating ballerina service file according to given yaml file.
@@ -91,8 +92,9 @@ public class BallerinaServiceGenerator {
         NodeList<Node> members = NodeFactory.createNodeList(functions);
 
         ServiceDeclarationNode serviceDeclarationNode = NodeFactory.createServiceDeclarationNode(
-                null, createEmptyNodeList(), createIdentifierToken(" service "), null,
-                absoluteResourcePath, createIdentifierToken(" on "), expressions,
+                null, createEmptyNodeList(), createIdentifierToken("service", getMinutiaes(), getMinutiaes()),
+                null, absoluteResourcePath, createIdentifierToken("on",
+                        getMinutiaes(), getMinutiaes()), expressions,
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         // Create module member declaration
@@ -129,11 +131,14 @@ public class BallerinaServiceGenerator {
     }
 
     private NodeList<Node> createBasePathNodeList(ListenerGenerator listener) {
-
-        String[] basePathNode = listener.getBasePath().split("/");
-        List<Node> basePath = Arrays.stream(basePathNode).filter(node -> !node.isBlank())
-                .map(node -> createIdentifierToken("/" + escapeIdentifier(node))).collect(Collectors.toList());
-        return AbstractNodeFactory.createNodeList(basePath);
+        if ("/".equals(listener.getBasePath())) {
+            return AbstractNodeFactory.createNodeList(createIdentifierToken(listener.getBasePath()));
+        } else {
+            String[] basePathNode = listener.getBasePath().split("/");
+            List<Node> basePath = Arrays.stream(basePathNode).filter(node -> !node.isBlank())
+                    .map(node -> createIdentifierToken("/" + escapeIdentifier(node))).collect(Collectors.toList());
+            return AbstractNodeFactory.createNodeList(basePath);
+        }
     }
 
     private List<Node> applyFiltersForOperations(Filter filter, Map.Entry<String, PathItem> path,
@@ -183,11 +188,11 @@ public class BallerinaServiceGenerator {
      */
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                        List<Node> pathNodes) throws BallerinaOpenApiException {
-
-        NodeList<Token> qualifiersList = NodeFactory.createNodeList(createIdentifierToken(RESOURCE));
-        Token functionKeyWord = createIdentifierToken(FUNCTION);
+        NodeList<Token> qualifiersList = NodeFactory.createNodeList(createIdentifierToken(RESOURCE, getMinutiaes(),
+                getMinutiaes()));
+        Token functionKeyWord = createIdentifierToken(FUNCTION, getMinutiaes(), getMinutiaes());
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
-                .toLowerCase(Locale.ENGLISH) + " ");
+                .toLowerCase(Locale.ENGLISH), getMinutiaes(), getMinutiaes());
         NodeList<Node> relativeResourcePath = NodeFactory.createNodeList(pathNodes);
         ParametersGenerator parametersGenerator = new ParametersGenerator();
         List<Node> params = parametersGenerator.generateResourcesInputs(operation);

@@ -26,8 +26,6 @@ import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.Minutiae;
-import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
@@ -49,6 +47,7 @@ import java.util.List;
 import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.HOST;
 import static io.ballerina.openapi.generators.GeneratorConstants.NEW;
+import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMinutiaes;
 
 /**
  * This util class for processing the mapping in between openAPI server section with ballerina listeners.
@@ -86,14 +85,11 @@ public class ListenerGenerator {
                 String resolvedUrl = GeneratorUtils.buildUrl(server.getUrl(), variables);
                 url = new URL(resolvedUrl);
                 host = url.getHost();
-                basePath = url.getPath();
+                this.basePath = url.getPath();
                 port = url.getPort();
                 boolean isHttps = "https".equalsIgnoreCase(url.getProtocol());
-
-                if (isHttps) {
-                    port = port == -1 ? httpsPort : port;
-                } else {
-                    port = port == -1 ? httpPort : port;
+                if (port < 0) {
+                    port = isHttps ? httpsPort : httpPort;
                 }
             } catch (MalformedURLException e) {
                 throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
@@ -103,28 +99,27 @@ public class ListenerGenerator {
             host = "localhost";
             port = 9090;
         }
-        return getListenerDeclarationNode(port, host, " ep0");
+        return getListenerDeclarationNode(port, host, "ep0");
     }
 
     public static ListenerDeclarationNode getListenerDeclarationNode(Integer port, String host, String ep) {
-
         // Take first server to Map
-        Token listenerKeyword = AbstractNodeFactory.createIdentifierToken("listener");
+        Token listenerKeyword = AbstractNodeFactory.createIdentifierToken("listener", getMinutiaes(),
+                getMinutiaes());
         // Create type descriptor
-        Token modulePrefix = AbstractNodeFactory.createIdentifierToken(" http");
-        IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("Listener");
+        Token modulePrefix = AbstractNodeFactory.createIdentifierToken("http", getMinutiaes(), getMinutiaes());
+        IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("Listener", getMinutiaes(),
+                AbstractNodeFactory.createEmptyMinutiaeList());
         QualifiedNameReferenceNode typeDescriptor = NodeFactory.createQualifiedNameReferenceNode(modulePrefix,
                 AbstractNodeFactory.createToken(SyntaxKind.COLON_TOKEN), identifier);
         // Create variable
-        Token variableName = AbstractNodeFactory.createIdentifierToken(ep);
+        Token variableName = AbstractNodeFactory.createIdentifierToken(ep, getMinutiaes(),
+                AbstractNodeFactory.createEmptyMinutiaeList());
         // Create initializer
         Token newKeyword = AbstractNodeFactory.createIdentifierToken(NEW);
-        MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
-        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
 
         Token literalToken = AbstractNodeFactory.createLiteralValueToken(SyntaxKind.DECIMAL_INTEGER_LITERAL_TOKEN
-                , String.valueOf(port), leading, trailing);
+                , String.valueOf(port), getMinutiaes(), getMinutiaes());
         BasicLiteralNode expression = NodeFactory.createBasicLiteralNode(SyntaxKind.NUMERIC_LITERAL, literalToken);
 
         PositionalArgumentNode portNode = NodeFactory.createPositionalArgumentNode(expression);
@@ -133,7 +128,8 @@ public class ListenerGenerator {
         SimpleNameReferenceNode argumentName = NodeFactory.createSimpleNameReferenceNode(name);
 
         Token fieldName = AbstractNodeFactory.createIdentifierToken(HOST);
-        Token literalHostToken = AbstractNodeFactory.createIdentifierToken('"' + host + '"', leading, trailing);
+        Token literalHostToken = AbstractNodeFactory.createIdentifierToken('"' + host + '"', getMinutiaes(),
+                getMinutiaes());
         BasicLiteralNode valueExpr = NodeFactory.createBasicLiteralNode(SyntaxKind.STRING_LITERAL,
                 literalHostToken);
         MappingFieldNode hostNode = NodeFactory.createSpecificFieldNode(null, fieldName,

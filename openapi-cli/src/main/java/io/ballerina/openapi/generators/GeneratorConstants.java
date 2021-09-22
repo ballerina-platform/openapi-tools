@@ -120,12 +120,15 @@ public class GeneratorConstants {
     public static final String CLASS = "class";
     public static final String EQUAL = "=";
     public static final String CONFIG = "config";
-    public static final String FUNCTION = "function ";
+    public static final String FUNCTION = "function";
     public static final String RETURN = "returns";
     public static final String PREFIX_TEST = " test";
     public static final String ANNOT_TEST = "test:Config";
     public static final String TEST_DIR = "tests";
     public static final String STRING = "string";
+    public static final String XML = "xml";
+    public static final String BYTE = "byte";
+    public static final String JSON = "json";
     public static final String SERVICE_URL = "serviceUrl";
     public static final String RECORD = "record";
     public static final String IDENTIFIER = "identifier";
@@ -181,7 +184,7 @@ public class GeneratorConstants {
     //Service related
     public static final String HOST = "host";
     public static final String NEW = "new";
-    public static final String RESOURCE = "resource ";
+    public static final String RESOURCE = "resource";
     public static final String QUERY = "query";
     public static final String HTTP_RESPONSE = "http:Response";
     public static final String DEFAULT = "default";
@@ -236,4 +239,5 @@ public class GeneratorConstants {
         aMap.put("505", "HttpVersionNotSupported");
         HTTP_CODES_DES = Collections.unmodifiableMap(aMap);
     }
+    public static final String HTTP_200 = "200";
 }

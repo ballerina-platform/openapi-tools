@@ -24,6 +24,7 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -35,6 +36,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.GeneratorConstants;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
@@ -53,6 +55,8 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.ext
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getIdentifierTokenForJsonSchema;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
+import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMinutiaes;
+
 /**
  * This class for generating request body payload for OAS requestBody section.
  *
@@ -78,7 +82,8 @@ public class RequestBodyGenerator {
                 annotValue = NodeFactory.createMappingConstructorExpressionNode(
                         createToken(SyntaxKind.OPEN_BRACE_TOKEN), fields, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             } else {
-                typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken("json"));
+                typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
+                        GeneratorConstants.JSON, getMinutiaes(), getMinutiaes()));
                 annotValue = NodeFactory.createMappingConstructorExpressionNode(
                         createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
                         createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
@@ -92,9 +97,9 @@ public class RequestBodyGenerator {
             annotValue = NodeFactory.createMappingConstructorExpressionNode(createToken(SyntaxKind.OPEN_BRACE_TOKEN),
                     NodeFactory.createSeparatedNodeList(), createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
         }
-        AnnotationNode annotationNode = getAnnotationNode("Payload ", annotValue);
+        AnnotationNode annotationNode = getAnnotationNode("Payload", annotValue);
         NodeList<AnnotationNode> annotation =  NodeFactory.createNodeList(annotationNode);
-        Token paramName = createIdentifierToken(" payload");
+        Token paramName = createIdentifierToken("payload", getMinutiaes(), getMinutiaes());
         return createRequiredParameterNode(annotation, typeName, paramName);
     }
 
@@ -102,10 +107,14 @@ public class RequestBodyGenerator {
                                                                             IdentifierToken mediaType,
                                                                             HashSet<Map.Entry<String,
                                                                                     MediaType>> equalDataType) {
+        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
+        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
+
         Iterator<Map.Entry<String, MediaType>> iter = equalDataType.iterator();
         while (iter.hasNext()) {
             Map.Entry<String, MediaType> next = iter.next();
-            literals.add(createIdentifierToken('"' + next.getKey().trim() + '"'));
+            literals.add(createIdentifierToken('"' + next.getKey().trim() + '"', leading, trailing));
             literals.add(comma);
         }
         literals.remove(literals.size() - 1);
