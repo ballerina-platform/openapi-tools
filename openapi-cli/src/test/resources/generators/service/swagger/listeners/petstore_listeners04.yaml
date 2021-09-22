@@ -5,18 +5,7 @@ info:
   license:
     name: MIT
 servers:
-  - url: /v1
-tags:
-  - name: pets
-    description: Pets Tag
-  - name: list
-    description: List Tag
-security:
-- petstore_auth:
-  - write:pets
-  - read:pets
-- user_auth:
-  - read:user
+  - url: https://api.sendgridf.com/v3
 
 paths:
   /pets:

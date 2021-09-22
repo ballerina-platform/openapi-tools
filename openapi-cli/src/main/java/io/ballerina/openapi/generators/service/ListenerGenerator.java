@@ -79,7 +79,7 @@ public class ListenerGenerator {
         String host;
         int port;
         Server server = servers.get(0);
-        if (server.getVariables() != null) {
+        if (!server.getUrl().isBlank() && !"/".equals(server.getUrl())) {
             ServerVariables variables = server.getVariables();
             URL url;
             try {
@@ -99,11 +99,6 @@ public class ListenerGenerator {
                 throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
                         server.getUrl(), e);
             }
-        } else if (!server.getUrl().isBlank()) {
-            String[] split = server.getUrl().trim().split("/");
-            basePath =  "/" + split[split.length - 1];
-            host = "localhost";
-            port = 9090;
         } else {
             host = "localhost";
             port = 9090;
