@@ -33,26 +33,26 @@ import java.util.Optional;
  * {@code OpenApiContractResolver} resolves the provided OpenAPI doc via `openapi:ServiceInfo` annotation.
  */
 public final class OpenApiContractResolver {
-    public Optional<Path> resolve(AnnotationNode serviceInfoAnnotation, Path projectRoot) {
+    public ResolverResponse resolve(AnnotationNode serviceInfoAnnotation, Path projectRoot) {
         Optional<MappingConstructorExpressionNode> mappingConstructorExpressionNode =
                 serviceInfoAnnotation.annotValue();
         if (mappingConstructorExpressionNode.isEmpty()) {
             // if details not available do not proceed
-            return Optional.empty();
+            return new ResolverResponse(false);
         }
 
         MappingConstructorExpressionNode exprNode = mappingConstructorExpressionNode.get();
         SeparatedNodeList<MappingFieldNode> fieldsOpt = exprNode.fields();
         if (fieldsOpt.isEmpty()) {
             // if details not available do not proceed
-            return Optional.empty();
+            return new ResolverResponse(false);
         }
 
         Optional<SeparatedNodeList<MappingFieldNode>> annotationFieldsOpt = serviceInfoAnnotation
                 .annotValue().map(MappingConstructorExpressionNode::fields);
         if (annotationFieldsOpt.isEmpty()) {
             // annotation fields are not available, hence will not proceed
-            return Optional.empty();
+            return new ResolverResponse(false);
         }
 
         SeparatedNodeList<MappingFieldNode> annotationFields = annotationFieldsOpt.get();
@@ -63,7 +63,7 @@ public final class OpenApiContractResolver {
                 .findFirst();
         if (contractFieldOpt.isEmpty()) {
             // could not find the `contract` field in the service-info annotation, hence will not proceed
-            return Optional.empty();
+            return new ResolverResponse(false);
         }
 
         SpecificFieldNode openApiContract = contractFieldOpt.get();
@@ -71,7 +71,7 @@ public final class OpenApiContractResolver {
         if (openApiContractValueOpt.isEmpty()) {
             // could not find the value for `contract` field in the service-info annotation,
             // hence will not proceed
-            return Optional.empty();
+            return new ResolverResponse(true);
         }
 
         ExpressionNode openApiContractValue = openApiContractValueOpt.get();
@@ -79,16 +79,16 @@ public final class OpenApiContractResolver {
                 .replaceAll("\"", "").trim();
         if (openApiContractPath.isBlank()) {
             // `contract` value is empty, hence will not proceed
-            return Optional.empty();
+            return new ResolverResponse(true);
         }
 
         Path pathToOpenApiContract = getPathToOpenApiContract(openApiContractPath, projectRoot);
         if (!Files.exists(pathToOpenApiContract)) {
             // could not find open-api contract file, hence will not proceed
-            return Optional.empty();
+            return new ResolverResponse(true);
         }
 
-        return Optional.of(pathToOpenApiContract);
+        return new ResolverResponse(pathToOpenApiContract);
     }
 
     private Path getPathToOpenApiContract(String openApiPath, Path projectRoot) {
@@ -97,6 +97,28 @@ public final class OpenApiContractResolver {
             return openApiDocPath;
         } else {
             return projectRoot.resolve(openApiDocPath);
+        }
+    }
+
+    public static class ResolverResponse {
+        private final boolean contractAvailable;
+        private Path contractPath;
+
+        ResolverResponse(boolean contractAvailable) {
+            this.contractAvailable = contractAvailable;
+        }
+
+        ResolverResponse(Path contractPath) {
+            this.contractAvailable = true;
+            this.contractPath = contractPath;
+        }
+
+        public boolean isContractAvailable() {
+            return contractAvailable;
+        }
+
+        public Optional<Path> getContractPath() {
+            return Optional.ofNullable(this.contractPath);
         }
     }
 }

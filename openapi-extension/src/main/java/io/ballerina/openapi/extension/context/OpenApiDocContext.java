@@ -59,12 +59,12 @@ public class OpenApiDocContext {
     public static class OpenApiDefinition {
         private final String fileName;
         private final String definition;
-        private final boolean autoEmbedToService;
+        private final boolean embed;
 
-        public OpenApiDefinition(String fileName, String definition, boolean autoEmbedToService) {
+        public OpenApiDefinition(String fileName, String definition, boolean embed) {
             this.fileName = fileName;
             this.definition = definition;
-            this.autoEmbedToService = autoEmbedToService;
+            this.embed = embed;
         }
 
         public String getFileName() {
@@ -76,7 +76,7 @@ public class OpenApiDocContext {
         }
 
         public boolean isAutoEmbedToService() {
-            return autoEmbedToService;
+            return embed;
         }
     }
 }

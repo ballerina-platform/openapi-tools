@@ -78,20 +78,35 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             if (serviceInfoAnnotationOpt.isPresent()) {
                 AnnotationNode serviceInfoAnnotation = serviceInfoAnnotationOpt.get();
 
-                // use the available open-api doc and update the context
-                Optional<Path> openApiContractOpt = this.contractResolver.resolve(serviceInfoAnnotation, projectRoot);
-                if (openApiContractOpt.isEmpty()) {
-                    // could not find the open-api contract file, hence will not proceed
-                    OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_101;
-                    updateCompilerContext(context, location, errorCode);
-                    return;
-                }
-                boolean autoEmbedToService = retrieveValueForAnnotationFields(
+                boolean embed = retrieveValueForAnnotationFields(
                         serviceInfoAnnotation, Constants.EMBED)
                         .map(Boolean::parseBoolean)
                         .orElse(true);
-                String openApiDefinition = Files.readString(openApiContractOpt.get());
-                updateOpenApiContext(currentPackage, srcRoot, openApiDocName, openApiDefinition, autoEmbedToService);
+
+                // use the available open-api doc and update the context
+                OpenApiContractResolver.ResolverResponse resolverResponse = this.contractResolver
+                        .resolve(serviceInfoAnnotation, projectRoot);
+                if (resolverResponse.isContractAvailable()) {
+                    // could not find the open-api contract file, hence will not proceed
+                    if (resolverResponse.getContractPath().isEmpty()) {
+                        OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_101;
+                        updateCompilerContext(context, location, errorCode);
+                        return;
+                    }
+                    String openApiDefinition = Files.readString(resolverResponse.getContractPath().get());
+                    updateOpenApiContext(currentPackage, srcRoot, openApiDocName, openApiDefinition, embed);
+                } else {
+                    // generate open-api doc and update the context if the `contract` configuration is not available
+                    String openApiDefinition = generateOpenApiDoc(
+                            config.getSemanticModel(), config.getSyntaxTree(), serviceNode, openApiDocName);
+                    if (null != openApiDefinition && !openApiDefinition.isBlank()) {
+                        updateOpenApiContext(
+                                currentPackage, srcRoot, openApiDocName, openApiDefinition, embed);
+                    } else {
+                        OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
+                        updateCompilerContext(context, location, errorCode);
+                    }
+                }
             } else {
                 // generate open-api doc and update the context
                 String openApiDefinition = generateOpenApiDoc(
@@ -114,9 +129,9 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
     }
 
     private void updateOpenApiContext(Package currentPackage, Path srcRoot, String openApiDocName,
-                                      String openApiDefinition, boolean autoEmbedToService) {
+                                      String openApiDefinition, boolean embed) {
         OpenApiDocContext.OpenApiDefinition openApiDef = new OpenApiDocContext
-                .OpenApiDefinition(openApiDocName, openApiDefinition, autoEmbedToService);
+                .OpenApiDefinition(openApiDocName, openApiDefinition, embed);
         getContextHandler().updateContext(currentPackage.packageId(), srcRoot, openApiDef);
     }
 
