@@ -89,11 +89,8 @@ public class ListenerGenerator {
                 basePath = url.getPath();
                 port = url.getPort();
                 boolean isHttps = "https".equalsIgnoreCase(url.getProtocol());
-
-                if (isHttps) {
-                    port = port == -1 ? httpsPort : port;
-                } else {
-                    port = port == -1 ? httpPort : port;
+                if (port < 0) {
+                    port = isHttps ? httpsPort : httpPort;
                 }
             } catch (MalformedURLException e) {
                 throw new BallerinaOpenApiException("Failed to read endpoint details of the server: " +
