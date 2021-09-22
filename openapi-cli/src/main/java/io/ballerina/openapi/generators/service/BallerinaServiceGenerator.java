@@ -91,11 +91,9 @@ public class BallerinaServiceGenerator {
         NodeList<Node> members = NodeFactory.createNodeList(functions);
 
         ServiceDeclarationNode serviceDeclarationNode = NodeFactory.createServiceDeclarationNode(
-                null, createEmptyNodeList(),
-                        createIdentifierToken(" service "), null,
-                        absoluteResourcePath, createIdentifierToken(" on "),
-                        expressions, createToken(SyntaxKind.OPEN_BRACE_TOKEN),
-                        members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+                null, createEmptyNodeList(), createIdentifierToken(" service "), null,
+                absoluteResourcePath, createIdentifierToken(" on "), expressions,
+                createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         // Create module member declaration
         NodeList<ModuleMemberDeclarationNode> moduleMembers = AbstractNodeFactory.createNodeList(
@@ -189,8 +187,8 @@ public class BallerinaServiceGenerator {
         NodeList<Token> qualifiersList = NodeFactory.createNodeList(createIdentifierToken(RESOURCE));
         Token functionKeyWord = createIdentifierToken(FUNCTION);
         // http method
-        IdentifierToken functionName = createIdentifierToken(
-                operation.getKey().name().toLowerCase(Locale.ENGLISH) + " ");
+        IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
+                .toLowerCase(Locale.ENGLISH) + " ");
         NodeList<Node> relativeResourcePath = NodeFactory.createNodeList(pathNodes);
 
         // Create FunctionSignature

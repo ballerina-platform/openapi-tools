@@ -45,10 +45,10 @@ public class CommonTestFunctions {
 
     public static void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String balfile, SyntaxTree syntaxTree)
             throws IOException, FormatterException {
-
         String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("generators/service/ballerina"),
                 balfile);
         String generatedSyntaxTree = syntaxTree.toString();
+        System.out.println(generatedSyntaxTree);
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));

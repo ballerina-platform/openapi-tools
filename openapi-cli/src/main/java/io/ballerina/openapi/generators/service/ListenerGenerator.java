@@ -61,7 +61,6 @@ public class ListenerGenerator {
     private String basePath = "/";
 
     public ListenerGenerator() {
-
     }
 
     public String getBasePath() {
@@ -77,7 +76,6 @@ public class ListenerGenerator {
      */
     public ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers) throws BallerinaOpenApiException {
         // Assign host port value to listeners
-
         String host;
         int port;
         Server server = servers.get(0);
@@ -169,5 +167,4 @@ public class ListenerGenerator {
                 typeDescriptor, variableName, AbstractNodeFactory.createToken(SyntaxKind.EQUAL_TOKEN), initializer,
                 AbstractNodeFactory.createToken(SyntaxKind.SEMICOLON_TOKEN));
     }
-
 }

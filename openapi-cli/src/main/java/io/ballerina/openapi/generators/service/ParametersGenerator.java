@@ -66,6 +66,13 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.esc
  */
 public class ParametersGenerator {
 
+    /**
+     * This function for generating operation parameters.
+     *
+     * @param operation OAS operation
+     * @return          List with parameterNodes
+     * @throws BallerinaOpenApiException when the parameter generation fails.
+     */
     public List<Node> generateResourcesInputs(Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
         List<Node> params = new ArrayList<>();
@@ -79,8 +86,8 @@ public class ParametersGenerator {
                     params.add(param);
                     params.add(comma);
                 } else if (parameter.getIn().trim().equals("query")) {
-                    // type​ ​ BasicType​ ​ boolean|int|float|decimal|string​ ;
-                    //public​ ​ type​ ​​ ()​ |BasicType|BasicType​ [];
+                    // type  BasicType boolean|int|float|decimal|string ;
+                    //public type () |BasicType|BasicType [];
                     Node param = createNodeForQueryParam(parameter);
                     params.add(param);
                     params.add(comma);

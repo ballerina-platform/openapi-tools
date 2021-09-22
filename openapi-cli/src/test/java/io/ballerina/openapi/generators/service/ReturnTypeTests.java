@@ -43,7 +43,7 @@ public class ReturnTypeTests {
     Filter filter = new Filter(list1, list2);
     SyntaxTree syntaxTree;
 
-    //    //Response scenarios
+    // Response scenarios
     @Test(description = "Scenario 01 - Response has single response without content type")
     public void generateResponseScenario01() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_01_rs.yaml");
@@ -172,7 +172,7 @@ public class ReturnTypeTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_16_rs.bal", syntaxTree);
     }
-    // Scenario 17, 18 is invalid
+
     @Test(description = "Scenario 19 - Multiple response with different mediaType")
     public void generateResponseScenario19() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_19_rs.yaml");
@@ -198,5 +198,14 @@ public class ReturnTypeTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "response/path_with_special_characters.bal", syntaxTree);
+    }
+
+    @Test(description = "Response has different status code except 200")
+    public void testWithDifferentStatusCode() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/response/different_status_code.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "response/different_status_code.bal", syntaxTree);
     }
 }
