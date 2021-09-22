@@ -129,11 +129,14 @@ public class BallerinaServiceGenerator {
     }
 
     private NodeList<Node> createBasePathNodeList(ListenerGenerator listener) {
-
-        String[] basePathNode = listener.getBasePath().split("/");
-        List<Node> basePath = Arrays.stream(basePathNode).filter(node -> !node.isBlank())
-                .map(node -> createIdentifierToken("/" + escapeIdentifier(node))).collect(Collectors.toList());
-        return AbstractNodeFactory.createNodeList(basePath);
+        if ("/".equals(listener.getBasePath())) {
+            return AbstractNodeFactory.createNodeList(createIdentifierToken(listener.getBasePath()));
+        } else {
+            String[] basePathNode = listener.getBasePath().split("/");
+            List<Node> basePath = Arrays.stream(basePathNode).filter(node -> !node.isBlank())
+                    .map(node -> createIdentifierToken("/" + escapeIdentifier(node))).collect(Collectors.toList());
+            return AbstractNodeFactory.createNodeList(basePath);
+        }
     }
 
     private List<Node> applyFiltersForOperations(Filter filter, Map.Entry<String, PathItem> path,

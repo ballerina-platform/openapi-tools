@@ -78,8 +78,8 @@ public class ServiceGenerationUtils {
                         identifier = stringBuilder.toString();
                     }
                     if (BAL_KEYWORDS.stream().anyMatch(Optional.ofNullable(identifier)
-                            .filter(sStr -> sStr.length() != 0)
-                            .map(sStr -> sStr.substring(0, sStr.length() - 1))
+                            .filter(balKeyWord -> balKeyWord.length() != 0)
+                            .map(balKeyWord -> balKeyWord.substring(0, balKeyWord.length() - 1))
                             .orElse(identifier)::equals)) {
                         identifier = "'" + identifier;
                     } else {
