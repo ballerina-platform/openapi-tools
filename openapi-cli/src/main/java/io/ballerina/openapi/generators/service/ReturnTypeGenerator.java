@@ -34,6 +34,7 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.GeneratorConstants;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -84,9 +85,8 @@ public class ReturnTypeGenerator {
             } else {
                 while (responseIter.hasNext()) {
                     Map.Entry<String, ApiResponse> response = responseIter.next();
-
                     if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
-                        String code = getHttpStatusCode(response.getKey().trim());
+                        String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
                         // Scenario 01
                         QualifiedNameReferenceNode statues = getQualifiedNameReferenceNode("http", code);
                         returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotations, statues);
@@ -113,7 +113,7 @@ public class ReturnTypeGenerator {
                             returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), type);
 
                         } else {
-                            String code = getHttpStatusCode(response.getKey().trim());
+                            String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
                             Content content = response.getValue().getContent();
                             Iterator<Map.Entry<String, MediaType>> contentItr = content.entrySet().iterator();
 
@@ -198,14 +198,14 @@ public class ReturnTypeGenerator {
     /**
      * Generate union type node when operation has multiple responses.
      */
-    private  UnionTypeDescriptorNode getUnionNode(Iterator<Map.Entry<String, ApiResponse>> responseIter)
+    private UnionTypeDescriptorNode getUnionNode(Iterator<Map.Entry<String, ApiResponse>> responseIter)
             throws BallerinaOpenApiException {
         List<TypeDescriptorNode> qualifiedNodes = new ArrayList<>();
         Token pipeToken = createIdentifierToken("|");
 
         while (responseIter.hasNext()) {
             Map.Entry<String, ApiResponse> response = responseIter.next();
-            String code = getHttpStatusCode(response.getKey().trim());
+            String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
             if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
                 //key and value
                 QualifiedNameReferenceNode node = getQualifiedNameReferenceNode("http", code);
@@ -231,8 +231,7 @@ public class ReturnTypeGenerator {
                 right);
         if (qualifiedNodes.size() >= 3) {
             for (int i = qualifiedNodes.size() - 3; i >= 0; i--) {
-                traversUnion = createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken,
-                        traversUnion);
+                traversUnion = createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken, traversUnion);
             }
         }
         return traversUnion;
@@ -266,46 +265,6 @@ public class ReturnTypeGenerator {
     }
 
     /**
-     * Util for select http key words with http codes.
-     * @param code http code.
-     * @return Http identification word.
-     */
-    private static String getHttpStatusCode(String code) {
-        switch (code) {
-            case "100":
-                return "Continue";
-            case "200":
-                return "Ok";
-            case "201":
-                return "Created";
-            case "202":
-                return "Accepted";
-            case "400":
-                return "BadRequest";
-            case "401":
-                return "Unauthorized";
-            case "402":
-                return "PaymentRequired";
-            case "403":
-                return "Forbidden";
-            case "404":
-                return "NotFound";
-            case "405":
-                return "MethodNotAllowed";
-            case "500":
-                return "InternalServerError";
-            case "501":
-                return "NotImplemented";
-            case "502":
-                return "BadGateway";
-            case "503":
-                return "ServiceUnavailable";
-            default:
-                return "Ok";
-        }
-    }
-
-    /**
      * Create recordType TypeDescriptor.
      */
     private static RecordTypeDescriptorNode createRecordTypeDescriptorNode(String code, TypeDescriptorNode type) {
@@ -314,21 +273,21 @@ public class ReturnTypeGenerator {
         Token recordKeyWord = createIdentifierToken("record ");
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
-        List<Node> recordfields = new ArrayList<>();
+        List<Node> recordFields = new ArrayList<>();
         // Type reference node
         Token asteriskToken = createIdentifierToken("*");
         QualifiedNameReferenceNode typeNameField = getQualifiedNameReferenceNode("http", code);
         TypeReferenceNode typeReferenceNode =
                 NodeFactory.createTypeReferenceNode(asteriskToken, typeNameField, createToken(SyntaxKind.SEMICOLON_TOKEN));
-        recordfields.add(typeReferenceNode);
+        recordFields.add(typeReferenceNode);
         // Record field name
         IdentifierToken fieldName = createIdentifierToken(" body");
         RecordFieldNode recordFieldNode =
                 NodeFactory.createRecordFieldNode(null, null, type, fieldName,
                         null, createToken(SyntaxKind.SEMICOLON_TOKEN));
-        recordfields.add(recordFieldNode);
+        recordFields.add(recordFieldNode);
 
-        NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordfields);
+        NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordFields);
         Token bodyEndDelimiter = createIdentifierToken("|}");
 
         return NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter,
