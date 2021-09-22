@@ -90,7 +90,6 @@ public class TestUtils {
 
         String expectedBallerinaContent = getStringFromGivenBalFile(path);
         String generatedSyntaxTree = syntaxTree.toString();
-        System.out.println(generatedSyntaxTree);
         generatedSyntaxTree = generatedSyntaxTree.replaceAll("\n", "");
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
@@ -102,7 +101,6 @@ public class TestUtils {
      */
     public static void writeFile(Path filePath, String content) throws IOException {
         PrintWriter writer = null;
-
         try {
             writer = new PrintWriter(filePath.toString(), "UTF-8");
             writer.print(content);
