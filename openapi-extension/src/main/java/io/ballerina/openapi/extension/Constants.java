@@ -33,4 +33,6 @@ public interface Constants {
     // open-api module related constants
     String SERVICE_INFO_ANNOTATION = "openapi:ServiceInfo";
     String CONTRACT = "contract";
+    String AUTO_EMBED_TO_SERVICE = "autoEmbedToService";
+    String AUTO_GEN = "autoGen";
 }

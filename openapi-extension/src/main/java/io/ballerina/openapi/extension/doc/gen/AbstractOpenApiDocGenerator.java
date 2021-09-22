@@ -18,13 +18,16 @@ package io.ballerina.openapi.extension.doc.gen;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.OpenApiConverterException;
@@ -73,8 +76,16 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             ServiceDeclarationNode serviceNode = config.getServiceNode();
             Optional<AnnotationNode> serviceInfoAnnotationOpt = getServiceInfoAnnotation(serviceNode);
             if (serviceInfoAnnotationOpt.isPresent()) {
-                // use the available open-api doc and add it to resource directory
                 AnnotationNode serviceInfoAnnotation = serviceInfoAnnotationOpt.get();
+
+                // do not generate open-api doc if `autoGen` is turned-off
+                Optional<String> autoGenFlag = retrieveValueForAnnotationFields(
+                        serviceInfoAnnotation, Constants.AUTO_GEN);
+                if (autoGenFlag.isPresent() && !Boolean.parseBoolean(autoGenFlag.get())) {
+                    return;
+                }
+
+                // use the available open-api doc and update the context
                 Optional<Path> openApiContractOpt = this.contractResolver.resolve(serviceInfoAnnotation, projectRoot);
                 if (openApiContractOpt.isEmpty()) {
                     // could not find the open-api contract file, hence will not proceed
@@ -82,14 +93,19 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                     updateCompilerContext(context, location, errorCode);
                     return;
                 }
+                boolean autoEmbedToService = retrieveValueForAnnotationFields(
+                        serviceInfoAnnotation, Constants.AUTO_EMBED_TO_SERVICE)
+                        .map(Boolean::parseBoolean)
+                        .orElse(true);
                 String openApiDefinition = Files.readString(openApiContractOpt.get());
-                updateOpenApiContext(currentPackage, srcRoot, openApiDocName, openApiDefinition);
+                updateOpenApiContext(currentPackage, srcRoot, openApiDocName, openApiDefinition, autoEmbedToService);
             } else {
-                // generate open-api doc and add it to resource directory
+                // generate open-api doc and update the context
                 String openApiDefinition = generateOpenApiDoc(
                         config.getSemanticModel(), config.getSyntaxTree(), serviceNode, openApiDocName);
                 if (null != openApiDefinition && !openApiDefinition.isBlank()) {
-                    updateOpenApiContext(currentPackage, srcRoot, openApiDocName, openApiDefinition);
+                    updateOpenApiContext(
+                            currentPackage, srcRoot, openApiDocName, openApiDefinition, true);
                 } else {
                     OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
                     updateCompilerContext(context, location, errorCode);
@@ -105,9 +121,9 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
     }
 
     private void updateOpenApiContext(Package currentPackage, Path srcRoot, String openApiDocName,
-                                      String openApiDefinition) {
+                                      String openApiDefinition, boolean autoEmbedToService) {
         OpenApiDocContext.OpenApiDefinition openApiDef = new OpenApiDocContext
-                .OpenApiDefinition(openApiDocName, openApiDefinition);
+                .OpenApiDefinition(openApiDocName, openApiDefinition, autoEmbedToService);
         getContextHandler().updateContext(currentPackage.packageId(), srcRoot, openApiDef);
     }
 
@@ -127,6 +143,20 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         return annotations.stream()
                 .filter(ann -> Constants.SERVICE_INFO_ANNOTATION.equals(ann.annotReference().toString().trim()))
                 .findFirst();
+    }
+
+    private Optional<String> retrieveValueForAnnotationFields(AnnotationNode serviceInfoAnnotation, String fieldName) {
+        return serviceInfoAnnotation
+                .annotValue()
+                .map(MappingConstructorExpressionNode::fields)
+                .flatMap(fields ->
+                        fields.stream()
+                            .filter(fld -> fld instanceof SpecificFieldNode)
+                            .map(fld -> (SpecificFieldNode) fld)
+                            .filter(fld -> fieldName.equals(fld.fieldName().toString().trim()))
+                            .findFirst()
+                ).flatMap(SpecificFieldNode::valueExpr)
+                .map(ExpressionNode::toString);
     }
 
     private String generateOpenApiDoc(SemanticModel semanticModel, SyntaxTree syntaxTree,
