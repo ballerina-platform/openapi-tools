@@ -1,0 +1,12 @@
+components:
+  schemas:
+    Link:
+      required:
+        - href
+      type: object
+      properties:
+        rel:
+          type: string
+          nullable: true
+        href:
+          type: string

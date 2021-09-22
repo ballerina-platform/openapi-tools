@@ -1,0 +1,25 @@
+components:
+  schemas:
+    Pet:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+          nullable: true
+    Link:
+      required:
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+          nullable: true
+        pet:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Pet'
