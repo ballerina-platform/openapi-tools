@@ -97,6 +97,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.generators.GeneratorConstants.ENCODING;
 import static io.ballerina.openapi.generators.GeneratorConstants.EXECUTE;
@@ -756,7 +757,12 @@ public class FunctionBodyGenerator {
 
     private boolean checkImportDuplicate(List<ImportDeclarationNode> imports, String module) {
         for (ImportDeclarationNode importModule:imports) {
-            if (importModule.toString().equals("import ballerina/" + module + ";")) {
+            StringBuilder moduleBuilder = new StringBuilder();
+            for (IdentifierToken identifierToken : importModule.moduleName()) {
+                moduleBuilder.append(identifierToken.toString().trim());
+            }
+            if (BALLERINA.equals(importModule.orgName().get().toString().trim().replace("/", "")) &&
+                    module.equals(moduleBuilder.toString())) {
                 return true;
             }
         }
