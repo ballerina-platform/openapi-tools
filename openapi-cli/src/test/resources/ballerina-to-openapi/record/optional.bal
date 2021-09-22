@@ -1,10 +1,10 @@
-import  ballerina/http;
+import ballerina/http;
 
 type Link record {|
-   string rel?;
-   string href;
-   string[] mediaTypes?;
-   Pet pet?;
+    string rel?;
+    string href;
+    string[] mediaTypes?;
+    Pet pet?;
 |};
 
 type Pet record {|
@@ -12,9 +12,9 @@ type Pet record {|
     string name?;
 |};
 
-listener  http:Listener  ep0  = new (443, config  = {host: "petstore.swagger.io"});
+listener http:Listener ep0 = new(443, config = {host: "petstore.swagger.io"});
 
- service  /payloadV  on  ep0  {
-        resource  function  post  pet(@http:Payload Link payload) {
+service /payloadV on ep0 {
+    resource function post pet(@http:Payload Link payload) {
     }
 }
