@@ -87,7 +87,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                     return;
                 }
                 boolean autoEmbedToService = retrieveValueForAnnotationFields(
-                        serviceInfoAnnotation, Constants.AUTO_EMBED_TO_SERVICE)
+                        serviceInfoAnnotation, Constants.EMBED)
                         .map(Boolean::parseBoolean)
                         .orElse(true);
                 String openApiDefinition = Files.readString(openApiContractOpt.get());

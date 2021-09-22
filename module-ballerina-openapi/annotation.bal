@@ -21,7 +21,7 @@
 # + excludeTags - Disable the OpenAPI validator for these tags
 # + excludeOperations - Disable the OpenAPI validator for these operations
 # + failOnErrors - Enable the OpenAPI validator
-# + autoEmbedToService - Enable auto-inject of OpenAPI documentation to current service
+# + embed - Enable auto-inject of OpenAPI documentation to current service
 public type ServiceInformation record {|
     string contract = "";
     string[]? tags = [];
@@ -29,7 +29,7 @@ public type ServiceInformation record {|
     string[]? excludeTags = [];
     string[]? excludeOperations = [];
     boolean failOnErrors = true;
-    boolean autoEmbedToService = true;
+    boolean embed = true;
 |};
 
 # Annotation for additional OpenAPI information of a Ballerina service.
