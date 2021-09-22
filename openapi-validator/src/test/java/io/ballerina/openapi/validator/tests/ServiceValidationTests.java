@@ -191,29 +191,6 @@ public class ServiceValidationTests {
 
     }
 
-    @Test(enabled = false, description = "test for undocumented path parameter  in contract")
-    public void testPathParameter() throws OpenApiValidatorException, IOException {
-        Path contractPath = RES_DIR.resolve("swagger/invalid/petstorePathParameter.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-    }
-
-    @Test(enabled = false, description = "test for undocumented field oneOf type record in contract")
-    public void testOneofscenario_01() throws OpenApiValidatorException, IOException {
-        Path contractPath = RES_DIR.resolve("swagger/invalid/oneOf.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-    }
-
-    @Test(enabled = false, description = "test for scenario 02")
-    public void testOneofscenario_02() throws OpenApiValidatorException, IOException {
-        Path contractPath = RES_DIR.resolve("swagger/invalid/oneOf-scenario02.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-    }
-
-    @Test(enabled = false, description = "test for scenario 03")
-    public void testOneofscenario_03() throws OpenApiValidatorException, IOException {
-        Path contractPath = RES_DIR.resolve("swagger/invalid/oneOf-scenario03.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-    }
 
     /**
      * OneOf - Invalid Scenario examples
