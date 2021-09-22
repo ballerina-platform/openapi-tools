@@ -125,7 +125,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         MetadataNode metaData = metadata.get();
         NodeList<AnnotationNode> annotations = metaData.annotations();
         return annotations.stream()
-                .filter(ann -> Constants.SERVICE_INFO_ANNOTATION.equals(ann.toString().trim()))
+                .filter(ann -> Constants.SERVICE_INFO_ANNOTATION.equals(ann.annotReference().toString().trim()))
                 .findFirst();
     }
 
