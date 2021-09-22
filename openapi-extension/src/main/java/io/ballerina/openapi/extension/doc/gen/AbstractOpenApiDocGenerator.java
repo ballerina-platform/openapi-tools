@@ -78,13 +78,6 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             if (serviceInfoAnnotationOpt.isPresent()) {
                 AnnotationNode serviceInfoAnnotation = serviceInfoAnnotationOpt.get();
 
-                // do not generate open-api doc if `autoGen` is turned-off
-                Optional<String> autoGenFlag = retrieveValueForAnnotationFields(
-                        serviceInfoAnnotation, Constants.AUTO_GEN);
-                if (autoGenFlag.isPresent() && !Boolean.parseBoolean(autoGenFlag.get())) {
-                    return;
-                }
-
                 // use the available open-api doc and update the context
                 Optional<Path> openApiContractOpt = this.contractResolver.resolve(serviceInfoAnnotation, projectRoot);
                 if (openApiContractOpt.isEmpty()) {

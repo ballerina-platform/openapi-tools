@@ -22,7 +22,6 @@
 # + excludeOperations - Disable the OpenAPI validator for these operations
 # + failOnErrors - Enable the OpenAPI validator
 # + autoEmbedToService - Enable auto-inject of OpenAPI documentation to current service
-# + autoGen - Enable OpenAPI documentation generation for current service
 public type ServiceInformation record {|
     string contract = "";
     string[]? tags = [];
@@ -31,7 +30,6 @@ public type ServiceInformation record {|
     string[]? excludeOperations = [];
     boolean failOnErrors = true;
     boolean autoEmbedToService = true;
-    boolean autoGen = true;
 |};
 
 # Annotation for additional OpenAPI information of a Ballerina service.
