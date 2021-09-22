@@ -34,6 +34,11 @@ import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 
+/**
+ * This store all the util functions related service generation process.
+ *
+ * @since 2.0.0
+ */
 public class ServiceGenerationUtils {
     /**
      * This method will escape special characters used in method names and identifiers.

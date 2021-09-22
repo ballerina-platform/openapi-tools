@@ -23,7 +23,6 @@ import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
@@ -50,8 +49,7 @@ public class ListenerTests {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
-        System.out.println(Formatter.format(syntaxTree));
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("importors.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners/importors.bal", syntaxTree);
     }
 
     @Test(description = "Generate listeners")
@@ -59,7 +57,7 @@ public class ListenerTests {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners02.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners/listeners.bal", syntaxTree);
     }
 
     @Test(description = "Generate listeners")
@@ -67,6 +65,6 @@ public class ListenerTests {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners03.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners03.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners/listeners03.bal", syntaxTree);
     }
 }

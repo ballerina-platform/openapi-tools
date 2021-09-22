@@ -88,8 +88,8 @@ public class ParametersGenerator {
             }
         }
         // Handle request Body (Payload)
-        // type​ ​ CustomRecord​ ​ record {| anydata...; |};
-        //public type​ ​ PayloadType​ ​ string|json|xml|byte[]|CustomRecord|CustomRecord[]​ ;
+        // type CustomRecord record {| anydata...; |};
+        //public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[] ;
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
@@ -106,9 +106,6 @@ public class ParametersGenerator {
 
     /**
      * This function for generating parameter ST node for header.
-     * @param parameter
-     * @return
-     * @throws BallerinaOpenApiException
      */
     private RequiredParameterNode handleHeader(Parameter parameter)throws BallerinaOpenApiException {
         Schema schema = parameter.getSchema();
@@ -138,7 +135,6 @@ public class ParametersGenerator {
                 headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
                         convertOpenAPITypeToBallerina(schema.getType().trim())));
             }
-
             // Create annotation
             MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
                     createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
@@ -147,7 +143,6 @@ public class ParametersGenerator {
             NodeList<AnnotationNode> headerAnnotations = NodeFactory.createNodeList(headerNode);
 
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
-
         }
     }
 
@@ -157,7 +152,6 @@ public class ParametersGenerator {
         QualifiedNameReferenceNode annotReference = getQualifiedNameReferenceNode(HTTP, identifier);
         return createAnnotationNode(atToken, annotReference, annotValue);
     }
-
 
     /**
      * This for generate query parameter nodes.
@@ -195,7 +189,7 @@ public class ParametersGenerator {
                 // create Optional type descriptor
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-                return createRequiredParameterNode(annotations,optionalNode, parameterName);
+                return createRequiredParameterNode(annotations, optionalNode, parameterName);
             } else {
                 // handle in case swagger has nested array or record type
                 // TODO create diagnostic after checking with team or map to map<json>.
@@ -235,26 +229,22 @@ public class ParametersGenerator {
                         memberTypeDesc, createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
                 // create Optional type descriptor
-                OptionalTypeDescriptorNode optionalNode =createOptionalTypeDescriptorNode(arrayTypeName,
+                OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
                 return createRequiredParameterNode(annotations, optionalNode, parameterName);
             }
         } else {
-            Token name =
-                    createIdentifierToken(convertOpenAPITypeToBallerina(
-                            schema.getType().toLowerCase(Locale.ENGLISH).trim()));
-            BuiltinSimpleNameReferenceNode rTypeName =
-                    createBuiltinSimpleNameReferenceNode(null, name);
+            Token name = createIdentifierToken(
+                    convertOpenAPITypeToBallerina(schema.getType().toLowerCase(Locale.ENGLISH).trim()));
+            BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             return createRequiredParameterNode(annotations, rTypeName, parameterName);
         }
     }
 
     // Create ArrayTypeDescriptorNode using Schema
     private  ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) {
-
         Token arrayName = createIdentifierToken(items.getType().trim());
-        BuiltinSimpleNameReferenceNode memberTypeDesc =
-                createBuiltinSimpleNameReferenceNode(null, arrayName);
+        BuiltinSimpleNameReferenceNode memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, arrayName);
         return createArrayTypeDescriptorNode(memberTypeDesc, createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
     }

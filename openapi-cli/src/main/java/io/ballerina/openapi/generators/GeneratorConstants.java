@@ -183,6 +183,8 @@ public class GeneratorConstants {
     public static final String NEW = "new";
     public static final String RESOURCE = "resource ";
     public static final String QUERY = "query";
+    public static final String HTTP_RESPONSE = "http:Response";
+    public static final String DEFAULT = "default";
     /**
      * Util for select http key words with http codes.
      * @param code http code.

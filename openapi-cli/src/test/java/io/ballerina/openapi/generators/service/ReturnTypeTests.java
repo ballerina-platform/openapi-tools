@@ -187,7 +187,8 @@ public class ReturnTypeTests {
         Path definitionPath = RES_DIR.resolve("swagger/response/petstore_default.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/petstore_default.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/petstore_default.bal",
+                syntaxTree);
     }
 
     @Test(description = "Path with special characters ")
@@ -195,6 +196,7 @@ public class ReturnTypeTests {
         Path definitionPath = RES_DIR.resolve("swagger/response/path_with_special_characters.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/path_with_special_characters.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "response/path_with_special_characters.bal", syntaxTree);
     }
 }

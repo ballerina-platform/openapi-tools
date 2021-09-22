@@ -75,18 +75,8 @@ public class BallerinaServiceGenerator {
     private  GeneratorUtils generatorUtils = new GeneratorUtils();
 
     public SyntaxTree generateSyntaxTree(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {
-        //1. create imports
-        //2. create listeners
-        //3. service declaration node
-        //      |-> remote function
-        //          |-> function signature
-        //              |-> function parameter
-        //          |-> function return
-        //          |-> function body
-
         // Create imports http and openapi
         NodeList<ImportDeclarationNode> imports = createImportDeclarationNodes();
-
         // Need to Generate Base path
         ListenerGenerator listener = new ListenerGenerator();
         ListenerDeclarationNode listenerDeclarationNode = listener.getListenerDeclarationNodes(openApi.getServers());
@@ -103,7 +93,7 @@ public class BallerinaServiceGenerator {
         ServiceDeclarationNode serviceDeclarationNode = NodeFactory.createServiceDeclarationNode(
                 null, createEmptyNodeList(),
                         createIdentifierToken(" service "), null,
-                        absoluteResourcePath, createIdentifierToken(" on"),
+                        absoluteResourcePath, createIdentifierToken(" on "),
                         expressions, createToken(SyntaxKind.OPEN_BRACE_TOKEN),
                         members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 

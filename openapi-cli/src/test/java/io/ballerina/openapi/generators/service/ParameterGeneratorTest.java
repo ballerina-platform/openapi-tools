@@ -33,9 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * All the tests related to the BallerinaServiceGenerator util.
+ * All the tests related to the Ballerina Service Generator.
  */
-public class BallerinaServiceGeneratorTest {
+public class ParameterGeneratorTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/service/").toAbsolutePath();
     BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator();
     List<String> list1 = new ArrayList<>();

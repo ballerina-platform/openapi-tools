@@ -17,7 +17,6 @@
  */
 
 package io.ballerina.openapi.generators.service;
-
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
@@ -54,15 +53,17 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.ext
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getIdentifierTokenForJsonSchema;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
-
+/**
+ * This class for generating request body payload for OAS requestBody section.
+ *
+ * @since 2.0.0
+ */
 public class RequestBodyGenerator {
     /**
      * This for creating request Body for given request object.
      */
     public RequiredParameterNode createNodeForRequestBody(RequestBody requestBody) throws BallerinaOpenApiException {
-//        List<Node> params = new ArrayList<>();
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
-
         List<Node> literals = new ArrayList<>();
         MappingConstructorExpressionNode annotValue;
         TypeDescriptorNode typeName;
@@ -71,44 +72,36 @@ public class RequestBodyGenerator {
             // Filter same data type
             HashSet<Map.Entry<String, MediaType>> equalDataType = filterMediaTypes(requestBody);
             if (!equalDataType.isEmpty()) {
-
                 typeName = getIdentifierTokenForJsonSchema(equalDataType.iterator().next().getValue().getSchema());
-                SeparatedNodeList<MappingFieldNode> fields =
-                        fillRequestAnnotationValues(comma, literals, mediaType, equalDataType);
-                annotValue = NodeFactory.createMappingConstructorExpressionNode(createToken(SyntaxKind.OPEN_BRACE_TOKEN),
-                        fields, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+                SeparatedNodeList<MappingFieldNode> fields = fillRequestAnnotationValues(comma, literals, mediaType,
+                        equalDataType);
+                annotValue = NodeFactory.createMappingConstructorExpressionNode(
+                        createToken(SyntaxKind.OPEN_BRACE_TOKEN), fields, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             } else {
-                typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken("json"));
-                annotValue = NodeFactory.createMappingConstructorExpressionNode(createToken(SyntaxKind.OPEN_BRACE_TOKEN),
-                        NodeFactory.createSeparatedNodeList(), createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+                typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken("json"));
+                annotValue = NodeFactory.createMappingConstructorExpressionNode(
+                        createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
+                        createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             }
         } else {
             Iterator<Map.Entry<String, MediaType>> content = requestBody.getContent().entrySet().iterator();
             Map.Entry<String, MediaType> next = createBasicLiteralNodeList(comma,
-                    AbstractNodeFactory.createEmptyMinutiaeList(),
-                    AbstractNodeFactory.createEmptyMinutiaeList(), literals, content);
+                    AbstractNodeFactory.createEmptyMinutiaeList(), AbstractNodeFactory.createEmptyMinutiaeList(),
+                    literals, content);
             typeName = getMediaTypeToken(next);
             annotValue = NodeFactory.createMappingConstructorExpressionNode(createToken(SyntaxKind.OPEN_BRACE_TOKEN),
                     NodeFactory.createSeparatedNodeList(), createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
         }
-
         AnnotationNode annotationNode = getAnnotationNode("Payload ", annotValue);
         NodeList<AnnotationNode> annotation =  NodeFactory.createNodeList(annotationNode);
         Token paramName = createIdentifierToken(" payload");
-
-//        RequiredParameterNode payload =
-//                createRequiredParameterNode(annotation, typeName, paramName);
-//
-//        params.add(payload);
-//        params.add(comma);
         return createRequiredParameterNode(annotation, typeName, paramName);
     }
 
     private SeparatedNodeList<MappingFieldNode> fillRequestAnnotationValues(Token comma, List<Node> literals,
                                                                             IdentifierToken mediaType,
-                                                                            HashSet<Map.Entry<String, MediaType>> equalDataType) {
-
+                                                                            HashSet<Map.Entry<String,
+                                                                                    MediaType>> equalDataType) {
         Iterator<Map.Entry<String, MediaType>> iter = equalDataType.iterator();
         while (iter.hasNext()) {
             Map.Entry<String, MediaType> next = iter.next();
@@ -118,23 +111,21 @@ public class RequestBodyGenerator {
         literals.remove(literals.size() - 1);
         SeparatedNodeList<Node> expression = NodeFactory.createSeparatedNodeList(literals);
         ListConstructorExpressionNode valueExpr = NodeFactory.createListConstructorExpressionNode(
-                createToken(
-                        SyntaxKind.OPEN_BRACKET_TOKEN), expression, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-        SpecificFieldNode specificFieldNode = NodeFactory.createSpecificFieldNode(
-                null, mediaType, createToken(SyntaxKind.COLON_TOKEN), valueExpr);
+                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), expression, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+        SpecificFieldNode specificFieldNode = NodeFactory.createSpecificFieldNode(null, mediaType,
+                createToken(SyntaxKind.COLON_TOKEN), valueExpr);
         return NodeFactory.createSeparatedNodeList(specificFieldNode);
     }
 
     //Extract same datatype
     private HashSet<Map.Entry<String, MediaType>> filterMediaTypes(RequestBody requestBody)
             throws BallerinaOpenApiException {
-
         HashSet<Map.Entry<String, MediaType>> equalDataType = new HashSet<>();
         Set<Map.Entry<String, MediaType>> entries = requestBody.getContent().entrySet();
         Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
         List<Map.Entry<String, MediaType>> updatedEntries = new ArrayList<>(entries);
         while (iterator.hasNext()) {
-//             remove element from updateEntries
+//             Remove element from updateEntries
             Map.Entry<String, MediaType> mediaTypeEntry = iterator.next();
             updatedEntries.remove(mediaTypeEntry);
             if (!updatedEntries.isEmpty()) {
@@ -151,7 +142,6 @@ public class RequestBodyGenerator {
     private void getSameDataTypeMedia(HashSet<Map.Entry<String, MediaType>> equalDataType,
                                       List<Map.Entry<String, MediaType>> updatedEntries,
                                       Map.Entry<String, MediaType> mediaTypeEntry) throws BallerinaOpenApiException {
-
         for (Map.Entry<String, MediaType> updateNext : updatedEntries) {
             MediaType parentValue = mediaTypeEntry.getValue();
             MediaType childValue = updateNext.getValue();
@@ -174,7 +164,6 @@ public class RequestBodyGenerator {
         BasicLiteralNode basicLiteralNode = NodeFactory.createBasicLiteralNode(null, literalToken);
         literals.add(basicLiteralNode);
         literals.add(comma);
-
         return next;
     }
 }
