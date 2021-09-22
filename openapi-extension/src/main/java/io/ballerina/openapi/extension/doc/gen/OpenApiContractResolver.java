@@ -100,6 +100,9 @@ public final class OpenApiContractResolver {
         }
     }
 
+    /**
+     * {@code ResolverResponse} contains the response for OpenAPI doc retrieval via `openapi:ServiceInfo` annotation.
+     */
     public static class ResolverResponse {
         private final boolean contractAvailable;
         private Path contractPath;

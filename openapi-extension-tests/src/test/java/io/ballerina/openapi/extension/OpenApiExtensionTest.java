@@ -109,6 +109,20 @@ public class OpenApiExtensionTest {
         Assert.assertEquals(info.messageFormat(), "could not find the provided contract file");
     }
 
+    @Test
+    public void testDocGenerationWithEmptyServiceInfoAnnotation() {
+        Package currentPackage = loadPackage("sample_9", false);
+        PackageCompilation compilation = currentPackage.getCompilation();
+        Assert.assertTrue(noOpenApiWarningAvailable(compilation));
+    }
+
+    @Test
+    public void testGeneratedDocEmbedDisableWithServiceInfoAnnotation() {
+        Package currentPackage = loadPackage("sample_10", false);
+        PackageCompilation compilation = currentPackage.getCompilation();
+        Assert.assertTrue(noOpenApiWarningAvailable(compilation));
+    }
+
     private Package loadPackage(String path, boolean isSingleFile) {
         Path projectDirPath = RESOURCE_DIRECTORY.resolve(path);
         if (isSingleFile) {
