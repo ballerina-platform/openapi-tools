@@ -125,7 +125,7 @@ public class RequestBodyGenerator {
         Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
         List<Map.Entry<String, MediaType>> updatedEntries = new ArrayList<>(entries);
         while (iterator.hasNext()) {
-//             Remove element from updateEntries
+            // Remove element from updateEntries
             Map.Entry<String, MediaType> mediaTypeEntry = iterator.next();
             updatedEntries.remove(mediaTypeEntry);
             if (!updatedEntries.isEmpty()) {

@@ -186,18 +186,13 @@ public class BallerinaServiceGenerator {
 
         NodeList<Token> qualifiersList = NodeFactory.createNodeList(createIdentifierToken(RESOURCE));
         Token functionKeyWord = createIdentifierToken(FUNCTION);
-        // http method
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
                 .toLowerCase(Locale.ENGLISH) + " ");
         NodeList<Node> relativeResourcePath = NodeFactory.createNodeList(pathNodes);
-
-        // Create FunctionSignature
-        // Didn't create http:Caller or http:Request as function parameters
         ParametersGenerator parametersGenerator = new ParametersGenerator();
         List<Node> params = parametersGenerator.generateResourcesInputs(operation);
 
         SeparatedNodeList<ParameterNode> parameters = AbstractNodeFactory.createSeparatedNodeList(params);
-        // Generate return type is node
         ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
                 createEmptyNodeList());

@@ -93,7 +93,7 @@ public class ReturnTypeGenerator {
                     Map.Entry<String, ApiResponse> response = responseIter.next();
                     if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
                         String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
-                        // Scenario 01
+                        // Scenario 01: Response has single response without content type
                         QualifiedNameReferenceNode statues = getQualifiedNameReferenceNode("http", code);
                         returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotations, statues);
                     } else if (response.getValue().getContent() != null) {
@@ -179,7 +179,7 @@ public class ReturnTypeGenerator {
         Token recordKeyWord = createIdentifierToken("record ");
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
-        List<Node> recordfields = new ArrayList<>();
+        List<Node> recordFields = new ArrayList<>();
         if (schema.getProperties() != null) {
             Map<String, Schema> properties = schema.getProperties();
             for (Map.Entry<String, Schema> field: properties.entrySet()) {
@@ -193,10 +193,10 @@ public class ReturnTypeGenerator {
                 Token typeRecordField = createIdentifierToken(typeProperty + " ");
                 RecordFieldNode recordFieldNode =  NodeFactory.createRecordFieldNode(null, null,
                         typeRecordField, fieldName, null, createToken(SyntaxKind.SEMICOLON_TOKEN));
-                recordfields.add(recordFieldNode);
+                recordFields.add(recordFieldNode);
             }
         }
-        NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordfields);
+        NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordFields);
         Token bodyEndDelimiter = createIdentifierToken("|}");
         type = NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter, fieldsList,
                 null, bodyEndDelimiter);

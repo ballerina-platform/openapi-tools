@@ -58,6 +58,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
+import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
 
 /**
  * This class uses for generating all resource function parameters.
@@ -87,7 +88,7 @@ public class ParametersGenerator {
                     params.add(comma);
                 } else if (parameter.getIn().trim().equals("query")) {
                     // type  BasicType boolean|int|float|decimal|string ;
-                    //public type () |BasicType|BasicType [];
+                    // public type () |BasicType|BasicType [];
                     Node param = createNodeForQueryParam(parameter);
                     params.add(param);
                     params.add(comma);
@@ -96,7 +97,7 @@ public class ParametersGenerator {
         }
         // Handle request Body (Payload)
         // type CustomRecord record {| anydata...; |};
-        //public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[] ;
+        // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[] ;
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
@@ -142,7 +143,7 @@ public class ParametersGenerator {
                 headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
                         convertOpenAPITypeToBallerina(schema.getType().trim())));
             }
-            // Create annotation
+            // Create annotation for header
             MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
                     createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
                     createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
@@ -151,13 +152,6 @@ public class ParametersGenerator {
 
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
         }
-    }
-
-    private  AnnotationNode getAnnotationNode(String identifier, MappingConstructorExpressionNode annotValue) {
-        // Create annotation
-        Token atToken = createIdentifierToken("@");
-        QualifiedNameReferenceNode annotReference = getQualifiedNameReferenceNode(HTTP, identifier);
-        return createAnnotationNode(atToken, annotReference, annotValue);
     }
 
     /**
@@ -173,13 +167,10 @@ public class ParametersGenerator {
                     parameterName);
         } else {
             if (parameter.getRequired()) {
-                //Required without typeDescriptor
-                //When it has arrayType
+                //Required typeDescriptor
                 return handleRequiredQueryParameter(schema, annotations, parameterName);
             } else {
-                //Optional TypeDescriptor
-                //Array type
-                //When it has arrayType
+                //Optional typeDescriptor
                 return handleOptionalQueryParameter(schema, annotations, parameterName);
             }
         }
@@ -187,13 +178,12 @@ public class ParametersGenerator {
 
     private Node handleOptionalQueryParameter(Schema schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
-
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
             if (!(items instanceof ObjectSchema) && !(items.getType().equals("array"))) {
                 // create arrayTypeDescriptor
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
-                // create Optional type descriptor
+                // create Optional typedescriptor
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
                 return createRequiredParameterNode(annotations, optionalNode, parameterName);
@@ -218,24 +208,18 @@ public class ParametersGenerator {
 
     private Node handleRequiredQueryParameter(Schema schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
-
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
             if (!(items instanceof ArraySchema)) {
-                // create arrayTypeDescriptor
-                //1. memberTypeDescriptor
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 return createRequiredParameterNode(annotations, arrayTypeName, parameterName);
             } else {
-                // handle in case swagger has nested array or record type
-                //create optional query parameter
                 Token arrayName = createIdentifierToken("string");
                 BuiltinSimpleNameReferenceNode memberTypeDesc =
                         createBuiltinSimpleNameReferenceNode(null, arrayName);
                 ArrayTypeDescriptorNode arrayTypeName = createArrayTypeDescriptorNode(
                         memberTypeDesc, createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-                // create Optional type descriptor
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
                 return createRequiredParameterNode(annotations, optionalNode, parameterName);
@@ -255,6 +239,4 @@ public class ParametersGenerator {
         return createArrayTypeDescriptorNode(memberTypeDesc, createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
     }
-
-
 }

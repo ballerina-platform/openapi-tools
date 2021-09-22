@@ -47,8 +47,8 @@ public class ServiceGenerationUtils {
      * @return - escaped string
      */
     public static String escapeIdentifier(String identifier) {
-        if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") || BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
-
+        if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b")
+                || BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
             // TODO: Remove this `if`. Refer - https://github.com/ballerina-platform/ballerina-lang/issues/23045
             if (identifier.equals("error")) {
                 identifier = "_error";
@@ -95,7 +95,6 @@ public class ServiceGenerationUtils {
     }
 
     public static AnnotationNode getAnnotationNode(String identifier, MappingConstructorExpressionNode annotValue) {
-        // Create annotation
         Token atToken = createIdentifierToken("@");
         QualifiedNameReferenceNode annotReference = getQualifiedNameReferenceNode("http", identifier);
         return createAnnotationNode(atToken, annotReference, annotValue);

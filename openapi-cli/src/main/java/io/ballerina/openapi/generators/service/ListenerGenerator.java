@@ -108,9 +108,7 @@ public class ListenerGenerator {
             host = "localhost";
             port = 9090;
         }
-        // Generate listener
         return getListenerDeclarationNode(port, host, " ep0");
-
     }
 
     public static ListenerDeclarationNode getListenerDeclarationNode(Integer port, String host, String ep) {
