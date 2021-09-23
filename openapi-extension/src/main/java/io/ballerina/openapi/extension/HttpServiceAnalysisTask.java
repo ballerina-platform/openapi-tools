@@ -31,6 +31,7 @@ import io.ballerina.openapi.extension.doc.gen.OpenApiDocConfig;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.util.Optional;
 
@@ -46,6 +47,14 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
 
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
+        boolean errorsAvailable = context.compilation().diagnosticResult()
+                .diagnostics().stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        if (errorsAvailable) {
+            // if there are any compilation errors, do not proceed
+            return;
+        }
+
         Project currentProject = context.currentPackage().project();
         ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) context.node();
         SemanticModel semanticModel = context.semanticModel();
