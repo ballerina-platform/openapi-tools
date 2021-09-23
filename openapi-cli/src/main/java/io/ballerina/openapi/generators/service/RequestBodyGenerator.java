@@ -51,11 +51,11 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
+import static io.ballerina.openapi.generators.GeneratorUtils.getMinutiaes;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getIdentifierTokenForJsonSchema;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMinutiaes;
 
 /**
  * This class for generating request body payload for OAS requestBody section.

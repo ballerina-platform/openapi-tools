@@ -47,7 +47,7 @@ import java.util.List;
 import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.HOST;
 import static io.ballerina.openapi.generators.GeneratorConstants.NEW;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMinutiaes;
+import static io.ballerina.openapi.generators.GeneratorUtils.getMinutiaes;
 
 /**
  * This util class for processing the mapping in between openAPI server section with ballerina listeners.

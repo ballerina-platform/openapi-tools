@@ -64,9 +64,9 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.generators.GeneratorConstants.FUNCTION;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
+import static io.ballerina.openapi.generators.GeneratorUtils.getMinutiaes;
 import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMinutiaes;
 
 /**
  * This Util class use for generating ballerina service file according to given yaml file.

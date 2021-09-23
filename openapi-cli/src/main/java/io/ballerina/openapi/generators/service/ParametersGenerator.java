@@ -56,9 +56,9 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDe
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.generators.GeneratorUtils.getMinutiaes;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMinutiaes;
 
 /**
  * This class uses for generating all resource function parameters.

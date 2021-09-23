@@ -225,9 +225,5 @@ public class ServiceGenerationUtils {
                 return createSimpleNameReferenceNode(identifierToken);
         }
     }
-    public static MinutiaeList getMinutiaes() {
-        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
-        return leading;
-    }
+
 }

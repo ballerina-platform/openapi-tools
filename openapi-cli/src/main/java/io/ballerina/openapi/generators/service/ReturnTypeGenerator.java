@@ -59,10 +59,10 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDesc
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.generators.GeneratorUtils.getMinutiaes;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMinutiaes;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getUnionNodeForOneOf;
 
 /**

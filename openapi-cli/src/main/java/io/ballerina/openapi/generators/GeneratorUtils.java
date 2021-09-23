@@ -94,11 +94,8 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
 public class GeneratorUtils {
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
-        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-        MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
-        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
 
-        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import", leading, trailing);
+        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import", getMinutiaes(), getMinutiaes());
         Token orgNameToken = AbstractNodeFactory.createIdentifierToken(orgName);
         Token slashToken = AbstractNodeFactory.createIdentifierToken("/");
         ImportOrgNameNode importOrgNameNode = NodeFactory.createImportOrgNameNode(orgNameToken, slashToken);
@@ -609,5 +606,11 @@ public class GeneratorUtils {
             }
         }
         return url;
+    }
+
+    public static MinutiaeList getMinutiaes() {
+        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
+        return leading;
     }
 }
