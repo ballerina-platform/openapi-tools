@@ -149,7 +149,6 @@ public class ServiceGenerationUtils {
      */
     public static TypeDescriptorNode getIdentifierTokenForJsonSchema(Schema schema) throws BallerinaOpenApiException {
         Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
         MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
 
         IdentifierToken identifierToken;
