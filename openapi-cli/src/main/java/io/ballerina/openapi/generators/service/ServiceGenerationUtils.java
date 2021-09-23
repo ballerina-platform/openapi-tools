@@ -21,8 +21,6 @@ import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.Minutiae;
-import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -51,6 +49,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleN
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
+import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 
@@ -148,9 +147,6 @@ public class ServiceGenerationUtils {
      * Generate typeDescriptor for application/json type.
      */
     public static TypeDescriptorNode getIdentifierTokenForJsonSchema(Schema schema) throws BallerinaOpenApiException {
-        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
-
         IdentifierToken identifierToken;
         if (schema != null) {
             if (schema.get$ref() != null) {
@@ -177,7 +173,7 @@ public class ServiceGenerationUtils {
                             null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
                 } else {
                     identifierToken =  createIdentifierToken(schema.getType(),
-                            AbstractNodeFactory.createEmptyMinutiaeList(), trailing);
+                            AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
                 }
             } else if (schema instanceof ComposedSchema) {
                 if (((ComposedSchema) schema).getOneOf() != null) {
@@ -185,15 +181,15 @@ public class ServiceGenerationUtils {
                     return getUnionNodeForOneOf(iterator);
                 } else {
                     identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
-                            AbstractNodeFactory.createEmptyMinutiaeList(), trailing);
+                            AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
                 }
             } else {
                 identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
-                        AbstractNodeFactory.createEmptyMinutiaeList(), trailing);
+                        AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
             }
         } else {
             identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
-                    AbstractNodeFactory.createEmptyMinutiaeList(), trailing);
+                    AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
         }
         return createSimpleNameReferenceNode(identifierToken);
     }
@@ -225,5 +221,4 @@ public class ServiceGenerationUtils {
                 return createSimpleNameReferenceNode(identifierToken);
         }
     }
-
 }

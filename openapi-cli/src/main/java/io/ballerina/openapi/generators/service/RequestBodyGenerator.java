@@ -24,7 +24,6 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -51,7 +50,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
-import static io.ballerina.openapi.generators.GeneratorUtils.getMinutiaes;
+import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getIdentifierTokenForJsonSchema;
@@ -83,7 +82,7 @@ public class RequestBodyGenerator {
                         createToken(SyntaxKind.OPEN_BRACE_TOKEN), fields, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             } else {
                 typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
-                        GeneratorConstants.JSON, getMinutiaes(), getMinutiaes()));
+                        GeneratorConstants.JSON, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE));
                 annotValue = NodeFactory.createMappingConstructorExpressionNode(
                         createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
                         createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
@@ -99,7 +98,7 @@ public class RequestBodyGenerator {
         }
         AnnotationNode annotationNode = getAnnotationNode("Payload", annotValue);
         NodeList<AnnotationNode> annotation =  NodeFactory.createNodeList(annotationNode);
-        Token paramName = createIdentifierToken("payload", getMinutiaes(), getMinutiaes());
+        Token paramName = createIdentifierToken("payload", SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         return createRequiredParameterNode(annotation, typeName, paramName);
     }
 
@@ -107,14 +106,12 @@ public class RequestBodyGenerator {
                                                                             IdentifierToken mediaType,
                                                                             HashSet<Map.Entry<String,
                                                                                     MediaType>> equalDataType) {
-        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
-        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
 
         Iterator<Map.Entry<String, MediaType>> iter = equalDataType.iterator();
         while (iter.hasNext()) {
             Map.Entry<String, MediaType> next = iter.next();
-            literals.add(createIdentifierToken('"' + next.getKey().trim() + '"', leading, trailing));
+            literals.add(createIdentifierToken('"' + next.getKey().trim() + '"', SINGLE_WS_MINUTIAE,
+                    SINGLE_WS_MINUTIAE));
             literals.add(comma);
         }
         literals.remove(literals.size() - 1);

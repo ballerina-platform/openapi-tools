@@ -76,6 +76,11 @@ public class ResourcePackagingService {
         Path resourcesDirectory = Paths.get(
                 Constants.RESOURCES_DIR_NAME, Constants.PACKAGE_ORG, Constants.PACKAGE_NAME);
         for (OpenApiDocContext.OpenApiDefinition definition: context.getOpenApiDetails()) {
+            // if auto-embed-to-service is disabled, skip the current definition
+            if (!definition.isAutoEmbedToService()) {
+                continue;
+            }
+
             try (InputStream inputStream = new ByteArrayInputStream(definition.getDefinition().getBytes())) {
                 Path targetFile = resourcesDirectory.resolve(definition.getFileName());
                 outStream.putNextEntry(new ZipEntry(targetFile.toString()));

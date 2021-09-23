@@ -93,9 +93,12 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
  */
 public class GeneratorUtils {
 
+    public static final MinutiaeList SINGLE_WS_MINUTIAE = getSingleWSMinutiae();
+
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
 
-        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import", getMinutiaes(), getMinutiaes());
+        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import", SINGLE_WS_MINUTIAE,
+                SINGLE_WS_MINUTIAE);
         Token orgNameToken = AbstractNodeFactory.createIdentifierToken(orgName);
         Token slashToken = AbstractNodeFactory.createIdentifierToken("/");
         ImportOrgNameNode importOrgNameNode = NodeFactory.createImportOrgNameNode(orgNameToken, slashToken);
@@ -109,12 +112,10 @@ public class GeneratorUtils {
     }
 
     public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
-        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
-        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
         Token modulePrefixToken = AbstractNodeFactory.createIdentifierToken(modulePrefix);
         Token colon = AbstractNodeFactory.createIdentifierToken(":");
-        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier, leading, trailing);
+        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier, SINGLE_WS_MINUTIAE
+                , SINGLE_WS_MINUTIAE);
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
     }
 
@@ -323,7 +324,7 @@ public class GeneratorUtils {
         }
     }
 
-    public boolean hasTags(List<String> tags, List<String> filterTags) {
+    public static boolean hasTags(List<String> tags, List<String> filterTags) {
         return !Collections.disjoint(filterTags, tags);
     }
 
@@ -360,7 +361,7 @@ public class GeneratorUtils {
     /**
      * Generate BallerinaMediaType for all the mediaTypes.
      */
-    public String getBallerinaMediaType(String mediaType) {
+    public static String getBallerinaMediaType(String mediaType) {
         switch (mediaType) {
             case "*/*":
             case "application/json":
@@ -388,7 +389,7 @@ public class GeneratorUtils {
      * @return - UnionString
      * @throws BallerinaOpenApiException
      */
-    public String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
+    public static String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
 
         StringBuilder unionType = new StringBuilder();
         for (Schema oneOfSchema: oneOf) {
@@ -431,7 +432,7 @@ public class GeneratorUtils {
      * @param paths - swagger paths object
      * @return {@link io.swagger.v3.oas.models.Paths }
      */
-    public Paths setOperationId(Paths paths) {
+    public static Paths setOperationId(Paths paths) {
         Set<Map.Entry<String, PathItem>> entries = paths.entrySet();
         for (Map.Entry<String, PathItem> entry: entries) {
             PathItem pathItem = entry.getValue();
@@ -554,7 +555,7 @@ public class GeneratorUtils {
         return paths;
     }
 
-    private String getOperationId(String[] split, String method) {
+    private static String getOperationId(String[] split, String method) {
         String operationId;
         String regEx = "\\{([^}]*)\\}";
         Matcher matcher = Pattern.compile(regEx).matcher(split[split.length - 1]);
@@ -608,7 +609,7 @@ public class GeneratorUtils {
         return url;
     }
 
-    public static MinutiaeList getMinutiaes() {
+    private static MinutiaeList getSingleWSMinutiae() {
         Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
         MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
         return leading;

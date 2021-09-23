@@ -64,7 +64,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.generators.GeneratorConstants.FUNCTION;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
-import static io.ballerina.openapi.generators.GeneratorUtils.getMinutiaes;
+import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
 
@@ -73,8 +73,6 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.esc
  */
 public class BallerinaServiceGenerator {
     // Add basicLiteralNode
-    private  GeneratorUtils generatorUtils = new GeneratorUtils();
-
     public SyntaxTree generateSyntaxTree(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {
         // Create imports http and openapi
         NodeList<ImportDeclarationNode> imports = createImportDeclarationNodes();
@@ -92,9 +90,10 @@ public class BallerinaServiceGenerator {
         NodeList<Node> members = NodeFactory.createNodeList(functions);
 
         ServiceDeclarationNode serviceDeclarationNode = NodeFactory.createServiceDeclarationNode(
-                null, createEmptyNodeList(), createIdentifierToken("service", getMinutiaes(), getMinutiaes()),
+                null, createEmptyNodeList(), createIdentifierToken("service", SINGLE_WS_MINUTIAE,
+                        SINGLE_WS_MINUTIAE),
                 null, absoluteResourcePath, createIdentifierToken("on",
-                        getMinutiaes(), getMinutiaes()), expressions,
+                        SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE), expressions,
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         // Create module member declaration
@@ -156,7 +155,7 @@ public class BallerinaServiceGenerator {
             if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
                 if (operationTags != null || ((!filterOperations.isEmpty())
                         && (operation.getValue().getOperationId() != null))) {
-                    if (generatorUtils.hasTags(operationTags, filterTags) ||
+                    if (GeneratorUtils.hasTags(operationTags, filterTags) ||
                             ((operation.getValue().getOperationId() != null) &&
                             filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                         // getRelative resource path
@@ -188,11 +187,11 @@ public class BallerinaServiceGenerator {
      */
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                        List<Node> pathNodes) throws BallerinaOpenApiException {
-        NodeList<Token> qualifiersList = NodeFactory.createNodeList(createIdentifierToken(RESOURCE, getMinutiaes(),
-                getMinutiaes()));
-        Token functionKeyWord = createIdentifierToken(FUNCTION, getMinutiaes(), getMinutiaes());
+        NodeList<Token> qualifiersList = NodeFactory.createNodeList(createIdentifierToken(RESOURCE, SINGLE_WS_MINUTIAE,
+                SINGLE_WS_MINUTIAE));
+        Token functionKeyWord = createIdentifierToken(FUNCTION, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
-                .toLowerCase(Locale.ENGLISH), getMinutiaes(), getMinutiaes());
+                .toLowerCase(Locale.ENGLISH), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         NodeList<Node> relativeResourcePath = NodeFactory.createNodeList(pathNodes);
         ParametersGenerator parametersGenerator = new ParametersGenerator();
         List<Node> params = parametersGenerator.generateResourcesInputs(operation);

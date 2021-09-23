@@ -27,7 +27,6 @@ import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.IndexedExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -253,6 +252,7 @@ public class FunctionBodyGenerator {
         } else {
 
             if (!queryApiKeyNameList.isEmpty()) {
+                ballerinaUtilGenerator.setQueryParamsFound(true);
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
                         "queryParam", queryApiKeyNameList));
                 // Add updated path
@@ -762,7 +762,7 @@ public class FunctionBodyGenerator {
             for (IdentifierToken identifierToken : importModule.moduleName()) {
                 moduleBuilder.append(identifierToken.toString().trim());
             }
-            if (BALLERINA.equals(((ImportOrgNameNode) importModule.orgName().get()).orgName().toString().trim()) &&
+            if (BALLERINA.equals((importModule.orgName().get()).orgName().toString().trim()) &&
                     module.equals(moduleBuilder.toString())) {
                 return true;
             }

@@ -58,8 +58,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleN
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
+import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
-import static io.ballerina.openapi.generators.GeneratorUtils.getMinutiaes;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
@@ -83,7 +83,7 @@ public class ReturnTypeGenerator {
                                                                 NodeList<AnnotationNode> annotations)
             throws BallerinaOpenApiException {
 
-        Token returnKeyWord = createIdentifierToken("returns", getMinutiaes(), getMinutiaes());
+        Token returnKeyWord = createIdentifierToken("returns", SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         ReturnTypeDescriptorNode returnNode = null;
         if (operation.getValue().getResponses() != null) {
             ApiResponses responses = operation.getValue().getResponses();
@@ -181,7 +181,7 @@ public class ReturnTypeGenerator {
     public TypeDescriptorNode getRecordTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
         TypeDescriptorNode type;
         Token recordKeyWord = createIdentifierToken("record", AbstractNodeFactory.createEmptyMinutiaeList(),
-                getMinutiaes());
+                SINGLE_WS_MINUTIAE);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
         List<Node> recordFields = new ArrayList<>();
@@ -196,7 +196,7 @@ public class ReturnTypeGenerator {
                     typeProperty = convertOpenAPITypeToBallerina(field.getValue().getType());
                 }
                 Token typeRecordField = createIdentifierToken(typeProperty,
-                        AbstractNodeFactory.createEmptyMinutiaeList(), getMinutiaes());
+                        AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
                 RecordFieldNode recordFieldNode =  NodeFactory.createRecordFieldNode(null, null,
                         typeRecordField, fieldName, null, createToken(SyntaxKind.SEMICOLON_TOKEN));
                 recordFields.add(recordFieldNode);
@@ -276,7 +276,7 @@ public class ReturnTypeGenerator {
      */
     private static RecordTypeDescriptorNode createReturnTypeInclusionRecord(String code, TypeDescriptorNode type) {
         Token recordKeyWord = createIdentifierToken("record", AbstractNodeFactory.createEmptyMinutiaeList(),
-                getMinutiaes());
+                SINGLE_WS_MINUTIAE);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
         List<Node> recordFields = new ArrayList<>();
@@ -287,7 +287,7 @@ public class ReturnTypeGenerator {
                 createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(typeReferenceNode);
         // Record field name
-        IdentifierToken fieldName = createIdentifierToken("body", getMinutiaes(), getMinutiaes());
+        IdentifierToken fieldName = createIdentifierToken("body", SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null, type,
                 fieldName, null, createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(recordFieldNode);

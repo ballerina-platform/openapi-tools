@@ -39,9 +39,30 @@ task copyDistribution(type: Copy) {
     into ballerinaDist
 }
 
+
+task copyPackageBala {
+    doLast {
+        copy {
+            from "${ballerinaOpenApiModulePath}/build/cache_parent"
+            into "${ballerinaDist}/repo"
+            copy {
+                into("bala/ballerina") {
+                    from "bala/ballerina"
+                }
+            }
+            copy {
+                into("cache/ballerina/") {
+                    from "cache/ballerina"
+                }
+            }
+        }
+    }
+}
+
 test {
     systemProperty "ballerina.offline.flag", "true"
     useTestNG()
 }
 
-test.dependsOn copyDistribution
+copyPackageBala.dependsOn copyDistribution
+test.dependsOn copyPackageBala
