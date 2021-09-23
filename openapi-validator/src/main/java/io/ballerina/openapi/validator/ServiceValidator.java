@@ -135,22 +135,28 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                     //Filter annotation attributes
                     if (!fields.isEmpty()) {
                         isAnnotationExist = true;
-                        try {
-                            kind = extractOpenAPIAnnotation(kind, filters, annotationNode, ballerinaFilePath);
-                            if (!validations.isEmpty()) {
-                                // when the contract has empty string
-                                for (Diagnostic diagnostic: validations) {
-                                    if (diagnostic.diagnosticInfo().code().equals(BAL_OPENAPI_VALIDATOR_0018) ||
-                                            diagnostic.diagnosticInfo().code().equals(BAL_OPENAPI_VALIDATOR_0020)) {
-                                        isAnnotationExist = false;
+                        boolean isEmbed = (fields.size() == 1 &&
+                                (((SpecificFieldNode) fields.get(0)).fieldName().toString().trim().equals("embed")));
+                        if (!isEmbed) {
+                            try {
+                                kind = extractOpenAPIAnnotation(kind, filters, annotationNode, ballerinaFilePath);
+                                if (!validations.isEmpty()) {
+                                    // when the contract has empty string
+                                    for (Diagnostic diagnostic: validations) {
+                                        if (diagnostic.diagnosticInfo().code().equals(BAL_OPENAPI_VALIDATOR_0018) ||
+                                                diagnostic.diagnosticInfo().code().equals(BAL_OPENAPI_VALIDATOR_0020)) {
+                                            isAnnotationExist = false;
+                                        }
                                     }
                                 }
+                            } catch (IOException e) {
+                                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(BAL_OPENAPI_VALIDATOR_0019,
+                                        e.getMessage(), DiagnosticSeverity.ERROR);
+                                Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location);
+                                validations.add(diagnostic);
+                                isAnnotationExist = false;
                             }
-                        } catch (IOException e) {
-                            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(BAL_OPENAPI_VALIDATOR_0019,
-                                    e.getMessage(), DiagnosticSeverity.ERROR);
-                            Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location);
-                            validations.add(diagnostic);
+                        } else {
                             isAnnotationExist = false;
                         }
                     }
