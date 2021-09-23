@@ -251,6 +251,7 @@ public class FunctionBodyGenerator {
         } else {
 
             if (!queryApiKeyNameList.isEmpty()) {
+                ballerinaUtilGenerator.setQueryParamsFound(true);
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
                         "queryParam", queryApiKeyNameList));
                 // Add updated path
