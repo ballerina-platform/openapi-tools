@@ -100,25 +100,26 @@ public class ListenerGenerator {
             host = "localhost";
             port = 9090;
         }
-        return getListenerDeclarationNode(port, host, " ep0");
+        return getListenerDeclarationNode(port, host, "ep0");
     }
 
     public static ListenerDeclarationNode getListenerDeclarationNode(Integer port, String host, String ep) {
-
+        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
+        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
         // Take first server to Map
-        Token listenerKeyword = AbstractNodeFactory.createIdentifierToken("listener");
+        Token listenerKeyword = AbstractNodeFactory.createIdentifierToken("listener", leading, trailing);
         // Create type descriptor
-        Token modulePrefix = AbstractNodeFactory.createIdentifierToken(" http");
-        IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("Listener");
+        Token modulePrefix = AbstractNodeFactory.createIdentifierToken("http", leading, trailing);
+        IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("Listener", leading,
+                AbstractNodeFactory.createEmptyMinutiaeList());
         QualifiedNameReferenceNode typeDescriptor = NodeFactory.createQualifiedNameReferenceNode(modulePrefix,
                 AbstractNodeFactory.createToken(SyntaxKind.COLON_TOKEN), identifier);
         // Create variable
-        Token variableName = AbstractNodeFactory.createIdentifierToken(ep);
+        Token variableName = AbstractNodeFactory.createIdentifierToken(ep, leading,
+                AbstractNodeFactory.createEmptyMinutiaeList());
         // Create initializer
         Token newKeyword = AbstractNodeFactory.createIdentifierToken(NEW);
-        MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
-        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
-        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
 
         Token literalToken = AbstractNodeFactory.createLiteralValueToken(SyntaxKind.DECIMAL_INTEGER_LITERAL_TOKEN
                 , String.valueOf(port), leading, trailing);

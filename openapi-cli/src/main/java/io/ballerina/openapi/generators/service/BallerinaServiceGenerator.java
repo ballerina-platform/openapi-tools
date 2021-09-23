@@ -26,6 +26,8 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
+import io.ballerina.compiler.syntax.tree.Minutiae;
+import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -75,6 +77,9 @@ public class BallerinaServiceGenerator {
     private  GeneratorUtils generatorUtils = new GeneratorUtils();
 
     public SyntaxTree generateSyntaxTree(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {
+        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
+        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
         // Create imports http and openapi
         NodeList<ImportDeclarationNode> imports = createImportDeclarationNodes();
         // Need to Generate Base path
@@ -91,8 +96,9 @@ public class BallerinaServiceGenerator {
         NodeList<Node> members = NodeFactory.createNodeList(functions);
 
         ServiceDeclarationNode serviceDeclarationNode = NodeFactory.createServiceDeclarationNode(
-                null, createEmptyNodeList(), createIdentifierToken(" service "), null,
-                absoluteResourcePath, createIdentifierToken(" on "), expressions,
+                null, createEmptyNodeList(), createIdentifierToken("service", leading, trailing),
+                null, absoluteResourcePath, createIdentifierToken("on",
+                        leading, trailing), expressions,
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         // Create module member declaration
@@ -186,11 +192,14 @@ public class BallerinaServiceGenerator {
      */
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                        List<Node> pathNodes) throws BallerinaOpenApiException {
+        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
+        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
 
-        NodeList<Token> qualifiersList = NodeFactory.createNodeList(createIdentifierToken(RESOURCE));
-        Token functionKeyWord = createIdentifierToken(FUNCTION);
+        NodeList<Token> qualifiersList = NodeFactory.createNodeList(createIdentifierToken(RESOURCE, leading, trailing));
+        Token functionKeyWord = createIdentifierToken(FUNCTION, leading, trailing);
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
-                .toLowerCase(Locale.ENGLISH) + " ");
+                .toLowerCase(Locale.ENGLISH), leading, trailing);
         NodeList<Node> relativeResourcePath = NodeFactory.createNodeList(pathNodes);
         ParametersGenerator parametersGenerator = new ParametersGenerator();
         List<Node> params = parametersGenerator.generateResourcesInputs(operation);

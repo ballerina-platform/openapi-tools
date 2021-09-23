@@ -17,9 +17,12 @@
  */
 package io.ballerina.openapi.generators.service;
 
+import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.Minutiae;
+import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -113,7 +116,7 @@ public class ServiceGenerationUtils {
 
     public static AnnotationNode getAnnotationNode(String identifier, MappingConstructorExpressionNode annotValue) {
         Token atToken = createIdentifierToken("@");
-        QualifiedNameReferenceNode annotReference = getQualifiedNameReferenceNode("http", identifier);
+        QualifiedNameReferenceNode annotReference = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, identifier);
         return createAnnotationNode(atToken, annotReference, annotValue);
     }
 
@@ -145,6 +148,10 @@ public class ServiceGenerationUtils {
      * Generate typeDescriptor for application/json type.
      */
     public static TypeDescriptorNode getIdentifierTokenForJsonSchema(Schema schema) throws BallerinaOpenApiException {
+        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
+        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
+
         IdentifierToken identifierToken;
         if (schema != null) {
             if (schema.get$ref() != null) {
@@ -161,29 +168,33 @@ public class ServiceGenerationUtils {
                                         getItems().get$ref())));
                     } else if (!(((ArraySchema) schema).getItems() instanceof ArraySchema)) {
                         member = createBuiltinSimpleNameReferenceNode(null,
-                                createIdentifierToken("string"));
+                                createIdentifierToken(GeneratorConstants.JSON));
                     } else {
                         member = createBuiltinSimpleNameReferenceNode(null,
                                 createIdentifierToken(convertOpenAPITypeToBallerina(
                                         ((ArraySchema) schema).getItems().getType())));
                     }
-                    return  createArrayTypeDescriptorNode(member, createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                            createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                    return  createArrayTypeDescriptorNode(member, createToken(SyntaxKind.OPEN_BRACKET_TOKEN),
+                            null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
                 } else {
-                    identifierToken =  createIdentifierToken(schema.getType() + " ");
+                    identifierToken =  createIdentifierToken(schema.getType(),
+                            AbstractNodeFactory.createEmptyMinutiaeList(), trailing);
                 }
             } else if (schema instanceof ComposedSchema) {
                 if (((ComposedSchema) schema).getOneOf() != null) {
                     Iterator<Schema> iterator = ((ComposedSchema) schema).getOneOf().iterator();
                     return getUnionNodeForOneOf(iterator);
                 } else {
-                    identifierToken =  createIdentifierToken("json ");
+                    identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
+                            AbstractNodeFactory.createEmptyMinutiaeList(), trailing);
                 }
             } else {
-                identifierToken =  createIdentifierToken("json ");
+                identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
+                        AbstractNodeFactory.createEmptyMinutiaeList(), trailing);
             }
         } else {
-            identifierToken =  createIdentifierToken("json ");
+            identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
+                    AbstractNodeFactory.createEmptyMinutiaeList(), trailing);
         }
         return createSimpleNameReferenceNode(identifierToken);
     }
@@ -200,17 +211,18 @@ public class ServiceGenerationUtils {
             case "application/json":
                 return getIdentifierTokenForJsonSchema(schema);
             case "application/xml":
-                identifierToken = createIdentifierToken("xml");
+                identifierToken = createIdentifierToken(GeneratorConstants.XML);
                 return createSimpleNameReferenceNode(identifierToken);
             case "text/plain":
-                identifierToken = createIdentifierToken("string");
+                identifierToken = createIdentifierToken(GeneratorConstants.STRING);
                 return createSimpleNameReferenceNode(identifierToken);
             case "application/octet-stream":
                 return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(
-                        null, createIdentifierToken("byte")), createToken(SyntaxKind.OPEN_BRACKET_TOKEN),
-                        null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                        null, createIdentifierToken(GeneratorConstants.BYTE)),
+                        createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                        createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
             default:
-                identifierToken = createIdentifierToken("json");
+                identifierToken = createIdentifierToken(GeneratorConstants.JSON);
                 return createSimpleNameReferenceNode(identifierToken);
         }
     }

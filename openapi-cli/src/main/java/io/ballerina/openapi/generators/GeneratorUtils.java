@@ -26,6 +26,8 @@ import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
+import io.ballerina.compiler.syntax.tree.Minutiae;
+import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -92,7 +94,11 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
 public class GeneratorUtils {
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
-        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import ");
+        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+        MinutiaeList leading = AbstractNodeFactory.createEmptyMinutiaeList();
+        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
+
+        Token importKeyword = AbstractNodeFactory.createIdentifierToken("import", leading, trailing);
         Token orgNameToken = AbstractNodeFactory.createIdentifierToken(orgName);
         Token slashToken = AbstractNodeFactory.createIdentifierToken("/");
         ImportOrgNameNode importOrgNameNode = NodeFactory.createImportOrgNameNode(orgNameToken, slashToken);
@@ -106,10 +112,12 @@ public class GeneratorUtils {
     }
 
     public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
-
+        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
+        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
+        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
         Token modulePrefixToken = AbstractNodeFactory.createIdentifierToken(modulePrefix);
         Token colon = AbstractNodeFactory.createIdentifierToken(":");
-        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier);
+        IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier, leading, trailing);
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
     }
 
