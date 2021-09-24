@@ -244,8 +244,7 @@ public class RequestBodyTest {
         try {
             Files.deleteIfExists(this.tempDir.resolve(filename));
             Files.deleteIfExists(this.tempDir.resolve("schema.bal"));
-        } catch (IOException e) {
-            //Ignore the exception
+        } catch (IOException ignored) {
         }
     }
 

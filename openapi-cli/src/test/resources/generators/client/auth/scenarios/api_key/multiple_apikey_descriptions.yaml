@@ -316,6 +316,11 @@ components:
   securitySchemes:
     app_id:
       type: apiKey
-      description: API key to authorize requests.
+      description: API key to authorize GET requests.
       name: appid
+      in: query
+    x_api_key:
+      type: apiKey
+      description: API key to authorize POST requests.
+      name: X-API-Key
       in: query

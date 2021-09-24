@@ -149,7 +149,7 @@ public class GeneratorConstants {
     public static final String CLIENT_CONFIG = "ClientConfig";
     public static final String OAUTH2 = "oauth2";
     public static final String SSL_FIELD_NAME = "secureSocket";
-
+    public static final String DEFAULT_API_KEY_DESC = "API keys for authorization";
 
     public static final String RESPONSE = "response";
 
@@ -178,7 +178,6 @@ public class GeneratorConstants {
     //OpenAPI Ballerina extensions
     public static final String X_BALLERINA_INIT_DESCRIPTION = "x-ballerina-init-description";
     public static final String X_BALLERINA_DISPLAY = "x-ballerina-display";
-    public static final String X_BALLERINA_APIKEY_DESCRIPTION = "x-ballerina-apikey-description";
     public static final String X_BALLERINA_DEPRECATED_REASON = "x-ballerina-deprecated-reason";
 
     //Service related

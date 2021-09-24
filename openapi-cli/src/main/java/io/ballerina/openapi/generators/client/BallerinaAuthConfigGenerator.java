@@ -79,7 +79,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultablePar
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createImplicitNewExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIntersectionTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMapTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationLineNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
@@ -91,12 +90,12 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createObjectFieldNod
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesizedArgList;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createPositionalArgumentNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceTypeDescNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
@@ -110,9 +109,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.DECIMAL_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FINAL_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.GT_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.LT_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAP_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.NEW_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
@@ -128,7 +124,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEYS_CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
-import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_RECORD_FIELD;
 import static io.ballerina.openapi.generators.GeneratorConstants.AUTH;
 import static io.ballerina.openapi.generators.GeneratorConstants.AuthConfigTypes;
 import static io.ballerina.openapi.generators.GeneratorConstants.BASIC;
@@ -141,8 +136,8 @@ import static io.ballerina.openapi.generators.GeneratorConstants.OAUTH2;
 import static io.ballerina.openapi.generators.GeneratorConstants.PASSWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.REFRESH_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.SSL_FIELD_NAME;
-import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_APIKEY_DESCRIPTION;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
 /**
  * This class is used to generate authentication related nodes of the ballerina connector client syntax tree.
@@ -150,34 +145,23 @@ import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 public class BallerinaAuthConfigGenerator {
     private final Map<String, String> headerApiKeyNameList = new HashMap<>();
     private final Map<String, String> queryApiKeyNameList = new HashMap<>();
-    private boolean isAPIKey = false;
-    private boolean isHttpOROAuth = false;
+    private final List<Node> apiKeysConfigRecordFields = new ArrayList<>();
+    private boolean apiKey;
+    private boolean httpOROAuth;
     private final Set<String> authTypes = new LinkedHashSet<>();
-    private String apiKeyDescription;
 
     public BallerinaAuthConfigGenerator(boolean isAPIKey, boolean isHttpOROAuth) {
-        this.isAPIKey = isAPIKey;
-        this.isHttpOROAuth = isHttpOROAuth;
+        this.apiKey = isAPIKey;
+        this.httpOROAuth = isHttpOROAuth;
     }
 
-    public BallerinaAuthConfigGenerator() {
-    }
-
-    /**
-     * Returns `true` if authentication mechanism is HTTP or OAuth2.0.
-     *
-     * @return {@link boolean}    values of the flag isHttpOROAuth
-     */
-    public boolean isHttpOROAuth() {
-        return isHttpOROAuth;
-    }
     /**
      * Returns `true` if authentication mechanism is API key.
      *
      * @return {@link boolean}    values of the flag isAPIKey
      */
-    public boolean isAPIKey() {
-        return isAPIKey;
+    public boolean isApiKey() {
+        return apiKey;
     }
 
     /**
@@ -205,15 +189,6 @@ public class BallerinaAuthConfigGenerator {
      */
     public Set<String> getAuthType() {
         return authTypes;
-    }
-    /**
-     * Returns the `x-ballerina-apikey-description` given when the authentication mechanism is API key.
-     * This value will be mapped to connector init function `apiKeyConfig` parameter doc comment.
-     *
-     * @return {@link String}   Api key description
-     */
-    public String getApiKeyDescription() {
-        return apiKeyDescription;
     }
 
     /**
@@ -272,12 +247,12 @@ public class BallerinaAuthConfigGenerator {
         Token typeName;
         NodeList<Node> recordFieldList;
         MetadataNode configRecordMetadataNode;
-        if (isAPIKey) {
+        if (apiKey) {
             configRecordMetadataNode = getMetadataNode(
                     "Provides API key configurations needed when communicating " +
                             "with a remote HTTP endpoint.");
             typeName = AbstractNodeFactory.createIdentifierToken(API_KEYS_CONFIG);
-            recordFieldList = createNodeList(getApiKeysConfigRecordFields());
+            recordFieldList = createNodeList(apiKeysConfigRecordFields);
         } else {
             configRecordMetadataNode = getMetadataNode(
                     "Provides a set of configurations for controlling the behaviours when communicating " +
@@ -296,23 +271,19 @@ public class BallerinaAuthConfigGenerator {
     }
 
     /**
-     * Generate Class variable for api key map {@code map<string> apiKeys; }.
+     * Generate Class variable for api key map {@code final readonly & ApiKeysConfig apiKeyConfig;}.
      *
      * @return {@link List<ObjectFieldNode>}    syntax tree object field node list
      */
     public ObjectFieldNode getApiKeyMapClassVariable() { // return ObjectFieldNode
-        if (isAPIKey) {
+        if (apiKey) {
             NodeList<Token> qualifierList = createNodeList(createToken(FINAL_KEYWORD));
             TypeDescriptorNode readOnlyNode = createTypeReferenceTypeDescNode(createSimpleNameReferenceNode
                     (createToken(READONLY_KEYWORD)));
-            TypeDescriptorNode apiKeyMapNode = createMapTypeDescriptorNode(createToken(MAP_KEYWORD),
-                    createTypeParameterNode(createToken(LT_TOKEN),
-                            createTypeReferenceTypeDescNode(
-                                    createSimpleNameReferenceNode(createToken(STRING_KEYWORD))),
-                            createToken(GT_TOKEN)));
+            TypeDescriptorNode apiKeyMapNode = createSimpleNameReferenceNode(createIdentifierToken(API_KEYS_CONFIG));
             TypeDescriptorNode intersectionTypeDescriptorNode = createIntersectionTypeDescriptorNode(readOnlyNode,
                     createToken(BITWISE_AND_TOKEN), apiKeyMapNode);
-            IdentifierToken fieldName = createIdentifierToken(API_KEY_CONFIG_RECORD_FIELD);
+            IdentifierToken fieldName = createIdentifierToken(API_KEY_CONFIG_PARAM);
             MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
             return createObjectFieldNode(metadataNode, null,
                     qualifierList, intersectionTypeDescriptorNode, fieldName, null, null,
@@ -343,7 +314,7 @@ public class BallerinaAuthConfigGenerator {
         Node serviceURLNode = getServiceURLNode(serviceUrl);
         List<Node> parameters = new ArrayList<>();
         IdentifierToken equalToken = createIdentifierToken(GeneratorConstants.EQUAL);
-        if (isHttpOROAuth) {
+        if (httpOROAuth) {
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(CLIENT_CONFIG));
             IdentifierToken paramName = createIdentifierToken(CONFIG_RECORD_ARG);
@@ -352,7 +323,7 @@ public class BallerinaAuthConfigGenerator {
             parameters.add(createToken(COMMA_TOKEN));
             parameters.add(serviceURLNode);
         } else {
-            if (isAPIKey) {
+            if (apiKey) {
                 BuiltinSimpleNameReferenceNode apiKeyConfigTypeName = createBuiltinSimpleNameReferenceNode(null,
                         createIdentifierToken(API_KEYS_CONFIG));
                 IdentifierToken apiKeyConfigParamName = createIdentifierToken(API_KEY_CONFIG_PARAM);
@@ -449,19 +420,17 @@ public class BallerinaAuthConfigGenerator {
     }
 
     /**
-     * Generate assignment nodes for api key map assignment {@code self.apiKeys=apiKeyConfig.apiKeys.cloneReadOnly();}.
+     * Generate assignment nodes for api key map assignment {@code self.apiKeyConfig=apiKeyConfig.cloneReadOnly();}.
      *
      * @return {@link AssignmentStatementNode} syntax tree assignment statement node.
      */
     public AssignmentStatementNode getApiKeyAssignmentNode() {
-        if (isAPIKey) {
+        if (apiKey) {
             FieldAccessExpressionNode varRefApiKey = createFieldAccessExpressionNode(
                     createSimpleNameReferenceNode(createIdentifierToken("self")), createToken(DOT_TOKEN),
-                    createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_RECORD_FIELD)));
-            ExpressionNode fieldAccessExpressionNode = createFieldAccessExpressionNode(
-                    createRequiredExpressionNode(createIdentifierToken(API_KEY_CONFIG_PARAM)),
-                    createToken(DOT_TOKEN),
-                    createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_RECORD_FIELD)));
+                    createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_PARAM)));
+            ExpressionNode fieldAccessExpressionNode = createRequiredExpressionNode(
+                    createIdentifierToken(API_KEY_CONFIG_PARAM));
             ExpressionNode methodCallExpressionNode = createMethodCallExpressionNode(
                     fieldAccessExpressionNode, createToken(DOT_TOKEN),
                     createSimpleNameReferenceNode(createIdentifierToken("cloneReadOnly")),
@@ -470,29 +439,6 @@ public class BallerinaAuthConfigGenerator {
                     createToken(EQUAL_TOKEN), methodCallExpressionNode, createToken(SEMICOLON_TOKEN));
         }
         return null;
-    }
-
-    /**
-     * Returns fields in ApiKeysConfig record.
-     * <pre>
-     *     # API keys related to connector authentication
-     *     map<string> apiKeys;
-     * </pre>
-     *
-     * @return {@link RecordFieldNode}  apiKeys field node
-     */
-    private RecordFieldNode getApiKeysConfigRecordFields() {
-        TypeDescriptorNode apiKeyMapNode = createMapTypeDescriptorNode(createToken(MAP_KEYWORD),
-                createTypeParameterNode(createToken(LT_TOKEN),
-                        createTypeReferenceTypeDescNode(
-                                createSimpleNameReferenceNode(createToken(STRING_KEYWORD))),
-                        createToken(GT_TOKEN)));
-        IdentifierToken apiKeyMapFieldName =
-                AbstractNodeFactory.createIdentifierToken(API_KEY_CONFIG_RECORD_FIELD);
-        MetadataNode fieldMetadataNode =
-                getMetadataNode("API keys related to connector authentication");
-        return NodeFactory.createRecordFieldNode(fieldMetadataNode, null,
-                apiKeyMapNode, apiKeyMapFieldName, null, createToken(SEMICOLON_TOKEN));
     }
 
     /**
@@ -716,7 +662,6 @@ public class BallerinaAuthConfigGenerator {
      * Store api key names which needs to send in the query string and as a request header separately.
      *
      * @param securitySchemeMap     Map of security schemas of the given open api spec
-     * @return {@link String}       Type name of the authConfig field in ClientConfig record
      */
     private void setAuthTypes(Map<String, SecurityScheme> securitySchemeMap) throws
             BallerinaOpenApiException {
@@ -726,7 +671,7 @@ public class BallerinaAuthConfigGenerator {
                 String schemaType = schemaValue.getType().name().toLowerCase(Locale.getDefault());
                 switch (schemaType) {
                     case HTTP:
-                        isHttpOROAuth = true;
+                        httpOROAuth = true;
                         String scheme = schemaValue.getScheme();
                         if (scheme.equals(BASIC)) {
                             authTypes.add(BASIC);
@@ -735,7 +680,7 @@ public class BallerinaAuthConfigGenerator {
                         }
                         break;
                     case OAUTH2:
-                        isHttpOROAuth = true;
+                        httpOROAuth = true;
                         if (schemaValue.getFlows().getClientCredentials() != null) {
                             authTypes.add(CLIENT_CRED);
                         }
@@ -750,10 +695,10 @@ public class BallerinaAuthConfigGenerator {
                         }
                         break;
                     case API_KEY:
-                        isAPIKey = true;
+                        apiKey = true;
                         String apiKeyType = schemaValue.getIn().name().toLowerCase(Locale.getDefault());
                         authTypes.add(API_KEY);
-                        setApiKeyDescription(schemaValue);
+                        setApiKeysConfigRecordFields(schemaValue);
                         switch (apiKeyType) {
                             case "query":
                                 queryApiKeyNameList.put(securitySchemeEntry.getKey(), schemaValue.getName());
@@ -768,11 +713,30 @@ public class BallerinaAuthConfigGenerator {
                 }
             }
         }
-        if (isAPIKey && isHttpOROAuth) {
+        if (apiKey && httpOROAuth) {
             throw new BallerinaOpenApiException("Unsupported combination of security schemes.");
-        } else if (!(isAPIKey || isHttpOROAuth)) {
+        } else if (!(apiKey || httpOROAuth)) {
             throw new BallerinaOpenApiException("Unsupported type of security schema");
         }
+    }
+
+    /**
+     * Returns fields in ApiKeysConfig record.
+     * <pre>
+     *     # API key related to connector authentication
+     *     string apiKey;
+     * </pre>
+     *
+     */
+    private void setApiKeysConfigRecordFields(SecurityScheme securityScheme) {
+        MetadataNode metadataNode = null;
+        if (securityScheme.getDescription() != null) {
+            metadataNode = getMetadataNode(securityScheme.getDescription());
+        }
+        TypeDescriptorNode stringTypeDesc = createSimpleNameReferenceNode(createToken(STRING_KEYWORD));
+        IdentifierToken apiKeyName = createIdentifierToken(getValidName(securityScheme.getName(), false));
+        apiKeysConfigRecordFields.add(createRecordFieldNode(metadataNode, null, stringTypeDesc,
+                apiKeyName, null, createToken(SEMICOLON_TOKEN)));
     }
 
     /**
@@ -826,24 +790,4 @@ public class BallerinaAuthConfigGenerator {
         }
         return httpAuthFieldTypes;
     }
-
-    /**
-     * This method is used set the apiKeyDescription when API key security schema is given.
-     *
-     * @param scheme    SecurityScheme to get the value of x-ballerina-apikey-description extension
-     */
-    private void setApiKeyDescription(SecurityScheme scheme) {
-        apiKeyDescription = "API key configuration detail";
-        if (scheme.getExtensions() != null) {
-            Map<String, Object> extensions = scheme.getExtensions();
-            if (!extensions.isEmpty()) {
-                for (Map.Entry<String, Object> extension : extensions.entrySet()) {
-                    if (extension.getKey().trim().equals(X_BALLERINA_APIKEY_DESCRIPTION)) {
-                        apiKeyDescription = extension.getValue().toString();
-                    }
-                }
-            }
-        }
-    }
-
 }

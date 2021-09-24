@@ -1,27 +1,25 @@
-import  ballerina/http;
-
+import ballerina/http;
 
 # Provides API key configurations needed when communicating with a remote HTTP endpoint.
 public type ApiKeysConfig record {|
-    # API keys related to connector authentication
-    map<string> apiKeys;
+    # Uber API Key
+    string serverToken;
 |};
 
 # Move your app forward with the Uber API
-
 public isolated client class Client {
     final http:Client clientEp;
-    final readonly & map<string> apiKeys;
+    final readonly & ApiKeysConfig apiKeyConfig;
     # Gets invoked to initialize the `connector`.
     #
-    # + apiKeyConfig - API key configuration detail
+    # + apiKeyConfig - API keys for authorization
     # + clientConfig - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
     public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://api.uber.com/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
-        self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();
+        self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
     }
     # Product Types
     #
@@ -30,7 +28,7 @@ public isolated client class Client {
     # + return - An array of products
     remote isolated function getProducts(float latitude, float longitude) returns Product[]|error {
         string  path = string `/products`;
-        map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, "server_token": self.apiKeys["server_token"]};
+        map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, "server_token": self.apiKeyConfig.serverToken};
         path = path + check getPathForQueryParam(queryParam);
         Product[] response = check self.clientEp-> get(path, targetType = ProductArr);
         return response;
@@ -84,5 +82,3 @@ public isolated client class Client {
         return response;
     }
 }
-
-

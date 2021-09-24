@@ -83,6 +83,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY;
+import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.generators.GeneratorConstants.BASIC;
 import static io.ballerina.openapi.generators.GeneratorConstants.BEARER;
 import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_CONFIG;
@@ -94,7 +95,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.REFRESH_TOKEN;
  * This class use for generating boilerplate codes for test cases.
  */
 public class BallerinaTestGenerator {
-    private BallerinaClientGenerator ballerinaClientGenerator;
+    private final BallerinaClientGenerator ballerinaClientGenerator;
     private final List<String> remoteFunctionNameList;
     private String configFileName;
     private boolean isHttpOrOAuth;
@@ -155,6 +156,15 @@ public class BallerinaTestGenerator {
     public String getConfigTomlFile () throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
         if (!configFileName.isBlank()) {
+            if (!isHttpOrOAuth) {
+                StringBuilder configFileContent = new StringBuilder("[" + API_KEY_CONFIG_PARAM + "]\n");
+
+                for (String apiKey: ballerinaClientGenerator.getApiKeyNameList()) {
+                    configFileContent.append(GeneratorUtils.getValidName(apiKey, false)).
+                            append(" = \"<Enter Value>\"\n");
+                }
+                return configFileContent.toString();
+            }
             InputStream inputStream = classLoader.getResourceAsStream("config_toml_files/" + configFileName);
             if (inputStream != null) {
                 return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
