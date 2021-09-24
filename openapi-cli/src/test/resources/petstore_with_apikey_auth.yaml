@@ -29,6 +29,9 @@ tags:
     description: Pets Tag
   - name: list
     description: List Tag
+security:
+  - app_id_1: []
+  - app_id_2: []
 paths:
   /pets:
     get:
@@ -122,10 +125,15 @@ paths:
         - GET
 components:
   securitySchemes:
-    app_id:
+    app_id_1:
       type: apiKey
-      description: API key to authorize requests. If you don't have an OpenWeatherMap API key, use `fd4698c940c6d1da602a70ac34f0b147`.
-      name: appid
+      description: API key to authorize requests.
+      name: appid1
+      in: query
+    app_id_2:
+      type: apiKey
+      description: API key to authorize requests.
+      name: appid2
       in: query
   schemas:
     Pet:

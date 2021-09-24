@@ -108,6 +108,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_API_KEY_DESC;
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
 import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_INIT_DESCRIPTION;
 
@@ -118,6 +119,7 @@ public class BallerinaClientGenerator {
     private final Filter filters;
     private List<ImportDeclarationNode> imports;
     private List<TypeDefinitionNode> typeDefinitionNodeList;
+    private List<String> apiKeyNameList = new ArrayList<>();
     private final OpenAPI openAPI;
     private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
@@ -316,8 +318,12 @@ public class BallerinaClientGenerator {
         assignmentNodes.add(clientInitializationNode);
         assignmentNodes.add(httpClientAssignmentStatementNode);
         // Get API key assignment node if authentication mechanism type is `apiKey`
-        if (ballerinaAuthConfigGenerator.isAPIKey()) {
+        if (ballerinaAuthConfigGenerator.isApiKey()) {
             assignmentNodes.add(ballerinaAuthConfigGenerator.getApiKeyAssignmentNode());
+            List<String> apiKeyNames = new ArrayList<>();
+            apiKeyNames.addAll(ballerinaAuthConfigGenerator.getHeaderApiKeyNameList().values());
+            apiKeyNames.addAll(ballerinaAuthConfigGenerator.getQueryApiKeyNameList().values());
+            setApiKeyNameList(apiKeyNames);
         }
         NodeList<StatementNode> statementList = createNodeList(assignmentNodes);
         return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
@@ -360,9 +366,9 @@ public class BallerinaClientGenerator {
         }
         //todo: setInitDocComment() pass the references
         docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(clientInitDocComment, true));
-        if (ballerinaAuthConfigGenerator.isAPIKey()) {
+        if (ballerinaAuthConfigGenerator.isApiKey()) {
             MarkdownParameterDocumentationLineNode apiKeyConfig = DocCommentsGenerator.createAPIParamDoc(
-                    "apiKeyConfig", ballerinaAuthConfigGenerator.getApiKeyDescription());
+                    "apiKeyConfig", DEFAULT_API_KEY_DESC);
             docs.add(apiKeyConfig);
         }
         // Create method description
@@ -376,8 +382,7 @@ public class BallerinaClientGenerator {
                 "An error if connector initialization failed");
         docs.add(returnDoc);
         MarkdownDocumentationNode clientInitDoc = createMarkdownDocumentationNode(createNodeList(docs));
-        MetadataNode clientInit = createMetadataNode(clientInitDoc, createEmptyNodeList());
-        return clientInit;
+        return createMetadataNode(clientInitDoc, createEmptyNodeList());
     }
 
 
@@ -557,5 +562,22 @@ public class BallerinaClientGenerator {
      */
     public Set<String> getAuthType () {
         return ballerinaAuthConfigGenerator.getAuthType();
+    }
+
+    /**
+     * Provide list of the field names in ApiKeysConfig record to generate the Config.toml file.
+     *
+     * @return  {@link List<String>}
+     */
+    public List<String> getApiKeyNameList() {
+        return apiKeyNameList;
+    }
+
+    /**
+     * Set the `apiKeyNameList` by adding the Api Key names available under security schemas.
+     * @param apiKeyNameList    {@link List<String>}
+     */
+    public void setApiKeyNameList(List<String> apiKeyNameList) {
+        this.apiKeyNameList = apiKeyNameList;
     }
 }

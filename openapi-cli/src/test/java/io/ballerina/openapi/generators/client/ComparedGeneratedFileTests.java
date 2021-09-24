@@ -91,7 +91,8 @@ public class ComparedGeneratedFileTests {
                 {"openapi_weather_api.yaml", "openapi_weather_api.bal"},
                 {"uber_openapi.yaml", "uber_openapi.bal"},
                 {"multiple_pathparam.yaml", "multiple_pathparam.bal"},
-                {"display_annotation.yaml", "display_annotation.bal"}
+                {"display_annotation.yaml", "display_annotation.bal"},
+                {"api2pdf.yaml", "api2pdf.bal"}
         };
     }
 
@@ -101,8 +102,7 @@ public class ComparedGeneratedFileTests {
             Files.deleteIfExists(clientPath);
             Files.deleteIfExists(schemaPath);
             Files.deleteIfExists(utilsPath);
-        } catch (IOException e) {
-            //Ignore the exception
+        } catch (IOException ignored) {
         }
     }
 }

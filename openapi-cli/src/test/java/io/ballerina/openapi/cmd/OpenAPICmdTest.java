@@ -242,7 +242,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
 
     @Test(description = "Test openapi to ballerina generation with license headers and test suit")
     public void testGenerationOfTestSuiteWithLicenseHeaders() throws IOException {
-        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_with_auth.yaml"));
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_with_oauth.yaml"));
         Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
                 licenseHeader.toString()};
@@ -250,7 +250,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         Path expectedConfigFilePath = resourceDir.resolve(Paths.get("expected_gen",
-                "api_key_config.toml"));
+                "bearer_config.toml"));
         String expectedConfig = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedConfigFilePath)) {
             expectedConfig = expectedSchemaLines.collect(Collectors.joining("\n"));
@@ -258,7 +258,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             Assert.fail(e.getMessage());
         }
         if (Files.exists(this.tmpDir.resolve("client.bal")) &&
-                Files.exists(this.tmpDir.resolve("petstore_with_auth_service.bal")) &&
+                Files.exists(this.tmpDir.resolve("petstore_with_oauth_service.bal")) &&
                 Files.exists(this.tmpDir.resolve("types.bal")) &&
                 Files.exists(this.tmpDir.resolve("tests/Config.toml")) &&
                 Files.exists(this.tmpDir.resolve("tests/test.bal"))) {

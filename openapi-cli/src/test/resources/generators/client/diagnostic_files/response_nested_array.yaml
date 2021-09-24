@@ -54,3 +54,4 @@ components:
       in: query
       name: api-key
       type: apiKey
+      description: Log in to https://api.nytimes.com/svc/suggest/v1 and get the api key

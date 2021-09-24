@@ -134,6 +134,18 @@ public class UtilGenerationTests {
         Assert.assertTrue(diagnostics.isEmpty());
     }
 
+    @Test(description = "Test the utilsbal file generation when only in:query api-key auth given")
+    public void testApiKeyauthUtilGen() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RESDIR.resolve("swagger/apikey_with_no_query_param.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
+        Assert.assertTrue(diagnostics.isEmpty());
+    }
+
     private boolean checkUtil(List<String> invalidFunctionNames, SyntaxTree utilSyntaxTree) {
         ModulePartNode modulePartNode = utilSyntaxTree.rootNode();
         NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();

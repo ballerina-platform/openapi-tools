@@ -196,6 +196,30 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test Ballerina Config.toml file generation for API Key authentication")
+    public void generateConfigFile() {
+        final String clientName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("petstore_with_apikey_auth.yaml").toString();
+        CodeGenerator generator = new CodeGenerator();
+        try {
+            String expectedConfigContent = getStringFromGivenBalFile(expectedServiceFile, "api_key_config.toml");
+            generator.generateClient(definitionPath, clientName, resourcePath.toString(), filter, true);
+
+            if (Files.exists(resourcePath.resolve("tests/Config.toml"))) {
+                String generateConfigContent = getStringFromGivenBalFile(resourcePath, "tests/Config.toml");
+                generateConfigContent = (generateConfigContent.trim()).replaceAll("\\s+", "");
+                expectedConfigContent = (expectedConfigContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generateConfigContent.contains(expectedConfigContent));
+            } else {
+                Assert.fail("Config.toml was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the connector. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
     @Test(description = "Test Ballerina client generation")
     public void generateFilteredClient() {
         final String clientName = "openapipetstore";
@@ -277,7 +301,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina skeleton generation for multiple Path parameter")
     public void generateSkeletonForTwoPathParameter() {
         final String serviceName = "openapipetstore";
-        String definitionPath = RES_DIR.resolve("multiPathParam.yaml").toString();;
+        String definitionPath = RES_DIR.resolve("multiPathParam.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
 
         try {
@@ -322,10 +346,10 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test Ballerina skeleton generation for multiple Query parameter", enabled = true)
+    @Test(description = "Test Ballerina skeleton generation for multiple Query parameter")
     public void generateSkeletonForTwoQueryParameter() {
         final String serviceName = "openapipetstore";
-        String definitionPath = RES_DIR.resolve("multiQueryParam.yaml").toString();;
+        String definitionPath = RES_DIR.resolve("multiQueryParam.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
 
         try {
@@ -347,10 +371,10 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test Ballerina skeleton generation for tag filter", enabled = true)
+    @Test(description = "Test Ballerina skeleton generation for tag filter")
     public void generateSkeletonForTagFilter() {
         final String serviceName = "openapipetstore";
-        String definitionPath = RES_DIR.resolve("petstoreTag.yaml").toString();;
+        String definitionPath = RES_DIR.resolve("petstoreTag.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
         List<String> list1 = new ArrayList<>();
         List<String> list2 = new ArrayList<>();
@@ -376,10 +400,10 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test Ballerina skeleton generation for operation filter", enabled = true)
+    @Test(description = "Test Ballerina skeleton generation for operation filter")
     public void generateSkeletonForOperationFilter() {
         final String serviceName = "openapipetstore";
-        String definitionPath = RES_DIR.resolve("petstoreOperation.yaml").toString();;
+        String definitionPath = RES_DIR.resolve("petstoreOperation.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
         List<String> list1 = new ArrayList<>();
         List<String> list2 = new ArrayList<>();
@@ -439,17 +463,12 @@ public class CodeGeneratorTest {
 
     @Test
     public void escapeIdentifierTest() {
-        GeneratorUtils generatorUtils = new GeneratorUtils();
-        Assert.assertEquals(generatorUtils.escapeIdentifier("abc"), "abc");
-        Assert.assertEquals(generatorUtils.escapeIdentifier("string"), "'string");
-        Assert.assertEquals(generatorUtils.escapeIdentifier("int"), "'int");
-        Assert.assertEquals(generatorUtils.escapeIdentifier("io.foo.bar"), "'io\\.foo\\.bar");
-        Assert.assertEquals(generatorUtils.escapeIdentifier("getV1CoreVersion"), "getV1CoreVersion");
-        Assert.assertEquals(generatorUtils.escapeIdentifier("org-invitation"), "'org\\-invitation");
-//        Assert.assertEquals(GeneratorUtils.escapeIdentifier
-//        ("sample_service_\\ \\!\\:\\[\\;"), "'sample_service_\\ \\!\\:\\[\\;");
-//        Assert.assertEquals(GeneratorUtils.escapeIdentifier
-//        ("listPets resource_!$:[;"), "'listPets\\ resource_\\!\\$\\:\\[\\;");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("abc"), "abc");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("string"), "'string");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("int"), "'int");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("io.foo.bar"), "'io\\.foo\\.bar");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("getV1CoreVersion"), "getV1CoreVersion");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("org-invitation"), "'org\\-invitation");
     }
 
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
@@ -467,9 +486,9 @@ public class CodeGeneratorTest {
             Files.deleteIfExists(resourcePath.resolve("types.bal"));
             Files.deleteIfExists(resourcePath.resolve("utils.bal"));
             Files.deleteIfExists(resourcePath.resolve("test.bal"));
+            Files.deleteIfExists(resourcePath.resolve("Config.toml"));
             FileUtils.deleteDirectory(new File(resourcePath + "/tests"));
-        } catch (IOException e) {
-            //Ignore the exception
+        } catch (IOException ignored) {
         }
     }
 

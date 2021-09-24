@@ -70,3 +70,4 @@ components:
       type: apiKey
       in: header
       name: X-API-KEY
+      description: Go to http://petstore.com and get the api key
