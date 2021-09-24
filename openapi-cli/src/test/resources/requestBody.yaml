@@ -4,7 +4,7 @@ info:
   description: refComponent
   version: 1.0.0
 servers:
-  - url: '/v1'
+  - url: /
 paths:
   /requestBody:
     post:

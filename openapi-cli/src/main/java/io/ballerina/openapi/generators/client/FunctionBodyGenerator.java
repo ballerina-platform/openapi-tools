@@ -40,7 +40,6 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -93,6 +92,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
+import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.generators.GeneratorConstants.ENCODING;
 import static io.ballerina.openapi.generators.GeneratorConstants.EXECUTE;
@@ -594,7 +594,7 @@ public class FunctionBodyGenerator {
             if (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
                     || requestBodySchema.getProperties() != null) {
                 ImportDeclarationNode xmlImport = GeneratorUtils.getImportDeclarationNode(
-                        GeneratorConstants.BALLERINA, "xmldata");
+                        BALLERINA, "xmldata");
                 if (!checkImportDuplicate(imports, "xmldata")) {
                     imports.add(xmlImport);
                 }
@@ -752,7 +752,12 @@ public class FunctionBodyGenerator {
 
     private boolean checkImportDuplicate(List<ImportDeclarationNode> imports, String module) {
         for (ImportDeclarationNode importModule:imports) {
-            if (importModule.toString().equals("importballerina/" + module + ";")) {
+            StringBuilder moduleBuilder = new StringBuilder();
+            for (IdentifierToken identifierToken : importModule.moduleName()) {
+                moduleBuilder.append(identifierToken.toString().trim());
+            }
+            if (BALLERINA.equals((importModule.orgName().get()).orgName().toString().trim()) &&
+                    module.equals(moduleBuilder.toString())) {
                 return true;
             }
         }

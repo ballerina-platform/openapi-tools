@@ -32,7 +32,7 @@ import java.nio.file.Paths;
 
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
-import static io.ballerina.openapi.generators.service.BallerinaServiceGenerator.extractReferenceType;
+import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 
 /**
  * This util class for testing functionality for {@GeneratorUtils.java}.
@@ -67,7 +67,7 @@ public class GeneratorUtilsTests {
     @Test(description = "Add valid reference path for extract")
     public static void testForReferenceLinkValid() throws BallerinaOpenApiException {
         Assert.assertEquals(generatorUtils.extractReferenceType("#/components/schemas/Error"), "Error");
-        Assert.assertEquals(generatorUtils.extractReferenceType("#/components/schemas/Pet.-id"), "Pet.-id");
+        Assert.assertEquals(GeneratorUtils.extractReferenceType("#/components/schemas/Pet.-id"), "Pet.-id");
         Assert.assertEquals(generatorUtils.extractReferenceType("#/components/schemas/Pet."), "Pet.");
         Assert.assertEquals(generatorUtils.extractReferenceType("#/components/schemas/200"), "200");
         Assert.assertEquals(getValidName(generatorUtils.extractReferenceType("#/components/schemas/worker"),

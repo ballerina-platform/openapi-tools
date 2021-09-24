@@ -99,5 +99,4 @@ public class RequestBodyTests {
         } catch (IOException ignored) {
         }
     }
-
 }

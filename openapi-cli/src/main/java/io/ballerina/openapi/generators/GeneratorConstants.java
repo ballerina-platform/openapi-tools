@@ -20,7 +20,9 @@ package io.ballerina.openapi.generators;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Constants for openapi code generator.
@@ -117,7 +119,6 @@ public class GeneratorConstants {
     public static final String CLIENT_EP = "clientEp";
     public static final String CLASS = "class";
     public static final String EQUAL = "=";
-    public static final String COLON = ":";
     public static final String CONFIG = "config";
     public static final String FUNCTION = "function";
     public static final String RETURN = "returns";
@@ -125,6 +126,9 @@ public class GeneratorConstants {
     public static final String ANNOT_TEST = "test:Config";
     public static final String TEST_DIR = "tests";
     public static final String STRING = "string";
+    public static final String XML = "xml";
+    public static final String BYTE = "byte";
+    public static final String JSON = "json";
     public static final String SERVICE_URL = "serviceUrl";
     public static final String RECORD = "record";
     public static final String IDENTIFIER = "identifier";
@@ -176,4 +180,63 @@ public class GeneratorConstants {
     public static final String X_BALLERINA_DISPLAY = "x-ballerina-display";
     public static final String X_BALLERINA_DEPRECATED_REASON = "x-ballerina-deprecated-reason";
 
+    //Service related
+    public static final String HOST = "host";
+    public static final String NEW = "new";
+    public static final String RESOURCE = "resource";
+    public static final String QUERY = "query";
+    public static final String HTTP_RESPONSE = "http:Response";
+    public static final String DEFAULT = "default";
+    /**
+     * Util for select http key words with http codes.
+     * @param code http code.
+     * @return Http identification word.
+     */
+    public static final Map<String, String> HTTP_CODES_DES;
+    static {
+        Map<String, String> aMap = new HashMap<>();
+        aMap.put("100", "Continue");
+        aMap.put("101", "SwitchingProtocols");
+        aMap.put("200", "Ok");
+        aMap.put("201", "Created");
+        aMap.put("202", "Accepted");
+        aMap.put("203", "NonAuthoritativeInformation");
+        aMap.put("204", "NoContent");
+        aMap.put("205", "RestContent");
+        aMap.put("206", "PartialContent");
+        aMap.put("300", "MultipleChoices");
+        aMap.put("301", "MovedPermanently");
+        aMap.put("302", "Found");
+        aMap.put("303", "SeeOther");
+        aMap.put("304", "NotModified");
+        aMap.put("305", "UseProxy");
+        aMap.put("308", "TemporaryRedirect");
+        aMap.put("400", "BadRequest");
+        aMap.put("401", "Unauthorized");
+        aMap.put("402", "PaymentRequired");
+        aMap.put("403", "Forbidden");
+        aMap.put("404", "NotFound");
+        aMap.put("405", "MethodNotAllowed");
+        aMap.put("406", "NotAccepted");
+        aMap.put("407", "ProxyAuthenticationRequires");
+        aMap.put("408", "RequestTimeOut");
+        aMap.put("409", "Conflict");
+        aMap.put("410", "Gone");
+        aMap.put("411", "LengthRequired");
+        aMap.put("412", "PreconditionFailed");
+        aMap.put("413", "UriTooLong");
+        aMap.put("414", "UnsupportedMediaType");
+        aMap.put("415", "RangeNotSatisfied");
+        aMap.put("416", "ExpectationFailed");
+        aMap.put("426", "UpgradeRequired");
+        aMap.put("431", "RequestHeaderFieldsTooLarge");
+        aMap.put("500", "InternalServerError");
+        aMap.put("501", "NotImplemented");
+        aMap.put("502", "BadGateway");
+        aMap.put("503", "ServiceUnavailable");
+        aMap.put("504", "GatewayTimeOut");
+        aMap.put("505", "HttpVersionNotSupported");
+        HTTP_CODES_DES = Collections.unmodifiableMap(aMap);
+    }
+    public static final String HTTP_200 = "200";
 }
