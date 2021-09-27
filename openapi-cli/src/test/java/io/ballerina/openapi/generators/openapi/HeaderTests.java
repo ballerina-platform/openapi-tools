@@ -65,6 +65,11 @@ public class HeaderTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario04.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec with for optional headers")
+    public void testOptionalHeaders() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("header_scenario05.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario05.yaml");
+    }
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
