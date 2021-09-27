@@ -31,7 +31,6 @@ import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -756,29 +755,14 @@ public class OpenAPIResponseMapper {
             MetadataNode metadataNode = serviceDefNode.metadata().get();
             NodeList<AnnotationNode> annotations = metadataNode.annotations();
             if (!annotations.isEmpty()) {
-                mediaType = extractServiceAnnotationDetails(mediaType, annotations);
+                mediaType = ConverterCommonUtils.extractServiceAnnotationDetails(annotations,
+                        "http:ServiceConfig", "mediaTypeSubtypePrefix");
             }
         }
         return mediaType;
     }
 
-    private String extractServiceAnnotationDetails(String mediaType, NodeList<AnnotationNode> annotations) {
-        for (AnnotationNode annotation: annotations) {
-            Node annotReference = annotation.annotReference();
-            if (annotReference.toString().trim().equals("http:ServiceConfig") && annotation.annotValue().isPresent()) {
-                MappingConstructorExpressionNode listOfannotValue = annotation.annotValue().get();
-                for (MappingFieldNode field : listOfannotValue.fields()) {
-                    SpecificFieldNode media = (SpecificFieldNode) field;
-                    if ((media).fieldName().toString().trim().equals("mediaTypeSubtypePrefix")
-                            && media.valueExpr().isPresent()) {
-                        ExpressionNode expressionNode = media.valueExpr().get();
-                        mediaType = expressionNode.toString().trim().replaceAll("\"", "");
-                    }
-                }
-            }
-        }
-        return mediaType;
-    }
+
 
     /**
      * Cache configuration utils.

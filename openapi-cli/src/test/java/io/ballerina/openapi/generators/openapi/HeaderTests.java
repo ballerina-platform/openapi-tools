@@ -70,6 +70,13 @@ public class HeaderTests {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario05.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario05.yaml");
     }
+
+    @Test(description = "Generate OpenAPI spec with when the service config has nullable and optional enable field")
+    public void testHeadersWithAnnotations() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("header_scenario06.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario06.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

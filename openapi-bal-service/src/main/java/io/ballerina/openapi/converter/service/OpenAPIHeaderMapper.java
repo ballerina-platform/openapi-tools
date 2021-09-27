@@ -17,15 +17,21 @@
  */
 package io.ballerina.openapi.converter.service;
 
+import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
@@ -52,11 +58,13 @@ public class OpenAPIHeaderMapper {
         HeaderParameter headerParameter = new HeaderParameter();
         Node node = headerParam.typeName();
         StringSchema stringSchema = new StringSchema();
-        if (node.kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
-            stringSchema.setNullable(true);
-        } else {
-            headerParameter.setRequired(true);
+        NodeList<AnnotationNode> annotations = getAnnotationNodesFromServiceNode(headerParam);
+        String isOptional = "true";
+        if (!annotations.isEmpty()) {
+            isOptional = ConverterCommonUtils.extractServiceAnnotationDetails(annotations,
+                    "http:ServiceConfig", "treatNilableAsOptional");
         }
+        enableHeaderRequiredOption(headerParameter, node, stringSchema, isOptional);
         if (!headerParam.annotations().isEmpty()) {
             AnnotationNode annotationNode = headerParam.annotations().get(0);
             headerName = getHeaderName(headerName, annotationNode);
@@ -76,6 +84,36 @@ public class OpenAPIHeaderMapper {
             parameters.add(headerParameter);
         }
         return parameters;
+    }
+
+    private void enableHeaderRequiredOption(HeaderParameter headerParameter, Node node, StringSchema stringSchema,
+                                            String isOptional) {
+        if (node.kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
+            stringSchema.setNullable(true);
+            if (isOptional.equals("false")) {
+                headerParameter.setRequired(true);
+            }
+        } else {
+            headerParameter.setRequired(true);
+        }
+    }
+
+    /**
+     * This function uses to take the service declaration node from given required node and return all the annotation
+     * nodes that attached to service node.
+     */
+    private NodeList<AnnotationNode> getAnnotationNodesFromServiceNode(RequiredParameterNode headerParam) {
+        NodeList<AnnotationNode> annotations = AbstractNodeFactory.createEmptyNodeList();
+        NonTerminalNode parent = headerParam.parent();
+        while (parent.kind() != SyntaxKind.SERVICE_DECLARATION) {
+            parent = parent.parent();
+        }
+        ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) parent;
+        if (serviceNode.metadata().isPresent()) {
+            MetadataNode metadataNode = serviceNode.metadata().get();
+            annotations = metadataNode.annotations();
+        }
+        return annotations;
     }
 
     /*Extract header name from header annotation value */

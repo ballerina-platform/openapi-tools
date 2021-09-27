@@ -18,6 +18,13 @@
  
 package io.ballerina.openapi.converter.utils;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.openapi.converter.Constants;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
@@ -140,5 +147,33 @@ public class ConverterCommonUtils {
             identifier = validName.toString();
         }
         return identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1);
+    }
+
+    /**
+     * This util function uses to take the field value from annotation field.
+     *
+     * @param annotations           - Annotation node list
+     * @param annotationReference   - Annotation reference that needs to extract
+     * @param annotationField       - Annotation field name that uses to take value
+     * @return                      - string value of field
+     */
+    public static String extractServiceAnnotationDetails(NodeList<AnnotationNode> annotations,
+                                                   String annotationReference, String annotationField) {
+        String mediaType = "";
+        for (AnnotationNode annotation: annotations) {
+            Node annotReference = annotation.annotReference();
+            if (annotReference.toString().trim().equals(annotationReference) && annotation.annotValue().isPresent()) {
+                MappingConstructorExpressionNode listOfannotValue = annotation.annotValue().get();
+                for (MappingFieldNode field : listOfannotValue.fields()) {
+                    SpecificFieldNode media = (SpecificFieldNode) field;
+                    if ((media).fieldName().toString().trim().equals(annotationField)
+                            && media.valueExpr().isPresent()) {
+                        ExpressionNode expressionNode = media.valueExpr().get();
+                        mediaType = expressionNode.toString().trim().replaceAll("\"", "");
+                    }
+                }
+            }
+        }
+        return mediaType;
     }
 }
