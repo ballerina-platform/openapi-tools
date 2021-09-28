@@ -98,6 +98,10 @@ public class OpenAPIHeaderMapper {
         String headerName = headerParam.paramName().get().text().replaceAll("\\\\", "");
         HeaderParameter headerParameter = new HeaderParameter();
         StringSchema stringSchema = new StringSchema();
+        if (headerParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
+            stringSchema.setNullable(true);
+        }
+
         if (!headerParam.annotations().isEmpty()) {
             AnnotationNode annotationNode = headerParam.annotations().get(0);
             headerName = getHeaderName(headerName, annotationNode);

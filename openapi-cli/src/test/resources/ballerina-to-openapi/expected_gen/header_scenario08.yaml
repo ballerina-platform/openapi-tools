@@ -1,0 +1,13 @@
+paths:
+  /ping:
+    get:
+      operationId: operation_get_/ping
+      parameters:
+        - name: x-client
+          in: header
+          schema:
+            type: string
+            nullable: true
+      responses:
+        "200":
+          description: Ok
