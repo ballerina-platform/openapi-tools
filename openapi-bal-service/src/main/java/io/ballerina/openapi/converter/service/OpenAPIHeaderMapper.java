@@ -32,6 +32,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -50,7 +51,7 @@ public class OpenAPIHeaderMapper {
     /**
      * Handle header parameters in ballerina data type.
      *
-     * @param headerParam    -  Resource function parameter list
+     * @param headerParam    -  {@link RequiredParameterNode} type header parameter node
      */
     public List<Parameter> setHeaderParameter(RequiredParameterNode headerParam) {
         List<Parameter> parameters = new ArrayList<>();
@@ -60,37 +61,21 @@ public class OpenAPIHeaderMapper {
         Node node = headerParam.typeName();
         StringSchema stringSchema = new StringSchema();
         NodeList<AnnotationNode> annotations = getAnnotationNodesFromServiceNode(headerParam);
-        String isOptional = "true";
+        String isOptional = Constants.TRUE;
         if (!annotations.isEmpty()) {
             isOptional = ConverterCommonUtils.extractServiceAnnotationDetails(annotations,
                     "http:ServiceConfig", "treatNilableAsOptional");
         }
         enableHeaderRequiredOption(headerParameter, node, stringSchema, isOptional);
-        if (!headerParam.annotations().isEmpty()) {
-            AnnotationNode annotationNode = headerParam.annotations().get(0);
-            headerName = getHeaderName(headerName, annotationNode);
-        }
-        if (headerParam.typeName() instanceof ArrayTypeDescriptorNode)  {
-            ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) headerParam.typeName();
-            if (arrayNode.memberTypeDesc().kind() == SyntaxKind.STRING_TYPE_DESC) {
-                ArraySchema arraySchema = new ArraySchema();
-                arraySchema.setItems(stringSchema);
-                headerParameter.schema(arraySchema);
-                headerParameter.setName(headerName.replaceAll("\\\\", ""));
-                parameters.add(headerParameter);
-            }
-        } else {
-            headerParameter.schema(stringSchema);
-            headerParameter.setName(headerName.replaceAll("\\\\", ""));
-            parameters.add(headerParameter);
-        }
+        completeHeaderParameter(parameters, headerName, headerParameter, stringSchema, headerParam.annotations(),
+                headerParam.typeName());
         return parameters;
     }
 
     /**
      * Handle header parameters in ballerina data type.
      *
-     * @param headerParam    -  Resource function parameter list
+     * @param headerParam    -  {@link DefaultableParameterNode} type header parameter node
      */
     public List<Parameter> setHeaderParameter(DefaultableParameterNode headerParam) {
         List<Parameter> parameters = new ArrayList<>();
@@ -101,13 +86,23 @@ public class OpenAPIHeaderMapper {
         if (headerParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
             stringSchema.setNullable(true);
         }
+        completeHeaderParameter(parameters, headerName, headerParameter, stringSchema, headerParam.annotations(),
+                headerParam.typeName());
+        return parameters;
+    }
 
-        if (!headerParam.annotations().isEmpty()) {
-            AnnotationNode annotationNode = headerParam.annotations().get(0);
+    /**
+     * Assign header values to OAS header parameter.
+     */
+    private void completeHeaderParameter(List<Parameter> parameters, String headerName, HeaderParameter headerParameter,
+                                         StringSchema stringSchema, NodeList<AnnotationNode> annotations, Node node) {
+
+        if (!annotations.isEmpty()) {
+            AnnotationNode annotationNode = annotations.get(0);
             headerName = getHeaderName(headerName, annotationNode);
         }
-        if (headerParam.typeName() instanceof ArrayTypeDescriptorNode)  {
-            ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) headerParam.typeName();
+        if (node instanceof ArrayTypeDescriptorNode) {
+            ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) node;
             if (arrayNode.memberTypeDesc().kind() == SyntaxKind.STRING_TYPE_DESC) {
                 ArraySchema arraySchema = new ArraySchema();
                 arraySchema.setItems(stringSchema);
@@ -120,14 +115,13 @@ public class OpenAPIHeaderMapper {
             headerParameter.setName(headerName.replaceAll("\\\\", ""));
             parameters.add(headerParameter);
         }
-        return parameters;
     }
 
     private void enableHeaderRequiredOption(HeaderParameter headerParameter, Node node, StringSchema stringSchema,
                                             String isOptional) {
         if (node.kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
             stringSchema.setNullable(true);
-            if (isOptional.equals("false")) {
+            if (isOptional.equals(Constants.FALSE)) {
                 headerParameter.setRequired(true);
             }
         } else {
