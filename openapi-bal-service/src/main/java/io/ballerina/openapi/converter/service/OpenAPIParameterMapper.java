@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -43,6 +44,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -85,6 +87,13 @@ public class OpenAPIParameterMapper {
                         !requiredParameterNode.annotations().isEmpty()) {
                     handleAnnotationParameters(components, semanticModel, parameters, requiredParameterNode);
                 }
+            } else if (parameterNode instanceof DefaultableParameterNode) {
+                DefaultableParameterNode defaultableParameterNode = (DefaultableParameterNode) parameterNode;
+                // Handle header parameter
+                if (defaultableParameterNode.typeName() instanceof TypeDescriptorNode &&
+                        !defaultableParameterNode.annotations().isEmpty()) {
+                    parameters.addAll(handleDefaultableAnnotationParameters(defaultableParameterNode));
+                }
             }
             //TODO: query other scenarios
         }
@@ -119,29 +128,31 @@ public class OpenAPIParameterMapper {
     /**
      * Handle function query parameters.
      */
-    private void createQueryParameter(List<Parameter> parameters, RequiredParameterNode queryParam) {
-
-        String queryParamName = queryParam.paramName().get().text();
-        if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode &&
-                !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
-                queryParam.annotations().isEmpty()) {
-            Parameter parameter = buildParameter(Constants.QUERY, queryParam);
-            parameter.setRequired(true);
-            // Handle required query parameter
-            if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
-                parameter.setDescription(apidocs.get(queryParamName.trim()));
+    private void createQueryParameter(List<Parameter> parameters, ParameterNode queryParameter) {
+        if (queryParameter instanceof RequiredParameterNode) {
+            RequiredParameterNode queryParam = (RequiredParameterNode) queryParameter;
+            String queryParamName = queryParam.paramName().get().text();
+            if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode &&
+                    !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
+                    queryParam.annotations().isEmpty()) {
+                Parameter parameter = buildParameter(Constants.QUERY, queryParam);
+                parameter.setRequired(true);
+                // Handle required query parameter
+                if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
+                    parameter.setDescription(apidocs.get(queryParamName.trim()));
+                }
+                parameters.add(parameter);
+            } else if (queryParam.typeName() instanceof OptionalTypeDescriptorNode &&
+                    !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
+                    queryParam.annotations().isEmpty()) {
+                // Handle optional query parameter
+                setOptionalQueryParameter(parameters, queryParamName, queryParam);
+            } else if (queryParam.typeName() instanceof ArrayTypeDescriptorNode &&
+                    !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
+                    queryParam.annotations().isEmpty()) {
+                // Handle required array type query parameter
+                handleArrayTypeQueryParameter(parameters, queryParam);
             }
-            parameters.add(parameter);
-        } else if (queryParam.typeName() instanceof OptionalTypeDescriptorNode &&
-                !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
-                queryParam.annotations().isEmpty()) {
-            // Handle optional query parameter
-            setOptionalQueryParameter(parameters, queryParamName, queryParam);
-        } else if (queryParam.typeName() instanceof ArrayTypeDescriptorNode &&
-                !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
-                queryParam.annotations().isEmpty()) {
-            // Handle required array type query parameter
-            handleArrayTypeQueryParameter(parameters, queryParam);
         }
     }
 
@@ -246,8 +257,10 @@ public class OpenAPIParameterMapper {
     /**
      * This function for handle the payload and header parameters with annotation @http:Payload, @http:Header.
      */
-    private void handleAnnotationParameters(Components components, SemanticModel semanticModel,
-                                            List<Parameter> parameters, RequiredParameterNode requiredParameterNode) {
+    private void handleAnnotationParameters(Components components,
+                                            SemanticModel semanticModel,
+                                            List<Parameter> parameters,
+                                            RequiredParameterNode requiredParameterNode) {
 
         NodeList<AnnotationNode> annotations = requiredParameterNode.annotations();
         for (AnnotationNode annotation: annotations) {
@@ -265,5 +278,21 @@ public class OpenAPIParameterMapper {
                         annotation, apidocs);
             }
         }
+    }
+
+    /**
+     * This function for handle the payload and header parameters with annotation @http:Payload, @http:Header.
+     */
+    private List<Parameter> handleDefaultableAnnotationParameters(DefaultableParameterNode requiredParameterNode) {
+        List<Parameter> parameters = new ArrayList<>();
+        NodeList<AnnotationNode> annotations = requiredParameterNode.annotations();
+        for (AnnotationNode annotation: annotations) {
+            if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
+                // Handle headers.
+                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper();
+                parameters = openAPIHeaderMapper.setHeaderParameter(requiredParameterNode);
+            }
+        }
+        return parameters;
     }
 }

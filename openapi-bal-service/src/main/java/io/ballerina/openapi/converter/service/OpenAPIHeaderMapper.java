@@ -20,6 +20,7 @@ package io.ballerina.openapi.converter.service;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -65,6 +66,38 @@ public class OpenAPIHeaderMapper {
                     "http:ServiceConfig", "treatNilableAsOptional");
         }
         enableHeaderRequiredOption(headerParameter, node, stringSchema, isOptional);
+        if (!headerParam.annotations().isEmpty()) {
+            AnnotationNode annotationNode = headerParam.annotations().get(0);
+            headerName = getHeaderName(headerName, annotationNode);
+        }
+        if (headerParam.typeName() instanceof ArrayTypeDescriptorNode)  {
+            ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) headerParam.typeName();
+            if (arrayNode.memberTypeDesc().kind() == SyntaxKind.STRING_TYPE_DESC) {
+                ArraySchema arraySchema = new ArraySchema();
+                arraySchema.setItems(stringSchema);
+                headerParameter.schema(arraySchema);
+                headerParameter.setName(headerName.replaceAll("\\\\", ""));
+                parameters.add(headerParameter);
+            }
+        } else {
+            headerParameter.schema(stringSchema);
+            headerParameter.setName(headerName.replaceAll("\\\\", ""));
+            parameters.add(headerParameter);
+        }
+        return parameters;
+    }
+
+    /**
+     * Handle header parameters in ballerina data type.
+     *
+     * @param headerParam    -  Resource function parameter list
+     */
+    public List<Parameter> setHeaderParameter(DefaultableParameterNode headerParam) {
+        List<Parameter> parameters = new ArrayList<>();
+        //Handle with string current header a support with only string and string[]
+        String headerName = headerParam.paramName().get().text().replaceAll("\\\\", "");
+        HeaderParameter headerParameter = new HeaderParameter();
+        StringSchema stringSchema = new StringSchema();
         if (!headerParam.annotations().isEmpty()) {
             AnnotationNode annotationNode = headerParam.annotations().get(0);
             headerName = getHeaderName(headerName, annotationNode);
