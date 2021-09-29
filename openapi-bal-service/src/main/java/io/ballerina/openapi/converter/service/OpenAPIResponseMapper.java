@@ -755,8 +755,11 @@ public class OpenAPIResponseMapper {
             MetadataNode metadataNode = serviceDefNode.metadata().get();
             NodeList<AnnotationNode> annotations = metadataNode.annotations();
             if (!annotations.isEmpty()) {
-                mediaType = ConverterCommonUtils.extractServiceAnnotationDetails(annotations,
+                Optional<String> value = ConverterCommonUtils.extractServiceAnnotationDetails(annotations,
                         "http:ServiceConfig", "mediaTypeSubtypePrefix");
+                if (value.isPresent()) {
+                    mediaType = value.get();
+                }
             }
         }
         return mediaType;

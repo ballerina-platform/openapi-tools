@@ -41,6 +41,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class for the mapping ballerina headers with OAS header parameter sections.
@@ -55,7 +56,6 @@ public class OpenAPIHeaderMapper {
      */
     public List<Parameter> setHeaderParameter(RequiredParameterNode headerParam) {
         List<Parameter> parameters = new ArrayList<>();
-        //Handle with string current header a support with only string and string[]
         String headerName = headerParam.paramName().get().text().replaceAll("\\\\", "");
         HeaderParameter headerParameter = new HeaderParameter();
         Node node = headerParam.typeName();
@@ -63,8 +63,11 @@ public class OpenAPIHeaderMapper {
         NodeList<AnnotationNode> annotations = getAnnotationNodesFromServiceNode(headerParam);
         String isOptional = Constants.TRUE;
         if (!annotations.isEmpty()) {
-            isOptional = ConverterCommonUtils.extractServiceAnnotationDetails(annotations,
+            Optional<String> values = ConverterCommonUtils.extractServiceAnnotationDetails(annotations,
                     "http:ServiceConfig", "treatNilableAsOptional");
+            if (values.isPresent()) {
+                isOptional = values.get();
+            }
         }
         enableHeaderRequiredOption(headerParameter, node, stringSchema, isOptional);
         completeHeaderParameter(parameters, headerName, headerParameter, stringSchema, headerParam.annotations(),
@@ -148,7 +151,13 @@ public class OpenAPIHeaderMapper {
         return annotations;
     }
 
-    /*Extract header name from header annotation value */
+    /**
+     * Extract header name from header annotation value.
+     *
+     * @param headerName        - Header name
+     * @param annotationNode    - Related annotation for extract details
+     * @return                  - Updated header name
+     */
     private String getHeaderName(String headerName, AnnotationNode annotationNode) {
         if (annotationNode.annotValue().isPresent()) {
             MappingConstructorExpressionNode fieldNode = annotationNode.annotValue().get();
@@ -156,7 +165,7 @@ public class OpenAPIHeaderMapper {
             for (MappingFieldNode field: fields) {
                 SpecificFieldNode sField = (SpecificFieldNode) field;
                 if (sField.fieldName().toString().trim().equals("name") && sField.valueExpr().isPresent()) {
-                    headerName = sField.valueExpr().get().toString().trim().replaceAll("\"", "");
+                    return sField.valueExpr().get().toString().trim().replaceAll("\"", "");
                 }
             }
         }
