@@ -90,6 +90,13 @@ public class HeaderTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario08.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec when the header has defaultable parameter with nullable enable data " +
+            "type and service config enable")
+    public void testHeadersWithDefaultValueWithNullableServiceConfig() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("header_scenario09.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario09.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
