@@ -305,6 +305,9 @@ public class OpenAPIComponentMapper {
         }
         //handle record field has nested record array type ex: Tag[] tags
         Schema symbolProperty  = ConverterCommonUtils.getOpenApiSchema(symbol.typeKind().getName());
+        if (symbol.typeKind() == TypeDescKind.UNION) {
+            symbolProperty = getSchemaForUnionType((UnionTypeSymbol) symbol, symbolProperty);
+        }
         //Set the record model to the definition
         if (symbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
             if (((TypeReferenceTypeSymbol) symbol).definition().kind() == SymbolKind.ENUM) {
@@ -323,6 +326,28 @@ public class OpenAPIComponentMapper {
         } else {
             property.setItems(symbolProperty);
         }
+    }
+
+    private Schema getSchemaForUnionType(UnionTypeSymbol symbol, Schema symbolProperty) {
+        List<Schema> oneOf = new ArrayList<>();
+        List<TypeSymbol> typeSymbols = symbol.userSpecifiedMemberTypes();
+        for (TypeSymbol typeSymbol: typeSymbols) {
+            if (typeSymbol.typeKind() == TypeDescKind.ARRAY) {
+                TypeSymbol arrayType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor();
+                symbolProperty = ConverterCommonUtils.getOpenApiSchema(arrayType.typeKind().getName());
+                oneOf.add(symbolProperty);
+            } else if (!(typeSymbol.typeKind() == TypeDescKind.NIL)) {
+                symbolProperty = ConverterCommonUtils.getOpenApiSchema(typeSymbol.typeKind().getName());
+                oneOf.add(symbolProperty);
+            }
+        }
+        if (typeSymbols.size() > 2) {
+            ComposedSchema oneOfSchema = new ComposedSchema();
+            oneOfSchema.setOneOf(oneOf);
+            oneOfSchema.setNullable(true);
+            symbolProperty = oneOfSchema;
+        }
+        return symbolProperty;
     }
 
     /**
