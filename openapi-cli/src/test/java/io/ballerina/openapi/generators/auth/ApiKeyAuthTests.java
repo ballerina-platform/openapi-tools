@@ -118,6 +118,22 @@ public class ApiKeyAuthTests {
         Assert.assertEquals(generatedConfigRecord, expectedConfigRecord);
     }
 
+    @Test(description = "Test ApiKeysConfig record documentation generation for multiline descriptions")
+    public void testConfigRecordDocumentationGen() throws IOException, BallerinaOpenApiException {
+        // generate ApiKeysConfig record
+        GeneratorUtils generatorUtils = new GeneratorUtils();
+        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(true, false);
+        String expectedConfigRecord = TestConstants.MULTI_LINE_API_KEY_DESC;
+        Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiline_api_key_desc.yaml");
+        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        String generatedConfigRecord = Objects.requireNonNull(
+                ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
+        Assert.assertFalse(generatedConfigRecord.isBlank());
+        generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
+        expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
+        Assert.assertEquals(generatedConfigRecord, expectedConfigRecord);
+    }
+
     @DataProvider(name = "apiKeyAuthIOProvider")
     public Object[] dataProvider() {
         return new Object[]{
