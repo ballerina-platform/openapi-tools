@@ -83,6 +83,7 @@ public class OpenAPIHeaderMapper {
         String headerName = headerParam.paramName().get().text().replaceAll("\\\\", "");
         HeaderParameter headerParameter = new HeaderParameter();
         StringSchema stringSchema = new StringSchema();
+        stringSchema.setDefault(headerParam.expression().toString().replaceAll("\"", ""));
         if (headerParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
             stringSchema.setNullable(true);
         }
@@ -107,12 +108,12 @@ public class OpenAPIHeaderMapper {
                 ArraySchema arraySchema = new ArraySchema();
                 arraySchema.setItems(stringSchema);
                 headerParameter.schema(arraySchema);
-                headerParameter.setName(headerName.replaceAll("\\\\", ""));
+                headerParameter.setName(headerName);
                 parameters.add(headerParameter);
             }
         } else {
             headerParameter.schema(stringSchema);
-            headerParameter.setName(headerName.replaceAll("\\\\", ""));
+            headerParameter.setName(headerName);
             parameters.add(headerParameter);
         }
     }

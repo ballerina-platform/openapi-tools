@@ -7,6 +7,7 @@ paths:
           in: header
           schema:
             type: string
+            default: header1
       responses:
         "200":
           description: Ok

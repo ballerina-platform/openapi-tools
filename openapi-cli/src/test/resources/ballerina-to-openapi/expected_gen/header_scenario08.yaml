@@ -8,6 +8,7 @@ paths:
           schema:
             type: string
             nullable: true
+            default: header1
       responses:
         "200":
           description: Ok
