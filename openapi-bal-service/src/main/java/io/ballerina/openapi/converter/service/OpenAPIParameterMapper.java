@@ -283,14 +283,14 @@ public class OpenAPIParameterMapper {
     /**
      * This function for handle the payload and header parameters with annotation @http:Payload, @http:Header.
      */
-    private List<Parameter> handleDefaultableAnnotationParameters(DefaultableParameterNode requiredParameterNode) {
+    private List<Parameter> handleDefaultableAnnotationParameters(DefaultableParameterNode defaultableParameterNode) {
         List<Parameter> parameters = new ArrayList<>();
-        NodeList<AnnotationNode> annotations = requiredParameterNode.annotations();
+        NodeList<AnnotationNode> annotations = defaultableParameterNode.annotations();
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
                 OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper();
-                parameters = openAPIHeaderMapper.setHeaderParameter(requiredParameterNode);
+                parameters = openAPIHeaderMapper.setHeaderParameter(defaultableParameterNode);
             }
         }
         return parameters;

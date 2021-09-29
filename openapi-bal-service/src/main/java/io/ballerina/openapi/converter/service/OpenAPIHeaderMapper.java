@@ -82,7 +82,6 @@ public class OpenAPIHeaderMapper {
      */
     public List<Parameter> setHeaderParameter(DefaultableParameterNode headerParam) {
         List<Parameter> parameters = new ArrayList<>();
-        //Handle with string current header a support with only string and string[]
         String headerName = headerParam.paramName().get().text().replaceAll("\\\\", "");
         HeaderParameter headerParameter = new HeaderParameter();
         StringSchema stringSchema = new StringSchema();

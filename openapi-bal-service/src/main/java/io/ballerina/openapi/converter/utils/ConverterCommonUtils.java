@@ -160,21 +160,20 @@ public class ConverterCommonUtils {
      */
     public static Optional<String> extractServiceAnnotationDetails(NodeList<AnnotationNode> annotations,
                                                                   String annotationReference, String annotationField) {
-        Optional<String> fieldValue = Optional.empty();
         for (AnnotationNode annotation: annotations) {
             Node annotReference = annotation.annotReference();
             if (annotReference.toString().trim().equals(annotationReference) && annotation.annotValue().isPresent()) {
-                MappingConstructorExpressionNode listOfannotValue = annotation.annotValue().get();
-                for (MappingFieldNode field : listOfannotValue.fields()) {
+                MappingConstructorExpressionNode listOfAnnotValue = annotation.annotValue().get();
+                for (MappingFieldNode field : listOfAnnotValue.fields()) {
                     SpecificFieldNode fieldNode = (SpecificFieldNode) field;
                     if ((fieldNode).fieldName().toString().trim().equals(annotationField)
                             && fieldNode.valueExpr().isPresent()) {
                         ExpressionNode expressionNode = fieldNode.valueExpr().get();
-                        fieldValue = Optional.of(expressionNode.toString().trim().replaceAll("\"", ""));
+                        return Optional.of(expressionNode.toString().trim().replaceAll("\"", ""));
                     }
                 }
             }
         }
-        return fieldValue;
+        return Optional.empty();
     }
 }
