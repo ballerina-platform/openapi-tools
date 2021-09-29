@@ -273,8 +273,19 @@ public class OpenAPIParameterMapper {
                 QueryParameter qParam = new QueryParameter();
                 RequiredParameterNode queryParam = (RequiredParameterNode) paramAttributes;
                 qParam.setName(queryParam.paramName().get().text());
-                type = ConverterCommonUtils.convertBallerinaTypeToOpenAPIType(queryParam.typeName().toString().trim());
-                qParam.schema(ConverterCommonUtils.getOpenApiSchema(type));
+                Schema openApiSchema;
+                if (queryParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
+                    OptionalTypeDescriptorNode optional = (OptionalTypeDescriptorNode) queryParam.typeName();
+                    type = ConverterCommonUtils.convertBallerinaTypeToOpenAPIType(
+                                    optional.typeDescriptor().toString().trim());
+                    openApiSchema = ConverterCommonUtils.getOpenApiSchema(type);
+                    openApiSchema.setNullable(true);
+                } else {
+                    type = ConverterCommonUtils.convertBallerinaTypeToOpenAPIType(
+                            queryParam.typeName().toString().trim());
+                    openApiSchema = ConverterCommonUtils.getOpenApiSchema(type);
+                }
+                qParam.schema(openApiSchema);
                 param = qParam;
                 break;
             case Constants.COOKIE:

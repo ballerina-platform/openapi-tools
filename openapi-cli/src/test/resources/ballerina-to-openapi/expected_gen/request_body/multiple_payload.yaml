@@ -16,11 +16,9 @@ paths:
       requestBody:
         content:
           application/json:
-            schema:
-              type: object
+            schema: {}
           application/xml:
-            schema:
-              type: object
+            schema: {}
       responses:
         "202":
           description: Accepted
