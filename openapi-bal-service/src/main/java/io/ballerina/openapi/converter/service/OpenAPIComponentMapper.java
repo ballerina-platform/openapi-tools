@@ -303,8 +303,9 @@ public class OpenAPIComponentMapper {
             ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) symbol;
             symbol = arrayTypeSymbol.memberTypeDescriptor();
         }
-        //handle record field has nested record array type ex: Tag[] tags
+        //handle record field has reference record array type ex: Tag[] tags
         Schema symbolProperty  = ConverterCommonUtils.getOpenApiSchema(symbol.typeKind().getName());
+        //handle record field has ex:string[]? name
         if (symbol.typeKind() == TypeDescKind.UNION) {
             symbolProperty = getSchemaForUnionType((UnionTypeSymbol) symbol, symbolProperty);
         }
@@ -328,24 +329,22 @@ public class OpenAPIComponentMapper {
         }
     }
 
+    /**
+     * This function uses to map union type of BUNION type ex: string[]? name.
+     *
+     * TODO: Map for different array type unions ex: float|int[] ids, float|int[]? ids
+     * `string[]? name` here it takes union member types as array and nil,fix should do with array type and map to
+     * oneOf OAS.
+     */
     private Schema getSchemaForUnionType(UnionTypeSymbol symbol, Schema symbolProperty) {
-        List<Schema> oneOf = new ArrayList<>();
         List<TypeSymbol> typeSymbols = symbol.userSpecifiedMemberTypes();
         for (TypeSymbol typeSymbol: typeSymbols) {
             if (typeSymbol.typeKind() == TypeDescKind.ARRAY) {
                 TypeSymbol arrayType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor();
                 symbolProperty = ConverterCommonUtils.getOpenApiSchema(arrayType.typeKind().getName());
-                oneOf.add(symbolProperty);
             } else if (!(typeSymbol.typeKind() == TypeDescKind.NIL)) {
                 symbolProperty = ConverterCommonUtils.getOpenApiSchema(typeSymbol.typeKind().getName());
-                oneOf.add(symbolProperty);
             }
-        }
-        if (typeSymbols.size() > 2) {
-            ComposedSchema oneOfSchema = new ComposedSchema();
-            oneOfSchema.setOneOf(oneOf);
-            oneOfSchema.setNullable(true);
-            symbolProperty = oneOfSchema;
         }
         return symbolProperty;
     }
