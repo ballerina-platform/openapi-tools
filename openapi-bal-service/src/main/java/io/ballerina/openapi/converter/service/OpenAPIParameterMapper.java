@@ -322,10 +322,9 @@ public class OpenAPIParameterMapper {
                     (!"GET".toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
                 Map<String, Schema> schema = components.getSchemas();
                 // Handle request payload.
-                OpenAPIRequestBodyMapper openAPIRequestBodyMapper =
-                        new OpenAPIRequestBodyMapper(components, operationAdaptor, semanticModel);
-                openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema,
-                        annotation, apidocs);
+                OpenAPIRequestBodyMapper openAPIRequestBodyMapper = new OpenAPIRequestBodyMapper(components,
+                        operationAdaptor, semanticModel);
+                openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
             }
         }
     }
