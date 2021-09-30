@@ -97,6 +97,12 @@ public class HeaderTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario09.yaml");
     }
 
+    @Test(description = "Tests for header parameter has default value as expression")
+    public void testHeaderWithDefaultExpressionValue() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("header_scenario10.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario10.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
