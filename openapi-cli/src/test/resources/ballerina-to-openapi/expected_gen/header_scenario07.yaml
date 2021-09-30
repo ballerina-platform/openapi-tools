@@ -3,16 +3,11 @@ paths:
     get:
       operationId: operation_get_/ping
       parameters:
-        - name: headerValue
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: x-request-client
+        - name: x-client
           in: header
           schema:
             type: string
-            nullable: true
+            default: header1
       responses:
         "200":
           description: Ok

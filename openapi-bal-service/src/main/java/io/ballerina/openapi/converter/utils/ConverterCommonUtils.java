@@ -18,6 +18,13 @@
  
 package io.ballerina.openapi.converter.utils;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.openapi.converter.Constants;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
@@ -28,6 +35,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Utilities used in Ballerina  to OpenAPI converter.
@@ -140,5 +148,32 @@ public class ConverterCommonUtils {
             identifier = validName.toString();
         }
         return identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1);
+    }
+
+    /**
+     * This util function uses to take the field value from annotation field.
+     *
+     * @param annotations           - Annotation node list
+     * @param annotationReference   - Annotation reference that needs to extract
+     * @param annotationField       - Annotation field name that uses to take value
+     * @return                      - string value of field
+     */
+    public static Optional<String> extractServiceAnnotationDetails(NodeList<AnnotationNode> annotations,
+                                                                  String annotationReference, String annotationField) {
+        for (AnnotationNode annotation: annotations) {
+            Node annotReference = annotation.annotReference();
+            if (annotReference.toString().trim().equals(annotationReference) && annotation.annotValue().isPresent()) {
+                MappingConstructorExpressionNode listOfAnnotValue = annotation.annotValue().get();
+                for (MappingFieldNode field : listOfAnnotValue.fields()) {
+                    SpecificFieldNode fieldNode = (SpecificFieldNode) field;
+                    if ((fieldNode).fieldName().toString().trim().equals(annotationField)
+                            && fieldNode.valueExpr().isPresent()) {
+                        ExpressionNode expressionNode = fieldNode.valueExpr().get();
+                        return Optional.of(expressionNode.toString().trim().replaceAll("\"", ""));
+                    }
+                }
+            }
+        }
+        return Optional.empty();
     }
 }

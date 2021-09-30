@@ -5,14 +5,19 @@ paths:
       parameters:
         - name: headerValue
           in: header
-          required: true
           schema:
             type: string
-        - name: x-request-client
+      responses:
+        "200":
+          description: Ok
+  /ping02:
+    get:
+      operationId: operation_get_/ping02
+      parameters:
+        - name: headerValue
           in: header
           schema:
             type: string
-            nullable: true
       responses:
         "200":
           description: Ok

@@ -5,14 +5,10 @@ paths:
       parameters:
         - name: headerValue
           in: header
-          required: true
-          schema:
-            type: string
-        - name: x-request-client
-          in: header
           schema:
             type: string
             nullable: true
+            default: default
       responses:
         "200":
           description: Ok

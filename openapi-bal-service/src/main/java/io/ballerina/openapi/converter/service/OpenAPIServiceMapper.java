@@ -53,7 +53,6 @@ public class OpenAPIServiceMapper {
      *
      * @param service   - Ballerina @Service object to be map to openApi definition
      * @param openapi   - OpenApi model to populate
-     * @param basePath  - For string base path
      * @return OpenApi object which represent current service.
      */
     public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi, String basePath)
