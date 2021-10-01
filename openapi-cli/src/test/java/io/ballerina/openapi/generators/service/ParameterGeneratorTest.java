@@ -51,6 +51,15 @@ public class ParameterGeneratorTest {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("service_gen.bal", syntaxTree);
     }
 
+    @Test(description = "Generate service with path has special characters")
+    public void generateServiceWithPathSpecialCharacters() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/petstore_service_with_special_characters.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("service_gen_special_characters.bal",
+                syntaxTree);
+    }
     @Test(description = "Generate functionDefinitionNode for multiple operations")
     public void generateMultipleOperations() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/multiOperations.yaml");
