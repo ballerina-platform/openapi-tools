@@ -51,7 +51,7 @@ public class ParameterGeneratorTest {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("service_gen.bal", syntaxTree);
     }
 
-    @Test(description = "Generate service with path has special characters")
+    @Test(description = "Generate service with path having special characters")
     public void generateServiceWithPathSpecialCharacters() throws IOException, BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_service_with_special_characters.yaml");
