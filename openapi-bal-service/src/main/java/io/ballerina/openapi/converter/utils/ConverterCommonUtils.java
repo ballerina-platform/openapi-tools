@@ -30,7 +30,6 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
@@ -98,10 +97,6 @@ public class ConverterCommonUtils {
             case Constants.INTEGER:
                 schema = new IntegerSchema();
                 break;
-            case Constants.TYPE_REFERENCE:
-            case Constants.TYPEREFERENCE:
-                schema = new Schema();
-                break;
             case Constants.BYTE_ARRAY:
             case Constants.OCTET_STREAM:
                 schema = new StringSchema();
@@ -115,10 +110,12 @@ public class ConverterCommonUtils {
                 schema = new NumberSchema();
                 schema.setFormat(Constants.FLOAT);
                 break;
+            case Constants.TYPE_REFERENCE:
+            case Constants.TYPEREFERENCE:
             case Constants.XML:
             case Constants.JSON:
             default:
-                schema = new ObjectSchema();
+                schema = new Schema();
                 break;
         }
         return schema;

@@ -18,7 +18,9 @@ paths:
           in: query
           required: false
           schema:
-            type: object
+            type: integer
+            format: int32
+            nullable: true
       responses:
         "200":
           description: Ok

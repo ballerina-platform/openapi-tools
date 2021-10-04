@@ -16,8 +16,7 @@ paths:
       requestBody:
         content:
           application/xml:
-            schema:
-              type: object
+            schema: {}
       responses:
         "200":
           description: Ok

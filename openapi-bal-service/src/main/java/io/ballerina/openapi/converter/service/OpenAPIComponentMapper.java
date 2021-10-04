@@ -99,7 +99,7 @@ public class OpenAPIComponentMapper {
             Optional<String> description = (documentation.get().description());
             apiDocs.put(componentName, description.get());
         }
-        // record field apidoc
+        // Record field apidoc mapping
         TypeReferenceTypeSymbol recordTypeReference = typeSymbol;
         TypeDefinitionSymbol recordTypeDefinitionSymbol = (TypeDefinitionSymbol) ((recordTypeReference).definition());
         if (recordTypeDefinitionSymbol.typeDescriptor() instanceof RecordTypeSymbol) {
@@ -139,7 +139,7 @@ public class OpenAPIComponentMapper {
                     unionKeys.addAll(tInFields.keySet());
                     unionKeys.removeAll(tInFields.keySet());
                     generateObjectSchemaFromRecordFields(schema, typeInclusionName, tInFields, apiDocs);
-                    //Update the schema value
+                    // Update the schema value
                     schema = this.components.getSchemas();
                 }
             }
@@ -151,7 +151,7 @@ public class OpenAPIComponentMapper {
         allOfSchemaList.add(objectSchema);
         allOfSchema.setAllOf(allOfSchemaList);
         if (schema != null && !schema.containsKey(componentName)) {
-            //Set properties for the schema
+            // Set properties for the schema
             schema.put(componentName, allOfSchema);
             this.components.setSchemas(schema);
         } else if (schema == null) {
@@ -199,7 +199,7 @@ public class OpenAPIComponentMapper {
         componentSchema.setProperties(schemaProperties);
         componentSchema.setRequired(required);
         if (componentName != null && schema != null && !schema.containsKey(componentName)) {
-            //Set properties for the schema
+            // Set properties for the schema
             schema.put(componentName, componentSchema);
             this.components.setSchemas(schema);
         } else if (schema == null && componentName != null) {
@@ -303,9 +303,13 @@ public class OpenAPIComponentMapper {
             ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) symbol;
             symbol = arrayTypeSymbol.memberTypeDescriptor();
         }
-        //handle record field has nested record array type ex: Tag[] tags
+        // Handle record fields have reference record array type (ex: Tag[] tags)
         Schema symbolProperty  = ConverterCommonUtils.getOpenApiSchema(symbol.typeKind().getName());
-        //Set the record model to the definition
+        // Handle record fields have union type array (ex: string[]? name)
+        if (symbol.typeKind() == TypeDescKind.UNION) {
+            symbolProperty = getSchemaForUnionType((UnionTypeSymbol) symbol, symbolProperty);
+        }
+        // Set the record model to the definition
         if (symbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
             if (((TypeReferenceTypeSymbol) symbol).definition().kind() == SymbolKind.ENUM) {
                 TypeReferenceTypeSymbol typeRefEnum = (TypeReferenceTypeSymbol) symbol;
@@ -317,12 +321,32 @@ public class OpenAPIComponentMapper {
                 createComponentSchema(schema, typeRecord);
             }
         }
-        //Handle nested array type
+        // Handle nested array type
         if (arrayDimensions > 1) {
             property.setItems(handleArray(arrayDimensions - 1, symbolProperty, new ArraySchema()));
         } else {
             property.setItems(symbolProperty);
         }
+    }
+
+    /**
+     * This function is used to map union type of BUNION type (ex: string[]? name).
+     *
+     * TODO: Map for different array type unions (ex:float|int[] ids, float|int[]? ids)
+     * `string[]? name` here it takes union member types as array and nil,fix should do with array type and map to
+     * oneOf OAS.
+     */
+    private Schema getSchemaForUnionType(UnionTypeSymbol symbol, Schema symbolProperty) {
+        List<TypeSymbol> typeSymbols = symbol.userSpecifiedMemberTypes();
+        for (TypeSymbol typeSymbol: typeSymbols) {
+            if (typeSymbol.typeKind() == TypeDescKind.ARRAY) {
+                TypeSymbol arrayType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor();
+                symbolProperty = ConverterCommonUtils.getOpenApiSchema(arrayType.typeKind().getName());
+            } else if (typeSymbol.typeKind() != TypeDescKind.NIL) {
+                symbolProperty = ConverterCommonUtils.getOpenApiSchema(typeSymbol.typeKind().getName());
+            }
+        }
+        return symbolProperty;
     }
 
     /**
