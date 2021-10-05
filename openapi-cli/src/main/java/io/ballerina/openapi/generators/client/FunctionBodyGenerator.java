@@ -413,14 +413,14 @@ public class FunctionBodyGenerator {
                 ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
                         "//TODO: Update the request as needed");
                 statementsList.add(expressionStatementNode);
-                clientCallStatement = "check self.clientEp-> " + method + "(path, request, headers = " +
+                clientCallStatement = "check self.clientEp->" + method + "(path, request, headers = " +
                             "accHeaders, targetType = " + targetType + ")";
 
             } else {
                 if (method.equals(HEAD)) {
-                    clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders)";
+                    clientCallStatement = "check self.clientEp->" + method + "(path, accHeaders)";
                 } else {
-                    clientCallStatement = "check self.clientEp-> " + method + "(path, accHeaders, targetType = "
+                    clientCallStatement = "check self.clientEp->" + method + "(path, accHeaders, targetType = "
                             + targetType + ")";
                 }
             }
@@ -435,9 +435,9 @@ public class FunctionBodyGenerator {
                         "check self.clientEp-> " + method + "(path, request, targetType = " + targetType + ")";
 
         } else if (method.equals(HEAD)) {
-            clientCallStatement = "check self.clientEp-> " + method + "(path)";
+            clientCallStatement = "check self.clientEp->" + method + "(path)";
         } else {
-            clientCallStatement = "check self.clientEp-> " + method + "(path, targetType = " + targetType + ")";
+            clientCallStatement = "check self.clientEp->" + method + "(path, targetType = " + targetType + ")";
         }
         //Return Variable
         VariableDeclarationNode clientCall = generatorUtils.getSimpleStatement(returnType, RESPONSE,
@@ -463,7 +463,7 @@ public class FunctionBodyGenerator {
     private VariableDeclarationNode getPathStatement(String path, NodeList<AnnotationNode> annotationNodes) {
 
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(createSimpleNameReferenceNode(
-                createIdentifierToken("string ")), createCaptureBindingPatternNode(
+                createIdentifierToken("string")), createCaptureBindingPatternNode(
                 createIdentifierToken("path")));
         // Create initializer
         // Content  should decide with /pet and /pet/{pet}
@@ -540,13 +540,13 @@ public class FunctionBodyGenerator {
         // POST, PUT, PATCH, DELETE, EXECUTE
         VariableDeclarationNode requestStatement =
                 generatorUtils.getSimpleStatement(returnType, RESPONSE, "check self.clientEp->"
-                        + method + "(path," + " request, targetType=" + targetType + ")");
+                        + method + "(path," + " request, targetType = " + targetType + ")");
         if (isHeader) {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
                 requestStatement = generatorUtils.getSimpleStatement(returnType, RESPONSE,
                         "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
-                                "targetType=" + targetType + ")");
+                                "targetType = " + targetType + ")");
                 statementsList.add(requestStatement);
                 Token returnKeyWord = createIdentifierToken("return");
                 SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
