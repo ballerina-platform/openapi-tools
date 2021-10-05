@@ -76,4 +76,12 @@ public class ListenerTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners/listeners04.bal", syntaxTree);
     }
+
+    @Test(description = "Generate listeners when the server url base path is absent")
+    public void generatelisteners04() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("generators/service/swagger/listeners/petstore_listeners05.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("listeners/listeners05.bal", syntaxTree);
+    }
 }

@@ -85,7 +85,10 @@ public class ListenerGenerator {
                 String resolvedUrl = GeneratorUtils.buildUrl(server.getUrl(), variables);
                 url = new URL(resolvedUrl);
                 host = url.getHost();
-                this.basePath = url.getPath();
+                if (!url.getPath().isBlank()) {
+                    this.basePath = url.getPath();
+                }
+
                 port = url.getPort();
                 boolean isHttps = "https".equalsIgnoreCase(url.getProtocol());
                 if (port < 0) {
