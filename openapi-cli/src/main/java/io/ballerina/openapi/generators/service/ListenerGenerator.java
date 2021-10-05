@@ -88,7 +88,6 @@ public class ListenerGenerator {
                 if (!url.getPath().isBlank()) {
                     this.basePath = url.getPath();
                 }
-
                 port = url.getPort();
                 boolean isHttps = "https".equalsIgnoreCase(url.getProtocol());
                 if (port < 0) {
