@@ -79,4 +79,13 @@ public class RequestBodyTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_03_rb.bal",
                 syntaxTree);
     }
+
+    @Test(description = "Scenario 04 - Request Body has record name with special characters.")
+    public void generateRecordName() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/requestBody/record_name_refactor.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/refactor_record_name.bal", syntaxTree);
+    }
 }
