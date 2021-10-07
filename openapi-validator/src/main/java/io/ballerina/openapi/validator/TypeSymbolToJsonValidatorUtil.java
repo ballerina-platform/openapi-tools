@@ -104,7 +104,7 @@ public class TypeSymbolToJsonValidatorUtil {
                 TypeSymbol recordType = null;
                 isExitType = true;
                 Optional<TypeSymbol> symbol = semanticModel
-                        .type(((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange());
+                        .typeOf(((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().getLocation().get().lineRange());
                 if (symbol.isPresent()) {
                     recordType = ((TypeDefinitionSymbol) symbol.get()).typeDescriptor();
                 }
@@ -194,14 +194,15 @@ public class TypeSymbolToJsonValidatorUtil {
                         TypeMismatch validationError = new TypeMismatch(fieldSymbol.getValue().getName().orElseThrow(),
                                 convertTypeToEnum(entry.getValue().getType()),
                                 convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
-                                componentName, fieldSymbol.getValue().location());
+                                componentName, fieldSymbol.getValue().getLocation().get());
                         validationErrorList.add(validationError);
                     } else if ((entry.getValue() instanceof ObjectSchema) && (fieldSymbol.getValue().typeDescriptor()
                             instanceof TypeReferenceTypeSymbol)) {
                         // Handle the nested record type
                         TypeSymbol refRecordType = null;
                         List<ValidationError> nestedValidationError;
-                        Optional<TypeSymbol> symbol = semanticModel.type(fieldSymbol.getValue().location().lineRange());
+                        Optional<TypeSymbol> symbol =
+                                semanticModel.typeOf(fieldSymbol.getValue().getLocation().get().lineRange());
                         fieldSymbol.getValue().typeDescriptor();
                         if (symbol != null && symbol.isPresent()) {
                             Symbol symbol1 = symbol.get();
