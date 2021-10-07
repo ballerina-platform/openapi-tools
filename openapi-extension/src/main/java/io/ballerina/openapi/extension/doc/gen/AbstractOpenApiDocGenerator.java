@@ -122,7 +122,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             // currently, we do not have open-api doc generation logic for following scenarios:
             //  1. default resources and for scenarios
             //  2. returning http-response from a resource
-            // hence will disable exception handling until it is finalized
+            // hence logs are disabled for now
         }
     }
 
