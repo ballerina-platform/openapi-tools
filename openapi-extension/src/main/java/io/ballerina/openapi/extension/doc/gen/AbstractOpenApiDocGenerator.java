@@ -39,7 +39,6 @@ import io.ballerina.projects.Package;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -119,12 +118,11 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                     updateCompilerContext(context, location, errorCode);
                 }
             }
-        } catch (IOException | OpenApiConverterException e) {
-            OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_102;
-            updateCompilerContext(context, location, errorCode);
         } catch (Exception e) {
-            OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_103;
-            updateCompilerContext(context, location, errorCode);
+            // currently, we do not have open-api doc generation logic for following scenarios:
+            //  1. default resources and for scenarios
+            //  2. returning http-response from a resource
+            // hence will disable exception handling until it is finalized
         }
     }
 
