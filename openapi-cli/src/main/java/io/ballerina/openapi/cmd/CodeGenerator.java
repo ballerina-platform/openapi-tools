@@ -225,9 +225,9 @@ public class CodeGenerator {
         String openAPIFileContent = Files.readString(Paths.get(definitionPath));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
         if (parseResult.getMessages().size() > 0) {
-            StringBuilder errorMessage = new StringBuilder("OpenAPI file has errors: \n\n");
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
             for (String message: parseResult.getMessages()) {
-                errorMessage.append(message);
+                errorMessage.append(message + "\n");
             }
             throw new BallerinaOpenApiException(errorMessage.toString());
         }

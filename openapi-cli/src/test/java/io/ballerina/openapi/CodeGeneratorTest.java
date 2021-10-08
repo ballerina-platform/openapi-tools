@@ -452,7 +452,7 @@ public class CodeGeneratorTest {
 
     @Test(description = "Functionality tests when invalid OpenAPI definition is given",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
+            expectedExceptionsMessageRegExp = "OpenAPI definition has errors: .*")
     public void testForInvalidDefinition() throws IOException, BallerinaOpenApiException,
             FormatterException {
         final String clientName = "openapipetstore";
