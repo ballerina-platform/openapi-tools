@@ -67,6 +67,17 @@ public class QueryParameterTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario04.yaml");
     }
 
+    @Test(description = "Query parameter has service config with optional field false")
+    public void testQueryscenario05() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario05.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario05.yaml");
+    }
+
+    @Test(description = "Query parameter has default parameter.")
+    public void testQueryscenario06() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario06.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario05.yaml");
+    }
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

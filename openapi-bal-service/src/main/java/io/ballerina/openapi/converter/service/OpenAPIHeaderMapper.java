@@ -43,6 +43,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
+
 /**
  * This class for the mapping ballerina headers with OAS header parameter sections.
  *
@@ -132,24 +134,6 @@ public class OpenAPIHeaderMapper {
         } else {
             headerParameter.setRequired(true);
         }
-    }
-
-    /**
-     * This function uses to take the service declaration node from given required node and return all the annotation
-     * nodes that attached to service node.
-     */
-    private NodeList<AnnotationNode> getAnnotationNodesFromServiceNode(RequiredParameterNode headerParam) {
-        NodeList<AnnotationNode> annotations = AbstractNodeFactory.createEmptyNodeList();
-        NonTerminalNode parent = headerParam.parent();
-        while (parent.kind() != SyntaxKind.SERVICE_DECLARATION) {
-            parent = parent.parent();
-        }
-        ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) parent;
-        if (serviceNode.metadata().isPresent()) {
-            MetadataNode metadataNode = serviceNode.metadata().get();
-            annotations = metadataNode.annotations();
-        }
-        return annotations;
     }
 
     /**
