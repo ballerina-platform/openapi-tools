@@ -20,14 +20,11 @@ package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
@@ -37,23 +34,15 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.CookieParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
-import io.swagger.v3.oas.models.parameters.QueryParameter;
-import org.ballerinalang.model.types.TypeKind;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
-
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
 
 /**
  * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.
@@ -84,10 +73,13 @@ public class OpenAPIParameterMapper {
         SeparatedNodeList<ParameterNode> parameterList = functionSignature.parameters();
         for (ParameterNode parameterNode : parameterList) {
             OpenAPIQueryParameterMapper queryParameterMapper = new OpenAPIQueryParameterMapper(apidocs);
-            if (parameterNode instanceof RequiredParameterNode) {
+            if (parameterNode.kind() == SyntaxKind.REQUIRED_PARAM) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
                 // Handle query parameter
-                parameters.add(queryParameterMapper.createQueryParameter(requiredParameterNode));
+                if (requiredParameterNode.typeName().kind() != SyntaxKind.QUALIFIED_NAME_REFERENCE &&
+                        requiredParameterNode.annotations().isEmpty()) {
+                    parameters.add(queryParameterMapper.createQueryParameter(requiredParameterNode));
+                }
                 // Handle header, payload parameter
                 if (requiredParameterNode.typeName() instanceof TypeDescriptorNode &&
                         !requiredParameterNode.annotations().isEmpty()) {
@@ -100,7 +92,7 @@ public class OpenAPIParameterMapper {
                         !defaultableParameterNode.annotations().isEmpty()) {
                     parameters.addAll(handleDefaultableAnnotationParameters(defaultableParameterNode));
                 } else {
-                    queryParameterMapper.createQueryParameter(defaultableParameterNode);
+                    parameters.add(queryParameterMapper.createQueryParameter(defaultableParameterNode));
                 }
             }
         }
@@ -122,7 +114,8 @@ public class OpenAPIParameterMapper {
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
 //                String type = ConverterCommonUtils
 //                        .convertBallerinaTypeToOpenAPIType(pathParam.typeDescriptor().toString().trim());
-                pathParameterOAS.schema(ConverterCommonUtils.getOpenApiSchema(pathParam.typeDescriptor().toString().trim()));
+                pathParameterOAS.schema(ConverterCommonUtils.getOpenApiSchema(
+                        pathParam.typeDescriptor().toString().trim()));
                 pathParameterOAS.setName(pathParam.paramName().text());
 
                 // Check the parameter has doc

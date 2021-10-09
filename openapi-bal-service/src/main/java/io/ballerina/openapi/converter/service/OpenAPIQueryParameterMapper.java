@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
@@ -18,11 +35,22 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.BOOLEAN_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.LIST_CONSTRUCTOR;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.NIL_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPTIONAL_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
 
+/**
+ * This class processes mapping query parameters in between Ballerina and OAS.
+ */
 public class OpenAPIQueryParameterMapper {
     private final Map<String, String> apidocs;
 
@@ -40,7 +68,6 @@ public class OpenAPIQueryParameterMapper {
         if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode && isQuery) {
             QueryParameter queryParameter = new QueryParameter();
             queryParameter.setName(queryParamName);
-//            String type = ConverterCommonUtils.convertBallerinaTypeToOpenAPIType();
             Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(queryParam.typeName().toString().trim());
             queryParameter.setSchema(openApiSchema);
             queryParameter.setRequired(true);
@@ -48,7 +75,7 @@ public class OpenAPIQueryParameterMapper {
                 queryParameter.setDescription(apidocs.get(queryParamName.trim()));
             }
             return queryParameter;
-        } else if (queryParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC && isQuery) {
+        } else if (queryParam.typeName().kind() == OPTIONAL_TYPE_DESC && isQuery) {
             // Handle optional query parameter
             NodeList<AnnotationNode> annotations = getAnnotationNodesFromServiceNode(queryParam);
             String isOptional = Constants.TRUE;
@@ -84,45 +111,53 @@ public class OpenAPIQueryParameterMapper {
         String queryParamName = defaultableQueryParam.paramName().get().text();
         boolean isQuery = !defaultableQueryParam.paramName().get().text().equals(Constants.PATH) &&
                 defaultableQueryParam.annotations().isEmpty();
-        // Need default value assign
 
+        QueryParameter queryParameter = new QueryParameter();
         if (defaultableQueryParam.typeName() instanceof BuiltinSimpleNameReferenceNode && isQuery) {
-            QueryParameter queryParameter = new QueryParameter();
             queryParameter.setName(queryParamName);
-//            String type = ConverterCommonUtils.convertBallerinaTypeToOpenAPIType();
-
-            Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(defaultableQueryParam.typeName().toString().trim());
+            Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(
+                    defaultableQueryParam.typeName().toString().trim());
             queryParameter.setSchema(openApiSchema);
-            if (!apidocs.isEmpty() && defaultableQueryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
+            if (!apidocs.isEmpty() && defaultableQueryParam.paramName().isPresent() &&
+                    apidocs.containsKey(queryParamName)) {
                 queryParameter.setDescription(apidocs.get(queryParamName.trim()));
             }
-            return queryParameter;
-        } else if (defaultableQueryParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC && isQuery) {
+        } else if (defaultableQueryParam.typeName().kind() == OPTIONAL_TYPE_DESC && isQuery) {
             // Handle optional query parameter
-            Parameter parameter = setOptionalQueryParameter(queryParamName,
+            queryParameter = setOptionalQueryParameter(queryParamName,
                     ((OptionalTypeDescriptorNode) defaultableQueryParam.typeName()),
                     Constants.TRUE);
-            return parameter;
         } else if (defaultableQueryParam.typeName() instanceof ArrayTypeDescriptorNode && isQuery) {
             // Handle required array type query parameter
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) defaultableQueryParam.typeName();
-            Parameter parameter = handleArrayTypeQueryParameter(queryParamName, arrayNode);
-            return parameter;
+            queryParameter = handleArrayTypeQueryParameter(queryParamName, arrayNode);
         } else {
-            QueryParameter queryParameter = new QueryParameter();
             queryParameter.setName(queryParamName);
             queryParameter.setSchema(new ObjectSchema());
-            if (!apidocs.isEmpty() && defaultableQueryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
+            if (!apidocs.isEmpty() && defaultableQueryParam.paramName().isPresent() &&
+                    apidocs.containsKey(queryParamName)) {
                 queryParameter.setDescription(apidocs.get(queryParamName.trim()));
             }
-            return queryParameter;
         }
+        // STRING_LITERAL, NUMERIC_LITERAL(int), NUMERIC_LITERAL(decimal), NUMERIC_LITERAL(float), BOOLEAN_LITERAL,
+        // LIST_CONSTRUCTER, NIL_LITERAL, MAPPING_CONSTRUCTOR
+
+        SyntaxKind[] invalidExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL, LIST_CONSTRUCTOR,
+                NIL_LITERAL, MAPPING_CONSTRUCTOR};
+        if (Arrays.stream(invalidExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
+                defaultableQueryParam.expression().kind())) {
+            String defaultValue = defaultableQueryParam.expression().toString().replaceAll("\"", "");
+            Schema schema = queryParameter.getSchema();
+            schema.setDefault(defaultValue);
+            queryParameter.setSchema(schema);
+        }
+        return queryParameter;
     }
 
     /**
      * Handle array type query parameter.
      */
-    private Parameter handleArrayTypeQueryParameter(String queryParamName, ArrayTypeDescriptorNode arrayNode) {
+    private QueryParameter handleArrayTypeQueryParameter(String queryParamName, ArrayTypeDescriptorNode arrayNode) {
         QueryParameter queryParameter = new QueryParameter();
         ArraySchema arraySchema = new ArraySchema();
         queryParameter.setName(queryParamName);
@@ -140,7 +175,7 @@ public class OpenAPIQueryParameterMapper {
     /**
      * Handle optional query parameter.
      */
-    private Parameter setOptionalQueryParameter(String queryParamName, OptionalTypeDescriptorNode typeNode,
+    private QueryParameter setOptionalQueryParameter(String queryParamName, OptionalTypeDescriptorNode typeNode,
                                                 String isOptional) {
         QueryParameter queryParameter = new QueryParameter();
         if (isOptional.equals(Constants.FALSE)) {

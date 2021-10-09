@@ -76,7 +76,7 @@ public class QueryParameterTests {
     @Test(description = "Query parameter has default parameter.")
     public void testQueryscenario06() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario06.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario05.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario06.yaml");
     }
     @AfterMethod
     public void cleanUp() {

@@ -1,0 +1,105 @@
+paths:
+  /pets:
+    get:
+      operationId: operation_get_/pets
+      parameters:
+        - name: pet
+          in: query
+          schema:
+            type: string
+            default: hello
+      responses:
+        "200":
+          description: Ok
+  /ping:
+    get:
+      operationId: operation_get_/ping
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 5
+      responses:
+        "200":
+          description: Ok
+  /ping02:
+    get:
+      operationId: operation_get_/ping02
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: number
+            default: 100.08
+      responses:
+        "200":
+          description: Ok
+  /ping03:
+    get:
+      operationId: operation_get_/ping03
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        "200":
+          description: Ok
+  /ping04:
+    get:
+      operationId: operation_get_/ping04
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: number
+            format: float
+            default: 100.08
+      responses:
+        "200":
+          description: Ok
+  /ping05:
+    get:
+      operationId: operation_get_/ping05
+      parameters:
+        - name: offset
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+            default: "[2, 1, 3, 4]"
+      responses:
+        "200":
+          description: Ok
+  /ping06:
+    get:
+      operationId: operation_get_/ping06
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: int32
+            nullable: true
+      responses:
+        "200":
+          description: Ok
+  /ping07:
+    get:
+      operationId: operation_get_/ping07
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            nullable: true
+            default: "{x: {id: sss}}"
+      responses:
+        "200":
+          description: Ok
+components: {}
