@@ -1,10 +1,12 @@
 paths:
   /pets:
     get:
+      summary: Mock example
       operationId: operation_get_/pets
       parameters:
         - name: pet
           in: query
+          description: Mock optional query parameter Description
           required: true
           schema:
             type: number

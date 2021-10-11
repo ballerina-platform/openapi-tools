@@ -107,13 +107,10 @@ public class OpenAPIParameterMapper {
      * Map path parameter data to OAS path parameter.
      */
     private void createPathParameters(List<Parameter> parameters, NodeList<Node> pathParams) {
-
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode) {
                 PathParameter pathParameterOAS = new PathParameter();
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
-//                String type = ConverterCommonUtils
-//                        .convertBallerinaTypeToOpenAPIType(pathParam.typeDescriptor().toString().trim());
                 pathParameterOAS.schema(ConverterCommonUtils.getOpenApiSchema(
                         pathParam.typeDescriptor().toString().trim()));
                 pathParameterOAS.setName(pathParam.paramName().text());

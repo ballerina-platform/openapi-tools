@@ -97,10 +97,30 @@ paths:
       parameters:
         - name: offset
           in: query
-          schema:
-            type: object
-            nullable: true
-            default: "{x: {id: sss}}"
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                nullable: true
+                default: "{x: {id: sss}}"
+      responses:
+        "200":
+          description: Ok
+  /ping08:
+    get:
+      summary: Mock resource function
+      operationId: operation_get_/ping08
+      parameters:
+        - name: offset
+          in: query
+          description: Mock query parameter
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                default: "{x: {id: sss}}"
       responses:
         "200":
           description: Ok

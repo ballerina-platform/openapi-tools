@@ -35,4 +35,13 @@ service /payloadV on helloEp {
         http:Ok ok = {body: ()};
         return ok;
     }
+
+    # Mock resource function
+    #
+    # + offset - Mock query parameter
+    # + return - Return Value Description
+    resource function get ping08(map<json> offset = {"x": {"id": "sss"}}) returns http:Ok {
+         http:Ok ok = {body: ()};
+         return ok;
+    }
 }

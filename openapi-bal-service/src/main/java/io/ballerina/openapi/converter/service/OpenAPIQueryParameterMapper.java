@@ -30,6 +30,8 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -50,6 +52,8 @@ import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnot
 
 /**
  * This class processes mapping query parameters in between Ballerina and OAS.
+ *
+ * @since 2.0.0
  */
 public class OpenAPIQueryParameterMapper {
     private final Map<String, String> apidocs;
@@ -59,12 +63,12 @@ public class OpenAPIQueryParameterMapper {
     }
 
     /**
-     * Handle function query parameters.
+     * Handle function query parameters for required parameters.
      */
     public Parameter createQueryParameter(RequiredParameterNode queryParam) {
         String queryParamName = queryParam.paramName().get().text();
-        boolean isQuery =
-                !queryParam.paramName().get().text().equals(Constants.PATH) && queryParam.annotations().isEmpty();
+        boolean isQuery = !queryParam.paramName().get().text().equals(Constants.PATH)
+                && queryParam.annotations().isEmpty();
         if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode && isQuery) {
             QueryParameter queryParameter = new QueryParameter();
             queryParameter.setName(queryParamName);
@@ -93,9 +97,7 @@ public class OpenAPIQueryParameterMapper {
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) queryParam.typeName();
             return handleArrayTypeQueryParameter(queryParamName, arrayNode);
         } else {
-            QueryParameter queryParameter = new QueryParameter();
-            queryParameter.setName(queryParamName);
-            queryParameter.setSchema(new ObjectSchema());
+            QueryParameter queryParameter = createContentTypeForMapJson(queryParamName, false);
             if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
                 queryParameter.setDescription(apidocs.get(queryParamName.trim()));
             }
@@ -104,7 +106,7 @@ public class OpenAPIQueryParameterMapper {
     }
 
     /**
-     * Handle function query parameters defualt.
+     * Create OAS query parameter for default query parameters.
      */
     public Parameter createQueryParameter(DefaultableParameterNode defaultableQueryParam) {
 
@@ -132,24 +134,32 @@ public class OpenAPIQueryParameterMapper {
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) defaultableQueryParam.typeName();
             queryParameter = handleArrayTypeQueryParameter(queryParamName, arrayNode);
         } else {
-            queryParameter.setName(queryParamName);
-            queryParameter.setSchema(new ObjectSchema());
+            queryParameter = createContentTypeForMapJson(queryParamName, false);
             if (!apidocs.isEmpty() && defaultableQueryParam.paramName().isPresent() &&
                     apidocs.containsKey(queryParamName)) {
                 queryParameter.setDescription(apidocs.get(queryParamName.trim()));
             }
         }
-        // STRING_LITERAL, NUMERIC_LITERAL(int), NUMERIC_LITERAL(decimal), NUMERIC_LITERAL(float), BOOLEAN_LITERAL,
-        // LIST_CONSTRUCTER, NIL_LITERAL, MAPPING_CONSTRUCTOR
 
-        SyntaxKind[] invalidExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL, LIST_CONSTRUCTOR,
+        SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL, LIST_CONSTRUCTOR,
                 NIL_LITERAL, MAPPING_CONSTRUCTOR};
-        if (Arrays.stream(invalidExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
+        if (Arrays.stream(validExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
                 defaultableQueryParam.expression().kind())) {
             String defaultValue = defaultableQueryParam.expression().toString().replaceAll("\"", "");
-            Schema schema = queryParameter.getSchema();
-            schema.setDefault(defaultValue);
-            queryParameter.setSchema(schema);
+            if (queryParameter.getContent() != null) {
+                Content content = queryParameter.getContent();
+                for (Map.Entry<String, MediaType> stringMediaTypeEntry : content.entrySet()) {
+                    Schema schema = stringMediaTypeEntry.getValue().getSchema();
+                    schema.setDefault(defaultValue);
+                    io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
+                    media.setSchema(schema);
+                    content.addMediaType(stringMediaTypeEntry.getKey(), media);
+                }
+            } else {
+                Schema schema = queryParameter.getSchema();
+                schema.setDefault(defaultValue);
+                queryParameter.setSchema(schema);
+            }
         }
         return queryParameter;
     }
@@ -203,6 +213,15 @@ public class OpenAPIQueryParameterMapper {
                 queryParameter.setDescription(apidocs.get(queryParamName));
             }
             return queryParameter;
+        } else if (node.kind() == SyntaxKind.MAP_TYPE_DESC) {
+            queryParameter = createContentTypeForMapJson(queryParamName, true);
+            if (isOptional.equals(Constants.FALSE)) {
+                queryParameter.setRequired(true);
+            }
+            if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apidocs.get(queryParamName));
+            }
+            return queryParameter;
         } else {
             Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(node.toString().trim());
             openApiSchema.setNullable(true);
@@ -214,4 +233,17 @@ public class OpenAPIQueryParameterMapper {
         }
     }
 
+    private QueryParameter createContentTypeForMapJson(String queryParamName, boolean nullable) {
+        QueryParameter queryParameter = new QueryParameter();
+        ObjectSchema objectSchema = new ObjectSchema();
+        if (nullable) {
+            objectSchema.setNullable(true);
+        }
+        objectSchema.setAdditionalProperties(true);
+        MediaType media = new MediaType();
+        media.setSchema(objectSchema);
+        queryParameter.setContent(new Content().addMediaType("application/json", media));
+        queryParameter.setName(queryParamName);
+        return queryParameter;
+    }
 }
