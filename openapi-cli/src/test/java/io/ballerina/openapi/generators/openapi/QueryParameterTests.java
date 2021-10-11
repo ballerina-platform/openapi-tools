@@ -78,6 +78,18 @@ public class QueryParameterTests {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario06.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario06.yaml");
     }
+
+    @Test(description = "Query parameter has array type with null values (ex: int?[] offset)")
+    public void testQueryscenario07() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario07.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario07.yaml");
+    }
+
+    @Test(description = "Default parameter scenarios do not support with tool")
+    public void testQueryscenario08() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario08.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario08.yaml");
+    }
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

@@ -88,7 +88,7 @@ public class OpenAPIQueryParameterMapper {
             }
             return setOptionalQueryParameter(queryParamName, ((OptionalTypeDescriptorNode) queryParam.typeName()),
                     isOptional);
-        } else if (queryParam.typeName() instanceof ArrayTypeDescriptorNode && isQuery) {
+        } else if (queryParam.typeName().kind() == SyntaxKind.ARRAY_TYPE_DESC && isQuery) {
             // Handle required array type query parameter
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) queryParam.typeName();
             return handleArrayTypeQueryParameter(queryParamName, arrayNode);
@@ -162,7 +162,14 @@ public class OpenAPIQueryParameterMapper {
         ArraySchema arraySchema = new ArraySchema();
         queryParameter.setName(queryParamName);
         TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
-        Schema itemSchema = ConverterCommonUtils.getOpenApiSchema(itemTypeNode.toString().trim());
+        Schema itemSchema;
+        if (arrayNode.memberTypeDesc().kind() == OPTIONAL_TYPE_DESC) {
+            itemSchema = ConverterCommonUtils.getOpenApiSchema(
+                    ((OptionalTypeDescriptorNode) itemTypeNode).typeDescriptor().toString().trim());
+            itemSchema.setNullable(true);
+        } else {
+            itemSchema = ConverterCommonUtils.getOpenApiSchema(itemTypeNode.toString().trim());
+        }
         arraySchema.setItems(itemSchema);
         queryParameter.schema(arraySchema);
         queryParameter.setRequired(true);
@@ -197,7 +204,6 @@ public class OpenAPIQueryParameterMapper {
             }
             return queryParameter;
         } else {
-//            String type = ConverterCommonUtils.convertBallerinaTypeToOpenAPIType(node.toString().trim());
             Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(node.toString().trim());
             openApiSchema.setNullable(true);
             queryParameter.setSchema(openApiSchema);
