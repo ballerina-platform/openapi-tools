@@ -118,51 +118,25 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec for resource has .")
     public void testPathscenario01() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("path_scenario01.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "path_scenario01.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "path_scenario01.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec multiple resource")
     public void testPathscenario02() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("path_scenario02.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "path_scenario02.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "path_scenario02.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with multipath including .")
     public void testPathscenario03() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("path_scenario03.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "path_scenario03.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "path_scenario03.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with path parameter including .")
     public void testPathscenario04() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("path_scenario04.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "path_scenario04.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with simple query parameter")
-    public void testQueryscenario01() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("query_scenario01.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "query_scenario01.yaml");
-    }
-
-    // type​ ​ BasicType​ ​ boolean|int|float|decimal|string​ ;
-    //public​ ​ type​ ​ QueryParamType​ ()​ |BasicType|BasicType[];
-    @Test(description = "Generate OpenAPI spec with optional query parameter")
-    public void testQueryscenario02() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("query_scenario02.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "query_scenario02.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with array type query parameter")
-    public void testQueryscenario03() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("query_scenario03.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "query_scenario03.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with optional type query parameter")
-    public void testQueryscenario04() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("query_scenario04.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "query_scenario04.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "path_scenario04.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for build project")
@@ -177,19 +151,19 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec for build project")
     public void testForResponse01() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("scenario01.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response01.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response01.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for build project")
     public void testForResponse02() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("scenario02.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "response02.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response02.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for given ballerina file has only compiler warning")
     public void testForCompilerWarning() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("compiler_warning.bal");
-        new TestUtils().compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
     }
 
     @AfterMethod

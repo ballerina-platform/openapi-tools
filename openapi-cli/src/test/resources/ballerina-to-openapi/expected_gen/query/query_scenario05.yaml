@@ -8,6 +8,7 @@ paths:
           required: true
           schema:
             type: number
+            format: double
             nullable: true
       responses:
         "200":

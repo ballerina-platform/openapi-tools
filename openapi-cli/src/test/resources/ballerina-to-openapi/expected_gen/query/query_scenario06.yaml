@@ -32,6 +32,7 @@ paths:
           in: query
           schema:
             type: number
+            format: double
             default: 100.08
       responses:
         "200":
@@ -97,6 +98,7 @@ paths:
         - name: offset
           in: query
           schema:
+            type: object
             nullable: true
             default: "{x: {id: sss}}"
       responses:

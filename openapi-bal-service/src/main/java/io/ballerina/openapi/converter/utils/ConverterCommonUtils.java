@@ -111,6 +111,7 @@ public class ConverterCommonUtils {
             case Constants.NUMBER:
             case Constants.DECIMAL:
                 schema = new NumberSchema();
+                schema.setFormat(Constants.DOUBLE);
                 break;
             case Constants.FLOAT:
                 schema = new NumberSchema();

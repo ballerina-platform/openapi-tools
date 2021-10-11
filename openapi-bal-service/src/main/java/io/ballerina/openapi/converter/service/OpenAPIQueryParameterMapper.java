@@ -190,7 +190,7 @@ public class OpenAPIQueryParameterMapper {
         }
         queryParameter.setName(queryParamName);
         Node node = typeNode.typeDescriptor();
-        if (node instanceof ArrayTypeDescriptorNode) {
+        if (node.kind() == SyntaxKind.ARRAY_TYPE_DESC) {
             ArraySchema arraySchema = new ArraySchema();
             arraySchema.setNullable(true);
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) node;

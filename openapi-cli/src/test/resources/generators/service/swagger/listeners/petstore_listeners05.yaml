@@ -1,0 +1,98 @@
+openapi: 3.0.0
+servers:
+  - description: Localhost
+    url: http://localhost:9080
+info:
+  title: Interceptor
+  description: Interceptor Service
+  version: v1
+  contact:
+    name: WSO2
+    url: http://wso2.com/products/api-manager/
+    email: architecture@wso2.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+  - name: mediation
+    description: Mediation
+paths:
+  /handle-request:
+    post:
+      tags:
+        - Request
+      summary: Handle request mediation
+      operationId: handleRequest
+      requestBody:
+        description: |
+          Content of the request
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/HandleRequest_RequestBody"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HandleResponse_RequestBody"
+components:
+  schemas:
+    HandleRequest_RequestBody:
+      title: Request/Response handler
+      type: object
+      properties:
+        headers:
+          "$ref": "#/components/schemas/Headers"
+        body:
+          "$ref": "#/components/schemas/Body"
+        context:
+          "$ref": "#/components/schemas/Context"
+    HandleResponse_RequestBody:
+      title: Request/Response handler
+      type: object
+      properties:
+        headersToAdd:
+          "$ref": "#/components/schemas/Headers"
+        headersToRemove:
+          "$ref": "#/components/schemas/HeaderKeys"
+        headersToReplace:
+          "$ref": "#/components/schemas/Headers"
+        body:
+          "$ref": "#/components/schemas/Body"
+        context:
+          "$ref": "#/components/schemas/Context"
+    Headers:
+      title: Headers
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Map (string-to-string dictionary) of key value pairs of headers
+      example:
+        content-type: application/json
+        content-length: "40"
+    HeaderKeys:
+      title: HeaderKeys
+      type: array
+      items:
+        type: string
+      description: |
+        Array of header keys
+      example:
+        - header-to-remove
+    Body:
+      type: string
+      description: |
+        Base64 encoded body
+      example: eyJIZWxsbyI6IldvcmxkIn0K
+    Context:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        Map (string-to-string dictionary) of key value pairs shared in Request and Response flow
+      example:
+        user-type: admin
+        validation: "true"

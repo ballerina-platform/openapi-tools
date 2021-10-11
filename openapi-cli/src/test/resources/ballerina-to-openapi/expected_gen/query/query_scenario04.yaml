@@ -5,7 +5,6 @@ paths:
       parameters:
         - name: pet
           in: query
-          required: false
           schema:
             type: array
             nullable: true

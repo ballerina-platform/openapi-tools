@@ -52,6 +52,7 @@ import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
+import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
 /**
  * This store all the util functions related service generation process.
@@ -150,7 +151,7 @@ public class ServiceGenerationUtils {
         IdentifierToken identifierToken;
         if (schema != null) {
             if (schema.get$ref() != null) {
-                identifierToken = createIdentifierToken(extractReferenceType(schema.get$ref()));
+                identifierToken = createIdentifierToken(getValidName(extractReferenceType(schema.get$ref()), true));
             } else if (schema.getType() != null) {
                 if (schema instanceof ObjectSchema) {
                     ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
@@ -159,8 +160,8 @@ public class ServiceGenerationUtils {
                     TypeDescriptorNode member;
                     if (((ArraySchema) schema).getItems().get$ref() != null) {
                         member = createBuiltinSimpleNameReferenceNode(null,
-                                createIdentifierToken(extractReferenceType(((ArraySchema) schema).
-                                        getItems().get$ref())));
+                                createIdentifierToken(getValidName(extractReferenceType(((ArraySchema) schema).
+                                        getItems().get$ref()), true)));
                     } else if (!(((ArraySchema) schema).getItems() instanceof ArraySchema)) {
                         member = createBuiltinSimpleNameReferenceNode(null,
                                 createIdentifierToken(GeneratorConstants.JSON));
