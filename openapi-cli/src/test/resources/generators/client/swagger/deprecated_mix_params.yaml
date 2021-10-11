@@ -1,0 +1,172 @@
+openapi: 3.0.1
+servers:
+  - url: "https://api.soundcloud.com"
+info:
+  x-ballerina-display:
+    label: SoundCloud
+    iconPath: "resources/soundcloud.svg"
+  contact:
+    name: API issue tracker
+    url: "https://github.com/soundcloud/api"
+  termsOfService: "https://developers.soundcloud.com/docs/api/terms-of-use"
+  title: SoundCloud Public API Specification
+  version: 1.0.0
+  x-apisguru-categories:
+    - media
+  x-logo:
+    url: "https://a-v2.sndcdn.com/assets/images/sc-icons/ios-a62dfc8fe7.png"
+  x-providerName: soundcloud.com
+  x-ballerina-init-description: >-
+    The connector initialization requires setting the API credentials.
+
+    Create an [SoundCloud account](https://soundcloud.com/)
+    and obtain tokens following [this guide](https://developers.soundcloud.com/docs/api/guide).
+  description: >-
+    This is a generated connector for [SoundCloud API v1.0.0](https://developers.soundcloud.com/) OpenAPI Specification.
+
+    SoundCloud API provides capability to access the online audio distribution platform and music sharing website that enables
+    you to upload,promote, and share audio, as well as a digital signal processor enabling listeners to stream audio.
+paths:
+  "/tracks/{track_id}/comments":
+    get:
+      operationId: getCommentsOnTrack
+      parameters:
+        - $ref: "#/components/parameters/track_id"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/linked_partitioning"
+      responses:
+        "200":
+          $ref: "#/components/responses/Comments"
+      summary: Returns the comments posted on the track(track_id).
+components:
+  parameters:
+    track_id:
+      description: SoundCloud Track id
+      example: 308946187
+      in: path
+      name: track_id
+      required: true
+      schema:
+        type: integer
+    offset:
+      deprecated: true
+      description: "Offset of first result. Deprecated, use `linked_partitioning` instead."
+      example: 0
+      in: query
+      name: offset
+      required: false
+      schema:
+        default: 0
+        type: integer
+    limit:
+      description: Number of results to return in the collection.
+      example: 2
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 50
+        maximum: 200
+        minimum: 1
+        type: integer
+    linked_partitioning:
+      description: >-
+        Returns paginated collection of items (recommended, returning a list
+        without pagination is deprecated and should not be used)
+      example: true
+      in: query
+      name: linked_partitioning
+      required: false
+      schema:
+        type: boolean
+  responses:
+    Comments:
+      content:
+        application/json; charset=utf-8:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Comments"
+              - $ref: "#/components/schemas/CommentsList"
+      description: Success
+  schemas:
+    Comment:
+      description: User's Comment
+      properties:
+        body:
+          description: Comment body.
+          type: string
+        created_at:
+          description: Created timestamp.
+          type: string
+        id:
+          description: Identifier.
+          type: integer
+        kind:
+          description: Kind (comment).
+          type: string
+        timestamp:
+          description: Timestamp.
+          type: string
+        track_id:
+          description: Track's identifier.
+          type: integer
+        uri:
+          description: Comment's URL.
+          type: string
+        user:
+          description: SoundCloud User object
+          properties:
+            avatar_url:
+              description: URL to a JPEG image.
+              type: string
+            followers_count:
+              description: number of followers.
+              type: integer
+            followings_count:
+              description: number of followed users.
+              type: integer
+            id:
+              description: unique identifier
+              type: integer
+            kind:
+              description: kind of resource.
+              type: string
+            last_modified:
+              description: last modified timestamp.
+              type: string
+            permalink:
+              description: permalink of the resource.
+              type: string
+            permalink_url:
+              description: URL to the SoundCloud.com page.
+              type: string
+            reposts_count:
+              description: number of reposts from user
+              type: integer
+            uri:
+              description: API resource URL.
+              type: string
+            username:
+              description: username
+              type: string
+          type: object
+        user_id:
+          description: User's identifier.
+          type: integer
+      type: object
+    Comments:
+      properties:
+        collection:
+          items:
+            $ref: "#/components/schemas/Comment"
+          type: array
+        next_href:
+          nullable: true
+          type: string
+      type: object
+    CommentsList:
+      deprecated: true
+      items:
+        $ref: "#/components/schemas/Comment"
+      type: array
