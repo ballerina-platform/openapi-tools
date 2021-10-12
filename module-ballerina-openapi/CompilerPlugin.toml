@@ -3,7 +3,7 @@ id = "ballerina-openapi"
 class = "io.ballerina.openapi.validator.OpenAPIValidatorPlugin"
 
 [[dependency]]
-path = "../openapi-validator/build/libs/openapi-validator-@project.version@.jar"
+path = "../openapi-validator/build/libs/openapi-validator-0.9.0-beta.4-SNAPSHOT.jar"
 groupId = "ballerina"
 artifactId = "openapi"
-version = "@project.version@"
+version = "0.9.0-beta.4-SNAPSHOT"
