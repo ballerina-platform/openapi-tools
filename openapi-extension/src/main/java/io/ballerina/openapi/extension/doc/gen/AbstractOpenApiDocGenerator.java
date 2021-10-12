@@ -162,7 +162,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                             .filter(fld -> fieldName.equals(fld.fieldName().toString().trim()))
                             .findFirst()
                 ).flatMap(SpecificFieldNode::valueExpr)
-                .map(ExpressionNode::toString);
+                .map(en -> en.toString().trim());
     }
 
     private String generateOpenApiDoc(SemanticModel semanticModel, SyntaxTree syntaxTree,
