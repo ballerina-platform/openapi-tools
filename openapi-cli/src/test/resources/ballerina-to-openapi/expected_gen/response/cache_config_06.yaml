@@ -22,6 +22,10 @@ paths:
                 type: string
         "500":
           description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
   /cachingBackEnd02:
     get:
       operationId: operation_get_/cachingBackEnd02
@@ -45,4 +49,8 @@ paths:
                 type: string
         "500":
           description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
 components: {}

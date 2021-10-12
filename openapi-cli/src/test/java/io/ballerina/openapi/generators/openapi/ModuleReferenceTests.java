@@ -36,4 +36,10 @@ public class ModuleReferenceTests {
         Path ballerinaFilePath = RES_DIR.resolve("snowpeak.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak.yaml");
     }
+
+    @Test(description = "Response in separate modules with cache config")
+    public void testResponse02() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("snowpeak_cache_config.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak_cache.yaml");
+    }
 }
