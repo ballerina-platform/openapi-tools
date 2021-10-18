@@ -61,6 +61,10 @@ paths:
       responses:
         "500":
           description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
   /v1:
     post:
       operationId: operation_post_/v1

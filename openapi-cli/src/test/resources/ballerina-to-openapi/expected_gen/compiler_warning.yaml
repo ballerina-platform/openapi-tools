@@ -22,4 +22,8 @@ paths:
                 type: string
         "500":
           description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
 components: {}

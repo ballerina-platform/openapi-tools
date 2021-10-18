@@ -29,6 +29,7 @@ import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -124,15 +125,28 @@ public class OpenAPIRequestBodyMapper {
                 break;
             default:
                 Node node = payloadNode.typeName();
-                if (node instanceof SimpleNameReferenceNode) {
+                if (node.kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
                     SimpleNameReferenceNode record = (SimpleNameReferenceNode) node;
-                    handleReferencePayload(record, schema, MediaType.APPLICATION_JSON, bodyParameter);
+                    // Creating request body - required.
+                    TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(record));
+                    String recordName = record.name().toString().trim();
+                    handleReferencePayload(typeSymbol, recordName, schema, MediaType.APPLICATION_JSON, bodyParameter);
                 } else if (node instanceof ArrayTypeDescriptorNode) {
                     handleArrayTypePayload(schema, (ArrayTypeDescriptorNode) node,
                             MediaType.APPLICATION_JSON, bodyParameter);
+                } else if (node.kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
+                    QualifiedNameReferenceNode separateRecord = (QualifiedNameReferenceNode) node;
+                    TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(separateRecord));
+                    String recordName = ((QualifiedNameReferenceNode) payloadNode.typeName()).identifier().text();
+                    handleReferencePayload(typeSymbol, recordName, schema, MediaType.APPLICATION_JSON, bodyParameter);
                 }
                 break;
         }
+    }
+
+    private TypeSymbol getReferenceTypeSymbol(Optional<Symbol> symbol2) {
+        Optional<Symbol> symbol = symbol2;
+        return (TypeSymbol) symbol.orElseThrow();
     }
 
     /**
@@ -147,8 +161,7 @@ public class OpenAPIRequestBodyMapper {
         if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
             //handel record for components
             SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) typeDescriptorNode;
-            Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
-            TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
+            TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(referenceNode));
             OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
             componentMapper.createComponentSchema(schema, typeSymbol);
             Schema itemSchema = new Schema();
@@ -203,9 +216,11 @@ public class OpenAPIRequestBodyMapper {
 
         String mimeType = mime.literalToken().text().
                 replaceAll("\"", "");
-        if (payloadNode.typeName() instanceof SimpleNameReferenceNode) {
+        if (payloadNode.typeName().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
             SimpleNameReferenceNode record = (SimpleNameReferenceNode) payloadNode.typeName();
-            handleReferencePayload(record, schema, mimeType, requestBody);
+            TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(record));
+            String recordName = record.name().toString().trim();
+            handleReferencePayload(typeSymbol, recordName, schema, mimeType, requestBody);
         } else if (payloadNode.typeName() instanceof ArrayTypeDescriptorNode) {
             ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) payloadNode.typeName();
             handleArrayTypePayload(schema, arrayTypeDescriptorNode, mimeType, requestBody);
@@ -228,17 +243,13 @@ public class OpenAPIRequestBodyMapper {
     /**
      * Handle record type request payload.
      */
-    private void handleReferencePayload(SimpleNameReferenceNode referenceNode,
+    private void handleReferencePayload(TypeSymbol typeSymbol, String recordName,
                                         Map<String, Schema> schema, String mediaType, RequestBody bodyParameter) {
-
-        // Creating request body - required.
-        Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
-        TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
-        //handel record for components
+        //handle record for components
         OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
         componentMapper.createComponentSchema(schema, typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
-        media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
+        media.setSchema(new Schema().$ref(recordName));
         if (bodyParameter.getContent() != null) {
             Content content = bodyParameter.getContent();
             content.addMediaType(mediaType, media);
