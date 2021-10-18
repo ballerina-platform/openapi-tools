@@ -1,0 +1,101 @@
+paths:
+  /locations:
+    get:
+      summary: Represents Snowpeak location resource
+      operationId: operation_get_/locations
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,public,max-age=3600"
+            ETag:
+              schema:
+                type: string
+            Last-Modified:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Locations'
+        "409":
+          description: Conflict
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    Link:
+      required:
+        - href
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+          description: Names the relationship of the linked target to the current
+            representation
+        href:
+          type: string
+          description: Target URL
+        types:
+          type: array
+          description: Expected resource representation media types
+          items:
+            type: string
+        methods:
+          type: array
+          description: Allowed resource methods
+          items:
+            type: string
+            enum:
+              - OPTIONS
+              - HEAD
+              - PATCH
+              - DELETE
+              - PUT
+              - POST
+              - GET
+      description: Represents a server-provided hyperlink
+    Links:
+      required:
+        - links
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+    Location:
+      allOf:
+        - $ref: '#/components/schemas/Links'
+        - required:
+            - address
+            - id
+            - name
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name of the location
+            id:
+              type: string
+              description: Unique identification
+            address:
+              type: string
+              description: Address of the location
+    Locations:
+      required:
+        - locations
+      type: object
+      properties:
+        locations:
+          type: array
+          description: collection of locations
+          items:
+            $ref: '#/components/schemas/Location'
+      description: Represents a collection of locations
