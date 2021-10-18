@@ -40,8 +40,9 @@ public class QueryParameterTests {
     public void setup() throws IOException {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
     }
+    // These are the data types that current ballerina query parameters can have.[effect from slbeta3]
     // type BasicType boolean|int|float|decimal|string ;
-    //public type  QueryParamType () |BasicType|BasicType[];
+    // public type  QueryParamType <map>json | () |BasicType|BasicType[];
 
     @Test(description = "Required query parameter")
     public void testQueryScenario01() throws OpenApiConverterException, IOException {

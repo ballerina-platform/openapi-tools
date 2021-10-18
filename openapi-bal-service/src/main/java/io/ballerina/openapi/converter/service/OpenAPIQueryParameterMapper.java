@@ -57,6 +57,8 @@ import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnot
  */
 public class OpenAPIQueryParameterMapper {
     private final Map<String, String> apidocs;
+    private final SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL,
+            LIST_CONSTRUCTOR, NIL_LITERAL, MAPPING_CONSTRUCTOR};
 
     public OpenAPIQueryParameterMapper(Map<String, String> apidocs) {
         this.apidocs = apidocs;
@@ -141,8 +143,6 @@ public class OpenAPIQueryParameterMapper {
             }
         }
 
-        SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL, LIST_CONSTRUCTOR,
-                NIL_LITERAL, MAPPING_CONSTRUCTOR};
         if (Arrays.stream(validExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
                 defaultableQueryParam.expression().kind())) {
             String defaultValue = defaultableQueryParam.expression().toString().replaceAll("\"", "");

@@ -1,0 +1,56 @@
+paths:
+  /cachingBackEnd01:
+    get:
+      operationId: operation_get_/cachingBackEnd01
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,no-store,no-transform,public,proxy-revalidate,max-age=3600"
+            ETag:
+              schema:
+                type: string
+            Last-Modified:
+              schema:
+                type: string
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
+  /cachingBackEnd02:
+    get:
+      operationId: operation_get_/cachingBackEnd02
+      responses:
+        "200":
+          description: Ok
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                default: "must-revalidate,no-store,no-transform,public,proxy-revalidate,max-age=3600,s-maxage=5"
+            ETag:
+              schema:
+                type: string
+            Last-Modified:
+              schema:
+                type: string
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}
