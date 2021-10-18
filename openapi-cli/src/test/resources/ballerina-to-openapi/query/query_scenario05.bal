@@ -1,11 +1,9 @@
 import ballerina/http;
 
-listener http:Listener helloEp = new (9090);
-
 @http:ServiceConfig {
     treatNilableAsOptional: false
 }
-service /payloadV on helloEp {
+service /payloadV on new http:Listener(9090) {
     # Mock example
     #
     # + pet - Mock optional query parameter Description
