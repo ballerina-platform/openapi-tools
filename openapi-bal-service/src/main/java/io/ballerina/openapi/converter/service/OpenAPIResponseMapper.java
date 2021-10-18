@@ -332,9 +332,7 @@ public class OpenAPIResponseMapper {
                 if (qNode.modulePrefix().toString().trim().equals(HTTP)) {
                     String code = generateApiResponseCode(qNode.identifier().toString().trim());
                     apiResponse.description(qNode.identifier().toString().trim());
-                    if (code.startsWith("2") && !headers.isEmpty()) {
-                        apiResponse.setHeaders(headers);
-                    }
+                    apiResponse = setCacheHeader(headers, apiResponse, code);
                     apiResponses.put(code, apiResponse);
                     return apiResponses;
                 } else {
@@ -356,9 +354,7 @@ public class OpenAPIResponseMapper {
             case INT_TYPE_DESC:
             case STRING_TYPE_DESC:
             case BOOLEAN_TYPE_DESC:
-                if (!headers.isEmpty()) {
-                    apiResponse.setHeaders(headers);
-                }
+                apiResponse = setCacheHeader(headers, apiResponse, HTTP_200);
                 String type =  typeNode.toString().toLowerCase(Locale.ENGLISH).trim();
                 Schema schema = ConverterCommonUtils.getOpenApiSchema(type);
                 String media = convertBallerinaMIMEToOASMIMETypes(type, customMediaPrefix);
@@ -368,9 +364,7 @@ public class OpenAPIResponseMapper {
                 apiResponses.put(HTTP_200, apiResponse);
                 return apiResponses;
             case JSON_TYPE_DESC:
-                if (!headers.isEmpty()) {
-                    apiResponse.setHeaders(headers);
-                }
+                apiResponse = setCacheHeader(headers, apiResponse, HTTP_200);
                 mediaType.setSchema(new ObjectSchema());
                 mediaTypeString = customMediaPrefix.isPresent() ? APPLICATION_PREFIX + customMediaPrefix.get() +
                         JSON_POSTFIX : MediaType.APPLICATION_JSON;
@@ -379,9 +373,7 @@ public class OpenAPIResponseMapper {
                 apiResponses.put(HTTP_200, apiResponse);
                 return apiResponses;
             case XML_TYPE_DESC:
-                if (!headers.isEmpty()) {
-                    apiResponse.setHeaders(headers);
-                }
+                apiResponse = setCacheHeader(headers, apiResponse, HTTP_200);
                 mediaType.setSchema(new ObjectSchema());
                 mediaTypeString = customMediaPrefix.isPresent() ? APPLICATION_PREFIX + customMediaPrefix.get() +
                         "+xml" : MediaType.APPLICATION_XML;
@@ -514,9 +506,7 @@ public class OpenAPIResponseMapper {
         mediaType.setSchema(inlineSchema);
         apiResponse.description(description);
         apiResponse.content(new Content().addMediaType(mediaTypeResponse, mediaType));
-        if (httpCode.startsWith("2") && !headers.isEmpty()) {
-            apiResponse.setHeaders(headers);
-        }
+        apiResponse = setCacheHeader(headers, apiResponse, httpCode);
         apiResponses.put(httpCode, apiResponse);
         return apiResponses;
     }
@@ -599,9 +589,7 @@ public class OpenAPIResponseMapper {
                                          Map<String, Schema> schema, ApiResponses apiResponses,
                                          Optional<String> customMediaPrefix, Map<String, Header> headers) {
         ApiResponse apiResponse = new ApiResponse();
-        if (!headers.isEmpty()) {
-            apiResponse.setHeaders(headers);
-        }
+        apiResponse = setCacheHeader(headers, apiResponse, HTTP_200);
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handel record for components
@@ -672,9 +660,7 @@ public class OpenAPIResponseMapper {
             mediaTypeString = APPLICATION_PREFIX + customMediaPrefix.get() + JSON_POSTFIX;
         }
         ApiResponse apiResponse = new ApiResponse();
-        if (!headers.isEmpty()) {
-            apiResponse.setHeaders(headers);
-        }
+        apiResponse = setCacheHeader(headers, apiResponse, HTTP_200);
         apiResponse.content(new Content().addMediaType(mediaTypeString, media));
         apiResponse.description(HTTP_200_DESCRIPTION);
         apiResponses.put(HTTP_200, apiResponse);
@@ -694,9 +680,7 @@ public class OpenAPIResponseMapper {
             if (HTTP.equals(typeInSymbol.getModule().orElseThrow().getName().orElseThrow())) {
                 isHttpModule = true;
                 String code = generateApiResponseCode(typeInSymbol.getName().orElseThrow().trim());
-                if (code.startsWith("2") && !headers.isEmpty()) {
-                    apiResponse.setHeaders(headers);
-                }
+                apiResponse = setCacheHeader(headers, apiResponse, code);
                 Map<String, RecordFieldSymbol> fieldsOfRecord = returnRecord.fieldDescriptors();
                 // Handle the content of the response
                 RecordFieldSymbol body = fieldsOfRecord.get(BODY);
@@ -728,9 +712,7 @@ public class OpenAPIResponseMapper {
             if (customMediaPrefix.isPresent()) {
                 mediaTypeString = APPLICATION_PREFIX + customMediaPrefix.get() + JSON_POSTFIX;
             }
-            if (!headers.isEmpty()) {
-                apiResponse.setHeaders(headers);
-            }
+            apiResponse = setCacheHeader(headers, apiResponse, HTTP_200);
             apiResponse.content(new Content().addMediaType(mediaTypeString, media));
             apiResponse.description(HTTP_200_DESCRIPTION);
             apiResponses.put(HTTP_200, apiResponse);
@@ -803,5 +785,15 @@ public class OpenAPIResponseMapper {
     private String buildCommaSeparatedString(List<String> fields) {
         String genString = fields.stream().map(field -> field.replaceAll("\"", "") + ",").collect(Collectors.joining());
         return genString.substring(0, genString.length() - 1);
+    }
+
+    /**
+     * This util function is for setting header parameters in the OAS response section which has 200 range status code.
+     */
+    private ApiResponse setCacheHeader(Map<String, Header> headers, ApiResponse apiResponse, String code) {
+        if (code.startsWith("2") && !headers.isEmpty()) {
+            apiResponse.setHeaders(headers);
+        }
+        return apiResponse;
     }
 }

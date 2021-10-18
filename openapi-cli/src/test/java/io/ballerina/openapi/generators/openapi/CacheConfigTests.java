@@ -29,7 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * This test class for capture the all the cache configuration related tests.
+ * This test class is for capturing all the cache configuration related tests.
  */
 public class CacheConfigTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
@@ -86,5 +86,4 @@ public class CacheConfigTests {
         System.setErr(null);
         System.setOut(null);
     }
-
 }
