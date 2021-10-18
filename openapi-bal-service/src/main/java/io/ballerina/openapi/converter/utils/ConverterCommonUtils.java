@@ -20,10 +20,13 @@ package io.ballerina.openapi.converter.utils;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.openapi.converter.Constants;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -169,6 +172,27 @@ public class ConverterCommonUtils {
                         return Optional.of(expressionNode.toString().trim().replaceAll("\"", ""));
                     }
                 }
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * This function for taking the specific media-type subtype prefix from http service configuration annotation.
+     * <pre>
+     *     @http:ServiceConfig {
+     *          mediaTypeSubtypePrefix : "vnd.exm.sales"
+     *  }
+     * </pre>
+     */
+    public static Optional<String> extractCustomMediaType(FunctionDefinitionNode functionDefNode) {
+        ServiceDeclarationNode serviceDefNode = (ServiceDeclarationNode) functionDefNode.parent();
+        if (serviceDefNode.metadata().isPresent()) {
+            MetadataNode metadataNode = serviceDefNode.metadata().get();
+            NodeList<AnnotationNode> annotations = metadataNode.annotations();
+            if (!annotations.isEmpty()) {
+                return ConverterCommonUtils.extractServiceAnnotationDetails(annotations,
+                        "http:ServiceConfig", "mediaTypeSubtypePrefix");
             }
         }
         return Optional.empty();

@@ -49,22 +49,31 @@ import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
 
+import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
+import static io.ballerina.openapi.converter.Constants.JSON_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
+import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
+
 /**
  * OpenAPIRequestBodyMapper provides functionality for converting ballerina payload to OAS request body model.
  *
  * @since 2.0.0
  */
 public class OpenAPIRequestBodyMapper {
-    Components components;
-    OperationAdaptor operationAdaptor;
-    SemanticModel semanticModel;
+    private final Components components;
+    private final OperationAdaptor operationAdaptor;
+    private final SemanticModel semanticModel;
+    private final Optional<String> customMediaType;
 
 
     public OpenAPIRequestBodyMapper(Components components, OperationAdaptor operationAdaptor,
-                                    SemanticModel semanticModel) {
+                                    SemanticModel semanticModel, Optional<String> customMediaType) {
         this.components = components;
         this.operationAdaptor = operationAdaptor;
         this.semanticModel = semanticModel;
+        this.customMediaType = customMediaType;
     }
 
     /**
@@ -94,7 +103,7 @@ public class OpenAPIRequestBodyMapper {
                 handleMultipleMIMETypes(bodyParameter, fields, payloadNode, schema);
             }  else {
                 //TODO : fill with rest of media types
-                handleSinglePayloadType(payloadNode, schema, bodyParameter);
+                handleSinglePayloadType(payloadNode, schema, bodyParameter, customMediaType);
             }
         }
     }
@@ -106,39 +115,48 @@ public class OpenAPIRequestBodyMapper {
      *</pre>
      */
     private void handleSinglePayloadType(RequiredParameterNode payloadNode, Map<String, Schema> schema,
-                                         RequestBody bodyParameter) {
+                                         RequestBody bodyParameter, Optional<String> customMediaPrefix) {
 
-        String consumes = "application/" + payloadNode.typeName().toString().trim();
+        String consumes = payloadNode.typeName().toString().trim();
+        String mediaTypeString;
         switch (consumes) {
-            case MediaType.APPLICATION_JSON:
-                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_JSON);
+            case Constants.JSON:
+                mediaTypeString = customMediaPrefix.map(value -> APPLICATION_PREFIX + value +
+                        JSON_POSTFIX).orElse(MediaType.APPLICATION_JSON);
+                addConsumes(operationAdaptor, bodyParameter, mediaTypeString);
                 break;
-            case MediaType.APPLICATION_XML:
-                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_XML);
+            case Constants.XML:
+                mediaTypeString = customMediaPrefix.map(value -> APPLICATION_PREFIX + value +
+                        XML_POSTFIX).orElse(MediaType.APPLICATION_XML);
+                addConsumes(operationAdaptor, bodyParameter, mediaTypeString);
                 break;
-            case MediaType.TEXT_PLAIN:
-            case "application/string":
-                addConsumes(operationAdaptor, bodyParameter, MediaType.TEXT_PLAIN);
+            case Constants.STRING:
+                mediaTypeString = customMediaPrefix.map(s -> TEXT_PREFIX + s +
+                        TEXT_POSTFIX).orElse(MediaType.TEXT_PLAIN);
+                addConsumes(operationAdaptor, bodyParameter, mediaTypeString);
                 break;
-            case "application/byte[]":
-                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_OCTET_STREAM);
+            case Constants.BYTE_ARRAY:
+                mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s +
+                        OCTECT_STREAM_POSTFIX).orElse(MediaType.APPLICATION_OCTET_STREAM);
+                addConsumes(operationAdaptor, bodyParameter, mediaTypeString);
                 break;
             default:
                 Node node = payloadNode.typeName();
+                mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s +
+                        JSON_POSTFIX).orElse(MediaType.APPLICATION_JSON);
                 if (node.kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
                     SimpleNameReferenceNode record = (SimpleNameReferenceNode) node;
                     // Creating request body - required.
                     TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(record));
                     String recordName = record.name().toString().trim();
-                    handleReferencePayload(typeSymbol, recordName, schema, MediaType.APPLICATION_JSON, bodyParameter);
+                    handleReferencePayload(typeSymbol, recordName, schema, mediaTypeString, bodyParameter);
                 } else if (node instanceof ArrayTypeDescriptorNode) {
-                    handleArrayTypePayload(schema, (ArrayTypeDescriptorNode) node,
-                            MediaType.APPLICATION_JSON, bodyParameter);
+                    handleArrayTypePayload(schema, (ArrayTypeDescriptorNode) node, mediaTypeString, bodyParameter);
                 } else if (node.kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
                     QualifiedNameReferenceNode separateRecord = (QualifiedNameReferenceNode) node;
                     TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(separateRecord));
                     String recordName = ((QualifiedNameReferenceNode) payloadNode.typeName()).identifier().text();
-                    handleReferencePayload(typeSymbol, recordName, schema, MediaType.APPLICATION_JSON, bodyParameter);
+                    handleReferencePayload(typeSymbol, recordName, schema, mediaTypeString, bodyParameter);
                 }
                 break;
         }

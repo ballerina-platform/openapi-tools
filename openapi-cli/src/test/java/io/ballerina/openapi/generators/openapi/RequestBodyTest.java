@@ -191,6 +191,12 @@ public class RequestBodyTest {
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario11.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for request body with customized media type")
+    public void testServiceConfig() throws OpenApiConverterException {
+        Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario12.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario12.yaml");
+    }
+
     @Test(description = "Generate OpenAPI spec with json file")
     public void testNestedRecordPayLoadJson() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/nestedRecord_payload_service.bal");

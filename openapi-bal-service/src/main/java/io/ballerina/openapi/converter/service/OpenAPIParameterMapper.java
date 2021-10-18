@@ -49,6 +49,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
  * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.
@@ -283,8 +286,9 @@ public class OpenAPIParameterMapper {
                     (!"GET".toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
                 Map<String, Schema> schema = components.getSchemas();
                 // Handle request payload.
+                Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
                 OpenAPIRequestBodyMapper openAPIRequestBodyMapper = new OpenAPIRequestBodyMapper(components,
-                        operationAdaptor, semanticModel);
+                        operationAdaptor, semanticModel, customMediaType);
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
             }
         }
