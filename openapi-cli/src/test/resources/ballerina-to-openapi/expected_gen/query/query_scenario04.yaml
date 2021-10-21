@@ -1,0 +1,17 @@
+paths:
+  /pets:
+    get:
+      operationId: operation_get_/pets
+      parameters:
+        - name: pet
+          in: query
+          schema:
+            type: array
+            nullable: true
+            items:
+              type: integer
+              format: int32
+      responses:
+        "200":
+          description: Ok
+components: {}

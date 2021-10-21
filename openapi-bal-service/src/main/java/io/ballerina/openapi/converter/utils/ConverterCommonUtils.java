@@ -18,6 +18,7 @@
  
 package io.ballerina.openapi.converter.utils;
 
+import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -26,13 +27,17 @@ import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NonTerminalNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
@@ -43,38 +48,6 @@ import java.util.Optional;
  * Utilities used in Ballerina  to OpenAPI converter.
  */
 public class ConverterCommonUtils {
-
-    /**
-     * This util function is for converting ballerina type to openapi type.
-     * @param type this string type parameter according to ballerina type
-     * @return  this return the string value of openAPI type
-     */
-    public static String convertBallerinaTypeToOpenAPIType(String type) {
-        String convertedType;
-        switch (type) {
-            case Constants.INT:
-                convertedType = Constants.OpenAPIType.INTEGER.toString();
-                break;
-            case Constants.STRING:
-                convertedType = Constants.OpenAPIType.STRING.toString();
-                break;
-            case Constants.BOOLEAN:
-                convertedType = Constants.OpenAPIType.BOOLEAN.toString();
-                break;
-            case Constants.ARRAY:
-                convertedType = Constants.OpenAPIType.ARRAY.toString();
-                break;
-            case Constants.RECORD:
-                convertedType = Constants.OpenAPIType.RECORD.toString();
-                break;
-            case Constants.DECIMAL:
-                convertedType = Constants.OpenAPIType.NUMBER.toString();
-                break;
-            default:
-                convertedType = "";
-        }
-        return convertedType;
-    }
 
     /**
      * Retrieves a matching OpenApi {@link Schema} for a provided ballerina type.
@@ -95,7 +68,6 @@ public class ConverterCommonUtils {
             case Constants.ARRAY:
                 schema = new ArraySchema();
                 break;
-            case Constants.NUMBER:
             case Constants.INT:
             case Constants.INTEGER:
                 schema = new IntegerSchema();
@@ -105,13 +77,17 @@ public class ConverterCommonUtils {
                 schema = new StringSchema();
                 schema.setFormat("uuid");
                 break;
+            case Constants.NUMBER:
             case Constants.DECIMAL:
                 schema = new NumberSchema();
-                schema.setFormat("double");
+                schema.setFormat(Constants.DOUBLE);
                 break;
             case Constants.FLOAT:
                 schema = new NumberSchema();
                 schema.setFormat(Constants.FLOAT);
+                break;
+            case Constants.MAP_JSON:
+                schema = new ObjectSchema();
                 break;
             case Constants.TYPE_REFERENCE:
             case Constants.TYPEREFERENCE:
@@ -175,6 +151,24 @@ public class ConverterCommonUtils {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * This function uses to take the service declaration node from given required node and return all the annotation
+     * nodes that attached to service node.
+     */
+    public static NodeList<AnnotationNode> getAnnotationNodesFromServiceNode(RequiredParameterNode headerParam) {
+        NodeList<AnnotationNode> annotations = AbstractNodeFactory.createEmptyNodeList();
+        NonTerminalNode parent = headerParam.parent();
+        while (parent.kind() != SyntaxKind.SERVICE_DECLARATION) {
+            parent = parent.parent();
+        }
+        ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) parent;
+        if (serviceNode.metadata().isPresent()) {
+            MetadataNode metadataNode = serviceNode.metadata().get();
+            annotations = metadataNode.annotations();
+        }
+        return annotations;
     }
 
     /**

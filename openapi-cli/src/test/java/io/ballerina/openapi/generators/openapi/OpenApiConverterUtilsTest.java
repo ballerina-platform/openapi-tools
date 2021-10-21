@@ -139,32 +139,6 @@ public class OpenApiConverterUtilsTest {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "path_scenario04.yaml");
     }
 
-    @Test(description = "Generate OpenAPI spec with simple query parameter")
-    public void testQueryscenario01() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("query_scenario01.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query_scenario01.yaml");
-    }
-
-    // type​ ​ BasicType​ ​ boolean|int|float|decimal|string​ ;
-    //public​ ​ type​ ​ QueryParamType​ ()​ |BasicType|BasicType[];
-    @Test(description = "Generate OpenAPI spec with optional query parameter")
-    public void testQueryscenario02() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("query_scenario02.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query_scenario02.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with array type query parameter")
-    public void testQueryscenario03() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("query_scenario03.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query_scenario03.yaml");
-    }
-
-    @Test(description = "Generate OpenAPI spec with optional type query parameter")
-    public void testQueryscenario04() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("query_scenario04.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query_scenario04.yaml");
-    }
-
     @Test(description = "Generate OpenAPI spec for build project")
     public void testRecordFieldPayLoad() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("project_bal/record_payload_service.bal");
