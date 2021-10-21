@@ -65,7 +65,7 @@ public class OpenAPIRequestBodyMapper {
     private final Components components;
     private final OperationAdaptor operationAdaptor;
     private final SemanticModel semanticModel;
-    private String customMediaType = null;
+    private final String customMediaType;
 
     /**
      * This constructor uses to create OpenAPIRequestBodyMapper instance when customMedia type enable.
@@ -95,6 +95,7 @@ public class OpenAPIRequestBodyMapper {
         this.components = components;
         this.operationAdaptor = operationAdaptor;
         this.semanticModel = semanticModel;
+        this.customMediaType = null;
     }
 
     /**
