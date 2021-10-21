@@ -83,9 +83,7 @@ public class RequestBodyGenerator {
             } else {
                 typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
                         GeneratorConstants.JSON, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE));
-                annotValue = NodeFactory.createMappingConstructorExpressionNode(
-                        createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
-                        createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+                annotValue = null;
             }
         } else {
             Iterator<Map.Entry<String, MediaType>> content = requestBody.getContent().entrySet().iterator();
@@ -93,8 +91,7 @@ public class RequestBodyGenerator {
                     AbstractNodeFactory.createEmptyMinutiaeList(), AbstractNodeFactory.createEmptyMinutiaeList(),
                     literals, content);
             typeName = getMediaTypeToken(next);
-            annotValue = NodeFactory.createMappingConstructorExpressionNode(createToken(SyntaxKind.OPEN_BRACE_TOKEN),
-                    NodeFactory.createSeparatedNodeList(), createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+            annotValue = null;
         }
         AnnotationNode annotationNode = getAnnotationNode("Payload", annotValue);
         NodeList<AnnotationNode> annotation =  NodeFactory.createNodeList(annotationNode);
