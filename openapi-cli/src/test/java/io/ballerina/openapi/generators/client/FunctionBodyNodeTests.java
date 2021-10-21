@@ -103,6 +103,9 @@ public class FunctionBodyNodeTests {
                         "xml? xmlBody = check xmldata:fromJson(jsonBody);" +
                         "request.setPayload(xmlBody);" +
                         "http:Response response = check self.clientEp->post(path, request, targetType=http:Response);" +
+                        "return response;}"},
+                {"swagger/response_type_order.yaml", "/pet/{petId}", "{string path = string `/pet/${petId}`;" +
+                        "Pet response = check self.clientEp->get(path, targetType = Pet);" +
                         "return response;}"}
         };
     }
