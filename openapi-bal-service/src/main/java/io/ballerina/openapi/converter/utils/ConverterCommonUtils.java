@@ -18,18 +18,25 @@
  
 package io.ballerina.openapi.converter.utils;
 
+import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NonTerminalNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
@@ -92,7 +99,6 @@ public class ConverterCommonUtils {
             case Constants.ARRAY:
                 schema = new ArraySchema();
                 break;
-            case Constants.NUMBER:
             case Constants.INT:
             case Constants.INTEGER:
                 schema = new IntegerSchema();
@@ -102,13 +108,17 @@ public class ConverterCommonUtils {
                 schema = new StringSchema();
                 schema.setFormat("uuid");
                 break;
+            case Constants.NUMBER:
             case Constants.DECIMAL:
                 schema = new NumberSchema();
-                schema.setFormat("double");
+                schema.setFormat(Constants.DOUBLE);
                 break;
             case Constants.FLOAT:
                 schema = new NumberSchema();
                 schema.setFormat(Constants.FLOAT);
+                break;
+            case Constants.MAP_JSON:
+                schema = new ObjectSchema();
                 break;
             case Constants.TYPE_REFERENCE:
             case Constants.TYPEREFERENCE:
@@ -172,5 +182,23 @@ public class ConverterCommonUtils {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * This function uses to take the service declaration node from given required node and return all the annotation
+     * nodes that attached to service node.
+     */
+    public static NodeList<AnnotationNode> getAnnotationNodesFromServiceNode(RequiredParameterNode headerParam) {
+        NodeList<AnnotationNode> annotations = AbstractNodeFactory.createEmptyNodeList();
+        NonTerminalNode parent = headerParam.parent();
+        while (parent.kind() != SyntaxKind.SERVICE_DECLARATION) {
+            parent = parent.parent();
+        }
+        ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) parent;
+        if (serviceNode.metadata().isPresent()) {
+            MetadataNode metadataNode = serviceNode.metadata().get();
+            annotations = metadataNode.annotations();
+        }
+        return annotations;
     }
 }
