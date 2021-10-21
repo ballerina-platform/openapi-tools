@@ -77,12 +77,6 @@ public class OpenAPIResourceMapper {
         for (FunctionDefinitionNode resource : resources) {
             List<String> methods = this.getHttpMethods(resource, false);
             getResourcePath(resource, methods);
-//            if (!methods.isEmpty()) {
-//                useMultiResourceMapper(resource, methods);
-//            }
-//            else {
-////                useDefaultResourceMapper(resource);
-//            }
         }
         return pathObject;
     }
@@ -105,20 +99,6 @@ public class OpenAPIResourceMapper {
             }
         }
     }
-
-// Enable after refactoring
-//    /**
-//     * Resource mapper when a resource has default  one http method.
-//     * @param resource The ballerina resource.
-//     */
-//    private void useDefaultResourceMapper(FunctionDefinitionNode resource) {
-//        String httpMethod = getHttpMethods(resource, true).get(0);
-//        OperationAdaptor operationAdaptor = this.convertResourceToOperation(resource, httpMethod, 1);
-//        operationAdaptor.setHttpOperation(httpMethod);
-//        String path = getPath(resource);
-//        io.swagger.v3.oas.models.Operation operation = operationAdaptor.getOperation();
-//        generatePathItem(httpMethod, pathObject, operation, path);
-//    }
 
     private void generatePathItem(String httpMethod, Paths path, Operation operation, String pathName) {
         PathItem pathItem = new PathItem();
@@ -212,7 +192,6 @@ public class OpenAPIResourceMapper {
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
         OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
         openAPIResponseMapper.getResourceOutput(resource, op);
-
         return op;
     }
 
@@ -275,20 +254,10 @@ public class OpenAPIResourceMapper {
                 }
             }
         }
-
-        if (httpMethods.isEmpty() && useDefaults) {
-            // By default all http methods are supported.
-            httpMethods.add(Constants.GET);
-            httpMethods.add(Constants.PUT);
-            httpMethods.add(Constants.POST);
-            httpMethods.add(Constants.DELETE);
-            httpMethods.add(Constants.PATCH);
-            httpMethods.add(Constants.OPTIONS);
-            httpMethods.add(Constants.HEAD);
-        }
-        List<String> httpMethodsAsString = new ArrayList<>(httpMethods);
-        Collections.reverse(httpMethodsAsString);
-        return httpMethodsAsString;
+//        List<String> httpMethodsAsString = new ArrayList<>(httpMethods);
+//        Collections.reverse(httpMethodsAsString);
+//        return httpMethodsAsString;
+        return new ArrayList<>(httpMethods);
     }
 
     private String generateRelativePath(FunctionDefinitionNode resource) {

@@ -66,7 +66,6 @@ public class OpenAPIServiceMapper {
             }
         }
         OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(this.semanticModel);
-        //
         openapi.setPaths(resourceMapper.getPaths(resource));
         openapi.setComponents(resourceMapper.getComponents());
         return openapi;
