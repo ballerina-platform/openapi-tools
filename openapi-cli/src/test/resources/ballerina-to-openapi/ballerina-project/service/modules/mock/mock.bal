@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/http;
 import 'service.representations as rep;
 
 public isolated function getLocations() returns rep:Locations {

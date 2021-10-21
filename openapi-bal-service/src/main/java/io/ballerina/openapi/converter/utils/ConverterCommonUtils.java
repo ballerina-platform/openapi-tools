@@ -21,6 +21,7 @@ package io.ballerina.openapi.converter.utils;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -47,38 +48,6 @@ import java.util.Optional;
  * Utilities used in Ballerina  to OpenAPI converter.
  */
 public class ConverterCommonUtils {
-
-    /**
-     * This util function is for converting ballerina type to openapi type.
-     * @param type this string type parameter according to ballerina type
-     * @return  this return the string value of openAPI type
-     */
-    public static String convertBallerinaTypeToOpenAPIType(String type) {
-        String convertedType;
-        switch (type) {
-            case Constants.INT:
-                convertedType = Constants.OpenAPIType.INTEGER.toString();
-                break;
-            case Constants.STRING:
-                convertedType = Constants.OpenAPIType.STRING.toString();
-                break;
-            case Constants.BOOLEAN:
-                convertedType = Constants.OpenAPIType.BOOLEAN.toString();
-                break;
-            case Constants.ARRAY:
-                convertedType = Constants.OpenAPIType.ARRAY.toString();
-                break;
-            case Constants.RECORD:
-                convertedType = Constants.OpenAPIType.RECORD.toString();
-                break;
-            case Constants.DECIMAL:
-                convertedType = Constants.OpenAPIType.NUMBER.toString();
-                break;
-            default:
-                convertedType = "";
-        }
-        return convertedType;
-    }
 
     /**
      * Retrieves a matching OpenApi {@link Schema} for a provided ballerina type.
@@ -200,5 +169,26 @@ public class ConverterCommonUtils {
             annotations = metadataNode.annotations();
         }
         return annotations;
+    }
+
+    /**
+     * This function for taking the specific media-type subtype prefix from http service configuration annotation.
+     * <pre>
+     *     @http:ServiceConfig {
+     *          mediaTypeSubtypePrefix : "vnd.exm.sales"
+     *  }
+     * </pre>
+     */
+    public static Optional<String> extractCustomMediaType(FunctionDefinitionNode functionDefNode) {
+        ServiceDeclarationNode serviceDefNode = (ServiceDeclarationNode) functionDefNode.parent();
+        if (serviceDefNode.metadata().isPresent()) {
+            MetadataNode metadataNode = serviceDefNode.metadata().get();
+            NodeList<AnnotationNode> annotations = metadataNode.annotations();
+            if (!annotations.isEmpty()) {
+                return ConverterCommonUtils.extractServiceAnnotationDetails(annotations,
+                        "http:ServiceConfig", "mediaTypeSubtypePrefix");
+            }
+        }
+        return Optional.empty();
     }
 }

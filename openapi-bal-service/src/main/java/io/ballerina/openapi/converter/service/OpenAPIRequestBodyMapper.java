@@ -29,6 +29,7 @@ import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -48,22 +49,53 @@ import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
 
+import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
+import static io.ballerina.openapi.converter.Constants.JSON_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
+import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
+
 /**
  * OpenAPIRequestBodyMapper provides functionality for converting ballerina payload to OAS request body model.
  *
  * @since 2.0.0
  */
 public class OpenAPIRequestBodyMapper {
-    Components components;
-    OperationAdaptor operationAdaptor;
-    SemanticModel semanticModel;
+    private final Components components;
+    private final OperationAdaptor operationAdaptor;
+    private final SemanticModel semanticModel;
+    private final String customMediaType;
 
+    /**
+     * This constructor uses to create OpenAPIRequestBodyMapper instance when customMedia type enable.
+     *
+     * @param components        - OAS Components
+     * @param operationAdaptor  - Model of operation
+     * @param semanticModel     - Semantic model for given ballerina service
+     * @param customMediaType   - custom media type
+     */
+    public OpenAPIRequestBodyMapper(Components components, OperationAdaptor operationAdaptor,
+                                    SemanticModel semanticModel, String customMediaType) {
+        this.components = components;
+        this.operationAdaptor = operationAdaptor;
+        this.semanticModel = semanticModel;
+        this.customMediaType = customMediaType;
+    }
 
+    /**
+     * This constructor uses to create OpenAPIRequestBodyMapper instance when customMedia type absent.
+     *
+     * @param components        - OAS Components
+     * @param operationAdaptor  - Model of operation
+     * @param semanticModel     - Semantic model for given ballerina service
+     */
     public OpenAPIRequestBodyMapper(Components components, OperationAdaptor operationAdaptor,
                                     SemanticModel semanticModel) {
         this.components = components;
         this.operationAdaptor = operationAdaptor;
         this.semanticModel = semanticModel;
+        this.customMediaType = null;
     }
 
     /**
@@ -93,62 +125,83 @@ public class OpenAPIRequestBodyMapper {
                 handleMultipleMIMETypes(bodyParameter, fields, payloadNode, schema);
             }  else {
                 //TODO : fill with rest of media types
-                handleSinglePayloadType(payloadNode, schema, bodyParameter);
+                handleSinglePayloadType(payloadNode, schema, bodyParameter, customMediaType);
             }
         }
     }
 
     /**
-     * This function is use to handle when payload has one mime type.
+     * This function is used to handle when payload has one mime type.
      *<pre>
      *     resource function post pets(@http:Payload json payload){}
      *</pre>
      */
     private void handleSinglePayloadType(RequiredParameterNode payloadNode, Map<String, Schema> schema,
-                                         RequestBody bodyParameter) {
+                                         RequestBody bodyParameter, String customMediaPrefix) {
 
-        String consumes = "application/" + payloadNode.typeName().toString().trim();
+        String consumes = payloadNode.typeName().toString().trim();
+        String mediaTypeString;
         switch (consumes) {
-            case MediaType.APPLICATION_JSON:
-                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_JSON);
+            case Constants.JSON:
+                mediaTypeString = customMediaPrefix == null ? MediaType.APPLICATION_JSON :
+                        APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
+                addConsumes(operationAdaptor, bodyParameter, mediaTypeString);
                 break;
-            case MediaType.APPLICATION_XML:
-                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_XML);
+            case Constants.XML:
+                mediaTypeString = customMediaPrefix == null ? MediaType.APPLICATION_XML :
+                        APPLICATION_PREFIX + customMediaPrefix + XML_POSTFIX;
+                addConsumes(operationAdaptor, bodyParameter, mediaTypeString);
                 break;
-            case MediaType.TEXT_PLAIN:
-            case "application/string":
-                addConsumes(operationAdaptor, bodyParameter, MediaType.TEXT_PLAIN);
+            case Constants.STRING:
+                mediaTypeString = customMediaPrefix == null ? MediaType.TEXT_PLAIN :
+                        TEXT_PREFIX + customMediaPrefix + TEXT_POSTFIX;
+                addConsumes(operationAdaptor, bodyParameter, mediaTypeString);
                 break;
-            case "application/byte[]":
-                addConsumes(operationAdaptor, bodyParameter, MediaType.APPLICATION_OCTET_STREAM);
+            case Constants.BYTE_ARRAY:
+                mediaTypeString = customMediaPrefix == null ? MediaType.APPLICATION_OCTET_STREAM :
+                        APPLICATION_PREFIX + customMediaPrefix + OCTECT_STREAM_POSTFIX;
+                addConsumes(operationAdaptor, bodyParameter, mediaTypeString);
                 break;
             default:
                 Node node = payloadNode.typeName();
-                if (node instanceof SimpleNameReferenceNode) {
+                mediaTypeString = customMediaPrefix == null ? MediaType.APPLICATION_JSON :
+                        APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
+                if (node.kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
                     SimpleNameReferenceNode record = (SimpleNameReferenceNode) node;
-                    handleReferencePayload(record, schema, MediaType.APPLICATION_JSON, bodyParameter);
+                    // Creating request body - required.
+                    TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(record));
+                    String recordName = record.name().toString().trim();
+                    handleReferencePayload(typeSymbol, recordName, schema, mediaTypeString, bodyParameter);
                 } else if (node instanceof ArrayTypeDescriptorNode) {
-                    handleArrayTypePayload(schema, (ArrayTypeDescriptorNode) node,
-                            MediaType.APPLICATION_JSON, bodyParameter);
+                    handleArrayTypePayload(schema, (ArrayTypeDescriptorNode) node, mediaTypeString, bodyParameter);
+                } else if (node.kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
+                    QualifiedNameReferenceNode separateRecord = (QualifiedNameReferenceNode) node;
+                    TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(separateRecord));
+                    String recordName = ((QualifiedNameReferenceNode) payloadNode.typeName()).identifier().text();
+                    handleReferencePayload(typeSymbol, recordName, schema, mediaTypeString, bodyParameter);
                 }
                 break;
         }
     }
 
+    private TypeSymbol getReferenceTypeSymbol(Optional<Symbol> symbol) {
+        return (TypeSymbol) symbol.orElseThrow();
+    }
+
     /**
      * Handle {@link io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode} in ballerina request payload.
      */
-    private void handleArrayTypePayload(Map<String, Schema> schema, ArrayTypeDescriptorNode arrayNode, String mimeType,
+    private void handleArrayTypePayload(Map<String, Schema> schema, ArrayTypeDescriptorNode arrayNode,
+                                        String mimeType,
                                         RequestBody requestBody) {
 
         ArraySchema arraySchema = new ArraySchema();
         TypeDescriptorNode typeDescriptorNode = arrayNode.memberTypeDesc();
         // Nested array not allowed
         if (typeDescriptorNode.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
-            //handel record for components
+            //handle record for components
             SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) typeDescriptorNode;
-            Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
-            TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
+            TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(referenceNode));
             OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
             componentMapper.createComponentSchema(schema, typeSymbol);
             Schema itemSchema = new Schema();
@@ -203,9 +256,11 @@ public class OpenAPIRequestBodyMapper {
 
         String mimeType = mime.literalToken().text().
                 replaceAll("\"", "");
-        if (payloadNode.typeName() instanceof SimpleNameReferenceNode) {
+        if (payloadNode.typeName().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
             SimpleNameReferenceNode record = (SimpleNameReferenceNode) payloadNode.typeName();
-            handleReferencePayload(record, schema, mimeType, requestBody);
+            TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(record));
+            String recordName = record.name().toString().trim();
+            handleReferencePayload(typeSymbol, recordName, schema, mimeType, requestBody);
         } else if (payloadNode.typeName() instanceof ArrayTypeDescriptorNode) {
             ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) payloadNode.typeName();
             handleArrayTypePayload(schema, arrayTypeDescriptorNode, mimeType, requestBody);
@@ -228,17 +283,13 @@ public class OpenAPIRequestBodyMapper {
     /**
      * Handle record type request payload.
      */
-    private void handleReferencePayload(SimpleNameReferenceNode referenceNode,
+    private void handleReferencePayload(TypeSymbol typeSymbol, String recordName,
                                         Map<String, Schema> schema, String mediaType, RequestBody bodyParameter) {
-
-        // Creating request body - required.
-        Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
-        TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
-        //handel record for components
+        //handle record for components
         OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
         componentMapper.createComponentSchema(schema, typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
-        media.setSchema(new Schema().$ref(referenceNode.name().toString().trim()));
+        media.setSchema(new Schema().$ref(recordName));
         if (bodyParameter.getContent() != null) {
             Content content = bodyParameter.getContent();
             content.addMediaType(mediaType, media);

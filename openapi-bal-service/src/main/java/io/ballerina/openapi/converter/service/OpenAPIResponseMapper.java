@@ -32,7 +32,6 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
@@ -41,7 +40,6 @@ import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -94,11 +92,16 @@ import static io.ballerina.openapi.converter.Constants.MUST_REVALIDATE;
 import static io.ballerina.openapi.converter.Constants.NO_CACHE;
 import static io.ballerina.openapi.converter.Constants.NO_STORE;
 import static io.ballerina.openapi.converter.Constants.NO_TRANSFORM;
+import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.PRIVATE;
 import static io.ballerina.openapi.converter.Constants.PROXY_REVALIDATE;
 import static io.ballerina.openapi.converter.Constants.PUBLIC;
 import static io.ballerina.openapi.converter.Constants.S_MAX_AGE;
+import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
 import static io.ballerina.openapi.converter.Constants.TRUE;
+import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
  * This class uses to map the Ballerina return details to the OAS response.
@@ -376,7 +379,7 @@ public class OpenAPIResponseMapper {
                 apiResponse = setCacheHeader(headers, apiResponse, HTTP_200);
                 mediaType.setSchema(new ObjectSchema());
                 mediaTypeString = customMediaPrefix.isPresent() ? APPLICATION_PREFIX + customMediaPrefix.get() +
-                        "+xml" : MediaType.APPLICATION_XML;
+                       XML_POSTFIX  : MediaType.APPLICATION_XML;
                 apiResponse.content(new Content().addMediaType(mediaTypeString, mediaType));
                 apiResponse.description(HTTP_200_DESCRIPTION);
                 apiResponses.put(HTTP_200, apiResponse);
@@ -563,12 +566,13 @@ public class OpenAPIResponseMapper {
                 return customMediaPrefix.map(s -> APPLICATION_PREFIX + s + JSON_POSTFIX)
                         .orElse(MediaType.APPLICATION_JSON);
             case Constants.XML:
-                return customMediaPrefix.map(s -> APPLICATION_PREFIX + s + "+xml").orElse(MediaType.APPLICATION_XML);
+                return customMediaPrefix.map(s -> APPLICATION_PREFIX + s + XML_POSTFIX)
+                        .orElse(MediaType.APPLICATION_XML);
             case Constants.BYTE_ARRAY:
-                return customMediaPrefix.map(s -> APPLICATION_PREFIX + s + "+octet-stream")
+                return customMediaPrefix.map(s -> APPLICATION_PREFIX + s + OCTECT_STREAM_POSTFIX)
                         .orElse(MediaType.APPLICATION_OCTET_STREAM);
             case Constants.STRING:
-                return customMediaPrefix.map(s -> "text/" + s + "+plain").orElse(MediaType.TEXT_PLAIN);
+                return customMediaPrefix.map(s -> TEXT_PREFIX + s + TEXT_POSTFIX).orElse(MediaType.TEXT_PLAIN);
             default:
                 throw new OpenApiConverterException("Invalid mediaType : " + type);
         }
@@ -719,29 +723,6 @@ public class OpenAPIResponseMapper {
         }
         return apiResponses;
     }
-
-    /**
-     * This function for taking the specific media-type subtype prefix from http service configuration annotation.
-     * <pre>
-     *     @http:ServiceConfig {
-     *          mediaTypeSubtypePrefix : "vnd.exm.sales"
-     *  }
-     * </pre>
-     */
-    private Optional<String> extractCustomMediaType(FunctionDefinitionNode functionDefNode) {
-        ServiceDeclarationNode serviceDefNode = (ServiceDeclarationNode) functionDefNode.parent();
-        if (serviceDefNode.metadata().isPresent()) {
-            MetadataNode metadataNode = serviceDefNode.metadata().get();
-            NodeList<AnnotationNode> annotations = metadataNode.annotations();
-            if (!annotations.isEmpty()) {
-                return ConverterCommonUtils.extractServiceAnnotationDetails(annotations,
-                        "http:ServiceConfig", "mediaTypeSubtypePrefix");
-            }
-        }
-        return Optional.empty();
-    }
-
-
 
     /**
      * Cache configuration utils.

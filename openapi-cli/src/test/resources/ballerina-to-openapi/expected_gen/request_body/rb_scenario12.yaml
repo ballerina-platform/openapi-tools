@@ -1,0 +1,64 @@
+paths:
+  /pets:
+    put:
+      operationId: operation_put_/pets
+      requestBody:
+        content:
+          application/vnd.snowpeak.reservation+json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        "200":
+          description: Ok
+    post:
+      operationId: operation_post_/pets
+      requestBody:
+        content:
+          application/vnd.snowpeak.reservation+json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        "200":
+          description: Ok
+components:
+  schemas:
+    Pet:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+    TagType:
+      required:
+        - category
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        category:
+          type: array
+          items:
+            type: string
+    Tag:
+      required:
+        - id
+        - name
+        - tagType
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        tagType:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagType'
