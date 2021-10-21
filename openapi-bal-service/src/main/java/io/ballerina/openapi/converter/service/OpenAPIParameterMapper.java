@@ -287,8 +287,11 @@ public class OpenAPIParameterMapper {
                 Map<String, Schema> schema = components.getSchemas();
                 // Handle request payload.
                 Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
-                OpenAPIRequestBodyMapper openAPIRequestBodyMapper = new OpenAPIRequestBodyMapper(components,
-                        operationAdaptor, semanticModel, customMediaType);
+                
+                OpenAPIRequestBodyMapper openAPIRequestBodyMapper = customMediaType.map(
+                        value -> new OpenAPIRequestBodyMapper(components,
+                        operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
+                        operationAdaptor, semanticModel));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
             }
         }
