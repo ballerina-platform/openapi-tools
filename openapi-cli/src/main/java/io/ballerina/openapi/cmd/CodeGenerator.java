@@ -92,9 +92,12 @@ import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_FILE_NAM
 import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_CLIENT_PKG;
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_MOCK_PKG;
+import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.generators.GeneratorConstants.ESCAPE_PATTERN;
+import static io.ballerina.openapi.generators.GeneratorConstants.GET;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_SERVICE;
+import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEMPLATES_DIR_PATH_KEY;
@@ -145,13 +148,13 @@ public class CodeGenerator {
     }
 
     public void generateBothFiles(GeneratorConstants.GenType type, String definitionPath, String serviceName,
-                                  String outPath , Filter filter, boolean nullable)
+                                  String outPath, Filter filter, boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles =  new ArrayList<>();
-        genFiles.addAll(generateBalSource(GEN_SERVICE, definitionPath,  serviceName, filter, nullable));
-        genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath,  serviceName, filter,
+        List<GenSrcFile> genFiles = new ArrayList<>();
+        genFiles.addAll(generateBalSource(GEN_SERVICE, definitionPath, serviceName, filter, nullable));
+        genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, serviceName, filter,
                 nullable));
         List<GenSrcFile> newGenFiles = genFiles.stream().filter(distinctByKey(
                 GenSrcFile::getFileName)).collect(Collectors.toList());
@@ -163,6 +166,7 @@ public class CodeGenerator {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
+
     /**
      * Generates ballerina source for provided Open API Definition in {@code definitionPath}.
      * Generated source will be written to a ballerina module at {@code outPath}
@@ -198,7 +202,7 @@ public class CodeGenerator {
     public void generateService(String definitionPath, String serviceName, String outPath, Filter filter,
                                 boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
-        generate(GEN_SERVICE,  definitionPath, serviceName, outPath, filter, nullable);
+        generate(GEN_SERVICE, definitionPath, serviceName, outPath, filter, nullable);
     }
 
     /**
@@ -226,7 +230,7 @@ public class CodeGenerator {
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent);
         if (parseResult.getMessages().size() > 0) {
             StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
-            for (String message: parseResult.getMessages()) {
+            for (String message : parseResult.getMessages()) {
                 errorMessage.append(message + "\n");
             }
             throw new BallerinaOpenApiException(errorMessage.toString());
@@ -338,7 +342,7 @@ public class CodeGenerator {
     }
 
     private void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, Path implPath,
-                                        GeneratorConstants.GenType type)
+                                       GeneratorConstants.GenType type)
             throws IOException {
         //  Remove old generated file with same name
         List<File> listFiles = new ArrayList<>();
@@ -414,10 +418,11 @@ public class CodeGenerator {
     }
 
     /**
-     *  This method for setting the file name for generated file.
-     * @param listFiles         generated files
-     * @param gFile             GenSrcFile object
-     * @param duplicateCount    add the tag with duplicate number if file already exist
+     * This method for setting the file name for generated file.
+     *
+     * @param listFiles      generated files
+     * @param gFile          GenSrcFile object
+     * @param duplicateCount add the tag with duplicate number if file already exist
      */
     private void setGeneratedFileName(List<File> listFiles, GenSrcFile gFile, int duplicateCount) {
 
@@ -442,7 +447,7 @@ public class CodeGenerator {
     private List<GenSrcFile> generateClient(Path openAPI, Filter filter, boolean nullable)
             throws IOException, BallerinaOpenApiException, FormatterException {
         if (srcPackage == null || srcPackage.isEmpty()) {
-            srcPackage =  DEFAULT_CLIENT_PKG;
+            srcPackage = DEFAULT_CLIENT_PKG;
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         // Normalize OpenAPI definition
@@ -467,7 +472,7 @@ public class CodeGenerator {
             schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent);
         }
         if (!schemaContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage,  TYPE_FILE_NAME,
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
                     schemaContent));
         }
 
@@ -552,7 +557,7 @@ public class CodeGenerator {
         return unusedTypeDefinitionNameList;
     }
 
-    private void writeFilesTemp (Map<String, String> srcFiles, Path tmpDir) throws IOException {
+    private void writeFilesTemp(Map<String, String> srcFiles, Path tmpDir) throws IOException {
         srcFiles.put(BALLERINA_TOML, BALLERINA_TOML_CONTENT);
         PrintWriter writer = null;
         for (Map.Entry<String, String> entry : srcFiles.entrySet()) {
@@ -569,7 +574,7 @@ public class CodeGenerator {
         }
     }
 
-    private  SemanticModel getSemanticModel(Path clientPath) throws ProjectException {
+    private SemanticModel getSemanticModel(Path clientPath) throws ProjectException {
         // Load project instance for single ballerina file
         try {
             Project project = ProjectLoader.loadProject(clientPath);
@@ -586,7 +591,7 @@ public class CodeGenerator {
             }
             return project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
         } catch (ProjectException e) {
-             throw new ProjectException(e.getMessage());
+            throw new ProjectException(e.getMessage());
         }
     }
 
@@ -596,7 +601,7 @@ public class CodeGenerator {
             throws IOException, FormatterException, BallerinaOpenApiException {
 
         if (srcPackage == null || srcPackage.isEmpty()) {
-            srcPackage =  DEFAULT_MOCK_PKG;
+            srcPackage = DEFAULT_MOCK_PKG;
         }
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
@@ -611,7 +616,7 @@ public class CodeGenerator {
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
         String schemaContent = Formatter.format(
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,  TYPE_FILE_NAME, schemaContent));
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME, schemaContent));
 
         return sourceFiles;
     }
@@ -619,8 +624,8 @@ public class CodeGenerator {
     /**
      * Normalized OpenAPI specification with adding proper naming to schema.
      *
-     * @param openAPIPath       - openAPI file path
-     * @return                  - openAPI specification
+     * @param openAPIPath - openAPI file path
+     * @return - openAPI specification
      * @throws IOException
      * @throws BallerinaOpenApiException
      */
@@ -629,6 +634,7 @@ public class CodeGenerator {
         OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
         if (isClient) {
             validateOperationIds(openAPI.getPaths().entrySet());
+            validateRequestBody(openAPI.getPaths().entrySet());
         } else {
             generatorUtils.setOperationId(openAPI.getPaths());
         }
@@ -653,11 +659,11 @@ public class CodeGenerator {
      * Check whether an operationId has been defined in each path. If given rename the operationId to accepted format.
      * -- ex: GetPetName -> getPetName
      *
-     * @param paths                         List of paths given in the Open API definition
-     * @throws BallerinaOpenApiException    When operationId is missing in any path
+     * @param paths List of paths given in the OpenAPI definition
+     * @throws BallerinaOpenApiException When operationId is missing in any path
      */
     private void validateOperationIds(Set<Map.Entry<String, PathItem>> paths) throws BallerinaOpenApiException {
-        for (Map.Entry<String, PathItem> entry: paths) {
+        for (Map.Entry<String, PathItem> entry : paths) {
             for (Operation operation : entry.getValue().readOperations()) {
                 if (operation.getOperationId() != null) {
                     String operationId = getValidName(operation.getOperationId(), false);
@@ -671,10 +677,42 @@ public class CodeGenerator {
     }
 
     /**
+     * Validate if requestBody found in GET/DELETE/HEAD operation.
+     *
+     * @param paths - List of paths given in the OpenAPI definition
+     * @throws BallerinaOpenApiException - If requestBody found in GET/DELETE/HEAD operation
+     */
+    private void validateRequestBody(Set<Map.Entry<String, PathItem>> paths) throws BallerinaOpenApiException {
+        List<String> errorList = new ArrayList<>();
+        for (Map.Entry<String, PathItem> entry : paths) {
+            if (!entry.getValue().readOperationsMap().isEmpty()) {
+                for (Map.Entry<PathItem.HttpMethod, Operation> operation : entry.getValue().readOperationsMap()
+                        .entrySet()) {
+                    String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
+                    boolean isRequestBodyInvalid = method.equals(GET) || method.equals(DELETE) || method.equals(HEAD);
+                    if (isRequestBodyInvalid && operation.getValue().getRequestBody() != null) {
+                        errorList.add(method.toUpperCase(Locale.ENGLISH) + " operation cannot have a requestBody. "
+                                + "Error at operationId: " + operation.getValue().getOperationId());
+                    }
+                }
+            }
+        }
+
+        if (!errorList.isEmpty()) {
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
+            for (String message : errorList) {
+                errorMessage.append(message).append("\n");
+            }
+            throw new BallerinaOpenApiException(errorMessage.toString());
+        }
+    }
+
+    /**
      * Set the content of license header.
+     *
      * @param licenseHeader license header value received from command line.
      */
-    public void setLicenseHeader (String licenseHeader) {
+    public void setLicenseHeader(String licenseHeader) {
         this.licenseHeader = licenseHeader;
     }
 }
