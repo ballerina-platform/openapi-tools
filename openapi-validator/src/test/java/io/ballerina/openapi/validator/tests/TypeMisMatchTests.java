@@ -59,7 +59,7 @@ public class TypeMisMatchTests {
         assert serviceDeclarationNode != null;
         List<FunctionDefinitionNode> functions = getFunctionDefinitionNodes(serviceDeclarationNode);
 
-        List<String > dummy = new ArrayList<>();
+        List<String> dummy = new ArrayList<>();
         Filters filters = new Filters(dummy, dummy, dummy, dummy, DiagnosticSeverity.ERROR);
 
         Path contractPath = RES_DIR.resolve("swagger/recordField.yaml");

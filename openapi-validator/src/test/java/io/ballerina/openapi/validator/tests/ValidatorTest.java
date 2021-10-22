@@ -213,9 +213,9 @@ public class ValidatorTest {
 
     }
 
-    public static List<FunctionDefinitionNode> getFunctionDefinitionNodes(ServiceDeclarationNode serviceDeclarationNode) {
+    public static List<FunctionDefinitionNode> getFunctionDefinitionNodes(ServiceDeclarationNode serviceNode) {
 
-        NodeList<Node> members = serviceDeclarationNode.members();
+        NodeList<Node> members = serviceNode.members();
         Iterator<Node> iterator = members.iterator();
         List<FunctionDefinitionNode> functions = new ArrayList<>();
 

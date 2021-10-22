@@ -183,4 +183,7 @@ class ErrorMessages {
         error[1] = "Given OpenAPI contract file path is an empty string.";
         return error;
     }
+    static String couldNotFindLocation(String fieldName) {
+        return String.format("Could not find the location for %s .", fieldName);
+    }
 }

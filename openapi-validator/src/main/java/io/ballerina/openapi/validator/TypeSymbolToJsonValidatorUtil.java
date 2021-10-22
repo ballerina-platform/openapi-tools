@@ -48,6 +48,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.validator.ErrorMessages.couldNotFindLocation;
+
 /**
  * This util use for comparing the TypeSymbol with given openAPI schema.
  */
@@ -103,8 +105,10 @@ public class TypeSymbolToJsonValidatorUtil {
                     (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
                 TypeSymbol recordType = null;
                 isExitType = true;
+                String finalParamName = paramName;
                 Optional<TypeSymbol> symbol = semanticModel.typeOf(((ArrayTypeSymbol) typeSymbol)
-                        .memberTypeDescriptor().getLocation().orElseThrow().lineRange());
+                        .memberTypeDescriptor().getLocation().orElseThrow(() -> new OpenApiValidatorException(
+                                couldNotFindLocation(finalParamName))).lineRange());
                 if (symbol.isPresent()) {
                     recordType = ((TypeDefinitionSymbol) symbol.get()).typeDescriptor();
                 }
@@ -196,7 +200,8 @@ public class TypeSymbolToJsonValidatorUtil {
                                 convertTypeToEnum(entry.getValue().getType()),
                                 convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
                                 componentName,
-                                fieldSymbol.getValue().getLocation().orElseThrow());
+                                fieldSymbol.getValue().getLocation().orElseThrow(() -> new OpenApiValidatorException(
+                                        couldNotFindLocation(fieldSymbol.getValue().getName().get()))));
                         validationErrorList.add(validationError);
 
                     } else if ((entry.getValue() instanceof ObjectSchema) && (fieldSymbol.getValue().typeDescriptor()
@@ -205,7 +210,8 @@ public class TypeSymbolToJsonValidatorUtil {
                         TypeSymbol refRecordType = null;
                         List<ValidationError> nestedValidationError;
                         Optional<TypeSymbol> symbol = semanticModel.typeOf(
-                                fieldSymbol.getValue().getLocation().orElseThrow().lineRange());
+                                fieldSymbol.getValue().getLocation().orElseThrow(() -> new OpenApiValidatorException(
+                                        couldNotFindLocation(fieldSymbol.getValue().getName().get()))).lineRange());
 
                         if (symbol != null && symbol.isPresent()) {
                             Symbol symbol1 = symbol.get();
