@@ -212,4 +212,19 @@ public class ValidatorTest {
         return  cPackage.getCompilation();
 
     }
+
+    public static List<FunctionDefinitionNode> getFunctionDefinitionNodes(ServiceDeclarationNode serviceDeclarationNode) {
+
+        NodeList<Node> members = serviceDeclarationNode.members();
+        Iterator<Node> iterator = members.iterator();
+        List<FunctionDefinitionNode> functions = new ArrayList<>();
+
+        while (iterator.hasNext()) {
+            Node next = iterator.next();
+            if (next instanceof FunctionDefinitionNode) {
+                functions.add((FunctionDefinitionNode) next);
+            }
+        }
+        return functions;
+    }
 }

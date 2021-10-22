@@ -46,6 +46,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.openapi.validator.tests.ValidatorTest.getFunctionDefinitionNodes;
+
 /**
  * Test for serviceValidation.
  */
@@ -77,21 +79,6 @@ public class ServiceValidationTests {
         Assert.assertFalse(openApiMissingServiceMethod.isEmpty());
         Assert.assertTrue(openApiMissingServiceMethod.get(0) instanceof OpenapiServiceValidationError);
         Assert.assertEquals(openApiMissingServiceMethod.get(0).getServicePath(), "/user");
-    }
-
-    private List<FunctionDefinitionNode> getFunctionDefinitionNodes(ServiceDeclarationNode serviceDeclarationNode) {
-
-        NodeList<Node> members = serviceDeclarationNode.members();
-        Iterator<Node> iterator = members.iterator();
-        List<FunctionDefinitionNode> functions = new ArrayList<>();
-
-        while (iterator.hasNext()) {
-            Node next = iterator.next();
-            if (next instanceof FunctionDefinitionNode) {
-                functions.add((FunctionDefinitionNode) next);
-            }
-        }
-        return functions;
     }
 
     @Test(description = "test for undocumented Method in contract missing method in bal service")

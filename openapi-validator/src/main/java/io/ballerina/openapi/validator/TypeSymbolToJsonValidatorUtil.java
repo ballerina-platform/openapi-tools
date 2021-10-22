@@ -66,7 +66,7 @@ public class TypeSymbolToJsonValidatorUtil {
         if (typeSymbol instanceof RecordTypeSymbol || typeSymbol instanceof TypeReferenceTypeSymbol) {
             Map<String, Schema> properties = schema.getProperties();
             if (schema instanceof ObjectSchema) {
-                properties = ((ObjectSchema) schema).getProperties();
+                properties = schema.getProperties();
             }
             if (typeSymbol instanceof TypeReferenceTypeSymbol) {
                 typeSymbol = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
@@ -103,8 +103,8 @@ public class TypeSymbolToJsonValidatorUtil {
                     (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
                 TypeSymbol recordType = null;
                 isExitType = true;
-                Optional<TypeSymbol> symbol = semanticModel
-                        .typeOf(((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().getLocation().get().lineRange());
+                Optional<TypeSymbol> symbol = semanticModel.typeOf(((ArrayTypeSymbol) typeSymbol)
+                        .memberTypeDescriptor().getLocation().orElseThrow().lineRange());
                 if (symbol.isPresent()) {
                     recordType = ((TypeDefinitionSymbol) symbol.get()).typeDescriptor();
                 }
@@ -175,13 +175,13 @@ public class TypeSymbolToJsonValidatorUtil {
         return validationErrorList;
     }
 
-    private static List<ValidationError> validateRecordType(RecordTypeSymbol typeSymbol, SyntaxTree syntaxTree,
+    private static List<ValidationError> validateRecordType(RecordTypeSymbol recordTypeSymbol, SyntaxTree syntaxTree,
                                                             SemanticModel semanticModel,
                                                             Map<String, Schema> properties, String componentName,
                                                             Location location)
             throws OpenApiValidatorException {
         List<ValidationError> validationErrorList = new ArrayList<>();
-        Map<String, RecordFieldSymbol> fieldSymbolList = typeSymbol.fieldDescriptors();
+        Map<String, RecordFieldSymbol> fieldSymbolList = recordTypeSymbol.fieldDescriptors();
         for (Map.Entry<String, RecordFieldSymbol> fieldSymbol : fieldSymbolList.entrySet()) {
             boolean isExist = false;
             for (Map.Entry<String, Schema> entry : properties.entrySet()) {
@@ -191,19 +191,22 @@ public class TypeSymbolToJsonValidatorUtil {
                             .equals(TypeSymbolToJsonValidatorUtil.convertOpenAPITypeToBallerina(entry.getValue()
                                     .getType())) && (!(entry.getValue() instanceof ObjectSchema)) &&
                             (!(fieldSymbol.getValue().typeDescriptor() instanceof ArrayTypeSymbol))) {
+
                         TypeMismatch validationError = new TypeMismatch(fieldSymbol.getValue().getName().orElseThrow(),
                                 convertTypeToEnum(entry.getValue().getType()),
                                 convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
-                                componentName, fieldSymbol.getValue().getLocation().get());
+                                componentName,
+                                fieldSymbol.getValue().getLocation().orElseThrow());
                         validationErrorList.add(validationError);
+
                     } else if ((entry.getValue() instanceof ObjectSchema) && (fieldSymbol.getValue().typeDescriptor()
                             instanceof TypeReferenceTypeSymbol)) {
                         // Handle the nested record type
                         TypeSymbol refRecordType = null;
                         List<ValidationError> nestedValidationError;
-                        Optional<TypeSymbol> symbol =
-                                semanticModel.typeOf(fieldSymbol.getValue().getLocation().get().lineRange());
-                        fieldSymbol.getValue().typeDescriptor();
+                        Optional<TypeSymbol> symbol = semanticModel.typeOf(
+                                fieldSymbol.getValue().getLocation().orElseThrow().lineRange());
+
                         if (symbol != null && symbol.isPresent()) {
                             Symbol symbol1 = symbol.get();
                             if (symbol1 instanceof TypeReferenceTypeSymbol) {
@@ -402,7 +405,7 @@ public class TypeSymbolToJsonValidatorUtil {
      * @param type  type of parameter
      * @return enum type
      */
-    public static String convertEnumTypetoString(Constants.Type type) {
+    public static String convertEnumTypeToString(Constants.Type type) {
         String convertedType;
         switch (type) {
             case INT:
