@@ -36,8 +36,8 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -56,6 +56,7 @@ public class OpenAPIResourceMapper {
     private final SemanticModel semanticModel;
     private final Paths pathObject = new Paths();
     private final Components components = new Components();
+    private final PrintStream outStream = System.out;
 
     /**
      * Initializes a resource parser for openApi.
@@ -70,7 +71,7 @@ public class OpenAPIResourceMapper {
     /**
      * This method will convert ballerina resource to openApi Paths objects.
      *
-     * @param resources Resource list to be convert.
+     * @param resources Resource list to be converted.
      * @return map of string and openApi path objects.
      */
     public Paths getPaths(List<FunctionDefinitionNode> resources) throws OpenApiConverterException {
@@ -93,8 +94,13 @@ public class OpenAPIResourceMapper {
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.
             if (resource.functionName().toString().trim().equals(httpMethod)) {
-                operation = convertResourceToOperation(resource, httpMethod, path).getOperation();
-                generatePathItem(httpMethod, pathObject, operation, path);
+                if (httpMethod.equals("'default")) {
+                    outStream.println("WARNING: Generated OpenAPI definition doesn't contain details " +
+                            "for the `default` resource method in the Ballerina service.");
+                } else {
+                    operation = convertResourceToOperation(resource, httpMethod, path).getOperation();
+                    generatePathItem(httpMethod, pathObject, operation, path);
+                }
                 break;
             }
         }
@@ -254,9 +260,6 @@ public class OpenAPIResourceMapper {
                 }
             }
         }
-//        List<String> httpMethodsAsString = new ArrayList<>(httpMethods);
-//        Collections.reverse(httpMethodsAsString);
-//        return httpMethodsAsString;
         return new ArrayList<>(httpMethods);
     }
 

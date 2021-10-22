@@ -19,32 +19,39 @@
 package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.openapi.converter.OpenApiConverterException;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * This Tests class for capturing the special tests regarding resource method.
+ * These Tests class is for capturing the special tests regarding resource method.
  */
 public class HttpMethodTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
     private Path tempDir;
+    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
 
     @BeforeMethod
     public void setup() throws IOException {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        System.setOut(new PrintStream(outputStreamCaptor));
     }
 
     @Test(description = "Generate OpenAPI spec for given ballerina file has only compiler warning")
     public void testForCompilerWarning() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("default_bal.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "default.yaml");
+        Assert.assertEquals("WARNING: Generated OpenAPI definition doesn't contain details for the" +
+                " `default` resource method in the Ballerina service.", outputStreamCaptor.toString().trim());
     }
 
     @AfterMethod
