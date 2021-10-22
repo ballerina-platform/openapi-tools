@@ -27,7 +27,6 @@ import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.StringTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
@@ -46,7 +45,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 import static io.ballerina.openapi.validator.ErrorMessages.couldNotFindLocation;
 
@@ -103,15 +101,8 @@ public class TypeSymbolToJsonValidatorUtil {
                 isExitType = true;
             } else if ((((ArraySchema) schema).getItems() instanceof ObjectSchema) &&
                     (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
-                TypeSymbol recordType = null;
                 isExitType = true;
-                String finalParamName = paramName;
-                Optional<TypeSymbol> symbol = semanticModel.typeOf(((ArrayTypeSymbol) typeSymbol)
-                        .memberTypeDescriptor().getLocation().orElseThrow(() -> new OpenApiValidatorException(
-                                couldNotFindLocation(finalParamName))).lineRange());
-                if (symbol.isPresent()) {
-                    recordType = ((TypeDefinitionSymbol) symbol.get()).typeDescriptor();
-                }
+                TypeSymbol recordType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor();
                 List<ValidationError> recordValidationError = validate(((ArraySchema) schema).getItems(),
                         recordType, syntaxTree, semanticModel, componentName, location);
                 validationErrorList.addAll(recordValidationError);
@@ -209,25 +200,19 @@ public class TypeSymbolToJsonValidatorUtil {
                         // Handle the nested record type
                         TypeSymbol refRecordType = null;
                         List<ValidationError> nestedValidationError;
-                        Optional<TypeSymbol> symbol = semanticModel.typeOf(
-                                fieldSymbol.getValue().getLocation().orElseThrow(() -> new OpenApiValidatorException(
-                                        couldNotFindLocation(fieldSymbol.getValue().getName().get()))).lineRange());
-
-                        if (symbol != null && symbol.isPresent()) {
-                            Symbol symbol1 = symbol.get();
-                            if (symbol1 instanceof TypeReferenceTypeSymbol) {
-                                refRecordType = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
-                            } else if (symbol1 instanceof VariableSymbol) {
-                                VariableSymbol variableSymbol = (VariableSymbol) symbol1;
-                                if (variableSymbol.typeDescriptor() != null) {
-                                    Symbol variable = variableSymbol.typeDescriptor();
-                                    if (variable instanceof TypeReferenceTypeSymbol) {
-                                        if (((TypeReferenceTypeSymbol) variable).typeDescriptor() != null) {
-                                            refRecordType = ((TypeReferenceTypeSymbol) variable).typeDescriptor();
-                                        }
-                                    } else {
-                                        refRecordType = variableSymbol.typeDescriptor();
+                        TypeSymbol symbol = fieldSymbol.getValue().typeDescriptor();
+                        if (symbol instanceof TypeReferenceTypeSymbol) {
+                            refRecordType = ((TypeReferenceTypeSymbol) symbol).typeDescriptor();
+                        } else if (symbol instanceof VariableSymbol) {
+                            VariableSymbol variableSymbol = (VariableSymbol) symbol;
+                            if (variableSymbol.typeDescriptor() != null) {
+                                Symbol variable = variableSymbol.typeDescriptor();
+                                if (variable instanceof TypeReferenceTypeSymbol) {
+                                    if (((TypeReferenceTypeSymbol) variable).typeDescriptor() != null) {
+                                        refRecordType = ((TypeReferenceTypeSymbol) variable).typeDescriptor();
                                     }
+                                } else {
+                                    refRecordType = variableSymbol.typeDescriptor();
                                 }
                             }
                         }
