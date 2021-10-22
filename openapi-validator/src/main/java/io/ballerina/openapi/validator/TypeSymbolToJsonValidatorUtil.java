@@ -90,54 +90,37 @@ public class TypeSymbolToJsonValidatorUtil {
                 schemaType = schema.getType();
                 ballerinaType = typeSymbol.typeKind().getName();
             }
-        } else if ((typeSymbol instanceof ArrayTypeSymbol) && (schema instanceof  ArraySchema)) {
+        } else if ((typeSymbol instanceof ArrayTypeSymbol) && (schema instanceof ArraySchema)) {
             if (!componentName.isBlank()) {
                 paramName = componentName;
             } else {
                 paramName = "array";
             }
-            if (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().typeKind().getName().toLowerCase(Locale.ENGLISH)
-                    .equals(convertOpenAPITypeToBallerina(((ArraySchema) schema).getItems().getType()))) {
+            ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) typeSymbol;
+            ArraySchema arraySchema = (ArraySchema) schema;
+            
+            if (arrayTypeSymbol.memberTypeDescriptor().typeKind().getName().toLowerCase(Locale.ENGLISH)
+                    .equals(convertOpenAPITypeToBallerina(arraySchema.getItems().getType()))) {
                 isExitType = true;
-            } else if ((((ArraySchema) schema).getItems() instanceof ObjectSchema) &&
-                    (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
+            } else if ((arraySchema.getItems() instanceof ObjectSchema) &&
+                    (arrayTypeSymbol.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
                 isExitType = true;
-                TypeSymbol recordType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor();
-                List<ValidationError> recordValidationError = validate(((ArraySchema) schema).getItems(),
+                TypeSymbol recordType = arrayTypeSymbol.memberTypeDescriptor();
+                List<ValidationError> recordValidationError = validate(arraySchema.getItems(),
                         recordType, syntaxTree, semanticModel, componentName, location);
                 validationErrorList.addAll(recordValidationError);
 
-            } else if ((((ArraySchema) schema).getItems() instanceof ArraySchema) &&
-                    (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof ArrayTypeSymbol)) {
-                // handle nested array
+            } else if ((arraySchema.getItems() instanceof ArraySchema) &&
+                    (arrayTypeSymbol.memberTypeDescriptor() instanceof ArrayTypeSymbol)) {
+                // Handle nested array
                 isExitType = true;
-
-                TypeSymbol bArrayTypeSymbol = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor();
-                Schema arraySchemaItems = ((ArraySchema) schema).getItems();
-
-                if ((bArrayTypeSymbol instanceof ArrayTypeSymbol) && (arraySchemaItems instanceof ArraySchema)) {
-                    ArrayTypeSymbol traverseNestedArray = (ArrayTypeSymbol) bArrayTypeSymbol;
-                    ArraySchema traversSchemaNestedArray = (ArraySchema) arraySchemaItems;
-
-                    while ((traverseNestedArray.memberTypeDescriptor() instanceof ArrayTypeSymbol) &&
-                            (traversSchemaNestedArray.getItems() instanceof ArraySchema)) {
-                        Schema<?> traversSchemaNestedArraySchemaType = traversSchemaNestedArray.getItems();
-                        if (traversSchemaNestedArraySchemaType instanceof ArraySchema) {
-                            traversSchemaNestedArray = (ArraySchema) traversSchemaNestedArraySchemaType;
-                        }
-                        TypeSymbol traverseNestedArrayBType = traverseNestedArray.memberTypeDescriptor();
-                        if (traverseNestedArrayBType instanceof ArrayTypeSymbol) {
-                            traverseNestedArray = (ArrayTypeSymbol) traverseNestedArrayBType;
-                        }
-                    }
-                    List<ValidationError> arrayErrors = validate(traversSchemaNestedArray,
-                            traverseNestedArray, syntaxTree, semanticModel, componentName, location);
-
-                    validationErrorList.addAll(arrayErrors);
-                }
+                TypeSymbol bArrayTypeSymbol = arrayTypeSymbol.memberTypeDescriptor();
+                Schema arraySchemaItems = arraySchema.getItems();
+                validateNestedArray(syntaxTree, semanticModel, componentName, location, validationErrorList,
+                        bArrayTypeSymbol, arraySchemaItems);
             } else {
-                schemaType = ((ArraySchema) schema).getItems().getType();
-                ballerinaType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().typeKind().getName()
+                schemaType = arraySchema.getItems().getType();
+                ballerinaType = arrayTypeSymbol.memberTypeDescriptor().typeKind().getName()
                                 .toLowerCase(Locale.ENGLISH);
             }
 
@@ -314,6 +297,36 @@ public class TypeSymbolToJsonValidatorUtil {
                     validationErrorList.add(typeMismatch);
                 }
             }
+        }
+    }
+
+    /**
+     * This function is used to validate nested array type.
+     */
+    private static void validateNestedArray(SyntaxTree syntaxTree, SemanticModel semanticModel, String componentName,
+                                            Location location, List<ValidationError> validationErrorList,
+                                            TypeSymbol bArrayTypeSymbol, Schema arraySchemaItems)
+            throws OpenApiValidatorException {
+
+        if ((bArrayTypeSymbol instanceof ArrayTypeSymbol) && (arraySchemaItems instanceof ArraySchema)) {
+            ArrayTypeSymbol traverseNestedArray = (ArrayTypeSymbol) bArrayTypeSymbol;
+            ArraySchema traversSchemaNestedArray = (ArraySchema) arraySchemaItems;
+
+            while ((traverseNestedArray.memberTypeDescriptor() instanceof ArrayTypeSymbol) &&
+                    (traversSchemaNestedArray.getItems() instanceof ArraySchema)) {
+                Schema<?> traversSchemaNestedArraySchemaType = traversSchemaNestedArray.getItems();
+                if (traversSchemaNestedArraySchemaType instanceof ArraySchema) {
+                    traversSchemaNestedArray = (ArraySchema) traversSchemaNestedArraySchemaType;
+                }
+                TypeSymbol traverseNestedArrayBType = traverseNestedArray.memberTypeDescriptor();
+                if (traverseNestedArrayBType instanceof ArrayTypeSymbol) {
+                    traverseNestedArray = (ArrayTypeSymbol) traverseNestedArrayBType;
+                }
+            }
+            List<ValidationError> arrayErrors = validate(traversSchemaNestedArray,
+                    traverseNestedArray, syntaxTree, semanticModel, componentName, location);
+
+            validationErrorList.addAll(arrayErrors);
         }
     }
 
