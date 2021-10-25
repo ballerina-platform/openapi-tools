@@ -19,7 +19,6 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -146,7 +145,6 @@ public class FunctionReturnType {
                 type = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1) +
                         "Response";
                 List<String> required = componentSchema.getRequired();
-                Token typeKeyWord = createIdentifierToken("public type");
                 List<Node> recordFieldList = new ArrayList<>();
                 Map<String, Schema> properties = componentSchema.getProperties();
                 List<Node> responseDocs = new ArrayList<>();
@@ -154,10 +152,9 @@ public class FunctionReturnType {
                     responseDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                             response.getDescription(), false));
                 }
-                TypeDefinitionNode typeDefinitionNode =
-                        ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(
-                                required, typeKeyWord, createIdentifierToken(type), recordFieldList,
-                                properties, responseDocs, openAPI, createEmptyNodeList());
+                TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(
+                                required, createIdentifierToken(type), recordFieldList,
+                                properties, responseDocs, createEmptyNodeList());
                 updateTypeDefinitionNodeList(type, typeDefinitionNode);
             }
         } else if (schema instanceof ArraySchema) {
@@ -257,7 +254,7 @@ public class FunctionReturnType {
                     "Response";
             List<String> required = composedSchema.getRequired();
             TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
-                    .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
+                    .getAllOfTypeDefinitionNode(new ArrayList<>(), required,
                             createIdentifierToken(recordName), new ArrayList<>(), allOf);
             updateTypeDefinitionNodeList(recordName, allOfTypeDefinitionNode);
             type = recordName;
@@ -290,9 +287,8 @@ public class FunctionReturnType {
                             description, false));
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
-                        createIdentifierToken("public type"),
                         createIdentifierToken(type), recordFieldList, properties, returnTypeDocs,
-                        openAPI, createEmptyNodeList());
+                        createEmptyNodeList());
                 updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {
@@ -325,9 +321,8 @@ public class FunctionReturnType {
                             description, false));
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
-                        createIdentifierToken("public type"),
                         createIdentifierToken(type), recordFieldList, properties, schemaDocs,
-                        openAPI, createEmptyNodeList());
+                        createEmptyNodeList());
                 updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {

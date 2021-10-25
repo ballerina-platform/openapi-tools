@@ -1,6 +1,6 @@
 public type Address record {
     int streetNo?;
-    string mainStreet?;
+    string[2] mainStreet?;
     string country?;
 };
 

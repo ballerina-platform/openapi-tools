@@ -241,4 +241,7 @@ public class GeneratorConstants {
         HTTP_CODES_DES = Collections.unmodifiableMap(aMap);
     }
     public static final String HTTP_200 = "200";
+    public static final String INTEGER = "integer";
+    public static final String BOOLEAN = "boolean";
+    public static final String NUMBER = "number";
 }

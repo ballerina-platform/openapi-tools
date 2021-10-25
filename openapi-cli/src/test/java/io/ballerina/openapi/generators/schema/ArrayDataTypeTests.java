@@ -114,7 +114,7 @@ public class ArrayDataTypeTests {
                 syntaxTree);
     }
 
-    @Test(description = "Array schema has no data type in items")
+    @Test(description = "Array schema has max item count")
     public void arrayHasMaxItems() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/array_max_item.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
@@ -129,6 +129,16 @@ public class ArrayDataTypeTests {
             expectedExceptionsMessageRegExp = "Array max item count exceeds ballerina array.*")
     public void arrayHasMaxItemsExceedLimit() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/array_exceed_max_item.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+    }
+
+    @Test(description = "Array schema has max items count that ballerina doesn't support, in record field",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Array max item count exceeds ballerina array.*")
+    public void arrayHasMaxItemsExceedLimit02() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/array_exceed_max_item_02.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();

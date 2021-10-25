@@ -526,9 +526,8 @@ public class FunctionSignatureGenerator {
             paramType = "Compound" +  getValidName(operationId, true) + "Request";
             List<Schema> allOf = composedSchema.getAllOf();
             List<String> required = composedSchema.getRequired();
-            TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
-                    .getAllOfTypeDefinitionNode(openAPI, new ArrayList<>(), required,
-                            createIdentifierToken(paramType), new ArrayList<>(), allOf);
+            TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator.getAllOfTypeDefinitionNode(
+                    new ArrayList<>(), required, createIdentifierToken(paramType), new ArrayList<>(), allOf);
             functionReturnType.updateTypeDefinitionNodeList(paramType, allOfTypeDefinitionNode);
         }
         return paramType;
@@ -551,8 +550,8 @@ public class FunctionSignatureGenerator {
                     requestBody.getDescription(), false));
         }
         TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
-                createIdentifierToken("public type"), createIdentifierToken(typeName), fields,
-                properties, requestBodyDocs, openAPI, createEmptyNodeList());
+                createIdentifierToken(typeName), fields,
+                properties, requestBodyDocs, createEmptyNodeList());
         functionReturnType.updateTypeDefinitionNodeList(typeName, recordNode);
         paramType = typeName;
         return paramType;

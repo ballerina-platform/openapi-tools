@@ -41,19 +41,12 @@ components:
     Pet:
       items:
        type: string
-    Address:
+    Stock:
      properties:
-       streetNo:
-         type: integer
-       mainStreet:
+       count:
          type: array
-         maxItems: 2
+         maxItems: 2147483640
          items:
-           type: string
+           type: integer
        country:
          type: string
-    UserAddress:
-      type: array
-      maxItems: 7
-      items:
-        type: integer
