@@ -152,6 +152,8 @@ public class GeneratorConstants {
     public static final String DEFAULT_API_KEY_DESC = "API keys for authorization";
 
     public static final String RESPONSE = "response";
+    public static final String TYPE = "type";
+    public static final String ANY_DATA = "anydata";
 
     //Http Methods
     public static final String POST = "post";

@@ -502,7 +502,7 @@ public class FunctionSignatureGenerator {
         } else if (arrayItems instanceof ComposedSchema) {
             paramType = "CompoundArrayItem" +  getValidName(operationId, true) + "Request";
             TypeDescriptorNode typeDescriptorNodeForArraySchema = ballerinaSchemaGenerator
-                    .getTypeDescriptorNodeForArraySchema(openAPI, arraySchema);
+                    .getArrayTypeDescriptorNode(arraySchema);
             // TODO - Add API doc by checking requestBody
             TypeDefinitionNode arrayTypeNode = NodeFactory.createTypeDefinitionNode(null, null,
                     createIdentifierToken("public type"),
