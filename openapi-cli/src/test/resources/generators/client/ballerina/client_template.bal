@@ -13,6 +13,7 @@ public isolated client class Client {
     returns error?{
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
+        return;
     }
     remote isolated function listPets(int? 'limit) returns Pets|error {
         string  path = string `/pets`;

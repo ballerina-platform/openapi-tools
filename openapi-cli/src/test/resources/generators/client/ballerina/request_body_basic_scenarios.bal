@@ -12,6 +12,7 @@ public isolated client class Client {
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://petstore.swagger.io:443/v2") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
+        return;
     }
     # 02 Example for rb has inline requestbody.
     #

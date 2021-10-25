@@ -17,6 +17,7 @@ public isolated client class Client {
     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://api.nytimes.com/svc/movies/v2") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
+        return;
     }
     # Get movie reviews that are critics' picks. You can either specify the reviewer name or use "all", "full-time", or "part-time".
     #
