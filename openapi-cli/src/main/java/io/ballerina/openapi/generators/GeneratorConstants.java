@@ -133,6 +133,10 @@ public class GeneratorConstants {
     public static final String RECORD = "record";
     public static final String IDENTIFIER = "identifier";
     public static final String TYPE_NAME = "typeName";
+    public static final String TEXT_PREFIX = "text/";
+    public static final String BINARY = "binary";
+    public static final String PDF = "pdf";
+
     // auth related constants
     public static final String API_KEY = "apikey";
     public static final String API_KEYS_CONFIG = "ApiKeysConfig";
@@ -250,4 +254,7 @@ public class GeneratorConstants {
     public static final String JSON_EXTENSION = ".json";
     public static final String YAML_EXTENSION = ".yaml";
     public static final String YML_EXTENSION = ".yml";
+
+    //Error related
+    public static final String UNSUPPORTED_MEDIA_ERROR = "Unsupported media type '%s' is given in the request body";
 }

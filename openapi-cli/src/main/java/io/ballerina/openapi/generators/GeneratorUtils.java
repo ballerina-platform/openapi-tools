@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
@@ -35,6 +36,7 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
@@ -72,22 +74,33 @@ import java.util.regex.Pattern;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createExpressionStatementNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
+import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
+import static io.ballerina.openapi.generators.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.generators.GeneratorConstants.GET;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.OPTIONS;
 import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
+import static io.ballerina.openapi.generators.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
 
 /**
@@ -220,6 +233,12 @@ public class GeneratorUtils {
             case Constants.DOUBLE:
             case Constants.FLOAT:
                 convertedType = "float";
+                break;
+            case Constants.BINARY:
+                convertedType = "byte[]";
+                break;
+            case Constants.BYTE:
+                convertedType = "byte[]";
                 break;
             default:
                 throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
@@ -635,4 +654,47 @@ public class GeneratorUtils {
         gFile.setFileName(gFile.getFileName().split("\\.")[0] + "." + (duplicateCount) + "." +
                 gFile.getFileName().split("\\.")[1]);
     }
+
+    /**
+     * Create each item of the encoding map.
+     *
+     * @param filedOfMap    Includes all the items in the encoding map
+     * @param style         Defines how multiple values are delimited and explode
+     * @param explode       Specifies whether arrays and objects should generate separate parameters
+     * @param key           Key of the item in the map
+     */
+    public static void createEncodingMap(List<Node> filedOfMap, String style, Boolean explode, String key) {
+        IdentifierToken fieldName = createIdentifierToken('"' + key + '"');
+        Token colon = createToken(COLON_TOKEN);
+        SpecificFieldNode styleField = createSpecificFieldNode(null,
+                createIdentifierToken(STYLE), createToken(COLON_TOKEN),
+                createRequiredExpressionNode(createIdentifierToken(style.toUpperCase(Locale.ROOT))));
+        SpecificFieldNode explodeField = createSpecificFieldNode(null,
+                createIdentifierToken(EXPLODE), createToken(COLON_TOKEN),
+                createRequiredExpressionNode(createIdentifierToken(explode.toString())));
+        ExpressionNode expressionNode = createMappingConstructorExpressionNode(
+                createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(styleField, createToken(COMMA_TOKEN),
+                        explodeField),
+                createToken(CLOSE_BRACE_TOKEN));
+        SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
+                fieldName, colon, expressionNode);
+        filedOfMap.add(specificFieldNode);
+        filedOfMap.add(createToken(COMMA_TOKEN));
+    }
+
+    public static boolean checkImportDuplicate(List<ImportDeclarationNode> imports, String module) {
+        for (ImportDeclarationNode importModule:imports) {
+            StringBuilder moduleBuilder = new StringBuilder();
+            for (IdentifierToken identifierToken : importModule.moduleName()) {
+                moduleBuilder.append(identifierToken.toString().trim());
+            }
+            if (BALLERINA.equals((importModule.orgName().get()).orgName().toString().trim()) &&
+                    module.equals(moduleBuilder.toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

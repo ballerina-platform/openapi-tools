@@ -84,7 +84,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.ErrorMessages.invalidPathParamType;
+import static io.ballerina.openapi.generators.GeneratorConstants.BINARY;
+import static io.ballerina.openapi.generators.GeneratorConstants.BYTE;
 import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
@@ -441,7 +444,12 @@ public class FunctionSignatureGenerator {
             } else if (schema.getType() != null && !schema.getType().equals("array") && !schema.getType().equals(
                     "object")) {
                 String typeOfPayload = schema.getType().trim();
-                paramType = convertOpenAPITypeToBallerina(typeOfPayload);
+                if (typeOfPayload.equals(STRING) && schema.getFormat() != null
+                        && (schema.getFormat().equals(BINARY) || schema.getFormat().equals(BYTE))) {
+                    paramType = convertOpenAPITypeToBallerina(schema.getFormat());
+                } else {
+                    paramType = convertOpenAPITypeToBallerina(typeOfPayload);
+                }
             } else if (schema instanceof ArraySchema) {
                 //TODO: handle nested array - this is impossible to handle
                 ArraySchema arraySchema = (ArraySchema) schema;

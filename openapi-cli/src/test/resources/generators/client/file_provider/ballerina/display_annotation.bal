@@ -22,7 +22,7 @@ public isolated client class Client {
         string  path = string `/pet`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
-        request.setPayload(jsonBody);
+        request.setPayload(jsonBody, "application/json");
         http:Response response = check self.clientEp->put(path, request);
         return response;
     }
