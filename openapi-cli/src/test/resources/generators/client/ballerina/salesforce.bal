@@ -12,6 +12,7 @@ public isolated client class Client {
                                   {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
+        return;
     }
     remote isolated function products(decimal latitude, decimal longitude) returns ProductArr|error {
         string path = string `/products`;
