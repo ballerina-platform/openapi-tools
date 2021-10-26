@@ -21,7 +21,7 @@ public client class openapiClient {
     remote function listPets(int 'limit) returns Pets {
         http:Client listPetsEp = self.clientEp;
         //Check if qutedIdntifer there , if there then remove and take name
-        Pets response = checkpanic listPetsEp->get(string `/pets?limit=${'limit}`, targetType = Pets);
+        Pets response = checkpanic listPetsEp->get(string `/pets?limit=${'limit}`);
 
         return response;
     }
@@ -30,20 +30,20 @@ public client class openapiClient {
         http:Client createPetsEp = self.clientEp;
 
         //post message mapped to response description.
-        string response = checkpanic createPetsEp->post("/pets","successful", targetType = string);
+        string response = checkpanic createPetsEp->post("/pets","successful");
         return response;
     }
 
     //client cant be with multiple value
     // remote function showPetById(string petId) returns Pet|Error {
     //     http:Client showPetByIdEp = self.clientEp;
-    //     Pet|Error response = checkpanic showPetByIdEp->get(string `/pets/${petId}`, targetType = Pet|Error);
+    //     Pet|Error response = checkpanic showPetByIdEp->get(string `/pets/${petId}`);
     //     return response;
     // }
 
     remote function showPetById(string petId) returns http:Response {
         http:Client showPetByIdEp = self.clientEp;
-        http:Response response = checkpanic showPetByIdEp->get(string `/pets/${petId}`, targetType = http:Response);
+        http:Response response = checkpanic showPetByIdEp->get(string `/pets/${petId}`);
         // if response is http:Response {
             // handle the given payload and return
         // }
@@ -56,7 +56,7 @@ public client class openapiClient {
     // remote function deletePet(int petId) returns boolean {
         // http:Client deletePetEp = self.clientEp;
         //can't use http:Accepted in targetType.
-        // http:Accepted response = check deletePetEp->delete(string `/pets/${petId}`, targetType = http:Accepted);
+        // http:Accepted response = check deletePetEp->delete(string `/pets/${petId}`);
         // return http:Accepted;
         // return true;
     // }
@@ -76,7 +76,7 @@ public client class openapiClient {
     remote function getPet() returns string {
         http:Client listPetsEp = self.clientEp;
         //Check if qutedIdntifer there , if there then remove and take name
-        string response = checkpanic listPetsEp->get("/pet", targetType = string);
+        string response = checkpanic listPetsEp->get("/pet");
 
         return response;
     }
@@ -125,7 +125,7 @@ public client class openapiClient {
     // remote function resource1() returns record {| *http:NotFound; string body; |} {
     //     http:Client resource1Ep = self.clientEp
     //     // TODO: Update the request as needed
-    //     var response = checkpanic resource1Ep->get("/ping", targetType = record {| *http:NotFound; string body; |});
+    //     var response = checkpanic resource1Ep->get("/ping");
     //     return response;
     // }
     remote function resource2() returns Pet[] {
@@ -133,7 +133,7 @@ public client class openapiClient {
         http:Request request = new;
 
         // TODO: Update the request as needed
-        Pet[] response = checkpanic resource1Ep->get("/ping2", targetType = Pet[]);
+        Pet[] response = checkpanic resource1Ep->get("/ping2");
 
         return response;
     }

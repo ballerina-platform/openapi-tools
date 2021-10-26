@@ -76,7 +76,7 @@ public class FunctionBodyNodeTests {
                 {"diagnostic_files/header_parameter.yaml", "/pets", "{stringpath=string`/pets`;map<any>headerValues=" +
                         "{\"X-Request-ID\":xRequestId,\"X-Request-Client\":xRequestClient};map<string|string[]>" +
                         "accHeaders=getMapForHeaders(headerValues);http:Response response =checkself.clientEp->get" +
-                        "(path,accHeaders, targetType=http:Response); return response;}"},
+                        "(path,accHeaders); return response;}"},
                 {"diagnostic_files/head_operation.yaml", "/{filesystem}", "{string path=string`/${filesystem}`;" +
                         "map<anydata>queryParam={\"resource\":'resource,\"timeout\":timeout};" +
                         "path = path + check getPathForQueryParam(queryParam);" +
@@ -85,27 +85,27 @@ public class FunctionBodyNodeTests {
                         "accHeaders = getMapForHeaders(headerValues);" +
                         "http:Responseresponse=check self.clientEp-> head(path, accHeaders);returnresponse;}"},
                 {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string  path = string `/pets/${petId}`;" +
-                        "http:Response response = check self.clientEp-> delete(path, targetType = http:Response);" +
+                        "http:Response response = check self.clientEp-> delete(path);" +
                         "return response;}"},
                 {"diagnostic_files/json_payload.yaml", "/pets", "{string  path = string `/pets`;" +
                         "http:Request request = new; request.setPayload(payload); " +
                         "http:Response response = check self.clientEp->" +
-                        "post(path, request, targetType=http:Response); " +
+                        "post(path, request); " +
                         "return response;}"},
                 {"diagnostic_files/xml_payload.yaml", "/pets", "{string  path = string `/pets`; " +
                         "http:Request request = new;" +
                         "request.setPayload(payload); " +
-                        "http:Response response = check self.clientEp->post(path, request, targetType=http:Response);" +
+                        "http:Response response = check self.clientEp->post(path, request);" +
                         "return response;}"},
                 {"diagnostic_files/xml_payload_with_ref.yaml", "/pets", "{string  path = string `/pets`;" +
                         "http:Request request = new;" +
                         "json jsonBody = check payload.cloneWithType(json);" +
                         "xml? xmlBody = check xmldata:fromJson(jsonBody);" +
                         "request.setPayload(xmlBody);" +
-                        "http:Response response = check self.clientEp->post(path, request, targetType=http:Response);" +
+                        "http:Response response = check self.clientEp->post(path, request);" +
                         "return response;}"},
                 {"swagger/response_type_order.yaml", "/pet/{petId}", "{string path = string `/pet/${petId}`;" +
-                        "Pet response = check self.clientEp->get(path, targetType = Pet);" +
+                        "Pet response = check self.clientEp->get(path);" +
                         "return response;}"}
         };
     }

@@ -30,7 +30,7 @@ public isolated client class Client {
         string path = string `/tracks/${trackId}/comments`;
         map<anydata> queryParam = {"limit": 'limit, "offset": offset, "linked_partitioning": linkedPartitioning};
         path = path + check getPathForQueryParam(queryParam);
-        InlineResponse200 response = check self.clientEp->get(path, targetType = InlineResponse200);
+        InlineResponse200 response = check self.clientEp->get(path);
         return response;
     }
 }

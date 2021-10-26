@@ -22,7 +22,7 @@ public isolated client class Client {
     # + return - A list of countries with all informtion included.
     remote isolated function getCovidinAllCountries() returns CountriesArr|error {
         string  path = string `/api`;
-        CountriesArr response = check self.clientEp-> get(path, targetType = CountriesArr);
+        CountriesArr response = check self.clientEp-> get(path);
         return response;
     }
     # List of all countries with COVID-19 cases
@@ -30,7 +30,7 @@ public isolated client class Client {
     # + return - Default response with array of strings
     remote isolated function getCountryList() returns CountryInfoArr|error {
         string  path = string `/api/v1/countries/list/`;
-        CountryInfoArr response = check self.clientEp-> get(path, targetType = CountryInfoArr);
+        CountryInfoArr response = check self.clientEp-> get(path);
         return response;
     }
     # Returns information about country. Pass country name as a parameter. Country name is case insensitive. For example – https://api-cov19.now.sh/api/countries/netherlands
@@ -39,7 +39,7 @@ public isolated client class Client {
     # + return - A list of countries with all informtion included.
     remote isolated function getCountryByName(string country) returns Country|error {
         string  path = string `/api/countries/${country}`;
-        Country response = check self.clientEp-> get(path, targetType = Country);
+        Country response = check self.clientEp-> get(path);
         return response;
     }
 }

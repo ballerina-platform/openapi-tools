@@ -31,7 +31,7 @@ public isolated client class Client {
         string  path = string `/products`;
         map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, server_token: self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp-> get(path, targetType = ProductArr);
+        ProductArr response = check self.clientEp-> get(path);
         return response;
     }
     # Price Estimates
@@ -45,7 +45,7 @@ public isolated client class Client {
         string  path = string `/estimates/price`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude, server_token: self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
-        PriceEstimateArr response = check self.clientEp-> get(path, targetType = PriceEstimateArr);
+        PriceEstimateArr response = check self.clientEp-> get(path);
         return response;
     }
     # Time Estimates
@@ -59,7 +59,7 @@ public isolated client class Client {
         string  path = string `/estimates/time`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId, server_token: self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp-> get(path, targetType = ProductArr);
+        ProductArr response = check self.clientEp-> get(path);
         return response;
     }
     # User Profile
@@ -69,7 +69,7 @@ public isolated client class Client {
         string  path = string `/me`;
         map<anydata> queryParam = {server_token: self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
-        Profile response = check self.clientEp-> get(path, targetType = Profile);
+        Profile response = check self.clientEp-> get(path);
         return response;
     }
     # User Activity
@@ -81,7 +81,7 @@ public isolated client class Client {
         string  path = string `/history`;
         map<anydata> queryParam = {"offset": offset, "limit": 'limit, server_token: self.apiKeys["server_token"]};
         path = path + check getPathForQueryParam(queryParam);
-        Activities response = check self.clientEp-> get(path, targetType = Activities);
+        Activities response = check self.clientEp-> get(path);
         return response;
     }
 }

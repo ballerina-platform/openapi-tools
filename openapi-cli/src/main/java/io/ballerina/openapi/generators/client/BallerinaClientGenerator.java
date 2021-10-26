@@ -216,7 +216,7 @@ public class BallerinaClientGenerator {
      *     // Remote functions
      *     remote isolated function pathParameter(int 'version, string name) returns string|error {
      *         string  path = string `/v1/${'version}/v2/${name}`;
-     *         string response = check self.clientEp-> get(path, targetType = string);
+     *         string response = check self.clientEp-> get(path);
      *         return response;
      *     }
      * }
@@ -473,7 +473,7 @@ public class BallerinaClientGenerator {
      * <pre>
      *     remote isolated function pathParameter(int 'version, string name) returns string|error {
      *          string  path = string `/v1/${'version}/v2/${name}`;
-     *          string response = check self.clientEp-> get(path, targetType = string);
+     *          string response = check self.clientEp-> get(path);
      *          return response;
      *    }
      * </pre>

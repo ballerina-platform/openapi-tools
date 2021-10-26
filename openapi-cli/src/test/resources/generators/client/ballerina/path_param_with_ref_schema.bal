@@ -18,7 +18,7 @@ public isolated client class Client {
     # + return - Ok
     remote isolated function operationId03(Id id) returns string|error {
         string  path = string `/v1/${id}`;
-        string response = check self.clientEp-> get(path, targetType = string);
+        string response = check self.clientEp-> get(path);
         return response;
     }
 }

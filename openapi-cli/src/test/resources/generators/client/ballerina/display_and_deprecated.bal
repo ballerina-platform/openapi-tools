@@ -25,7 +25,7 @@ public isolated client class Client {
         string  path = string `/pets`;
         map<anydata> queryParam = {"limit": 'limit};
         path = path + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp-> get(path, targetType = Pets);
+        Pets response = check self.clientEp-> get(path);
         return response;
     }
     # Create a pet
@@ -35,7 +35,7 @@ public isolated client class Client {
         string  path = string `/pets`;
         http:Request request = new;
         //TODO: Update the request as needed;
-        http:Response response = check self.clientEp-> post(path, request, targetType = http:Response);
+        http:Response response = check self.clientEp-> post(path, request);
         return response;
     }
     # Info for a specific pet
@@ -52,7 +52,7 @@ public isolated client class Client {
         string  path = string `/pets/${petId}`;
         map<anydata> queryParam = {"limit": 'limit};
         path = path + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp-> get(path, targetType = Pets);
+        Pets response = check self.clientEp-> get(path);
         return response;
     }
 }

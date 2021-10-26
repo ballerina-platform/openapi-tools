@@ -31,7 +31,7 @@ public isolated client class Client {
         string  path = string `/products`;
         map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, "server_token": self.apiKeyConfig.serverToken};
         path = path + check getPathForQueryParam(queryParam);
-        Product[] response = check self.clientEp-> get(path, targetType = ProductArr);
+        Product[] response = check self.clientEp-> get(path);
         return response;
     }
     # Price Estimates
@@ -45,7 +45,7 @@ public isolated client class Client {
         string  path = string `/estimates/price`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude};
         path = path + check getPathForQueryParam(queryParam);
-        PriceEstimate[] response = check self.clientEp-> get(path, targetType = PriceEstimateArr);
+        PriceEstimate[] response = check self.clientEp-> get(path);
         return response;
     }
     # Time Estimates
@@ -59,7 +59,7 @@ public isolated client class Client {
         string  path = string `/estimates/time`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId};
         path = path + check getPathForQueryParam(queryParam);
-        Product[] response = check self.clientEp-> get(path, targetType = ProductArr);
+        Product[] response = check self.clientEp-> get(path);
         return response;
     }
     # User Profile
@@ -67,7 +67,7 @@ public isolated client class Client {
     # + return - Profile information for a user
     remote isolated function getUserProfile() returns Profile|error {
         string  path = string `/me`;
-        Profile response = check self.clientEp-> get(path, targetType = Profile);
+        Profile response = check self.clientEp-> get(path);
         return response;
     }
     # User Activity
@@ -79,7 +79,7 @@ public isolated client class Client {
         string  path = string `/history`;
         map<anydata> queryParam = {"offset": offset, "limit": 'limit};
         path = path + check getPathForQueryParam(queryParam);
-        Activities response = check self.clientEp-> get(path, targetType = Activities);
+        Activities response = check self.clientEp-> get(path);
         return response;
     }
 }

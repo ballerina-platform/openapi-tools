@@ -18,7 +18,7 @@ public isolated client class Client {
     # + return - Ok
     remote isolated function operationId01() returns string|error {
         string  path = string `/`;
-        string response = check self.clientEp-> get(path, targetType = string);
+        string response = check self.clientEp-> get(path);
         return response;
     }
     #
@@ -27,7 +27,7 @@ public isolated client class Client {
         string  path = string `/`;
         http:Request request = new;
         //TODO: Update the request as needed;
-        string response = check self.clientEp-> post(path, request, targetType = string);
+        string response = check self.clientEp-> post(path, request);
         return response;
     }
     # op2
@@ -36,28 +36,28 @@ public isolated client class Client {
     # + return - Ok
     remote isolated function operationId03(int id) returns string|error {
         string  path = string `/v1/${id}`;
-        string response = check self.clientEp-> get(path, targetType = string);
+        string response = check self.clientEp-> get(path);
         return response;
     }
     #
     # + return - Ok
     remote isolated function operationId04(int 'version, string name) returns string|error {
         string  path = string `/v1/${'version}/v2/${name}`;
-        string response = check self.clientEp-> get(path, targetType = string);
+        string response = check self.clientEp-> get(path);
         return response;
     }
     #
     # + return - Ok
     remote isolated function operationId05(int 'version, int 'limit) returns string|error {
         string  path = string `/v1/${'version}/v2/${'limit}`;
-        string response = check self.clientEp-> get(path, targetType = string);
+        string response = check self.clientEp-> get(path);
         return response;
     }
     #
     # + return - Ok
     remote isolated function operationId06(int age, string name) returns string|error {
         string  path = string `/v1/${age}/v2/${name}`;
-        string response = check self.clientEp-> get(path, targetType = string);
+        string response = check self.clientEp-> get(path);
         return response;
     }
 }

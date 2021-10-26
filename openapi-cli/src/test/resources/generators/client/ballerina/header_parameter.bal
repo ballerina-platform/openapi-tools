@@ -29,7 +29,7 @@ public isolated client class Client {
         string  path = string `/pets`;
         map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-API-KEY": self.apiKeyConfig.xApiKey};
         map<string|string[]> accHeaders = getMapForHeaders(headerValues);
-        http:Response response = check self.clientEp-> get(path, accHeaders, targetType = http:Response);
+        http:Response response = check self.clientEp-> get(path, accHeaders);
         return response;
     }
 }
