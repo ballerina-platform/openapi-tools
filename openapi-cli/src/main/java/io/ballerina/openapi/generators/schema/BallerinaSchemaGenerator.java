@@ -51,6 +51,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,10 +66,19 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocume
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ANYDATA_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ASTERISK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
+import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
+import static io.ballerina.openapi.generators.GeneratorConstants.INTEGER;
+import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
+import static io.ballerina.openapi.generators.GeneratorConstants.NUMBER;
+import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
@@ -228,8 +238,8 @@ public class BallerinaSchemaGenerator {
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
             MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
             typeDefNode = NodeFactory.createTypeDefinitionNode(metadataNode,
-                    createIdentifierToken(GeneratorConstants.PUBLIC),
-                    createIdentifierToken(GeneratorConstants.TYPE, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE),
+                    createToken(PUBLIC_KEYWORD),
+                    createToken(TYPE_KEYWORD),
                     typeName, recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
             typeDefinitionNodeList.add(typeDefNode);
 
@@ -287,10 +297,8 @@ public class BallerinaSchemaGenerator {
     private TypeDefinitionNode getTypeDefinitionNode(IdentifierToken nameReference, String type,
                                                      MetadataNode metadataNode) {
 
-        return createTypeDefinitionNode(metadataNode, createIdentifierToken(GeneratorConstants.PUBLIC),
-                createIdentifierToken(GeneratorConstants.TYPE, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE),
-                createIdentifierToken(type),
-                createSimpleNameReferenceNode(nameReference),
+        return createTypeDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD),
+                createIdentifierToken(type), createSimpleNameReferenceNode(nameReference),
                 createToken(SEMICOLON_TOKEN));
     }
 
@@ -315,9 +323,7 @@ public class BallerinaSchemaGenerator {
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
         MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
         return NodeFactory.createTypeDefinitionNode(metadataNode,
-                createIdentifierToken(GeneratorConstants.PUBLIC),
-                createIdentifierToken(GeneratorConstants.TYPE, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE),
-                typeName, recordTypeDescriptorNode,
+                createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName, recordTypeDescriptorNode,
                 AbstractNodeFactory.createToken(SEMICOLON_TOKEN));
     }
 
@@ -370,8 +376,7 @@ public class BallerinaSchemaGenerator {
 
         Token typeRef = AbstractNodeFactory.createIdentifierToken(getValidName(
                         extractReferenceType(allOfSchema.get$ref()), true));
-        Token asterisk = AbstractNodeFactory.createIdentifierToken("*");
-        TypeReferenceNode recordField = NodeFactory.createTypeReferenceNode(asterisk, typeRef,
+        TypeReferenceNode recordField = NodeFactory.createTypeReferenceNode(createToken(ASTERISK_TOKEN), typeRef,
                 createToken(SEMICOLON_TOKEN));
         recordFieldList.add(recordField);
         if (allOfSchema.getDescription() != null) {
@@ -409,9 +414,8 @@ public class BallerinaSchemaGenerator {
                     createMarkdownDocumentationNode(createNodeList(schemaDoc));
             MetadataNode metadataNode = createMetadataNode(documentationNode, annotationNodes);
             typeDefinitionNode = NodeFactory.createTypeDefinitionNode(metadataNode,
-                    createIdentifierToken(GeneratorConstants.PUBLIC),
-                    createIdentifierToken(GeneratorConstants.TYPE, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE),
-                    typeName, recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+                    createToken(PUBLIC_KEYWORD),
+                    createToken(TYPE_KEYWORD), typeName, recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
         } else {
             RecordTypeDescriptorNode recordTypeDescriptorNode = NodeFactory.createRecordTypeDescriptorNode(
                     createToken(SyntaxKind.RECORD_KEYWORD),
@@ -421,8 +425,8 @@ public class BallerinaSchemaGenerator {
                     createMarkdownDocumentationNode(createNodeList(schemaDoc));
             MetadataNode metadataNode = createMetadataNode(documentationNode, annotationNodes);
             typeDefinitionNode = NodeFactory.createTypeDefinitionNode(metadataNode,
-                    createIdentifierToken(GeneratorConstants.PUBLIC),
-                    createIdentifierToken(GeneratorConstants.TYPE, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE), typeName,
+                    createToken(PUBLIC_KEYWORD),
+                    createToken(TYPE_KEYWORD), typeName,
                     recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
         }
         return typeDefinitionNode;
@@ -481,14 +485,12 @@ public class BallerinaSchemaGenerator {
 
         if (schema.getType() != null || schema.getProperties() != null) {
 
-            boolean isOASPrimitive = (schema.getType().equals(GeneratorConstants.INTEGER) ||
-                    schema.getType().equals(GeneratorConstants.NUMBER))
-                    || schema.getType().equals(GeneratorConstants.STRING) ||
-                    schema.getType().equals(GeneratorConstants.BOOLEAN);
+            List<String> primitiveTypeList = new ArrayList<>(Arrays.asList(INTEGER, NUMBER, STRING, BOOLEAN));
+            boolean isOASPrimitive = primitiveTypeList.contains(schema.getType());
 
             if (schema.getType() != null && (isOASPrimitive)) {
                 String type = convertOpenAPITypeToBallerina(schema.getType().trim());
-                if (schema.getType().equals(GeneratorConstants.NUMBER)) {
+                if (schema.getType().equals(NUMBER)) {
                     if (schema.getFormat() != null) {
                         type = convertOpenAPITypeToBallerina(schema.getFormat().trim());
                     }
@@ -597,8 +599,7 @@ public class BallerinaSchemaGenerator {
         if (arraySchema.getItems() != null) {
             fieldTypeName = extractOpenAPISchema(arraySchema.getItems());
         } else {
-            Token type = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.ANY_DATA, SINGLE_WS_MINUTIAE,
-                    SINGLE_WS_MINUTIAE);
+            Token type = AbstractNodeFactory.createToken(ANYDATA_KEYWORD);
             fieldTypeName = NodeFactory.createBuiltinSimpleNameReferenceNode(null, type);
         }
         if (arraySchema.getDescription() != null) {
@@ -613,7 +614,7 @@ public class BallerinaSchemaGenerator {
         }
         String arrayBrackets = "[]";
         if (arraySchema.getMaxItems() != null && arraySchema.getMaxItems() == (int) arraySchema.getMaxItems()) {
-            if (arraySchema.getMaxItems() <= 2147483637) {
+            if (arraySchema.getMaxItems() <= MAX_ARRAY_LENGTH) {
                 arrayBrackets = "[" + arraySchema.getMaxItems() + "]";
             } else {
                 throw new BallerinaOpenApiException("Array max item count exceeds ballerina array max count.");
@@ -661,12 +662,12 @@ public class BallerinaSchemaGenerator {
             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
         } else {
             closeSBracketToken = AbstractNodeFactory.createIdentifierToken(getNullableType(arraySchema, "]"));
-            typeName = AbstractNodeFactory.createIdentifierToken(GeneratorConstants.ANY_DATA);
+            typeName = AbstractNodeFactory.createToken(ANYDATA_KEYWORD);
             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
         }
 
         if (arraySchema.getMaxItems() != null && arraySchema.getMaxItems() == (int) arraySchema.getMaxItems()) {
-            if (arraySchema.getMaxItems() <= 2147483637) {
+            if (arraySchema.getMaxItems() <= MAX_ARRAY_LENGTH) {
                 return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                         createIdentifierToken(arraySchema.getMaxItems().toString()), closeSBracketToken);
             } else {
