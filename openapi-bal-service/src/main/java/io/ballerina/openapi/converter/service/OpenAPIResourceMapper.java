@@ -31,6 +31,9 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.error.ErrorMessages;
+import io.ballerina.openapi.converter.error.IncompatibleResourceError;
+import io.ballerina.openapi.converter.error.OpenAPIConverterError;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -56,7 +59,12 @@ public class OpenAPIResourceMapper {
     private final SemanticModel semanticModel;
     private final Paths pathObject = new Paths();
     private final Components components = new Components();
-    private final PrintStream outStream = System.out;
+    private final List<OpenAPIConverterError> errors = new ArrayList<>();
+
+    public List<OpenAPIConverterError> getErrors() {
+
+        return errors;
+    }
 
     /**
      * Initializes a resource parser for openApi.
@@ -74,7 +82,7 @@ public class OpenAPIResourceMapper {
      * @param resources Resource list to be converted.
      * @return map of string and openApi path objects.
      */
-    public Paths getPaths(List<FunctionDefinitionNode> resources) throws OpenApiConverterException {
+    public Paths getPaths(List<FunctionDefinitionNode> resources) {
         for (FunctionDefinitionNode resource : resources) {
             List<String> methods = this.getHttpMethods(resource, false);
             getResourcePath(resource, methods);
@@ -87,16 +95,17 @@ public class OpenAPIResourceMapper {
      * @param resource The ballerina resource.
      * @param httpMethods   Sibling methods related to operation.
      */
-    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods)
-            throws OpenApiConverterException {
+    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods) {
         String path = generateRelativePath(resource);
         Operation operation;
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.
             if (resource.functionName().toString().trim().equals(httpMethod)) {
                 if (httpMethod.equals("'default")) {
-                    outStream.println("WARNING: Generated OpenAPI definition doesn't contain details " +
-                            "for the `default` resource method in the Ballerina service.");
+                    ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_100;
+                    IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getSeverity(),
+                            errorMessage.getDescription(), errorMessage.getCode(), resource.location());
+                    errors.add(error);
                 } else {
                     operation = convertResourceToOperation(resource, httpMethod, path).getOperation();
                     generatePathItem(httpMethod, pathObject, operation, path);
@@ -176,8 +185,7 @@ public class OpenAPIResourceMapper {
      * @return Operation Adaptor object of given resource
      */
     private OperationAdaptor convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                        String generateRelativePath)
-            throws OpenApiConverterException {
+                                                        String generateRelativePath) {
         OperationAdaptor op = new OperationAdaptor();
         op.setHttpOperation(httpMethod);
         op.setPath(generateRelativePath);
@@ -196,8 +204,10 @@ public class OpenAPIResourceMapper {
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
-        OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
+        OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components,
+                resource.location());
         openAPIResponseMapper.getResourceOutput(resource, op);
+        errors.addAll(openAPIResponseMapper.getErrors());
         return op;
     }
 

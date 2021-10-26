@@ -15,17 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package io.ballerina.openapi.converter.error;
 
 /**
- * {@code OpenAPIConverterError} represents error type in the ballerina to openapi command.
+ * {@code ExceptionError} represents all the errors that happens during the code generation process.
  *
  * @since 2.0.0
  */
-public abstract class OpenAPIConverterError {
+public class ExceptionError extends OpenAPIConverterError {
 
-//    public abstract int getCode();
-    public abstract String getMessage();
+    private String message;
 
+    public ExceptionError(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
 }

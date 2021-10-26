@@ -19,6 +19,7 @@
 package io.ballerina.openapi.converter.error;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.ballerina.tools.diagnostics.Location;
 
 /**
  * {@code IncompatibleResourceError} represents the error that OAS not compatible with ballerina implementation.
@@ -26,7 +27,34 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
  * @since 2.0.0
  */
 public class IncompatibleResourceError extends OpenAPIConverterError {
-    DiagnosticSeverity diagnosticSeverity;
+    private DiagnosticSeverity diagnosticSeverity;
+    private String message;
+    private String code;
+    private Location location;
 
+    public IncompatibleResourceError(DiagnosticSeverity diagnosticSeverity, String message, String code,
+                                     Location location) {
 
+        this.diagnosticSeverity = diagnosticSeverity;
+        this.message = message;
+        this.code = code;
+        this.location = location;
+    }
+
+    public DiagnosticSeverity getDiagnosticSeverity() {
+        return diagnosticSeverity;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
 }
