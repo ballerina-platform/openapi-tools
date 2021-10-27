@@ -20,7 +20,8 @@ package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.error.ExceptionError;
+import io.ballerina.openapi.converter.error.OpenAPIConverterError;
 import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.projects.Document;
@@ -35,7 +36,9 @@ import io.ballerina.projects.directory.ProjectLoader;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,11 +49,16 @@ public class OpenApiConverter {
     private  SyntaxTree syntaxTree;
     private  SemanticModel semanticModel;
     private  Project project;
+    private List<OpenAPIConverterError> errors = new ArrayList<>();
 
     /**
      * Initialize constructor.
      */
     public OpenApiConverter() {
+    }
+
+    public List<OpenAPIConverterError> getErrors() {
+        return errors;
     }
 
     /**
@@ -63,7 +71,7 @@ public class OpenApiConverter {
      * @throws ProjectException          Error occurred generating OpenAPI specification.
      */
     public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName
-            , Boolean needJson) throws IOException, ProjectException, OpenApiConverterException {
+            , Boolean needJson) {
         // Load project instance for single ballerina file
         project = ProjectLoader.loadProject(servicePath);
         Package packageName = project.currentPackage();
@@ -85,9 +93,15 @@ public class OpenApiConverter {
         semanticModel =  project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
         Map<String, String> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
                 semanticModel, serviceName, needJson, outPath);
+        this.errors.addAll(ServiceToOpenAPIConverterUtils.getErrors());
         if (!openAPIDefinitions.isEmpty()) {
             for (Map.Entry<String, String> definition: openAPIDefinitions.entrySet()) {
-                CodegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue());
+                try {
+                    CodegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue());
+                } catch (IOException e) {
+                    ExceptionError error = new ExceptionError(e.getMessage());
+                    this.errors.add(error);
+                }
             }
         }
     }

@@ -27,7 +27,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.OpenApiConverterException;
-import io.ballerina.openapi.converter.error.IncompatibleResourceError;
+import io.ballerina.openapi.converter.error.ExceptionError;
 import io.ballerina.openapi.converter.error.OpenAPIConverterError;
 import io.ballerina.openapi.converter.service.OAS;
 import io.ballerina.openapi.converter.service.OASResult;
@@ -59,11 +59,10 @@ import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
  */
 public class ServiceToOpenAPIConverterUtils {
 
+    private static final List<OpenAPIConverterError> errors = new ArrayList<>();
 
-    private List<OpenAPIConverterError> errors = new ArrayList<>();
-
-    public void setErrors(List<OpenAPIConverterError> errors) {
-        this.errors = errors;
+    public static List<OpenAPIConverterError> getErrors() {
+        return errors;
     }
 
     /**
@@ -78,14 +77,14 @@ public class ServiceToOpenAPIConverterUtils {
      * @throws OpenApiConverterException when code generation is fail
      */
     public static Map<String, String> generateOAS3Definition(SyntaxTree syntaxTree, SemanticModel semanticModel,
-                                                             String serviceName, Boolean needJson, Path outPath)
-            throws OpenApiConverterException {
+                                                             String serviceName, Boolean needJson, Path outPath) {
         Map<String, String> openAPIDefinitions = new HashMap<>();
         List<ListenerDeclarationNode> endpoints = new ArrayList<>();
         List<ServiceDeclarationNode> servicesToGenerate = new ArrayList<>();
         List<String> availableService = new ArrayList<>();
         if (containErrors(semanticModel.diagnostics())) {
-            throw new OpenApiConverterException("Given ballerina file has syntax/compilation error.");
+            ExceptionError error = new ExceptionError("Given ballerina file has syntax/compilation error.");
+            errors.add(error);
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
             extractListenersAndServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode,
@@ -93,9 +92,10 @@ public class ServiceToOpenAPIConverterUtils {
 
             // If there are no services found for a given service name.
             if (serviceName != null && servicesToGenerate.isEmpty()) {
-                throw new OpenApiConverterException("No Ballerina services found with name '" + serviceName +
+                ExceptionError error = new ExceptionError("No Ballerina services found with name '" + serviceName +
                         "' to generate an OpenAPI specification. These services are " +
-                        "available in ballerina file. " + availableService.toString());
+                        "available in ballerina file. " + availableService);
+                errors.add(error);
             }
 
             // Generating for the services
@@ -105,11 +105,7 @@ public class ServiceToOpenAPIConverterUtils {
                 OASResult oasResult = generateOAS(serviceNode, serviceNodeName, needJson, endpoints,
                         semanticModel, openApiName);
                 String openApiSource = oasResult.getDefinition();
-                for (OpenAPIConverterError error : oasResult.getErrors()) {
-                    if (error instanceof IncompatibleResourceError) {
-                        //ToDO: ------------
-                    }
-                }
+                errors.addAll(oasResult.getErrors());
                 //  Checked old generated file with same name
                 openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
                 openAPIDefinitions.put(openApiName, openApiSource);

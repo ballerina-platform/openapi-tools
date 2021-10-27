@@ -18,12 +18,13 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.openapi.converter.error.OpenAPIConverterError;
-import io.swagger.v3.oas.models.OpenAPI;
 
 import java.util.List;
 
 /**
- * {@code OASResult} is used to contain
+ * {@code OASResult} is used to contain OpenAPI definition in string format and error list.
+ *
+ * @since 2.0.0
  */
 public class OASResult {
     private String definition;

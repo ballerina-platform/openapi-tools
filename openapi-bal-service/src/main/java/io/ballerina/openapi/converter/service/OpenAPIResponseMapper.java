@@ -49,7 +49,6 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.error.ErrorMessages;
 import io.ballerina.openapi.converter.error.IncompatibleResourceError;
 import io.ballerina.openapi.converter.error.OpenAPIConverterError;
@@ -425,8 +424,9 @@ public class OpenAPIResponseMapper {
                         ((OptionalTypeDescriptorNode) typeNode).typeDescriptor(), customMediaPrefix, headers);
             default:
                 ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_101;
-                IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getSeverity(),
-                        errorMessage.getDescription() + typeNode.kind(), errorMessage.getCode(), this.location);
+                IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
+                        errorMessage.getDescription() + typeNode.kind(), this.location,
+                        errorMessage.getSeverity());
                 errors.add(error);
                 return Optional.empty();
         }
@@ -436,9 +436,10 @@ public class OpenAPIResponseMapper {
     /**
      * Handle return has array types.
      */
-    private Optional<ApiResponses> getApiResponsesForArrayTypes(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
-                                                      ArrayTypeDescriptorNode array, ApiResponse apiResponse,
-                                                      io.swagger.v3.oas.models.media.MediaType mediaType,
+    private Optional<ApiResponses> getApiResponsesForArrayTypes(OperationAdaptor operationAdaptor,
+                                                                ApiResponses apiResponses,
+                                                                ArrayTypeDescriptorNode array, ApiResponse apiResponse,
+                                                                io.swagger.v3.oas.models.media.MediaType mediaType,
                                                       Optional<String> customMediaPrefix, Map<String, Header> headers) {
         Map<String, Schema> schemas02 = components.getSchemas();
         if (array.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
@@ -590,7 +591,8 @@ public class OpenAPIResponseMapper {
                 return Optional.of(customMediaPrefix.map(s -> APPLICATION_PREFIX + s + JSON_POSTFIX)
                         .orElse(MediaType.APPLICATION_JSON));
             case Constants.XML:
-                return Optional.of(customMediaPrefix.map(s -> APPLICATION_PREFIX + s + "+xml").orElse(MediaType.APPLICATION_XML));
+                return Optional.of(customMediaPrefix.map(s -> APPLICATION_PREFIX + s + "+xml").
+                        orElse(MediaType.APPLICATION_XML));
             case Constants.BYTE_ARRAY:
                 return Optional.of(customMediaPrefix.map(s -> APPLICATION_PREFIX + s + "+octet-stream")
                         .orElse(MediaType.APPLICATION_OCTET_STREAM));
@@ -598,8 +600,8 @@ public class OpenAPIResponseMapper {
                 return Optional.of(customMediaPrefix.map(s -> "text/" + s + "+plain").orElse(MediaType.TEXT_PLAIN));
             default:
                 ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_102;
-                IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getSeverity(),
-                        errorMessage.getDescription() + type, errorMessage.getCode(), this.location);
+                IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
+                        errorMessage.getDescription() + type, this.location, errorMessage.getSeverity());
                 errors.add(error);
                 return Optional.empty();
         }
@@ -613,8 +615,8 @@ public class OpenAPIResponseMapper {
             return Optional.of(HTTP_CODES.get(identifier));
         } else {
             ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_103;
-            IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getSeverity(),
-                    errorMessage.getDescription()  + identifier, errorMessage.getCode(), this.location);
+            IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
+                    errorMessage.getDescription()  + identifier, this.location, errorMessage.getSeverity());
             errors.add(error);
             return Optional.empty();
         }
@@ -703,10 +705,12 @@ public class OpenAPIResponseMapper {
         return apiResponses;
     }
 
-    private Optional<ApiResponses> handleRecordHasHttpTypeInclusionField(Map<String, Schema> schema, TypeSymbol typeSymbol,
+    private Optional<ApiResponses> handleRecordHasHttpTypeInclusionField(Map<String, Schema> schema,
+                                                                         TypeSymbol typeSymbol,
                                                        OpenAPIComponentMapper componentMapper,
-                                                       RecordTypeSymbol returnRecord, List<TypeSymbol> typeInclusions
-            , Optional<String> customMediaPrefix, Map<String, Header> headers) {
+                                                       RecordTypeSymbol returnRecord, List<TypeSymbol> typeInclusions,
+                                                                         Optional<String> customMediaPrefix, Map<String,
+            Header> headers) {
         ApiResponses apiResponses = new ApiResponses();
         ApiResponse apiResponse = new ApiResponse();
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();

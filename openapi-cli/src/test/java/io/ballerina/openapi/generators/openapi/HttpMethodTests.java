@@ -18,7 +18,7 @@
 
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.error.OpenAPIConverterError;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -31,6 +31,7 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * These Tests class is for capturing the special tests regarding resource method.
@@ -46,12 +47,19 @@ public class HttpMethodTests {
         System.setOut(new PrintStream(outputStreamCaptor));
     }
 
-    @Test(description = "Generate OpenAPI spec for given ballerina file has only compiler warning")
-    public void testForCompilerWarning() throws OpenApiConverterException, IOException {
+    @Test(description = "Compiler warning for 'default' resource methods.")
+    public void testForCompilerWarningForDefault() {
         Path ballerinaFilePath = RES_DIR.resolve("default_bal.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "default.yaml");
-        Assert.assertEquals("WARNING: Generated OpenAPI definition doesn't contain details for the" +
-                " `default` resource method in the Ballerina service.", outputStreamCaptor.toString().trim());
+        OpenApiConverter openApiConverter = new OpenApiConverter();
+        openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
+                , false);
+        List<OpenAPIConverterError> errors = openApiConverter.getErrors();
+        Assert.assertFalse(errors.isEmpty());
+        Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not " +
+                "contain details for the `default` resource method in the Ballerina service.");
+
+//        Assert.assertEquals("WARNING: Generated OpenAPI definition doesn't contain details for the" +
+//                " `default` resource method in the Ballerina service.", outputStreamCaptor.toString().trim());
     }
 
     @AfterMethod

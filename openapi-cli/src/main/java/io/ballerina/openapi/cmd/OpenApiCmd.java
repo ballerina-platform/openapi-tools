@@ -18,11 +18,12 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.error.ExceptionError;
+import io.ballerina.openapi.converter.error.IncompatibleResourceError;
+import io.ballerina.openapi.converter.error.OpenAPIConverterError;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.openapi.OpenApiConverter;
-import io.ballerina.projects.ProjectException;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 
@@ -143,12 +144,8 @@ public class OpenApiCmd implements BLauncherCmd {
                     exitError(this.exitWhenFinish);
                 }
             } else if (fileName.endsWith(".bal")) {
-                try {
-                    ballerinaToOpenApi(fileName);
-                } catch (IOException e) {
-                    outStream.println(e.getLocalizedMessage());
-                    exitError(this.exitWhenFinish);
-                }
+                ballerinaToOpenApi(fileName);
+                exitError(this.exitWhenFinish);
             } else {
                 outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
                 exitError(this.exitWhenFinish);
@@ -169,23 +166,42 @@ public class OpenApiCmd implements BLauncherCmd {
      * This util method to generate openApi contract based on the given service ballerina file.
      * @param fileName  input resource file
      */
-    private void ballerinaToOpenApi(String fileName) throws IOException {
+    private void ballerinaToOpenApi(String fileName) {
+        List<OpenAPIConverterError> errors = new ArrayList<>();
         final File balFile = new File(fileName);
-        Path balFilePath = Paths.get(balFile.getCanonicalPath());
+        Path balFilePath = null;
+        try {
+            balFilePath = Paths.get(balFile.getCanonicalPath());
+        } catch (IOException e) {
+            ExceptionError error = new ExceptionError(e.getLocalizedMessage());
+            errors.add(error);
+        }
         getTargetOutputPath();
         // Check service name it is mandatory
-        try {
-            OpenApiConverter openApiConverter = new OpenApiConverter();
-            openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
-                    generatedFileType);
-        } catch (IOException  | ProjectException | OpenApiConverterException e) {
-            outStream.println(e.getLocalizedMessage());
-            exitError(this.exitWhenFinish);
+        OpenApiConverter openApiConverter = new OpenApiConverter();
+        openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
+                generatedFileType);
+        errors.addAll(openApiConverter.getErrors());
+        if (!errors.isEmpty()) {
+            for (OpenAPIConverterError error: errors) {
+                if (error instanceof ExceptionError) {
+                    this.outStream = System.err;
+                    outStream.println(error.getMessage());
+                    exitError(this.exitWhenFinish);
+                } else if (error instanceof IncompatibleResourceError) {
+                    IncompatibleResourceError incompatibleError = (IncompatibleResourceError) error;
+                    OpenAPIDiagnostic diagnostic = CmdUtils.getDiagnostics(incompatibleError.getCode(),
+                            incompatibleError.getMessage(), incompatibleError.getSeverity(),
+                            incompatibleError.getLocation());
+                    outStream.println(diagnostic.toString());
+                }
+            }
         }
     }
 
     /**
-     * A util method for generating service and client stub using given contract file.
+     * This util method for generating service and client stub using given contract file.
+     *
      * @param fileName input resource file
      */
     private void openApiToBallerina(String fileName, Filter filter) throws IOException {
@@ -218,7 +234,7 @@ public class OpenApiCmd implements BLauncherCmd {
     }
 
     /**
-     * A util to take the resource Path.
+     * This util is to take the resource Path.
      * 
      * @param resourceFile      resource file path
      * @return path of given resource file
@@ -229,13 +245,13 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             Path relativePath = targetPath.relativize(resourcePath);
             return relativePath.resolve(resourceFile.getName());
-        } catch (IllegalArgumentException iaex) {
+        } catch (IllegalArgumentException exception) {
             return resourcePath.resolve(resourceFile.getName());
         }
     }
 
     /**
-     * A util to get the output Path.
+     * This util is to get the output Path.
      */
     private void getTargetOutputPath() {
         targetOutputPath = executionPath;
@@ -248,7 +264,7 @@ public class OpenApiCmd implements BLauncherCmd {
         }
     }
     /**
-     * A util to set the license header content which is to be add at the beginning of the ballerina files.
+     * This util is to set the license header content which is to be added at the beginning of the ballerina files.
      */
     private String setLicenseHeader() {
         String licenseHeader = "";
@@ -311,7 +327,7 @@ public class OpenApiCmd implements BLauncherCmd {
     }
 
     /**
-     * A util method to generate both service and client stub files based on the given yaml contract file.
+     * This util method is to generate both service and client stub files based on the given yaml contract file.
      * @param generator         generator object
      * @param fileName          service name  use for naming the files
      * @param resourcePath      resource path

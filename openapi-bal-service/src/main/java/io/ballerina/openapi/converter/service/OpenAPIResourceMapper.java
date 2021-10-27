@@ -30,7 +30,6 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.error.ErrorMessages;
 import io.ballerina.openapi.converter.error.IncompatibleResourceError;
 import io.ballerina.openapi.converter.error.OpenAPIConverterError;
@@ -39,7 +38,6 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -59,7 +57,7 @@ public class OpenAPIResourceMapper {
     private final SemanticModel semanticModel;
     private final Paths pathObject = new Paths();
     private final Components components = new Components();
-    private final List<OpenAPIConverterError> errors = new ArrayList<>();
+    private final List<OpenAPIConverterError> errors;
 
     public List<OpenAPIConverterError> getErrors() {
 
@@ -71,6 +69,7 @@ public class OpenAPIResourceMapper {
      */
     OpenAPIResourceMapper(SemanticModel semanticModel) {
         this.semanticModel = semanticModel;
+        this.errors = new ArrayList<>();
     }
 
     public Components getComponents() {
@@ -103,8 +102,8 @@ public class OpenAPIResourceMapper {
             if (resource.functionName().toString().trim().equals(httpMethod)) {
                 if (httpMethod.equals("'default")) {
                     ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_100;
-                    IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getSeverity(),
-                            errorMessage.getDescription(), errorMessage.getCode(), resource.location());
+                    IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
+                            errorMessage.getDescription(), resource.location(), errorMessage.getSeverity());
                     errors.add(error);
                 } else {
                     operation = convertResourceToOperation(resource, httpMethod, path).getOperation();

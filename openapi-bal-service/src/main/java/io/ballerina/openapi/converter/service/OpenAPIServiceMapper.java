@@ -25,8 +25,6 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.converter.OpenApiConverterException;
-import io.ballerina.openapi.converter.error.ExceptionError;
 import io.ballerina.openapi.converter.error.OpenAPIConverterError;
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -73,8 +71,9 @@ public class OpenAPIServiceMapper {
         }
         OpenAPIResourceMapper resourceMapper = new OpenAPIResourceMapper(this.semanticModel);
         openapi.setPaths(resourceMapper.getPaths(resource));
-
         openapi.setComponents(resourceMapper.getComponents());
+        errors.addAll(resourceMapper.getErrors());
+
         return openapi;
     }
 }

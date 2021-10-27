@@ -53,15 +53,17 @@ public class OpenApiConverterUtilsTest {
         Assert.assertTrue(Files.exists(this.tempDir.resolve("hello02_openapi.yaml")));
     }
 
-    @Test(description = "Generate OpenAPI spec by filtering non existing service",
-            expectedExceptions = OpenApiConverterException.class,
-            expectedExceptionsMessageRegExp = "No Ballerina services found with name '/abc' to generate an OpenAPI " +
-                    "specification. These services are available in ballerina file. \\[/hello, /hello02]")
+
+    @Test(description = "Generate OpenAPI spec by filtering non existing service")
     public void testBasicServicesWithInvalidServiceName() throws IOException, OpenApiConverterException {
         Path ballerinaFilePath = RES_DIR.resolve("basic_service.bal");
         OpenApiConverter openApiConverter = new OpenApiConverter();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, "/abc",
                 false);
+        Assert.assertFalse(openApiConverter.getErrors().isEmpty());
+        Assert.assertEquals(openApiConverter.getErrors().get(0).getMessage(), "No Ballerina services found " +
+                "with name '/abc' to generate an OpenAPI specification. These services are available in " +
+                "ballerina file. [/hello, /hello02]");
     }
 
     @Test(description = "Test if invalid 'exampleSetFlag' attribute is coming it the generated spec")

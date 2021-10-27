@@ -27,31 +27,30 @@ import io.ballerina.tools.diagnostics.Location;
  * @since 2.0.0
  */
 public class IncompatibleResourceError extends OpenAPIConverterError {
-    private DiagnosticSeverity diagnosticSeverity;
-    private String message;
-    private String code;
-    private Location location;
+    private final String code;
+    private final String message;
+    private final Location location;
+    private final DiagnosticSeverity severity;
 
-    public IncompatibleResourceError(DiagnosticSeverity diagnosticSeverity, String message, String code,
-                                     Location location) {
-
-        this.diagnosticSeverity = diagnosticSeverity;
-        this.message = message;
+    public IncompatibleResourceError(String code, String message,
+                                     Location location, DiagnosticSeverity severity) {
         this.code = code;
+        this.message = message;
         this.location = location;
+        this.severity = severity;
     }
 
-    public DiagnosticSeverity getDiagnosticSeverity() {
-        return diagnosticSeverity;
+    public String getCode() {
+        return code;
+    }
+
+    public DiagnosticSeverity getSeverity() {
+        return severity;
     }
 
     @Override
     public String getMessage() {
         return message;
-    }
-
-    public String getCode() {
-        return code;
     }
 
     public Location getLocation() {
