@@ -20,14 +20,11 @@ package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
@@ -37,18 +34,18 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.CookieParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
-import io.swagger.v3.oas.models.parameters.QueryParameter;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
  * OpenAPIParameterMapper provides functionality for converting ballerina parameter to OAS parameter model.
@@ -78,24 +75,29 @@ public class OpenAPIParameterMapper {
         FunctionSignatureNode functionSignature = functionDefinitionNode.functionSignature();
         SeparatedNodeList<ParameterNode> parameterList = functionSignature.parameters();
         for (ParameterNode parameterNode : parameterList) {
-            if (parameterNode instanceof RequiredParameterNode) {
+            OpenAPIQueryParameterMapper queryParameterMapper = new OpenAPIQueryParameterMapper(apidocs);
+            if (parameterNode.kind() == SyntaxKind.REQUIRED_PARAM) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
                 // Handle query parameter
-                createQueryParameter(parameters, requiredParameterNode);
+                if (requiredParameterNode.typeName().kind() != SyntaxKind.QUALIFIED_NAME_REFERENCE &&
+                        requiredParameterNode.annotations().isEmpty()) {
+                    parameters.add(queryParameterMapper.createQueryParameter(requiredParameterNode));
+                }
                 // Handle header, payload parameter
                 if (requiredParameterNode.typeName() instanceof TypeDescriptorNode &&
                         !requiredParameterNode.annotations().isEmpty()) {
                     handleAnnotationParameters(components, semanticModel, parameters, requiredParameterNode);
                 }
-            } else if (parameterNode instanceof DefaultableParameterNode) {
+            } else if (parameterNode.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                 DefaultableParameterNode defaultableParameterNode = (DefaultableParameterNode) parameterNode;
                 // Handle header parameter
                 if (defaultableParameterNode.typeName() instanceof TypeDescriptorNode &&
                         !defaultableParameterNode.annotations().isEmpty()) {
                     parameters.addAll(handleDefaultableAnnotationParameters(defaultableParameterNode));
+                } else {
+                    parameters.add(queryParameterMapper.createQueryParameter(defaultableParameterNode));
                 }
             }
-            //TODO: query other scenarios
         }
         if (parameters.isEmpty()) {
             operationAdaptor.getOperation().setParameters(null);
@@ -108,161 +110,23 @@ public class OpenAPIParameterMapper {
      * Map path parameter data to OAS path parameter.
      */
     private void createPathParameters(List<Parameter> parameters, NodeList<Node> pathParams) {
-
         for (Node param: pathParams) {
             if (param instanceof ResourcePathParameterNode) {
+                PathParameter pathParameterOAS = new PathParameter();
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
-                Parameter parameter = buildParameter(Constants.PATH, pathParam);
-                parameter.setName(pathParam.paramName().text());
+                pathParameterOAS.schema(ConverterCommonUtils.getOpenApiSchema(
+                        pathParam.typeDescriptor().toString().trim()));
+                pathParameterOAS.setName(pathParam.paramName().text());
+
                 // Check the parameter has doc
                 if (!apidocs.isEmpty() && apidocs.containsKey(pathParam.paramName().text().trim())) {
-                    parameter.setDescription(apidocs.get(pathParam.paramName().text().trim()));
+                    pathParameterOAS.setDescription(apidocs.get(pathParam.paramName().text().trim()));
                 }
                 // Set param description
-                parameter.setRequired(true);
-                parameters.add(parameter);
+                pathParameterOAS.setRequired(true);
+                parameters.add(pathParameterOAS);
             }
         }
-    }
-
-    /**
-     * Handle function query parameters.
-     */
-    private void createQueryParameter(List<Parameter> parameters, ParameterNode queryParameter) {
-        if (queryParameter instanceof RequiredParameterNode) {
-            RequiredParameterNode queryParam = (RequiredParameterNode) queryParameter;
-            String queryParamName = queryParam.paramName().get().text();
-            if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode &&
-                    !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
-                    queryParam.annotations().isEmpty()) {
-                Parameter parameter = buildParameter(Constants.QUERY, queryParam);
-                parameter.setRequired(true);
-                // Handle required query parameter
-                if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
-                    parameter.setDescription(apidocs.get(queryParamName.trim()));
-                }
-                parameters.add(parameter);
-            } else if (queryParam.typeName() instanceof OptionalTypeDescriptorNode &&
-                    !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
-                    queryParam.annotations().isEmpty()) {
-                // Handle optional query parameter
-                setOptionalQueryParameter(parameters, queryParamName, queryParam);
-            } else if (queryParam.typeName() instanceof ArrayTypeDescriptorNode &&
-                    !queryParam.paramName().orElseThrow().text().equals(Constants.PATH) &&
-                    queryParam.annotations().isEmpty()) {
-                // Handle required array type query parameter
-                handleArrayTypeQueryParameter(parameters, queryParam);
-            }
-        }
-    }
-
-    /**
-     * Handle array type query parameter.
-     */
-    private void handleArrayTypeQueryParameter(List<Parameter> parameters, RequiredParameterNode queryParam) {
-
-        ArraySchema arraySchema = new ArraySchema();
-        String queryParamName = queryParam.paramName().get().text();
-        ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) queryParam.typeName();
-        if (!(arrayNode.memberTypeDesc() instanceof ArrayTypeDescriptorNode)) {
-            TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
-            if (!itemTypeNode.kind().equals(SyntaxKind.TYPE_REFERENCE)) {
-                Schema itemSchema = ConverterCommonUtils.getOpenApiSchema(itemTypeNode.toString().trim());
-                arraySchema.setItems(itemSchema);
-                QueryParameter queryParameter = new QueryParameter();
-                queryParameter.schema(arraySchema);
-                queryParameter.setName(queryParamName);
-                queryParameter.setRequired(true);
-                if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
-                    queryParameter.setDescription(apidocs.get(queryParamName.trim()));
-                }
-                parameters.add(queryParameter);
-            }
-        }
-    }
-
-    /**
-     * Handle optional query parameter.
-     */
-    private void setOptionalQueryParameter(List<Parameter> parameters, String queryParamName,
-                                           RequiredParameterNode queryParam) {
-        Node node = ((OptionalTypeDescriptorNode) queryParam.typeName()).typeDescriptor();
-        if (node instanceof ArrayTypeDescriptorNode) {
-            ArraySchema arraySchema = new ArraySchema();
-            ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) node;
-            TypeDescriptorNode itemTypeNode = arrayNode.memberTypeDesc();
-            if (!itemTypeNode.kind().equals(SyntaxKind.TYPE_REFERENCE)) {
-                Schema itemSchema = ConverterCommonUtils.getOpenApiSchema(itemTypeNode.toString().trim());
-                arraySchema.setItems(itemSchema);
-                QueryParameter queryParameter = new QueryParameter();
-                queryParameter.schema(arraySchema);
-                queryParameter.setName(queryParamName);
-                queryParameter.setRequired(false);
-                if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
-                    queryParameter.setDescription(apidocs.get(queryParamName));
-                }
-                parameters.add(queryParameter);
-            }
-        } else {
-            Parameter parameter = buildParameter(Constants.QUERY, queryParam);
-            parameter.setRequired(false);
-            if (!apidocs.isEmpty() && apidocs.containsKey(queryParamName)) {
-                parameter.setDescription(apidocs.get(queryParamName));
-            }
-            parameters.add(parameter);
-        }
-    }
-
-    /**
-     * Builds an OpenApi {@link io.swagger.models.parameters.Parameter} for provided parameter location.
-     *
-     * @param in              location of the parameter in the request definition
-     * @param paramAttributes parameter attributes for the operation
-     * @return OpenApi {@link io.swagger.models.parameters.Parameter} for parameter location {@code in}
-     */
-    private Parameter buildParameter(String in, Node paramAttributes) {
-        Parameter param = new Parameter();
-        String type;
-        switch (in) {
-            case Constants.BODY:
-                // TODO : support for inline and other types of schemas
-                break;
-            case Constants.QUERY:
-                QueryParameter qParam = new QueryParameter();
-                RequiredParameterNode queryParam = (RequiredParameterNode) paramAttributes;
-                qParam.setName(queryParam.paramName().get().text());
-                Schema openApiSchema;
-                if (queryParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
-                    OptionalTypeDescriptorNode optional = (OptionalTypeDescriptorNode) queryParam.typeName();
-                    type = ConverterCommonUtils.convertBallerinaTypeToOpenAPIType(
-                                    optional.typeDescriptor().toString().trim());
-                    openApiSchema = ConverterCommonUtils.getOpenApiSchema(type);
-                    openApiSchema.setNullable(true);
-                } else {
-                    type = ConverterCommonUtils.convertBallerinaTypeToOpenAPIType(
-                            queryParam.typeName().toString().trim());
-                    openApiSchema = ConverterCommonUtils.getOpenApiSchema(type);
-                }
-                qParam.schema(openApiSchema);
-                param = qParam;
-                break;
-            case Constants.COOKIE:
-                param = new CookieParameter();
-                break;
-            case Constants.FORM:
-                break;
-            case Constants.PATH:
-            default:
-                PathParameter pParam = new PathParameter();
-                ResourcePathParameterNode pathParam = (ResourcePathParameterNode) paramAttributes;
-                type = ConverterCommonUtils
-                        .convertBallerinaTypeToOpenAPIType(pathParam.typeDescriptor().toString().trim());
-                pParam.schema(ConverterCommonUtils.getOpenApiSchema(type));
-                pParam.setName(pathParam.paramName().text());
-                param = pParam;
-        }
-
-        return param;
     }
 
     /**
@@ -283,8 +147,12 @@ public class OpenAPIParameterMapper {
                     (!"GET".toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
                 Map<String, Schema> schema = components.getSchemas();
                 // Handle request payload.
-                OpenAPIRequestBodyMapper openAPIRequestBodyMapper = new OpenAPIRequestBodyMapper(components,
-                        operationAdaptor, semanticModel);
+                Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
+                
+                OpenAPIRequestBodyMapper openAPIRequestBodyMapper = customMediaType.map(
+                        value -> new OpenAPIRequestBodyMapper(components,
+                        operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
+                        operationAdaptor, semanticModel));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
             }
         }

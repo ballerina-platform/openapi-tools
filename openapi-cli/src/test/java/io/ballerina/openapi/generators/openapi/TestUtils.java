@@ -54,7 +54,6 @@ public class TestUtils {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
-
             OpenApiConverter openApiConverter = new OpenApiConverter();
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                     , false);

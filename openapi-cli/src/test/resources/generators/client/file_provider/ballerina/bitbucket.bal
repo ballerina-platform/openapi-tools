@@ -20,6 +20,7 @@ public isolated client class Client {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
         self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();
+        return;
     }
     # Product Types
     #

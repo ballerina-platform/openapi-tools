@@ -15,7 +15,7 @@ paths:
       operationId: operation_post_/pets
       requestBody:
         content:
-          application/json:
+          application/vnd.wso2.sales+json:
             schema:
               $ref: '#/components/schemas/Pet'
       responses:

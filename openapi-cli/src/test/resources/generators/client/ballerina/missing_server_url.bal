@@ -13,6 +13,7 @@ public isolated client class Client {
     public isolated function init(string serviceUrl, http:ClientConfiguration clientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
+        return;
     }
     # Provide weather forecast for any geographical coordinates
     #

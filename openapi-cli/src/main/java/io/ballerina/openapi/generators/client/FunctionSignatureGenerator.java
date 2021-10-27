@@ -164,6 +164,7 @@ public class FunctionSignatureGenerator {
 
         List<Parameter> parameters = operation.getParameters();
         List<Node> defaultable = new ArrayList<>();
+        List<Node> deprecatedParamDocComments = new ArrayList<>();
         if (parameters != null) {
             for (Parameter parameter: parameters) {
                 if (parameter.getDescription() != null) {
@@ -173,8 +174,7 @@ public class FunctionSignatureGenerator {
                     remoteFunctionDoc.add(paramAPIDoc);
                 }
                 List<AnnotationNode> parameterAnnotationNodeList =
-                        getParameterAnnotationNodeList(remoteFunctionDoc, parameter);
-
+                        getParameterAnnotationNodeList(parameter, deprecatedParamDocComments);
                 String in = parameter.getIn();
                 switch (in) {
                     case "path":
@@ -227,21 +227,22 @@ public class FunctionSignatureGenerator {
                 parameterList.add(comma);
             }
         }
+        remoteFunctionDoc.addAll(deprecatedParamDocComments);
         //Filter defaultable parameters
         if (!defaultable.isEmpty()) {
             parameterList.addAll(defaultable);
         }
     }
 
-    private List<AnnotationNode> getParameterAnnotationNodeList(List<Node> remoteFunctionDoc, Parameter parameter) {
+    private List<AnnotationNode> getParameterAnnotationNodeList(Parameter parameter,
+                                                      List<Node> deprecatedParamDocComments) {
         List<AnnotationNode> parameterAnnotationNodeList = new ArrayList<>();
         DocCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions(), parameterAnnotationNodeList);
         if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
             if (!this.deprecatedParamFound) {
-                remoteFunctionDoc.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                deprecatedParamDocComments.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                         "# Deprecated parameters", false));
                 this.deprecatedParamFound = true;
-
             }
             String deprecatedDescription = "";
             if (parameter.getExtensions() != null) {
@@ -255,7 +256,7 @@ public class FunctionSignatureGenerator {
             MarkdownParameterDocumentationLineNode paramAPIDoc =
                     DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(getValidName(
                             parameter.getName(), false)), deprecatedDescription);
-            remoteFunctionDoc.add(paramAPIDoc);
+            deprecatedParamDocComments.add(paramAPIDoc);
             parameterAnnotationNodeList.add(createAnnotationNode(createToken(AT_TOKEN),
                     createSimpleNameReferenceNode(createIdentifierToken("deprecated")), null));
         }

@@ -107,7 +107,8 @@ public class AnnotationTests {
     public Object[][] fileProviderForFilesComparison() {
         return new Object[][]{
                 {"deprecated_functions.yaml", "deprecated_functions.bal"},
-                {"display_and_deprecated.yaml", "display_and_deprecated.bal"}
+                {"display_and_deprecated.yaml", "display_and_deprecated.bal"},
+                {"deprecated_mix_params.yaml", "deprecated_mix_params.bal"}
         };
     }
 }

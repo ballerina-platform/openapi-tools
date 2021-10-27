@@ -36,4 +36,22 @@ public class ModuleReferenceTests {
         Path ballerinaFilePath = RES_DIR.resolve("snowpeak.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak.yaml");
     }
+
+    @Test(description = "Response in separate modules with cache config")
+    public void testResponse02() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("snowpeak_cache_config.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak_cache.yaml");
+    }
+
+    @Test(description = "Request Body with separate modules")
+    public void testResponse03() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("snowpeak_request_body.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak_request_body_ref.yaml");
+    }
+
+    @Test(description = "Request Body with separate modules when serivce configuration enable")
+    public void testResponse04() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("snowpeak_service_config.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak_service_config.yaml");
+    }
 }

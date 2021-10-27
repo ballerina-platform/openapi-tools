@@ -66,6 +66,12 @@ paths:
     put:
       summary: Represents Snowpeak reservation resource
       operationId: operation_put_/reservation
+      requestBody:
+        description: Reservation representation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
       responses:
         "200":
           description: Ok
@@ -82,6 +88,12 @@ paths:
     post:
       summary: Represents Snowpeak reservation resource
       operationId: operation_post_/reservation
+      requestBody:
+        description: Reservation representation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
       responses:
         "201":
           description: Created
@@ -102,17 +114,6 @@ paths:
                 $ref: '#/components/schemas/ReservationReceipt'
         "409":
           description: Conflict
-          headers:
-            Cache-Control:
-              schema:
-                type: string
-                default: "must-revalidate,public,max-age=3600"
-            ETag:
-              schema:
-                type: string
-            Last-Modified:
-              schema:
-                type: string
           content:
             text/plain:
               schema:
@@ -128,6 +129,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        description: Payment representation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
       responses:
         "201":
           description: Created
@@ -336,6 +343,28 @@ components:
               format: double
             reservation:
               $ref: '#/components/schemas/Reservation'
+    Payment:
+      required:
+        - cardNumber
+        - cardholderName
+        - expiryMonth
+        - expiryYear
+      type: object
+      properties:
+        cardholderName:
+          type: string
+          description: Name of the card holder
+        cardNumber:
+          type: integer
+          description: Card number
+          format: int32
+        expiryMonth:
+          type: string
+          description: Expiration month of the card in mm
+        expiryYear:
+          type: string
+          description: Expiaration year of the card in yyyy
+      description: Reperesents payement for rooms
     PaymentReceipt:
       required:
         - currency

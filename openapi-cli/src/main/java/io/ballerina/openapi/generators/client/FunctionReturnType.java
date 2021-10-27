@@ -38,7 +38,6 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,11 +88,12 @@ public class FunctionReturnType {
         String returnType = "http:Response|error";
         if (operation.getResponses() != null) {
             ApiResponses responses = operation.getResponses();
-            Collection<ApiResponse> values = responses.values();
-            Iterator<ApiResponse> iteratorRes = values.iterator();
+            Iterator<Map.Entry<String, ApiResponse>> iteratorRes = responses.entrySet().iterator();
             while (iteratorRes.hasNext()) {
-                ApiResponse response = iteratorRes.next();
-                if (response.getContent() != null) {
+                Map.Entry<String, ApiResponse> entry = iteratorRes.next();
+                String statusCode = entry.getKey();
+                ApiResponse response = entry.getValue();
+                if (statusCode.startsWith("2") && response.getContent() != null) {
                     Content content = response.getContent();
                     Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
                     for (Map.Entry<String, MediaType> media : mediaTypes) {
@@ -113,9 +113,8 @@ public class FunctionReturnType {
                         // Currently support for first media type
                         break;
                     }
+                    break;
                 }
-                // Currently support for first response.
-                break;
             }
         }
         return returnType;

@@ -14,6 +14,7 @@ public client class openapiClient {
             config.clientConfig.cache});
         self.clientEp = httpEp;
         self.config = config;
+        return;
     }
 
     //1.service with query parameters limit , 'limit

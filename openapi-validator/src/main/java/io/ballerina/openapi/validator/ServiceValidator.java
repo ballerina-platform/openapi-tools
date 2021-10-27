@@ -554,9 +554,9 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
             if (((TypeMismatch) postErr).getRecordName() != null) {
                 String[] error = ErrorMessages.typeMismatchingRecord(postErr.getFieldName(),
                                 ((TypeMismatch) postErr).getRecordName(),
-                                TypeSymbolToJsonValidatorUtil.convertEnumTypetoString((
+                                TypeSymbolToJsonValidatorUtil.convertEnumTypeToString((
                                         (TypeMismatch) postErr).getTypeJsonSchema()),
-                                TypeSymbolToJsonValidatorUtil.convertEnumTypetoString(((
+                                TypeSymbolToJsonValidatorUtil.convertEnumTypeToString(((
                                         TypeMismatch) postErr).getTypeBallerinaType()), method.getKey(),
                                 resourcePathSummary.getPath());
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
@@ -565,9 +565,9 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 validations.add(diagnostic);
             } else {
                 String[] error = ErrorMessages.typeMismatching(postErr.getFieldName(),
-                                TypeSymbolToJsonValidatorUtil.convertEnumTypetoString
+                                TypeSymbolToJsonValidatorUtil.convertEnumTypeToString
                                         (((TypeMismatch) postErr).getTypeJsonSchema()),
-                                TypeSymbolToJsonValidatorUtil.convertEnumTypetoString
+                                TypeSymbolToJsonValidatorUtil.convertEnumTypeToString
                                         (((TypeMismatch) postErr).getTypeBallerinaType()), method.getKey(),
                                 resourcePathSummary.getPath());
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
