@@ -1,0 +1,163 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+        description: this value is assigned by the service provider
+  - url: https://{subdomain}.swagger.io:{port}/{basePath}
+    description: The production API server
+    variables:
+      subdomain:
+        default: petstore
+        description: this value is assigned by the service provider
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '443'
+      basePath:
+        default: v2
+tags:
+  - name: pets
+    description: Pets Tag
+  - name: list
+    description: List Tag
+
+paths:
+  /pets/{petId}:
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+              type: object
+        required: false
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+    delete:
+      summary: Info for a specific pet
+      operationId: showPetById2
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+              type: object
+        required: false
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+    head:
+      summary: Info for a specific pet
+      operationId: showPetById3
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+              type: object
+        required: false
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+  /pets2/{petId}:
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById4
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+              type: object
+        required: false
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+components:
+  schemas:
+    Pet:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
+        type:
+          type: string

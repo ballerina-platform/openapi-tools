@@ -39,6 +39,7 @@ import io.ballerina.compiler.syntax.tree.ObjectFieldNode;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -88,6 +89,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createObjectFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createQualifiedNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLASS_KEYWORD;
@@ -107,6 +109,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_API_KEY_DESC;
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
@@ -325,6 +328,9 @@ public class BallerinaClientGenerator {
             apiKeyNames.addAll(ballerinaAuthConfigGenerator.getQueryApiKeyNameList().values());
             setApiKeyNameList(apiKeyNames);
         }
+        ReturnStatementNode returnStatementNode = createReturnStatementNode(createToken(
+                RETURN_KEYWORD), null, createToken(SEMICOLON_TOKEN));
+        assignmentNodes.add(returnStatementNode);
         NodeList<StatementNode> statementList = createNodeList(assignmentNodes);
         return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, statementList, createToken(CLOSE_BRACE_TOKEN));

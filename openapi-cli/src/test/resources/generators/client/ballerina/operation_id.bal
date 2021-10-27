@@ -10,6 +10,7 @@ public isolated client class Client {
     public isolated function init(string serviceUrl = "http://localhost:9090/petstore/v1", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
+        return;
     }
     remote isolated function  pet() returns http:Response | error {
         string  path = string `/pet`;

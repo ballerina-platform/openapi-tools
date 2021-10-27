@@ -62,6 +62,7 @@ public isolated client class Client {
     public isolated function init(string serviceUrl = "https://your-domain.atlassian.com", http:ClientConfiguration  httpClientConfig =  {}) returns error? {
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
+        return;
     }
     remote isolated function updateCustomFieldValue(string fieldIdOrKey, CustomFieldValueUpdateRequest payload) returns json|error {
         string  path = string `/rest/api/2/app/field/${fieldIdOrKey}/value`;

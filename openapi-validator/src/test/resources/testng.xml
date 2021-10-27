@@ -33,10 +33,10 @@ under the License.
             <package name="org.ballerinalang.openapi.validator.*"/>
         </packages>
         <classes>
-            <class name="io.ballerina.openapi.validator.tests.OpenApiFilterTests"></class>
+            <class name="io.ballerina.openapi.validator.tests.OpenApiFilterTests"/>
             <class name="io.ballerina.openapi.validator.tests.ResourceToOperationTests"/>
-            <class name="io.ballerina.openapi.validator.tests.ServiceValidationTests"></class>
-
+            <class name="io.ballerina.openapi.validator.tests.ServiceValidationTests"/>
+            <class name="io.ballerina.openapi.validator.tests.TypeMisMatchTests"/>
         </classes>
     </test>
 </suite>

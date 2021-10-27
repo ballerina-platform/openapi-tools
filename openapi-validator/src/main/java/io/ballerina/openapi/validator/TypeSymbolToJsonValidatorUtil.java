@@ -27,7 +27,6 @@ import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.StringTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
@@ -46,7 +45,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
+
+import static io.ballerina.openapi.validator.ErrorMessages.couldNotFindLocation;
 
 /**
  * This util use for comparing the TypeSymbol with given openAPI schema.
@@ -66,7 +66,7 @@ public class TypeSymbolToJsonValidatorUtil {
         if (typeSymbol instanceof RecordTypeSymbol || typeSymbol instanceof TypeReferenceTypeSymbol) {
             Map<String, Schema> properties = schema.getProperties();
             if (schema instanceof ObjectSchema) {
-                properties = ((ObjectSchema) schema).getProperties();
+                properties = schema.getProperties();
             }
             if (typeSymbol instanceof TypeReferenceTypeSymbol) {
                 typeSymbol = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
@@ -90,59 +90,37 @@ public class TypeSymbolToJsonValidatorUtil {
                 schemaType = schema.getType();
                 ballerinaType = typeSymbol.typeKind().getName();
             }
-        } else if ((typeSymbol instanceof ArrayTypeSymbol) && (schema instanceof  ArraySchema)) {
+        } else if ((typeSymbol instanceof ArrayTypeSymbol) && (schema instanceof ArraySchema)) {
             if (!componentName.isBlank()) {
                 paramName = componentName;
             } else {
                 paramName = "array";
             }
-            if (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().typeKind().getName().toLowerCase(Locale.ENGLISH)
-                    .equals(convertOpenAPITypeToBallerina(((ArraySchema) schema).getItems().getType()))) {
+            ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) typeSymbol;
+            ArraySchema arraySchema = (ArraySchema) schema;
+            
+            if (arrayTypeSymbol.memberTypeDescriptor().typeKind().getName().toLowerCase(Locale.ENGLISH)
+                    .equals(convertOpenAPITypeToBallerina(arraySchema.getItems().getType()))) {
                 isExitType = true;
-            } else if ((((ArraySchema) schema).getItems() instanceof ObjectSchema) &&
-                    (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
-                TypeSymbol recordType = null;
+            } else if ((arraySchema.getItems() instanceof ObjectSchema) &&
+                    (arrayTypeSymbol.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
                 isExitType = true;
-                Optional<TypeSymbol> symbol = semanticModel
-                        .type(((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().location().lineRange());
-                if (symbol.isPresent()) {
-                    recordType = ((TypeDefinitionSymbol) symbol.get()).typeDescriptor();
-                }
-                List<ValidationError> recordValidationError = validate(((ArraySchema) schema).getItems(),
+                TypeSymbol recordType = arrayTypeSymbol.memberTypeDescriptor();
+                List<ValidationError> recordValidationError = validate(arraySchema.getItems(),
                         recordType, syntaxTree, semanticModel, componentName, location);
                 validationErrorList.addAll(recordValidationError);
 
-            } else if ((((ArraySchema) schema).getItems() instanceof ArraySchema) &&
-                    (((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor() instanceof ArrayTypeSymbol)) {
-                // handle nested array
+            } else if ((arraySchema.getItems() instanceof ArraySchema) &&
+                    (arrayTypeSymbol.memberTypeDescriptor() instanceof ArrayTypeSymbol)) {
+                // Handle nested array
                 isExitType = true;
-
-                TypeSymbol bArrayTypeSymbol = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor();
-                Schema arraySchemaItems = ((ArraySchema) schema).getItems();
-
-                if ((bArrayTypeSymbol instanceof ArrayTypeSymbol) && (arraySchemaItems instanceof ArraySchema)) {
-                    ArrayTypeSymbol traverseNestedArray = (ArrayTypeSymbol) bArrayTypeSymbol;
-                    ArraySchema traversSchemaNestedArray = (ArraySchema) arraySchemaItems;
-
-                    while ((traverseNestedArray.memberTypeDescriptor() instanceof ArrayTypeSymbol) &&
-                            (traversSchemaNestedArray.getItems() instanceof ArraySchema)) {
-                        Schema<?> traversSchemaNestedArraySchemaType = traversSchemaNestedArray.getItems();
-                        if (traversSchemaNestedArraySchemaType instanceof ArraySchema) {
-                            traversSchemaNestedArray = (ArraySchema) traversSchemaNestedArraySchemaType;
-                        }
-                        TypeSymbol traverseNestedArrayBType = traverseNestedArray.memberTypeDescriptor();
-                        if (traverseNestedArrayBType instanceof ArrayTypeSymbol) {
-                            traverseNestedArray = (ArrayTypeSymbol) traverseNestedArrayBType;
-                        }
-                    }
-                    List<ValidationError> arrayErrors = validate(traversSchemaNestedArray,
-                            traverseNestedArray, syntaxTree, semanticModel, componentName, location);
-
-                    validationErrorList.addAll(arrayErrors);
-                }
+                TypeSymbol bArrayTypeSymbol = arrayTypeSymbol.memberTypeDescriptor();
+                Schema arraySchemaItems = arraySchema.getItems();
+                validateNestedArray(syntaxTree, semanticModel, componentName, location, validationErrorList,
+                        bArrayTypeSymbol, arraySchemaItems);
             } else {
-                schemaType = ((ArraySchema) schema).getItems().getType();
-                ballerinaType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor().typeKind().getName()
+                schemaType = arraySchema.getItems().getType();
+                ballerinaType = arrayTypeSymbol.memberTypeDescriptor().typeKind().getName()
                                 .toLowerCase(Locale.ENGLISH);
             }
 
@@ -175,13 +153,13 @@ public class TypeSymbolToJsonValidatorUtil {
         return validationErrorList;
     }
 
-    private static List<ValidationError> validateRecordType(RecordTypeSymbol typeSymbol, SyntaxTree syntaxTree,
+    private static List<ValidationError> validateRecordType(RecordTypeSymbol recordTypeSymbol, SyntaxTree syntaxTree,
                                                             SemanticModel semanticModel,
                                                             Map<String, Schema> properties, String componentName,
                                                             Location location)
             throws OpenApiValidatorException {
         List<ValidationError> validationErrorList = new ArrayList<>();
-        Map<String, RecordFieldSymbol> fieldSymbolList = typeSymbol.fieldDescriptors();
+        Map<String, RecordFieldSymbol> fieldSymbolList = recordTypeSymbol.fieldDescriptors();
         for (Map.Entry<String, RecordFieldSymbol> fieldSymbol : fieldSymbolList.entrySet()) {
             boolean isExist = false;
             for (Map.Entry<String, Schema> entry : properties.entrySet()) {
@@ -191,33 +169,33 @@ public class TypeSymbolToJsonValidatorUtil {
                             .equals(TypeSymbolToJsonValidatorUtil.convertOpenAPITypeToBallerina(entry.getValue()
                                     .getType())) && (!(entry.getValue() instanceof ObjectSchema)) &&
                             (!(fieldSymbol.getValue().typeDescriptor() instanceof ArrayTypeSymbol))) {
+
                         TypeMismatch validationError = new TypeMismatch(fieldSymbol.getValue().getName().orElseThrow(),
                                 convertTypeToEnum(entry.getValue().getType()),
                                 convertTypeToEnum(fieldSymbol.getValue().typeDescriptor().typeKind().getName()),
-                                componentName, fieldSymbol.getValue().location());
+                                componentName,
+                                fieldSymbol.getValue().getLocation().orElseThrow(() -> new OpenApiValidatorException(
+                                        couldNotFindLocation(fieldSymbol.getValue().getName().get()))));
                         validationErrorList.add(validationError);
+
                     } else if ((entry.getValue() instanceof ObjectSchema) && (fieldSymbol.getValue().typeDescriptor()
                             instanceof TypeReferenceTypeSymbol)) {
                         // Handle the nested record type
                         TypeSymbol refRecordType = null;
                         List<ValidationError> nestedValidationError;
-                        Optional<TypeSymbol> symbol = semanticModel.type(fieldSymbol.getValue().location().lineRange());
-                        fieldSymbol.getValue().typeDescriptor();
-                        if (symbol != null && symbol.isPresent()) {
-                            Symbol symbol1 = symbol.get();
-                            if (symbol1 instanceof TypeReferenceTypeSymbol) {
-                                refRecordType = ((TypeReferenceTypeSymbol) symbol1).typeDescriptor();
-                            } else if (symbol1 instanceof VariableSymbol) {
-                                VariableSymbol variableSymbol = (VariableSymbol) symbol1;
-                                if (variableSymbol.typeDescriptor() != null) {
-                                    Symbol variable = variableSymbol.typeDescriptor();
-                                    if (variable instanceof TypeReferenceTypeSymbol) {
-                                        if (((TypeReferenceTypeSymbol) variable).typeDescriptor() != null) {
-                                            refRecordType = ((TypeReferenceTypeSymbol) variable).typeDescriptor();
-                                        }
-                                    } else {
-                                        refRecordType = variableSymbol.typeDescriptor();
+                        TypeSymbol symbol = fieldSymbol.getValue().typeDescriptor();
+                        if (symbol instanceof TypeReferenceTypeSymbol) {
+                            refRecordType = ((TypeReferenceTypeSymbol) symbol).typeDescriptor();
+                        } else if (symbol instanceof VariableSymbol) {
+                            VariableSymbol variableSymbol = (VariableSymbol) symbol;
+                            if (variableSymbol.typeDescriptor() != null) {
+                                Symbol variable = variableSymbol.typeDescriptor();
+                                if (variable instanceof TypeReferenceTypeSymbol) {
+                                    if (((TypeReferenceTypeSymbol) variable).typeDescriptor() != null) {
+                                        refRecordType = ((TypeReferenceTypeSymbol) variable).typeDescriptor();
                                     }
+                                } else {
+                                    refRecordType = variableSymbol.typeDescriptor();
                                 }
                             }
                         }
@@ -323,6 +301,36 @@ public class TypeSymbolToJsonValidatorUtil {
     }
 
     /**
+     * This function is used to validate nested array type.
+     */
+    private static void validateNestedArray(SyntaxTree syntaxTree, SemanticModel semanticModel, String componentName,
+                                            Location location, List<ValidationError> validationErrorList,
+                                            TypeSymbol bArrayTypeSymbol, Schema arraySchemaItems)
+            throws OpenApiValidatorException {
+
+        if ((bArrayTypeSymbol instanceof ArrayTypeSymbol) && (arraySchemaItems instanceof ArraySchema)) {
+            ArrayTypeSymbol traverseNestedArray = (ArrayTypeSymbol) bArrayTypeSymbol;
+            ArraySchema traversSchemaNestedArray = (ArraySchema) arraySchemaItems;
+
+            while ((traverseNestedArray.memberTypeDescriptor() instanceof ArrayTypeSymbol) &&
+                    (traversSchemaNestedArray.getItems() instanceof ArraySchema)) {
+                Schema<?> traversSchemaNestedArraySchemaType = traversSchemaNestedArray.getItems();
+                if (traversSchemaNestedArraySchemaType instanceof ArraySchema) {
+                    traversSchemaNestedArray = (ArraySchema) traversSchemaNestedArraySchemaType;
+                }
+                TypeSymbol traverseNestedArrayBType = traverseNestedArray.memberTypeDescriptor();
+                if (traverseNestedArrayBType instanceof ArrayTypeSymbol) {
+                    traverseNestedArray = (ArrayTypeSymbol) traverseNestedArrayBType;
+                }
+            }
+            List<ValidationError> arrayErrors = validate(traversSchemaNestedArray,
+                    traverseNestedArray, syntaxTree, semanticModel, componentName, location);
+
+            validationErrorList.addAll(arrayErrors);
+        }
+    }
+
+    /**
      * Method for convert string type to constant enum type.
      * @param type  input type
      * @return enum type
@@ -401,7 +409,7 @@ public class TypeSymbolToJsonValidatorUtil {
      * @param type  type of parameter
      * @return enum type
      */
-    public static String convertEnumTypetoString(Constants.Type type) {
+    public static String convertEnumTypeToString(Constants.Type type) {
         String convertedType;
         switch (type) {
             case INT:

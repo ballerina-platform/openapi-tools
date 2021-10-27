@@ -17,19 +17,15 @@
  */
 package io.ballerina.openapi.converter.service;
 
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
@@ -42,6 +38,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
 
 /**
  * This class for the mapping ballerina headers with OAS header parameter sections.
@@ -132,24 +130,6 @@ public class OpenAPIHeaderMapper {
         } else {
             headerParameter.setRequired(true);
         }
-    }
-
-    /**
-     * This function uses to take the service declaration node from given required node and return all the annotation
-     * nodes that attached to service node.
-     */
-    private NodeList<AnnotationNode> getAnnotationNodesFromServiceNode(RequiredParameterNode headerParam) {
-        NodeList<AnnotationNode> annotations = AbstractNodeFactory.createEmptyNodeList();
-        NonTerminalNode parent = headerParam.parent();
-        while (parent.kind() != SyntaxKind.SERVICE_DECLARATION) {
-            parent = parent.parent();
-        }
-        ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) parent;
-        if (serviceNode.metadata().isPresent()) {
-            MetadataNode metadataNode = serviceNode.metadata().get();
-            annotations = metadataNode.annotations();
-        }
-        return annotations;
     }
 
     /**

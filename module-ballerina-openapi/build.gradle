@@ -177,10 +177,10 @@ task ballerinaBuild {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat build --skip-tests -c && exit " +
+                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat build -c && exit " +
                         "%%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "${distributionBinPath}"+'/bal build --skip-tests -c'
+                commandLine 'sh', '-c', "${distributionBinPath}"+'/bal build -c'
             }
         }
 

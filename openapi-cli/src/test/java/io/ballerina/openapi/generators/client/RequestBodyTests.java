@@ -91,6 +91,15 @@ public class RequestBodyTests {
         ballerinaClientGenerator.generateSyntaxTree();
     }
 
+    @Test(description = "Test requestBody validation in GET/DELETE/HEAD operations",
+            expectedExceptions = BallerinaOpenApiException.class, expectedExceptionsMessageRegExp =
+                                    ".*GET operation cannot have a requestBody.*")
+    public void testGetOrDeleteOrHeadContainRequestBody() throws IOException, BallerinaOpenApiException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RES_DIR.resolve("swagger/request_body_in_get_delete_head.yaml");
+        codeGenerator.normalizeOpenAPI(definitionPath, true);
+    }
+
     @AfterTest
     private void deleteGeneratedFiles() {
         try {

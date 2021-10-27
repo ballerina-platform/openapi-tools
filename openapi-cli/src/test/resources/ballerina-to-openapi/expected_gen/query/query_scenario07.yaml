@@ -1,14 +1,3 @@
-openapi: 3.0.1
-info:
-  title: PayloadV
-  version: 1.0.0
-servers:
-  - url: "{server}:{port}/payloadV"
-    variables:
-      server:
-        default: http://localhost
-      port:
-        default: "9090"
 paths:
   /pets:
     get:
@@ -16,12 +5,13 @@ paths:
       parameters:
         - name: pet
           in: query
-          required: false
+          required: true
           schema:
             type: array
             items:
               type: integer
               format: int32
+              nullable: true
       responses:
         "200":
           description: Ok
