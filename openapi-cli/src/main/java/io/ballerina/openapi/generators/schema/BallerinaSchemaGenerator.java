@@ -77,6 +77,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.generators.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
+import static io.ballerina.openapi.generators.GeneratorConstants.NULLABLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
@@ -92,7 +93,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
  */
 public class BallerinaSchemaGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeList;
-    private final boolean nullable;
+    private final boolean isNullable;
     private final OpenAPI openAPI;
 
     /**
@@ -100,11 +101,11 @@ public class BallerinaSchemaGenerator {
      * enabled in the openapi command.
      *
      * @param openAPI       OAS definition
-     * @param nullable      nullable value
+     * @param isNullable      nullable value
      */
-    public BallerinaSchemaGenerator(OpenAPI openAPI, boolean nullable) {
+    public BallerinaSchemaGenerator(OpenAPI openAPI, boolean isNullable) {
         this.openAPI = openAPI;
-        this.nullable = nullable;
+        this.isNullable = isNullable;
         this.typeDefinitionNodeList = new LinkedList<>();
     }
 
@@ -115,7 +116,7 @@ public class BallerinaSchemaGenerator {
      * @param openAPI       OAS definition
      */
     public BallerinaSchemaGenerator(OpenAPI openAPI) {
-       this (openAPI, false);
+       this(openAPI, false);
     }
 
     /**
@@ -201,7 +202,7 @@ public class BallerinaSchemaGenerator {
             ComposedSchema composedSchema = (ComposedSchema) schemaValue;
             getTypeDefinitionNodeForComposedSchema(typeDefinitionNodeList, schemaDoc, required, typeName,
                     defineDatatypeName, typeAnnotations, recordFieldList, composedSchema);
-        } else if (schemaValue.getProperties() != null || (schemaValue instanceof ObjectSchema)) {
+        } else if (schemaValue.getProperties() != null || schemaValue instanceof ObjectSchema) {
             Map<String, Schema> fields = schemaValue.getProperties();
             typeDefNode = getTypeDefinitionNodeForObjectSchema(required, typeName, recordFieldList, fields,
                     schemaDoc, createNodeList(typeAnnotations));
@@ -227,8 +228,7 @@ public class BallerinaSchemaGenerator {
         } else if (schemaValue.get$ref() != null) {
             Token typeRef = AbstractNodeFactory.createIdentifierToken(getValidName(
                     extractReferenceType(schemaValue.get$ref()), true));
-            Token asterisk = AbstractNodeFactory.createIdentifierToken("*");
-            TypeReferenceNode recordField = NodeFactory.createTypeReferenceNode(asterisk, typeRef,
+            TypeReferenceNode recordField = NodeFactory.createTypeReferenceNode(createToken(ASTERISK_TOKEN), typeRef,
                     createToken(SEMICOLON_TOKEN));
             recordFieldList.add(recordField);
             NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
@@ -247,8 +247,8 @@ public class BallerinaSchemaGenerator {
 
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
             MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
-            String anyData = GeneratorConstants.ANY_DATA;
-            anyData = getNullableType(schemaValue, anyData);
+
+            String anyData = getNullableType(schemaValue, GeneratorConstants.ANY_DATA);
             typeDefNode = getTypeDefinitionNode(createIdentifierToken(anyData), getValidName((defineDatatypeName),
                             true), metadataNode);
             typeDefinitionNodeList.add(typeDefNode);
@@ -458,7 +458,7 @@ public class BallerinaSchemaGenerator {
         }
         IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldN);
         TypeDescriptorNode fieldTypeName = extractOpenAPISchema(field.getValue());
-        Token questionMarkToken = AbstractNodeFactory.createIdentifierToken("?");
+        Token questionMarkToken = AbstractNodeFactory.createIdentifierToken(NULLABLE);
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
         MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
         if (required != null) {
@@ -582,10 +582,10 @@ public class BallerinaSchemaGenerator {
     private String getNullableType(Schema<?> schema, String type) {
         if (schema.getNullable() != null) {
             if (schema.getNullable()) {
-                type = type + "?";
+                type = type + NULLABLE;
             }
-        } else if (nullable) {
-            type = type + "?";
+        } else if (isNullable) {
+            type = type + NULLABLE;
         }
         return type;
     }
@@ -609,15 +609,16 @@ public class BallerinaSchemaGenerator {
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
         MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
         String fieldTypeNameStr = fieldTypeName.toString().trim();
-        if (fieldTypeName.toString().endsWith("?")) {
+        if (fieldTypeName.toString().endsWith(NULLABLE)) {
             fieldTypeNameStr = fieldTypeNameStr.substring(0, fieldTypeNameStr.length() - 1);
         }
         String arrayBrackets = "[]";
-        if (arraySchema.getMaxItems() != null && arraySchema.getMaxItems() == (int) arraySchema.getMaxItems()) {
+        if (arraySchema.getMaxItems() != null) {
             if (arraySchema.getMaxItems() <= MAX_ARRAY_LENGTH) {
                 arrayBrackets = "[" + arraySchema.getMaxItems() + "]";
             } else {
-                throw new BallerinaOpenApiException("Array max item count exceeds ballerina array max count.");
+                throw new BallerinaOpenApiException("Maximum item count defined in the definition exceeds the " +
+                        "maximum ballerina array length.");
             }
         }
         fieldTypeNameStr = getNullableType(arraySchema, fieldTypeNameStr + arrayBrackets);
@@ -666,12 +667,13 @@ public class BallerinaSchemaGenerator {
             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, typeName);
         }
 
-        if (arraySchema.getMaxItems() != null && arraySchema.getMaxItems() == (int) arraySchema.getMaxItems()) {
+        if (arraySchema.getMaxItems() != null) {
             if (arraySchema.getMaxItems() <= MAX_ARRAY_LENGTH) {
                 return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
                         createIdentifierToken(arraySchema.getMaxItems().toString()), closeSBracketToken);
             } else {
-                throw new BallerinaOpenApiException("Array max item count exceeds ballerina array max count.");
+                throw new BallerinaOpenApiException("Maximum item count defined in the definition exceeds the maximum" +
+                        " ballerina array length.");
             }
         }
         return NodeFactory.createArrayTypeDescriptorNode(memberTypeDesc, openSBracketToken,
@@ -689,7 +691,7 @@ public class BallerinaSchemaGenerator {
             if (composedSchema.getNullable()) {
                 nullableComposedSchema = true;
             }
-        } else if (nullable) {
+        } else if (isNullable) {
             nullableComposedSchema = true;
         }
         if (composedSchema.getOneOf() != null) {
@@ -709,7 +711,7 @@ public class BallerinaSchemaGenerator {
             throw new BallerinaOpenApiException("Unsupported OAS data type.");
         }
         if (nullableComposedSchema && !isArray) {
-            typeName = typeName + "?";
+            typeName = typeName + NULLABLE;
             return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(typeName));
         } else {
             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(typeName));
