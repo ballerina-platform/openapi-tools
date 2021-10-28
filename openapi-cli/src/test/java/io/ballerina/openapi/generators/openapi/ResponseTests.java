@@ -149,6 +149,12 @@ public class ResponseTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario18.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for service configuration annotation in resource")
+    public void testHttpResponse() throws OpenApiConverterException, IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario19.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario18.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

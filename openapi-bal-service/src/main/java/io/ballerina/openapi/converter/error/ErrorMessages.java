@@ -28,7 +28,11 @@ public enum ErrorMessages {
             "resource method in the Ballerina service.", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_101("OAS_CONVERTOR_101", "Unexpected value: " , DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_102("OAS_CONVERTOR_102", "Invalid mediaType : " , DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_103("OAS_CONVERTOR_103", "No related status code for : " , DiagnosticSeverity.ERROR);
+    OAS_CONVERTOR_103("OAS_CONVERTOR_103", "No related status code for : " , DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_104("OAS_CONVERTOR_104",
+                              "Generated OpenAPI definition does not contain details for the " +
+                              "resource function which has `http:Request` parameters in the Ballerina service.",
+            DiagnosticSeverity.WARNING);
 
 
     private final String code;

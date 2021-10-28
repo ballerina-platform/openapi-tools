@@ -27,6 +27,10 @@ import java.util.Collections;
  * {@code CmdUtils} contains all the util functions used for openapi commands.
  */
 public class CmdUtils {
+
+    /**
+     * This util method is used to generate {@code Diagnostic} for openapi command errors.
+     */
     public static OpenAPIDiagnostic getDiagnostics(String code, String message, DiagnosticSeverity severity,
                                             Location location, Object... args) {
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(

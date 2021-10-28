@@ -60,7 +60,6 @@ public class OpenAPIResourceMapper {
     private final List<OpenAPIConverterError> errors;
 
     public List<OpenAPIConverterError> getErrors() {
-
         return errors;
     }
 
@@ -91,6 +90,7 @@ public class OpenAPIResourceMapper {
 
     /**
      * Resource mapper when a resource has more than 1 http method.
+     *
      * @param resource The ballerina resource.
      * @param httpMethods   Sibling methods related to operation.
      */
@@ -106,8 +106,13 @@ public class OpenAPIResourceMapper {
                             errorMessage.getDescription(), resource.location(), errorMessage.getSeverity());
                     errors.add(error);
                 } else {
-                    operation = convertResourceToOperation(resource, httpMethod, path).getOperation();
-                    generatePathItem(httpMethod, pathObject, operation, path);
+                    Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod, path);
+                    if (operationAdaptor.isPresent()) {
+                        operation = operationAdaptor.get().getOperation();
+                        generatePathItem(httpMethod, pathObject, operation, path);
+                    } else {
+                        break;
+                    }
                 }
                 break;
             }
@@ -183,7 +188,7 @@ public class OpenAPIResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private OperationAdaptor convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
+    private Optional<OperationAdaptor> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
                                                         String generateRelativePath) {
         OperationAdaptor op = new OperationAdaptor();
         op.setHttpOperation(httpMethod);
@@ -203,11 +208,18 @@ public class OpenAPIResourceMapper {
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
+        if (!openAPIParameterMapper.getErrors().isEmpty()) {
+            errors.addAll(openAPIParameterMapper.getErrors());
+            return Optional.empty();
+        }
         OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components,
                 resource.location());
         openAPIResponseMapper.getResourceOutput(resource, op);
-        errors.addAll(openAPIResponseMapper.getErrors());
-        return op;
+        if (!openAPIResponseMapper.getErrors().isEmpty()) {
+            errors.addAll(openAPIResponseMapper.getErrors());
+            return Optional.empty();
+        }
+        return Optional.of(op);
     }
 
     /**
