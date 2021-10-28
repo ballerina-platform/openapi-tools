@@ -109,6 +109,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TYPE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.UNTITLED_SERVICE;
 import static io.ballerina.openapi.generators.GeneratorConstants.UTIL_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.generators.GeneratorUtils.setGeneratedFileName;
 
 /**
  * This class generates Ballerina Services/Clients for a provided OAS definition.
@@ -389,7 +390,10 @@ public class CodeGenerator {
                     CodegenUtils.writeFile(filePath, fileContent);
                 }
             } else {
-                if (file.getFileName().equals(TEST_FILE_NAME) || file.getFileName().equals(CONFIG_FILE_NAME)) {
+                boolean isDuplicatedFileInTests = file.getFileName().matches("test.+[0-9]+.bal") ||
+                        file.getFileName().matches("Config.+[0-9]+.toml");
+                if (file.getFileName().equals(TEST_FILE_NAME) || file.getFileName().equals(CONFIG_FILE_NAME) ||
+                        isDuplicatedFileInTests) {
                     // Create test directory if not exists in the path. If exists do not throw an error
                     Files.createDirectories(Paths.get(srcPath + OAS_PATH_SEPARATOR + TEST_DIR));
                     filePath = Paths.get(srcPath.resolve(TEST_DIR + OAS_PATH_SEPARATOR +
@@ -415,27 +419,6 @@ public class CodeGenerator {
         while (iterator.hasNext()) {
             outStream.println("-- " + iterator.next().getFileName());
         }
-    }
-
-    /**
-     * This method for setting the file name for generated file.
-     *
-     * @param listFiles      generated files
-     * @param gFile          GenSrcFile object
-     * @param duplicateCount add the tag with duplicate number if file already exist
-     */
-    private void setGeneratedFileName(List<File> listFiles, GenSrcFile gFile, int duplicateCount) {
-
-        for (File listFile : listFiles) {
-            String listFileName = listFile.getName();
-            if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2)
-                    && (listFileName.split("\\.")[0]
-                    .equals(gFile.getFileName().split("\\.")[0]))) {
-                duplicateCount = 1 + duplicateCount;
-            }
-        }
-        gFile.setFileName(gFile.getFileName().split("\\.")[0] + "." + (duplicateCount) +
-                ".bal");
     }
 
     /**

@@ -38,8 +38,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.ballerina.openapi.cmd.model.GenSrcFile.GenFileType.GEN_SRC;
+import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_FILE_NAME;
+import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_CLIENT;
+import static io.ballerina.openapi.generators.GeneratorConstants.TEST_FILE_NAME;
+import static io.ballerina.openapi.generators.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.USER_DIR;
+import static io.ballerina.openapi.generators.GeneratorConstants.UTIL_FILE_NAME;
 
 /**
  * Unit tests for {@link CodeGenerator}.
@@ -98,6 +104,35 @@ public class CodeGeneratorTest {
         } finally {
             deleteGeneratedFiles("client.bal");
         }
+    }
+
+    @Test(description = "Test duplicated files generation")
+    public void generateDuplicatedFiles() {
+        List<File> duplicatedFileList = new ArrayList<>();
+        duplicatedFileList.add(new File(TEST_FILE_NAME));
+        duplicatedFileList.add(new File(CONFIG_FILE_NAME));
+        duplicatedFileList.add(new File(CLIENT_FILE_NAME));
+        duplicatedFileList.add(new File(UTIL_FILE_NAME));
+        duplicatedFileList.add(new File(TYPE_FILE_NAME));
+
+        String testPackageName = "testDuplicatedFiles";
+        GenSrcFile duplicatedTestFile = new GenSrcFile(GEN_SRC, testPackageName, TEST_FILE_NAME, "");
+        GenSrcFile duplicatedConfigFile = new GenSrcFile(GEN_SRC, testPackageName, CONFIG_FILE_NAME, "");
+        GenSrcFile duplicatedClientFile = new GenSrcFile(GEN_SRC, testPackageName, CLIENT_FILE_NAME, "");
+        GenSrcFile duplicatedUtilsFile = new GenSrcFile(GEN_SRC, testPackageName, UTIL_FILE_NAME, "");
+        GenSrcFile duplicatedTypesFile = new GenSrcFile(GEN_SRC, testPackageName, TYPE_FILE_NAME, "");
+
+        GeneratorUtils.setGeneratedFileName(duplicatedFileList, duplicatedTestFile, 0);
+        GeneratorUtils.setGeneratedFileName(duplicatedFileList, duplicatedConfigFile, 0);
+        GeneratorUtils.setGeneratedFileName(duplicatedFileList, duplicatedClientFile, 0);
+        GeneratorUtils.setGeneratedFileName(duplicatedFileList, duplicatedUtilsFile, 0);
+        GeneratorUtils.setGeneratedFileName(duplicatedFileList, duplicatedTypesFile, 0);
+
+        Assert.assertEquals(duplicatedTestFile.getFileName(), "test.1.bal");
+        Assert.assertEquals(duplicatedConfigFile.getFileName(), "Config.1.toml");
+        Assert.assertEquals(duplicatedClientFile.getFileName(), "client.1.bal");
+        Assert.assertEquals(duplicatedUtilsFile.getFileName(), "utils.1.bal");
+        Assert.assertEquals(duplicatedTypesFile.getFileName(), "types.1.bal");
     }
 
     @Test(description = "Test Ballerina client generation with doc comments in class init function")
