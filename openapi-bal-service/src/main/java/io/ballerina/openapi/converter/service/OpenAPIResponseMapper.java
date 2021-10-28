@@ -340,32 +340,7 @@ public class OpenAPIResponseMapper {
         switch (typeNode.kind()) {
             case QUALIFIED_NAME_REFERENCE:
                 QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) typeNode;
-                if (qNode.modulePrefix().toString().trim().equals(HTTP)) {
-                    Optional<String> code = generateApiResponseCode(qNode.identifier().toString().trim());
-                    if (code.isPresent()) {
-                        apiResponse.description(qNode.identifier().toString().trim());
-                        apiResponse = setCacheHeader(headers, apiResponse, code.get());
-                        apiResponses.put(code.get(), apiResponse);
-                        return Optional.of(apiResponses);
-                    } else {
-                        return Optional.empty();
-                    }
-                } else {
-                    Symbol symbol = semanticModel.symbol(qNode).get();
-                    if (symbol instanceof  TypeReferenceTypeSymbol) {
-                        TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) symbol;
-                        TypeSymbol typeSymbol = typeRef.typeDescriptor();
-                        if (typeSymbol.typeKind() == TypeDescKind.RECORD) {
-                            RecordTypeSymbol recordType = (RecordTypeSymbol) typeSymbol;
-                            ApiResponses responses = handleRecordTypeSymbol(qNode.identifier().text().trim(),
-                                    components.getSchemas(), customMediaPrefix, typeRef,
-                                    new OpenAPIComponentMapper(components), recordType, headers);
-                            apiResponses.putAll(responses);
-                            return Optional.of(apiResponses);
-                        }
-                    }
-                }
-                break;
+                return  handleQualifiedNameType(apiResponses, customMediaPrefix, headers, apiResponse, qNode);
             case INT_TYPE_DESC:
             case STRING_TYPE_DESC:
             case BOOLEAN_TYPE_DESC:
@@ -433,7 +408,50 @@ public class OpenAPIResponseMapper {
                 errors.add(error);
                 return Optional.empty();
         }
-        return Optional.of(apiResponses);
+    }
+
+    /**
+     * This function is for handling {@code QualifiedNameReferenceNode} type returns.
+     */
+    private Optional<ApiResponses> handleQualifiedNameType(ApiResponses apiResponses,
+                                                           Optional<String> customMediaPrefix,
+                                                           Map<String, Header> headers, ApiResponse apiResponse,
+                                                           QualifiedNameReferenceNode qNode) {
+
+        if (qNode.modulePrefix().text().equals(HTTP)) {
+            String typeName = qNode.modulePrefix().text() + ":" + qNode.identifier().text();
+            if (typeName.equals("http:Response")) {
+                ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_105;
+                IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
+                        errorMessage.getDescription(), location, errorMessage.getSeverity());
+                errors.add(error);
+            } else {
+                Optional<String> code = generateApiResponseCode(qNode.identifier().toString().trim());
+                if (code.isPresent()) {
+                    apiResponse.description(qNode.identifier().toString().trim());
+                    apiResponse = setCacheHeader(headers, apiResponse, code.get());
+                    apiResponses.put(code.get(), apiResponse);
+                    return Optional.of(apiResponses);
+                } else {
+                    return Optional.empty();
+                }
+            }
+        } else {
+            Symbol symbol = semanticModel.symbol(qNode).get();
+            if (symbol instanceof  TypeReferenceTypeSymbol) {
+                TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) symbol;
+                TypeSymbol typeSymbol = typeRef.typeDescriptor();
+                if (typeSymbol.typeKind() == TypeDescKind.RECORD) {
+                    RecordTypeSymbol recordType = (RecordTypeSymbol) typeSymbol;
+                    ApiResponses responses = handleRecordTypeSymbol(qNode.identifier().text().trim(),
+                            components.getSchemas(), customMediaPrefix, typeRef,
+                            new OpenAPIComponentMapper(components), recordType, headers);
+                    apiResponses.putAll(responses);
+                    return Optional.of(apiResponses);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     /**

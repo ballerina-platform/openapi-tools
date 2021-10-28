@@ -32,8 +32,11 @@ public enum ErrorMessages {
     OAS_CONVERTOR_104("OAS_CONVERTOR_104",
                               "Generated OpenAPI definition does not contain details for the " +
                               "resource function which has `http:Request` parameters in the Ballerina service.",
-            DiagnosticSeverity.WARNING);
-
+            DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_105("OAS_CONVERTOR_105",
+                              "Generated OpenAPI definition does not contain details for the " +
+                              "resource function which has `http:Response` as return type in the Ballerina service.",
+                      DiagnosticSeverity.WARNING);
 
     private final String code;
     private String description;

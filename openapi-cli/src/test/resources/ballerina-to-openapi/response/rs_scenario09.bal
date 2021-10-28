@@ -10,7 +10,7 @@ type  Pet record  {
 };
 
 service /payloadV on helloEp {
-    resource function get .(http:Caller caller, http:Request request) {
+    resource function get .() {
         http:Response res = new;
         res.setPayload("Hello World!");
         var result = caller->respond(res);
@@ -19,7 +19,7 @@ service /payloadV on helloEp {
         }
     }
 
-    resource function get hi(http:Caller caller, @http:Header{} string X\-client) {
+    resource function get hi(@http:Header{} string X\-client) {
         http:Response res = new;
         res.setPayload("Hello World!");
         var result = caller->respond(res);

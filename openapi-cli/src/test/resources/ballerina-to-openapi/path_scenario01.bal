@@ -4,7 +4,7 @@
 
  service /payloadV on helloEp {
 
-     resource function post .(http:Caller caller, http:Request request) {
+     resource function post .() {
 
      }
  }

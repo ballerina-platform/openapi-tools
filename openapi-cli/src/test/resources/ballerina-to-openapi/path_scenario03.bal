@@ -4,13 +4,13 @@
 
  service /payloadV on helloEp {
 
-     resource function post . (http:Caller caller, http:Request request) {
+     resource function post . () {
 
      }
-     resource function get . (http:Caller caller, http:Request request) {
+     resource function get . () {
 
      }
-     resource function get v1/[int id] (http:Caller caller, http:Request request) {
+     resource function get v1/[int id] () {
 
      }
  }

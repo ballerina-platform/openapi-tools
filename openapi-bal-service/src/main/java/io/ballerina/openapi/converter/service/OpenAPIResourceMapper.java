@@ -106,7 +106,8 @@ public class OpenAPIResourceMapper {
                             errorMessage.getDescription(), resource.location(), errorMessage.getSeverity());
                     errors.add(error);
                 } else {
-                    Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod, path);
+                    Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod,
+                            path);
                     if (operationAdaptor.isPresent()) {
                         operation = operationAdaptor.get().getOperation();
                         generatePathItem(httpMethod, pathObject, operation, path);
