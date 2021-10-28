@@ -1,2 +1,2 @@
 # Latitude
-public type Latitude any?;
+public type Latitude anydata?;
