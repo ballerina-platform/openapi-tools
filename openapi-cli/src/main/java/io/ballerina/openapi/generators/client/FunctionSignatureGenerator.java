@@ -381,10 +381,12 @@ public class FunctionSignatureGenerator {
             }
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(type));
-            IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
+            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(),
+                    false)));
             return createRequiredParameterNode(parameterAnnotationNodeList, typeName, paramName);
         } else {
-            IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
+            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(),
+                    false)));
             if (schema.getDefault() != null) {
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                         createIdentifierToken(convertOpenAPITypeToBallerina(
