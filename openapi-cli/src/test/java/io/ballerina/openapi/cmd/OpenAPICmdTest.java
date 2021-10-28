@@ -112,6 +112,47 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
+    @Test(description = "Check the type content in openapi-to-ballerina command when using to generate both " +
+            "client and service")
+    public void testSuccessfulTypeBalGeneration() throws IOException {
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_type.yaml"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema_type.bal"));
+        String expectedSchemaContent = "";
+        try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
+            expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("client.bal")) &&
+                Files.exists(this.tmpDir.resolve("petstore_type_service.bal")) &&
+                Files.exists(this.tmpDir.resolve("types.bal")) &&
+                Files.exists(this.tmpDir.resolve("tests/test.bal"))) {
+            //Compare schema contents
+            String generatedSchema = "";
+            try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
+                generatedSchema = generatedSchemaLines.collect(Collectors.joining("\n"));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
+            expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
+            if (expectedSchemaContent.equals(generatedSchema)) {
+                Assert.assertTrue(true);
+                deleteGeneratedFiles(false);
+            } else {
+                Assert.fail("Expected content and actual generated content is mismatched for: "
+                        + petstoreYaml.toString());
+                deleteGeneratedFiles(false);
+            }
+        } else {
+            Assert.fail("Type generation failed. : " + readOutput(true));
+        }
+    }
+
     @Test(description = "Test openapi to ballerina generation with license headers")
     public void testGenerationWithLicenseHeaders() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));

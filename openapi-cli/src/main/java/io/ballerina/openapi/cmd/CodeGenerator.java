@@ -153,11 +153,12 @@ public class CodeGenerator {
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles = new ArrayList<>();
-        genFiles.addAll(generateBalSource(GEN_SERVICE, definitionPath, serviceName, filter, nullable));
-        genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, serviceName, filter,
+        List<GenSrcFile> genSrcFiles = generateBalSource(GEN_SERVICE, definitionPath, serviceName, filter, nullable)
+                .stream().filter(genSrcFile -> !genSrcFile.getFileName().equals(TYPE_FILE_NAME))
+                        .collect(Collectors.toList());
+        genSrcFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, serviceName, filter,
                 nullable));
-        List<GenSrcFile> newGenFiles = genFiles.stream().filter(distinctByKey(
+        List<GenSrcFile> newGenFiles = genSrcFiles.stream().filter(distinctByKey(
                 GenSrcFile::getFileName)).collect(Collectors.toList());
         writeGeneratedSources(newGenFiles, srcPath, implPath, type);
     }
