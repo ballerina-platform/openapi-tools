@@ -77,7 +77,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.generators.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
-import static io.ballerina.openapi.generators.GeneratorConstants.NULLABLE;
+import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
@@ -458,7 +458,7 @@ public class BallerinaSchemaGenerator {
         }
         IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldN);
         TypeDescriptorNode fieldTypeName = extractOpenAPISchema(field.getValue());
-        Token questionMarkToken = AbstractNodeFactory.createIdentifierToken(NULLABLE);
+        Token questionMarkToken = AbstractNodeFactory.createIdentifierToken(NILLABLE);
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
         MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
         if (required != null) {
@@ -582,10 +582,10 @@ public class BallerinaSchemaGenerator {
     private String getNullableType(Schema<?> schema, String type) {
         if (schema.getNullable() != null) {
             if (schema.getNullable()) {
-                type = type + NULLABLE;
+                type = type + NILLABLE;
             }
         } else if (isNullable) {
-            type = type + NULLABLE;
+            type = type + NILLABLE;
         }
         return type;
     }
@@ -609,7 +609,7 @@ public class BallerinaSchemaGenerator {
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
         MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
         String fieldTypeNameStr = fieldTypeName.toString().trim();
-        if (fieldTypeName.toString().endsWith(NULLABLE)) {
+        if (fieldTypeName.toString().endsWith(NILLABLE)) {
             fieldTypeNameStr = fieldTypeNameStr.substring(0, fieldTypeNameStr.length() - 1);
         }
         String arrayBrackets = "[]";
@@ -711,7 +711,7 @@ public class BallerinaSchemaGenerator {
             throw new BallerinaOpenApiException("Unsupported OAS data type.");
         }
         if (nullableComposedSchema && !isArray) {
-            typeName = typeName + NULLABLE;
+            typeName = typeName + NILLABLE;
             return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(typeName));
         } else {
             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(typeName));

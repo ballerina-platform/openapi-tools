@@ -245,5 +245,5 @@ public class GeneratorConstants {
     public static final String BOOLEAN = "boolean";
     public static final String NUMBER = "number";
     public static final Integer MAX_ARRAY_LENGTH = 2147483637;
-    public static final String NULLABLE = "?";
+    public static final String NILLABLE = "?";
 }
