@@ -15,14 +15,14 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.converter.error;
+package io.ballerina.openapi.converter.diagnostic;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 /**
  * This {@code ErrorMessages} enum class for containing the error message related to ballerina to openapi command.
  */
-public enum ErrorMessages {
+public enum DiagnosticMessages {
     OAS_CONVERTOR_100("OAS_CONVERTOR_100",
             "Generated OpenAPI definition does not contain details for the `default` " +
             "resource method in the Ballerina service.", DiagnosticSeverity.WARNING),
@@ -42,7 +42,7 @@ public enum ErrorMessages {
     private String description;
     private final DiagnosticSeverity severity;
 
-    ErrorMessages(String code, String description, DiagnosticSeverity severity) {
+    DiagnosticMessages(String code, String description, DiagnosticSeverity severity) {
         this.code = code;
         this.description = description;
         this.severity = severity;

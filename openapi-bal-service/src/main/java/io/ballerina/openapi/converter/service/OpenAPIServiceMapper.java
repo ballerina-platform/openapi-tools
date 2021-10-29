@@ -25,7 +25,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.openapi.converter.error.OpenAPIConverterError;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 
 import java.util.ArrayList;
@@ -39,9 +39,9 @@ import java.util.List;
  */
 public class OpenAPIServiceMapper {
     private final SemanticModel semanticModel;
-    private final List<OpenAPIConverterError> errors = new ArrayList<>();
+    private final List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
 
-    public List<OpenAPIConverterError> getErrors() {
+    public List<OpenAPIConverterDiagnostic> getErrors() {
         return errors;
     }
 
@@ -60,7 +60,7 @@ public class OpenAPIServiceMapper {
      * @param openapi   - OpenApi model to populate
      * @return OpenApi object which represent current service.
      */
-    public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi, String basePath) {
+    public OpenAPI convertServiceToOpenAPI(ServiceDeclarationNode service, OpenAPI openapi) {
         NodeList<Node> functions = service.members();
         List<FunctionDefinitionNode> resource = new ArrayList<>();
         for (Node function: functions) {

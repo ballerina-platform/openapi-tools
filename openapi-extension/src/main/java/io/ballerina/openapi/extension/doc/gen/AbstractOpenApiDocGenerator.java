@@ -29,7 +29,6 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.openapi.extension.Constants;
 import io.ballerina.openapi.extension.OpenApiDiagnosticCode;
@@ -165,13 +164,12 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
     }
 
     private String generateOpenApiDoc(SemanticModel semanticModel, SyntaxTree syntaxTree,
-                                      ServiceDeclarationNode serviceNode, String outputFileName)
-            throws OpenApiConverterException {
+                                      ServiceDeclarationNode serviceNode, String outputFileName) {
         ModulePartNode modulePartNode = syntaxTree.rootNode();
         List<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
-        String serviceBasePath = getServiceBasePath(serviceNode);
+//        String serviceBasePath = getServiceBasePath(serviceNode);
         return ServiceToOpenAPIConverterUtils.generateOASForGivenFormat(
-                serviceNode, serviceBasePath, true, listenerNodes, semanticModel, outputFileName);
+                serviceNode, true, listenerNodes, semanticModel, outputFileName);
     }
 
     private List<ListenerDeclarationNode> extractListenerNodes(ModulePartNode modulePartNode) {

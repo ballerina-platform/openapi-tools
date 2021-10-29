@@ -6,7 +6,7 @@
      resource function get hi/[int abc]() {
 
      }
-     resource function post hi(http:Caller caller, http:Request request, int id) {
+     resource function post hi(int id) {
 
      }
  }

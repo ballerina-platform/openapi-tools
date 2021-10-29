@@ -1,5 +1,3 @@
-package io.ballerina.openapi.extension;
-
 /*
  *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,25 +15,22 @@ package io.ballerina.openapi.extension;
  *  specific language governing permissions and limitations
  *  under the License.
  */
+package io.ballerina.openapi.cmd;
 
-import io.ballerina.openapi.converter.service.OASResult;
+import org.testng.annotations.BeforeTest;
+
+import java.io.IOException;
 
 /**
- * The extended service for the OpenAPIConverter endpoint.
+ * This {@code BallerinaToOASTests} represents the tests for all the special scenarios in the ballerina to openapi
+ * command.
  *
  * @since 2.0.0
  */
-public class OpenAPIConverterResponse {
-    private OASResult yamlContent;
-
-    public OASResult getYamlContent() {
-        return yamlContent;
+public class BallerinaToOASTests extends OpenAPICommandTest {
+    @BeforeTest(description = "This will create a new ballerina project for testing below scenarios.")
+    public void setupBallerinaProject() throws IOException {
+        super.setup();
     }
 
-    public void setYamlContent(OASResult yamlContent) {
-        this.yamlContent = yamlContent;
-    }
-
-    public OpenAPIConverterResponse() {
-    }
 }

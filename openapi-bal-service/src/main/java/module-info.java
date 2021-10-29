@@ -37,6 +37,7 @@ module io.ballerina.openapi.converter {
     requires org.apache.commons.lang3;
     exports io.ballerina.openapi.converter;
     exports io.ballerina.openapi.converter.utils;
-    exports io.ballerina.openapi.converter.error;
+    exports io.ballerina.openapi.converter.diagnostic;
+    exports io.ballerina.openapi.converter.service;
 }
 

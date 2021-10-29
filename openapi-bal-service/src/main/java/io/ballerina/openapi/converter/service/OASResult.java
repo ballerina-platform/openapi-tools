@@ -17,9 +17,11 @@
  */
 package io.ballerina.openapi.converter.service;
 
-import io.ballerina.openapi.converter.error.OpenAPIConverterError;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
+import io.swagger.v3.oas.models.OpenAPI;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * {@code OASResult} is used to contain OpenAPI definition in string format and error list.
@@ -28,22 +30,59 @@ import java.util.List;
  */
 public class OASResult {
     private String definition;
-    private List<OpenAPIConverterError> errors;
+    private OpenAPI openAPI;
+    private Map<String, String> finalOASSet;
+    private List<OpenAPIConverterDiagnostic> diagnostics;
 
-    public OASResult(String definition, List<OpenAPIConverterError> errors) {
+    public OASResult(String definition, OpenAPI openAPI, Map<String, String> finalOASSet,
+                     List<OpenAPIConverterDiagnostic> diagnostics) {
         this.definition = definition;
-        this.errors = errors;
+        this.openAPI = openAPI;
+        this.finalOASSet = finalOASSet;
+        this.diagnostics = diagnostics;
+    }
+
+    /**
+     * This constructor is used to store the details that final out put with string format including JSON or YAML.
+     *
+     * @param definition    - OpenAPI definition with string format.
+     * @param diagnostics   - List of Diagnostic found through the generation process.
+     */
+    public OASResult(String definition, List<OpenAPIConverterDiagnostic> diagnostics) {
+        this(definition, null , null, diagnostics);
+    }
+
+    /**
+     * This constructor is used to store the details that {@code OpenAPI} object and diagnostic list.
+     */
+    public OASResult(OpenAPI openAPI, List<OpenAPIConverterDiagnostic> diagnostics) {
+        this(null, openAPI, null, diagnostics);
+    }
+
+    /**
+     * This constructor is used to store the details that Map of {@code OpenAPI} objects and diagnostic list.
+     */
+    public OASResult(Map<String, String> finalOASSet, List<OpenAPIConverterDiagnostic> diagnostics) {
+        this(null, null, finalOASSet, diagnostics);
     }
 
     public String getDefinition() {
         return definition;
     }
 
-    public List<OpenAPIConverterError> getErrors() {
-        return errors;
+    public OpenAPI getOpenAPI() {
+        return openAPI;
     }
 
-    public void setErrors(List<OpenAPIConverterError> errors) {
-        this.errors = errors;
+    public Map<String, String> getFinalOASSet() {
+        return finalOASSet;
+    }
+
+    public List<OpenAPIConverterDiagnostic> getDiagnostics() {
+        return diagnostics;
+    }
+
+    public void setDiagnostics(List<OpenAPIConverterDiagnostic> diagnostics) {
+        this.diagnostics = diagnostics;
     }
 }

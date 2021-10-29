@@ -21,6 +21,7 @@ package io.ballerina.openapi.extension;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.converter.service.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import org.ballerinalang.annotation.JavaSPIService;
 import org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService;
@@ -63,25 +64,23 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
     public CompletableFuture<OpenAPIConverterResponse> generateOpenAPIFile(OpenAPIConverterRequest request) {
         return CompletableFuture.supplyAsync(() -> {
             OpenAPIConverterResponse response = new OpenAPIConverterResponse();
-            try {
-                String fileUri = request.getDocumentFilePath();
-                Optional<Path> documentPath = getPathFromURI(fileUri);
-                Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath.orElseThrow());
-                Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath.orElseThrow());
-                Map<String, String> yamlContent =
-                        ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.orElseThrow(),
-                                semanticModel.orElseThrow(), null, false, null);
-                //Response should handle
-                if (!yamlContent.isEmpty()) {
-                    Map.Entry<String, String> content = yamlContent.entrySet().iterator().next();
-                    response.setYamlContent(content.getValue());
-                } else {
-                    response.setYamlContent("Error occurred while generating yaml");
-                }
-            } catch (Throwable e) {
-                // Throw a exceptions.
-                response.setYamlContent("Error occurred while generating yaml :" + e.getLocalizedMessage());
+            String fileUri = request.getDocumentFilePath();
+            Optional<Path> documentPath = getPathFromURI(fileUri);
+            Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath.orElseThrow());
+            Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath.orElseThrow());
+            OASResult oasResult =
+                    ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.orElseThrow(),
+                            semanticModel.orElseThrow(), null, false, null);
+            //Response handle with returning {@code OASResult} model.
+            OASResult outResult;
+            if (!oasResult.getFinalOASSet().isEmpty()) {
+                Map.Entry<String, String> content = oasResult.getFinalOASSet().entrySet().iterator().next();
+                outResult = new OASResult(content.getValue(), oasResult.getDiagnostics());
+            } else {
+                outResult = new OASResult("Error occurred while generating yaml.",
+                        oasResult.getDiagnostics());
             }
+            response.setYamlContent(outResult);
             return response;
         });
     }
@@ -90,8 +89,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
     public static Optional<Path> getPathFromURI(String uri) {
         try {
             return Optional.of(Paths.get(new URL(uri).toURI()));
-        } catch (URISyntaxException | MalformedURLException e) {
-            // ignore
+        } catch (URISyntaxException | MalformedURLException ignore) {
         }
         return Optional.empty();
     }

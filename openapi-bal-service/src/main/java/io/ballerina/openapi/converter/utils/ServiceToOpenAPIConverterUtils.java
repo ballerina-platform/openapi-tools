@@ -26,10 +26,8 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.Constants;
-import io.ballerina.openapi.converter.OpenApiConverterException;
-import io.ballerina.openapi.converter.error.ExceptionError;
-import io.ballerina.openapi.converter.error.OpenAPIConverterError;
-import io.ballerina.openapi.converter.service.OAS;
+import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.service.OASResult;
 import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
@@ -58,13 +56,6 @@ import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
  * @since 2.0.0
  */
 public class ServiceToOpenAPIConverterUtils {
-
-    private static final List<OpenAPIConverterError> errors = new ArrayList<>();
-
-    public static List<OpenAPIConverterError> getErrors() {
-        return errors;
-    }
-
     /**
      * This method will generate  openapi definition Map list with ballerina code.
      *
@@ -74,17 +65,17 @@ public class ServiceToOpenAPIConverterUtils {
      * @param needJson    - Flag for enabling the generated file format with json or YAML
      * @param outPath     - Out put path to check given path has same name file
      * @return            - {@link java.util.Map} with openAPI definitions for service nodes
-     * @throws OpenApiConverterException when code generation is fail
      */
-    public static Map<String, String> generateOAS3Definition(SyntaxTree syntaxTree, SemanticModel semanticModel,
+    public static OASResult generateOAS3Definition(SyntaxTree syntaxTree, SemanticModel semanticModel,
                                                              String serviceName, Boolean needJson, Path outPath) {
         Map<String, String> openAPIDefinitions = new HashMap<>();
         List<ListenerDeclarationNode> endpoints = new ArrayList<>();
         List<ServiceDeclarationNode> servicesToGenerate = new ArrayList<>();
         List<String> availableService = new ArrayList<>();
+        List<OpenAPIConverterDiagnostic> diagnostics = new ArrayList<>();
         if (containErrors(semanticModel.diagnostics())) {
-            ExceptionError error = new ExceptionError("Given ballerina file has syntax/compilation error.");
-            errors.add(error);
+            ExceptionDiagnostic error = new ExceptionDiagnostic("Given ballerina file has syntax/compilation error.");
+            diagnostics.add(error);
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
             extractListenersAndServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode,
@@ -92,26 +83,26 @@ public class ServiceToOpenAPIConverterUtils {
 
             // If there are no services found for a given service name.
             if (serviceName != null && servicesToGenerate.isEmpty()) {
-                ExceptionError error = new ExceptionError("No Ballerina services found with name '" + serviceName +
-                        "' to generate an OpenAPI specification. These services are " +
+                ExceptionDiagnostic error = new ExceptionDiagnostic("No Ballerina services found with name '"
+                        + serviceName + "' to generate an OpenAPI specification. These services are " +
                         "available in ballerina file. " + availableService);
-                errors.add(error);
+                diagnostics.add(error);
             }
 
             // Generating for the services
             for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
                 String serviceNodeName = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
-                OASResult oasResult = generateOAS(serviceNode, serviceNodeName, needJson, endpoints,
+                OASResult oasResult = generateOAS(serviceNode, needJson, endpoints,
                         semanticModel, openApiName);
                 String openApiSource = oasResult.getDefinition();
-                errors.addAll(oasResult.getErrors());
+                diagnostics.addAll(oasResult.getDiagnostics());
                 //  Checked old generated file with same name
                 openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
                 openAPIDefinitions.put(openApiName, openApiSource);
             }
         }
-        return openAPIDefinitions;
+        return new OASResult(openAPIDefinitions, diagnostics);
     }
 
     private static boolean containErrors(List<Diagnostic> diagnostics) {
@@ -165,11 +156,11 @@ public class ServiceToOpenAPIConverterUtils {
     /**
      * Generate openAPI definition according to the given format JSON or YAML.
      */
-    public static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
+    public static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode,
                                                     boolean needJson, List<ListenerDeclarationNode> endpoints,
                                                     SemanticModel semanticModel, String openApiName)    {
-        OpenAPI openapi = generateOpenAPIDefinition(new OpenAPI(), serviceName, endpoints, serviceDeclarationNode,
-                semanticModel).getDefinition();
+        OpenAPI openapi = generateOpenAPIDefinition(new OpenAPI(), endpoints, serviceDeclarationNode,
+                semanticModel).getOpenAPI();
         if (openapi.getInfo().getTitle() == null) {
             openapi = getInfo(openapi, openApiName);
         }
@@ -184,19 +175,18 @@ public class ServiceToOpenAPIConverterUtils {
      * generation, Using this user have capable of handling errors according to their preference.
      *
      * @param serviceDeclarationNode        Service Node related to ballerina service
-     * @param serviceName                   Service base path
      * @param needJson                      User given OAS format JSON or YAML
      * @param endpoints                     Listener endpoints that bind to service
      * @param semanticModel                 Semantic model for given ballerina file
      * @param openApiName                   Service name for title
-     * @return  {@code OAS}
+     * @return  {@code OASResult}
      */
-    public static OASResult generateOAS(ServiceDeclarationNode serviceDeclarationNode, String serviceName,
+    public static OASResult generateOAS(ServiceDeclarationNode serviceDeclarationNode,
                                         boolean needJson, List<ListenerDeclarationNode> endpoints,
                                         SemanticModel semanticModel, String openApiName) {
-        OAS oas = generateOpenAPIDefinition(new OpenAPI(), serviceName, endpoints, serviceDeclarationNode,
+        OASResult oas = generateOpenAPIDefinition(new OpenAPI(), endpoints, serviceDeclarationNode,
                 semanticModel);
-        OpenAPI openapi = oas.getDefinition();
+        OpenAPI openapi = oas.getOpenAPI();
         //TODO: update info section with openapi annotation details and package details.
         if (openapi.getInfo().getTitle() == null) {
             openapi = getInfo(openapi, openApiName);
@@ -207,13 +197,13 @@ public class ServiceToOpenAPIConverterUtils {
         } else {
             definition =  Yaml.pretty(openapi);
         }
-        return new OASResult(definition, oas.getErrors());
+        return new OASResult(definition, oas.getDiagnostics());
     }
 
     /**
      * Generated OpenAPI specification with openAPI object.
      */
-    private static OAS generateOpenAPIDefinition(OpenAPI openapi, String serviceName,
+    private static OASResult generateOpenAPIDefinition(OpenAPI openapi,
                                                  List<ListenerDeclarationNode> endpoints,
                                                  ServiceDeclarationNode serviceDefinition,
                                                  SemanticModel semanticModel) {
@@ -226,14 +216,8 @@ public class ServiceToOpenAPIConverterUtils {
         openapi = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServers(openapi, endpoints, serviceDefinition);
         // 03. Filter path and component sections in OAS.
         // Generate openApi string for the mentioned service name.
-        if (!serviceName.isBlank() && currentServiceName.trim().equals(serviceName)) {
-            openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi, serviceName);
-        } else {
-            // If no service name mentioned, then generate openApi definition for the first service.
-            openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi,
-                    currentServiceName.trim());
-        }
-        return new OAS(openapi, openAPIServiceMapper.getErrors());
+        openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi);
+        return new OASResult(openapi, openAPIServiceMapper.getErrors());
     }
 
     //Set the OAS info section details

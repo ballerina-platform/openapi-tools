@@ -25,6 +25,7 @@ under the License.
           parallel="false">
         <classes>
             <class name="io.ballerina.openapi.cmd.OpenAPICmdTest"/>
+            <class name="io.ballerina.openapi.cmd.BallerinaToOASTests"/>
             <class name="io.ballerina.openapi.generators.openapi.OpenApiConverterUtilsTest"/>
             <class name="io.ballerina.openapi.generators.openapi.RequestBodyTest"/>
             <class name="io.ballerina.openapi.generators.openapi.RecordTests"/>

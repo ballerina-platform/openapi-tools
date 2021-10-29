@@ -47,9 +47,9 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
-import io.ballerina.openapi.converter.error.ErrorMessages;
-import io.ballerina.openapi.converter.error.IncompatibleResourceError;
-import io.ballerina.openapi.converter.error.OpenAPIConverterError;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Components;
@@ -114,10 +114,10 @@ import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractC
 public class OpenAPIResponseMapper {
     private final SemanticModel semanticModel;
     private final Components components;
-    private final List<OpenAPIConverterError> errors = new ArrayList<>();
+    private final List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
     private final Location location;
 
-    public List<OpenAPIConverterError> getErrors() {
+    public List<OpenAPIConverterDiagnostic> getErrors() {
         return errors;
     }
 
@@ -401,8 +401,8 @@ public class OpenAPIResponseMapper {
                 return getAPIResponses(operationAdaptor, apiResponses,
                         ((OptionalTypeDescriptorNode) typeNode).typeDescriptor(), customMediaPrefix, headers);
             default:
-                ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_101;
-                IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
+                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_101;
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage.getCode(),
                         errorMessage.getDescription() + typeNode.kind(), this.location,
                         errorMessage.getSeverity());
                 errors.add(error);
@@ -421,8 +421,8 @@ public class OpenAPIResponseMapper {
         if (qNode.modulePrefix().text().equals(HTTP)) {
             String typeName = qNode.modulePrefix().text() + ":" + qNode.identifier().text();
             if (typeName.equals("http:Response")) {
-                ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_105;
-                IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
+                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_105;
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage.getCode(),
                         errorMessage.getDescription(), location, errorMessage.getSeverity());
                 errors.add(error);
             } else {
@@ -621,8 +621,8 @@ public class OpenAPIResponseMapper {
                 return Optional.of(customMediaPrefix.map(s -> TEXT_PREFIX + s +
                         TEXT_POSTFIX).orElse(MediaType.TEXT_PLAIN));
             default:
-                ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_102;
-                IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
+                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_102;
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage.getCode(),
                         errorMessage.getDescription() + type, this.location, errorMessage.getSeverity());
                 errors.add(error);
                 return Optional.empty();
@@ -636,10 +636,10 @@ public class OpenAPIResponseMapper {
         if (HTTP_CODES.containsKey(identifier)) {
             return Optional.of(HTTP_CODES.get(identifier));
         } else {
-            ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_103;
-            IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
-                    errorMessage.getDescription()  + identifier, this.location, errorMessage.getSeverity());
-            errors.add(error);
+//            ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_103;
+//            IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
+//                    errorMessage.getDescription()  + identifier, this.location, errorMessage.getSeverity());
+//            errors.add(error);
             return Optional.empty();
         }
     }

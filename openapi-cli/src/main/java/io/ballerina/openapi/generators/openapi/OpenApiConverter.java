@@ -20,8 +20,9 @@ package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.error.ExceptionError;
-import io.ballerina.openapi.converter.error.OpenAPIConverterError;
+import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
+import io.ballerina.openapi.converter.service.OASResult;
 import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.projects.Document;
@@ -49,7 +50,7 @@ public class OpenApiConverter {
     private  SyntaxTree syntaxTree;
     private  SemanticModel semanticModel;
     private  Project project;
-    private List<OpenAPIConverterError> errors = new ArrayList<>();
+    private List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
 
     /**
      * Initialize constructor.
@@ -57,7 +58,7 @@ public class OpenApiConverter {
     public OpenApiConverter() {
     }
 
-    public List<OpenAPIConverterError> getErrors() {
+    public List<OpenAPIConverterDiagnostic> getErrors() {
         return errors;
     }
 
@@ -91,15 +92,15 @@ public class OpenApiConverter {
         }
         syntaxTree = doc.syntaxTree();
         semanticModel =  project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
-        Map<String, String> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
+        OASResult openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
                 semanticModel, serviceName, needJson, outPath);
-        this.errors.addAll(ServiceToOpenAPIConverterUtils.getErrors());
-        if (!openAPIDefinitions.isEmpty()) {
-            for (Map.Entry<String, String> definition: openAPIDefinitions.entrySet()) {
+        this.errors.addAll(openAPIDefinitions.getDiagnostics());
+        if (!openAPIDefinitions.getFinalOASSet().isEmpty()) {
+            for (Map.Entry<String, String> definition: openAPIDefinitions.getFinalOASSet().entrySet()) {
                 try {
                     CodegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue());
                 } catch (IOException e) {
-                    ExceptionError error = new ExceptionError(e.getMessage());
+                    ExceptionDiagnostic error = new ExceptionDiagnostic(e.getMessage());
                     this.errors.add(error);
                 }
             }

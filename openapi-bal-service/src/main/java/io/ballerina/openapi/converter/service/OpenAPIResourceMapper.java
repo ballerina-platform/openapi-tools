@@ -30,9 +30,9 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
-import io.ballerina.openapi.converter.error.ErrorMessages;
-import io.ballerina.openapi.converter.error.IncompatibleResourceError;
-import io.ballerina.openapi.converter.error.OpenAPIConverterError;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -57,9 +57,9 @@ public class OpenAPIResourceMapper {
     private final SemanticModel semanticModel;
     private final Paths pathObject = new Paths();
     private final Components components = new Components();
-    private final List<OpenAPIConverterError> errors;
+    private final List<OpenAPIConverterDiagnostic> errors;
 
-    public List<OpenAPIConverterError> getErrors() {
+    public List<OpenAPIConverterDiagnostic> getErrors() {
         return errors;
     }
 
@@ -101,8 +101,8 @@ public class OpenAPIResourceMapper {
             //Iterate through http methods and fill path map.
             if (resource.functionName().toString().trim().equals(httpMethod)) {
                 if (httpMethod.equals("'default")) {
-                    ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_100;
-                    IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
+                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
+                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage.getCode(),
                             errorMessage.getDescription(), resource.location(), errorMessage.getSeverity());
                     errors.add(error);
                 } else {

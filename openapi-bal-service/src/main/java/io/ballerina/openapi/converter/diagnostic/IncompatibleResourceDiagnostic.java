@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.converter.error;
+package io.ballerina.openapi.converter.diagnostic;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
@@ -26,14 +26,14 @@ import io.ballerina.tools.diagnostics.Location;
  *
  * @since 2.0.0
  */
-public class IncompatibleResourceError extends OpenAPIConverterError {
+public class IncompatibleResourceDiagnostic extends OpenAPIConverterDiagnostic {
     private final String code;
     private final String message;
     private final Location location;
     private final DiagnosticSeverity severity;
 
-    public IncompatibleResourceError(String code, String message,
-                                     Location location, DiagnosticSeverity severity) {
+    public IncompatibleResourceDiagnostic(String code, String message,
+                                          Location location, DiagnosticSeverity severity) {
         this.code = code;
         this.message = message;
         this.location = location;

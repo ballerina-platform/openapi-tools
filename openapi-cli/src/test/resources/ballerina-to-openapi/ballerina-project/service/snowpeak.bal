@@ -35,8 +35,7 @@ service /payloadV on new http:Listener(9090) {
     # + startDate - Start date in format yyyy-mm-dd
     # + endDate - End date in format yyyy-mm-dd
     # + return - `Rooms` representation
-    resource function get locations/[string id]/rooms(string startDate, string endDate)
-                returns rep:Rooms {
+    resource function get locations/[string id]/rooms(string startDate, string endDate) returns rep:Rooms {
         rep:Rooms rooms = mock:getRooms(startDate, endDate);
         return rooms;
     }

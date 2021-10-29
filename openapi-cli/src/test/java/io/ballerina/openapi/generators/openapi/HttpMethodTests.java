@@ -18,7 +18,7 @@
 
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.converter.error.OpenAPIConverterError;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -53,7 +53,7 @@ public class HttpMethodTests {
         OpenApiConverter openApiConverter = new OpenApiConverter();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
-        List<OpenAPIConverterError> errors = openApiConverter.getErrors();
+        List<OpenAPIConverterDiagnostic> errors = openApiConverter.getErrors();
         Assert.assertFalse(errors.isEmpty());
         Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not " +
                 "contain details for the `default` resource method in the Ballerina service.");

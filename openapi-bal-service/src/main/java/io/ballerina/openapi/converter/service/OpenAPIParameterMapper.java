@@ -33,9 +33,9 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
-import io.ballerina.openapi.converter.error.ErrorMessages;
-import io.ballerina.openapi.converter.error.IncompatibleResourceError;
-import io.ballerina.openapi.converter.error.OpenAPIConverterError;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
@@ -58,9 +58,9 @@ public class OpenAPIParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
     private final OperationAdaptor operationAdaptor;
     private final Map<String, String> apidocs;
-    private final List<OpenAPIConverterError> errors = new ArrayList<>();
+    private final List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
 
-    public List<OpenAPIConverterError> getErrors() {
+    public List<OpenAPIConverterDiagnostic> getErrors() {
         return errors;
     }
 
@@ -95,8 +95,8 @@ public class OpenAPIParameterMapper {
                             (QualifiedNameReferenceNode) requiredParameterNode.typeName();
                     String typeName = (referenceNode).modulePrefix().text() + ":" + (referenceNode).identifier().text();
                     if (typeName.equals("http:Request")) {
-                        ErrorMessages messages = ErrorMessages.OAS_CONVERTOR_104;
-                        IncompatibleResourceError error = new IncompatibleResourceError(messages.getCode(),
+                        DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_104;
+                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(messages.getCode(),
                                 messages.getDescription(), functionDefinitionNode.location(), messages.getSeverity());
                         errors.add(error);
                     }

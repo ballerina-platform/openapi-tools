@@ -18,9 +18,9 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.openapi.converter.error.ExceptionError;
-import io.ballerina.openapi.converter.error.IncompatibleResourceError;
-import io.ballerina.openapi.converter.error.OpenAPIConverterError;
+import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.openapi.OpenApiConverter;
@@ -167,13 +167,13 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName  input resource file
      */
     private void ballerinaToOpenApi(String fileName) {
-        List<OpenAPIConverterError> errors = new ArrayList<>();
+        List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
         final File balFile = new File(fileName);
         Path balFilePath = null;
         try {
             balFilePath = Paths.get(balFile.getCanonicalPath());
         } catch (IOException e) {
-            ExceptionError error = new ExceptionError(e.getLocalizedMessage());
+            ExceptionDiagnostic error = new ExceptionDiagnostic(e.getLocalizedMessage());
             errors.add(error);
         }
         getTargetOutputPath();
@@ -183,13 +183,13 @@ public class OpenApiCmd implements BLauncherCmd {
                 generatedFileType);
         errors.addAll(openApiConverter.getErrors());
         if (!errors.isEmpty()) {
-            for (OpenAPIConverterError error: errors) {
-                if (error instanceof ExceptionError) {
+            for (OpenAPIConverterDiagnostic error: errors) {
+                if (error instanceof ExceptionDiagnostic) {
                     this.outStream = System.err;
                     outStream.println(error.getMessage());
                     exitError(this.exitWhenFinish);
-                } else if (error instanceof IncompatibleResourceError) {
-                    IncompatibleResourceError incompatibleError = (IncompatibleResourceError) error;
+                } else if (error instanceof IncompatibleResourceDiagnostic) {
+                    IncompatibleResourceDiagnostic incompatibleError = (IncompatibleResourceDiagnostic) error;
                     OpenAPIDiagnostic diagnostic = CmdUtils.getDiagnostics(incompatibleError.getCode(),
                             incompatibleError.getMessage(), incompatibleError.getSeverity(),
                             incompatibleError.getLocation());
