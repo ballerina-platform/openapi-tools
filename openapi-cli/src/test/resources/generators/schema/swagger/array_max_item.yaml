@@ -1,0 +1,59 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Petstore
+  license:
+    name: MIT
+tags:
+  - name: pets
+    description: Pets Tag
+  - name: list
+    description: List Tag
+security:
+- petstore_auth:
+  - write:pets
+  - read:pets
+- user_auth:
+  - read:user
+
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      description: Show a list of pets in the system
+      operationId: listPets
+      tags:
+        - pets
+        - list
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: An paged array of pets
+components:
+  schemas:
+    Pet:
+      items:
+       type: string
+    Address:
+     properties:
+       streetNo:
+         type: integer
+       mainStreet:
+         type: array
+         maxItems: 2
+         items:
+           type: string
+       country:
+         type: string
+    UserAddress:
+      type: array
+      maxItems: 7
+      items:
+        type: integer

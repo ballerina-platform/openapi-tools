@@ -40,6 +40,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.ErrorMessages;
+import io.ballerina.openapi.cmd.model.GenSrcFile;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -55,6 +56,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -613,5 +615,24 @@ public class GeneratorUtils {
         Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
         MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
         return leading;
+    }
+
+    /**
+     * This method for setting the file name for generated file.
+     *
+     * @param listFiles      generated files
+     * @param gFile          GenSrcFile object
+     * @param duplicateCount add the tag with duplicate number if file already exist
+     */
+    public static void setGeneratedFileName(List<File> listFiles, GenSrcFile gFile, int duplicateCount) {
+        for (File listFile : listFiles) {
+            String listFileName = listFile.getName();
+            if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2) &&
+                    (listFileName.split("\\.")[0].equals(gFile.getFileName().split("\\.")[0]))) {
+                duplicateCount = 1 + duplicateCount;
+            }
+        }
+        gFile.setFileName(gFile.getFileName().split("\\.")[0] + "." + (duplicateCount) + "." +
+                gFile.getFileName().split("\\.")[1]);
     }
 }

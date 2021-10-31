@@ -152,6 +152,8 @@ public class GeneratorConstants {
     public static final String DEFAULT_API_KEY_DESC = "API keys for authorization";
 
     public static final String RESPONSE = "response";
+    public static final String TYPE = "type";
+    public static final String ANY_DATA = "anydata";
 
     //Http Methods
     public static final String POST = "post";
@@ -239,4 +241,9 @@ public class GeneratorConstants {
         HTTP_CODES_DES = Collections.unmodifiableMap(aMap);
     }
     public static final String HTTP_200 = "200";
+    public static final String INTEGER = "integer";
+    public static final String BOOLEAN = "boolean";
+    public static final String NUMBER = "number";
+    public static final Integer MAX_ARRAY_LENGTH = 2147483637;
+    public static final String NILLABLE = "?";
 }
