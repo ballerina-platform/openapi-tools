@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.cmd;
 
+import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
@@ -33,8 +34,10 @@ public class CmdUtils {
      */
     public static OpenAPIDiagnostic getDiagnostics(String code, String message, DiagnosticSeverity severity,
                                             Location location, Object... args) {
-        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                code, message, severity);
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(code, message, severity);
+        if (location == null) {
+            location = new ConverterCommonUtils.NullLocation();
+        }
         return new OpenAPIDiagnostic(diagnosticInfo, location, Collections.emptyList(), args);
     }
 }

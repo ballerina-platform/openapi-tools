@@ -49,6 +49,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.converter.Constants.HTTP_REQUEST;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
@@ -94,10 +95,10 @@ public class OpenAPIParameterMapper {
                     QualifiedNameReferenceNode referenceNode =
                             (QualifiedNameReferenceNode) requiredParameterNode.typeName();
                     String typeName = (referenceNode).modulePrefix().text() + ":" + (referenceNode).identifier().text();
-                    if (typeName.equals("http:Request")) {
+                    if (typeName.equals(HTTP_REQUEST)) {
                         DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_104;
-                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(messages.getCode(),
-                                messages.getDescription(), functionDefinitionNode.location(), messages.getSeverity());
+                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(messages,
+                                functionDefinitionNode.location());
                         errors.add(error);
                     }
                 }

@@ -88,6 +88,7 @@ import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.HTTP_200;
 import static io.ballerina.openapi.converter.Constants.HTTP_200_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
+import static io.ballerina.openapi.converter.Constants.HTTP_RESPONSE;
 import static io.ballerina.openapi.converter.Constants.JSON_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.LAST_MODIFIED;
 import static io.ballerina.openapi.converter.Constants.MAX_AGE;
@@ -402,9 +403,8 @@ public class OpenAPIResponseMapper {
                         ((OptionalTypeDescriptorNode) typeNode).typeDescriptor(), customMediaPrefix, headers);
             default:
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_101;
-                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage.getCode(),
-                        errorMessage.getDescription() + typeNode.kind(), this.location,
-                        errorMessage.getSeverity());
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, this.location,
+                        typeNode.kind().toString());
                 errors.add(error);
                 return Optional.empty();
         }
@@ -420,10 +420,9 @@ public class OpenAPIResponseMapper {
 
         if (qNode.modulePrefix().text().equals(HTTP)) {
             String typeName = qNode.modulePrefix().text() + ":" + qNode.identifier().text();
-            if (typeName.equals("http:Response")) {
+            if (typeName.equals(HTTP_RESPONSE)) {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_105;
-                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage.getCode(),
-                        errorMessage.getDescription(), location, errorMessage.getSeverity());
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, location);
                 errors.add(error);
             } else {
                 Optional<String> code = generateApiResponseCode(qNode.identifier().toString().trim());
@@ -622,8 +621,8 @@ public class OpenAPIResponseMapper {
                         TEXT_POSTFIX).orElse(MediaType.TEXT_PLAIN));
             default:
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_102;
-                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage.getCode(),
-                        errorMessage.getDescription() + type, this.location, errorMessage.getSeverity());
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, this.location,
+                        type);
                 errors.add(error);
                 return Optional.empty();
         }

@@ -20,9 +20,10 @@ package io.ballerina.openapi.generators.openapi;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
-import io.ballerina.openapi.converter.service.result.OASResult;
+import io.ballerina.openapi.converter.service.OASResult;
 import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.projects.Document;
@@ -31,7 +32,6 @@ import io.ballerina.projects.Module;
 import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
-import io.ballerina.projects.ProjectException;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 
@@ -40,22 +40,23 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 /**
  * OpenApi related utility classes.
  */
 
 public class OpenApiConverter {
-    private  SyntaxTree syntaxTree;
-    private  SemanticModel semanticModel;
-    private  Project project;
+    private SyntaxTree syntaxTree;
+    private SemanticModel semanticModel;
+    private Project project;
     private List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
 
     /**
      * Initialize constructor.
      */
     public OpenApiConverter() {
+
     }
 
     public List<OpenAPIConverterDiagnostic> getErrors() {
@@ -68,11 +69,9 @@ public class OpenApiConverter {
      * @param servicePath The path to a single ballerina file.
      * @param outPath     The output directory to which the OpenAPI specifications should be generated to.
      * @param serviceName Filter the services to generate OpenAPI specification for service with this name.
-     * @throws IOException               Error when writing the OpenAPI specification file.
-     * @throws ProjectException          Error occurred generating OpenAPI specification.
      */
-    public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName
-            , Boolean needJson) {
+    public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName,
+                                                  Boolean needJson) {
         // Load project instance for single ballerina file
         project = ProjectLoader.loadProject(servicePath);
         Package packageName = project.currentPackage();
@@ -91,16 +90,28 @@ public class OpenApiConverter {
             doc = currentModule.document(docId);
         }
         syntaxTree = doc.syntaxTree();
-        semanticModel =  project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
-        OASResult openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
+        semanticModel = project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
+        List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
                 semanticModel, serviceName, needJson, outPath);
-        this.errors.addAll(openAPIDefinitions.getDiagnostics());
-        if (!openAPIDefinitions.getFinalOASSet().isEmpty()) {
-            for (Map.Entry<String, String> definition: openAPIDefinitions.getFinalOASSet().entrySet()) {
+
+        if (!openAPIDefinitions.isEmpty()) {
+            for (OASResult definition : openAPIDefinitions) {
                 try {
-                    CodegenUtils.writeFile(outPath.resolve(definition.getKey()), definition.getValue());
+                    this.errors.addAll(definition.getDiagnostics());
+                    if (definition.getOpenAPI().isPresent()) {
+                        Optional<String> content;
+                        if (needJson) {
+                            content = definition.getJson();
+                        } else {
+                            content = definition.getYaml();
+                        }
+                        CodegenUtils.writeFile(outPath.resolve(definition.getServiceName()), content.get());
+                    }
                 } catch (IOException e) {
-                    ExceptionDiagnostic error = new ExceptionDiagnostic(e.getMessage());
+                    DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_108;
+                    ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
+                            message.getDescription() + e.getLocalizedMessage(),
+                            null);
                     this.errors.add(error);
                 }
             }

@@ -21,30 +21,33 @@ package io.ballerina.openapi.converter.diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
- * {@code IncompatibleResourceError} represents the error that OAS not compatible with ballerina implementation.
+ * This {@code IncompatibleResourceError} represents the error that OAS not compatible with ballerina implementation.
  *
  * @since 2.0.0
  */
-public class IncompatibleResourceDiagnostic extends OpenAPIConverterDiagnostic {
+public class IncompatibleResourceDiagnostic implements OpenAPIConverterDiagnostic {
     private final String code;
     private final String message;
     private final Location location;
     private final DiagnosticSeverity severity;
 
-    public IncompatibleResourceDiagnostic(String code, String message,
-                                          Location location, DiagnosticSeverity severity) {
-        this.code = code;
-        this.message = message;
+    public IncompatibleResourceDiagnostic(DiagnosticMessages details, Location location, String... args) {
+        this.code = details.getCode();
+        this.message = generateDescription(details, args);
         this.location = location;
-        this.severity = severity;
+        this.severity = details.getSeverity();
     }
 
     public String getCode() {
         return code;
     }
 
-    public DiagnosticSeverity getSeverity() {
+    @Override
+    public DiagnosticSeverity getDiagnosticSeverity() {
         return severity;
     }
 
@@ -53,7 +56,19 @@ public class IncompatibleResourceDiagnostic extends OpenAPIConverterDiagnostic {
         return message;
     }
 
-    public Location getLocation() {
-        return location;
+    public Optional<Location> getLocation() {
+        return Optional.ofNullable(location);
+    }
+
+    /**
+     *  This method is to create message description with args values.
+     */
+    private static String generateDescription(DiagnosticMessages details, String[] args) {
+        StringBuilder message = new StringBuilder();
+        message.append(details.getDescription());
+        if (args.length > 0) {
+            Arrays.stream(args).forEach(message::append);
+        }
+        return message.toString();
     }
 }

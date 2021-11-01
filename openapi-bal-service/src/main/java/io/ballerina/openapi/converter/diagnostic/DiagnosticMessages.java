@@ -21,25 +21,32 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 /**
  * This {@code ErrorMessages} enum class for containing the error message related to ballerina to openapi command.
+ *
+ * @since 2.0.0
  */
 public enum DiagnosticMessages {
     OAS_CONVERTOR_100("OAS_CONVERTOR_100",
             "Generated OpenAPI definition does not contain details for the `default` " +
-            "resource method in the Ballerina service.", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_101("OAS_CONVERTOR_101", "Unexpected value: " , DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_102("OAS_CONVERTOR_102", "Invalid mediaType : " , DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_103("OAS_CONVERTOR_103", "No related status code for : " , DiagnosticSeverity.ERROR),
+                    "resource method in the Ballerina service.", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_101("OAS_CONVERTOR_101", "Unexpected value: ", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_102("OAS_CONVERTOR_102", "Invalid mediaType : ", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_103("OAS_CONVERTOR_103", "No related status code for : ", DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_104("OAS_CONVERTOR_104",
-                              "Generated OpenAPI definition does not contain details for the " +
-                              "resource function which has `http:Request` parameters in the Ballerina service.",
+            "Generated OpenAPI definition does not contain details for the " +
+                    "resource function which has `http:Request` parameters in the Ballerina service.",
             DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_105("OAS_CONVERTOR_105",
-                              "Generated OpenAPI definition does not contain details for the " +
-                              "resource function which has `http:Response` as return type in the Ballerina service.",
-                      DiagnosticSeverity.WARNING);
+            "Generated OpenAPI definition does not contain details for the " +
+                    "resource function which has `http:Response` as return type in the Ballerina service.",
+            DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_106("OAS_CONVERTOR_106", "Given ballerina file has syntax/compilation error.",
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_107("OAS_CONVERTOR_107", "' to generate an OpenAPI specification. " +
+            "These services are available in ballerina file. ", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_108("OAS_CONVERTOR_108", "Having Exception issues : ", DiagnosticSeverity.ERROR);
 
     private final String code;
-    private String description;
+    private final String description;
     private final DiagnosticSeverity severity;
 
     DiagnosticMessages(String code, String description, DiagnosticSeverity severity) {
@@ -59,5 +66,4 @@ public enum DiagnosticMessages {
     public DiagnosticSeverity getSeverity() {
         return severity;
     }
-
 }

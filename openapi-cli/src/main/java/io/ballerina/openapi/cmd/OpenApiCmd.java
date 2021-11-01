@@ -18,6 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
@@ -173,7 +174,9 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             balFilePath = Paths.get(balFile.getCanonicalPath());
         } catch (IOException e) {
-            ExceptionDiagnostic error = new ExceptionDiagnostic(e.getLocalizedMessage());
+            DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_108;
+            ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
+                    message.getDescription() + e.getLocalizedMessage(), null);
             errors.add(error);
         }
         getTargetOutputPath();
@@ -186,13 +189,17 @@ public class OpenApiCmd implements BLauncherCmd {
             for (OpenAPIConverterDiagnostic error: errors) {
                 if (error instanceof ExceptionDiagnostic) {
                     this.outStream = System.err;
-                    outStream.println(error.getMessage());
+                    ExceptionDiagnostic exceptionDiagnostic = (ExceptionDiagnostic) error;
+                    OpenAPIDiagnostic diagnostic = CmdUtils.getDiagnostics(exceptionDiagnostic.getCode(),
+                            exceptionDiagnostic.getMessage(), exceptionDiagnostic.getDiagnosticSeverity(),
+                            exceptionDiagnostic.getLocation().orElse(null));
+                    outStream.println(diagnostic.toString());
                     exitError(this.exitWhenFinish);
                 } else if (error instanceof IncompatibleResourceDiagnostic) {
                     IncompatibleResourceDiagnostic incompatibleError = (IncompatibleResourceDiagnostic) error;
                     OpenAPIDiagnostic diagnostic = CmdUtils.getDiagnostics(incompatibleError.getCode(),
-                            incompatibleError.getMessage(), incompatibleError.getSeverity(),
-                            incompatibleError.getLocation());
+                            incompatibleError.getMessage(), incompatibleError.getDiagnosticSeverity(),
+                            incompatibleError.getLocation().get());
                     outStream.println(diagnostic.toString());
                 }
             }

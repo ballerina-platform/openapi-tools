@@ -18,11 +18,20 @@
 
 package io.ballerina.openapi.converter.diagnostic;
 
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.ballerina.tools.diagnostics.Location;
+
+import java.util.Optional;
 /**
- * {@code OpenAPIConverterError} represents error type in the ballerina to openapi command.
+ * This {@code OpenAPIConverterError} represents error type in the ballerina to openapi command.
  *
  * @since 2.0.0
  */
-public abstract class OpenAPIConverterDiagnostic {
-    public abstract String getMessage();
+public interface OpenAPIConverterDiagnostic {
+
+    DiagnosticSeverity getDiagnosticSeverity();
+
+    String getMessage();
+
+    Optional<Location> getLocation();
 }

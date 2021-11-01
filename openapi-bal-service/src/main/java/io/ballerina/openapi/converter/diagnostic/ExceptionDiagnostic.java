@@ -17,21 +17,45 @@
  */
 package io.ballerina.openapi.converter.diagnostic;
 
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.ballerina.tools.diagnostics.Location;
+
+import java.util.Optional;
+
 /**
- * {@code ExceptionError} represents all the errors that happens during the code generation process.
+ * This {@code ExceptionError} represents all the errors that happens during the code generation process.
  *
  * @since 2.0.0
  */
-public class ExceptionDiagnostic extends OpenAPIConverterDiagnostic {
+public class ExceptionDiagnostic implements OpenAPIConverterDiagnostic {
+    private final String code;
+    private final String message;
+    private final DiagnosticSeverity diagnosticSeverity;
+    private final Location location;
 
-    private String message;
-
-    public ExceptionDiagnostic(String message) {
+    public ExceptionDiagnostic(String code, String message, Location location) {
+        this.code = code;
         this.message = message;
+        this.diagnosticSeverity = DiagnosticSeverity.ERROR;
+        this.location = location;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    @Override
+    public DiagnosticSeverity getDiagnosticSeverity() {
+        return diagnosticSeverity;
     }
 
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public Optional<Location> getLocation() {
+        return Optional.ofNullable(location);
     }
 }

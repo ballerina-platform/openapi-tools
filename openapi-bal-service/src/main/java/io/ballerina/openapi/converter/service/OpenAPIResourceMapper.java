@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.ballerina.openapi.converter.Constants.DEFAULT;
 
 /**
  * This class will do resource mapping from ballerina to openApi.
@@ -100,10 +101,10 @@ public class OpenAPIResourceMapper {
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.
             if (resource.functionName().toString().trim().equals(httpMethod)) {
-                if (httpMethod.equals("'default") || httpMethod.equals("default")) {
+                if (httpMethod.equals("'" + DEFAULT) || httpMethod.equals(DEFAULT)) {
                     DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
-                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage.getCode(),
-                            errorMessage.getDescription(), resource.location(), errorMessage.getSeverity());
+                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                            resource.location());
                     errors.add(error);
                 } else {
                     Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod,

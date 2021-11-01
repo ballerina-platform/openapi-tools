@@ -39,7 +39,6 @@ public class OpenAPIDiagnostic extends Diagnostic {
 
     public OpenAPIDiagnostic(DiagnosticInfo diagnosticInfo, Location location, List<DiagnosticProperty<?>> properties,
                              Object[] args) {
-
         this.diagnosticInfo = diagnosticInfo;
         this.location = location;
         this.properties = properties;
@@ -64,7 +63,6 @@ public class OpenAPIDiagnostic extends Diagnostic {
 
     @Override
     public  String toString() {
-
         LineRange lineRange = getOneBasedLineRange(this.location().lineRange());
         String var10000 = this.diagnosticInfo().severity().toString();
         return var10000 + " [" + lineRange.filePath() + ":" + lineRange + "] " + this.message();
