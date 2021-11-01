@@ -1,5 +1,3 @@
-package io.ballerina.openapi.extension;
-
 /*
  *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,25 +15,29 @@ package io.ballerina.openapi.extension;
  *  specific language governing permissions and limitations
  *  under the License.
  */
+package io.ballerina.openapi.converter.service.result;
 
-import io.ballerina.openapi.converter.service.result.OASDefinition;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
+
+import java.util.List;
 
 /**
- * The extended service for the OpenAPIConverter endpoint.
+ * {@code Result} is used to contain {@code Diagnostic} list.
  *
  * @since 2.0.0
  */
-public class OpenAPIConverterResponse {
-    private OASDefinition yamlContent;
+public class Result {
+    private List<OpenAPIConverterDiagnostic> diagnostics;
 
-    public OASDefinition getYamlContent() {
-        return yamlContent;
+    public Result(List<OpenAPIConverterDiagnostic> diagnostics) {
+        this.diagnostics = diagnostics;
     }
 
-    public void setYamlContent(OASDefinition yamlContent) {
-        this.yamlContent = yamlContent;
+    public List<OpenAPIConverterDiagnostic> getDiagnostics() {
+        return diagnostics;
     }
 
-    public OpenAPIConverterResponse() {
+    public void setDiagnostics(List<OpenAPIConverterDiagnostic> diagnostics) {
+        this.diagnostics = diagnostics;
     }
 }

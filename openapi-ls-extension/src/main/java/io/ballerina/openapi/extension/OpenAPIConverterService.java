@@ -21,7 +21,8 @@ package io.ballerina.openapi.extension;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.service.OASResult;
+import io.ballerina.openapi.converter.service.result.OASDefinition;
+import io.ballerina.openapi.converter.service.result.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import org.ballerinalang.annotation.JavaSPIService;
 import org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService;
@@ -68,19 +69,18 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             Optional<Path> documentPath = getPathFromURI(fileUri);
             Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath.orElseThrow());
             Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath.orElseThrow());
-            OASResult oasResult =
-                    ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.orElseThrow(),
+            OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.orElseThrow(),
                             semanticModel.orElseThrow(), null, false, null);
-            //Response handle with returning {@code OASResult} model.
-            OASResult outResult;
+            //Response handle with returning {@code OASDefinition} model.
+            OASDefinition oasDefinition;
             if (!oasResult.getFinalOASSet().isEmpty()) {
                 Map.Entry<String, String> content = oasResult.getFinalOASSet().entrySet().iterator().next();
-                outResult = new OASResult(content.getValue(), oasResult.getDiagnostics());
+                oasDefinition = new OASDefinition(content.getValue(), oasResult.getDiagnostics());
             } else {
-                outResult = new OASResult("Error occurred while generating yaml.",
+                oasDefinition = new OASDefinition("Error occurred while generating yaml.",
                         oasResult.getDiagnostics());
             }
-            response.setYamlContent(outResult);
+            response.setYamlContent(oasDefinition);
             return response;
         });
     }

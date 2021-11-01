@@ -636,10 +636,6 @@ public class OpenAPIResponseMapper {
         if (HTTP_CODES.containsKey(identifier)) {
             return Optional.of(HTTP_CODES.get(identifier));
         } else {
-//            ErrorMessages errorMessage = ErrorMessages.OAS_CONVERTOR_103;
-//            IncompatibleResourceError error = new IncompatibleResourceError(errorMessage.getCode(),
-//                    errorMessage.getDescription()  + identifier, this.location, errorMessage.getSeverity());
-//            errors.add(error);
             return Optional.empty();
         }
     }

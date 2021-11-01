@@ -82,7 +82,7 @@ public class OpenAPIResourceMapper {
      */
     public Paths getPaths(List<FunctionDefinitionNode> resources) {
         for (FunctionDefinitionNode resource : resources) {
-            List<String> methods = this.getHttpMethods(resource, false);
+            List<String> methods = this.getHttpMethods(resource);
             getResourcePath(resource, methods);
         }
         return pathObject;
@@ -100,7 +100,7 @@ public class OpenAPIResourceMapper {
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.
             if (resource.functionName().toString().trim().equals(httpMethod)) {
-                if (httpMethod.equals("'default")) {
+                if (httpMethod.equals("'default") || httpMethod.equals("default")) {
                     DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
                     IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage.getCode(),
                             errorMessage.getDescription(), resource.location(), errorMessage.getSeverity());
@@ -262,10 +262,9 @@ public class OpenAPIResourceMapper {
      * Gets the http methods of a resource.
      *
      * @param resource    The ballerina resource.
-     * @param useDefaults True to add default http methods, else false.
      * @return A list of http methods.
      */
-    private List<String> getHttpMethods(FunctionDefinitionNode resource, boolean useDefaults) {
+    private List<String> getHttpMethods(FunctionDefinitionNode resource) {
         Set<String> httpMethods = new LinkedHashSet<>();
         ServiceDeclarationNode parentNode = (ServiceDeclarationNode) resource.parent();
         NodeList<Node> siblings = parentNode.members();
