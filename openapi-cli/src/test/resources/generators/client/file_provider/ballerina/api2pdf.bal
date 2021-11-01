@@ -35,7 +35,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders, targetType=ApiResponseSuccess);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
         return response;
     }
     # Convert URL to PDF
@@ -47,7 +47,7 @@ public isolated client class Client {
         string  path = string `/chrome/url`;
         map<anydata> queryParam = {"url": url, "output": output, "apikey": self.apiKeyConfig.apikey};
         path = path + check getPathForQueryParam(queryParam);
-        ApiResponseSuccess response = check self.clientEp-> get(path, targetType = ApiResponseSuccess);
+        ApiResponseSuccess response = check self.clientEp-> get(path);
         return response;
     }
     # Convert URL to PDF
@@ -61,7 +61,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders, targetType=ApiResponseSuccess);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
         return response;
     }
     # Convert office document or image to PDF
@@ -75,7 +75,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders, targetType=ApiResponseSuccess);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
         return response;
     }
     # Merge multiple PDFs together
@@ -89,7 +89,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders, targetType=ApiResponseSuccess);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
         return response;
     }
     # Convert raw HTML to PDF
@@ -103,7 +103,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders, targetType=ApiResponseSuccess);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
         return response;
     }
     # Convert URL to PDF
@@ -115,7 +115,7 @@ public isolated client class Client {
         string  path = string `/wkhtmltopdf/url`;
         map<anydata> queryParam = {"url": url, "output": output, "apikey": self.apiKeyConfig.apikey};
         path = path + check getPathForQueryParam(queryParam);
-        ApiResponseSuccess response = check self.clientEp-> get(path, targetType = ApiResponseSuccess);
+        ApiResponseSuccess response = check self.clientEp-> get(path);
         return response;
     }
     # Convert URL to PDF
@@ -129,7 +129,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders, targetType=ApiResponseSuccess);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
         return response;
     }
     # Generate bar codes and QR codes with ZXING.
@@ -144,7 +144,7 @@ public isolated client class Client {
         string  path = string `/zebra`;
         map<anydata> queryParam = {"format": format, "value": value, "showlabel": showlabel, "height": height, "width": width, "apikey": self.apiKeyConfig.apikey};
         path = path + check getPathForQueryParam(queryParam);
-        string response = check self.clientEp-> get(path, targetType = string);
+        string response = check self.clientEp-> get(path);
         return response;
     }
 }

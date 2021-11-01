@@ -27,7 +27,7 @@ public isolated client class Client {
         string  path = string `/onecall`;
         map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units};
         path = path + check getPathForQueryParam(queryParam);
-        WeatherForecast response = check self.clientEp-> get(path, targetType = WeatherForecast);
+        WeatherForecast response = check self.clientEp-> get(path);
         return response;
     }
 }

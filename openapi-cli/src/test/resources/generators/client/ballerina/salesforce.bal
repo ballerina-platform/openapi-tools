@@ -21,7 +21,7 @@ public isolated client class Client {
             longitude: longitude
         };
         path = path + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp->get(path, targetType = ProductArr);
+        ProductArr response = check self.clientEp->get(path);
         return response;
     }
     remote isolated function price(decimal start_latitude, decimal start_longitude, decimal end_latitude,
@@ -34,7 +34,7 @@ public isolated client class Client {
             end_longitude: end_longitude
         };
         path = path + check getPathForQueryParam(queryParam);
-        PriceEstimateArr response = check self.clientEp->get(path, targetType = PriceEstimateArr);
+        PriceEstimateArr response = check self.clientEp->get(path);
         return response;
     }
     remote isolated function time(decimal start_latitude, decimal start_longitude, string? customer_uuid,
@@ -47,19 +47,19 @@ public isolated client class Client {
             product_id: product_id
         };
         path = path + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp->get(path, targetType = ProductArr);
+        ProductArr response = check self.clientEp->get(path);
         return response;
     }
     remote isolated function me() returns Profile|error {
         string path = string `/me`;
-        Profile response = check self.clientEp->get(path, targetType = Profile);
+        Profile response = check self.clientEp->get(path);
         return response;
     }
     remote isolated function history(int? offset, int? 'limit) returns Activities|error {
         string path = string `/history`;
         map<anydata> queryParam = {offset: offset, 'limit: 'limit};
         path = path + check getPathForQueryParam(queryParam);
-        Activities response = check self.clientEp->get(path, targetType = Activities);
+        Activities response = check self.clientEp->get(path);
         return response;
     }
 }

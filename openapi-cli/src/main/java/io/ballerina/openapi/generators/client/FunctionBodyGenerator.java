@@ -170,15 +170,13 @@ public class FunctionBodyGenerator {
         String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
         // This return type for target data type binding.
         String rType = functionReturnType.getReturnType(operation.getValue(), true);
-        String tType = functionReturnType.getReturnType(operation.getValue(), false);
         String returnType = returnTypeForTargetTypeField(rType);
-        String targetType = returnTypeForTargetTypeField(tType);
         // Statement Generator for requestBody
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
-            handleRequestBodyInOperation(statementsList, method, returnType, targetType, requestBody);
+            handleRequestBodyInOperation(statementsList, method, returnType, requestBody);
         } else {
-            createCommonFunctionBodyStatements(statementsList, method, rType, returnType, targetType);
+            createCommonFunctionBodyStatements(statementsList, method, rType, returnType);
         }
         //Create statements
         NodeList<StatementNode> statements = createNodeList(statementsList);
@@ -369,7 +367,7 @@ public class FunctionBodyGenerator {
      * Handle request body in operation.
      */
     private void handleRequestBodyInOperation(List<StatementNode> statementsList, String method, String returnType,
-                                              String targetType, RequestBody requestBody)
+                                              RequestBody requestBody)
             throws BallerinaOpenApiException {
 
         if (requestBody.getContent() != null) {
@@ -378,7 +376,7 @@ public class FunctionBodyGenerator {
             Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
             //Currently align with first content of the requestBody
             while (iterator.hasNext()) {
-                createRequestBodyStatements(isHeader, statementsList, method, returnType, targetType, iterator);
+                createRequestBodyStatements(isHeader, statementsList, method, returnType, iterator);
                 break;
             }
         } else if (requestBody.get$ref() != null) {
@@ -389,7 +387,7 @@ public class FunctionBodyGenerator {
             Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
             //Currently align with first content of the requestBody
             while (iterator.hasNext()) {
-                createRequestBodyStatements(isHeader, statementsList, method, returnType, targetType, iterator);
+                createRequestBodyStatements(isHeader, statementsList, method, returnType, iterator);
                 break;
             }
         }
@@ -399,7 +397,7 @@ public class FunctionBodyGenerator {
      * Generate common statements in function bosy.
      */
     private void createCommonFunctionBodyStatements(List<StatementNode> statementsList, String method, String rType,
-                                                    String returnType, String targetType) {
+                                                    String returnType) {
 
         String clientCallStatement;
 
@@ -414,14 +412,13 @@ public class FunctionBodyGenerator {
                         "//TODO: Update the request as needed");
                 statementsList.add(expressionStatementNode);
                 clientCallStatement = "check self.clientEp->" + method + "(path, request, headers = " +
-                            "accHeaders, targetType = " + targetType + ")";
+                            "accHeaders)";
 
             } else {
                 if (method.equals(HEAD)) {
                     clientCallStatement = "check self.clientEp->" + method + "(path, accHeaders)";
                 } else {
-                    clientCallStatement = "check self.clientEp->" + method + "(path, accHeaders, targetType = "
-                            + targetType + ")";
+                    clientCallStatement = "check self.clientEp->" + method + "(path, accHeaders)";
                 }
             }
         } else if (isMethod) {
@@ -432,12 +429,9 @@ public class FunctionBodyGenerator {
                     "//TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
             clientCallStatement =
-                        "check self.clientEp-> " + method + "(path, request, targetType = " + targetType + ")";
-
-        } else if (method.equals(HEAD)) {
-            clientCallStatement = "check self.clientEp->" + method + "(path)";
+                        "check self.clientEp-> " + method + "(path, request)";
         } else {
-            clientCallStatement = "check self.clientEp->" + method + "(path, targetType = " + targetType + ")";
+            clientCallStatement = "check self.clientEp->" + method + "(path)";
         }
         //Return Variable
         VariableDeclarationNode clientCall = generatorUtils.getSimpleStatement(returnType, RESPONSE,
@@ -509,7 +503,7 @@ public class FunctionBodyGenerator {
      *    http:Request request = new;
      *    json jsonBody = check payload.cloneWithType(json);
      *    request.setPayload(jsonBody);
-     *    json response = check self.clientEp->put(path, request, targetType=json);
+     *    json response = check self.clientEp->put(path, request);
      * </pre>
      *
      * @param isHeader       - Boolean value for header availability.
@@ -519,8 +513,8 @@ public class FunctionBodyGenerator {
      * @param iterator       - RequestBody media type
      */
     private  void createRequestBodyStatements(boolean isHeader, List<StatementNode> statementsList,
-                                              String method, String returnType, String targetType,
-                                              Iterator<Map.Entry<String, MediaType>> iterator)
+                                              String method, String returnType, Iterator<Map.Entry<String,
+                                              MediaType>> iterator)
             throws BallerinaOpenApiException {
 
         //Create Request statement
@@ -540,13 +534,12 @@ public class FunctionBodyGenerator {
         // POST, PUT, PATCH, DELETE, EXECUTE
         VariableDeclarationNode requestStatement =
                 generatorUtils.getSimpleStatement(returnType, RESPONSE, "check self.clientEp->"
-                        + method + "(path," + " request, targetType = " + targetType + ")");
+                        + method + "(path," + " request)");
         if (isHeader) {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
                 requestStatement = generatorUtils.getSimpleStatement(returnType, RESPONSE,
-                        "check self.clientEp->" + method + "(path, request, headers = accHeaders, " +
-                                "targetType = " + targetType + ")");
+                        "check self.clientEp->" + method + "(path, request, headers = accHeaders)");
                 statementsList.add(requestStatement);
                 Token returnKeyWord = createIdentifierToken("return");
                 SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));

@@ -19,12 +19,12 @@ public isolated client class Client {
         string  path = string `/pets`;
         map<anydata> queryParam = {'limit: 'limit};
         path = path + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp->get(path, targetType = Pets);
+        Pets response = check self.clientEp->get(path);
         return response;
     }
     remote isolated function showPetById(string petId) returns Pets|error {
         string  path = string `/pets/${petId}`;
-        Pets response = check self.clientEp->get(path, targetType = Pets);
+        Pets response = check self.clientEp->get(path);
         return response;
     }
 }

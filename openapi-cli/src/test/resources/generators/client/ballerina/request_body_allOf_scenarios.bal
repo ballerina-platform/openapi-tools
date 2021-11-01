@@ -23,7 +23,7 @@ public isolated client class Client {
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp->put(path, request, targetType = http:Response);
+        http:Response response = check self.clientEp->put(path, request);
         return response;
     }
     # Request Body has nested allOf.
@@ -34,7 +34,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp->post(path, request, targetType = http:Response);
+        http:Response response = check self.clientEp->post(path, request);
         return response;
     }
     # Request Body has Array type AllOf.
@@ -46,7 +46,7 @@ public isolated client class Client {
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp->post(path, request, targetType = http:Response);
+        http:Response response = check self.clientEp->post(path, request);
         return response;
     }
 }

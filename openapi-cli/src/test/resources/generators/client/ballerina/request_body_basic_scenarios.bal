@@ -22,7 +22,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp->put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->put(path, request);
         return response;
     }
     # 01 Request body with reference.
@@ -33,7 +33,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request);
         return response;
     }
     # 04 Example for rb has inline requestbody.
@@ -45,7 +45,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp->put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->put(path, request);
         return response;
     }
     # 03 Request body with record reference.
@@ -56,7 +56,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody);
-        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request);
         return response;
     }
     # 06 Example for rb has array inline requestbody.
@@ -68,7 +68,7 @@ public isolated client class Client {
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp->put(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->put(path, request);
         return response;
     }
     # 05 Example for rb has array inline requestbody.
@@ -80,7 +80,7 @@ public isolated client class Client {
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request);
         return response;
     }
     # 07 Example for rb has array inline requestbody.
@@ -92,7 +92,7 @@ public isolated client class Client {
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody);
-        http:Response response = check self.clientEp->post(path, request, targetType=http:Response);
+        http:Response response = check self.clientEp->post(path, request);
         return response;
     }
 }
