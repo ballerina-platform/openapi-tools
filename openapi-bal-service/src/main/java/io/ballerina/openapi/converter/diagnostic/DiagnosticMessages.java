@@ -28,9 +28,9 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_100("OAS_CONVERTOR_100",
             "Generated OpenAPI definition does not contain details for the `default` " +
                     "resource method in the Ballerina service.", DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_101("OAS_CONVERTOR_101", "Unexpected value: ", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_102("OAS_CONVERTOR_102", "Invalid mediaType : ", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_103("OAS_CONVERTOR_103", "No related status code for : ", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_101("OAS_CONVERTOR_101", "Unexpected value: %s", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_102("OAS_CONVERTOR_102", "Invalid mediaType: %s", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_103("OAS_CONVERTOR_103", "No related status code for: %s", DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_104("OAS_CONVERTOR_104",
             "Generated OpenAPI definition does not contain details for the " +
                     "resource function which has `http:Request` parameters in the Ballerina service.",
@@ -39,11 +39,13 @@ public enum DiagnosticMessages {
             "Generated OpenAPI definition does not contain details for the " +
                     "resource function which has `http:Response` as return type in the Ballerina service.",
             DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_106("OAS_CONVERTOR_106", "Given ballerina file has syntax/compilation error.",
+    OAS_CONVERTOR_106("OAS_CONVERTOR_106", "Given Ballerina file contains compilation error(s).",
             DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_107("OAS_CONVERTOR_107", "' to generate an OpenAPI specification. " +
-            "These services are available in ballerina file. ", DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_108("OAS_CONVERTOR_108", "Having Exception issues : ", DiagnosticSeverity.ERROR);
+    OAS_CONVERTOR_107("OAS_CONVERTOR_107", "No Ballerina services found with name '%s' to" +
+            " generate an OpenAPI specification. These services are available in ballerina file. %s",
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_108("OAS_CONVERTOR_108", "Failed to generate OpenAPI definition due to: %s",
+            DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;
