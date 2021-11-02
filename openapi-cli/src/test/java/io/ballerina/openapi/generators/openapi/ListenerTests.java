@@ -82,7 +82,7 @@ public class ListenerTests {
                 , false);
         List<OpenAPIConverterDiagnostic> errors = openApiConverter.getErrors();
         Assert.assertFalse(errors.isEmpty());
-        Assert.assertEquals(errors.get(0).getMessage(), "Given ballerina file has syntax/compilation error.");
+        Assert.assertEquals(errors.get(0).getMessage(), "Given Ballerina file contains compilation error(s).");
     }
 
     @Test(description = "Generate OpenAPI spec for http load balancer listeners")

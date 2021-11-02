@@ -21,7 +21,6 @@ package io.ballerina.openapi.converter.diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -43,6 +42,9 @@ public class IncompatibleResourceDiagnostic implements OpenAPIConverterDiagnosti
         this.severity = details.getSeverity();
     }
 
+    public IncompatibleResourceDiagnostic(DiagnosticMessages details, Location location) {
+        this(details, location, details.getDescription());
+    }
     public String getCode() {
         return code;
     }
@@ -65,11 +67,6 @@ public class IncompatibleResourceDiagnostic implements OpenAPIConverterDiagnosti
      *  This method is to create message description with args values.
      */
     private static String generateDescription(DiagnosticMessages details, String[] args) {
-        StringBuilder message = new StringBuilder();
-        message.append(details.getDescription());
-        if (args.length > 0) {
-            Arrays.stream(args).forEach(message::append);
-        }
-        return message.toString();
+        return String.format(details.getDescription(), args);
     }
 }

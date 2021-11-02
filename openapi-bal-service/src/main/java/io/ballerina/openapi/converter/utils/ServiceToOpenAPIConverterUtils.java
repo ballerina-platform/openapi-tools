@@ -88,9 +88,8 @@ public class ServiceToOpenAPIConverterUtils {
             // If there are no services found for a given service name.
             if (serviceName != null && servicesToGenerate.isEmpty()) {
                 DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_107;
-                ExceptionDiagnostic error = new ExceptionDiagnostic(messages.getCode(), "No Ballerina " +
-                        "services found with name '" + serviceName + messages.getDescription() + availableService,
-                        null);
+                ExceptionDiagnostic error = new ExceptionDiagnostic(messages.getCode(), messages.getDescription(),
+                        null, serviceName, availableService.toString());
                 diagnostics.add(error);
             }
             // Generating for the services
@@ -175,10 +174,7 @@ public class ServiceToOpenAPIConverterUtils {
             if (openAPI.getInfo().getTitle() == null) {
                 openAPI = getInfo(openAPI, openApiName);
             }
-            if (needJson) {
-                return Json.pretty(openAPI);
-            }
-            return Yaml.pretty(openAPI);
+            return needJson ? Json.pretty(openAPI) : Yaml.pretty(openAPI);
         }
         return "Error while generating openAPI contract";
     }

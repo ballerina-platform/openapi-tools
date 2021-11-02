@@ -182,7 +182,7 @@ public class OpenApiCmd implements BLauncherCmd {
         } catch (IOException e) {
             DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_108;
             ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                    message.getDescription() + e.getLocalizedMessage(), null);
+                    message.getDescription(), null,  e.getLocalizedMessage());
             errors.add(error);
         }
         getTargetOutputPath();
