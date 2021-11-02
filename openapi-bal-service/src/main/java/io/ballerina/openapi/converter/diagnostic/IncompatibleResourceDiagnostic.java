@@ -25,7 +25,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * This {@code IncompatibleResourceError} represents the error that OAS not compatible with ballerina implementation.
+ * This {@code IncompatibleResourceDiagnostic} represents the diagnostic that OAS not compatible with ballerina
+ * implementation.
  *
  * @since 2.0.0
  */

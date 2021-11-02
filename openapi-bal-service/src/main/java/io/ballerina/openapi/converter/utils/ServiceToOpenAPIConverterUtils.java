@@ -159,29 +159,33 @@ public class ServiceToOpenAPIConverterUtils {
 
     /**
      * Generate openAPI definition according to the given format JSON or YAML.
-     * @deprecated This API is deprecated due to it provides only openapi content except its diagnostic.
-     * Please make use of {@link #generateOAS(ServiceDeclarationNode, List, SemanticModel, String)} on behalf of this
-     * deprecated API. Because new API provides {@code OASResult} that containing all the details about generated
-     * openapi contract.
+     *
+     * @deprecated use {@link #generateOAS(ServiceDeclarationNode, List, SemanticModel, String)} instead.
+     * The new API provides a list of {@code OASResult}, which contains all the diagnostic information collected
+     * while generating the openAPI contract.
      */
     @Deprecated
     public static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode,
                                                    boolean needJson, List<ListenerDeclarationNode> endpoints,
                                                    SemanticModel semanticModel, String openApiName) {
-        OpenAPI openapi = generateOpenAPIDefinition(new OpenAPI(), endpoints, serviceDeclarationNode,
-                semanticModel).getOpenAPI().get();
-        if (openapi.getInfo().getTitle() == null) {
-            openapi = getInfo(openapi, openApiName);
+        Optional<OpenAPI> openapi = generateOpenAPIDefinition(new OpenAPI(), endpoints, serviceDeclarationNode,
+                semanticModel).getOpenAPI();
+        if (openapi.isPresent()) {
+            OpenAPI openAPI = openapi.get();
+            if (openAPI.getInfo().getTitle() == null) {
+                openAPI = getInfo(openAPI, openApiName);
+            }
+            if (needJson) {
+                return Json.pretty(openAPI);
+            }
+            return Yaml.pretty(openAPI);
         }
-        if (needJson) {
-            return Json.pretty(openapi);
-        }
-        return Yaml.pretty(openapi);
+        return "Error while generating openAPI contract";
     }
 
     /**
-     * The purpose of this API is providing both OpenAPI definition and error list that occurs during the code
-     * generation, Using this user have capable of handling errors according to their preference.
+     * Provides an instance of {@code OASResult}, which contains the generated contract as well as
+     * all the diagnostics information.
      *
      * @param serviceDeclarationNode Service Node related to ballerina service
      * @param endpoints              Listener endpoints that bind to service

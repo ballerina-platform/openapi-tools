@@ -54,9 +54,11 @@ public class OASResult {
     public String getServiceName() {
         return this.serviceName;
     }
+
     public Optional<String> getYaml() {
         return Optional.ofNullable(Yaml.pretty(this.openAPI));
     }
+
     public Optional<String> getJson() {
         return Optional.ofNullable(Json.pretty(this.openAPI));
     }

@@ -20,7 +20,7 @@ package io.ballerina.openapi.converter.diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 /**
- * This {@code ErrorMessages} enum class for containing the error message related to ballerina to openapi command.
+ * This {@code DiagnosticMessages} enum class for containing the error message related to ballerina to openapi command.
  *
  * @since 2.0.0
  */

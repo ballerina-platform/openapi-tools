@@ -34,7 +34,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * These Tests class is for capturing the special tests regarding resource method.
+ * This test class is for capturing special tests regarding resource methods.
  */
 public class HttpMethodTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
@@ -57,9 +57,6 @@ public class HttpMethodTests {
         Assert.assertFalse(errors.isEmpty());
         Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not " +
                 "contain details for the `default` resource method in the Ballerina service.");
-
-//        Assert.assertEquals("WARNING: Generated OpenAPI definition doesn't contain details for the" +
-//                " `default` resource method in the Ballerina service.", outputStreamCaptor.toString().trim());
     }
 
     @AfterMethod

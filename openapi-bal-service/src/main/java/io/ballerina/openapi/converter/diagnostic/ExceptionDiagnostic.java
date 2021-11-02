@@ -23,7 +23,7 @@ import io.ballerina.tools.diagnostics.Location;
 import java.util.Optional;
 
 /**
- * This {@code ExceptionError} represents all the errors that happens during the code generation process.
+ * This {@code ExceptionDiagnostic} represents all the errors that happens during the code generation process.
  *
  * @since 2.0.0
  */

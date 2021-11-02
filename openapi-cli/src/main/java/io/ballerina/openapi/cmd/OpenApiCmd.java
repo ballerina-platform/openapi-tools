@@ -38,6 +38,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.ballerina.openapi.generators.GeneratorConstants.BAL_EXTENSION;
+import static io.ballerina.openapi.generators.GeneratorConstants.JSON_EXTENSION;
+import static io.ballerina.openapi.generators.GeneratorConstants.YAML_EXTENSION;
+import static io.ballerina.openapi.generators.GeneratorConstants.YML_EXTENSION;
+
 /**
  * Main class to implement "openapi" command for ballerina. Commands for Client Stub, Service file and OpenApi contract
  * generation.
@@ -128,11 +133,12 @@ public class OpenApiCmd implements BLauncherCmd {
             // else if given ballerina service file it generates openapi contract file
             // else it generates error message to enter correct input file
             String fileName = argList.get(0);
-            if (fileName.endsWith(".yaml") || fileName.endsWith(".json") || fileName.endsWith(".yml")) {
+            if (fileName.endsWith(YAML_EXTENSION) || fileName.endsWith(JSON_EXTENSION) ||
+                    fileName.endsWith(YML_EXTENSION)) {
                 List<String> tag = new ArrayList<>();
                 List<String> operation = new ArrayList<>();
                 if (tags != null) {
-                     tag.addAll(Arrays.asList(tags.split(",")));
+                    tag.addAll(Arrays.asList(tags.split(",")));
                 }
                 if (operations != null) {
                     operation.addAll(Arrays.asList(operations.split(",")));
@@ -144,7 +150,7 @@ public class OpenApiCmd implements BLauncherCmd {
                     outStream.println(e.getLocalizedMessage());
                     exitError(this.exitWhenFinish);
                 }
-            } else if (fileName.endsWith(".bal")) {
+            } else if (fileName.endsWith(BAL_EXTENSION)) {
                 ballerinaToOpenApi(fileName);
                 exitError(this.exitWhenFinish);
             } else {
@@ -190,14 +196,14 @@ public class OpenApiCmd implements BLauncherCmd {
                 if (error instanceof ExceptionDiagnostic) {
                     this.outStream = System.err;
                     ExceptionDiagnostic exceptionDiagnostic = (ExceptionDiagnostic) error;
-                    OpenAPIDiagnostic diagnostic = CmdUtils.getDiagnostics(exceptionDiagnostic.getCode(),
+                    OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(exceptionDiagnostic.getCode(),
                             exceptionDiagnostic.getMessage(), exceptionDiagnostic.getDiagnosticSeverity(),
                             exceptionDiagnostic.getLocation().orElse(null));
                     outStream.println(diagnostic.toString());
                     exitError(this.exitWhenFinish);
                 } else if (error instanceof IncompatibleResourceDiagnostic) {
                     IncompatibleResourceDiagnostic incompatibleError = (IncompatibleResourceDiagnostic) error;
-                    OpenAPIDiagnostic diagnostic = CmdUtils.getDiagnostics(incompatibleError.getCode(),
+                    OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(incompatibleError.getCode(),
                             incompatibleError.getMessage(), incompatibleError.getDiagnosticSeverity(),
                             incompatibleError.getLocation().get());
                     outStream.println(diagnostic.toString());
