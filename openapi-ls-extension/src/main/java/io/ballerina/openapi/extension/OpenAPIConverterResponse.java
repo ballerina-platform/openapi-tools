@@ -21,6 +21,7 @@ package io.ballerina.openapi.extension;
 import io.ballerina.openapi.converter.service.OASResult;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The extended service for the OpenAPIConverter endpoint.
@@ -33,6 +34,7 @@ public class OpenAPIConverterResponse {
     private String yamlContent;
 
     private List<OASResult> content;
+    private String error;
 
     public OpenAPIConverterResponse() {
     }
@@ -53,5 +55,13 @@ public class OpenAPIConverterResponse {
 
     public void setContent(List<OASResult> content) {
         this.content = content;
+    }
+
+    public Optional<String> getError() {
+        return Optional.ofNullable(this.error);
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 }

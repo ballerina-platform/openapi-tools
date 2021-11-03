@@ -70,23 +70,24 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
     public CompletableFuture<OpenAPIConverterResponse> generateOpenAPIFile(OpenAPIConverterRequest request) {
         return CompletableFuture.supplyAsync(() -> {
             OpenAPIConverterResponse response = new OpenAPIConverterResponse();
-            try {
-                String fileUri = request.getDocumentFilePath();
-                Optional<Path> documentPath = getPathFromURI(fileUri);
-                Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath.orElseThrow());
-                Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath.orElseThrow());
-                List<OASResult> yamlContent =
-                        ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.orElseThrow(),
-                                semanticModel.orElseThrow(), null, false, null);
+            String fileUri = request.getDocumentFilePath();
+            Optional<SyntaxTree> syntaxTree = getPathFromURI(fileUri).flatMap(workspaceManager::syntaxTree);
+            Optional<SemanticModel> semanticModel = getPathFromURI(fileUri).flatMap(workspaceManager::semanticModel);
+            if (semanticModel.isEmpty() || syntaxTree.isEmpty()) {
+                StringBuilder errorString = getErrorMessage(syntaxTree, semanticModel);
+                response.setError(errorString.toString());
+            } else {
+                response.setError(null);
+                List<OASResult> yamlContent = ServiceToOpenAPIConverterUtils.generateOAS3Definition(
+                        syntaxTree.orElseThrow(), semanticModel.orElseThrow(), null, false,
+                        null);
                 //Response should handle
                 if (!yamlContent.isEmpty() && (yamlContent.get(0).getOpenAPI().isPresent())) {
-                    response.setYamlContent(yamlContent.get(0).getYaml().orElse("No generated yaml content."));
+                    Optional<String> yaml = yamlContent.get(0).getYaml();
+                    yaml.ifPresent(response::setYamlContent);
                 } else {
-                    response.setYamlContent("Error occurred while generating yaml");
+                    response.setError("Error occurred while generating yaml.");
                 }
-            } catch (Throwable e) {
-                // Throw exceptions.
-                response.setYamlContent("Error occurred while generating yaml :" + e.getLocalizedMessage());
             }
             return response;
         });
@@ -101,15 +102,32 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
         return CompletableFuture.supplyAsync(() -> {
             OpenAPIConverterResponse response = new OpenAPIConverterResponse();
             String fileUri = request.getDocumentFilePath();
-            Optional<Path> documentPath = getPathFromURI(fileUri);
-            Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath.orElseThrow());
-            Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath.orElseThrow());
-            List<OASResult> oasResult = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.orElseThrow(),
-                    semanticModel.orElseThrow(), null, false, null);
-            //Response handle with returning list of {@code OASResult} model.
-            response.setContent(oasResult);
+            Optional<SyntaxTree> syntaxTree = getPathFromURI(fileUri).flatMap(workspaceManager::syntaxTree);
+            Optional<SemanticModel> semanticModel = getPathFromURI(fileUri).flatMap(workspaceManager::semanticModel);
+            if (semanticModel.isEmpty() || syntaxTree.isEmpty()) {
+                StringBuilder errorString = getErrorMessage(syntaxTree, semanticModel);
+                response.setError(errorString.toString());
+            } else {
+                response.setError(null);
+                List<OASResult> oasResult = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.get(),
+                        semanticModel.get(), null, false, null);
+                //Response handle with returning list of {@code OASResult} model.
+                response.setContent(oasResult);
+            }
             return response;
         });
+    }
+
+    // Generate error message.
+    private StringBuilder getErrorMessage(Optional<SyntaxTree> syntaxTree, Optional<SemanticModel> semanticModel) {
+        StringBuilder errorString = new StringBuilder();
+        if (syntaxTree.isEmpty()) {
+            errorString.append("Error while generating syntax tree.").append(System.lineSeparator());
+        }
+        if (semanticModel.isEmpty()) {
+            errorString.append("Error while generating semantic model.");
+        }
+        return errorString;
     }
 
     // Refactor documentation path
