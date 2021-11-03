@@ -509,7 +509,7 @@ public class CodeGeneratorTest {
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
 
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
-        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
+        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(System.lineSeparator()));
         expectedServiceLines.close();
         return expectedServiceContent;
     }
