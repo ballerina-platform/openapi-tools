@@ -18,7 +18,10 @@
 
 package io.ballerina.openapi.converter.utils;
 
+import io.ballerina.compiler.api.ModuleID;
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -28,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
+import io.ballerina.openapi.converter.service.OpenAPIInfo;
 import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -45,6 +49,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
 
@@ -159,7 +164,7 @@ public class ServiceToOpenAPIConverterUtils {
         OpenAPI openapi = generateOpenAPIDefinition(new OpenAPI(), serviceName, endpoints, serviceDeclarationNode,
                 semanticModel);
         if (openapi.getInfo().getTitle() == null) {
-            openapi = getInfo(openapi, openApiName);
+            openapi = getInfo(openapi, new OpenAPIInfo(openApiName, getContractVersion(serviceDeclarationNode, semanticModel)));
         }
         if (needJson) {
             return Json.pretty(openapi);
@@ -175,11 +180,14 @@ public class ServiceToOpenAPIConverterUtils {
                                                      ServiceDeclarationNode serviceDefinition,
                                                      SemanticModel semanticModel)
             throws OpenApiConverterException {
+
+        String version = getContractVersion(serviceDefinition, semanticModel);
         // Take base path of service
         OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
         String currentServiceName = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceDefinition);
         // 01. Set openAPI inFor section wit details
-        openapi = getInfo(openapi, currentServiceName);
+        OpenAPIInfo info = new OpenAPIInfo(currentServiceName, version);
+        openapi = getInfo(openapi, info);
         // 02. Filter and set the ServerURLs according to endpoints. Complete the servers section in OAS
         openapi = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServers(openapi, endpoints, serviceDefinition);
         // 03. Filter path and component sections in OAS.
@@ -194,10 +202,26 @@ public class ServiceToOpenAPIConverterUtils {
         return openapi;
     }
 
-    //Set the OAS info section details
-    private static OpenAPI getInfo(OpenAPI openapi, String currentServiceName) {
+    private static String getContractVersion(ServiceDeclarationNode serviceDefinition, SemanticModel semanticModel) {
+        // 1. check the annotation is available
+        Optional<Symbol> symbol = semanticModel.symbol(serviceDefinition);
+        String version = "1.0.0";
+        if (symbol.isPresent()) {
+            Symbol serviceSymbol = symbol.get();
+            Optional<ModuleSymbol> module = serviceSymbol.getModule();
+            if (module.isPresent()) {
+                ModuleSymbol moduleSymbol = module.get();
+                ModuleID id = moduleSymbol.id();
+                String moduleName = id.moduleName();
+                version = id.version();
+            }
+        }
+        return version;
+    }
 
-        String[] splits = (currentServiceName.replaceFirst("/", "")).split(SPLIT_PATTERN);
+    //Set the OAS info section details
+    private static OpenAPI getInfo(OpenAPI openapi, OpenAPIInfo info) {
+        String[] splits = (info.getTitle().replaceFirst("/", "")).split(SPLIT_PATTERN);
         StringBuilder stringBuilder = new StringBuilder();
         String title = null;
         if (splits.length > 1) {
@@ -214,7 +238,7 @@ public class ServiceToOpenAPIConverterUtils {
             title = stringBuilder.toString().trim();
         }
 
-        openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version("1.0.0").title(title));
+        openapi.setInfo(new io.swagger.v3.oas.models.info.Info().version(info.getVersion()).title(title));
         return openapi;
     }
 
