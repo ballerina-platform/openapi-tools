@@ -95,7 +95,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
 
     /**
      * This API is used to return the List of {@code OASResult} that containing all the service node generated yaml
-     * content, json content, openapi content and all diagnostics.
+     * content, json content, openapi content and all diagnostics and error message if generation failed.
      */
     @JsonRequest
     public CompletableFuture<OpenAPIConverterResponse> generateOpenAPI(OpenAPIConverterRequest request) {

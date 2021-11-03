@@ -44,7 +44,8 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_107("OAS_CONVERTOR_107", "No Ballerina services found with name '%s' to" +
             " generate an OpenAPI specification. These services are available in ballerina file. %s",
             DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_108("OAS_CONVERTOR_108", "Having Exception issues: %s", DiagnosticSeverity.ERROR);
+    OAS_CONVERTOR_108("OAS_CONVERTOR_108", "Failed to generate OpenAPI definition due to: %s",
+            DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;
