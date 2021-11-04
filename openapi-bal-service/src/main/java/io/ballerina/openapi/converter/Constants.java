@@ -78,6 +78,9 @@ public class Constants {
     public static final String OCTECT_STREAM_POSTFIX = "+octet-stream";
     public static final String TEXT_PREFIX = "text/";
     public static final String MAP_JSON = "map<json>";
+    public static final String HTTP_REQUEST = "http:Request";
+    public static final String DEFAULT = "default";
+    public static final String HTTP_RESPONSE = "http:Response";
 
     /**
      * Enum to select the Ballerina Type.

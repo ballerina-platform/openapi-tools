@@ -21,6 +21,7 @@ package io.ballerina.openapi.extension;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.converter.service.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import org.ballerinalang.annotation.JavaSPIService;
 import org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService;
@@ -33,7 +34,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -59,39 +60,81 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
         return getClass();
     }
 
+    /**
+     * @deprecated This API deprecated due to providing only output yaml string as response. Please make use of this
+     * new API {@link #generateOpenAPI(OpenAPIConverterRequest)} for replacement to this. It will provide list of {@code
+     * OASResult} that containing OpenAPI model with its diagnostics.
+     */
     @JsonRequest
+    @Deprecated
     public CompletableFuture<OpenAPIConverterResponse> generateOpenAPIFile(OpenAPIConverterRequest request) {
         return CompletableFuture.supplyAsync(() -> {
             OpenAPIConverterResponse response = new OpenAPIConverterResponse();
-            try {
-                String fileUri = request.getDocumentFilePath();
-                Optional<Path> documentPath = getPathFromURI(fileUri);
-                Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath.orElseThrow());
-                Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath.orElseThrow());
-                Map<String, String> yamlContent =
-                        ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.orElseThrow(),
-                                semanticModel.orElseThrow(), null, false, null);
+            String fileUri = request.getDocumentFilePath();
+            Optional<SyntaxTree> syntaxTree = getPathFromURI(fileUri).flatMap(workspaceManager::syntaxTree);
+            Optional<SemanticModel> semanticModel = getPathFromURI(fileUri).flatMap(workspaceManager::semanticModel);
+            if (semanticModel.isEmpty() || syntaxTree.isEmpty()) {
+                StringBuilder errorString = getErrorMessage(syntaxTree, semanticModel);
+                response.setError(errorString.toString());
+            } else {
+                response.setError(null);
+                List<OASResult> yamlContent = ServiceToOpenAPIConverterUtils.generateOAS3Definition(
+                        syntaxTree.orElseThrow(), semanticModel.orElseThrow(), null, false,
+                        null);
                 //Response should handle
-                if (!yamlContent.isEmpty()) {
-                    Map.Entry<String, String> content = yamlContent.entrySet().iterator().next();
-                    response.setYamlContent(content.getValue());
+                if (!yamlContent.isEmpty() && (yamlContent.get(0).getOpenAPI().isPresent())) {
+                    Optional<String> yaml = yamlContent.get(0).getYaml();
+                    yaml.ifPresent(response::setYamlContent);
                 } else {
-                    response.setYamlContent("Error occurred while generating yaml");
+                    response.setError("Error occurred while generating yaml.");
                 }
-            } catch (Throwable e) {
-                // Throw a exceptions.
-                response.setYamlContent("Error occurred while generating yaml :" + e.getLocalizedMessage());
             }
             return response;
         });
+    }
+
+    /**
+     * This API is used to return the List of {@code OASResult} that containing all the service node generated yaml
+     * content, json content, openapi content and all diagnostics and error message if generation failed.
+     */
+    @JsonRequest
+    public CompletableFuture<OpenAPIConverterResponse> generateOpenAPI(OpenAPIConverterRequest request) {
+        return CompletableFuture.supplyAsync(() -> {
+            OpenAPIConverterResponse response = new OpenAPIConverterResponse();
+            String fileUri = request.getDocumentFilePath();
+            Optional<SyntaxTree> syntaxTree = getPathFromURI(fileUri).flatMap(workspaceManager::syntaxTree);
+            Optional<SemanticModel> semanticModel = getPathFromURI(fileUri).flatMap(workspaceManager::semanticModel);
+            if (semanticModel.isEmpty() || syntaxTree.isEmpty()) {
+                StringBuilder errorString = getErrorMessage(syntaxTree, semanticModel);
+                response.setError(errorString.toString());
+            } else {
+                response.setError(null);
+                List<OASResult> oasResult = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.get(),
+                        semanticModel.get(), null, false, null);
+                //Response handle with returning list of {@code OASResult} model.
+                response.setContent(oasResult);
+            }
+            return response;
+        });
+    }
+
+    // Generate error message.
+    private StringBuilder getErrorMessage(Optional<SyntaxTree> syntaxTree, Optional<SemanticModel> semanticModel) {
+        StringBuilder errorString = new StringBuilder();
+        if (syntaxTree.isEmpty()) {
+            errorString.append("Error while generating syntax tree.").append(System.lineSeparator());
+        }
+        if (semanticModel.isEmpty()) {
+            errorString.append("Error while generating semantic model.");
+        }
+        return errorString;
     }
 
     // Refactor documentation path
     public static Optional<Path> getPathFromURI(String uri) {
         try {
             return Optional.of(Paths.get(new URL(uri).toURI()));
-        } catch (URISyntaxException | MalformedURLException e) {
-            // ignore
+        } catch (URISyntaxException | MalformedURLException ignore) {
         }
         return Optional.empty();
     }

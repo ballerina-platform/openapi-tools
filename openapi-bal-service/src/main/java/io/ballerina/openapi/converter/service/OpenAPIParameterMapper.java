@@ -26,12 +26,16 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
@@ -45,6 +49,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.converter.Constants.HTTP_REQUEST;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
@@ -54,6 +59,11 @@ public class OpenAPIParameterMapper {
     private final FunctionDefinitionNode functionDefinitionNode;
     private final OperationAdaptor operationAdaptor;
     private final Map<String, String> apidocs;
+    private final List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
+
+    public List<OpenAPIConverterDiagnostic> getErrors() {
+        return errors;
+    }
 
     public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode,
                                   OperationAdaptor operationAdaptor, Map<String, String> apidocs) {
@@ -62,6 +72,8 @@ public class OpenAPIParameterMapper {
         this.operationAdaptor = operationAdaptor;
         this.apidocs = apidocs;
     }
+
+
 
     /**
      * Create {@code Parameters} model for openAPI operation.
@@ -79,6 +91,17 @@ public class OpenAPIParameterMapper {
             if (parameterNode.kind() == SyntaxKind.REQUIRED_PARAM) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
                 // Handle query parameter
+                if (requiredParameterNode.typeName().kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
+                    QualifiedNameReferenceNode referenceNode =
+                            (QualifiedNameReferenceNode) requiredParameterNode.typeName();
+                    String typeName = (referenceNode).modulePrefix().text() + ":" + (referenceNode).identifier().text();
+                    if (typeName.equals(HTTP_REQUEST)) {
+                        DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_104;
+                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(messages,
+                                functionDefinitionNode.location());
+                        errors.add(error);
+                    }
+                }
                 if (requiredParameterNode.typeName().kind() != SyntaxKind.QUALIFIED_NAME_REFERENCE &&
                         requiredParameterNode.annotations().isEmpty()) {
                     parameters.add(queryParameterMapper.createQueryParameter(requiredParameterNode));

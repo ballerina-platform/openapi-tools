@@ -28,17 +28,14 @@ public class OpenAPIConverterRequest {
     private String documentFilePath;
 
     public OpenAPIConverterRequest(String documentFilePath) {
-
         this.documentFilePath = documentFilePath;
     }
 
     public String getDocumentFilePath() {
-
         return documentFilePath;
     }
 
     public void setDocumentFilePath(String documentFilePath) {
-
         this.documentFilePath = documentFilePath;
     }
 }

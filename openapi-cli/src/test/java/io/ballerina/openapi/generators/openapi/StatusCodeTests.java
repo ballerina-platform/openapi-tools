@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -41,7 +40,7 @@ public class StatusCodeTests {
     }
 
     @Test(description = "Return type with not acceptable status code")
-    public void notAcceptable() throws OpenApiConverterException, IOException {
+    public void notAcceptable() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("not_acceptable.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "status_code/not_acceptable.yaml");
     }

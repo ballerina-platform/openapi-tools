@@ -18,11 +18,13 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
-import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.openapi.OpenApiConverter;
-import io.ballerina.projects.ProjectException;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 
@@ -35,6 +37,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static io.ballerina.openapi.generators.GeneratorConstants.BAL_EXTENSION;
+import static io.ballerina.openapi.generators.GeneratorConstants.JSON_EXTENSION;
+import static io.ballerina.openapi.generators.GeneratorConstants.YAML_EXTENSION;
+import static io.ballerina.openapi.generators.GeneratorConstants.YML_EXTENSION;
 
 /**
  * Main class to implement "openapi" command for ballerina. Commands for Client Stub, Service file and OpenApi contract
@@ -126,11 +133,12 @@ public class OpenApiCmd implements BLauncherCmd {
             // else if given ballerina service file it generates openapi contract file
             // else it generates error message to enter correct input file
             String fileName = argList.get(0);
-            if (fileName.endsWith(".yaml") || fileName.endsWith(".json") || fileName.endsWith(".yml")) {
+            if (fileName.endsWith(YAML_EXTENSION) || fileName.endsWith(JSON_EXTENSION) ||
+                    fileName.endsWith(YML_EXTENSION)) {
                 List<String> tag = new ArrayList<>();
                 List<String> operation = new ArrayList<>();
                 if (tags != null) {
-                     tag.addAll(Arrays.asList(tags.split(",")));
+                    tag.addAll(Arrays.asList(tags.split(",")));
                 }
                 if (operations != null) {
                     operation.addAll(Arrays.asList(operations.split(",")));
@@ -142,13 +150,9 @@ public class OpenApiCmd implements BLauncherCmd {
                     outStream.println(e.getLocalizedMessage());
                     exitError(this.exitWhenFinish);
                 }
-            } else if (fileName.endsWith(".bal")) {
-                try {
-                    ballerinaToOpenApi(fileName);
-                } catch (IOException e) {
-                    outStream.println(e.getLocalizedMessage());
-                    exitError(this.exitWhenFinish);
-                }
+            } else if (fileName.endsWith(BAL_EXTENSION)) {
+                ballerinaToOpenApi(fileName);
+                exitError(this.exitWhenFinish);
             } else {
                 outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
                 exitError(this.exitWhenFinish);
@@ -169,23 +173,48 @@ public class OpenApiCmd implements BLauncherCmd {
      * This util method to generate openApi contract based on the given service ballerina file.
      * @param fileName  input resource file
      */
-    private void ballerinaToOpenApi(String fileName) throws IOException {
+    private void ballerinaToOpenApi(String fileName) {
+        List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
         final File balFile = new File(fileName);
-        Path balFilePath = Paths.get(balFile.getCanonicalPath());
+        Path balFilePath = null;
+        try {
+            balFilePath = Paths.get(balFile.getCanonicalPath());
+        } catch (IOException e) {
+            DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_108;
+            ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
+                    message.getDescription(), null,  e.getLocalizedMessage());
+            errors.add(error);
+        }
         getTargetOutputPath();
         // Check service name it is mandatory
-        try {
-            OpenApiConverter openApiConverter = new OpenApiConverter();
-            openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
-                    generatedFileType);
-        } catch (IOException  | ProjectException | OpenApiConverterException e) {
-            outStream.println(e.getLocalizedMessage());
-            exitError(this.exitWhenFinish);
+        OpenApiConverter openApiConverter = new OpenApiConverter();
+        openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
+                generatedFileType);
+        errors.addAll(openApiConverter.getErrors());
+        if (!errors.isEmpty()) {
+            for (OpenAPIConverterDiagnostic error: errors) {
+                if (error instanceof ExceptionDiagnostic) {
+                    this.outStream = System.err;
+                    ExceptionDiagnostic exceptionDiagnostic = (ExceptionDiagnostic) error;
+                    OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(exceptionDiagnostic.getCode(),
+                            exceptionDiagnostic.getMessage(), exceptionDiagnostic.getDiagnosticSeverity(),
+                            exceptionDiagnostic.getLocation().orElse(null));
+                    outStream.println(diagnostic.toString());
+                    exitError(this.exitWhenFinish);
+                } else if (error instanceof IncompatibleResourceDiagnostic) {
+                    IncompatibleResourceDiagnostic incompatibleError = (IncompatibleResourceDiagnostic) error;
+                    OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(incompatibleError.getCode(),
+                            incompatibleError.getMessage(), incompatibleError.getDiagnosticSeverity(),
+                            incompatibleError.getLocation().get());
+                    outStream.println(diagnostic.toString());
+                }
+            }
         }
     }
 
     /**
-     * A util method for generating service and client stub using given contract file.
+     * This util method for generating service and client stub using given contract file.
+     *
      * @param fileName input resource file
      */
     private void openApiToBallerina(String fileName, Filter filter) throws IOException {
@@ -218,7 +247,7 @@ public class OpenApiCmd implements BLauncherCmd {
     }
 
     /**
-     * A util to take the resource Path.
+     * This util is to take the resource Path.
      * 
      * @param resourceFile      resource file path
      * @return path of given resource file
@@ -229,13 +258,13 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             Path relativePath = targetPath.relativize(resourcePath);
             return relativePath.resolve(resourceFile.getName());
-        } catch (IllegalArgumentException iaex) {
+        } catch (IllegalArgumentException exception) {
             return resourcePath.resolve(resourceFile.getName());
         }
     }
 
     /**
-     * A util to get the output Path.
+     * This util is to get the output Path.
      */
     private void getTargetOutputPath() {
         targetOutputPath = executionPath;
@@ -248,7 +277,7 @@ public class OpenApiCmd implements BLauncherCmd {
         }
     }
     /**
-     * A util to set the license header content which is to be add at the beginning of the ballerina files.
+     * This util is to set the license header content which is to be added at the beginning of the ballerina files.
      */
     private String setLicenseHeader() {
         String licenseHeader = "";
@@ -311,7 +340,7 @@ public class OpenApiCmd implements BLauncherCmd {
     }
 
     /**
-     * A util method to generate both service and client stub files based on the given yaml contract file.
+     * This util method is to generate both service and client stub files based on the given yaml contract file.
      * @param generator         generator object
      * @param fileName          service name  use for naming the files
      * @param resourcePath      resource path
