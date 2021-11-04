@@ -30,14 +30,15 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
-import io.ballerina.openapi.converter.OpenApiConverterException;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -46,6 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.ballerina.openapi.converter.Constants.DEFAULT;
 
 /**
  * This class will do resource mapping from ballerina to openApi.
@@ -56,12 +58,18 @@ public class OpenAPIResourceMapper {
     private final SemanticModel semanticModel;
     private final Paths pathObject = new Paths();
     private final Components components = new Components();
+    private final List<OpenAPIConverterDiagnostic> errors;
+
+    public List<OpenAPIConverterDiagnostic> getErrors() {
+        return errors;
+    }
 
     /**
      * Initializes a resource parser for openApi.
      */
     OpenAPIResourceMapper(SemanticModel semanticModel) {
         this.semanticModel = semanticModel;
+        this.errors = new ArrayList<>();
     }
 
     public Components getComponents() {
@@ -70,55 +78,48 @@ public class OpenAPIResourceMapper {
     /**
      * This method will convert ballerina resource to openApi Paths objects.
      *
-     * @param resources Resource list to be convert.
+     * @param resources Resource list to be converted.
      * @return map of string and openApi path objects.
      */
-    public Paths getPaths(List<FunctionDefinitionNode> resources) throws OpenApiConverterException {
+    public Paths getPaths(List<FunctionDefinitionNode> resources) {
         for (FunctionDefinitionNode resource : resources) {
-            List<String> methods = this.getHttpMethods(resource, false);
+            List<String> methods = this.getHttpMethods(resource);
             getResourcePath(resource, methods);
-//            if (!methods.isEmpty()) {
-//                useMultiResourceMapper(resource, methods);
-//            }
-//            else {
-////                useDefaultResourceMapper(resource);
-//            }
         }
         return pathObject;
     }
 
     /**
      * Resource mapper when a resource has more than 1 http method.
+     *
      * @param resource The ballerina resource.
      * @param httpMethods   Sibling methods related to operation.
      */
-    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods)
-            throws OpenApiConverterException {
+    private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods) {
         String path = generateRelativePath(resource);
         Operation operation;
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.
             if (resource.functionName().toString().trim().equals(httpMethod)) {
-                operation = convertResourceToOperation(resource, httpMethod, path).getOperation();
-                generatePathItem(httpMethod, pathObject, operation, path);
+                if (httpMethod.equals("'" + DEFAULT) || httpMethod.equals(DEFAULT)) {
+                    DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_100;
+                    IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                            resource.location());
+                    errors.add(error);
+                } else {
+                    Optional<OperationAdaptor> operationAdaptor = convertResourceToOperation(resource, httpMethod,
+                            path);
+                    if (operationAdaptor.isPresent()) {
+                        operation = operationAdaptor.get().getOperation();
+                        generatePathItem(httpMethod, pathObject, operation, path);
+                    } else {
+                        break;
+                    }
+                }
                 break;
             }
         }
     }
-
-// Enable after refactoring
-//    /**
-//     * Resource mapper when a resource has default  one http method.
-//     * @param resource The ballerina resource.
-//     */
-//    private void useDefaultResourceMapper(FunctionDefinitionNode resource) {
-//        String httpMethod = getHttpMethods(resource, true).get(0);
-//        OperationAdaptor operationAdaptor = this.convertResourceToOperation(resource, httpMethod, 1);
-//        operationAdaptor.setHttpOperation(httpMethod);
-//        String path = getPath(resource);
-//        io.swagger.v3.oas.models.Operation operation = operationAdaptor.getOperation();
-//        generatePathItem(httpMethod, pathObject, operation, path);
-//    }
 
     private void generatePathItem(String httpMethod, Paths path, Operation operation, String pathName) {
         PathItem pathItem = new PathItem();
@@ -189,9 +190,8 @@ public class OpenAPIResourceMapper {
      *
      * @return Operation Adaptor object of given resource
      */
-    private OperationAdaptor convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
-                                                        String generateRelativePath)
-            throws OpenApiConverterException {
+    private Optional<OperationAdaptor> convertResourceToOperation(FunctionDefinitionNode resource, String httpMethod,
+                                                        String generateRelativePath) {
         OperationAdaptor op = new OperationAdaptor();
         op.setHttpOperation(httpMethod);
         op.setPath(generateRelativePath);
@@ -210,10 +210,18 @@ public class OpenAPIResourceMapper {
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
-        OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components);
+        if (!openAPIParameterMapper.getErrors().isEmpty()) {
+            errors.addAll(openAPIParameterMapper.getErrors());
+            return Optional.empty();
+        }
+        OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components,
+                resource.location());
         openAPIResponseMapper.getResourceOutput(resource, op);
-
-        return op;
+        if (!openAPIResponseMapper.getErrors().isEmpty()) {
+            errors.addAll(openAPIResponseMapper.getErrors());
+            return Optional.empty();
+        }
+        return Optional.of(op);
     }
 
     /**
@@ -255,10 +263,9 @@ public class OpenAPIResourceMapper {
      * Gets the http methods of a resource.
      *
      * @param resource    The ballerina resource.
-     * @param useDefaults True to add default http methods, else false.
      * @return A list of http methods.
      */
-    private List<String> getHttpMethods(FunctionDefinitionNode resource, boolean useDefaults) {
+    private List<String> getHttpMethods(FunctionDefinitionNode resource) {
         Set<String> httpMethods = new LinkedHashSet<>();
         ServiceDeclarationNode parentNode = (ServiceDeclarationNode) resource.parent();
         NodeList<Node> siblings = parentNode.members();
@@ -275,20 +282,7 @@ public class OpenAPIResourceMapper {
                 }
             }
         }
-
-        if (httpMethods.isEmpty() && useDefaults) {
-            // By default all http methods are supported.
-            httpMethods.add(Constants.GET);
-            httpMethods.add(Constants.PUT);
-            httpMethods.add(Constants.POST);
-            httpMethods.add(Constants.DELETE);
-            httpMethods.add(Constants.PATCH);
-            httpMethods.add(Constants.OPTIONS);
-            httpMethods.add(Constants.HEAD);
-        }
-        List<String> httpMethodsAsString = new ArrayList<>(httpMethods);
-        Collections.reverse(httpMethodsAsString);
-        return httpMethodsAsString;
+        return new ArrayList<>(httpMethods);
     }
 
     private String generateRelativePath(FunctionDefinitionNode resource) {

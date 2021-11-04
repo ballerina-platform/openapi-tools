@@ -22,14 +22,12 @@ import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.openapi.extension.Constants;
 import io.ballerina.openapi.extension.OpenApiDiagnosticCode;
@@ -165,13 +163,11 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
     }
 
     private String generateOpenApiDoc(SemanticModel semanticModel, SyntaxTree syntaxTree,
-                                      ServiceDeclarationNode serviceNode, String outputFileName)
-            throws OpenApiConverterException {
+                                      ServiceDeclarationNode serviceNode, String outputFileName) {
         ModulePartNode modulePartNode = syntaxTree.rootNode();
         List<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
-        String serviceBasePath = getServiceBasePath(serviceNode);
-        return ServiceToOpenAPIConverterUtils.generateOASForGivenFormat(
-                serviceNode, serviceBasePath, true, listenerNodes, semanticModel, outputFileName);
+        return ServiceToOpenAPIConverterUtils.generateOASForGivenFormat(serviceNode, true, listenerNodes,
+                semanticModel, outputFileName);
     }
 
     private List<ListenerDeclarationNode> extractListenerNodes(ModulePartNode modulePartNode) {
@@ -179,15 +175,6 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 .filter(n -> SyntaxKind.LISTENER_DECLARATION.equals(n.kind()))
                 .map(n -> (ListenerDeclarationNode) n)
                 .collect(Collectors.toList());
-    }
-
-    private String getServiceBasePath(ServiceDeclarationNode serviceDefinition) {
-        StringBuilder currentServiceName = new StringBuilder();
-        NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
-        for (Node serviceBasedPathNode : serviceNameNodes) {
-            currentServiceName.append(serviceBasedPathNode.toString());
-        }
-        return currentServiceName.toString().trim();
     }
 
     protected Path retrieveProjectRoot(Path projectRoot) {

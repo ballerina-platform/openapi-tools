@@ -92,10 +92,7 @@ public class OpenAPIRequestBodyMapper {
      */
     public OpenAPIRequestBodyMapper(Components components, OperationAdaptor operationAdaptor,
                                     SemanticModel semanticModel) {
-        this.components = components;
-        this.operationAdaptor = operationAdaptor;
-        this.semanticModel = semanticModel;
-        this.customMediaType = null;
+        this(components, operationAdaptor, semanticModel, null);
     }
 
     /**

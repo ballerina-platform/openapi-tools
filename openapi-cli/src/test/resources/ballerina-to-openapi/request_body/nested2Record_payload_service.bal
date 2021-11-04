@@ -17,6 +17,6 @@ type Pet record {
      boolean bark;
   };
  service /payloadV on helloEp {
-     resource function post hi(http:Caller caller, http:Request request, @http:Payload {} Dog payload) {
-
-     }}
+     resource function post hi(@http:Payload {} Dog payload) {
+     }
+ }
