@@ -8,6 +8,6 @@ type Pet record {
     string tag?;
  };
  service /payloadV on helloEp {
-     resource function post hi(http:Caller caller, http:Request request, @http:Payload {} Pet payload) {
+     resource function post hi(@http:Payload {} Pet payload) {
 
      }}

@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -42,14 +41,22 @@ public class OpenAPIInfoTests {
     }
 
     @Test(description = "Generate OpenAPI spec with default value with empty Ballerina.toml")
-    public void defaultOpenAPIInfo() throws OpenApiConverterException, IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("project01/project02.bal");
+    public void defaultOpenAPIInfo() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("project01/project04.bal");
         compareWithGeneratedFile(ballerinaFilePath, "openapi_info/project01.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with default value with version Ballerina.toml")
-    public void versionOpenAPIInfo() throws OpenApiConverterException, IOException {
+    public void versionOpenAPIInfo() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("project02/project02.bal");
         compareWithGeneratedFile(ballerinaFilePath, "openapi_info/project02.yaml");
     }
+
+    @Test(description = "Generate OpenAPI spec with default value with version Ballerina.toml")
+    public void openAPIAnnotation() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("project03/project03.bal");
+        compareWithGeneratedFile(ballerinaFilePath, "openapi_info/project02.yaml");
+    }
+
+
 }

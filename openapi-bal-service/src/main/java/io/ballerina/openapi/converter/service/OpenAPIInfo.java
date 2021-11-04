@@ -1,5 +1,9 @@
 package io.ballerina.openapi.converter.service;
 
+import java.util.Locale;
+
+import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
+
 public class OpenAPIInfo {
     private String title;
     private String version;
@@ -11,7 +15,7 @@ public class OpenAPIInfo {
     }
 
     public String getTitle() {
-        return title;
+        return normalizedTitle(this.title);
     }
 
     public void setTitle(String title) {
@@ -32,5 +36,26 @@ public class OpenAPIInfo {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    // Generate Title
+    private static String normalizedTitle(String serviceName) {
+        String[] splits = (serviceName.replaceFirst("/", "")).split(SPLIT_PATTERN);
+        StringBuilder stringBuilder = new StringBuilder();
+        String title = serviceName;
+        if (splits.length > 1) {
+            for (String piece : splits) {
+                if (piece.isBlank()) {
+                    continue;
+                }
+                stringBuilder.append(piece.substring(0, 1).toUpperCase(Locale.ENGLISH) + piece.substring(1));
+                stringBuilder.append(" ");
+            }
+            title = stringBuilder.toString().trim();
+        } else if (splits.length == 1 && !splits[0].isBlank()) {
+            stringBuilder.append(splits[0].substring(0, 1).toUpperCase(Locale.ENGLISH) + splits[0].substring(1));
+            title = stringBuilder.toString().trim();
+        }
+        return title;
     }
 }

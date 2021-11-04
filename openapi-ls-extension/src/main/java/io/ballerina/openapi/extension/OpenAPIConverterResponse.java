@@ -18,22 +18,49 @@ package io.ballerina.openapi.extension;
  *  under the License.
  */
 
+import io.ballerina.openapi.converter.service.OASResult;
+
+import java.util.List;
+import java.util.Optional;
+
 /**
  * The extended service for the OpenAPIConverter endpoint.
  *
  * @since 2.0.0
  */
 public class OpenAPIConverterResponse {
+    @Deprecated
     private String yamlContent;
 
+    private List<OASResult> content;
+    private String error;
+
+    public OpenAPIConverterResponse() {
+    }
+
+    @Deprecated
     public String getYamlContent() {
         return yamlContent;
     }
 
+    @Deprecated
     public void setYamlContent(String yamlContent) {
         this.yamlContent = yamlContent;
     }
 
-    public OpenAPIConverterResponse() {
+    public List<OASResult> getContent() {
+        return content;
+    }
+
+    public void setContent(List<OASResult> content) {
+        this.content = content;
+    }
+
+    public Optional<String> getError() {
+        return Optional.ofNullable(this.error);
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 }
