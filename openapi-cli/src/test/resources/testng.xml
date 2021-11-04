@@ -37,6 +37,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.openapi.HeaderTests"/>
             <class name="io.ballerina.openapi.generators.openapi.QueryParameterTests"/>
             <class name="io.ballerina.openapi.generators.openapi.CacheConfigTests"/>
+            <class name="io.ballerina.openapi.generators.openapi.StatusCodeTests"/>
             <class name="io.ballerina.openapi.generators.openapi.HttpMethodTests"/>
             <class name="io.ballerina.openapi.cmd.OpenApiGenServiceCmdTest"/>
             <class name="io.ballerina.openapi.CodeGeneratorTest"/>
