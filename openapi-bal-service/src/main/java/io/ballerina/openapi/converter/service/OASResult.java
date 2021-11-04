@@ -33,7 +33,7 @@ import java.util.Optional;
 public class OASResult {
     private OpenAPI openAPI;
     private String serviceName; // added base path for key to definition
-    private List<OpenAPIConverterDiagnostic> diagnostics;
+    private final List<OpenAPIConverterDiagnostic> diagnostics;
 
     /**
      * This constructor is used to store the details that Map of {@code OpenAPI} objects and diagnostic list.
