@@ -99,17 +99,17 @@ public class OAuth2Tests {
         };
     }
 
-    @Test(description = "Generate Client with apiKey and OAuth security schemes",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp =
-                    "Unsupported combination of security schemes.")
-    public void unsupportedSecuritySchemaCombination() throws IOException, BallerinaOpenApiException {
-        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(true,
-                true);
-        GeneratorUtils generatorUtils = new GeneratorUtils();
-        Path definitionPath = RES_DIR.resolve("scenarios/oauth2/unsupported_security_schema.yaml");
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        String generatedConfigRecord = Objects.requireNonNull(
-                ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
-    }
+//    @Test(description = "Generate Client with apiKey and OAuth security schemes",
+//            expectedExceptions = BallerinaOpenApiException.class,
+//            expectedExceptionsMessageRegExp =
+//                    "Unsupported combination of security schemes.")
+//    public void unsupportedSecuritySchemaCombination() throws IOException, BallerinaOpenApiException {
+//        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(true,
+//                true);
+//        GeneratorUtils generatorUtils = new GeneratorUtils();
+//        Path definitionPath = RES_DIR.resolve("scenarios/oauth2/unsupported_security_schema.yaml");
+//        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+//        String generatedConfigRecord = Objects.requireNonNull(
+//                ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
+//    }
 }

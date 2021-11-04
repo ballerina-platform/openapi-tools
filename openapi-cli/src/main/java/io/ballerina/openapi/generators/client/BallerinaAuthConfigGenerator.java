@@ -123,6 +123,8 @@ import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEYS_CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.generators.GeneratorConstants.AUTH;
+import static io.ballerina.openapi.generators.GeneratorConstants.AUTH_CONFIG;
+import static io.ballerina.openapi.generators.GeneratorConstants.AUTH_CONFIG_RECORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.AuthConfigTypes;
 import static io.ballerina.openapi.generators.GeneratorConstants.BASIC;
 import static io.ballerina.openapi.generators.GeneratorConstants.BEARER;
@@ -160,6 +162,15 @@ public class BallerinaAuthConfigGenerator {
      */
     public boolean isApiKey() {
         return apiKey;
+    }
+
+    /**
+     * Returns `true` if HTTP or OAuth authentication is supported.
+     *
+     * @return {@link boolean}
+     */
+    public boolean isHttpOROAuth() {
+        return httpOROAuth;
     }
 
     /**
@@ -265,7 +276,20 @@ public class BallerinaAuthConfigGenerator {
         return NodeFactory.createTypeDefinitionNode(configRecordMetadataNode,
                 createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName,
                 recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+    }
 
+    public TypeDefinitionNode getAuthConfigRecord() {
+        Token typeName = AbstractNodeFactory.createIdentifierToken(AUTH_CONFIG_RECORD);
+        NodeList<Node> recordFieldList = createNodeList(getAuthConfigRecordFields());
+        MetadataNode configRecordMetadataNode = getMetadataNode("Provides Auth configurations needed when " +
+                "communicating with a remote HTTP endpoint.");
+        RecordTypeDescriptorNode recordTypeDescriptorNode =
+                NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                        createToken(OPEN_BRACE_PIPE_TOKEN), recordFieldList, null,
+                        createToken(CLOSE_BRACE_PIPE_TOKEN));
+        return NodeFactory.createTypeDefinitionNode(configRecordMetadataNode,
+                createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName,
+                recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
     }
 
     /**
@@ -279,6 +303,9 @@ public class BallerinaAuthConfigGenerator {
             TypeDescriptorNode readOnlyNode = createTypeReferenceTypeDescNode(createSimpleNameReferenceNode
                     (createToken(READONLY_KEYWORD)));
             TypeDescriptorNode apiKeyMapNode = createSimpleNameReferenceNode(createIdentifierToken(API_KEYS_CONFIG));
+            if (httpOROAuth) {
+                apiKeyMapNode = createOptionalTypeDescriptorNode(apiKeyMapNode, createToken(QUESTION_MARK_TOKEN));
+            }
             TypeDescriptorNode intersectionTypeDescriptorNode = createIntersectionTypeDescriptorNode(readOnlyNode,
                     createToken(BITWISE_AND_TOKEN), apiKeyMapNode);
             IdentifierToken fieldName = createIdentifierToken(API_KEY_CONFIG_PARAM);
@@ -312,7 +339,7 @@ public class BallerinaAuthConfigGenerator {
         Node serviceURLNode = getServiceURLNode(serviceUrl);
         List<Node> parameters = new ArrayList<>();
         IdentifierToken equalToken = createIdentifierToken(GeneratorConstants.EQUAL);
-        if (httpOROAuth) {
+        if (httpOROAuth && !apiKey) {
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(CLIENT_CONFIG));
             IdentifierToken paramName = createIdentifierToken(CONFIG_RECORD_ARG);
@@ -321,7 +348,15 @@ public class BallerinaAuthConfigGenerator {
             parameters.add(createToken(COMMA_TOKEN));
             parameters.add(serviceURLNode);
         } else {
-            if (apiKey) {
+            if (apiKey && httpOROAuth) {
+                BuiltinSimpleNameReferenceNode authConfigTypeName = createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(AUTH_CONFIG_RECORD));
+                IdentifierToken authConfigParamName = createIdentifierToken(AUTH_CONFIG);
+                RequiredParameterNode authConfigParamNode = createRequiredParameterNode(annotationNodes,
+                        authConfigTypeName, authConfigParamName);
+                parameters.add(authConfigParamNode);
+                parameters.add(createToken(COMMA_TOKEN));
+            } else if (apiKey) {
                 BuiltinSimpleNameReferenceNode apiKeyConfigTypeName = createBuiltinSimpleNameReferenceNode(null,
                         createIdentifierToken(API_KEYS_CONFIG));
                 IdentifierToken apiKeyConfigParamName = createIdentifierToken(API_KEY_CONFIG_PARAM);
@@ -646,6 +681,20 @@ public class BallerinaAuthConfigGenerator {
         return recordFieldNodes;
     }
 
+    public List<Node> getAuthConfigRecordFields() {
+        List<Node> recordFieldNodes = new ArrayList<>();
+        Token semicolonToken = createToken(SEMICOLON_TOKEN);
+
+        MetadataNode authMetadataNode = getMetadataNode("Auth Configuration");
+        IdentifierToken authFieldName = AbstractNodeFactory.createIdentifierToken(escapeIdentifier(AUTH));
+        TypeDescriptorNode authFieldTypeNode = createSimpleNameReferenceNode(
+                createIdentifierToken(getAuthFieldTypeName() + "|ApiKeysConfig"));
+        RecordFieldNode authFieldNode = NodeFactory.createRecordFieldNode(authMetadataNode, null,
+                authFieldTypeNode, authFieldName, null, semicolonToken);
+        recordFieldNodes.add(authFieldNode);
+        return recordFieldNodes;
+    }
+
     private MetadataNode getMetadataNode(String comment) {
         List<Node> docs = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(comment, false));
         MarkdownDocumentationNode authDocumentationNode = createMarkdownDocumentationNode(
@@ -710,7 +759,7 @@ public class BallerinaAuthConfigGenerator {
             }
         }
         if (apiKey && httpOROAuth) {
-            throw new BallerinaOpenApiException("Unsupported combination of security schemes.");
+            //throw new BallerinaOpenApiException("Unsupported combination of security schemes.");
         } else if (!(apiKey || httpOROAuth)) {
             throw new BallerinaOpenApiException("Unsupported type of security schema");
         }
@@ -741,7 +790,7 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link String}   Field type name of auth field
      *                          Ex: {@code http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig}
      */
-    private String getAuthFieldTypeName() {
+    public String getAuthFieldTypeName() {
         Set<String> httpFieldTypeNames = new HashSet<>();
         for (String authType : authTypes) {
             switch (authType) {

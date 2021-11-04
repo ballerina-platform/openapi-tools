@@ -140,6 +140,7 @@ public class GeneratorConstants {
     public static final String API_KEY_CONFIG_RECORD_FIELD = "apiKeys";
     public static final String AUTH = "auth";
     public static final String AUTH_CONFIG = "authConfig";
+    public static final String AUTH_CONFIG_RECORD = "AuthConfig";
     public static final String BASIC = "basic";
     public static final String BEARER = "bearer";
     public static final String REFRESH_TOKEN = "refresh_token";
