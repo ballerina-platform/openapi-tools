@@ -44,6 +44,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 
 /**
  *  Factory class for mime type creation.
+ *
+ *  @since 2.0.0
  */
 public class MimeFactory {
 

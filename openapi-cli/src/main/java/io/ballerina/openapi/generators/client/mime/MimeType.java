@@ -26,17 +26,16 @@ import io.swagger.v3.oas.models.media.MediaType;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD;
+
 /**
+ * Abstract class that defines the mime type.
  *
+ * @since 2.0.0
  */
 public abstract class MimeType {
 
-    GeneratorUtils generatorUtils;
-    String payloadName = "payload";
-
-    public MimeType() {
-        this.generatorUtils = new GeneratorUtils();
-    }
+    String payloadName = PAYLOAD;
 
     /**
      * Generate statements of defining structure and setting payload.
@@ -53,11 +52,9 @@ public abstract class MimeType {
      * @param payloadName       - Payload name
      * @param mediaType         - Media type
      */
-    public void setPayload(List<StatementNode> statementsList, String payloadName,
-                           String mediaType) {
-        ExpressionStatementNode setPayloadExpression = generatorUtils.getSimpleExpressionStatementNode(
+    public void setPayload(List<StatementNode> statementsList, String payloadName, String mediaType) {
+        ExpressionStatementNode setPayloadExpression = GeneratorUtils.getSimpleExpressionStatementNode(
                 String.format("request.setPayload(%s, \"%s\")", payloadName, mediaType));
         statementsList.add(setPayloadExpression);
     }
-
 }

@@ -43,7 +43,6 @@ import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.ErrorMessages;
 import io.ballerina.openapi.cmd.model.GenSrcFile;
-import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -207,43 +206,11 @@ public class GeneratorUtils {
      * @return ballerina type
      */
     public static String convertOpenAPITypeToBallerina(String type) throws BallerinaOpenApiException {
-        String convertedType;
-        switch (type) {
-            case Constants.INTEGER:
-                convertedType = "int";
-                break;
-            case Constants.STRING:
-                convertedType = "string";
-                break;
-            case Constants.BOOLEAN:
-                convertedType = "boolean";
-                break;
-            case Constants.ARRAY:
-                convertedType = "[]";
-                break;
-            case Constants.OBJECT:
-                convertedType = "record {}";
-                break;
-            case Constants.DECIMAL:
-                convertedType = "decimal";
-                break;
-            case Constants.NUMBER:
-                convertedType = "decimal";
-                break;
-            case Constants.DOUBLE:
-            case Constants.FLOAT:
-                convertedType = "float";
-                break;
-            case Constants.BINARY:
-                convertedType = "byte[]";
-                break;
-            case Constants.BYTE:
-                convertedType = "byte[]";
-                break;
-            default:
-                throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
+        if (GeneratorConstants.TYPE_MAP.containsKey(type)) {
+            return GeneratorConstants.TYPE_MAP.get(type);
+        } else {
+            throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
         }
-        return convertedType;
     }
 
 
@@ -591,7 +558,7 @@ public class GeneratorUtils {
     /*
      * Generate variableDeclarationNode.
      */
-    public VariableDeclarationNode getSimpleStatement(String responseType, String variable,
+    public static VariableDeclarationNode getSimpleStatement(String responseType, String variable,
                                                              String initializer) {
         SimpleNameReferenceNode resTypeBind = createSimpleNameReferenceNode(createIdentifierToken(responseType));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(createIdentifierToken(variable));
@@ -605,7 +572,7 @@ public class GeneratorUtils {
     /*
      * Generate expressionStatementNode.
      */
-    public ExpressionStatementNode getSimpleExpressionStatementNode(String expression) {
+    public static ExpressionStatementNode getSimpleExpressionStatementNode(String expression) {
         SimpleNameReferenceNode expressionNode = createSimpleNameReferenceNode(
                 createIdentifierToken(expression));
         return createExpressionStatementNode(null, expressionNode, createToken(SEMICOLON_TOKEN));

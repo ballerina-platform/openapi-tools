@@ -29,4 +29,3 @@ components:
       properties:
         Name:
           type: string
-

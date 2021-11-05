@@ -25,6 +25,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.BallerinaUtilGenerator;
 import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -52,6 +53,8 @@ import static io.ballerina.openapi.generators.GeneratorUtils.createEncodingMap;
 
 /**
  * Defines the payload structure of "application/x-www-form-urlencoded" mime type.
+ *
+ * @since 2.0.0
  */
 public class UrlEncodedType extends MimeType {
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
@@ -68,12 +71,12 @@ public class UrlEncodedType extends MimeType {
         payloadName = "encodedRequestBody";
         if (requestBodyEncodingMap != null) {
             statementsList.add(requestBodyEncodingMap);
-            VariableDeclarationNode requestBodyVariable = generatorUtils.getSimpleStatement(STRING,
+            VariableDeclarationNode requestBodyVariable = GeneratorUtils.getSimpleStatement(STRING,
                     payloadName,
                     "createFormURLEncodedRequestBody(payload, requestBodyEncoding)");
             statementsList.add(requestBodyVariable);
         } else {
-            VariableDeclarationNode requestBodyVariable = generatorUtils.getSimpleStatement(STRING,
+            VariableDeclarationNode requestBodyVariable = GeneratorUtils.getSimpleStatement(STRING,
                     payloadName, "createFormURLEncodedRequestBody(payload)");
             statementsList.add(requestBodyVariable);
         }
@@ -118,5 +121,4 @@ public class UrlEncodedType extends MimeType {
         }
         return null;
     }
-
 }

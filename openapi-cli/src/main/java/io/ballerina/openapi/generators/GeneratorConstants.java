@@ -133,9 +133,13 @@ public class GeneratorConstants {
     public static final String RECORD = "record";
     public static final String IDENTIFIER = "identifier";
     public static final String TYPE_NAME = "typeName";
-    public static final String TEXT_PREFIX = "text/";
     public static final String BINARY = "binary";
+    public static final String DOUBLE = "double";
+    public static final String FLOAT = "float";
+    public static final String PAYLOAD = "payload";
     public static final String PDF = "pdf";
+    public static final String TEXT_PREFIX = "text/";
+    public static final String XML_DATA = "xmldata";
 
     // auth related constants
     public static final String API_KEY = "apikey";
@@ -254,6 +258,23 @@ public class GeneratorConstants {
     public static final String JSON_EXTENSION = ".json";
     public static final String YAML_EXTENSION = ".yaml";
     public static final String YML_EXTENSION = ".yml";
+
+    public static final Map<String, String> TYPE_MAP;
+    static {
+        Map<String, String> typeMap = new HashMap<>();
+        typeMap.put("integer", "int");
+        typeMap.put("string", "string");
+        typeMap.put("boolean", "boolean");
+        typeMap.put("array", "[]");
+        typeMap.put("object", "record {}");
+        typeMap.put("decimal", "decimal");
+        typeMap.put("number", "decimal");
+        typeMap.put("double", "float");
+        typeMap.put("float", "float");
+        typeMap.put("binary", "byte[]");
+        typeMap.put("byte", "byte[]");
+        TYPE_MAP = Collections.unmodifiableMap(typeMap);
+    }
 
     //Error related
     public static final String UNSUPPORTED_MEDIA_ERROR = "Unsupported media type '%s' is given in the request body";

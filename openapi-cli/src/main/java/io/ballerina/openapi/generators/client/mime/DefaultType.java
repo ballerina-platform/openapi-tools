@@ -26,6 +26,8 @@ import java.util.Map;
 
 /**
  * Defines default payload structure.
+ *
+ * @since 2.0.0
  */
 public class DefaultType extends MimeType {
 

@@ -20,6 +20,7 @@ package io.ballerina.openapi.generators.client.mime;
 
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.media.MediaType;
 
 import java.util.List;
@@ -30,13 +31,15 @@ import static io.ballerina.openapi.generators.GeneratorConstants.BYTE;
 
 /**
  * Defines the payload structure of "application/octet-stream" mime type.
+ *
+ * @since 2.0.0
  */
 public class OctedStreamType extends MimeType {
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
         if (mediaTypeEntry.getValue().getSchema().getFormat().equals(BYTE)) {
             payloadName = "encodedRequestBody";
-            VariableDeclarationNode encodedVariable = generatorUtils.getSimpleStatement("string",
+            VariableDeclarationNode encodedVariable = GeneratorUtils.getSimpleStatement("string",
                     payloadName, "payload.toBase64()");
             statementsList.add(encodedVariable);
         }

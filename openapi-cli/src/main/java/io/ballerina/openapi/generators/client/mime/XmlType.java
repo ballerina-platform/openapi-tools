@@ -28,10 +28,13 @@ import java.util.List;
 import java.util.Map;
 
 import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
+import static io.ballerina.openapi.generators.GeneratorConstants.XML_DATA;
 import static io.ballerina.openapi.generators.GeneratorUtils.checkImportDuplicate;
 
 /**
  * Defines the payload structure of xml mime type.
+ *
+ * @since 2.0.0
  */
 public class XmlType extends MimeType {
     private List<ImportDeclarationNode> imports;
@@ -43,17 +46,16 @@ public class XmlType extends MimeType {
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
         payloadName = "xmlBody";
-        ImportDeclarationNode xmlImport = GeneratorUtils.getImportDeclarationNode(BALLERINA, "xmldata");
-        if (!checkImportDuplicate(imports, "xmldata")) {
+        ImportDeclarationNode xmlImport = GeneratorUtils.getImportDeclarationNode(BALLERINA, XML_DATA);
+        if (!checkImportDuplicate(imports, XML_DATA)) {
             imports.add(xmlImport);
         }
-        VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
+        VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json",
                 "jsonBody", "check payload.cloneWithType(json)");
         statementsList.add(jsonVariable);
-        VariableDeclarationNode xmlBody = generatorUtils.getSimpleStatement("xml?", payloadName,
+        VariableDeclarationNode xmlBody = GeneratorUtils.getSimpleStatement("xml?", payloadName,
                 "check xmldata:fromJson(jsonBody)");
         statementsList.add(xmlBody);
         setPayload(statementsList, payloadName, mediaTypeEntry.getKey());
     }
-
 }

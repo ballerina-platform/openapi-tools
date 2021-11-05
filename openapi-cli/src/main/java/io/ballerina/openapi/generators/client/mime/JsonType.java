@@ -20,6 +20,7 @@ package io.ballerina.openapi.generators.client.mime;
 
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.media.MediaType;
 
 import java.util.List;
@@ -27,13 +28,15 @@ import java.util.Map;
 
 /**
  * Defines the payload structure of json mime type.
+ *
+ * @since 2.0.0
  */
 public class JsonType extends MimeType {
 
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaType) {
         payloadName = "jsonBody";
-        VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json", payloadName
+        VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json", payloadName
                 , "check payload.cloneWithType(json)");
         statementsList.add(jsonVariable);
         setPayload(statementsList, payloadName, mediaType.getKey());

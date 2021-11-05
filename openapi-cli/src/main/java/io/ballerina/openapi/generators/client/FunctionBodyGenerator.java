@@ -41,8 +41,8 @@ import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
 import io.ballerina.openapi.generators.client.mime.MimeType;
+import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -112,7 +112,6 @@ public class FunctionBodyGenerator {
     private final OpenAPI openAPI;
     private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
-    private final GeneratorUtils generatorUtils;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
 
     public List<ImportDeclarationNode> getImports() {
@@ -134,7 +133,6 @@ public class FunctionBodyGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
-        this.generatorUtils = new GeneratorUtils();
         this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
     }
 
@@ -219,11 +217,11 @@ public class FunctionBodyGenerator {
                 VariableDeclarationNode queryParamEncodingMap = getQueryParameterEncodingMap(queryParameters);
                 if (queryParamEncodingMap != null) {
                     statementsList.add(queryParamEncodingMap);
-                    ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
+                    ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
                             "path = path + check getPathForQueryParam(queryParam, queryParamEncoding)");
                     statementsList.add(updatedPath);
                 } else {
-                    ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
+                    ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
                             "path = path + check getPathForQueryParam(queryParam)");
                     statementsList.add(updatedPath);
                 }
@@ -231,7 +229,7 @@ public class FunctionBodyGenerator {
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<any>",
                         "headerValues", headerApiKeyNameList));
-                statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
+                statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
                 ballerinaUtilGenerator.setHeadersFound(true);
@@ -243,14 +241,14 @@ public class FunctionBodyGenerator {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
                         "queryParam", queryApiKeyNameList));
                 // Add updated path
-                ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
+                ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
                         "path = path + check getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
             }
             if (!headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<any>",
                         "headerValues", headerApiKeyNameList));
-                statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
+                statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
                 ballerinaUtilGenerator.setHeadersFound(true);
@@ -371,10 +369,10 @@ public class FunctionBodyGenerator {
         boolean isMethod = method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(EXECUTE);
         if (isHeader) {
             if (isMethod) {
-                ExpressionStatementNode requestStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+                ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "http:Request request = new");
                 statementsList.add(requestStatementNode);
-                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+                ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "//TODO: Update the request as needed");
                 statementsList.add(expressionStatementNode);
                 clientCallStatement = "check self.clientEp->" + method + "(path, request, headers = " +
@@ -388,10 +386,10 @@ public class FunctionBodyGenerator {
                 }
             }
         } else if (isMethod) {
-            ExpressionStatementNode requestStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "http:Request request = new");
             statementsList.add(requestStatementNode);
-            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "//TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
             clientCallStatement =
@@ -400,7 +398,7 @@ public class FunctionBodyGenerator {
             clientCallStatement = "check self.clientEp->" + method + "(path)";
         }
         //Return Variable
-        VariableDeclarationNode clientCall = generatorUtils.getSimpleStatement(returnType, RESPONSE,
+        VariableDeclarationNode clientCall = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
                 clientCallStatement);
         statementsList.add(clientCall);
         Token returnKeyWord = createIdentifierToken("return");
@@ -485,7 +483,7 @@ public class FunctionBodyGenerator {
 
         //Create Request statement
         Map.Entry<String, MediaType> next = iterator.next();
-        VariableDeclarationNode requestVariable = generatorUtils.getSimpleStatement("http:Request",
+        VariableDeclarationNode requestVariable = GeneratorUtils.getSimpleStatement("http:Request",
                 "request", "new");
         statementsList.add(requestVariable);
         if (next.getValue().getSchema() != null) {
@@ -493,18 +491,18 @@ public class FunctionBodyGenerator {
             // TODO:Fill with other mime type
         } else {
             // Add default value comment
-            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
         }
         // POST, PUT, PATCH, DELETE, EXECUTE
         VariableDeclarationNode requestStatement =
-                generatorUtils.getSimpleStatement(returnType, RESPONSE, "check self.clientEp->"
+                GeneratorUtils.getSimpleStatement(returnType, RESPONSE, "check self.clientEp->"
                         + method + "(path," + " request)");
         if (isHeader) {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
-                requestStatement = generatorUtils.getSimpleStatement(returnType, RESPONSE,
+                requestStatement = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
                         "check self.clientEp->" + method + "(path, request, headers = accHeaders)");
                 statementsList.add(requestStatement);
                 Token returnKeyWord = createIdentifierToken("return");
@@ -524,9 +522,9 @@ public class FunctionBodyGenerator {
     }
 
     /**
-     * This function use for generating function body statements according to the given request body media type.
+     * This function is used for generating function body statements according to the given request body media type.
      *
-     * @param statementsList    - previous statements list
+     * @param statementsList    - Previous statements list
      * @param mediaTypeEntry    - Media type entry
      */
     private void genStatementsForRequestMediaType(List<StatementNode> statementsList,
