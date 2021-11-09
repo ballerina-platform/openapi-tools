@@ -26,17 +26,15 @@ public class OpenAPIClientCapabilities extends BallerinaClientCapability {
 
     private boolean generateOpenAPI;
 
-    public boolean isGenerateOpenAPI() {
+    public OpenAPIClientCapabilities() {
+        super(OpenAPIServiceConstants.CAPABILITY_NAME);
+    }
 
+    public boolean isGenerateOpenAPI() {
         return generateOpenAPI;
     }
 
     public void setGenerateOpenAPI(boolean generateOpenAPI) {
-
         this.generateOpenAPI = generateOpenAPI;
-    }
-
-    public OpenAPIClientCapabilities() {
-        super(Constants.CAPABILITY_NAME);
     }
 }

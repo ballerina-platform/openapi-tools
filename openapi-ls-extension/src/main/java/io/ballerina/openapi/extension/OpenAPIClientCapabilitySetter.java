@@ -29,7 +29,7 @@ public class OpenAPIClientCapabilitySetter extends
 
     @Override
     public String getCapabilityName() {
-        return Constants.CAPABILITY_NAME;
+        return OpenAPIServiceConstants.CAPABILITY_NAME;
     }
 
     @Override

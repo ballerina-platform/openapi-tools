@@ -31,7 +31,6 @@ public class OpenAPIServerCapabilitySetter extends
 
     @Override
     public Optional<OpenAPIServerCapabilities> build() {
-
         OpenAPIServerCapabilities capabilities = new OpenAPIServerCapabilities();
         capabilities.setGenerateOpenAPI(true);
         return Optional.of(capabilities);
@@ -39,7 +38,7 @@ public class OpenAPIServerCapabilitySetter extends
 
     @Override
     public String getCapabilityName() {
-        return Constants.CAPABILITY_NAME;
+        return OpenAPIServiceConstants.CAPABILITY_NAME;
     }
 
     @Override

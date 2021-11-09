@@ -51,7 +51,6 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
 
     @Override
     public void init(LanguageServer langServer, WorkspaceManager workspaceManager) {
-
         this.workspaceManager = workspaceManager;
     }
 
