@@ -86,7 +86,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             } else {
                 response.setError(null);
                 List<OASResult> yamlContent = ServiceToOpenAPIConverterUtils.generateOAS3Definition(
-                        syntaxTree.orElseThrow(), semanticModel.orElseThrow(), null, false,
+                        syntaxTree.get(), semanticModel.get(), null, false,
                         null);
                 //Response should handle
                 if (!yamlContent.isEmpty() && (yamlContent.get(0).getOpenAPI().isPresent())) {
