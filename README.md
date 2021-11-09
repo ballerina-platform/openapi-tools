@@ -25,7 +25,12 @@ For more information on the supported operations, go to [Using the OpenAPI Tools
 1. OpenJDK 11 ([Adopt OpenJDK](https://adoptopenjdk.net/) or any other OpenJDK distribution)
 
     >**Info:** You can also use [Oracle JDK](https://www.oracle.com/java/technologies/javase-downloads.html). Set the JAVA_HOME environment variable to the pathname of the directory into which you installed JDK.
-
+   
+2. Export GitHub Personal access token with read package permissions as follows,
+   ```
+   export packageUser=<Username>
+   export packagePAT=<Personal access token>
+   ```
      
 ### Building the Source
 
@@ -65,5 +70,5 @@ All contributors are encouraged to read the [Ballerina Code of Conduct](https://
 * Discuss about code changes of the Ballerina project in [ballerina-dev@googlegroups.com](mailto:ballerina-dev@googlegroups.com).
 * Chat live with us via our [Slack channel](https://ballerina.io/community/slack/).
 * Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
-* View the [Ballerina performance test results](performance/benchmarks/summary.md).
+* View the [Ballerina performance test results](https://github.com/ballerina-platform/ballerina-lang/blob/master/performance/benchmarks/summary.md).
 
