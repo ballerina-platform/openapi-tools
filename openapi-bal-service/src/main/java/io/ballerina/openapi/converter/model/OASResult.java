@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.openapi.converter.service;
+package io.ballerina.openapi.converter.model;
 
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.swagger.v3.core.util.Json;

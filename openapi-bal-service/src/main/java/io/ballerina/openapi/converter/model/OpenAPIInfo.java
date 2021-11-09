@@ -1,4 +1,4 @@
-package io.ballerina.openapi.converter.service;
+package io.ballerina.openapi.converter.model;
 
 import java.util.Locale;
 
@@ -7,7 +7,13 @@ import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
 public class OpenAPIInfo {
     private String title;
     private String version;
-    private String description;
+    private String contractPath;
+
+    public OpenAPIInfo() {
+        this.title = null;
+        this.version = null;
+        this.contractPath = null;
+    }
 
     public OpenAPIInfo(String title, String version) {
         this.title = title;
@@ -30,14 +36,6 @@ public class OpenAPIInfo {
         this.version = version;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     // Generate Title
     private static String normalizedTitle(String serviceName) {
         String[] splits = (serviceName.replaceFirst("/", "")).split(SPLIT_PATTERN);
@@ -58,4 +56,12 @@ public class OpenAPIInfo {
         }
         return title;
     }
+    public String getContractPath() {
+        return contractPath;
+    }
+
+    public void setContractPath(String contractPath) {
+        this.contractPath = contractPath;
+    }
+
 }

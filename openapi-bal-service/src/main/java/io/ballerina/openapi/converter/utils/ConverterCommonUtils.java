@@ -33,10 +33,15 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
+import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.tools.diagnostics.Location;
 import io.ballerina.tools.text.LinePosition;
 import io.ballerina.tools.text.LineRange;
 import io.ballerina.tools.text.TextRange;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
@@ -44,7 +49,16 @@ import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -210,5 +224,52 @@ public class ConverterCommonUtils {
         public TextRange textRange() {
             return TextRange.from(0, 0);
         }
+    }
+
+    /**
+     * Parse and get the {@link OpenAPI} for the given OpenAPI contract.
+     *
+     * @param definitionURI     URI for the OpenAPI contract
+     * @return {@link OASResult}  OpenAPI model
+     */
+    public static OASResult parseOpenAPIFile(String definitionURI) {
+        List<OpenAPIConverterDiagnostic> diagnostics = new ArrayList<>();
+        Path contractPath = Paths.get(definitionURI);
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+
+        if (!Files.exists(contractPath)) {
+            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
+                    error.getDescription(), null);
+            diagnostics.add(diagnostic);
+        }
+        if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json") || definitionURI.endsWith(".yml"))) {
+            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
+                    error.getDescription(), null);
+            diagnostics.add(diagnostic);
+        }
+        String openAPIFileContent = null;
+        try {
+            openAPIFileContent = Files.readString(Paths.get(definitionURI));
+        } catch (IOException e) {
+            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode()
+                    , error.getDescription(), null, e.toString());
+            diagnostics.add(diagnostic);
+        }
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null,
+                parseOptions);
+        if (!parseResult.getMessages().isEmpty()) {
+            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_112;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode()
+                    , error.getDescription(), null);
+            diagnostics.add(diagnostic);
+            return new OASResult(null, diagnostics);
+        }
+        OpenAPI api = parseResult.getOpenAPI();
+        return new OASResult(api, diagnostics);
     }
 }

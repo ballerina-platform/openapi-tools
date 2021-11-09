@@ -45,7 +45,15 @@ public enum DiagnosticMessages {
             " generate an OpenAPI specification. These services are available in ballerina file. %s",
             DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_108("OAS_CONVERTOR_108", "Failed to generate OpenAPI definition due to: %s",
-            DiagnosticSeverity.ERROR);
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_109("OAS_CONVERTOR_109", "OpenAPI contract doesn't exist in the given location:%s",
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_110("OAS_CONVERTOR_110", "OpenAPI contract path can not be blank.",
+                      DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_111("OAS_CONVERTOR_111", "Invalid file type. Provide either a .yaml or .json file.",
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_112("OAS_CONVERTOR_112", "Given OpenAPI contract has parser issues.",
+                      DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;

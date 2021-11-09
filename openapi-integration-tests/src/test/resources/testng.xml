@@ -18,10 +18,10 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="BallerinaOpenAPIExtensionTests">
+<suite name="Ballerina Integration Tests">
     <test name="UnitTests">
         <classes>
-            <class name="io.ballerina.openapi.extension.OpenApiExtensionTest"/>
+            <class name="io.ballerina.openapi.generators.openapi.OpenAPIInfoTests"/>
         </classes>
     </test>
 </suite>

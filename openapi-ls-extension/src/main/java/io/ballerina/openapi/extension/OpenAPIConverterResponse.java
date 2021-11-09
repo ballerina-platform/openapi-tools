@@ -18,7 +18,7 @@ package io.ballerina.openapi.extension;
  *  under the License.
  */
 
-import io.ballerina.openapi.converter.service.OASResult;
+import io.ballerina.openapi.converter.model.OASResult;
 
 import java.util.List;
 import java.util.Optional;

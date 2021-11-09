@@ -30,6 +30,8 @@ public type ServiceInformation record {|
     string[]? excludeOperations = [];
     boolean failOnErrors = true;
     boolean embed = true;
+    string title = "";
+    string version = "";
 |};
 
 # Annotation for additional OpenAPI information of a Ballerina service.

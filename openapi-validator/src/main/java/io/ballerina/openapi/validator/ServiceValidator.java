@@ -79,6 +79,11 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
     private static OpenAPI openAPI;
     private static List<Diagnostic> validations = new ArrayList<>();
     private Location location;
+    private static Path ballerinaFilePath = null;
+
+    public static Path getBallerinaFilePath() {
+        return ballerinaFilePath;
+    }
 
     @Override
     public void perform(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
@@ -92,8 +97,9 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         Package aPackage = syntaxNodeAnalysisContext.currentPackage();
         DocumentId documentId = syntaxNodeAnalysisContext.documentId();
         Optional<Path> path = aPackage.project().documentPath(documentId);
-        Path ballerinaFilePath = path.orElseThrow();
-
+        if (path.isPresent()) {
+            ballerinaFilePath = path.get();
+        }
         ModulePartNode modulePartNode = syntaxTree.rootNode();
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
