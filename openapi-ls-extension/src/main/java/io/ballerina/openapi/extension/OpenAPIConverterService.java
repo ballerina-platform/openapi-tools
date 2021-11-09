@@ -28,6 +28,7 @@ import org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerSe
 import org.ballerinalang.langserver.commons.workspace.WorkspaceManager;
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 import org.eclipse.lsp4j.jsonrpc.services.JsonSegment;
+import org.eclipse.lsp4j.services.LanguageServer;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -47,6 +48,12 @@ import java.util.concurrent.CompletableFuture;
 @JsonSegment("openAPILSExtension")
 public class OpenAPIConverterService implements ExtendedLanguageServerService {
     private WorkspaceManager workspaceManager;
+
+    @Override
+    public void init(LanguageServer langServer, WorkspaceManager workspaceManager) {
+
+        this.workspaceManager = workspaceManager;
+    }
 
     public OpenAPIConverterService(WorkspaceManager workspaceManager) {
         this.workspaceManager = workspaceManager;
