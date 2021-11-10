@@ -42,8 +42,8 @@ import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
-import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.model.OpenAPIInfo;
+import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
 import io.ballerina.openapi.validator.ServiceValidator;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -111,12 +111,14 @@ public class ServiceToOpenAPIConverterUtils {
                 diagnostics.add(error);
             }
             // Generating for the services
+            boolean ignoreAnnotation = servicesToGenerate.size() > 1;
             for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
                 String serviceNodeName = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
                 //  Checked old generated file with same name
                 openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
-                OASResult oasDefinition = generateOAS(serviceNode, endpoints, semanticModel, openApiName);
+                OASResult oasDefinition = generateOAS(serviceNode, endpoints, semanticModel, openApiName,
+                        ignoreAnnotation);
                 oasDefinition.setServiceName(openApiName);
                 if (servicesToGenerate.size() > 1) {
                     Optional<OpenAPI> openAPI = oasDefinition.getOpenAPI();
@@ -185,7 +187,7 @@ public class ServiceToOpenAPIConverterUtils {
     /**
      * Generate openAPI definition according to the given format JSON or YAML.
      *
-     * @deprecated use {@link #generateOAS(ServiceDeclarationNode, List, SemanticModel, String)} instead.
+     * @deprecated use {@link #generateOAS(ServiceDeclarationNode, List, SemanticModel, String, boolean)} instead.
      * The new API provides a list of {@code OASResult}, which contains all the diagnostic information collected
      * while generating the openAPI contract.
      */
@@ -193,8 +195,8 @@ public class ServiceToOpenAPIConverterUtils {
     public static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode,
                                                    boolean needJson, List<ListenerDeclarationNode> endpoints,
                                                    SemanticModel semanticModel, String openApiName) {
-        Optional<OpenAPI> openapi = generateOAS(serviceDeclarationNode, endpoints, semanticModel, openApiName)
-                .getOpenAPI();
+        Optional<OpenAPI> openapi = generateOAS(serviceDeclarationNode, endpoints, semanticModel, openApiName,
+                true).getOpenAPI();
         if (openapi.isPresent()) {
             OpenAPI openAPI = openapi.get();
             if (openAPI.getInfo().getTitle() == null || openAPI.getInfo().getTitle().equals("/")) {
@@ -212,14 +214,16 @@ public class ServiceToOpenAPIConverterUtils {
      * @param serviceDefinition Service Node related to ballerina service
      * @param endpoints              Listener endpoints that bind to service
      * @param semanticModel          Semantic model for given ballerina file
+     * @param ignoreAnnotation       Flag for avoiding the conflict with annotation when service has multiple service
+     *                              node
      * @return {@code OASResult}
      */
     public static OASResult generateOAS(ServiceDeclarationNode serviceDefinition,
                                         List<ListenerDeclarationNode> endpoints, SemanticModel semanticModel,
-                                        String openApiName) {
+                                        String openApiName, boolean ignoreAnnotation) {
         // 01.Fill the openAPI info section
-        OASResult oasResult = fillOpenAPIInfoSection(serviceDefinition, semanticModel);
-        if (!oasResult.getOpenAPI().isEmpty() && oasResult.getDiagnostics().isEmpty()) {
+        OASResult oasResult = fillOpenAPIInfoSection(serviceDefinition, semanticModel, openApiName, ignoreAnnotation);
+        if (oasResult.getOpenAPI().isPresent() && oasResult.getDiagnostics().isEmpty()) {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             if (openapi.getPaths() == null) {
                 // Take base path of service
@@ -229,15 +233,8 @@ public class ServiceToOpenAPIConverterUtils {
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
                 openapi = openAPIServiceMapper.convertServiceToOpenAPI(serviceDefinition, openapi);
-                // Check the title has `/`
-                if (openapi.getInfo().getTitle() == null || openapi.getInfo().getTitle().equals("/")) {
-                    openapi.getInfo().setTitle(normalizeTitle(openApiName));
-                }
                 return new OASResult(openapi, openAPIServiceMapper.getErrors());
             } else {
-                if (openapi.getInfo().getTitle() == null || openapi.getInfo().getTitle().equals("/")) {
-                    openapi.getInfo().setTitle(normalizeTitle(openApiName));
-                }
                 return new OASResult(openapi, oasResult.getDiagnostics());
             }
         } else {
@@ -330,17 +327,15 @@ public class ServiceToOpenAPIConverterUtils {
      * @param semanticModel Semantic model for relevant project.
      * @return {@code OASResult}
      */
-    private static OASResult fillOpenAPIInfoSection(ServiceDeclarationNode serviceNode, SemanticModel semanticModel) {
+    private static OASResult fillOpenAPIInfoSection(ServiceDeclarationNode serviceNode, SemanticModel semanticModel,
+                                                    String openapiFileName, boolean ignoreAnnotation) {
         Optional<MetadataNode> metadata = serviceNode.metadata();
         List<OpenAPIConverterDiagnostic> diagnostics = new ArrayList<>();
         OpenAPI openAPI = new OpenAPI();
         String currentServiceName = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
-        // 01. Set openAPI inFor section wit package details
+        // 01. Set openAPI inFo section wit package details
         String version = getContractVersion(serviceNode, semanticModel);
-        OpenAPIInfo infoDetails = new OpenAPIInfo(currentServiceName, version);
-        openAPI.setInfo(getInfo(infoDetails));
-
-        if (metadata.isPresent()) {
+        if (metadata.isPresent() && !ignoreAnnotation) {
             MetadataNode metadataNode = metadata.get();
             NodeList<AnnotationNode> annotations = metadataNode.annotations();
             if (!annotations.isEmpty()) {
@@ -349,13 +344,55 @@ public class ServiceToOpenAPIConverterUtils {
                          QualifiedNameReferenceNode ref = (QualifiedNameReferenceNode) annotation.annotReference();
                          String annotationName = ref.modulePrefix().text() + ":" + ref.identifier().text();
                          if (annotationName.equals("openapi:ServiceInfo")) {
-                             return setAnnotationDetails(diagnostics, openAPI, infoDetails, annotation);
+                             OASResult oasResult = setAnnotationDetails(diagnostics, annotation);
+                             return normalizeInfoSection(openapiFileName, currentServiceName, version, oasResult);
+                         } else {
+                             openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
                          }
                      }
                 }
+            } else if (currentServiceName.equals("/")) {
+                openAPI.setInfo(new Info().version(version).title(normalizeTitle(openapiFileName)));
+            } else {
+                openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
             }
+        } else if (currentServiceName.equals("/")) {
+            openAPI.setInfo(new Info().version(version).title(normalizeTitle(openapiFileName)));
+        } else {
+            openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
         }
+
         return new OASResult(openAPI, diagnostics);
+    }
+
+    private static OASResult normalizeInfoSection(String openapiFileName, String currentServiceName, String version,
+                                          OASResult oasResult) {
+        if (oasResult.getOpenAPI().isPresent()) {
+            OpenAPI openAPI = oasResult.getOpenAPI().get();
+            if (openAPI.getInfo() == null) {
+                String title = normalizeTitle(currentServiceName);
+                if (currentServiceName.equals("/")) {
+                    title = normalizeTitle(openapiFileName);
+                }
+                openAPI.setInfo(new Info().title(title).version(version));
+            } else {
+                if (openAPI.getInfo().getTitle() == null) {
+                    openAPI.getInfo().setTitle(normalizeTitle(currentServiceName));
+                } else if (openAPI.getInfo().getTitle() != null && openAPI.getInfo().getTitle().equals("/")) {
+                    openAPI.getInfo().setTitle(normalizeTitle(openapiFileName));
+                } else if (openAPI.getInfo().getTitle().isBlank()) {
+                    openAPI.getInfo().setTitle(normalizeTitle(currentServiceName));
+                } else if (openAPI.getInfo().getTitle() == null && currentServiceName.equals("/")) {
+                    openAPI.getInfo().setTitle(normalizeTitle(openapiFileName));
+                }
+                if (openAPI.getInfo().getVersion() == null || openAPI.getInfo().getVersion().isBlank()) {
+                    openAPI.getInfo().setVersion(version);
+                }
+            }
+            return new OASResult(openAPI, oasResult.getDiagnostics());
+        } else {
+            return oasResult;
+        }
     }
 
     // Set contract version by default using package version.
@@ -374,112 +411,109 @@ public class ServiceToOpenAPIConverterUtils {
         return version;
     }
 
-    // Set the OAS info section details with package details.
-    private static Info getInfo(OpenAPIInfo infoDetails) {
-        Info info = new Info();
-        String title = normalizeTitle(infoDetails.getTitle());
-        info.setTitle(title);
-        info.setVersion(infoDetails.getVersion());
-        return info;
-    }
-
     private static String normalizeTitle(String title) {
-        String[] splits = (title.replaceFirst("/", "")).split(SPLIT_PATTERN);
-        StringBuilder stringBuilder = new StringBuilder();
-        if (splits.length > 1) {
-            for (String piece : splits) {
-                if (piece.isBlank()) {
-                    continue;
+        if (title != null) {
+            String[] splits = (title.replaceFirst("/", "")).split(SPLIT_PATTERN);
+            StringBuilder stringBuilder = new StringBuilder();
+            if (splits.length > 1) {
+                for (String piece : splits) {
+                    if (piece.isBlank()) {
+                        continue;
+                    }
+                    stringBuilder.append(piece.substring(0, 1).toUpperCase(Locale.ENGLISH)).append(piece.substring(1));
+                    stringBuilder.append(" ");
                 }
-                stringBuilder.append(piece.substring(0, 1).toUpperCase(Locale.ENGLISH) + piece.substring(1));
-                stringBuilder.append(" ");
+                title = stringBuilder.toString().trim();
+            } else if (splits.length == 1 && !splits[0].isBlank()) {
+                stringBuilder.append(splits[0].substring(0, 1).toUpperCase(Locale.ENGLISH))
+                        .append(splits[0].substring(1));
+                title = stringBuilder.toString().trim();
             }
-            title = stringBuilder.toString().trim();
-        } else if (splits.length == 1 && !splits[0].isBlank()) {
-            stringBuilder.append(splits[0].substring(0, 1).toUpperCase(Locale.ENGLISH) + splits[0].substring(1));
-            title = stringBuilder.toString().trim();
+            return title;
         }
-        return title;
+        return null;
     }
 
     // Set annotation details  for info section.
-    private static OASResult setAnnotationDetails(List<OpenAPIConverterDiagnostic> diagnostics, OpenAPI openAPI,
-                                          OpenAPIInfo infoDetails, AnnotationNode annotation) {
-        Info info = openAPI.getInfo();
+    private static OASResult setAnnotationDetails(List<OpenAPIConverterDiagnostic> diagnostics,
+                                                  AnnotationNode annotation) {
         Location location = annotation.location();
+        OpenAPI openAPI = new OpenAPI();
         Optional<MappingConstructorExpressionNode> content = annotation.annotValue();
         // If contract path there
         if (content.isPresent()) {
            SeparatedNodeList<MappingFieldNode> fields = content.get().fields();
            if (!fields.isEmpty()) {
-               OpenAPIInfo openAPIInfo = updateOpenAPIInfoModel(infoDetails, fields);
+               OpenAPIInfo openAPIInfo = updateOpenAPIInfoModel(fields);
                // process openapi according to annotation
-               if (openAPIInfo.getContractPath() != null) {
-                   return updateExistingContractOpenAPI(diagnostics, openAPI, location,
-                           openAPIInfo);
-               } if (openAPIInfo.getTitle() != null && openAPIInfo.getVersion() != null) {
-                   info.setTitle(openAPIInfo.getTitle());
-                   info.setVersion(openAPIInfo.getVersion());
-               } else if (openAPIInfo.getVersion() != null) {
-                   info.setVersion(openAPIInfo.getVersion());
-               } else {
-                   info.setTitle(openAPIInfo.getTitle());
+               if (openAPIInfo.getContractPath().isPresent()) {
+                   return updateExistingContractOpenAPI(diagnostics, location, openAPIInfo);
+               } else if (openAPIInfo.getTitle().isPresent() && openAPIInfo.getVersion().isPresent()) {
+                   openAPI.setInfo(new Info().version(openAPIInfo.getVersion().get()).title(normalizeTitle
+                           (openAPIInfo.getTitle().get())));
+               } else if (openAPIInfo.getVersion().isPresent()) {
+                   openAPI.getInfo().setVersion(openAPIInfo.getVersion().get());
+               } else if (openAPIInfo.getTitle().isPresent()) {
+                   openAPI.getInfo().setTitle(normalizeTitle(openAPIInfo.getTitle().get()));
                }
-               openAPI.setInfo(info);
            }
         }
         return new OASResult(openAPI, diagnostics);
     }
 
     private static OASResult updateExistingContractOpenAPI(List<OpenAPIConverterDiagnostic> diagnostics,
-                                                           OpenAPI openAPI, Location location,
-                                                           OpenAPIInfo openAPIInfo) {
+                                                           Location location, OpenAPIInfo openAPIInfo) {
+
         OASResult oasResult = resolveContractPath(diagnostics, location, openAPIInfo);
         Optional<OpenAPI> openAPI1 = oasResult.getOpenAPI();
         if (openAPI1.isPresent()) {
-            openAPI = openAPI1.get();
+            OpenAPI openAPI = openAPI1.get();
+            if (openAPIInfo.getVersion().isPresent() && openAPIInfo.getTitle().isPresent()) {
+                // read the openapi
+                openAPI.getInfo().setVersion(openAPIInfo.getVersion().get());
+                openAPI.getInfo().setTitle(openAPIInfo.getTitle().get());
+                diagnostics.addAll(oasResult.getDiagnostics());
+                return new OASResult(openAPI, oasResult.getDiagnostics());
+            } else if (openAPIInfo.getTitle().isPresent()) {
+                openAPI.getInfo().setTitle(openAPIInfo.getTitle().get());
+                return new OASResult(openAPI, oasResult.getDiagnostics());
+            } else if (openAPIInfo.getVersion().isPresent()) {
+                // TODO Check why this is pass even it is empty.
+                openAPI.getInfo().setVersion(openAPIInfo.getVersion().get());
+                return new OASResult(openAPI, oasResult.getDiagnostics());
+            } else {
+                return oasResult;
+            }
         }
-        Info info = openAPI.getInfo();
-        if (openAPIInfo.getVersion() != null && openAPIInfo.getTitle() != null) {
-            // read the openapi
-            info.setVersion(openAPIInfo.getVersion());
-            info.setTitle(openAPIInfo.getTitle());
-            diagnostics.addAll(oasResult.getDiagnostics());
-            return new OASResult(openAPI, diagnostics);
-        } else if (openAPIInfo.getTitle() != null) {
-            info.setTitle(openAPIInfo.getTitle());
-            openAPI.setInfo(info);
-            return new OASResult(openAPI, diagnostics);
-        } else if (openAPIInfo.getVersion() != null){
-            info.setVersion(openAPIInfo.getVersion());
-            info.setTitle(openAPI.getInfo().getTitle());
-            openAPI.setInfo(info);
-            return new OASResult(openAPI, diagnostics);
-        } else {
-            return oasResult;
-        }
+        return oasResult;
     }
 
-    private static OpenAPIInfo updateOpenAPIInfoModel(OpenAPIInfo openAPIInfo,
-                                                      SeparatedNodeList<MappingFieldNode> fields) {
+    private static OpenAPIInfo updateOpenAPIInfoModel(SeparatedNodeList<MappingFieldNode> fields) {
+        OpenAPIInfo openAPIInfo = new OpenAPIInfo();
         for (MappingFieldNode field: fields) {
             String fieldName = ((SpecificFieldNode) field).fieldName().toString().trim();
             Optional<ExpressionNode> value = ((SpecificFieldNode) field).valueExpr();
-            switch (fieldName) {
-                case "contract":
-                    openAPIInfo.setContractPath(value.map(expressionNode -> expressionNode.toString().trim())
-                            .orElse(openAPIInfo.getContractPath()));
-                    break;
-                case "title":
-                    openAPIInfo.setTitle(value.map(expressionNode -> expressionNode.toString().trim())
-                            .orElse(openAPIInfo.getTitle()));
-                    break;
-                case "version":
-                    openAPIInfo.setVersion(value.map(expressionNode -> expressionNode.toString().trim())
-                            .orElse(openAPIInfo.getVersion()));
-                    break;
-                default:
-                    break;
+            String fieldValue;
+            if (value.isPresent()) {
+                ExpressionNode expressionNode = value.get();
+                if (!expressionNode.toString().trim().isBlank()) {
+                    fieldValue = expressionNode.toString().trim().replaceAll("\"", "");
+                    if (!fieldValue.isBlank()) {
+                        switch (fieldName) {
+                            case "contract":
+                                openAPIInfo.setContractPath(fieldValue);
+                                break;
+                            case "title":
+                                openAPIInfo.setTitle(fieldValue);
+                                break;
+                            case "'version":
+                                openAPIInfo.setVersion(fieldValue);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
             }
         }
         return openAPIInfo;
@@ -489,7 +523,7 @@ public class ServiceToOpenAPIConverterUtils {
                                      OpenAPIInfo openAPIInfo) {
         OASResult oasResult;
         OpenAPI openAPI = null;
-        Path openapiPath = Paths.get(openAPIInfo.getContractPath().replaceAll("\"", "").trim());
+        Path openapiPath = Paths.get(openAPIInfo.getContractPath().get().replaceAll("\"", "").trim());
         Path relativePath = null;
         Path ballerinaFilePath = ServiceValidator.getBallerinaFilePath();
         if (openapiPath.toString().isBlank()) {
@@ -514,7 +548,7 @@ public class ServiceToOpenAPIConverterUtils {
         }
         if (relativePath != null && Files.exists(relativePath)) {
             oasResult = ConverterCommonUtils.parseOpenAPIFile(relativePath.toString());
-            if(oasResult.getOpenAPI().isPresent()) {
+            if (oasResult.getOpenAPI().isPresent()) {
                 openAPI = oasResult.getOpenAPI().get();
             }
             diagnostics.addAll(oasResult.getDiagnostics());

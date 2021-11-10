@@ -1,90 +1,93 @@
-///*
-// * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-// *
-// * WSO2 Inc. licenses this file to you under the Apache License,
-// * Version 2.0 (the "License"); you may not use this file except
-// * in compliance with the License.
-// * You may obtain a copy of the License at
-// *
-// *    http://www.apache.org/licenses/LICENSE-2.0
-// *
-// * Unless required by applicable law or agreed to in writing,
-// * software distributed under the License is distributed on an
-// * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// * KIND, either express or implied. See the License for the
-// * specific language governing permissions and limitations
-// * under the License.
-// */
-//
-//description = 'Ballerina to OpenAPI Integration  Tests'
-//
-//def ballerinaOpenApiModulePath = "${project.rootDir}/module-ballerina-openapi/"
-////def openApiServiceJar = "${project.rootDir}/openapi-bal-service/build/libs/openapi-bal-service-${version}.jar"
-////def ballerinaDistPath = "${ballerinaOpenApiModulePath}/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
-////def ballerinaDist = "${buildDir}/target/ballerina-distribution"
-//
-//dependencies {
-//    testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-//    testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
-//    testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
-//    testRuntime group: 'commons-io', name: 'commons-io', version: "${ballerinaLangVersion}"
-//    testRuntime project(':openapi-bal-service')
-//    testRuntime project(':module-bal-service')
-//    testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
-//
-//    balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
-//        transitive = false
-//    }
-//}
-//def bDistribution = file("$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
-//task jBallerinaPack {
-//    doLast {
-//        configurations.balTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-//            copy {
-//                from project.zipTree(artifact.getFile())
-//                into new File(project.buildDir, "extracted-distribution/")
-//            }
-//        }
-//    }
-//    outputs.dir bDistribution
-//}
-//
-//task unpackStdLibs() {
-//    dependsOn(jBallerinaPack)
-//    doLast {
-//        configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-//            copy {
-//                from project.zipTree(artifact.getFile())
-//                into new File("${project.buildDir}/extracted-distribution/" + artifact.name + "-zip")
-//            }
-//        }
-//    }
-//}
-//
-//task copyStdlibs(type: Copy) {
-//    dependsOn(unpackStdLibs)
-//    def ballerinaDist = "$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
-//    into ballerinaDist
-//
-//    /* Standard Libraries */
-//    configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-//        def artifactExtractedPath = "${project.buildDir}/extracted-distribution/" + artifact.name + "-zip"
-//        into("repo/bala") {
-//            from "${artifactExtractedPath}/bala/"
-//        }
-//        into("repo/cache") {
-//            from "${artifactExtractedPath}/cache"
-//        }
-//    }
-//}
-//
-//test {
-//    dependsOn {
-//        copyStdlibs
-//    }
-//    systemProperty "ballerina.home", bDistribution
-//
-//    useTestNG() {
-//        suites "src/test/resources/testng.xml"
-//    }
-//}
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+description = 'Ballerina to OpenAPI Integration Tests'
+apply from: "$rootDir/gradle/javaProject.gradle"
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
+
+configurations {
+    balTools
+}
+
+dependencies {
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
+    testImplementation "org.testng:testng:${testngVersion}"
+    testImplementation "net.lingala.zip4j:zip4j:${netLingalaZip4jVersion}"
+    testImplementation "commons-io:commons-io:${commonsIoVersion}"
+    testImplementation "org.apache.commons:commons-lang3:${commonsLang3Version}"
+
+    balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+        transitive = false
+    }
+}
+def ballerinaDistribution = file("$project.rootDir/module-ballerina-openapi/build/target/extracted-distributions/jballerina-tools-zip/")
+def bDistribution = file("$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
+def targetOpenApiModule = file("$project.rootDir/module-ballerina-openapi/build/")
+//def ballerinaDistribution = file("/home/hansani/Ballerina-OpenAPI-WorkPlace/ballerina-openapi/module-ballerina-openapi/build/target/extracted-distributions/jballerina-tools-zip/")
+task jBallerinaPack {
+    doLast {
+        copy {
+            from ballerinaDistribution
+            into new File(project.buildDir, "extracted-distribution/")
+        }
+    }
+}
+
+task copyOpenAPI() {
+    doLast {
+        copy {
+            from "${targetOpenApiModule}/cache_parent/bala"
+            into file("${bDistribution}/repo/bala/")
+        }
+        copy {
+            from file("${targetOpenApiModule}/cache_parent/cache")
+            exclude '**/*-testable.jar'
+            exclude '**/tests_cache/'
+            into("${bDistribution}/repo/cache/")
+        }
+
+        copy {
+            from file("${targetOpenApiModule}/lib_parent/libs")
+            into("${bDistribution}/bre/lib/")
+        }
+    }
+}
+
+test {
+    systemProperty "distributions.dir", bDistribution
+    systemProperty "target.dir", "$project.buildDir"
+    useTestNG() {
+        suites "src/test/resources/testng.xml"
+    }
+}
+
+compileJava {
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+    }
+}
+copyOpenAPI.dependsOn jBallerinaPack
+test.dependsOn copyOpenAPI
+test.dependsOn ":module-ballerina-openapi:build"

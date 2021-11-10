@@ -151,10 +151,58 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         try {
             cmd.execute();
             output = readOutput(true);
-            Path definitionPath = resourceDir.resolve("cmd/ballerina-to-openapi/hello_openapi.yaml");
+            Path definitionPath = resourceDir.resolve("cmd/ballerina-to-openapi/project_1/result.yaml");
             if (Files.exists(this.tmpDir.resolve("service_openapi.yaml"))) {
                 String generatedOpenAPI = getStringFromGivenBalFile(this.tmpDir.resolve("service_openapi.yaml"));
-                System.out.println(generatedOpenAPI);
+                String expectedYaml = getStringFromGivenBalFile(definitionPath);
+                Assert.assertEquals(expectedYaml, generatedOpenAPI);
+
+            }
+        } catch (BLauncherException | IOException e) {
+            output = e.toString();
+            Assert.fail(output);
+        }
+    }
+
+    @Test(description = "OpenAPI Annotation with ballerina to openapi")
+    public void openapiAnnotationWithOutContract() {
+        Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/project_2/service.bal"));
+        String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+
+        String output = "";
+        try {
+            cmd.execute();
+            output = readOutput(true);
+            Path definitionPath = resourceDir.resolve("cmd/ballerina-to-openapi/project_2/result.yaml");
+            if (Files.exists(this.tmpDir.resolve("service_openapi.yaml"))) {
+                String generatedOpenAPI = getStringFromGivenBalFile(this.tmpDir.resolve("service_openapi.yaml"));
+                String expectedYaml = getStringFromGivenBalFile(definitionPath);
+                Assert.assertEquals(expectedYaml, generatedOpenAPI);
+            }
+        } catch (BLauncherException | IOException e) {
+            output = e.toString();
+            Assert.fail(output);
+        }
+    }
+
+    @Test(description = "OpenAPI Annotation with ballerina to openapi")
+    public void openapiAnnotationWithoutFields() {
+        Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/project_3/service.bal"));
+        String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+
+        String output = "";
+        try {
+            cmd.execute();
+            output = readOutput(true);
+            Path definitionPath = resourceDir.resolve("cmd/ballerina-to-openapi/project_3/result.yaml");
+            if (Files.exists(this.tmpDir.resolve("service_openapi.yaml"))) {
+                String generatedOpenAPI = getStringFromGivenBalFile(this.tmpDir.resolve("service_openapi.yaml"));
+                String expectedYaml = getStringFromGivenBalFile(definitionPath);
+                Assert.assertEquals(expectedYaml, generatedOpenAPI);
             }
         } catch (BLauncherException | IOException e) {
             output = e.toString();
@@ -166,7 +214,8 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(System.lineSeparator()));
         expectedServiceLines.close();
-        return expectedServiceContent;
+        return expectedServiceContent.trim().replaceAll("\\s+", "").replaceAll(System.lineSeparator(), "");
+//        return expectedServiceContent;
     }
 
     @AfterTest

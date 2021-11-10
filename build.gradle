@@ -31,6 +31,9 @@ apply plugin: "org.javamodularity.moduleplugin"
 
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.testngVersion = project.testngVersion
+ext.commonsLang3Version = project.commonsLang3Version
+ext.commonsIoVersion = project.commonsIoVersion
+ext.netLingalaZip4jVersion = project.netLingalaZip4jVersion
 ext.slf4jVersion = project.slf4jVersion
 ext.stdlibIoVersion = project.stdlibIoVersion
 ext.stdlibLogVersion = project.stdlibLogVersion
