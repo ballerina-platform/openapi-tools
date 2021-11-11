@@ -28,6 +28,8 @@ import org.ballerinalang.langserver.commons.workspace.WorkspaceManager;
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 import org.eclipse.lsp4j.jsonrpc.services.JsonSegment;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -72,15 +74,20 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                         ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.orElseThrow(),
                                 semanticModel.orElseThrow(), null, false, null);
                 //Response should handle
-                if (!yamlContent.isEmpty()) {
+                if (semanticModel.isEmpty() || syntaxTree.isEmpty()) {
+                    StringBuilder errorString = getErrorMessage(syntaxTree, semanticModel);
+                    response.setYamlContent(errorString.toString());
+                } else if (!yamlContent.isEmpty()) {
                     Map.Entry<String, String> content = yamlContent.entrySet().iterator().next();
                     response.setYamlContent(content.getValue());
                 } else {
                     response.setYamlContent("Error occurred while generating yaml");
                 }
             } catch (Throwable e) {
-                // Throw a exceptions.
-                response.setYamlContent("Error occurred while generating yaml :" + e.getLocalizedMessage());
+                // Throw an exceptions.
+                StringWriter sw = new StringWriter();
+                e.printStackTrace(new PrintWriter(sw));
+                response.setYamlContent("Error occurred while generating yaml : " + sw.toString());
             }
             return response;
         });
@@ -94,5 +101,17 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             // ignore
         }
         return Optional.empty();
+    }
+
+    // Generate error message.
+    private StringBuilder getErrorMessage(Optional<SyntaxTree> syntaxTree, Optional<SemanticModel> semanticModel) {
+        StringBuilder errorString = new StringBuilder();
+        if (syntaxTree.isEmpty()) {
+            errorString.append("Error while generating syntax tree.").append(System.lineSeparator());
+        }
+        if (semanticModel.isEmpty()) {
+            errorString.append("Error while generating semantic model.");
+        }
+        return errorString;
     }
 }
