@@ -72,16 +72,16 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 if (semanticModel.isEmpty() || syntaxTree.isEmpty()) {
                     StringBuilder errorString = getErrorMessage(syntaxTree, semanticModel);
                     response.setYamlContent(errorString.toString());
-                }
-                Map<String, String> yamlContent =
-                        ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.get(),
-                                semanticModel.get(), null, false, null);
-                Map.Entry<String, String> content = yamlContent.entrySet().iterator().next();
-
-                if (!yamlContent.isEmpty()) {
-                    response.setYamlContent(content.getValue());
                 } else {
-                    response.setYamlContent("Error occurred while generating yaml");
+                    Map<String, String> yamlContent =
+                            ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.get(),
+                                    semanticModel.get(), null, false, null);
+                    Map.Entry<String, String> content = yamlContent.entrySet().iterator().next();
+                    if (!yamlContent.isEmpty()) {
+                        response.setYamlContent(content.getValue());
+                    } else {
+                        response.setYamlContent("Error occurred while generating yaml");
+                    }
                 }
             } catch (Throwable e) {
                 // Throw an exceptions.
