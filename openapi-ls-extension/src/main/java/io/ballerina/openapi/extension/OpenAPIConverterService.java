@@ -19,10 +19,21 @@
 
 package io.ballerina.openapi.extension;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.service.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.projects.Document;
+import io.ballerina.projects.DocumentId;
+import io.ballerina.projects.Module;
+import io.ballerina.tools.diagnostics.Location;
 import org.ballerinalang.annotation.JavaSPIService;
 import org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService;
 import org.ballerinalang.langserver.commons.workspace.WorkspaceManager;
@@ -52,13 +63,6 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
     @Override
     public void init(LanguageServer langServer, WorkspaceManager workspaceManager) {
         this.workspaceManager = workspaceManager;
-    }
-
-    public OpenAPIConverterService(WorkspaceManager workspaceManager) {
-        this.workspaceManager = workspaceManager;
-    }
-
-    public OpenAPIConverterService() {
     }
 
     @Override
@@ -100,28 +104,91 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
     }
 
     /**
-     * This API is used to return the List of {@code OASResult} that containing all the service node generated yaml
-     * content, json content, openapi content and all diagnostics and error message if generation failed.
+     * This API is used to return the Json Array of {@code OASResult} that containing all the service node generated
+     * yaml content, json content, openapi content and all diagnostics and error message if generation failed.
      */
     @JsonRequest
     public CompletableFuture<OpenAPIConverterResponse> generateOpenAPI(OpenAPIConverterRequest request) {
         return CompletableFuture.supplyAsync(() -> {
             OpenAPIConverterResponse response = new OpenAPIConverterResponse();
-            String fileUri = request.getDocumentFilePath();
-            Optional<SyntaxTree> syntaxTree = getPathFromURI(fileUri).flatMap(workspaceManager::syntaxTree);
-            Optional<SemanticModel> semanticModel = getPathFromURI(fileUri).flatMap(workspaceManager::semanticModel);
-            if (semanticModel.isEmpty() || syntaxTree.isEmpty()) {
-                StringBuilder errorString = getErrorMessage(syntaxTree, semanticModel);
-                response.setError(errorString.toString());
-            } else {
-                response.setError(null);
-                List<OASResult> oasResult = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.get(),
-                        semanticModel.get(), null, false, null);
-                //Response handle with returning list of {@code OASResult} model.
-                response.setContent(oasResult);
+            Path filePath = Path.of(request.getDocumentFilePath());
+            Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(filePath);
+            Optional<Module> module = workspaceManager.module(filePath);
+
+            if (semanticModel.isEmpty()) {
+                response.setError("Error while generating semantic model.");
+                return response;
             }
+            if (module.isEmpty()) {
+                response.setError("Error while getting the module.");
+                return response;
+            }
+            Module defaultModule = module.get();
+            JsonArray specs = new JsonArray();
+            for (DocumentId currentDocumentID : defaultModule.documentIds()) {
+                Document document = defaultModule.document(currentDocumentID);
+
+                SyntaxTree syntaxTree = document.syntaxTree();
+                List<OASResult> oasResults = ServiceToOpenAPIConverterUtils.generateOAS3Definition(
+                        syntaxTree, semanticModel.get(), null, false, null);
+
+                generateServiceJson(response, document.name(), oasResults, specs);
+            }
+            response.setContent(specs);
             return response;
         });
+    }
+
+    /**
+     * Generate openAPI json for a service.
+     * @param response OpenAPIConverterResponse to set error message
+     * @param documentName Ballerina document name
+     * @param oasResults OAS Results list
+     * @param specs Specs array to add the service
+     */
+    private void generateServiceJson(OpenAPIConverterResponse response, String documentName,
+                                     List<OASResult> oasResults, JsonArray specs) {
+        for (OASResult oasResult : oasResults) {
+            if (oasResult.getOpenAPI().isPresent()) {
+                if (oasResult.getJson().isPresent()) {
+                    JsonObject spec = new JsonObject();
+                    JsonElement json = JsonParser.parseString(oasResult.getJson().get()).getAsJsonObject();
+                    JsonArray diagnosticsJson = getDiagnosticsJson(oasResult);
+
+                    spec.addProperty("serviceName",
+                            documentName + " - " + oasResult.getOpenAPI().get().getInfo().getTitle());
+                    spec.add("spec", json);
+                    spec.add("diagnostics", diagnosticsJson);
+                    specs.add(spec);
+                }
+            } else {
+                response.setError("Error occurred while generating yaml.");
+            }
+        }
+    }
+
+    /**
+     * Generate and returns the diagnostics data in OAS Result.
+     * @param oasResult OASResult
+     * @return Json Array of diagnostics
+     */
+    private JsonArray getDiagnosticsJson(OASResult oasResult) {
+        List<OpenAPIConverterDiagnostic> diagnostics = oasResult.getDiagnostics();
+        JsonArray diagnosticsJson = new JsonArray();
+        for (OpenAPIConverterDiagnostic diagnostic : diagnostics) {
+            JsonObject diagnosticJson = new JsonObject();
+            diagnosticJson.addProperty("message", diagnostic.getMessage());
+            diagnosticJson.addProperty("severity", diagnostic.getDiagnosticSeverity().name());
+            Optional<Location> diagnosticLocation = diagnostic.getLocation();
+            if (diagnosticLocation.isPresent()) {
+                GsonBuilder builder = new GsonBuilder();
+                builder.serializeNulls();
+                Gson gson = builder.create();
+                diagnosticJson.add("location", gson.toJsonTree(diagnosticLocation.get().lineRange()));
+            }
+            diagnosticsJson.add(diagnosticJson);
+        }
+        return diagnosticsJson;
     }
 
     // Generate error message.
