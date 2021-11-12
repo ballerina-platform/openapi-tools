@@ -169,8 +169,8 @@ public class FunctionSignatureGenerator {
             for (Parameter parameter: parameters) {
                 if (parameter.getDescription() != null) {
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(getValidName(
-                                            parameter.getName(), false)), parameter.getDescription());
+                            DocCommentsGenerator.createAPIParamDoc(getValidName(
+                                            parameter.getName(), false), parameter.getDescription());
                     remoteFunctionDoc.add(paramAPIDoc);
                 }
                 List<AnnotationNode> parameterAnnotationNodeList =
@@ -254,8 +254,8 @@ public class FunctionSignatureGenerator {
                 }
             }
             MarkdownParameterDocumentationLineNode paramAPIDoc =
-                    DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(getValidName(
-                            parameter.getName(), false)), deprecatedDescription);
+                    DocCommentsGenerator.createAPIParamDoc(getValidName(
+                            parameter.getName(), false), deprecatedDescription);
             deprecatedParamDocComments.add(paramAPIDoc);
             parameterAnnotationNodeList.add(createAnnotationNode(createToken(AT_TOKEN),
                     createSimpleNameReferenceNode(createIdentifierToken("deprecated")), null));
@@ -302,11 +302,11 @@ public class FunctionSignatureGenerator {
         if (parameter.getRequired()) {
             typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
             IdentifierToken paramName =
-                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
+                    createIdentifierToken(getValidName(parameter.getName().trim(), false));
             return createRequiredParameterNode(parameterAnnotationNodeList, typeName, paramName);
         } else {
             IdentifierToken paramName =
-                    createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(), false)));
+                    createIdentifierToken(getValidName(parameter.getName().trim(), false));
             // Handle given default values in query parameter.
             if (parameterSchema.getDefault() != null) {
                 typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
@@ -341,8 +341,7 @@ public class FunctionSignatureGenerator {
     public Node getPathParameters(Parameter parameter, NodeList<AnnotationNode> parameterAnnotationNodeList)
             throws BallerinaOpenApiException {
 
-        IdentifierToken paramName = createIdentifierToken(escapeIdentifier(
-                getValidName(parameter.getName(), false)));
+        IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName(), false));
         String type = "";
         Schema parameterSchema = parameter.getSchema();
         if (parameterSchema.get$ref() != null) {
@@ -381,12 +380,12 @@ public class FunctionSignatureGenerator {
             }
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(type));
-            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(),
-                    false)));
+            IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(),
+                    false));
             return createRequiredParameterNode(parameterAnnotationNodeList, typeName, paramName);
         } else {
-            IdentifierToken paramName = createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(),
-                    false)));
+            IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(),
+                    false));
             if (schema.getDefault() != null) {
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                         createIdentifierToken(convertOpenAPITypeToBallerina(
