@@ -33,6 +33,7 @@ import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
+import io.ballerina.projects.Project;
 import io.ballerina.tools.diagnostics.Location;
 import org.ballerinalang.annotation.JavaSPIService;
 import org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService;
@@ -58,6 +59,13 @@ import java.util.concurrent.CompletableFuture;
 @JavaSPIService("org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService")
 @JsonSegment("openAPILSExtension")
 public class OpenAPIConverterService implements ExtendedLanguageServerService {
+    public static final String SERVICE_NAME = "serviceName";
+    public static final String SPEC = "spec";
+    public static final String DIAGNOSTICS = "diagnostics";
+    public static final String MESSAGE = "message";
+    public static final String SEVERITY = "severity";
+    public static final String LOCATION = "location";
+    public static final String FILE = "file";
     private WorkspaceManager workspaceManager;
 
     @Override
@@ -113,7 +121,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             OpenAPIConverterResponse response = new OpenAPIConverterResponse();
             Path filePath = Path.of(request.getDocumentFilePath());
             Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(filePath);
-            Optional<Module> module = workspaceManager.module(filePath);
+            Optional<Project> module = workspaceManager.project(filePath);
 
             if (semanticModel.isEmpty()) {
                 response.setError("Error while generating semantic model.");
@@ -123,7 +131,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 response.setError("Error while getting the module.");
                 return response;
             }
-            Module defaultModule = module.get();
+            Module defaultModule = module.get().currentPackage().getDefaultModule();
             JsonArray specs = new JsonArray();
             for (DocumentId currentDocumentID : defaultModule.documentIds()) {
                 Document document = defaultModule.document(currentDocumentID);
@@ -132,7 +140,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 List<OASResult> oasResults = ServiceToOpenAPIConverterUtils.generateOAS3Definition(
                         syntaxTree, semanticModel.get(), null, false, null);
 
-                generateServiceJson(response, document.name(), oasResults, specs);
+                generateServiceJson(response, document.syntaxTree().filePath(), oasResults, specs);
             }
             response.setContent(specs);
             return response;
@@ -142,29 +150,30 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
     /**
      * Generate openAPI json for a service.
      *
-     * @param response OpenAPIConverterResponse to set error message
-     * @param documentName Ballerina document name
-     * @param oasResults OAS Results list
-     * @param specs Specs array to add the service
+     * @param response     OpenAPIConverterResponse to set error message
+     * @param document     Ballerina document path
+     * @param oasResults   OAS Results list
+     * @param specs        Specs array to add the service
      */
-    private void generateServiceJson(OpenAPIConverterResponse response, String documentName,
+    private void generateServiceJson(OpenAPIConverterResponse response, String document,
                                      List<OASResult> oasResults, JsonArray specs) {
         for (OASResult oasResult : oasResults) {
-            if (oasResult.getOpenAPI().isPresent()) {
-                if (oasResult.getJson().isPresent()) {
-                    JsonObject spec = new JsonObject();
-                    JsonElement json = JsonParser.parseString(oasResult.getJson().get()).getAsJsonObject();
-                    JsonArray diagnosticsJson = getDiagnosticsJson(oasResult);
-
-                    spec.addProperty("serviceName",
-                            documentName + " - " + oasResult.getOpenAPI().get().getInfo().getTitle());
-                    spec.add("spec", json);
-                    spec.add("diagnostics", diagnosticsJson);
-                    specs.add(spec);
-                }
-            } else {
+            if (oasResult.getOpenAPI().isEmpty()) {
                 response.setError("Error occurred while generating yaml.");
+                continue;
             }
+            if (oasResult.getJson().isEmpty()) {
+                continue;
+            }
+            JsonObject spec = new JsonObject();
+            JsonElement json = JsonParser.parseString(oasResult.getJson().get()).getAsJsonObject();
+            JsonArray diagnosticsJson = getDiagnosticsJson(oasResult);
+
+            spec.addProperty(SERVICE_NAME, oasResult.getOpenAPI().get().getInfo().getTitle());
+            spec.addProperty(FILE, document);
+            spec.add(SPEC, json);
+            spec.add(DIAGNOSTICS, diagnosticsJson);
+            specs.add(spec);
         }
     }
 
@@ -179,14 +188,14 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
         JsonArray diagnosticsJson = new JsonArray();
         for (OpenAPIConverterDiagnostic diagnostic : diagnostics) {
             JsonObject diagnosticJson = new JsonObject();
-            diagnosticJson.addProperty("message", diagnostic.getMessage());
-            diagnosticJson.addProperty("severity", diagnostic.getDiagnosticSeverity().name());
+            diagnosticJson.addProperty(MESSAGE, diagnostic.getMessage());
+            diagnosticJson.addProperty(SEVERITY, diagnostic.getDiagnosticSeverity().name());
             Optional<Location> diagnosticLocation = diagnostic.getLocation();
             if (diagnosticLocation.isPresent()) {
                 GsonBuilder builder = new GsonBuilder();
                 builder.serializeNulls();
                 Gson gson = builder.create();
-                diagnosticJson.add("location", gson.toJsonTree(diagnosticLocation.get().lineRange()));
+                diagnosticJson.add(LOCATION, gson.toJsonTree(diagnosticLocation.get().lineRange()));
             }
             diagnosticsJson.add(diagnosticJson);
         }
