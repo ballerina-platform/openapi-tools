@@ -215,7 +215,6 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(System.lineSeparator()));
         expectedServiceLines.close();
         return expectedServiceContent.trim().replaceAll("\\s+", "").replaceAll(System.lineSeparator(), "");
-//        return expectedServiceContent;
     }
 
     @AfterTest

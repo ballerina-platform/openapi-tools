@@ -152,7 +152,6 @@ public class OpenApiCmd implements BLauncherCmd {
                 }
             } else if (fileName.endsWith(BAL_EXTENSION)) {
                 ballerinaToOpenApi(fileName);
-                exitError(this.exitWhenFinish);
             } else {
                 outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
                 exitError(this.exitWhenFinish);

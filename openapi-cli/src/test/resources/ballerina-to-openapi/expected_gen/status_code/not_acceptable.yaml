@@ -1,0 +1,25 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "8090"
+paths:
+  /hello:
+    get:
+      operationId: operation_get_/hello
+      responses:
+        "406":
+          description: NotAcceptable
+        "500":
+          description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}

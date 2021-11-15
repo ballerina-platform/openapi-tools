@@ -170,7 +170,7 @@ public class Constants {
         aMap.put("Forbidden", "403");
         aMap.put("NotFound", "404");
         aMap.put("MethodNotAllowed", "405");
-        aMap.put("NotAccepted", "406");
+        aMap.put("NotAcceptable", "406");
         aMap.put("ProxyAuthenticationRequires", "407");
         aMap.put("RequestTimeOut", "408");
         aMap.put("Conflict", "409");
@@ -211,5 +211,10 @@ public class Constants {
 
     public static final String TRUE = "true";
     public static final String FALSE = "false";
+    public static final String SLASH = "/";
+    public static final String CONTRACT = "contract";
+    public static final String VERSION = "'version";
+    public static final String TITLE = "title";
+
 
 }

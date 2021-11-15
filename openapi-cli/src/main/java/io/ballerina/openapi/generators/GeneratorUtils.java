@@ -294,7 +294,7 @@ public class GeneratorUtils {
         if (isSchema) {
             return identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1);
         } else {
-            return identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1);
+            return escapeIdentifier(identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1));
         }
     }
 
