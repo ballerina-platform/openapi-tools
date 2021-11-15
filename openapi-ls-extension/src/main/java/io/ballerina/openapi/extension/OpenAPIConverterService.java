@@ -27,6 +27,7 @@ import org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerSe
 import org.ballerinalang.langserver.commons.workspace.WorkspaceManager;
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 import org.eclipse.lsp4j.jsonrpc.services.JsonSegment;
+import org.eclipse.lsp4j.services.LanguageServer;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -47,11 +48,9 @@ import java.util.concurrent.CompletableFuture;
 public class OpenAPIConverterService implements ExtendedLanguageServerService {
     private WorkspaceManager workspaceManager;
 
-    public OpenAPIConverterService(WorkspaceManager workspaceManager) {
+    @Override
+    public void init(LanguageServer languageServer, WorkspaceManager workspaceManager) {
         this.workspaceManager = workspaceManager;
-    }
-
-    public OpenAPIConverterService() {
     }
 
     @Override
@@ -68,19 +67,25 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 Optional<Path> documentPath = getPathFromURI(fileUri);
                 Optional<SyntaxTree> syntaxTree = workspaceManager.syntaxTree(documentPath.orElseThrow());
                 Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(documentPath.orElseThrow());
-                Map<String, String> yamlContent =
-                        ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.orElseThrow(),
-                                semanticModel.orElseThrow(), null, false, null);
+
                 //Response should handle
-                if (!yamlContent.isEmpty()) {
-                    Map.Entry<String, String> content = yamlContent.entrySet().iterator().next();
-                    response.setYamlContent(content.getValue());
+                if (semanticModel.isEmpty() || syntaxTree.isEmpty()) {
+                    StringBuilder errorString = getErrorMessage(syntaxTree, semanticModel);
+                    response.setYamlContent(errorString.toString());
                 } else {
-                    response.setYamlContent("Error occurred while generating yaml");
+                    Map<String, String> yamlContent =
+                            ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree.get(),
+                                    semanticModel.get(), null, false, null);
+                    Map.Entry<String, String> content = yamlContent.entrySet().iterator().next();
+                    if (!yamlContent.isEmpty()) {
+                        response.setYamlContent(content.getValue());
+                    } else {
+                        response.setYamlContent("Error occurred while generating yaml");
+                    }
                 }
             } catch (Throwable e) {
-                // Throw a exceptions.
-                response.setYamlContent("Error occurred while generating yaml :" + e.getLocalizedMessage());
+                // Throw an exceptions.
+                response.setYamlContent("Error occurred while generating yaml : " + e.getMessage());
             }
             return response;
         });
@@ -94,5 +99,17 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             // ignore
         }
         return Optional.empty();
+    }
+
+    // Generate error message.
+    private StringBuilder getErrorMessage(Optional<SyntaxTree> syntaxTree, Optional<SemanticModel> semanticModel) {
+        StringBuilder errorString = new StringBuilder();
+        if (syntaxTree.isEmpty()) {
+            errorString.append("Error while generating syntax tree.").append(System.lineSeparator());
+        }
+        if (semanticModel.isEmpty()) {
+            errorString.append("Error while generating semantic model.");
+        }
+        return errorString;
     }
 }
