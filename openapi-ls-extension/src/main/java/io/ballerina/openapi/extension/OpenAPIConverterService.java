@@ -141,6 +141,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
 
     /**
      * Generate openAPI json for a service.
+     *
      * @param response OpenAPIConverterResponse to set error message
      * @param documentName Ballerina document name
      * @param oasResults OAS Results list
@@ -169,6 +170,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
 
     /**
      * Generate and returns the diagnostics data in OAS Result.
+     *
      * @param oasResult OASResult
      * @return Json Array of diagnostics
      */
