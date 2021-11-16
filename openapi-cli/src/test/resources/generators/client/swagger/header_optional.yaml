@@ -51,6 +51,26 @@ paths:
             type: integer
           x-ballerina-display:
             label: Units
+        - description: 'ID list'
+          in: header
+          name: idList
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+          x-ballerina-display:
+            label: ID List
+        - description: 'Location list'
+          in: header
+          name: locationList
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Location'
+          x-ballerina-display:
+            label: Location List
       x-ballerina-display:
         label: "Weather Forecast"
       responses:
@@ -80,6 +100,13 @@ tags:
 components:
   schemas:
     WeatherForecast:
+      type: object
+      properties:
+        lat:
+          type: number
+        lon:
+          type: number
+    Location:
       type: object
       properties:
         lat:

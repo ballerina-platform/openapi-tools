@@ -24,10 +24,11 @@ public isolated client class Client {
     #
     # + xRequestId - Tests header 01
     # + xRequestClient - Tests header 02
+    # + xRequestPet - Tests header 03
     # + return - Expected response to a valid request
-    remote isolated function showPetById(string xRequestId, string[] xRequestClient) returns http:Response|error {
+    remote isolated function showPetById(string xRequestId, string[] xRequestClient, Pet[] xRequestPet) returns http:Response|error {
         string  path = string `/pets`;
-        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-API-KEY": self.apiKeyConfig.xApiKey};
+        map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet, "X-API-KEY": self.apiKeyConfig.xApiKey};
         map<string|string[]> accHeaders = getMapForHeaders(headerValues);
         http:Response response = check self.clientEp-> get(path, accHeaders);
         return response;
