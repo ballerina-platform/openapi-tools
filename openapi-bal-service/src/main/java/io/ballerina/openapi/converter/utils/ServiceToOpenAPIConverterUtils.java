@@ -19,6 +19,8 @@
 package io.ballerina.openapi.converter.utils;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -83,7 +85,7 @@ public class ServiceToOpenAPIConverterUtils {
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
             extractListenersAndServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode,
-                    endpoints);
+                    endpoints, semanticModel);
 
             // If there are no services found for a given service name.
             if (serviceName != null && servicesToGenerate.isEmpty()) {
@@ -121,7 +123,8 @@ public class ServiceToOpenAPIConverterUtils {
     private static void extractListenersAndServiceNodes(String serviceName, List<String> availableService,
                                                         List<ServiceDeclarationNode> servicesToGenerate,
                                                         ModulePartNode modulePartNode,
-                                                        List<ListenerDeclarationNode> endpoints) {
+                                                        List<ListenerDeclarationNode> endpoints,
+                                                        SemanticModel semanticModel) {
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
             // Load a listen_declaration for the server part in the yaml spec
@@ -132,7 +135,13 @@ public class ServiceToOpenAPIConverterUtils {
             // Load a service Node
             if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                 ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
-                extractServiceDeclarationNodes(serviceName, availableService, servicesToGenerate, serviceNode);
+                Optional<Symbol> symbol = semanticModel.symbol(serviceNode);
+                if (symbol.isPresent()) {
+                    ServiceDeclarationSymbol serviceSymbol = (ServiceDeclarationSymbol) symbol.get();
+                    if (ConverterCommonUtils.isHttpService(serviceSymbol.getModule().get())) {
+                        extractServiceDeclarationNodes(serviceName, availableService, servicesToGenerate, serviceNode);
+                    }
+                }
             }
         }
     }

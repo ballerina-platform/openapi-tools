@@ -40,6 +40,7 @@ public class ExceptionDiagnostic implements OpenAPIConverterDiagnostic {
         this.location = location;
     }
 
+    @Override
     public String getCode() {
         return code;
     }

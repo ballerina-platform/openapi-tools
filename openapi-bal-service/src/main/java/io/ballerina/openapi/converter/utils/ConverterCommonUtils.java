@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.converter.utils;
 
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -210,5 +211,11 @@ public class ConverterCommonUtils {
         public TextRange textRange() {
             return TextRange.from(0, 0);
         }
+    }
+
+    public static boolean isHttpService(ModuleSymbol moduleSymbol) {
+        Optional<String> moduleNameOpt = moduleSymbol.getName();
+        return moduleNameOpt.isPresent() && Constants.HTTP.equals(moduleNameOpt.get())
+                && Constants.BALLERINA.equals(moduleSymbol.id().orgName());
     }
 }
