@@ -133,6 +133,7 @@ public class GeneratorConstants {
     public static final String RECORD = "record";
     public static final String IDENTIFIER = "identifier";
     public static final String TYPE_NAME = "typeName";
+
     // auth related constants
     public static final String API_KEY = "apikey";
     public static final String API_KEYS_CONFIG = "ApiKeysConfig";
