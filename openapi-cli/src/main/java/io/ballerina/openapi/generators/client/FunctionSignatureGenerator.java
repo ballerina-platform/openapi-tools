@@ -84,6 +84,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.ErrorMessages.invalidPathParamType;
+import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.generators.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
@@ -291,11 +293,11 @@ public class FunctionSignatureGenerator {
                     String itemType = arraySchema.getItems().getType();
                     if (itemType.equals("string") || itemType.equals("integer") || itemType.equals("boolean")
                             || itemType.equals("number")) {
-                        paramType = convertOpenAPITypeToBallerina(itemType) + "[]";
+                        paramType = convertOpenAPITypeToBallerina(itemType) + SQUARE_BRACKETS;
                     }
                 } else if (arraySchema.getItems().get$ref() != null) {
                     paramType = getValidName(extractReferenceType(
-                            arraySchema.getItems().get$ref().trim()), true) + "[]";
+                            arraySchema.getItems().get$ref().trim()), true) + SQUARE_BRACKETS;
                 }
             }
         }
@@ -368,17 +370,16 @@ public class FunctionSignatureGenerator {
     private Node getHeaderParameter(Parameter parameter, NodeList<AnnotationNode> parameterAnnotationNodeList)
             throws BallerinaOpenApiException {
         Schema schema = parameter.getSchema();
-        if (parameter.getRequired()) {
-            String type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
-
-            if (schema instanceof ArraySchema) {
-                ArraySchema arraySchema = (ArraySchema) schema;
-                if (arraySchema.getItems().get$ref() != null) {
-                    type = extractReferenceType(arraySchema.getItems().get$ref()) + "[]";
-                } else {
-                    type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType().trim()) + "[]";
-                }
+        String type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
+        if (schema instanceof ArraySchema) {
+            ArraySchema arraySchema = (ArraySchema) schema;
+            if (arraySchema.getItems().get$ref() != null) {
+                type = extractReferenceType(arraySchema.getItems().get$ref()) + SQUARE_BRACKETS;
+            } else {
+                type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType().trim()) + SQUARE_BRACKETS;
             }
+        }
+        if (parameter.getRequired()) {
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(type));
             IdentifierToken paramName = createIdentifierToken(escapeIdentifier(getValidName(parameter.getName().trim(),
@@ -407,8 +408,7 @@ public class FunctionSignatureGenerator {
                         createToken(EQUAL_TOKEN), literalValueToken);
             } else {
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(convertOpenAPITypeToBallerina(
-                                parameter.getSchema().getType().trim()) + "?"));
+                        createIdentifierToken(type + NILLABLE));
                 NilLiteralNode nilLiteralNode =
                         createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
                 return createDefaultableParameterNode(parameterAnnotationNodeList, typeName, paramName,

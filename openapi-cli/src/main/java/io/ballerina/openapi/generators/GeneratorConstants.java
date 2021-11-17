@@ -246,4 +246,9 @@ public class GeneratorConstants {
     public static final String NUMBER = "number";
     public static final Integer MAX_ARRAY_LENGTH = 2147483637;
     public static final String NILLABLE = "?";
+    public static final String SQUARE_BRACKETS = "[]";
+    public static final String BAL_EXTENSION = ".bal";
+    public static final String JSON_EXTENSION = ".json";
+    public static final String YAML_EXTENSION = ".yaml";
+    public static final String YML_EXTENSION = ".yml";
 }
