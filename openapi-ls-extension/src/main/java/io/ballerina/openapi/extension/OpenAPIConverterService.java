@@ -59,13 +59,13 @@ import java.util.concurrent.CompletableFuture;
 @JavaSPIService("org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService")
 @JsonSegment("openAPILSExtension")
 public class OpenAPIConverterService implements ExtendedLanguageServerService {
-    public static final String SERVICE_NAME = "serviceName";
-    public static final String SPEC = "spec";
-    public static final String DIAGNOSTICS = "diagnostics";
-    public static final String MESSAGE = "message";
-    public static final String SEVERITY = "severity";
-    public static final String LOCATION = "location";
-    public static final String FILE = "file";
+    private static final String SERVICE_NAME = "serviceName";
+    private static final String SPEC = "spec";
+    private static final String DIAGNOSTICS = "diagnostics";
+    private static final String MESSAGE = "message";
+    private static final String SEVERITY = "severity";
+    private static final String LOCATION = "location";
+    private static final String FILE = "file";
     private WorkspaceManager workspaceManager;
 
     @Override
@@ -128,7 +128,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 return response;
             }
             if (module.isEmpty()) {
-                response.setError("Error while getting the module.");
+                response.setError("Error while getting the project.");
                 return response;
             }
             Module defaultModule = module.get().currentPackage().getDefaultModule();
