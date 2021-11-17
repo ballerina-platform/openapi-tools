@@ -84,6 +84,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.ErrorMessages.invalidPathParamType;
+import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
@@ -388,26 +389,30 @@ public class FunctionSignatureGenerator {
                     false));
             if (schema.getDefault() != null) {
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(convertOpenAPITypeToBallerina(
-                                parameter.getSchema().getType().trim())));
+                        createIdentifierToken(convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim())));
                 LiteralValueToken literalValueToken;
                 if (schema.getType().equals("string")) {
                     literalValueToken = createLiteralValueToken(null,
                             '"' + schema.getDefault().toString() + '"', createEmptyMinutiaeList(),
                             createEmptyMinutiaeList());
                 } else {
-                    literalValueToken =
-                            createLiteralValueToken(null, schema.getDefault().toString(),
-                                    createEmptyMinutiaeList(),
-                                    createEmptyMinutiaeList());
-
+                    literalValueToken = createLiteralValueToken(null, schema.getDefault().toString(),
+                                    createEmptyMinutiaeList(), createEmptyMinutiaeList());
                 }
                 return createDefaultableParameterNode(parameterAnnotationNodeList, typeName, paramName,
                         createToken(EQUAL_TOKEN), literalValueToken);
             } else {
+                String type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim()) + NILLABLE;
+                if (schema instanceof ArraySchema) {
+                    ArraySchema arraySchema = (ArraySchema) schema;
+                    if (arraySchema.getItems().get$ref() != null) {
+                        type = extractReferenceType(arraySchema.getItems().get$ref()) + "[]?";
+                    } else {
+                        type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType().trim()) + "[]?";
+                    }
+                }
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(convertOpenAPITypeToBallerina(
-                                parameter.getSchema().getType().trim()) + "?"));
+                        createIdentifierToken(type));
                 NilLiteralNode nilLiteralNode =
                         createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
                 return createDefaultableParameterNode(parameterAnnotationNodeList, typeName, paramName,
