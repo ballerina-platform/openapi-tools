@@ -1,6 +1,5 @@
 import ballerina/http;
 
-# refComponent
 public isolated client class Client {
     final http:Client clientEp;
     # Gets invoked to initialize the `connector`.
@@ -8,21 +7,21 @@ public isolated client class Client {
     # + clientConfig - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://petstore.swagger.io:443/v2") returns error? {
+    public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "http://petstore.{host}.io/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
         return;
     }
-    # Request Body has nested allOf.
+    # Create a pet
     #
-    # + payload - A JSON object containing pet information
-    # + return - OK
-    remote isolated function postXMLUser(Path01Body payload) returns http:Response|error {
-        string  path = string `/path01`;
+    # + return - Null response
+    remote isolated function createPet(byte[] payload) returns http:Response|error {
+        string path = string `/pets`;
         http:Request request = new;
-        json jsonBody = check payload.cloneWithType(json);
-        request.setPayload(jsonBody, "application/json");
+        string encodedRequestBody = payload.toBase64();
+        request.setPayload(encodedRequestBody, "application/octet-stream");
         http:Response response = check self.clientEp->post(path, request);
         return response;
     }
 }
+

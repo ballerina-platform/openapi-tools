@@ -47,9 +47,8 @@ public class OAuth2Tests {
             BallerinaOpenApiException {
         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false,
                 true);
-        GeneratorUtils generatorUtils = new GeneratorUtils();
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2/" + yamlFile);
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedConfigRecord = configRecord;
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
@@ -106,9 +105,8 @@ public class OAuth2Tests {
     public void unsupportedSecuritySchemaCombination() throws IOException, BallerinaOpenApiException {
         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(true,
                 true);
-        GeneratorUtils generatorUtils = new GeneratorUtils();
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2/unsupported_security_schema.yaml");
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
     }

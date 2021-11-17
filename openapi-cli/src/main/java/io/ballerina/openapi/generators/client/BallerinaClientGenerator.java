@@ -126,7 +126,6 @@ public class BallerinaClientGenerator {
     private final OpenAPI openAPI;
     private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
-    private final GeneratorUtils generatorUtils;
     private final List<String> remoteFunctionNameList;
     private String serverURL;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
@@ -166,7 +165,6 @@ public class BallerinaClientGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, nullable);
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
-        this.generatorUtils = new GeneratorUtils();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
@@ -447,7 +445,7 @@ public class BallerinaClientGenerator {
                     if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
                         // Generate remote function only if it is available in tag filter or operation filter or both
                         if (operationTags != null || ((!filterOperations.isEmpty()) && (operationId != null))) {
-                            if (generatorUtils.hasTags(operationTags, filterTags) ||
+                            if (GeneratorUtils.hasTags(operationTags, filterTags) ||
                                     ((operationId != null) && filterOperations.contains(operationId.trim()))) {
                                 // Generate remote function
                                 FunctionDefinitionNode functionDefinitionNode =
@@ -541,13 +539,12 @@ public class BallerinaClientGenerator {
                 }
             }
         }
-        GeneratorUtils generatorUtils = new GeneratorUtils();
         if (selectedServer.getUrl() == null) {
             serverURL = "http://localhost:9090/v1";
         } else if (selectedServer.getVariables() != null) {
             ServerVariables variables = selectedServer.getVariables();
             URL url;
-            String resolvedUrl = generatorUtils.buildUrl(selectedServer.getUrl(), variables);
+            String resolvedUrl = GeneratorUtils.buildUrl(selectedServer.getUrl(), variables);
             try {
                 url = new URL(resolvedUrl);
                 serverURL = url.toString();

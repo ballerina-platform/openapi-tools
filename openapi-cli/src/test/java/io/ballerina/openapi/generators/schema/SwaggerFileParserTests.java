@@ -32,26 +32,25 @@ import java.nio.file.Paths;
  */
 public class SwaggerFileParserTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    GeneratorUtils parser = new GeneratorUtils();
 
     @Test(description = "Test invalid file path",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI contract doesn't exist in the given .*")
     public void testInvalidFilePath() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = parser.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("user.yaml"));
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("user.yaml"));
     }
 
     @Test(description = "Test invalid file type",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Invalid file type.*")
     public void testInvalidFileType() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = parser.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/petstore.txt"));
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/petstore.txt"));
     }
 
     @Test(description = "Test invalid swagger file ",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
     public void testInvalidFile() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = parser.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/invalid.yaml"));
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/invalid.yaml"));
     }
 }
