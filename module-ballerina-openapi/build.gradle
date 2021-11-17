@@ -294,7 +294,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ballerina-platform/ballerina-openapi")
+            url = uri("https://maven.pkg.github.com/ballerina-platform/openapi-tools")
             credentials {
                 username = System.getenv("packageUser")
                 password = System.getenv("packagePAT")
