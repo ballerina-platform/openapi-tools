@@ -88,24 +88,35 @@ public class FunctionBodyNodeTests {
                         "http:Response response = check self.clientEp-> delete(path);" +
                         "return response;}"},
                 {"diagnostic_files/json_payload.yaml", "/pets", "{string  path = string `/pets`;" +
-                        "http:Request request = new; request.setPayload(payload); " +
+                        "http:Request request = new; request.setPayload(payload, \"application/json\"); " +
                         "http:Response response = check self.clientEp->" +
                         "post(path, request); " +
                         "return response;}"},
                 {"diagnostic_files/xml_payload.yaml", "/pets", "{string  path = string `/pets`; " +
                         "http:Request request = new;" +
-                        "request.setPayload(payload); " +
+                        "request.setPayload(payload, \"application/xml\"); " +
                         "http:Response response = check self.clientEp->post(path, request);" +
                         "return response;}"},
                 {"diagnostic_files/xml_payload_with_ref.yaml", "/pets", "{string  path = string `/pets`;" +
                         "http:Request request = new;" +
                         "json jsonBody = check payload.cloneWithType(json);" +
                         "xml? xmlBody = check xmldata:fromJson(jsonBody);" +
-                        "request.setPayload(xmlBody);" +
+                        "request.setPayload(xmlBody, \"application/xml\");" +
                         "http:Response response = check self.clientEp->post(path, request);" +
                         "return response;}"},
                 {"swagger/response_type_order.yaml", "/pet/{petId}", "{string path = string `/pet/${petId}`;" +
                         "Pet response = check self.clientEp->get(path);" +
+                        "return response;}"},
+                {"swagger/text_request_payload.yaml", "/pets", "{string path = string `/pets`;" +
+                        "http:Request request = new;" +
+                        "json jsonBody = check payload.cloneWithType(json);" +
+                        "request.setPayload(jsonBody, \"text/json\");" +
+                        "json response = check self.clientEp->post(path, request);" +
+                        "return response;}"},
+                {"swagger/pdf_payload.yaml", "/pets", "{string path = string `/pets`;" +
+                        "http:Request request = new;" +
+                        "request.setPayload(payload, \"application/pdf\");" +
+                        "http:Response response = check self.clientEp->post(path, request);" +
                         "return response;}"}
         };
     }

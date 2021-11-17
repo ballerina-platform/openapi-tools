@@ -18,7 +18,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
-        request.setPayload(xmlBody);
+        request.setPayload(xmlBody, "application/xml");
         http:Response  response = check self.clientEp->post(path, request);
         return response;
     }
