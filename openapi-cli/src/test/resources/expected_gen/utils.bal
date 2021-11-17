@@ -15,9 +15,9 @@ enum EncodingStyle {
     PIPEDELIMITED
 }
 
-type SimpleBasicType string|boolean|int|float|decimal;
-
 final Encoding & readonly defaultEncoding = {};
+
+type SimpleBasicType string|boolean|int|float|decimal;
 
 # Serialize the record according to the deepObject style.
 #

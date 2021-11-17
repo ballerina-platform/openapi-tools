@@ -100,10 +100,13 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
             // Load a service declarations for the path part in the yaml spec
             if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                 ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
-                location = serviceDeclarationNode.location();
-                // Check annotation is available
-                kind = getDiagnosticFromServiceNode(functions, kind, filters, semanticModel, syntaxTree,
-                        ballerinaFilePath, serviceDeclarationNode);
+                Optional<MetadataNode> metadata = serviceDeclarationNode.metadata();
+                if (metadata.isPresent()) {
+                    location = serviceDeclarationNode.location();
+                    // Check annotation is available
+                    kind = getDiagnosticFromServiceNode(functions, kind, filters, semanticModel, syntaxTree,
+                            ballerinaFilePath, serviceDeclarationNode);
+                }
             }
         }
         if (!validations.isEmpty()) {

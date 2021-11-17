@@ -38,6 +38,8 @@ import java.util.stream.Stream;
  * OpenAPI command test suit.
  */
 public class OpenAPICmdTest extends OpenAPICommandTest {
+    private static final String LINE_SEPARATOR = System.lineSeparator();
+
     @BeforeTest(description = "This will create a new ballerina project for testing below scenarios.")
     public void setupBallerinaProject() throws IOException {
         super.setup();
@@ -82,7 +84,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
         String expectedSchemaContent = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
-            expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
+            expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
@@ -93,7 +95,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             //Compare schema contents
             String generatedSchema = "";
             try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
-                generatedSchema = generatedSchemaLines.collect(Collectors.joining("\n"));
+                generatedSchema = generatedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
             } catch (IOException e) {
                 Assert.fail(e.getMessage());
             }
@@ -112,6 +114,46 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
+    @Test(description = "Check the type content in openapi-to-ballerina command when using to generate both " +
+            "client and service")
+    public void testSuccessfulTypeBalGeneration() throws IOException {
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_type.yaml"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema_type.bal"));
+        String expectedSchemaContent = "";
+        try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
+            expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("client.bal")) &&
+                Files.exists(this.tmpDir.resolve("petstore_type_service.bal")) &&
+                Files.exists(this.tmpDir.resolve("types.bal")) &&
+                Files.exists(this.tmpDir.resolve("tests/test.bal"))) {
+            //Compare schema contents
+            String generatedSchema = "";
+            try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
+                generatedSchema = generatedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
+            expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
+            if (expectedSchemaContent.equals(generatedSchema)) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.fail("Expected content and actual generated content is mismatched for: "
+                        + petstoreYaml.toString());
+            }
+            deleteGeneratedFiles(false);
+        } else {
+            Assert.fail("Type generation failed. : " + readOutput(true));
+        }
+    }
+
     @Test(description = "Test openapi to ballerina generation with license headers")
     public void testGenerationWithLicenseHeaders() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
@@ -125,7 +167,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "petstore_schema_with_license.bal"));
         String expectedSchemaContent = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
-            expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
+            expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
@@ -136,7 +178,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             //Compare schema contents
             String generatedSchema = "";
             try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
-                generatedSchema = generatedSchemaLines.collect(Collectors.joining("\n"));
+                generatedSchema = generatedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
             } catch (IOException e) {
                 Assert.fail(e.getMessage());
             }
@@ -144,12 +186,11 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
             if (expectedSchemaContent.equals(generatedSchema)) {
                 Assert.assertTrue(true);
-                deleteGeneratedFiles(false);
             } else {
                 Assert.fail("Expected content and actual generated content is mismatched for: "
                         + petstoreYaml.toString());
-                deleteGeneratedFiles(false);
             }
+            deleteGeneratedFiles(false);
         } else {
             Assert.fail("Code generation failed. : " + readOutput(true));
         }
@@ -168,7 +209,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "generated_client_with_license.bal"));
         String expectedClientContent = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
-            expectedClientContent = expectedSchemaLines.collect(Collectors.joining("\n"));
+            expectedClientContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
@@ -179,7 +220,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             //Compare schema contents
             String generatedClientContent = "";
             try (Stream<String> generatedClientLines = Files.lines(this.tmpDir.resolve("client.bal"))) {
-                generatedClientContent = generatedClientLines.collect(Collectors.joining("\n"));
+                generatedClientContent = generatedClientLines.collect(Collectors.joining(LINE_SEPARATOR));
             } catch (IOException e) {
                 Assert.fail(e.getMessage());
             }
@@ -210,7 +251,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "client_filtered_by_tags.bal"));
         String expectedClientContent = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedClientFile)) {
-            expectedClientContent = expectedSchemaLines.collect(Collectors.joining("\n"));
+            expectedClientContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
@@ -221,7 +262,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             //Compare client contents
             String generatedClientContent = "";
             try (Stream<String> generatedClientLines = Files.lines(this.tmpDir.resolve("client.bal"))) {
-                generatedClientContent = generatedClientLines.collect(Collectors.joining("\n"));
+                generatedClientContent = generatedClientLines.collect(Collectors.joining(LINE_SEPARATOR));
             } catch (IOException e) {
                 Assert.fail(e.getMessage());
             }
@@ -253,7 +294,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "bearer_config.toml"));
         String expectedConfig = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedConfigFilePath)) {
-            expectedConfig = expectedSchemaLines.collect(Collectors.joining("\n"));
+            expectedConfig = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
@@ -265,7 +306,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             //Compare schema contents
             String generatedConfig = "";
             try (Stream<String> configContent = Files.lines(this.tmpDir.resolve("tests/Config.toml"))) {
-                generatedConfig = configContent.collect(Collectors.joining("\n"));
+                generatedConfig = configContent.collect(Collectors.joining(LINE_SEPARATOR));
             } catch (IOException e) {
                 Assert.fail(e.getMessage());
             }
@@ -310,7 +351,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
         String expectedSchemaContent = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
-            expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining("\n"));
+            expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
@@ -321,7 +362,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             //Compare schema contents
             String generatedSchema = "";
             try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
-                generatedSchema = generatedSchemaLines.collect(Collectors.joining("\n"));
+                generatedSchema = generatedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
             } catch (IOException e) {
                 Assert.fail(e.getMessage());
             }
@@ -340,21 +381,6 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test ballerina to openapi")
-    public void testBallerinaToOpenAPIGeneration() {
-        Path petstoreBal = resourceDir.resolve(Paths.get("bal-files/ballerinaFile.bal"));
-        String[] args = {"--input", petstoreBal.toString(), "-o", this.tmpDir.toString()};
-        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
-        new CommandLine(cmd).parseArgs(args);
-
-        String output = "";
-        try {
-            cmd.execute();
-        } catch (BLauncherException e) {
-            output = e.getDetailedMessages().get(0);
-            Assert.fail(output);
-        }
-    }
 
     // Delete the generated files
     private void deleteGeneratedFiles(boolean isConfigGenerated) throws IOException {

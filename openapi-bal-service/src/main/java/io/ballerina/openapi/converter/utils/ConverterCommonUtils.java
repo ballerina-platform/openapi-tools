@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
- 
+
 package io.ballerina.openapi.converter.utils;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
@@ -33,6 +33,10 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
+import io.ballerina.tools.diagnostics.Location;
+import io.ballerina.tools.text.LinePosition;
+import io.ballerina.tools.text.LineRange;
+import io.ballerina.tools.text.TextRange;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
@@ -112,7 +116,7 @@ public class ConverterCommonUtils {
         if (!identifier.matches("\\b[0-9]*\\b")) {
             String[] split = identifier.split(Constants.ESCAPE_PATTERN);
             StringBuilder validName = new StringBuilder();
-            for (String part: split) {
+            for (String part : split) {
                 if (!part.isBlank()) {
                     if (split.length > 1) {
                         part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
@@ -129,14 +133,14 @@ public class ConverterCommonUtils {
     /**
      * This util function uses to take the field value from annotation field.
      *
-     * @param annotations           - Annotation node list
-     * @param annotationReference   - Annotation reference that needs to extract
-     * @param annotationField       - Annotation field name that uses to take value
-     * @return                      - string value of field
+     * @param annotations         - Annotation node list
+     * @param annotationReference - Annotation reference that needs to extract
+     * @param annotationField     - Annotation field name that uses to take value
+     * @return - string value of field
      */
     public static Optional<String> extractServiceAnnotationDetails(NodeList<AnnotationNode> annotations,
-                                                                  String annotationReference, String annotationField) {
-        for (AnnotationNode annotation: annotations) {
+                                                                   String annotationReference, String annotationField) {
+        for (AnnotationNode annotation : annotations) {
             Node annotReference = annotation.annotReference();
             if (annotReference.toString().trim().equals(annotationReference) && annotation.annotValue().isPresent()) {
                 MappingConstructorExpressionNode listOfAnnotValue = annotation.annotValue().get();
@@ -190,5 +194,21 @@ public class ConverterCommonUtils {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * This {@code NullLocation} represents the null location allocation for scenarios which has not location.
+     */
+    public static class NullLocation implements Location {
+        @Override
+        public LineRange lineRange() {
+            LinePosition from = LinePosition.from(0, 0);
+            return LineRange.from("", from, from);
+        }
+
+        @Override
+        public TextRange textRange() {
+            return TextRange.from(0, 0);
+        }
     }
 }

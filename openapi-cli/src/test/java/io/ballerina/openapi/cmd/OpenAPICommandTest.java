@@ -118,7 +118,7 @@ public abstract class OpenAPICommandTest {
     //Convert file content to one string.
     public String getStringFromFile(Path filePath) throws IOException {
         Stream<String> serviceLines = Files.lines(filePath);
-        String generatedService = serviceLines.collect(Collectors.joining("\n"));
+        String generatedService = serviceLines.collect(Collectors.joining(System.lineSeparator()));
         serviceLines.close();
         return generatedService;
     }

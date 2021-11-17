@@ -78,6 +78,9 @@ public class Constants {
     public static final String OCTECT_STREAM_POSTFIX = "+octet-stream";
     public static final String TEXT_PREFIX = "text/";
     public static final String MAP_JSON = "map<json>";
+    public static final String HTTP_REQUEST = "http:Request";
+    public static final String DEFAULT = "default";
+    public static final String HTTP_RESPONSE = "http:Response";
 
     /**
      * Enum to select the Ballerina Type.
@@ -167,7 +170,7 @@ public class Constants {
         aMap.put("Forbidden", "403");
         aMap.put("NotFound", "404");
         aMap.put("MethodNotAllowed", "405");
-        aMap.put("NotAccepted", "406");
+        aMap.put("NotAcceptable", "406");
         aMap.put("ProxyAuthenticationRequires", "407");
         aMap.put("RequestTimeOut", "408");
         aMap.put("Conflict", "409");

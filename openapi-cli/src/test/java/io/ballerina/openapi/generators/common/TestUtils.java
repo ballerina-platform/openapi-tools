@@ -58,6 +58,7 @@ public class TestUtils {
     private static final Path clientPath = RES_DIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RES_DIR.resolve("ballerina_project/types.bal");
     private static final Path utilPath = RES_DIR.resolve("ballerina_project/utils.bal");
+    private static final String LINE_SEPARATOR = System.lineSeparator();
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
@@ -80,9 +81,9 @@ public class TestUtils {
     //Get string as a content of ballerina file
     public static String getStringFromGivenBalFile(Path expectedServiceFile) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile);
-        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
+        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(LINE_SEPARATOR));
         expectedServiceLines.close();
-        return expectedServiceContent.replaceAll("\n", "");
+        return expectedServiceContent.replaceAll(LINE_SEPARATOR, "");
     }
 
     public static void compareGeneratedSyntaxTreeWithExpectedSyntaxTree(Path path, SyntaxTree syntaxTree)
@@ -90,7 +91,7 @@ public class TestUtils {
 
         String expectedBallerinaContent = getStringFromGivenBalFile(path);
         String generatedSyntaxTree = syntaxTree.toString();
-        generatedSyntaxTree = generatedSyntaxTree.replaceAll("\n", "");
+        generatedSyntaxTree = generatedSyntaxTree.replaceAll(LINE_SEPARATOR, "");
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.equals(expectedBallerinaContent));
@@ -142,7 +143,7 @@ public class TestUtils {
 
     public static String  getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
-        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
+        String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(LINE_SEPARATOR));
         expectedServiceLines.close();
         return expectedServiceContent;
     }
