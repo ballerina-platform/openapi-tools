@@ -412,7 +412,7 @@ public class FunctionSignatureGenerator {
                     }
                 }
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(type + NILLABLE));
+                        createIdentifierToken(type));
                 NilLiteralNode nilLiteralNode =
                         createNilLiteralNode(createToken(OPEN_PAREN_TOKEN), createToken(CLOSE_PAREN_TOKEN));
                 return createDefaultableParameterNode(parameterAnnotationNodeList, typeName, paramName,
