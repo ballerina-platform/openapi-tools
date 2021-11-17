@@ -9,7 +9,7 @@ allow you to validate a service implementation against an OpenAPI contract durin
 ensures that the implementation of a service does not deviate from its OpenAPI contract.
 
 ### Report Issues
-To report bugs, request new features, start new discussions, etc., go to the [open issues](https://github.com/ballerina-platform/ballerina-openapi/issues).
+To report bugs, request new features, start new discussions, etc., go to the [open issues](https://github.com/ballerina-platform/openapi-tools/issues).
 
 ### Useful Links
 
