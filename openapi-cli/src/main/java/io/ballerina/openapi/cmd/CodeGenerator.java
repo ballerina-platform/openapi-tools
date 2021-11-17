@@ -153,11 +153,12 @@ public class CodeGenerator {
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genFiles = new ArrayList<>();
-        genFiles.addAll(generateBalSource(GEN_SERVICE, definitionPath, serviceName, filter, nullable));
-        genFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, serviceName, filter,
+        List<GenSrcFile> genSrcFiles = generateBalSource(GEN_SERVICE, definitionPath, serviceName, filter, nullable)
+                .stream().filter(genSrcFile -> !genSrcFile.getFileName().equals(TYPE_FILE_NAME))
+                        .collect(Collectors.toList());
+        genSrcFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, serviceName, filter,
                 nullable));
-        List<GenSrcFile> newGenFiles = genFiles.stream().filter(distinctByKey(
+        List<GenSrcFile> newGenFiles = genSrcFiles.stream().filter(distinctByKey(
                 GenSrcFile::getFileName)).collect(Collectors.toList());
         writeGeneratedSources(newGenFiles, srcPath, implPath, type);
     }
@@ -613,13 +614,12 @@ public class CodeGenerator {
      * @throws BallerinaOpenApiException
      */
     public OpenAPI normalizeOpenAPI(Path openAPIPath, boolean isClient) throws IOException, BallerinaOpenApiException {
-        GeneratorUtils generatorUtils = new GeneratorUtils();
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
         if (isClient) {
             validateOperationIds(openAPI.getPaths().entrySet());
             validateRequestBody(openAPI.getPaths().entrySet());
         } else {
-            generatorUtils.setOperationId(openAPI.getPaths());
+            GeneratorUtils.setOperationId(openAPI.getPaths());
         }
 
         if (openAPI.getComponents() != null) {

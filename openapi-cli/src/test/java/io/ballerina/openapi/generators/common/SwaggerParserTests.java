@@ -39,14 +39,13 @@ import java.util.stream.Stream;
 public class SwaggerParserTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-    private GeneratorUtils generatorUtils = new GeneratorUtils();
 
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
     public void generateHandleUnsupportedData() throws  IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/invalid.yaml");
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
     }

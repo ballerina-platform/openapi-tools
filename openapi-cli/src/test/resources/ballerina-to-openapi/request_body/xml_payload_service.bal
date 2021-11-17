@@ -4,8 +4,7 @@
 
  service /payloadXml on helloEp {
 
-     resource function post hi02(http:Caller caller, http:Request request, @http:Payload {} xml payload) {
-
+     resource function post hi02(@http:Payload {} xml payload) {
      }
  }
 

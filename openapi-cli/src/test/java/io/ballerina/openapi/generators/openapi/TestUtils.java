@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import org.testng.Assert;
 
 import java.io.File;
@@ -50,7 +49,7 @@ public class TestUtils {
     }
 
     public static void compareWithGeneratedFile(Path ballerinaFilePath, String yamlFile)
-            throws OpenApiConverterException, IOException {
+            throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);

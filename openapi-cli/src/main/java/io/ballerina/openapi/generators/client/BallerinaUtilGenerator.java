@@ -212,9 +212,10 @@ public class BallerinaUtilGenerator {
      */
     private void getUtilTypeDeclarationNodes(List<ModuleMemberDeclarationNode> memberDeclarationNodes) {
         if (requestBodyEncodingFound || queryParamsFound) {
-            memberDeclarationNodes.addAll(Arrays.asList(
-                    getEncodingRecord(), getStyleEnum(), getSimpleBasicTypeDefinitionNode(), getDefaultEncoding()
-            ));
+            memberDeclarationNodes.addAll(Arrays.asList(getEncodingRecord(), getStyleEnum(), getDefaultEncoding()));
+        }
+        if (requestBodyEncodingFound || queryParamsFound || headersFound) {
+            memberDeclarationNodes.add(getSimpleBasicTypeDefinitionNode());
         }
     }
 

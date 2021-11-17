@@ -1,0 +1,78 @@
+openapi: 3.0.1
+info:
+  title: Hello
+  version: 1.0.0
+servers:
+  - url: "{server}:{port}/hello"
+    variables:
+      server:
+        default: http://petstore.openapi.io
+      port:
+        default: "80"
+paths:
+  /pet/{id}:
+    get:
+      summary: Getting pet by givning petId
+      operationId: "operation_get_/pet/{id}"
+      parameters:
+        - name: id
+          in: path
+          description: 'Pet Id '
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /pets:
+    get:
+      summary: Getting all the pets in the list
+      operationId: operation_get_/pets
+      parameters:
+        - name: offset
+          in: query
+          description: Number of retriving items
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+  /hello:
+    get:
+      operationId: operation_get_/hello
+      parameters:
+        - name: pet
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+components:
+  schemas:
+    Pet:
+      required:
+        - name
+        - petId
+      type: object
+      properties:
+        petId:
+          type: integer
+          format: int32
+        name:
+          type: string
+        petType:
+          type: string
