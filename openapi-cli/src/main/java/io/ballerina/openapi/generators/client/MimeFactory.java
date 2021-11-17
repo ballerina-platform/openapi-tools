@@ -67,7 +67,7 @@ public class MimeFactory {
             String mediaType = mediaTypeEntry.getKey();
             if (mediaType.contains(JSON)) {
                 return new JsonType();
-            } else if (mediaType.startsWith(TEXT_PREFIX) || mediaType.contains(PDF)) {
+            } else if (mediaType.startsWith(TEXT_PREFIX) || mediaType.contains(PDF) || mediaType.startsWith("image") || mediaType.equals("*/*")) {
                 return new DefaultType();
             } else if (mediaType.contains(XML)) {
                 return new XmlType(imports);

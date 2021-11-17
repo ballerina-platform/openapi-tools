@@ -140,6 +140,7 @@ public class GeneratorConstants {
     public static final String PDF = "pdf";
     public static final String TEXT_PREFIX = "text/";
     public static final String XML_DATA = "xmldata";
+    public static final String IMAGE = "image";
 
     // auth related constants
     public static final String API_KEY = "apikey";
