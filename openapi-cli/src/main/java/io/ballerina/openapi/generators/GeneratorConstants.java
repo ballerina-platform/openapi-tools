@@ -136,8 +136,12 @@ public class GeneratorConstants {
     public static final String BINARY = "binary";
     public static final String DOUBLE = "double";
     public static final String FLOAT = "float";
+    public static final String HEADER = "header";
+    public static final String HEADER_VALUES = "headerValues";
     public static final String PAYLOAD = "payload";
     public static final String PDF = "pdf";
+    public static final String QUERY_PARAM = "queryParam";
+    public static final String SELF = "self";
     public static final String TEXT_PREFIX = "text/";
     public static final String XML_DATA = "xmldata";
 
@@ -148,6 +152,7 @@ public class GeneratorConstants {
     public static final String API_KEY_CONFIG_RECORD_FIELD = "apiKeys";
     public static final String AUTH = "auth";
     public static final String AUTH_CONFIG = "authConfig";
+    public static final String AUTH_CONFIG_RECORD = "AuthConfig";
     public static final String BASIC = "basic";
     public static final String BEARER = "bearer";
     public static final String REFRESH_TOKEN = "refresh_token";
