@@ -51,6 +51,8 @@ public class SchemaFactory {
             new ArrayList<>(Arrays.asList(INTEGER, NUMBER, STRING, BOOLEAN));
 
     /**
+     * Get SchemaType object relevant to the schema given.
+     *
      * @param openAPI     OpenAPI definition
      * @param schemaValue Schema object
      * @param nullable    Indicates whether the user has given ``nullable command line option
@@ -71,11 +73,8 @@ public class SchemaFactory {
             return new PrimitiveSchemaType(nullable);
         } else if (schemaValue.get$ref() != null) {
             return new ReferencedSchemaType(openAPI, nullable);
-        } else if (schemaValue.getType() == null) {
+        } else { // when schemaValue.type == null
             return new AnyDataSchemaType(nullable);
-        } else {
-            // TODO: Provide more details in error message
-            throw new BallerinaOpenApiException("Unsupported OAS schema is found`");
         }
     }
 }

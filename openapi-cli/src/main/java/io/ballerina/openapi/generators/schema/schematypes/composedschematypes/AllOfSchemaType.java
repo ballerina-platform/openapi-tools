@@ -36,7 +36,6 @@ import io.ballerina.openapi.generators.schema.SchemaUtils;
 import io.ballerina.openapi.generators.schema.schematypes.SchemaType;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
@@ -129,24 +128,26 @@ public class AllOfSchemaType extends SchemaType {
                     SchemaUtils.addRecordFields
                             (allOfSchema.getRequired(), recordFieldList, field, this.nullable, this.openAPI);
                 }
-            } else if (allOfSchema instanceof ComposedSchema) {
-                ComposedSchema allOfNested = (ComposedSchema) allOfSchema;
-                if (allOfNested.getAllOf() != null) {
-                    for (Schema nestedSchema : allOfNested.getAllOf()) {
-                        if (nestedSchema instanceof ObjectSchema) {
-                            ObjectSchema objectSchema = (ObjectSchema) nestedSchema;
-                            List<String> requiredField = objectSchema.getRequired();
-                            Map<String, Schema> properties = objectSchema.getProperties();
-                            // TODO: add api documentation
-                            for (Map.Entry<String, Schema> field : properties.entrySet()) {
-                                SchemaUtils.addRecordFields
-                                        (requiredField, recordFieldList, field, this.nullable, this.openAPI);
-                            }
-                        }
-                    }
-                }
-                // TODO handle OneOf, AnyOf
             }
+//            TODO: Address nested coposed schemas
+//            else if (allOfSchema instanceof ComposedSchema) {
+//                ComposedSchema allOfNested = (ComposedSchema) allOfSchema;
+//                if (allOfNested.getAllOf() != null) {
+//                    for (Schema nestedSchema : allOfNested.getAllOf()) {
+//                        if (nestedSchema instanceof ObjectSchema) {
+//                            ObjectSchema objectSchema = (ObjectSchema) nestedSchema;
+//                            List<String> requiredField = objectSchema.getRequired();
+//                            Map<String, Schema> properties = objectSchema.getProperties();
+//                            // TODO: add api documentation
+//                            for (Map.Entry<String, Schema> field : properties.entrySet()) {
+//                                SchemaUtils.addRecordFields
+//                                        (requiredField, recordFieldList, field, this.nullable, this.openAPI);
+//                            }
+//                        }
+//                    }
+//                }
+//                // TODO handle OneOf, AnyOf
+//            }
         }
         NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
         return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD), createToken(OPEN_BRACE_TOKEN),

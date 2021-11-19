@@ -40,7 +40,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocume
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.ANYDATA_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
@@ -90,16 +89,13 @@ public class ArraySchemaType extends SchemaType {
     /**
      * Generate TypeDescriptorNode for array type schemas. If array type is not given, type will be `AnyData`
      */
+    @Override
     public TypeDescriptorNode generateTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         String fieldTypeNameStr;
-        if (arraySchema.getItems() != null) {
-            fieldTypeNameStr = SchemaUtils.getSchemaType
-                    (arraySchema.getItems(), this.nullable, this.openAPI).toString().trim();
-        } else {
-            fieldTypeNameStr = ANYDATA_KEYWORD.stringValue().trim();
-        }
+        fieldTypeNameStr = SchemaUtils.getSchemaType
+                (arraySchema.getItems(), this.nullable, this.openAPI).toString().trim();
         if (fieldTypeNameStr.endsWith(NILLABLE)) {
             fieldTypeNameStr = fieldTypeNameStr.substring(0, fieldTypeNameStr.length() - 1);
         }

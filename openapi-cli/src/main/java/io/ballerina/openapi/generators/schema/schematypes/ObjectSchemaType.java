@@ -117,6 +117,7 @@ public class ObjectSchemaType extends SchemaType {
     /**
      * Generate TypeDescriptorNode for object type schemas.
      */
+    @Override
     public TypeDescriptorNode generateTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
         if (schema.getProperties() != null) {
             Map<String, Schema> properties = schema.getProperties();

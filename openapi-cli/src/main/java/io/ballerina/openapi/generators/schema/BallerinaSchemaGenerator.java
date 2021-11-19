@@ -128,6 +128,14 @@ public class BallerinaSchemaGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
+    /**
+     * Create Type Definition Node for a given OpenAPI schema.
+     *
+     * @param schema   OpenAPI schema
+     * @param typeName IdentifierToken of the name of the type
+     * @return {@link TypeDefinitionNode}
+     * @throws BallerinaOpenApiException when unsupported schema type is found
+     */
     public TypeDefinitionNode getTypeDefinitionNode(Schema schema, String typeName, List<Node> schemaDocs)
             throws BallerinaOpenApiException {
         IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(getValidName(
@@ -140,6 +148,11 @@ public class BallerinaSchemaGenerator {
                 schemaDocs, typeAnnotations);
     }
 
+    /**
+     * @param schema OpenAPI schema
+     * @return {@link TypeDescriptorNode}
+     * @throws BallerinaOpenApiException when unsupported schema type is found
+     */
     public TypeDescriptorNode getTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
         SchemaType schemaType = schemaFactory.getSchemaType(openAPI, schema, isNullable);
         return schemaType.generateTypeDescriptorNode(schema);

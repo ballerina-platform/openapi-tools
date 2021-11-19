@@ -49,6 +49,8 @@ public abstract class SchemaType {
             throws BallerinaOpenApiException;
 
     /**
+     * Create Type Descriptor Node for a given OpenAPI schema.
+     *
      * @param schema OpenAPI schema
      * @return {@link TypeDescriptorNode}
      * @throws BallerinaOpenApiException when unsupported schema type is found

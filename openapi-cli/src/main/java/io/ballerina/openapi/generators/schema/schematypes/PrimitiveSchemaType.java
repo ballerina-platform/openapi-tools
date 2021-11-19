@@ -86,6 +86,7 @@ public class PrimitiveSchemaType extends SchemaType {
     /**
      * Generate TypeDescriptorNode for primitive type schemas.
      */
+    @Override
     public TypeDescriptorNode generateTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
         String typeDescriptorName = convertOpenAPITypeToBallerina(schema.getType().trim());
         if (schema.getType().equals(NUMBER)) {

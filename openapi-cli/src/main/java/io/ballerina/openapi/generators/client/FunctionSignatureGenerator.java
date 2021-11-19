@@ -457,16 +457,8 @@ public class FunctionSignatureGenerator {
                 // The requestBody only can have oneOf and anyOf data types
                 ComposedSchema composedSchema = (ComposedSchema) schema;
                 paramType = getRequestBodyParameterForComposedSchema(operationId, paramType, composedSchema);
-            } else if (schema instanceof ObjectSchema) {
-                ObjectSchema objectSchema = (ObjectSchema) schema;
-                if (objectSchema.getProperties() != null) {
-                    // Generate properties
-                    paramType = generateRecordForInlineRequestBody(operationId, requestBody,
-                            objectSchema, objectSchema.getRequired());
-                }
-            } else if (schema.getProperties() != null) {
-                paramType = generateRecordForInlineRequestBody(operationId, requestBody, schema,
-                        schema.getRequired());
+            } else if (schema instanceof ObjectSchema || schema.getProperties() != null) {
+                paramType = generateRecordForInlineRequestBody(operationId, requestBody, schema, schema.getRequired());
             } else {
                 paramType = GeneratorUtils.getBallerinaMediaType(next.getKey());
             }
