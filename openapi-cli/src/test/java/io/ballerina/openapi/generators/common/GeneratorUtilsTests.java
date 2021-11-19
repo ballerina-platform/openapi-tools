@@ -19,6 +19,7 @@
 package io.ballerina.openapi.generators.common;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
@@ -39,14 +40,13 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.ext
  */
 public class GeneratorUtilsTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators").toAbsolutePath();
-    private static final GeneratorUtils generatorUtils = new GeneratorUtils();
 
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
     public static void getIncorrectYamlContract() throws IOException, BallerinaOpenApiException {
         Path path = RES_DIR.resolve("swagger/invalid/petstore_without_info.yaml");
-        OpenAPI ballerinaOpenApiType = generatorUtils.getOpenAPIFromOpenAPIV3Parser(path);
+        OpenAPI ballerinaOpenApiType = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(path);
     }
 
     @Test(description = "Functionality tests for When info section null",
@@ -54,7 +54,7 @@ public class GeneratorUtilsTests {
             expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
     public static void testForInfoNull() throws IOException, BallerinaOpenApiException {
         Path path = RES_DIR.resolve("swagger/invalid/petstore_without_info.yaml");
-        OpenAPI ballerinaOpenApiType = generatorUtils.getOpenAPIFromOpenAPIV3Parser(path);
+        OpenAPI ballerinaOpenApiType = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(path);
     }
 
     @Test(description = "Functionality negative tests for extractReferenceType",
@@ -66,13 +66,13 @@ public class GeneratorUtilsTests {
 
     @Test(description = "Add valid reference path for extract")
     public static void testForReferenceLinkValid() throws BallerinaOpenApiException {
-        Assert.assertEquals(generatorUtils.extractReferenceType("#/components/schemas/Error"), "Error");
+        Assert.assertEquals(GeneratorUtils.extractReferenceType("#/components/schemas/Error"), "Error");
         Assert.assertEquals(GeneratorUtils.extractReferenceType("#/components/schemas/Pet.-id"), "Pet.-id");
-        Assert.assertEquals(generatorUtils.extractReferenceType("#/components/schemas/Pet."), "Pet.");
-        Assert.assertEquals(generatorUtils.extractReferenceType("#/components/schemas/200"), "200");
-        Assert.assertEquals(getValidName(generatorUtils.extractReferenceType("#/components/schemas/worker"),
+        Assert.assertEquals(GeneratorUtils.extractReferenceType("#/components/schemas/Pet."), "Pet.");
+        Assert.assertEquals(GeneratorUtils.extractReferenceType("#/components/schemas/200"), "200");
+        Assert.assertEquals(getValidName(GeneratorUtils.extractReferenceType("#/components/schemas/worker"),
                 true), "Worker");
-        Assert.assertEquals(getValidName(generatorUtils.extractReferenceType("#/components/schemas/worker abc"),
+        Assert.assertEquals(getValidName(GeneratorUtils.extractReferenceType("#/components/schemas/worker abc"),
                 true), "WorkerAbc");
     }
 
@@ -84,8 +84,9 @@ public class GeneratorUtilsTests {
 
     @Test(description = "Set record name with removing special Characters")
     public static void testRecordName() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("schema/swagger/recordName" +
-                ".yaml"));
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("schema/swagger/recordName" +
+                ".yaml"), false);
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         Path expectedPath = RES_DIR.resolve("schema/ballerina/recordName.bal");

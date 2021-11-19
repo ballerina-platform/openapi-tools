@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.generators.schema;
 
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
@@ -35,7 +34,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree;
 
 /**
@@ -84,9 +82,8 @@ public class AdvanceRecordTypeTests {
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ObjectSchema objectSchema = (ObjectSchema) schema;
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
-        TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(null,
-                        AbstractNodeFactory.createIdentifierToken("Error"),
-                        null, objectSchema.getProperties(), new ArrayList<>(), createEmptyNodeList());
-        Assert.assertTrue(((RecordTypeDescriptorNode) recordNode.typeDescriptor()).fields().isEmpty());
+        TypeDefinitionNode recordNode =
+                ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, "Error", new ArrayList<>());
+        Assert.assertFalse(recordNode.typeDescriptor() instanceof RecordTypeDescriptorNode);
     }
 }

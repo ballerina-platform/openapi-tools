@@ -8,17 +8,14 @@ public type ProjectStatusBase record {
     # The time at which this project status was last modified.
     anydata modified_at?;
     # The text content of the status update.
-    string text?;
+    string text;
     string html_text?;
     # The color associated with the status update.
-    string color?;
+    string color;
 };
 
-public type ProjectStatusRequest record {
-    *ProjectStatusBase;
-};
+public type ProjectStatusRequest ProjectStatusBase;
 
-# A user object represents an account in Asana that can be given access to various workspaces, projects, and tasks.
 public type UserCompact record {
     *AsanaResource;
     # Read-only except when same user as requester.
@@ -33,7 +30,6 @@ public type AsanaResource record {
     string resource_type?;
 };
 
-# A project status is an update on the progress of a particular project, and is sent out to all project followers when created.
 public type ProjectStatusCompact record {
     *AsanaResource;
     # The title of the project status update.

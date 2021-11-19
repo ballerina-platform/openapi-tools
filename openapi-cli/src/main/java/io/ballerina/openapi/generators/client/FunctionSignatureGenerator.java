@@ -452,10 +452,10 @@ public class FunctionSignatureGenerator {
                 if (objectSchema.getProperties() != null) {
                     // Generate properties
                     paramType = generateRecordForInlineRequestBody(operationId, requestBody,
-                            objectSchema.getProperties(), objectSchema.getRequired());
+                            objectSchema, objectSchema.getRequired());
                 }
             } else if (schema.getProperties() != null) {
-                paramType = generateRecordForInlineRequestBody(operationId, requestBody, schema.getProperties(),
+                paramType = generateRecordForInlineRequestBody(operationId, requestBody, schema,
                         schema.getRequired());
             } else {
                 paramType = generatorUtils.getBallerinaMediaType(next.getKey());
@@ -494,7 +494,7 @@ public class FunctionSignatureGenerator {
                 if (objectSchema.getProperties() != null) {
                     // Generate properties
                     paramType = generateRecordForInlineRequestBody(operationId, requestBody,
-                            objectSchema.getProperties(), objectSchema.getRequired());
+                            objectSchema, objectSchema.getRequired());
                     paramType = paramType + "[]";
                 }
             } else {
@@ -504,8 +504,8 @@ public class FunctionSignatureGenerator {
             paramType = getValidName(extractReferenceType(arrayItems.get$ref()), true) + "[]";
         } else if (arrayItems instanceof ComposedSchema) {
             paramType = "CompoundArrayItem" +  getValidName(operationId, true) + "Request";
-            TypeDescriptorNode typeDescriptorNodeForArraySchema = ballerinaSchemaGenerator
-                    .getArrayTypeDescriptorNode(arraySchema);
+            TypeDescriptorNode typeDescriptorNodeForArraySchema =
+                    ballerinaSchemaGenerator.getTypeDescriptorNode(arraySchema);
             // TODO - Add API doc by checking requestBody
             TypeDefinitionNode arrayTypeNode = NodeFactory.createTypeDefinitionNode(null, null,
                     createIdentifierToken("public type"),
@@ -527,10 +527,8 @@ public class FunctionSignatureGenerator {
             paramType = generatorUtils.getOneOfUnionType(composedSchema.getAnyOf());
         } else if (composedSchema.getAllOf() != null) {
             paramType = "Compound" +  getValidName(operationId, true) + "Request";
-            List<Schema> allOf = composedSchema.getAllOf();
-            List<String> required = composedSchema.getRequired();
-            TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator.getAllOfTypeDefinitionNode(
-                    new ArrayList<>(), required, createIdentifierToken(paramType), new ArrayList<>(), allOf);
+            TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
+                    (composedSchema, paramType, new ArrayList<>());
             functionReturnType.updateTypeDefinitionNodeList(paramType, allOfTypeDefinitionNode);
         }
         return paramType;
@@ -540,21 +538,19 @@ public class FunctionSignatureGenerator {
      * Handle inline record with request parameter OAS ObjectSchema.
      */
     private String generateRecordForInlineRequestBody(String operationId, RequestBody requestBody,
-                                                     Map<String, Schema> properties, List<String> required)
+                                                     Schema schema, List<String> required)
             throws BallerinaOpenApiException {
 
         String paramType;
         operationId = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1);
         String typeName = operationId + "Request";
-        List<Node> fields = new ArrayList<>();
         List<Node> requestBodyDocs = new ArrayList<>();
         if (requestBody.getDescription() != null) {
             requestBodyDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                     requestBody.getDescription(), false));
         }
-        TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
-                createIdentifierToken(typeName), fields,
-                properties, requestBodyDocs, createEmptyNodeList());
+        TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNode
+                (schema, typeName, requestBodyDocs);
         functionReturnType.updateTypeDefinitionNodeList(typeName, recordNode);
         paramType = typeName;
         return paramType;

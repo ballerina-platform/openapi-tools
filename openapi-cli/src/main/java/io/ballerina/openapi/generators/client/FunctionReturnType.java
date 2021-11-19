@@ -45,7 +45,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
@@ -143,17 +142,13 @@ public class FunctionReturnType {
                 String operationId = operation.getOperationId();
                 type = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1) +
                         "Response";
-                List<String> required = componentSchema.getRequired();
-                List<Node> recordFieldList = new ArrayList<>();
-                Map<String, Schema> properties = componentSchema.getProperties();
                 List<Node> responseDocs = new ArrayList<>();
                 if (response.getDescription() != null) {
                     responseDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                             response.getDescription(), false));
                 }
-                TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(
-                                required, createIdentifierToken(type), recordFieldList,
-                                properties, responseDocs, createEmptyNodeList());
+                TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
+                        (componentSchema, type, responseDocs);
                 updateTypeDefinitionNodeList(type, typeDefinitionNode);
             }
         } else if (schema instanceof ArraySchema) {
@@ -248,13 +243,10 @@ public class FunctionReturnType {
                 type = typeName;
             }
         } else if (composedSchema.getAllOf() != null) {
-            List<Schema> allOf = composedSchema.getAllOf();
             String recordName = "Compound" + getValidName(operation.getOperationId(), true) +
                     "Response";
-            List<String> required = composedSchema.getRequired();
-            TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator
-                    .getAllOfTypeDefinitionNode(new ArrayList<>(), required,
-                            createIdentifierToken(recordName), new ArrayList<>(), allOf);
+            TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
+                    (composedSchema, recordName, new ArrayList<>());
             updateTypeDefinitionNodeList(recordName, allOfTypeDefinitionNode);
             type = recordName;
         }
@@ -269,7 +261,6 @@ public class FunctionReturnType {
             throws BallerinaOpenApiException {
         Map<String, Schema> properties = objectSchema.getProperties();
         String ref = objectSchema.get$ref();
-        List<String> required = objectSchema.getRequired();
         String type = getValidName(operation.getOperationId(), true) + "Response";
 
         if (ref != null) {
@@ -278,16 +269,14 @@ public class FunctionReturnType {
             if (properties.isEmpty()) {
                 type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
             } else {
-                List<Node> recordFieldList = new ArrayList<>();
                 List<Node> returnTypeDocs = new ArrayList<>();
                 String description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
                 if (description != null) {
                     returnTypeDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                             description, false));
                 }
-                TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
-                        createIdentifierToken(type), recordFieldList, properties, returnTypeDocs,
-                        createEmptyNodeList());
+                TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNode
+                        (objectSchema, type, returnTypeDocs);
                 updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {
@@ -303,7 +292,6 @@ public class FunctionReturnType {
                                                MapSchema mapSchema) throws BallerinaOpenApiException {
         Map<String, Schema> properties = mapSchema.getProperties();
         String ref = mapSchema.get$ref();
-        List<String> required = mapSchema.getRequired();
         String type = getValidName(operation.getOperationId(), true) + "Response";
 
         if (ref != null) {
@@ -312,16 +300,14 @@ public class FunctionReturnType {
             if (properties.isEmpty()) {
                 type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
             } else {
-                List<Node> recordFieldList = new ArrayList<>();
                 List<Node> schemaDocs = new ArrayList<>();
                 String description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
                 if (description != null) {
                     schemaDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                             description, false));
                 }
-                TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNodeForObjectSchema(required,
-                        createIdentifierToken(type), recordFieldList, properties, schemaDocs,
-                        createEmptyNodeList());
+                TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNode
+                        (mapSchema, type, schemaDocs);
                 updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {
