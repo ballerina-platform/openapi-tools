@@ -14,9 +14,7 @@ public type ProjectStatusBase record {
     string color?;
 };
 
-public type ProjectStatusRequest record {
-    *ProjectStatusBase;
-};
+public type ProjectStatusRequest ProjectStatusBase;
 
 # A user object represents an account in Asana that can be given access to various workspaces, projects, and tasks.
 public type UserCompact record {
