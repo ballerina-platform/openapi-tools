@@ -64,7 +64,7 @@ public class ReferencedSchemaType extends SchemaType {
      * Generate TypeDefinitionNode for referenced types.
      * -- ex:
      * Sample OpenAPI :
-     *  <pre>
+     * <pre>
      *      components:
      *          schemas:
      *              PetName:

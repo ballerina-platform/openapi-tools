@@ -49,6 +49,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 public class SchemaFactory {
     private final List<String> primitiveTypeList =
             new ArrayList<>(Arrays.asList(INTEGER, NUMBER, STRING, BOOLEAN));
+
     /**
      * @param openAPI     OpenAPI definition
      * @param schemaValue Schema object

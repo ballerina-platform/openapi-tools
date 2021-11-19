@@ -54,8 +54,8 @@ import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
 public class BallerinaSchemaGenerator {
     private final boolean isNullable;
     private final OpenAPI openAPI;
-    private List<TypeDefinitionNode> typeDefinitionNodeList;
     private final SchemaFactory schemaFactory = new SchemaFactory();
+    private List<TypeDefinitionNode> typeDefinitionNodeList;
 
     /**
      * This public constructor is used to generate record and other relevant data type when the nullable flag is

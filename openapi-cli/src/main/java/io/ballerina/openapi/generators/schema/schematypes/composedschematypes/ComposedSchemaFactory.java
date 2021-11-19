@@ -29,9 +29,9 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
  */
 public class ComposedSchemaFactory {
     /**
-     * @param openAPI     OpenAPI definition
+     * @param openAPI        OpenAPI definition
      * @param composedSchema Composed schema object
-     * @param nullable    Indicates whether the user has given ``nullable command line option
+     * @param nullable       Indicates whether the user has given ``nullable command line option
      * @return Relevant SchemaType object
      */
     public SchemaType getComposedSchemaType(OpenAPI openAPI, ComposedSchema composedSchema, boolean nullable) {
