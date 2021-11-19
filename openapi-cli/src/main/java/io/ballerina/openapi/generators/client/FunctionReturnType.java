@@ -62,8 +62,6 @@ public class FunctionReturnType {
     private OpenAPI openAPI;
     private BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
-    private GeneratorUtils generatorUtils = new GeneratorUtils();
-
 
     public FunctionReturnType() {}
 
@@ -101,7 +99,7 @@ public class FunctionReturnType {
                             Schema schema = media.getValue().getSchema();
                             type = getDataType(operation, isSignature, response, media, type, schema);
                         } else {
-                            type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
+                            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
                         }
 
                         StringBuilder builder = new StringBuilder();
@@ -160,7 +158,7 @@ public class FunctionReturnType {
         } else if (media.getKey().trim().equals("application/xml")) {
             type = generateCustomTypeDefine("xml", "XML", isSignature);
         } else {
-            type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
+            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
         }
         return type;
     }
@@ -191,12 +189,12 @@ public class FunctionReturnType {
             } else if (media.getKey().trim().equals("application/pdf") ||
                     media.getKey().trim().equals("image/png") ||
                     media.getKey().trim().equals("application/octet-stream")) {
-                String typeName = generatorUtils.getBallerinaMediaType(media.getKey().trim()) + "Arr";
-                type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
+                String typeName = GeneratorUtils.getBallerinaMediaType(media.getKey().trim()) + "Arr";
+                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
                 type = generateCustomTypeDefine(type, typeName, isSignature);
             } else {
-                String typeName = generatorUtils.getBallerinaMediaType(media.getKey().trim()) + "Arr";
-                type = generatorUtils.getBallerinaMediaType(media.getKey().trim()) + "[]";
+                String typeName = GeneratorUtils.getBallerinaMediaType(media.getKey().trim()) + "Arr";
+                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim()) + "[]";
                 type = generateCustomTypeDefine(type, typeName, isSignature);
             }
         } else {
@@ -230,7 +228,7 @@ public class FunctionReturnType {
             throws BallerinaOpenApiException {
         if (composedSchema.getOneOf() != null) {
             List<Schema> oneOf = composedSchema.getOneOf();
-            type = generatorUtils.getOneOfUnionType(oneOf);
+            type = GeneratorUtils.getOneOfUnionType(oneOf);
             // Get oneOfUnionType name
             String typeName = "OneOf" + getValidName(operation.getOperationId().trim(), true) +  "Response";
             TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
@@ -267,7 +265,7 @@ public class FunctionReturnType {
             type = extractReferenceType(ref.trim());
         } else if (properties != null) {
             if (properties.isEmpty()) {
-                type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
+                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
             } else {
                 List<Node> returnTypeDocs = new ArrayList<>();
                 String description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
@@ -280,7 +278,7 @@ public class FunctionReturnType {
                 updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {
-            type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
+            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
         }
         return type;
     }
@@ -298,7 +296,7 @@ public class FunctionReturnType {
             type = extractReferenceType(ref.trim());
         } else if (properties != null) {
             if (properties.isEmpty()) {
-                type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
+                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
             } else {
                 List<Node> schemaDocs = new ArrayList<>();
                 String description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
@@ -311,7 +309,7 @@ public class FunctionReturnType {
                 updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {
-            type = generatorUtils.getBallerinaMediaType(media.getKey().trim());
+            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
         }
         return type;
     }

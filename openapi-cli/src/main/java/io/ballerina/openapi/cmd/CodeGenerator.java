@@ -614,13 +614,12 @@ public class CodeGenerator {
      * @throws BallerinaOpenApiException
      */
     public OpenAPI normalizeOpenAPI(Path openAPIPath, boolean isClient) throws IOException, BallerinaOpenApiException {
-        GeneratorUtils generatorUtils = new GeneratorUtils();
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
         if (isClient) {
             validateOperationIds(openAPI.getPaths().entrySet());
             validateRequestBody(openAPI.getPaths().entrySet());
         } else {
-            generatorUtils.setOperationId(openAPI.getPaths());
+            GeneratorUtils.setOperationId(openAPI.getPaths());
         }
 
         if (openAPI.getComponents() != null) {

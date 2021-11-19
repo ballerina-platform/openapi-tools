@@ -44,9 +44,8 @@ public class ApiKeyAuthTests {
     @Test(description = "Generate config record for openweathermap api", dataProvider = "apiKeyAuthIOProvider")
     public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
         // generate ApiKeysConfig record
-        GeneratorUtils generatorUtils = new GeneratorUtils();
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/" + yamlFile);
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         Assert.assertFalse(generatedConfigRecord.isBlank());
@@ -90,10 +89,9 @@ public class ApiKeyAuthTests {
 
     @Test(description = "Test the generation of api key documentation comment when multiple api keys defined")
     public void testGetApiKeyDescriptionForMultipleApiKeys () throws IOException, BallerinaOpenApiException {
-        GeneratorUtils generatorUtils = new GeneratorUtils();
         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(true, false);
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiple_apikey_descriptions.yaml");
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String expectedConfigRecord = TestConstants.MULTIPLE_API_KEY_RECORD;
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
@@ -105,11 +103,10 @@ public class ApiKeyAuthTests {
     @Test(description = "Test ApiKeysConfig record generation for multiple api keys")
     public void testConfigRecordGenForAPIKeyAuth() throws IOException, BallerinaOpenApiException {
         // generate ApiKeysConfig record
-        GeneratorUtils generatorUtils = new GeneratorUtils();
         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(true, false);
         String expectedConfigRecord = TestConstants.API_KEYS_CONFIG_RECORD;
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiple_api_keys.yaml");
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         Assert.assertFalse(generatedConfigRecord.isBlank());
@@ -121,11 +118,10 @@ public class ApiKeyAuthTests {
     @Test(description = "Test ApiKeysConfig record documentation generation for multiline descriptions")
     public void testConfigRecordDocumentationGen() throws IOException, BallerinaOpenApiException {
         // generate ApiKeysConfig record
-        GeneratorUtils generatorUtils = new GeneratorUtils();
         BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(true, false);
         String expectedConfigRecord = TestConstants.MULTI_LINE_API_KEY_DESC;
         Path definitionPath = RES_DIR.resolve("auth/scenarios/api_key/multiline_api_key_desc.yaml");
-        OpenAPI openAPI = generatorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
         Assert.assertFalse(generatedConfigRecord.isBlank());

@@ -1,8 +1,8 @@
 # Ballerina-OpenAPI
- [![Build master](https://github.com/ballerina-platform/ballerina-openapi/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/ballerina-openapi/actions/workflows/build-timestamped-master.yml)
- [![Daily build](https://github.com/ballerina-platform/ballerina-openapi/workflows/Daily%20build/badge.svg)](https://github.com/ballerina-platform/ballerina-openapi/actions?query=workflow%3A%22Daily+build%22)
- [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/ballerina-openapi.svg)](https://github.com/ballerina-platform/ballerina-openapi/commits/master)
- [![codecov](https://codecov.io/gh/ballerina-platform/ballerina-openapi/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/ballerina-openapi)
+ [![Build master](https://github.com/ballerina-platform/openapi-tools/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/openapi-tools/actions/workflows/build-timestamped-master.yml)
+ [![Daily build](https://github.com/ballerina-platform/openapi-tools/workflows/Daily%20build/badge.svg)](https://github.com/ballerina-platform/openapi-tools/actions?query=workflow%3A%22Daily+build%22)
+ [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/openapi-tools.svg)](https://github.com/ballerina-platform/openapi-tools/commits/master)
+ [![codecov](https://codecov.io/gh/ballerina-platform/openapi-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/openapi-tools)
  
 The OpenAPI Specification is a specification, which creates a RESTFUL contract for APIs detailing all of its resources 
 and operations in both human and machine-readable format for easy development, discovery, and integration. Ballerina
@@ -56,7 +56,7 @@ Execute the commands below to build from the source.
 
 As an open-source project, Ballerina welcomes contributions from the community. 
 
-You can also check for [open issues](https://github.com/ballerina-platform/ballerina-openapi/issues) that
+You can also check for [open issues](https://github.com/ballerina-platform/openapi-tools/issues) that
  interest you. We look forward to receiving your contributions.
 
 For more information, go to the [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md).
