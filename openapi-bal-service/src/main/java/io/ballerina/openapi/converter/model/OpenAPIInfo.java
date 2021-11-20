@@ -1,4 +1,3 @@
-package io.ballerina.openapi.converter.model;
 /*
  *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,6 +15,7 @@ package io.ballerina.openapi.converter.model;
  *  specific language governing permissions and limitations
  *  under the License.
  */
+package io.ballerina.openapi.converter.model;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -24,6 +24,8 @@ import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
 
 /**
  * This {@code OpenAPIInfo} contains details related to openAPI info section.
+ *
+ * @since 2.0.0
  */
 public class OpenAPIInfo {
     private String title = null;

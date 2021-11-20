@@ -50,74 +50,77 @@ public class BallerinaToOpenAPITests {
 
     @Test(description = "Check ballerina to openapi generator command with annotation")
     public void annotationWithTitleAndVersion() throws IOException, InterruptedException {
-        List<String> buildArgs = new LinkedList<>();
-        buildArgs.add("-i");
-        buildArgs.add("project_1/service.bal");
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("service_openapi.yaml")));
-        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("service_openapi.yaml"));
-        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_1/result.yaml"));
-        Assert.assertEquals(expectedYaml, generatedOpenAPI);
+        executeCommand("project_1/service.bal", "service_openapi.yaml",
+                "project_1/result.yaml");
     }
 
     @Test(description = "Annotation with contract and version field")
     public void annotationWithVersionAndContract() throws IOException, InterruptedException {
-        List<String> buildArgs = new LinkedList<>();
-        buildArgs.add("-i");
-        buildArgs.add("project_2/service.bal");
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("greeting_openapi.yaml"));
-        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_2/result.yaml"));
-        Assert.assertEquals(expectedYaml, generatedOpenAPI);
+        executeCommand("project_2/service.bal", "greeting_openapi.yaml",
+                "project_2/result.yaml");
+//        List<String> buildArgs = new LinkedList<>();
+//        buildArgs.add("-i");
+//        buildArgs.add("project_2/service.bal");
+//        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+//        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("greeting_openapi.yaml"));
+//        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_2/result.yaml"));
+//        Assert.assertEquals(expectedYaml, generatedOpenAPI);
     }
 
     @Test(description = "Annotation with contract and title field")
     public void annotationWithTitleAndContract() throws IOException, InterruptedException {
-        List<String> buildArgs = new LinkedList<>();
-        buildArgs.add("-i");
-        buildArgs.add("project_3/service.bal");
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("title_openapi.yaml"));
-        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_3/result.yaml"));
-        Assert.assertEquals(expectedYaml, generatedOpenAPI);
+        executeCommand("project_3/service.bal", "title_openapi.yaml",
+                "project_3/result.yaml");
+//        List<String> buildArgs = new LinkedList<>();
+//        buildArgs.add("-i");
+//        buildArgs.add("project_3/service.bal");
+//        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+//        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("title_openapi.yaml"));
+//        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_3/result.yaml"));
+//        Assert.assertEquals(expectedYaml, generatedOpenAPI);
     }
 
     @Test(description = "Annotation with blank title")
     public void annotationWithBlankTitle() throws IOException, InterruptedException {
-        List<String> buildArgs = new LinkedList<>();
-        buildArgs.add("-i");
-        buildArgs.add("project_4/service.bal");
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("blankTitle_openapi.yaml"));
-        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_4/result.yaml"));
-        Assert.assertEquals(expectedYaml, generatedOpenAPI);
+        executeCommand("project_4/service.bal", "blankTitle_openapi.yaml",
+                "project_4/result.yaml");
+//        List<String> buildArgs = new LinkedList<>();
+//        buildArgs.add("-i");
+//        buildArgs.add("project_4/service.bal");
+//        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+//        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("blankTitle_openapi.yaml"));
+//        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_4/result.yaml"));
+//        Assert.assertEquals(expectedYaml, generatedOpenAPI);
     }
 
     @Test(description = "Annotation with blank version")
     public void annotationWithBlankVersion() throws IOException, InterruptedException {
-        List<String> buildArgs = new LinkedList<>();
-        buildArgs.add("-i");
-        buildArgs.add("project_5/service.bal");
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("blankVersion_openapi.yaml"));
-        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_5/result.yaml"));
-        Assert.assertEquals(expectedYaml, generatedOpenAPI);
+        executeCommand("project_5/service.bal", "blankVersion_openapi.yaml",
+                "project_5/result.yaml");
+//        List<String> buildArgs = new LinkedList<>();
+//        buildArgs.add("-i");
+//        buildArgs.add("project_5/service.bal");
+//        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+//        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("blankVersion_openapi.yaml"));
+//        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_5/result.yaml"));
+//        Assert.assertEquals(expectedYaml, generatedOpenAPI);
     }
 
     @Test(description = "Annotation with blank version and title")
     public void annotationWithBlankTitleAndVersion() throws IOException, InterruptedException {
-        List<String> buildArgs = new LinkedList<>();
-        buildArgs.add("-i");
-        buildArgs.add("project_6/service.bal");
-        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("bothBlank_openapi.yaml"));
-        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_6/hello_openapi.yaml"));
-        Assert.assertEquals(expectedYaml, generatedOpenAPI);
+        executeCommand("project_6/service.bal", "bothBlank_openapi.yaml",
+                "project_6/result.yaml");
+//        List<String> buildArgs = new LinkedList<>();
+//        buildArgs.add("-i");
+//        buildArgs.add("project_6/service.bal");
+//        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+//        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve("bothBlank_openapi.yaml"));
+//        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve("project_6/hello_openapi.yaml"));
+//        Assert.assertEquals(expectedYaml, generatedOpenAPI);
     }
 
     @Test(description = "Check ballerina to openapi generator command")
     public void multipleService() throws IOException, InterruptedException {
-        // TODO: Compiler plugin won't support to handle multiple service.
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("-i");
         buildArgs.add("project_7/service.bal");
@@ -149,6 +152,17 @@ public class BallerinaToOpenAPITests {
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining(System.lineSeparator()));
         expectedServiceLines.close();
         return expectedServiceContent.trim().replaceAll("\\s+", "").replaceAll(System.lineSeparator(), "");
-//        return expectedServiceContent;
+    }
+
+    private void executeCommand(String resourcePath, String generatedFile, String expectedPath) throws IOException,
+            InterruptedException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add(resourcePath);
+        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve(generatedFile)));
+        String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve(generatedFile));
+        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve(expectedPath));
+        Assert.assertEquals(expectedYaml, generatedOpenAPI);
     }
 }
