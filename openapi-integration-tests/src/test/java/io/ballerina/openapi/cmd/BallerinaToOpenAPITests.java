@@ -93,6 +93,28 @@ public class BallerinaToOpenAPITests {
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("mTitle_openapi.yaml")));
     }
 
+    @Test(description = "Check ballerina to openapi generator command with multiple service with annotation")
+    public void multipleServiceWithAnnotation() throws IOException, InterruptedException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add("project_8/service.bal");
+        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("mTitle01_openapi.yaml")));
+        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("mVersion_openapi.yaml")));
+    }
+
+    @Test(description = "Annotation with version")
+    public void annotationWithVersion() throws IOException, InterruptedException {
+        executeCommand("project_9/service.bal", "versionBase_openapi.yaml",
+                "project_9/result.yaml");
+    }
+
+    @Test(description = "Annotation with title")
+    public void annotationWithTitle() throws IOException, InterruptedException {
+        executeCommand("project_10/service.bal", "titleBase_openapi.yaml",
+                "project_10/result.yaml");
+    }
+
     @AfterClass
     public void cleanUp() throws IOException {
         TestUtil.cleanDistribution();

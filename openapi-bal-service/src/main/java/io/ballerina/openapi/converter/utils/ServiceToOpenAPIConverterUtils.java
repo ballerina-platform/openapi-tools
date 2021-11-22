@@ -125,13 +125,13 @@ public class ServiceToOpenAPIConverterUtils {
                 openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
                 OASResult oasDefinition = generateOAS(serviceNode, endpoints, semanticModel, openApiName, inputPath);
                 oasDefinition.setServiceName(openApiName);
-                if (servicesToGenerate.size() > 1) {
-                    Optional<OpenAPI> openAPI = oasDefinition.getOpenAPI();
-                    if (openAPI.isPresent()) {
-                        OpenAPI openapi = openAPI.get();
-                        openapi.getInfo().setTitle(openapi.getInfo().getTitle() + "-" + normalizeTitle(openApiName));
-                    }
-                }
+//                if (servicesToGenerate.size() > 1) {
+//                    Optional<OpenAPI> openAPI = oasDefinition.getOpenAPI();
+//                    if (openAPI.isPresent()) {
+//                        OpenAPI openapi = openAPI.get();
+//                        openapi.getInfo().setTitle(openapi.getInfo().getTitle() + "-" + normalizeTitle(openApiName));
+//                    }
+//                }
                 outputs.add(oasDefinition);
             }
         }
@@ -215,16 +215,19 @@ public class ServiceToOpenAPIConverterUtils {
      * Provides an instance of {@code OASResult}, which contains the generated contract as well as
      * all the diagnostics information.
      *
-     * @param serviceDefinition Service Node related to ballerina service
-     * @param endpoints              Listener endpoints that bind to service
-     * @param semanticModel          Semantic model for given ballerina file
+     * @param serviceDefinition     Service Node related to ballerina service
+     * @param endpoints             Listener endpoints that bind to service
+     * @param semanticModel         Semantic model for given ballerina file
+     * @param openApiFileName       OpenAPI file name
+     * @param ballerinaFilePath     Input ballerina file Path
      * @return {@code OASResult}
      */
     public static OASResult generateOAS(ServiceDeclarationNode serviceDefinition,
                                         List<ListenerDeclarationNode> endpoints, SemanticModel semanticModel,
-                                        String openApiName, Path ballerinaFilePath) {
+                                        String openApiFileName, Path ballerinaFilePath) {
         // 01.Fill the openAPI info section
-        OASResult oasResult = fillOpenAPIInfoSection(serviceDefinition, semanticModel, openApiName, ballerinaFilePath);
+        OASResult oasResult = fillOpenAPIInfoSection(serviceDefinition, semanticModel, openApiFileName,
+                ballerinaFilePath);
         if (oasResult.getOpenAPI().isPresent() && oasResult.getDiagnostics().isEmpty()) {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             if (openapi.getPaths() == null) {
@@ -456,7 +459,6 @@ public class ServiceToOpenAPIConverterUtils {
            SeparatedNodeList<MappingFieldNode> fields = content.get().fields();
            if (!fields.isEmpty()) {
                OpenAPIInfo openAPIInfo = updateOpenAPIInfoModel(fields);
-               // process openapi according to annotation
                /**
                 * If in case ballerina file path is getting null, then openAPI specification will be generated for given
                 * services.
@@ -467,9 +469,9 @@ public class ServiceToOpenAPIConverterUtils {
                    openAPI.setInfo(new Info().version(openAPIInfo.getVersion().get()).title(normalizeTitle
                            (openAPIInfo.getTitle().get())));
                } else if (openAPIInfo.getVersion().isPresent()) {
-                   openAPI.getInfo().setVersion(openAPIInfo.getVersion().get());
+                   openAPI.setInfo(new Info().version(openAPIInfo.getVersion().get()));
                } else if (openAPIInfo.getTitle().isPresent()) {
-                   openAPI.getInfo().setTitle(normalizeTitle(openAPIInfo.getTitle().get()));
+                   openAPI.setInfo(new Info().title(normalizeTitle(openAPIInfo.getTitle().get())));
                }
            }
         }

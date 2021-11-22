@@ -82,10 +82,6 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
     private static Path ballerinaFilePath = null;
     private boolean contractPathExist;
 
-    public static Path getBallerinaFilePath() {
-        return ballerinaFilePath;
-    }
-
     @Override
     public void perform(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
         List<FunctionDefinitionNode> functions = new ArrayList<>();
@@ -481,11 +477,11 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 for (ResourceValidationError resourceValidationError: resourceMissingPathMethod) {
                     if (resourcePathSummary.getPath().equals(resourceValidationError.getResourcePath())) {
                         if ((!resourcePathSummary.getMethods().isEmpty())
-                                && (resourceValidationError.getresourceMethod() != null)) {
+                                && (resourceValidationError.getResourceMethod() != null)) {
                             Map<String, ResourceMethod> resourceMethods = resourcePathSummary.getMethods();
                             resourceMethods.entrySet().removeIf(resourceMethod -> resourceMethod.getKey()
-                                    .equals(resourceValidationError.getresourceMethod()));
-                        } else if (resourceValidationError.getresourceMethod() == null) {
+                                    .equals(resourceValidationError.getResourceMethod()));
+                        } else if (resourceValidationError.getResourceMethod() == null) {
                             resourcePSIterator.remove();
                         }
                     }

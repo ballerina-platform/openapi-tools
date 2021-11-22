@@ -6,7 +6,7 @@ import ballerina/openapi;
     'version: "",
     title: ""
 }
-service /mTitle on new http:Listener(9090) {
+service /mTitle01 on new http:Listener(9090) {
     resource function get title() returns string {
         return "Hello, World!";
     }
