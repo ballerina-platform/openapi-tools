@@ -23,7 +23,7 @@
 # + failOnErrors - Enable the OpenAPI validator
 # + embed - Enable auto-inject of OpenAPI documentation to current service
 # + title - Title for generated OpenAPI contract
-# + 'version - Version for generated OpenAPI contract
+# + version - Version for generated OpenAPI contract
 public type ServiceInformation record {|
     string contract = "";
     string[]? tags = [];
@@ -32,8 +32,8 @@ public type ServiceInformation record {|
     string[]? excludeOperations = [];
     boolean failOnErrors = true;
     boolean embed = true;
-    string title = "";
-    string 'version = "";
+    string title?;
+    string 'version?;
 |};
 
 # Annotation for additional OpenAPI information of a Ballerina service.
