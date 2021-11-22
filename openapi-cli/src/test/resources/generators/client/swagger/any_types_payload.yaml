@@ -16,10 +16,9 @@ paths:
         content:
           "*/*":
             schema:
-              properties:
-                name:
-                  type: string
-                type: object
+              type: array
+              items:
+                type: string
       responses:
         '201':
           description: Null response

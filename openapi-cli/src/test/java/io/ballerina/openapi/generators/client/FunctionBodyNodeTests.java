@@ -122,18 +122,6 @@ public class FunctionBodyNodeTests {
                         "http:Request request = new;" +
                         "request.setPayload(payload, \"image/png\");" +
                         "http:Response response = check self.clientEp->post(path, request);" +
-                        "return response;}"},
-                {"swagger/all_types_payload.yaml", "/pets", "{string path = string `/pets`;" +
-                        "http:Request request = new;" +
-                        "json jsonBody = check payload.cloneWithType(json);" +
-                        "request.setPayload(jsonBody);" +
-                        "http:Response response = check self.clientEp->post(path, request);" +
-                        "return response;}"},
-                {"swagger/vendor_specific_payload.yaml", "/pets", "{string path = string `/pets`;" +
-                        "http:Request request = new;" +
-                        "json jsonBody = check payload.cloneWithType(json);" +
-                        "request.setPayload(jsonBody, \"application/vnd.ms-excel\");" +
-                        "http:Response response = check self.clientEp->post(path, request);" +
                         "return response;}"}
         };
     }

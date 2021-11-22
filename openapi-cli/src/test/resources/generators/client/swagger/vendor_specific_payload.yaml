@@ -19,7 +19,6 @@ paths:
               properties:
                 name:
                   type: string
-                type: object
       responses:
         '201':
           description: Null response

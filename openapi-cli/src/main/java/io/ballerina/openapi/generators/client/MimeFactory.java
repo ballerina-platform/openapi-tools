@@ -20,7 +20,7 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.client.mime.AllType;
+import io.ballerina.openapi.generators.client.mime.AnyType;
 import io.ballerina.openapi.generators.client.mime.CustomType;
 import io.ballerina.openapi.generators.client.mime.JsonType;
 import io.ballerina.openapi.generators.client.mime.MimeType;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 
-import static io.ballerina.openapi.generators.GeneratorConstants.ALL_TYPES;
+import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.generators.GeneratorConstants.IMAGE;
 import static io.ballerina.openapi.generators.GeneratorConstants.JSON;
 import static io.ballerina.openapi.generators.GeneratorConstants.PDF;
@@ -69,7 +69,9 @@ public class MimeFactory {
         if (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
                 || requestBodySchema.getProperties() != null) {
             String mediaType = mediaTypeEntry.getKey();
-            if (mediaType.contains(JSON) || mediaType.contains(VENDOR_SPECIFIC_TYPE)) {
+            if (mediaType.contains(VENDOR_SPECIFIC_TYPE)) {
+                return new CustomType();
+            } else if (mediaType.contains(JSON)) {
                 return new JsonType();
             } else if (mediaType.startsWith(TEXT_PREFIX) || mediaType.contains(PDF) || mediaType.startsWith(IMAGE)) {
                 return new CustomType();
@@ -79,8 +81,8 @@ public class MimeFactory {
                 return new UrlEncodedType(ballerinaUtilGenerator);
             } else if (mediaType.equals(APPLICATION_OCTET_STREAM)) {
                 return new OctedStreamType();
-            } else if (mediaType.contains(ALL_TYPES)) {
-                return new AllType();
+            } else if (mediaType.contains(ANY_TYPE)) {
+                return new AnyType();
             } else {
                 throw new BallerinaOpenApiException(String.format(UNSUPPORTED_MEDIA_ERROR, mediaType));
             }
