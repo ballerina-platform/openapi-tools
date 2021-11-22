@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.generators.client.mime;
 
+import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.generators.GeneratorUtils;
@@ -26,23 +27,21 @@ import io.swagger.v3.oas.models.media.MediaType;
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.openapi.generators.GeneratorConstants.BYTE;
-
-
 /**
- * Defines the payload structure of "application/octet-stream" mime type.
+ * Defines payload that supports all types structure.
  *
  * @since 2.0.0
  */
-public class OctedStreamType extends MimeType {
+public class AllType extends MimeType {
+
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
-        if (mediaTypeEntry.getValue().getSchema().getFormat().equals(BYTE)) {
-            payloadName = "encodedRequestBody";
-            VariableDeclarationNode encodedVariable = GeneratorUtils.getSimpleStatement("string",
-                    payloadName, "payload.toBase64()");
-            statementsList.add(encodedVariable);
-        }
-        setPayload(statementsList, payloadName, javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM);
+        payloadName = "jsonBody";
+        VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json", payloadName
+                , "check payload.cloneWithType(json)");
+        statementsList.add(jsonVariable);
+        ExpressionStatementNode setPayloadExpression = GeneratorUtils.getSimpleExpressionStatementNode(
+                String.format("request.setPayload(%s)", payloadName));
+        statementsList.add(setPayloadExpression);
     }
 }

@@ -141,6 +141,8 @@ public class GeneratorConstants {
     public static final String TEXT_PREFIX = "text/";
     public static final String XML_DATA = "xmldata";
     public static final String IMAGE = "image";
+    public static final String ALL_TYPES = "*/*";
+    public static final String VENDOR_SPECIFIC_TYPE = "vnd.";
 
     // auth related constants
     public static final String API_KEY = "apikey";

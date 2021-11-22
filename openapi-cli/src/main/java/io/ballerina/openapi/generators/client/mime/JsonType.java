@@ -34,11 +34,11 @@ import java.util.Map;
 public class JsonType extends MimeType {
 
     @Override
-    public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaType) {
+    public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
         payloadName = "jsonBody";
         VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json", payloadName
                 , "check payload.cloneWithType(json)");
         statementsList.add(jsonVariable);
-        setPayload(statementsList, payloadName, mediaType.getKey());
+        setPayload(statementsList, payloadName, mediaTypeEntry.getKey());
     }
 }

@@ -25,12 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Defines default payload structure.
+ * Defines vendor specific payload mime type.
  *
  * @since 2.0.0
  */
-public class DefaultType extends MimeType {
-
+public class CustomType extends MimeType {
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
         setPayload(statementsList, payloadName, mediaTypeEntry.getKey());
