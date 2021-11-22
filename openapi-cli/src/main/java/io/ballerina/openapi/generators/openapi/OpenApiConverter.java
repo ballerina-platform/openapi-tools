@@ -89,10 +89,13 @@ public class OpenApiConverter {
             docId = documentIterator.next();
             doc = currentModule.document(docId);
         }
+        Optional<Path> path = project.documentPath(docId);
+        Path inputPath = path.isPresent() ? path.get() : null;
+
         syntaxTree = doc.syntaxTree();
         semanticModel = project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
         List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
-                semanticModel, serviceName, needJson, outPath);
+                semanticModel, serviceName, needJson, outPath, inputPath);
 
         if (!openAPIDefinitions.isEmpty()) {
             for (OASResult definition : openAPIDefinitions) {

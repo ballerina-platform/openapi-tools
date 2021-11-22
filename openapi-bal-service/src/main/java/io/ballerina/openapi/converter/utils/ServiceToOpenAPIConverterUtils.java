@@ -91,14 +91,14 @@ public class ServiceToOpenAPIConverterUtils {
      * @param serviceName   - Service name that need to generate the openAPI specification
      * @param needJson      - Flag for enabling the generated file format with json or YAML
      * @param outPath       - Out put path to check given path has same named file
+     * @param inputPath     -
      * @return - {@link java.util.Map} with openAPI definitions for service nodes
      */
     public static List<OASResult> generateOAS3Definition(SyntaxTree syntaxTree, SemanticModel semanticModel,
-                                                         String serviceName, Boolean needJson, Path outPath) {
+                                                         String serviceName, Boolean needJson, Path outPath,
+                                                         Path inputPath) {
 
         Node node = syntaxTree.rootNode();
-        String s = node.location().lineRange().filePath();
-
         List<ListenerDeclarationNode> endpoints = new ArrayList<>();
         List<ServiceDeclarationNode> servicesToGenerate = new ArrayList<>();
         List<String> availableService = new ArrayList<>();
@@ -127,7 +127,7 @@ public class ServiceToOpenAPIConverterUtils {
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
                 //  Checked old generated file with same name
                 openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
-                OASResult oasDefinition = generateOAS(serviceNode, endpoints, semanticModel, openApiName);
+                OASResult oasDefinition = generateOAS(serviceNode, endpoints, semanticModel, openApiName, inputPath);
                 oasDefinition.setServiceName(openApiName);
                 if (servicesToGenerate.size() > 1) {
                     Optional<OpenAPI> openAPI = oasDefinition.getOpenAPI();
@@ -195,16 +195,17 @@ public class ServiceToOpenAPIConverterUtils {
     /**
      * Generate openAPI definition according to the given format JSON or YAML.
      *
-     * @deprecated use {@link #generateOAS(ServiceDeclarationNode, List, SemanticModel, String)} instead.
+     * @deprecated use {@link #generateOAS(ServiceDeclarationNode, List, SemanticModel, String, Path)} instead.
      * The new API provides a list of {@code OASResult}, which contains all the diagnostic information collected
      * while generating the openAPI contract.
      */
     @Deprecated
     public static String generateOASForGivenFormat(ServiceDeclarationNode serviceDeclarationNode,
                                                    boolean needJson, List<ListenerDeclarationNode> endpoints,
-                                                   SemanticModel semanticModel, String openApiName) {
-        Optional<OpenAPI> openapi = generateOAS(serviceDeclarationNode, endpoints, semanticModel, openApiName)
-                .getOpenAPI();
+                                                   SemanticModel semanticModel, String openApiName,
+                                                   Path ballerinaFilePath) {
+        Optional<OpenAPI> openapi = generateOAS(serviceDeclarationNode, endpoints, semanticModel, openApiName,
+                ballerinaFilePath).getOpenAPI();
         if (openapi.isPresent()) {
             OpenAPI openAPI = openapi.get();
             if (openAPI.getInfo().getTitle() == null || openAPI.getInfo().getTitle().equals(SLASH)) {
@@ -226,9 +227,9 @@ public class ServiceToOpenAPIConverterUtils {
      */
     public static OASResult generateOAS(ServiceDeclarationNode serviceDefinition,
                                         List<ListenerDeclarationNode> endpoints, SemanticModel semanticModel,
-                                        String openApiName) {
+                                        String openApiName, Path ballerinaFilePath) {
         // 01.Fill the openAPI info section
-        OASResult oasResult = fillOpenAPIInfoSection(serviceDefinition, semanticModel, openApiName);
+        OASResult oasResult = fillOpenAPIInfoSection(serviceDefinition, semanticModel, openApiName, ballerinaFilePath);
         if (oasResult.getOpenAPI().isPresent() && oasResult.getDiagnostics().isEmpty()) {
             OpenAPI openapi = oasResult.getOpenAPI().get();
             if (openapi.getPaths() == null) {
@@ -331,10 +332,24 @@ public class ServiceToOpenAPIConverterUtils {
      *
      * @param serviceNode   Service node for relevant service.
      * @param semanticModel Semantic model for relevant project.
+     * @param openapiFileName
+     * @param ballerinaFilePath
      * @return {@code OASResult}
      */
     private static OASResult fillOpenAPIInfoSection(ServiceDeclarationNode serviceNode, SemanticModel semanticModel,
-                                                    String openapiFileName) {
+                                                    String openapiFileName, Path ballerinaFilePath) {
+        /**
+         * First check the given service node has metadata with annotation details with `openapi:serviceInfo`,
+         * if it is there, then {@link #setAnnotationDetails(List, AnnotationNode, Path)} function extracts the
+         * annotation details and store details in {@code OpenAPIInfo} model using
+         * {@link #updateOpenAPIInfoModel(SeparatedNodeList)} function. If the annotation contains the valid contract
+         * path then we complete given OpenAPI specification using annotation details. if not we create new OpenAPI
+         * specification and fill openAPI info sections.
+         * If the annotation is not in the given service, then we filled the OpenAPI specification info section using
+         * package details and title with service base path.
+         * After completing these two process we normalized the OpenAPI specification by checking all the info
+         * details are completed, if in case not completed, we complete empty fields with default values.
+         */
         Optional<MetadataNode> metadata = serviceNode.metadata();
         List<OpenAPIConverterDiagnostic> diagnostics = new ArrayList<>();
         OpenAPI openAPI = new OpenAPI();
@@ -349,25 +364,7 @@ public class ServiceToOpenAPIConverterUtils {
                     QualifiedNameReferenceNode ref = (QualifiedNameReferenceNode) annotation.annotReference();
                     String annotationName = ref.modulePrefix().text() + ":" + ref.identifier().text();
                     if (annotationName.equals(OPENAPI_ANNOTATION)) {
-                        Path ballerinaFilePath = null;
-                        Optional<Symbol> symbol = semanticModel.symbol(serviceNode);
-                        if (symbol.isPresent()) {
-                            Symbol serviceSymbol = symbol.get();
-                            Optional<ModuleSymbol> module = serviceSymbol.getModule();
-                            ModuleSymbol moduleSymbol = module.get();
-                            Optional<Location> location1 = moduleSymbol.getLocation();
-                            Location location2 = location1.get();
-                            String s = location2.lineRange().filePath();
-
-                            Optional<Location> location = serviceSymbol.getLocation();
-                            if (location.isPresent()) {
-                                Location fileLocation = location.get();
-                                LineRange lineRange = fileLocation.lineRange();
-                                String filePath = lineRange.filePath();
-                                ballerinaFilePath = Path.of(filePath);
-                                System.out.println(filePath);
-                            }
-                        }
+//                        Path ballerinaFilePath = ServiceValidator.getBallerinaFilePath();
                         OASResult oasResult = setAnnotationDetails(diagnostics, annotation, ballerinaFilePath);
                         return normalizeInfoSection(openapiFileName, currentServiceName, version, oasResult);
                     } else {
