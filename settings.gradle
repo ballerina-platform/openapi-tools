@@ -17,7 +17,7 @@
 plugins {
     id "com.gradle.enterprise" version "3.5"
 }
-rootProject.name = 'ballerina-openapi'
+rootProject.name = 'openapi-tools'
 include(':config:checkstyle')
 include(':module-ballerina-openapi')
 include(':openapi-bal-service')

@@ -42,13 +42,13 @@ jobs:
           ./gradlew -Pversion=${VERSION} publish -x test -PpublishToCentral=true
       - name: Create Github release from the release tag
         run: |
-          curl --request POST 'https://api.github.com/repos/ballerina-platform/ballerina-openapi/releases' \
+          curl --request POST 'https://api.github.com/repos/ballerina-platform/openapi-tools/releases' \
           --header 'Accept: application/vnd.github.v3+json' \
           --header 'Authorization: Bearer ${{ secrets.BALLERINA_BOT_TOKEN }}' \
           --header 'Content-Type: application/json' \
           --data-raw '{
               "tag_name": "v'"$VERSION"'",
-              "name": "ballerina-openapi-v'"$VERSION"'"
+              "name": "openapi-tools-v'"$VERSION"'"
           }'
       - name: Post release PR
         env:

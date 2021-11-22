@@ -50,9 +50,10 @@ public enum DiagnosticMessages {
             DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_110("OAS_CONVERTOR_110", "OpenAPI contract path can not be blank.",
                       DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_111("OAS_CONVERTOR_111", "Invalid file type. Provide either a .yaml or .json file.",
+    OAS_CONVERTOR_111("OAS_CONVERTOR_111", "Unsupported file type. Provide a valid contract " +
+            "file in .yaml or .json format.",
             DiagnosticSeverity.ERROR),
-    OAS_CONVERTOR_112("OAS_CONVERTOR_112", "Given OpenAPI contract has parser issues.",
+    OAS_CONVERTOR_112("OAS_CONVERTOR_112", "Provided OpenAPI contract contains parsing error(s).",
                       DiagnosticSeverity.ERROR);
 
     private final String code;

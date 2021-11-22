@@ -245,7 +245,8 @@ public class ConverterCommonUtils {
                     error.getDescription(), null);
             diagnostics.add(diagnostic);
         }
-        if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json") || definitionURI.endsWith(".yml"))) {
+        if (!(definitionURI.endsWith(Constants.YAML_EXTENSION) || definitionURI.endsWith(Constants.JSON_EXTENSION)
+                || definitionURI.endsWith(Constants.YML_EXTENSION))) {
             DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
             ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
                     error.getDescription(), null);

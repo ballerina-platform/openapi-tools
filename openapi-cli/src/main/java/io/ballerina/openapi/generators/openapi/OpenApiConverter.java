@@ -90,7 +90,7 @@ public class OpenApiConverter {
             doc = currentModule.document(docId);
         }
         Optional<Path> path = project.documentPath(docId);
-        Path inputPath = path.isPresent() ? path.get() : null;
+        Path inputPath = path.orElse(null);
 
         syntaxTree = doc.syntaxTree();
         semanticModel = project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());

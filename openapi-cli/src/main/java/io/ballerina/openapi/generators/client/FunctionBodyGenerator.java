@@ -41,12 +41,12 @@ import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
+import io.ballerina.openapi.generators.client.mime.MimeType;
 import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -75,7 +75,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBinding
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
@@ -92,18 +91,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
-import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.generators.GeneratorConstants.ENCODING;
 import static io.ballerina.openapi.generators.GeneratorConstants.EXECUTE;
-import static io.ballerina.openapi.generators.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.generators.GeneratorConstants.POST;
 import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESPONSE;
-import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
-import static io.ballerina.openapi.generators.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
@@ -117,7 +112,6 @@ public class FunctionBodyGenerator {
     private final OpenAPI openAPI;
     private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
-    private final GeneratorUtils generatorUtils;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
 
     public List<ImportDeclarationNode> getImports() {
@@ -139,7 +133,6 @@ public class FunctionBodyGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
-        this.generatorUtils = new GeneratorUtils();
         this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
     }
 
@@ -224,11 +217,11 @@ public class FunctionBodyGenerator {
                 VariableDeclarationNode queryParamEncodingMap = getQueryParameterEncodingMap(queryParameters);
                 if (queryParamEncodingMap != null) {
                     statementsList.add(queryParamEncodingMap);
-                    ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
+                    ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
                             "path = path + check getPathForQueryParam(queryParam, queryParamEncoding)");
                     statementsList.add(updatedPath);
                 } else {
-                    ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
+                    ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
                             "path = path + check getPathForQueryParam(queryParam)");
                     statementsList.add(updatedPath);
                 }
@@ -236,7 +229,7 @@ public class FunctionBodyGenerator {
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<any>",
                         "headerValues", headerApiKeyNameList));
-                statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
+                statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
                 ballerinaUtilGenerator.setHeadersFound(true);
@@ -248,14 +241,14 @@ public class FunctionBodyGenerator {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
                         "queryParam", queryApiKeyNameList));
                 // Add updated path
-                ExpressionStatementNode updatedPath = generatorUtils.getSimpleExpressionStatementNode(
+                ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
                         "path = path + check getPathForQueryParam(queryParam)");
                 statementsList.add(updatedPath);
             }
             if (!headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(new ArrayList<>(), "map<any>",
                         "headerValues", headerApiKeyNameList));
-                statementsList.add(generatorUtils.getSimpleExpressionStatementNode(
+                statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
                 ballerinaUtilGenerator.setHeadersFound(true);
@@ -294,7 +287,7 @@ public class FunctionBodyGenerator {
             if (paramSchema != null && (paramSchema.getProperties() != null ||
                     (paramSchema.getType() != null && paramSchema.getType().equals("array")))) {
                 if (parameter.getStyle() != null || parameter.getExplode() != null) {
-                    createEncodingMap(filedOfMap, parameter.getStyle().toString(),
+                    GeneratorUtils.createEncodingMap(filedOfMap, parameter.getStyle().toString(),
                             parameter.getExplode(), parameter.getName().trim());
                 }
             }
@@ -311,34 +304,6 @@ public class FunctionBodyGenerator {
         return null;
 
     }
-
-    /**
-     * Create each item of the encoding map.
-     *
-     * @param filedOfMap    Includes all the items in the encoding map
-     * @param style         Defines how multiple values are delimited and explode
-     * @param explode       Specifies whether arrays and objects should generate separate parameters
-     * @param key           Key of the item in the map
-     */
-    private void createEncodingMap(List<Node> filedOfMap, String style, Boolean explode, String key) {
-        IdentifierToken fieldName = createIdentifierToken('"' + key + '"');
-        Token colon = createToken(COLON_TOKEN);
-        SpecificFieldNode styleField = createSpecificFieldNode(null,
-                createIdentifierToken(STYLE), createToken(COLON_TOKEN),
-                createRequiredExpressionNode(createIdentifierToken(style.toUpperCase(Locale.ROOT))));
-        SpecificFieldNode explodeField = createSpecificFieldNode(null,
-                createIdentifierToken(EXPLODE), createToken(COLON_TOKEN),
-                createRequiredExpressionNode(createIdentifierToken(explode.toString())));
-        ExpressionNode expressionNode = createMappingConstructorExpressionNode(
-                createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(styleField, createToken(COMMA_TOKEN),
-                        explodeField),
-                createToken(CLOSE_BRACE_TOKEN));
-        SpecificFieldNode specificFieldNode = createSpecificFieldNode(null,
-                fieldName, colon, expressionNode);
-        filedOfMap.add(specificFieldNode);
-        filedOfMap.add(createToken(COMMA_TOKEN));
-    }
-
 
     /**
      * Provides the list of security schemes available for the given operation.
@@ -404,10 +369,10 @@ public class FunctionBodyGenerator {
         boolean isMethod = method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(EXECUTE);
         if (isHeader) {
             if (isMethod) {
-                ExpressionStatementNode requestStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+                ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "http:Request request = new");
                 statementsList.add(requestStatementNode);
-                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+                ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "//TODO: Update the request as needed");
                 statementsList.add(expressionStatementNode);
                 clientCallStatement = "check self.clientEp->" + method + "(path, request, headers = " +
@@ -421,10 +386,10 @@ public class FunctionBodyGenerator {
                 }
             }
         } else if (isMethod) {
-            ExpressionStatementNode requestStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "http:Request request = new");
             statementsList.add(requestStatementNode);
-            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "//TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
             clientCallStatement =
@@ -433,7 +398,7 @@ public class FunctionBodyGenerator {
             clientCallStatement = "check self.clientEp->" + method + "(path)";
         }
         //Return Variable
-        VariableDeclarationNode clientCall = generatorUtils.getSimpleStatement(returnType, RESPONSE,
+        VariableDeclarationNode clientCall = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
                 clientCallStatement);
         statementsList.add(clientCall);
         Token returnKeyWord = createIdentifierToken("return");
@@ -501,7 +466,7 @@ public class FunctionBodyGenerator {
      * <pre>
      *    http:Request request = new;
      *    json jsonBody = check payload.cloneWithType(json);
-     *    request.setPayload(jsonBody);
+     *    request.setPayload(jsonBody, "application/json");
      *    json response = check self.clientEp->put(path, request);
      * </pre>
      *
@@ -518,7 +483,7 @@ public class FunctionBodyGenerator {
 
         //Create Request statement
         Map.Entry<String, MediaType> next = iterator.next();
-        VariableDeclarationNode requestVariable = generatorUtils.getSimpleStatement("http:Request",
+        VariableDeclarationNode requestVariable = GeneratorUtils.getSimpleStatement("http:Request",
                 "request", "new");
         statementsList.add(requestVariable);
         if (next.getValue().getSchema() != null) {
@@ -526,18 +491,18 @@ public class FunctionBodyGenerator {
             // TODO:Fill with other mime type
         } else {
             // Add default value comment
-            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
+            ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
         }
         // POST, PUT, PATCH, DELETE, EXECUTE
         VariableDeclarationNode requestStatement =
-                generatorUtils.getSimpleStatement(returnType, RESPONSE, "check self.clientEp->"
+                GeneratorUtils.getSimpleStatement(returnType, RESPONSE, "check self.clientEp->"
                         + method + "(path," + " request)");
         if (isHeader) {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
-                requestStatement = generatorUtils.getSimpleStatement(returnType, RESPONSE,
+                requestStatement = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
                         "check self.clientEp->" + method + "(path, request, headers = accHeaders)");
                 statementsList.add(requestStatement);
                 Token returnKeyWord = createIdentifierToken("return");
@@ -557,121 +522,17 @@ public class FunctionBodyGenerator {
     }
 
     /**
-     * This function use for generating function body statements according to the given request body media type.
+     * This function is used for generating function body statements according to the given request body media type.
      *
-     * @param statementsList    - previous statements list
+     * @param statementsList    - Previous statements list
      * @param mediaTypeEntry    - Media type entry
      */
     private void genStatementsForRequestMediaType(List<StatementNode> statementsList,
                                                   Map.Entry<String, MediaType> mediaTypeEntry)
             throws BallerinaOpenApiException {
-
-        Schema requestBodySchema = mediaTypeEntry.getValue().getSchema();
-        if (mediaTypeEntry.getKey().contains("json")) {
-            if (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
-                    || requestBodySchema.getProperties() != null) {
-                VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
-                        "jsonBody", "check payload.cloneWithType(json)");
-                statementsList.add(jsonVariable);
-                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
-                        "request.setPayload(jsonBody)");
-                statementsList.add(expressionStatementNode);
-            } else {
-                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
-                        "request.setPayload(payload)");
-                statementsList.add(expressionStatementNode);
-            }
-        } else if (mediaTypeEntry.getKey().contains("xml")) {
-
-            if (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
-                    || requestBodySchema.getProperties() != null) {
-                ImportDeclarationNode xmlImport = GeneratorUtils.getImportDeclarationNode(
-                        BALLERINA, "xmldata");
-                if (!checkImportDuplicate(imports, "xmldata")) {
-                    imports.add(xmlImport);
-                }
-                VariableDeclarationNode jsonVariable = generatorUtils.getSimpleStatement("json",
-                        "jsonBody", "check payload.cloneWithType(json)");
-                statementsList.add(jsonVariable);
-                VariableDeclarationNode xmlBody = generatorUtils.getSimpleStatement("xml?", "xmlBody",
-                        "check xmldata:fromJson(jsonBody)");
-                statementsList.add(xmlBody);
-                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
-                        "request.setPayload(xmlBody)");
-                statementsList.add(expressionStatementNode);
-            } else {
-                ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
-                        "request.setPayload(payload)");
-                statementsList.add(expressionStatementNode);
-            }
-        } else if (mediaTypeEntry.getKey().contains("plain")) {
-            ExpressionStatementNode expressionStatementNode = generatorUtils.getSimpleExpressionStatementNode(
-                    "request.setPayload(payload)");
-            statementsList.add(expressionStatementNode);
-        } else if (mediaTypeEntry.getKey().contains("x-www-form-urlencoded")) {
-            ballerinaUtilGenerator.setRequestBodyEncodingFound(true);
-            ExpressionStatementNode setContentTypeExpression = generatorUtils.getSimpleExpressionStatementNode(
-                    "check request.setContentType(\"application/x-www-form-urlencoded\")");
-            statementsList.add(setContentTypeExpression);
-            VariableDeclarationNode requestBodyEncodingMap = getRequestBodyEncodingMap(
-                    mediaTypeEntry.getValue().getEncoding());
-            if (requestBodyEncodingMap != null) {
-                statementsList.add(requestBodyEncodingMap);
-                VariableDeclarationNode requestBodyVariable = generatorUtils.getSimpleStatement(STRING,
-                        "encodedRequestBody",
-                        "createFormURLEncodedRequestBody(payload, requestBodyEncoding)");
-                statementsList.add(requestBodyVariable);
-            } else {
-                VariableDeclarationNode requestBodyVariable = generatorUtils.getSimpleStatement(STRING,
-                        "encodedRequestBody", "createFormURLEncodedRequestBody(payload)");
-                statementsList.add(requestBodyVariable);
-            }
-            ExpressionStatementNode setPayloadExpression = generatorUtils.getSimpleExpressionStatementNode(
-                    "request.setPayload(encodedRequestBody)");
-            statementsList.add(setPayloadExpression);
-        } else {
-            throw new BallerinaOpenApiException("Unsupported media type '" + mediaTypeEntry.getKey() +
-                    "' is given in the request body");
-        }
-    }
-
-    /**
-     * Generate VariableDeclarationNode for request body encoding map which includes the data related serialization
-     * mechanism that needs to be used in each array or object type property. These data is given in the `style` and
-     * `explode` sections under the requestBody encoding section of the OpenAPI definition. Style defines how multiple
-     * values are delimited and explode specifies whether arrays and objects should generate separate parameters.
-     *
-     * --ex: {@code map<[string, boolean]> requestBodyEncoding =
-     *                                      {"address": ["deepObject", true], "bank_account": ["deepObject", true]}}
-     *
-     * @param encodingMap   Encoding details of the `application/x-www-form-urlencoded` type request body
-     * @return              {@link VariableDeclarationNode}
-     */
-    public VariableDeclarationNode getRequestBodyEncodingMap(Map<String, Encoding> encodingMap) {
-        List<Node> filedOfMap = new ArrayList<>();
-        BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken("map<" + ENCODING + ">"));
-        CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
-                createIdentifierToken("requestBodyEncoding"));
-        TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
-        if (encodingMap != null && encodingMap.size() > 0) {
-            for (Map.Entry<String, Encoding> encoding : encodingMap.entrySet()) {
-                if (encoding.getValue().getStyle() != null || encoding.getValue().getExplode() != null) {
-                    createEncodingMap(filedOfMap, encoding.getValue().getStyle().toString(),
-                            encoding.getValue().getExplode(), encoding.getKey());
-                }
-            }
-            if (!filedOfMap.isEmpty()) {
-                filedOfMap.remove(filedOfMap.size() - 1);
-                MappingConstructorExpressionNode initialize = createMappingConstructorExpressionNode(
-                        createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(filedOfMap),
-                        createToken(CLOSE_BRACE_TOKEN));
-                return createVariableDeclarationNode(createEmptyNodeList(),
-                        null, bindingPatternNode, createToken(EQUAL_TOKEN), initialize,
-                        createToken(SEMICOLON_TOKEN));
-            }
-        }
-        return null;
+        MimeFactory factory = new MimeFactory();
+        MimeType mimeType = factory.getMimeType(mediaTypeEntry, ballerinaUtilGenerator, imports);
+        mimeType.setPayload(statementsList, mediaTypeEntry);
     }
 
     /**
@@ -742,17 +603,4 @@ public class FunctionBodyGenerator {
                 createToken(SEMICOLON_TOKEN));
     }
 
-    private boolean checkImportDuplicate(List<ImportDeclarationNode> imports, String module) {
-        for (ImportDeclarationNode importModule:imports) {
-            StringBuilder moduleBuilder = new StringBuilder();
-            for (IdentifierToken identifierToken : importModule.moduleName()) {
-                moduleBuilder.append(identifierToken.toString().trim());
-            }
-            if (BALLERINA.equals((importModule.orgName().get()).orgName().toString().trim()) &&
-                    module.equals(moduleBuilder.toString())) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

@@ -88,8 +88,8 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
 
 /**
- *This class wraps the {@link Schema} from openapi models inorder to overcome complications
- *while populating syntax tree.
+ * This class wraps the {@link Schema} from openapi models inorder to overcome complications
+ * while populating syntax tree.
  */
 public class BallerinaSchemaGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeList;
@@ -100,8 +100,8 @@ public class BallerinaSchemaGenerator {
      * This public constructor is used to generate record and other relevant data type when the nullable flag is
      * enabled in the openapi command.
      *
-     * @param openAPI       OAS definition
-     * @param isNullable      nullable value
+     * @param openAPI    OAS definition
+     * @param isNullable nullable value
      */
     public BallerinaSchemaGenerator(OpenAPI openAPI, boolean isNullable) {
         this.openAPI = openAPI;
@@ -113,10 +113,10 @@ public class BallerinaSchemaGenerator {
      * This public constructor is used to generate record and other relevant data type when the absent of the nullable
      * flag in the openapi command.
      *
-     * @param openAPI       OAS definition
+     * @param openAPI OAS definition
      */
     public BallerinaSchemaGenerator(OpenAPI openAPI) {
-       this(openAPI, false);
+        this(openAPI, false);
     }
 
     /**
@@ -125,6 +125,7 @@ public class BallerinaSchemaGenerator {
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
         return typeDefinitionNodeList;
     }
+
     /**
      * Set the typeDefinitionNodeList.
      */
@@ -144,7 +145,7 @@ public class BallerinaSchemaGenerator {
             Map<String, Schema> componentsSchemas = components.getSchemas();
             if (componentsSchemas != null) {
                 Map<String, Schema> refacSchema = new HashMap<>();
-                for (Map.Entry<String, Schema> schemaEntry: componentsSchemas.entrySet()) {
+                for (Map.Entry<String, Schema> schemaEntry : componentsSchemas.entrySet()) {
                     String name = getValidName(schemaEntry.getKey(), true);
                     refacSchema.put(name, schemaEntry.getValue());
                 }
@@ -152,7 +153,7 @@ public class BallerinaSchemaGenerator {
             }
             Map<String, Schema> schemas = components.getSchemas();
             if (schemas != null) {
-                for (Map.Entry<String, Schema> schema: schemas.entrySet()) {
+                for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
                     List<Node> schemaDoc = new ArrayList<>();
                     if (schema.getValue().getDescription() != null) {
                         schemaDoc.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
@@ -189,7 +190,6 @@ public class BallerinaSchemaGenerator {
 
         IdentifierToken typeName = AbstractNodeFactory.createIdentifierToken(recordName);
         String defineDatatypeName = getValidName(recordName, true);
-
         List<AnnotationNode> typeAnnotations = new ArrayList<>();
         if (schemaValue.getDeprecated() != null && schemaValue.getDeprecated()) {
             DocCommentsGenerator.extractDeprecatedAnnotation(schemaValue.getExtensions(),
@@ -228,21 +228,13 @@ public class BallerinaSchemaGenerator {
         } else if (schemaValue.get$ref() != null) {
             Token typeRef = AbstractNodeFactory.createIdentifierToken(getValidName(
                     extractReferenceType(schemaValue.get$ref()), true));
-            TypeReferenceNode recordField = NodeFactory.createTypeReferenceNode(createToken(ASTERISK_TOKEN), typeRef,
-                    createToken(SEMICOLON_TOKEN));
-            recordFieldList.add(recordField);
-            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
-            RecordTypeDescriptorNode recordTypeDescriptorNode = NodeFactory.createRecordTypeDescriptorNode(
-                    createToken(SyntaxKind.RECORD_KEYWORD), createToken(OPEN_BRACE_TOKEN),
-                    fieldNodes, null, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
             MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
-            typeDefNode = NodeFactory.createTypeDefinitionNode(metadataNode,
-                    createToken(PUBLIC_KEYWORD),
-                    createToken(TYPE_KEYWORD),
-                    typeName, recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+            String typeDescriptorName = typeRef.text();
+            typeDescriptorName = getNullableType(schemaValue, typeDescriptorName);
+            typeDefNode = getTypeDefinitionNode(createIdentifierToken(typeDescriptorName),
+                    getValidName((defineDatatypeName), true), metadataNode);
             typeDefinitionNodeList.add(typeDefNode);
-
         } else if (schemaValue.getType() == null) {
 
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
@@ -250,7 +242,7 @@ public class BallerinaSchemaGenerator {
 
             String anyData = getNullableType(schemaValue, GeneratorConstants.ANY_DATA);
             typeDefNode = getTypeDefinitionNode(createIdentifierToken(anyData), getValidName((defineDatatypeName),
-                            true), metadataNode);
+                    true), metadataNode);
             typeDefinitionNodeList.add(typeDefNode);
         } else {
             throw new BallerinaOpenApiException("Unsupported OAS schema type.");
@@ -275,7 +267,7 @@ public class BallerinaSchemaGenerator {
         } else if (composedSchema.getOneOf() != null) {
             List<Schema> oneOf = composedSchema.getOneOf();
             String unionTypeCont = GeneratorUtils.getOneOfUnionType(oneOf);
-            String type  = escapeIdentifier(defineDatatypeName.trim());
+            String type = escapeIdentifier(defineDatatypeName.trim());
             MetadataNode metadataNode = createMetadataNode(
                     createMarkdownDocumentationNode(createNodeList(schemaDoc)), createNodeList(typeAnnotations));
             typeDefNode = getTypeDefinitionNode(createIdentifierToken(unionTypeCont), type, metadataNode);
@@ -283,7 +275,7 @@ public class BallerinaSchemaGenerator {
         } else if (composedSchema.getAnyOf() != null) {
             List<Schema> anyOf = composedSchema.getAnyOf();
             String unionTypeCont = GeneratorUtils.getOneOfUnionType(anyOf);
-            String type  = escapeIdentifier(defineDatatypeName.trim());
+            String type = escapeIdentifier(defineDatatypeName.trim());
             MetadataNode metadataNode = createMetadataNode(
                     createMarkdownDocumentationNode(createNodeList(schemaDoc)), createNodeList(typeAnnotations));
             typeDefNode = getTypeDefinitionNode(createIdentifierToken(unionTypeCont), type, metadataNode);
@@ -305,12 +297,12 @@ public class BallerinaSchemaGenerator {
     /**
      * Generate Node for allOf data binding.
      *
-     * @param schemaDoc         - API docs list
-     * @param required          - required fields
-     * @param typeName          - main record name
-     * @param recordFieldList   - generated previous record field list
-     * @param allOf             - allOf schema values
-     * @return                  TypeDefinitionNode for allOf
+     * @param schemaDoc       - API docs list
+     * @param required        - required fields
+     * @param typeName        - main record name
+     * @param recordFieldList - generated previous record field list
+     * @param allOf           - allOf schema values
+     * @return TypeDefinitionNode for allOf
      * @throws BallerinaOpenApiException
      */
     public TypeDefinitionNode getAllOfTypeDefinitionNode(List<Node> schemaDoc, List<String> required,
@@ -335,7 +327,7 @@ public class BallerinaSchemaGenerator {
                                                                       List<Schema> allOf)
             throws BallerinaOpenApiException {
 
-        for (Schema<?> allOfSchema: allOf) {
+        for (Schema<?> allOfSchema : allOf) {
             if (allOfSchema.getType() == null && allOfSchema.get$ref() != null) {
                 //Generate typeReferenceNode
                 getAllOfRecordFieldForReference(schemaDoc, recordFieldList, allOfSchema);
@@ -351,7 +343,7 @@ public class BallerinaSchemaGenerator {
             } else if (allOfSchema instanceof ComposedSchema) {
                 ComposedSchema allOfNested = (ComposedSchema) allOfSchema;
                 if (allOfNested.getAllOf() != null) {
-                    for (Schema schema: allOfNested.getAllOf()) {
+                    for (Schema schema : allOfNested.getAllOf()) {
                         if (schema instanceof ObjectSchema) {
                             ObjectSchema objectSchema = (ObjectSchema) schema;
                             List<String> requiredField = objectSchema.getRequired();
@@ -375,7 +367,7 @@ public class BallerinaSchemaGenerator {
             throws BallerinaOpenApiException {
 
         Token typeRef = AbstractNodeFactory.createIdentifierToken(getValidName(
-                        extractReferenceType(allOfSchema.get$ref()), true));
+                extractReferenceType(allOfSchema.get$ref()), true));
         TypeReferenceNode recordField = NodeFactory.createTypeReferenceNode(createToken(ASTERISK_TOKEN), typeRef,
                 createToken(SEMICOLON_TOKEN));
         recordFieldList.add(recordField);
@@ -387,8 +379,8 @@ public class BallerinaSchemaGenerator {
     /**
      * This function is used to create typeDefinitionNode for objectSchema.
      *
-     * @param required - This string list include required fields in properties.
-     * @param typeName      - Record Name
+     * @param required        - This string list include required fields in properties.
+     * @param typeName        - Record Name
      * @param recordFieldList - RecordFieldList
      * @param fields          - schema properties map
      * @return This return record TypeDefinitionNode
@@ -499,18 +491,18 @@ public class BallerinaSchemaGenerator {
                 Token typeName = AbstractNodeFactory.createIdentifierToken(type);
                 return createBuiltinSimpleNameReferenceNode(null, typeName);
             } else if (schema instanceof ArraySchema) {
-                    final ArraySchema arraySchema = (ArraySchema) schema;
-                    if (arraySchema.getItems() != null) {
-                        // single array
-                        return getArrayTypeDescriptorNode(arraySchema);
-                    }
+                final ArraySchema arraySchema = (ArraySchema) schema;
+                if (arraySchema.getItems() != null) {
+                    // single array
+                    return getArrayTypeDescriptorNode(arraySchema);
+                }
             } else if ((schema.getType() != null && schema.getType().equals("object")) ||
-                    (schema.getProperties() != null))  {
+                    (schema.getProperties() != null)) {
                 if (schema.getProperties() != null) {
                     Map<String, Schema> properties = schema.getProperties();
                     List<Node> recordFList = new ArrayList<>();
                     List<String> required = schema.getRequired();
-                    for (Map.Entry<String, Schema> property: properties.entrySet()) {
+                    for (Map.Entry<String, Schema> property : properties.entrySet()) {
                         addRecordFields(required, recordFList, property);
                     }
                     NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
@@ -528,7 +520,7 @@ public class BallerinaSchemaGenerator {
                     return createBuiltinSimpleNameReferenceNode(null, typeName);
                 } else {
                     Token typeName = AbstractNodeFactory.createIdentifierToken(
-                                    convertOpenAPITypeToBallerina(schema.getType().trim()));
+                            convertOpenAPITypeToBallerina(schema.getType().trim()));
                     return createBuiltinSimpleNameReferenceNode(null, typeName);
                 }
             } else if (schema.getType() != null && schema.getType().equals("object")) {
@@ -545,7 +537,7 @@ public class BallerinaSchemaGenerator {
             type = getNullableType(refSchema, type);
             Token typeName = AbstractNodeFactory.createIdentifierToken(type);
             return createBuiltinSimpleNameReferenceNode(null, typeName);
-        }  else if (schema instanceof ComposedSchema) {
+        } else if (schema instanceof ComposedSchema) {
             //TODO: API doc generator
             ComposedSchema composedSchema = (ComposedSchema) schema;
             return getTypeDescriptorNodeForComposedSchema(composedSchema, new ArrayList<>(), false);
@@ -568,16 +560,16 @@ public class BallerinaSchemaGenerator {
 
     /**
      * Generate proper type name considering the nullable configurations.
-     *  Scenario 1 : schema.getNullable() != null && schema.getNullable() == true && nullable == true -> string?
-     *  Scenario 2 : schema.getNullable() != null && schema.getNullable() == true && nullable == false -> string?
-     *  Scenario 3 : schema.getNullable() != null && schema.getNullable() == false && nullable == false -> string
-     *  Scenario 4 : schema.getNullable() != null && schema.getNullable() == false && nullable == true -> string
-     *  Scenario 5 : schema.getNullable() == null && nullable == true -> string?
-     *  Scenario 6 : schema.getNullable() == null && nullable == false -> string
+     * Scenario 1 : schema.getNullable() != null && schema.getNullable() == true && nullable == true -> string?
+     * Scenario 2 : schema.getNullable() != null && schema.getNullable() == true && nullable == false -> string?
+     * Scenario 3 : schema.getNullable() != null && schema.getNullable() == false && nullable == false -> string
+     * Scenario 4 : schema.getNullable() != null && schema.getNullable() == false && nullable == true -> string
+     * Scenario 5 : schema.getNullable() == null && nullable == true -> string?
+     * Scenario 6 : schema.getNullable() == null && nullable == false -> string
      *
-     * @param schema    Schema of the property
-     * @param type      Type name
-     * @return          Final type of the field
+     * @param schema Schema of the property
+     * @param type   Type name
+     * @return Final type of the field
      */
     private String getNullableType(Schema<?> schema, String type) {
         if (schema.getNullable() != null) {
@@ -589,6 +581,7 @@ public class BallerinaSchemaGenerator {
         }
         return type;
     }
+
     /**
      * This function is used to handle the array schema under the OAS components.
      */
@@ -629,7 +622,7 @@ public class BallerinaSchemaGenerator {
     /**
      * Generate {@code TypeDescriptorNode} for Array Schema.
      *
-     * @param arraySchema    - Array schema
+     * @param arraySchema - Array schema
      * @throws BallerinaOpenApiException when failure happens while processing
      */
     public TypeDescriptorNode getArrayTypeDescriptorNode(ArraySchema arraySchema) throws BallerinaOpenApiException {
@@ -715,7 +708,7 @@ public class BallerinaSchemaGenerator {
             return createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(typeName));
         } else {
             memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(typeName));
-            return  memberTypeDesc;
+            return memberTypeDesc;
         }
     }
 }
