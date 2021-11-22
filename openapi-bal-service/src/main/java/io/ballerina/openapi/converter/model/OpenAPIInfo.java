@@ -17,10 +17,9 @@
  */
 package io.ballerina.openapi.converter.model;
 
-import java.util.Locale;
 import java.util.Optional;
 
-import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.normalizeTitle;
 
 /**
  * This {@code OpenAPIInfo} contains details related to openAPI info section.
@@ -28,58 +27,55 @@ import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
  * @since 2.0.0
  */
 public class OpenAPIInfo {
-    private String title = null;
-    private String version = null;
-    private String contractPath = null;
+    private final String title;
+    private final String version;
+    private final String contractPath;
 
-    public OpenAPIInfo() {
+    public OpenAPIInfo(OpenAPIInfoBuilder openAPIInfoBuilder) {
+        this.title = openAPIInfoBuilder.title;
+        this.version = openAPIInfoBuilder.version;
+        this.contractPath = openAPIInfoBuilder.contractPath;
     }
 
     public Optional<String> getTitle() {
-        return Optional.ofNullable(normalizedTitle(this.title));
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
+        return Optional.ofNullable(normalizeTitle(this.title));
     }
 
     public Optional<String> getVersion() {
         return Optional.ofNullable(this.version);
     }
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    // Generate Title
-    private static String normalizedTitle(String serviceName) {
-        if (serviceName != null) {
-            String[] splits = (serviceName.replaceFirst("/", "")).split(SPLIT_PATTERN);
-            StringBuilder stringBuilder = new StringBuilder();
-            String title = serviceName;
-            if (splits.length > 1) {
-                for (String piece : splits) {
-                    if (piece.isBlank()) {
-                        continue;
-                    }
-                    stringBuilder.append(piece.substring(0, 1).toUpperCase(Locale.ENGLISH) + piece.substring(1));
-                    stringBuilder.append(" ");
-                }
-                title = stringBuilder.toString().trim();
-            } else if (splits.length == 1 && !splits[0].isBlank()) {
-                stringBuilder.append(splits[0].substring(0, 1).toUpperCase(Locale.ENGLISH) + splits[0].substring(1));
-                title = stringBuilder.toString().trim();
-            }
-            return title;
-        }
-        return null;
-    }
     public Optional<String> getContractPath() {
-        return Optional.ofNullable(contractPath);
+        return Optional.ofNullable(this.contractPath);
     }
 
-    public void setContractPath(String contractPath) {
-        this.contractPath = contractPath;
-    }
+    /**
+     * This is the builder class for the {@link OpenAPIInfo}.
+     */
+    public static class OpenAPIInfoBuilder {
+        private String title;
+        private String version;
+        private String contractPath;
 
+        public OpenAPIInfoBuilder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public OpenAPIInfoBuilder version(String version) {
+            this.version = version;
+            return this;
+        }
+
+        public OpenAPIInfoBuilder contractPath(String contractPath) {
+            this.contractPath = contractPath;
+            return this;
+        }
+
+        public OpenAPIInfo build() {
+            OpenAPIInfo openAPIInfo = new OpenAPIInfo(this);
+            return openAPIInfo;
+        }
+    }
 }
+

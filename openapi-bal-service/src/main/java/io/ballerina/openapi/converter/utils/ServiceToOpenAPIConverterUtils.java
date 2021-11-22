@@ -68,7 +68,7 @@ import static io.ballerina.openapi.converter.Constants.CONTRACT;
 import static io.ballerina.openapi.converter.Constants.JSON_EXTENSION;
 import static io.ballerina.openapi.converter.Constants.OPENAPI_ANNOTATION;
 import static io.ballerina.openapi.converter.Constants.SLASH;
-import static io.ballerina.openapi.converter.Constants.SPLIT_PATTERN;
+import static io.ballerina.openapi.converter.Constants.SPECIAL_CHAR_REGEX;
 import static io.ballerina.openapi.converter.Constants.TITLE;
 import static io.ballerina.openapi.converter.Constants.VERSION;
 import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
@@ -125,13 +125,6 @@ public class ServiceToOpenAPIConverterUtils {
                 openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
                 OASResult oasDefinition = generateOAS(serviceNode, endpoints, semanticModel, openApiName, inputPath);
                 oasDefinition.setServiceName(openApiName);
-//                if (servicesToGenerate.size() > 1) {
-//                    Optional<OpenAPI> openAPI = oasDefinition.getOpenAPI();
-//                    if (openAPI.isPresent()) {
-//                        OpenAPI openapi = openAPI.get();
-//                        openapi.getInfo().setTitle(openapi.getInfo().getTitle() + "-" + normalizeTitle(openApiName));
-//                    }
-//                }
                 outputs.add(oasDefinition);
             }
         }
@@ -426,7 +419,7 @@ public class ServiceToOpenAPIConverterUtils {
 
     private static String normalizeTitle(String title) {
         if (title != null) {
-            String[] splits = (title.replaceFirst(SLASH, "")).split(SPLIT_PATTERN);
+            String[] splits = (title.replaceFirst(SLASH, "")).split(SPECIAL_CHAR_REGEX);
             StringBuilder stringBuilder = new StringBuilder();
             if (splits.length > 1) {
                 for (String piece : splits) {
@@ -506,7 +499,7 @@ public class ServiceToOpenAPIConverterUtils {
     }
 
     private static OpenAPIInfo updateOpenAPIInfoModel(SeparatedNodeList<MappingFieldNode> fields) {
-        OpenAPIInfo openAPIInfo = new OpenAPIInfo();
+        OpenAPIInfo.OpenAPIInfoBuilder infoBuilder = new OpenAPIInfo.OpenAPIInfoBuilder();
         for (MappingFieldNode field: fields) {
             String fieldName = ((SpecificFieldNode) field).fieldName().toString().trim();
             Optional<ExpressionNode> value = ((SpecificFieldNode) field).valueExpr();
@@ -518,13 +511,13 @@ public class ServiceToOpenAPIConverterUtils {
                     if (!fieldValue.isBlank()) {
                         switch (fieldName) {
                             case CONTRACT:
-                                openAPIInfo.setContractPath(fieldValue);
+                                infoBuilder.contractPath(fieldValue);
                                 break;
                             case TITLE:
-                                openAPIInfo.setTitle(fieldValue);
+                                infoBuilder.title(fieldValue);
                                 break;
                             case VERSION:
-                                openAPIInfo.setVersion(fieldValue);
+                                infoBuilder.version(fieldValue);
                                 break;
                             default:
                                 break;
@@ -533,7 +526,7 @@ public class ServiceToOpenAPIConverterUtils {
                 }
             }
         }
-        return openAPIInfo;
+        return infoBuilder.build();
     }
     private static OASResult resolveContractPath(List<OpenAPIConverterDiagnostic> diagnostics, Location location,
                                      OpenAPIInfo openAPIInfo, Path ballerinaFilePath) {

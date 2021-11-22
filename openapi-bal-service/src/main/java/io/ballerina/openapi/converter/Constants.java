@@ -68,7 +68,6 @@ public class Constants {
     public static final String OPENAPI_SUFFIX = "_openapi";
     public static final String SERVER = "server";
     public static final String PORT = "port";
-    public static final String SPLIT_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
     public static final String APPLICATION_PREFIX = "application/";
     public static final String JSON_POSTFIX = "+json";
     public static final String XML_POSTFIX = "+xml";
@@ -191,7 +190,7 @@ public class Constants {
     }
     public static final String HTTP_200 = "200";
     public static final String HTTP_200_DESCRIPTION = "Ok";
-    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
+    public static final String SPECIAL_CHAR_REGEX = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
 
     //Cache config constant
     public static final String CACHE_CONTROL = "Cache-Control";

@@ -62,6 +62,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import static io.ballerina.openapi.converter.Constants.SPECIAL_CHAR_REGEX;
+
 /**
  * Utilities used in Ballerina  to OpenAPI converter.
  */
@@ -128,7 +130,7 @@ public class ConverterCommonUtils {
         //For the flatten enable we need to remove first Part of valid name check
         // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
         if (!identifier.matches("\\b[0-9]*\\b")) {
-            String[] split = identifier.split(Constants.ESCAPE_PATTERN);
+            String[] split = identifier.split(SPECIAL_CHAR_REGEX);
             StringBuilder validName = new StringBuilder();
             for (String part : split) {
                 if (!part.isBlank()) {
@@ -272,5 +274,28 @@ public class ConverterCommonUtils {
         }
         OpenAPI api = parseResult.getOpenAPI();
         return new OASResult(api, diagnostics);
+    }
+
+    public static String normalizeTitle(String serviceName) {
+        if (serviceName == null) {
+            return null;
+        }
+        String[] urlPaths = (serviceName.replaceFirst(Constants.SLASH, "")).split(SPECIAL_CHAR_REGEX);
+        StringBuilder stringBuilder = new StringBuilder();
+        String title = serviceName;
+        if (urlPaths.length > 1) {
+            for (String path : urlPaths) {
+                if (path.isBlank()) {
+                    continue;
+                }
+                stringBuilder.append(path.substring(0, 1).toUpperCase(Locale.ENGLISH) + path.substring(1));
+                stringBuilder.append(" ");
+            }
+            title = stringBuilder.toString().trim();
+        } else if (urlPaths.length == 1 && !urlPaths[0].isBlank()) {
+            stringBuilder.append(urlPaths[0].substring(0, 1).toUpperCase(Locale.ENGLISH) + urlPaths[0].substring(1));
+            title = stringBuilder.toString().trim();
+        }
+        return title;
     }
 }
