@@ -20,40 +20,38 @@ package io.ballerina.openapi.generators.schema.schematypes;
 
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.schema.SchemaUtils;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import java.util.List;
+
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.openapi.generators.GeneratorConstants.NUMBER;
-import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 
 /**
- * Generate TypeDefinitionNode and TypeDescriptorNode for primitive type schemas.
+ * Generate TypeDefinitionNode and TypeDescriptorNode for anyOf schemas.
  *
  * @since 2.0.0
  */
-public class PrimitiveSchemaType extends SchemaType {
-
+public class AnyOfSchemaType extends SchemaType {
     private final boolean nullable;
 
-    public PrimitiveSchemaType(boolean nullable) {
+    public AnyOfSchemaType(boolean nullable) {
         this.nullable = nullable;
     }
 
     /**
-     * Generate TypeDescriptorNode for primitive type schemas.
-     * public type PetName string;
+     * Generate TypeDescriptorNode for anyOf schemas.
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
-        String typeDescriptorName = convertOpenAPITypeToBallerina(schema.getType().trim());
-        if (schema.getType().equals(NUMBER)) {
-            if (schema.getFormat() != null) {
-                typeDescriptorName = convertOpenAPITypeToBallerina(schema.getFormat().trim());
-            }
-        }
-        typeDescriptorName = SchemaUtils.getNullableType(schema, typeDescriptorName, this.nullable);
-        return createSimpleNameReferenceNode(createIdentifierToken(typeDescriptorName));
+        assert schema instanceof ComposedSchema;
+        ComposedSchema composedSchema = (ComposedSchema) schema;
+        List<Schema> anyOf = composedSchema.getAnyOf();
+        String unionTypeCont = GeneratorUtils.getOneOfUnionType(anyOf);
+        unionTypeCont = SchemaUtils.getNullableType(schema, unionTypeCont, this.nullable);
+        return createSimpleNameReferenceNode(createIdentifierToken(unionTypeCont));
     }
 }

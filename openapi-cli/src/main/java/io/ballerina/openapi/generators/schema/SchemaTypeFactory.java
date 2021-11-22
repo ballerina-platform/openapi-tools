@@ -19,13 +19,15 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.schema.schematypes.AllOfSchemaType;
 import io.ballerina.openapi.generators.schema.schematypes.AnyDataSchemaType;
+import io.ballerina.openapi.generators.schema.schematypes.AnyOfSchemaType;
 import io.ballerina.openapi.generators.schema.schematypes.ArraySchemaType;
 import io.ballerina.openapi.generators.schema.schematypes.ObjectSchemaType;
+import io.ballerina.openapi.generators.schema.schematypes.OneOfSchemaType;
 import io.ballerina.openapi.generators.schema.schematypes.PrimitiveSchemaType;
 import io.ballerina.openapi.generators.schema.schematypes.ReferencedSchemaType;
 import io.ballerina.openapi.generators.schema.schematypes.SchemaType;
-import io.ballerina.openapi.generators.schema.schematypes.composedschematypes.ComposedSchemaFactory;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -46,33 +48,37 @@ import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
  *
  * @since 2.0.0
  */
-public class SchemaFactory {
+public class SchemaTypeFactory {
     private final List<String> primitiveTypeList =
             new ArrayList<>(Arrays.asList(INTEGER, NUMBER, STRING, BOOLEAN));
 
     /**
      * Get SchemaType object relevant to the schema given.
      *
-     * @param openAPI     OpenAPI definition
      * @param schemaValue Schema object
      * @param nullable    Indicates whether the user has given ``nullable command line option
      * @return Relevant SchemaType object
      * @throws BallerinaOpenApiException On type of schema is not supported
      */
-    public SchemaType getSchemaType(OpenAPI openAPI, Schema<?> schemaValue, boolean nullable)
+    public SchemaType getType(OpenAPI openAPI, Schema<?> schemaValue, boolean nullable)
             throws BallerinaOpenApiException {
-        if (schemaValue instanceof ComposedSchema) {
+        if (schemaValue.get$ref() != null) {
+            return new ReferencedSchemaType(openAPI, nullable);
+        } else if (schemaValue instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schemaValue;
-            ComposedSchemaFactory composedSchemaFactory = new ComposedSchemaFactory();
-            return composedSchemaFactory.getComposedSchemaType(openAPI, composedSchema, nullable);
+            if (composedSchema.getAllOf() != null) {
+                return new AllOfSchemaType(openAPI, nullable);
+            } else if (composedSchema.getAnyOf() != null) {
+                return new AnyOfSchemaType(nullable);
+            } else {
+                return new OneOfSchemaType(nullable);
+            }
         } else if (schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null) {
             return new ObjectSchemaType(openAPI, nullable);
         } else if (schemaValue instanceof ArraySchema) {
             return new ArraySchemaType(openAPI, nullable);
         } else if (schemaValue.getType() != null && primitiveTypeList.contains(schemaValue.getType())) {
             return new PrimitiveSchemaType(nullable);
-        } else if (schemaValue.get$ref() != null) {
-            return new ReferencedSchemaType(openAPI, nullable);
         } else { // when schemaValue.type == null
             return new AnyDataSchemaType(nullable);
         }

@@ -88,9 +88,9 @@ public class SchemaUtils {
         RecordFieldNode recordFieldNode;
         String fieldN = escapeIdentifier(field.getKey().trim());
         // API doc generations
-        List<Node> schemaDoc = getFieldApiDocs(openAPI, field.getValue());
+        List<Node> schemaDoc = getFieldApiDocs(field.getValue(), openAPI);
         IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldN);
-        TypeDescriptorNode fieldTypeName = getSchemaType(field.getValue(), nullable, openAPI);
+        TypeDescriptorNode fieldTypeName = getBallerinaTypeName(field.getValue(), nullable, openAPI);
         Token questionMarkToken = AbstractNodeFactory.createIdentifierToken(NILLABLE);
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
         MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
@@ -112,11 +112,10 @@ public class SchemaUtils {
     /**
      * Create API documentation for record fields.
      *
-     * @param openAPI OpenAPI definition file
      * @param field   Schema of the field to generate
      * @return Documentation node list
      */
-    public static List<Node> getFieldApiDocs(OpenAPI openAPI, Schema<?> field) {
+    public static List<Node> getFieldApiDocs(Schema<?> field, OpenAPI openAPI) {
         List<Node> schemaDoc = new ArrayList<>();
         if (field.getDescription() != null) {
             schemaDoc.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
@@ -159,14 +158,13 @@ public class SchemaUtils {
      *
      * @param schema   OpenAPI schema
      * @param nullable Indicates whether the user has given ``nullable command line option
-     * @param openAPI  OpenAPI definition file
      * @return {@link TypeDescriptorNode}
      * @throws BallerinaOpenApiException when unsupported schema type found
      */
-    public static TypeDescriptorNode getSchemaType(Schema schema, boolean nullable, OpenAPI openAPI)
+    public static TypeDescriptorNode getBallerinaTypeName(Schema schema, boolean nullable, OpenAPI openAPI)
             throws BallerinaOpenApiException {
-        SchemaFactory schemaFactory = new SchemaFactory();
-        SchemaType schemaType = schemaFactory.getSchemaType(openAPI, schema, nullable);
+        SchemaTypeFactory schemaFactory = new SchemaTypeFactory();
+        SchemaType schemaType = schemaFactory.getType(openAPI, schema, nullable);
         return schemaType.generateTypeDescriptorNode(schema);
     }
 }

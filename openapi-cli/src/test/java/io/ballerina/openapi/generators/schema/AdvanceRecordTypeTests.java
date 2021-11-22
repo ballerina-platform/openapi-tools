@@ -84,6 +84,6 @@ public class AdvanceRecordTypeTests {
         BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
         TypeDefinitionNode recordNode =
                 ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, "Error", new ArrayList<>());
-        Assert.assertFalse(recordNode.typeDescriptor() instanceof RecordTypeDescriptorNode);
+        Assert.assertTrue(((RecordTypeDescriptorNode) recordNode.typeDescriptor()).fields().isEmpty());
     }
 }

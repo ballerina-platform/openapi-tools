@@ -54,7 +54,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
 public class BallerinaSchemaGenerator {
     private final boolean isNullable;
     private final OpenAPI openAPI;
-    private final SchemaFactory schemaFactory = new SchemaFactory();
+    private final SchemaTypeFactory schemaFactory = new SchemaTypeFactory();
     private List<TypeDefinitionNode> typeDefinitionNodeList;
 
     /**
@@ -108,7 +108,7 @@ public class BallerinaSchemaGenerator {
                     String schemaKey = schema.getKey().trim();
                     if (isValidSchemaName(schemaKey)) {
                         List<Node> schemaDoc = new ArrayList<>();
-                        typeDefinitionNodeList.add(this.getTypeDefinitionNode
+                        typeDefinitionNodeList.add(getTypeDefinitionNode
                                 (schema.getValue(), schemaKey, schemaDoc));
                     }
                 }
@@ -140,8 +140,7 @@ public class BallerinaSchemaGenerator {
             throws BallerinaOpenApiException {
         IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(getValidName(
                 typeName.trim(), true));
-        SchemaType schemaType = schemaFactory.getSchemaType(openAPI, schema, isNullable);
-
+        SchemaType schemaType = schemaFactory.getType(openAPI, schema, isNullable);
         List<AnnotationNode> typeAnnotations = new ArrayList<>();
         SchemaUtils.getRecordDocs(schemaDocs, schema, typeAnnotations);
         return schemaType.generateTypeDefinitionNode(schema, typeNameToken,
@@ -154,7 +153,7 @@ public class BallerinaSchemaGenerator {
      * @throws BallerinaOpenApiException when unsupported schema type is found
      */
     public TypeDescriptorNode getTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
-        SchemaType schemaType = schemaFactory.getSchemaType(openAPI, schema, isNullable);
+        SchemaType schemaType = schemaFactory.getType(openAPI, schema, isNullable);
         return schemaType.generateTypeDescriptorNode(schema);
     }
 }

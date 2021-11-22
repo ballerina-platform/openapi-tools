@@ -20,6 +20,8 @@ package io.ballerina.openapi.generators.schema.schematypes;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -27,6 +29,15 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
+
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 
 /**
  * Abstract class for schema types.
@@ -43,10 +54,16 @@ public abstract class SchemaType {
      * @return {@link TypeDefinitionNode}
      * @throws BallerinaOpenApiException when unsupported schema type is found
      */
-    public abstract TypeDefinitionNode generateTypeDefinitionNode(Schema<Object> schemaValue, IdentifierToken typeName,
+    public TypeDefinitionNode generateTypeDefinitionNode(Schema<Object> schemaValue, IdentifierToken typeName,
                                                                   List<Node> schemaDoc,
                                                                   List<AnnotationNode> typeAnnotations)
-            throws BallerinaOpenApiException;
+            throws BallerinaOpenApiException {
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
+        MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
+        return createTypeDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD),
+                typeName, generateTypeDescriptorNode(schemaValue),
+                createToken(SEMICOLON_TOKEN));
+    }
 
     /**
      * Create Type Descriptor Node for a given OpenAPI schema.

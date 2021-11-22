@@ -16,24 +16,17 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.schema.schematypes.composedschematypes;
+package io.ballerina.openapi.generators.schema.schematypes;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.SchemaUtils;
-import io.ballerina.openapi.generators.schema.schematypes.SchemaType;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -42,18 +35,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ASTERISK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
@@ -69,41 +56,6 @@ public class AllOfSchemaType extends SchemaType {
     public AllOfSchemaType(OpenAPI openAPI, boolean nullable) {
         this.openAPI = openAPI;
         this.nullable = nullable;
-    }
-
-    /**
-     * Generate TypeDefinitionNode for allOf schemas.
-     * -- ex:
-     * Sample OpenAPI :
-     * <pre>
-     *    schemas:
-     *     Dog:
-     *       allOf:
-     *       - $ref: "#/components/schemas/Pet"
-     *       - type: object
-     *         properties:
-     *           bark:
-     *             type: boolean
-     *  </pre>
-     * Generated Ballerina type for the allOf schema `Dog` :
-     * <pre>
-     *  public type Dog record {
-     *      *Pet;
-     *      boolean bark?;
-     *  };
-     * </pre>
-     */
-    @Override
-    public TypeDefinitionNode generateTypeDefinitionNode(Schema<Object> schemaValue, IdentifierToken typeName,
-                                                         List<Node> schemaDoc, List<AnnotationNode> typeAnnotations)
-            throws BallerinaOpenApiException {
-        RecordTypeDescriptorNode recordTypeDescriptorNode =
-                (RecordTypeDescriptorNode) this.generateTypeDescriptorNode(schemaValue);
-        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
-        MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
-        return NodeFactory.createTypeDefinitionNode(metadataNode,
-                createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName, recordTypeDescriptorNode,
-                AbstractNodeFactory.createToken(SEMICOLON_TOKEN));
     }
 
     /**
@@ -126,7 +78,7 @@ public class AllOfSchemaType extends SchemaType {
                 Map<String, Schema> properties = allOfSchema.getProperties();
                 for (Map.Entry<String, Schema> field : properties.entrySet()) {
                     SchemaUtils.addRecordFields
-                            (allOfSchema.getRequired(), recordFieldList, field, this.nullable, this.openAPI);
+                            (allOfSchema.getRequired(), recordFieldList, field, nullable, openAPI);
                 }
             }
 //            TODO: Address nested coposed schemas

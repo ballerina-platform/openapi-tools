@@ -18,12 +18,6 @@
 
 package io.ballerina.openapi.generators.schema.schematypes;
 
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.SchemaUtils;
@@ -31,18 +25,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.List;
-
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
 import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 
@@ -61,32 +45,6 @@ public class ArraySchemaType extends SchemaType {
     }
 
     /**
-     * Generate TypeDefinitionNode for object types.
-     * -- ex:
-     * Sample OpenAPI :
-     * <pre>
-     *     Pets:
-     *       type: array
-     *       items:
-     *         $ref: "#/components/schemas/Pet"
-     *  </pre>
-     * Generated Ballerina type for the schema `Pet` :
-     * <pre>
-     *      public type Pets Pet[];
-     * </pre>
-     */
-    @Override
-    public TypeDefinitionNode generateTypeDefinitionNode(Schema<Object> schemaValue, IdentifierToken typeName,
-                                                         List<Node> schemaDoc, List<AnnotationNode> typeAnnotations)
-            throws BallerinaOpenApiException {
-        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(
-                createNodeList(schemaDoc));
-        MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
-        return createTypeDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD),
-                typeName, this.generateTypeDescriptorNode(schemaValue), createToken(SEMICOLON_TOKEN));
-    }
-
-    /**
      * Generate TypeDescriptorNode for array type schemas. If array type is not given, type will be `AnyData`
      */
     @Override
@@ -94,8 +52,8 @@ public class ArraySchemaType extends SchemaType {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         String fieldTypeNameStr;
-        fieldTypeNameStr = SchemaUtils.getSchemaType
-                (arraySchema.getItems(), this.nullable, this.openAPI).toString().trim();
+        fieldTypeNameStr = SchemaUtils.getBallerinaTypeName
+                (arraySchema.getItems(), nullable, openAPI).toString().trim();
         if (fieldTypeNameStr.endsWith(NILLABLE)) {
             fieldTypeNameStr = fieldTypeNameStr.substring(0, fieldTypeNameStr.length() - 1);
         }
