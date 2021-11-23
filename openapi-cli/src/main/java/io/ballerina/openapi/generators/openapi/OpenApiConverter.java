@@ -23,7 +23,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
-import io.ballerina.openapi.converter.service.OASResult;
+import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.projects.Document;
@@ -89,10 +89,13 @@ public class OpenApiConverter {
             docId = documentIterator.next();
             doc = currentModule.document(docId);
         }
+        Optional<Path> path = project.documentPath(docId);
+        Path inputPath = path.orElse(null);
+
         syntaxTree = doc.syntaxTree();
         semanticModel = project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
         List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
-                semanticModel, serviceName, needJson, outPath);
+                semanticModel, serviceName, needJson, outPath, inputPath);
 
         if (!openAPIDefinitions.isEmpty()) {
             for (OASResult definition : openAPIDefinitions) {

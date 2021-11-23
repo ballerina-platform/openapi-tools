@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: PayloadV
-  version: 1.0.0
+  version: 0.0.0
 servers:
   - url: "{server}:{port}/payloadV"
     variables:

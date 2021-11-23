@@ -51,17 +51,6 @@ public class ResourcePathSummary {
         this.methods.put(method, resourceMethod);
     }
 
-    public boolean isMethodAvailable(String method) {
-        boolean isAvailable = false;
-        Map<String, ResourceMethod> methods = this.methods;
-        for (Map.Entry<String, ResourceMethod> m : methods.entrySet()) {
-            if (m.getKey().equals(method)) {
-                isAvailable = true;
-                break;
-            }
-        }
-        return isAvailable;
-    }
     public Location getPathPosition() {
         return pathPosition;
     }

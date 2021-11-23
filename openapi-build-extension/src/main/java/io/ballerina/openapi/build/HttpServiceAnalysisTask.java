@@ -1,51 +1,59 @@
 package io.ballerina.openapi.build;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
-import io.ballerina.openapi.converter.service.OASResult;
-import io.ballerina.openapi.converter.utils.CodegenUtils;
+import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
-import io.ballerina.projects.environment.ProjectEnvironment;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.Location;
-import io.ballerina.tools.text.LinePosition;
-import io.ballerina.tools.text.LineRange;
-import io.ballerina.tools.text.TextRange;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
 
     @Override
-    public void perform(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
-        SemanticModel semanticModel = syntaxNodeAnalysisContext.semanticModel();
-        SyntaxTree syntaxTree = syntaxNodeAnalysisContext.syntaxTree();
+    public void perform(SyntaxNodeAnalysisContext context) {
+        SemanticModel semanticModel = context.semanticModel();
+        SyntaxTree syntaxTree = context.syntaxTree();
         // Take the output path
-        Package currentPackage = syntaxNodeAnalysisContext.currentPackage();
+        Package currentPackage = context.currentPackage();
         Project project = currentPackage.project();
         Path outPath = project.targetDir();
+        Optional<Path> path = currentPackage.project().documentPath(context.documentId());
+        Path inputPath = path.orElse(null);
         // Check service node is http:service
+        // If listener is http then we can directly map if not we cann't
+        // Traverse the service declaration nodes
+        ModulePartNode modulePartNode = syntaxTree.rootNode();
+        for (Node node : modulePartNode.members()) {
+            SyntaxKind syntaxKind = node.kind();
+            // Load a service declarations for the path part in the yaml spec
+            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
+                ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
+                Optional<MetadataNode> metadata = serviceDeclarationNode.metadata();
+                if (metadata.isPresent()) {
+
+                }
+            }
+        }
+
         List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
-                semanticModel, null, false, outPath);
+                semanticModel, null, false, outPath, inputPath);
         List<Diagnostic> diagnostics = new ArrayList<>();
+
         if (!openAPIDefinitions.isEmpty()) {
             Map<String,String> yamls  = new HashMap<>();
             for (OASResult oasResult: openAPIDefinitions) {
@@ -62,7 +70,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         // Create the
         if (!diagnostics.isEmpty()) {
             for (Diagnostic diagnostic : diagnostics) {
-                syntaxNodeAnalysisContext.reportDiagnostic(diagnostic);
+                context.reportDiagnostic(diagnostic);
             }
         }
     }

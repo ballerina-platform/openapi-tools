@@ -166,6 +166,12 @@ public class OpenApiConverterUtilsTest {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for given ballerina file has only compiler warning")
+    public void testForNonHttpService() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("nonhttp_service.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

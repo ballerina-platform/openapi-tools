@@ -79,11 +79,14 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
     private static OpenAPI openAPI;
     private static List<Diagnostic> validations = new ArrayList<>();
     private Location location;
+    private static Path ballerinaFilePath = null;
+    private boolean contractPathExist;
 
     @Override
     public void perform(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
         List<FunctionDefinitionNode> functions = new ArrayList<>();
         DiagnosticSeverity kind = DiagnosticSeverity.ERROR;
+        contractPathExist = false;
         Filters filters = new Filters(kind);
         SemanticModel semanticModel = syntaxNodeAnalysisContext.semanticModel();
         SyntaxTree syntaxTree = syntaxNodeAnalysisContext.syntaxTree();
@@ -92,8 +95,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         Package aPackage = syntaxNodeAnalysisContext.currentPackage();
         DocumentId documentId = syntaxNodeAnalysisContext.documentId();
         Optional<Path> path = aPackage.project().documentPath(documentId);
-        Path ballerinaFilePath = path.orElseThrow();
-
+        path.ifPresent(value -> ballerinaFilePath = value);
         ModulePartNode modulePartNode = syntaxTree.rootNode();
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
@@ -165,7 +167,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                     }
                 }
             }
-            if (isAnnotationExist) {
+            if (isAnnotationExist && contractPathExist) {
                 // Summaries functions
                 NodeList<Node> members = serviceDeclarationNode.members();
                 Iterator<Node> iterator = members.iterator();
@@ -329,8 +331,8 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
     }
 
     //Extract details from openapi annotation.
-    private static DiagnosticSeverity extractOpenAPIAnnotation(DiagnosticSeverity kind, Filters filters,
-                                                              AnnotationNode annotationNode, Path ballerinaFilePath)
+    private DiagnosticSeverity extractOpenAPIAnnotation(DiagnosticSeverity kind, Filters filters,
+                                                        AnnotationNode annotationNode, Path ballerinaFilePath)
             throws IOException {
         SeparatedNodeList<MappingFieldNode> fields = annotationNode.annotValue().orElseThrow().fields();
         for (MappingFieldNode fieldNode: fields) {
@@ -340,6 +342,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 //Handle openapi contract path if path is empty return exceptions.
                 ExpressionNode openAPIAnnotation = expressionNode.orElseThrow();
                 if (specificFieldNode.fieldName().toString().trim().equals("contract")) {
+                    this.contractPathExist = true;
                     Path openapiPath = Paths.get(openAPIAnnotation.toString().replaceAll("\"", "").trim());
                     Path relativePath = null;
                     if (openapiPath.toString().isBlank()) {
@@ -474,11 +477,11 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 for (ResourceValidationError resourceValidationError: resourceMissingPathMethod) {
                     if (resourcePathSummary.getPath().equals(resourceValidationError.getResourcePath())) {
                         if ((!resourcePathSummary.getMethods().isEmpty())
-                                && (resourceValidationError.getresourceMethod() != null)) {
+                                && (resourceValidationError.getResourceMethod() != null)) {
                             Map<String, ResourceMethod> resourceMethods = resourcePathSummary.getMethods();
                             resourceMethods.entrySet().removeIf(resourceMethod -> resourceMethod.getKey()
-                                    .equals(resourceValidationError.getresourceMethod()));
-                        } else if (resourceValidationError.getresourceMethod() == null) {
+                                    .equals(resourceValidationError.getResourceMethod()));
+                        } else if (resourceValidationError.getResourceMethod() == null) {
                             resourcePSIterator.remove();
                         }
                     }
