@@ -71,7 +71,7 @@ public class APIDocTests {
     }
 
     @Test(description = "TypeInclusion record api doc mapped to OAS description")
-    public void testsForRecordHasTypeInclusion() throws OpenApiConverterException, IOException {
+    public void testsForRecordHasTypeInclusion() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("apidoc/typeInclusion.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "apidoc/typeInclusion.yaml");
     }

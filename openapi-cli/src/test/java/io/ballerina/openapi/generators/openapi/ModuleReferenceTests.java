@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -50,7 +49,7 @@ public class ModuleReferenceTests {
     }
 
     @Test(description = "Request Body with separate modules when serivce configuration enable")
-    public void testResponse04() throws OpenApiConverterException, IOException {
+    public void testResponse04() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("snowpeak_service_config.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak_service_config.yaml");
     }
