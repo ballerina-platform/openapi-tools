@@ -18,9 +18,8 @@ package io.ballerina.openapi.extension;
  *  under the License.
  */
 
-import io.ballerina.openapi.converter.service.OASResult;
+import com.google.gson.JsonArray;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -32,7 +31,8 @@ public class OpenAPIConverterResponse {
     @Deprecated
     private String yamlContent;
 
-    private List<OASResult> content;
+    // Json Array of OASResults
+    private JsonArray content;
     private String error;
 
     public OpenAPIConverterResponse() {
@@ -48,11 +48,11 @@ public class OpenAPIConverterResponse {
         this.yamlContent = yamlContent;
     }
 
-    public List<OASResult> getContent() {
+    public JsonArray getContent() {
         return content;
     }
 
-    public void setContent(List<OASResult> content) {
+    public void setContent(JsonArray content) {
         this.content = content;
     }
 

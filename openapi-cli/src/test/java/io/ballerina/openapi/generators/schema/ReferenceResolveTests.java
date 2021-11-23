@@ -17,7 +17,6 @@
  */
 
 package io.ballerina.openapi.generators.schema;
-
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -29,13 +28,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+
 /**
  * Tests for Schema Reference resolve.
  */
 public class ReferenceResolveTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     CodeGenerator codeGenerator = new CodeGenerator();
-
     @Test(description = "Tests with object type include reference")
     public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"), true);
@@ -64,5 +63,15 @@ public class ReferenceResolveTests {
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/parameter_schema_refs.bal", syntaxTree);
+    }
+
+    @Test(description = "Test Ballerina types generation when referred by another record with no additional fields")
+    public void testReferredTypesWithoutAdditionalFields() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/referred_inclusion.yaml"), true);
+        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/referred_inclusion.bal", syntaxTree);
     }
 }

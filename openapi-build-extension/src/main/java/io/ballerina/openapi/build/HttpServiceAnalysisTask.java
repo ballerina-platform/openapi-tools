@@ -5,6 +5,7 @@ import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.service.OASResult;
+import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
@@ -17,9 +18,18 @@ import io.ballerina.tools.text.LinePosition;
 import io.ballerina.tools.text.LineRange;
 import io.ballerina.tools.text.TextRange;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
@@ -37,8 +47,11 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 semanticModel, null, false, outPath);
         List<Diagnostic> diagnostics = new ArrayList<>();
         if (!openAPIDefinitions.isEmpty()) {
+            Map<String,String> yamls  = new HashMap<>();
             for (OASResult oasResult: openAPIDefinitions) {
-                Optional<OpenAPI> openAPI = oasResult.getOpenAPI();
+                if (oasResult.getYaml().isPresent()) {
+                    yamls.put(oasResult.getServiceName(), oasResult.getYaml().get());
+                }
                 if (!oasResult.getDiagnostics().isEmpty()) {
                     for (OpenAPIConverterDiagnostic diagnostic: oasResult.getDiagnostics()) {
                         diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
