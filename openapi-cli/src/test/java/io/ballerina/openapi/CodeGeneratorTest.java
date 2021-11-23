@@ -238,6 +238,7 @@ public class CodeGeneratorTest {
         CodeGenerator generator = new CodeGenerator();
         try {
             String expectedConfigContent = getStringFromGivenBalFile(expectedServiceFile, "api_key_config.toml");
+            generator.setIncludeTestFiles(true);
             generator.generateClient(definitionPath, clientName, resourcePath.toString(), filter, true);
 
             if (Files.exists(resourcePath.resolve("tests/Config.toml"))) {
@@ -265,9 +266,9 @@ public class CodeGeneratorTest {
         listTags.add("dogs");
         Filter filterCustom = new Filter(listTags, list2);
         try {
-            String expectedSchemaContent = getStringFromGivenBalFile(expectedServiceFile, "type_filtered_by_tags.bal");
-            generator.generateClient(definitionPath, clientName, resourcePath.toString(),
-                    filterCustom, false);
+            String expectedSchemaContent = getStringFromGivenBalFile(expectedServiceFile, 
+                "type_filtered_by_tags.bal");          
+            generator.generateClient(definitionPath, clientName, resourcePath.toString(), filterCustom, false);
             if (Files.exists(resourcePath.resolve("types.bal")) && Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedSchema = getStringFromGivenBalFile(resourcePath, "types.bal");
                 generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
@@ -340,7 +341,7 @@ public class CodeGeneratorTest {
         CodeGenerator generator = new CodeGenerator();
 
         try {
-            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generated_bal.bal");
+            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generated_bal.bal");       
             generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter, false);
             if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
                 String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");

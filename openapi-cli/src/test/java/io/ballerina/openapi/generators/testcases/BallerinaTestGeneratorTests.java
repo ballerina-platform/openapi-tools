@@ -68,6 +68,7 @@ public class BallerinaTestGeneratorTests {
         Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
         CodeGenerator codeGenerator = new CodeGenerator();
+        codeGenerator.setIncludeTestFiles(true);
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         BallerinaSchemaGenerator schemaGenerator = new BallerinaSchemaGenerator(openAPI);

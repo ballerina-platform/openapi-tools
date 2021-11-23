@@ -90,8 +90,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
         if (Files.exists(this.tmpDir.resolve("client.bal")) &&
                 Files.exists(this.tmpDir.resolve("petstore_service.bal")) &&
-                Files.exists(this.tmpDir.resolve("types.bal")) &&
-                Files.exists(this.tmpDir.resolve("tests/test.bal"))) {
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
             //Compare schema contents
             String generatedSchema = "";
             try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
@@ -131,8 +130,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
         if (Files.exists(this.tmpDir.resolve("client.bal")) &&
                 Files.exists(this.tmpDir.resolve("petstore_type_service.bal")) &&
-                Files.exists(this.tmpDir.resolve("types.bal")) &&
-                Files.exists(this.tmpDir.resolve("tests/test.bal"))) {
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
             //Compare schema contents
             String generatedSchema = "";
             try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
@@ -173,8 +171,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
         if (Files.exists(this.tmpDir.resolve("client.bal")) &&
                 Files.exists(this.tmpDir.resolve("petstore_service.bal")) &&
-                Files.exists(this.tmpDir.resolve("types.bal")) &&
-                Files.exists(this.tmpDir.resolve("tests/test.bal"))) {
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
             //Compare schema contents
             String generatedSchema = "";
             try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
@@ -186,11 +183,12 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");
             if (expectedSchemaContent.equals(generatedSchema)) {
                 Assert.assertTrue(true);
+                deleteGeneratedFiles(false);
             } else {
                 Assert.fail("Expected content and actual generated content is mismatched for: "
                         + petstoreYaml.toString());
+                deleteGeneratedFiles(false);
             }
-            deleteGeneratedFiles(false);
         } else {
             Assert.fail("Code generation failed. : " + readOutput(true));
         }
@@ -215,8 +213,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
         if (Files.exists(this.tmpDir.resolve("client.bal")) &&
                 Files.exists(this.tmpDir.resolve("petstore_service.bal")) &&
-                Files.exists(this.tmpDir.resolve("types.bal")) &&
-                Files.exists(this.tmpDir.resolve("tests/test.bal"))) {
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
             //Compare schema contents
             String generatedClientContent = "";
             try (Stream<String> generatedClientLines = Files.lines(this.tmpDir.resolve("client.bal"))) {
@@ -257,8 +254,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
         if (Files.exists(this.tmpDir.resolve("client.bal")) &&
                 Files.exists(this.tmpDir.resolve("utils.bal")) &&
-                Files.exists(this.tmpDir.resolve("types.bal")) &&
-                Files.exists(this.tmpDir.resolve("tests/test.bal"))) {
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
             //Compare client contents
             String generatedClientContent = "";
             try (Stream<String> generatedClientLines = Files.lines(this.tmpDir.resolve("client.bal"))) {
@@ -286,7 +282,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_with_oauth.yaml"));
         Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
-                licenseHeader.toString()};
+                licenseHeader.toString(), "--with-tests"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
@@ -338,6 +334,36 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         Assert.assertTrue(output.contains("Invalid license file path : "));
     }
 
+    @Test(description = "Test generation without including test files")
+    public void testClientGenerationWithoutIncludeTestFilesOption() throws IOException, BallerinaOpenApiException {
+        Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_with_oauth.yaml"));
+        Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
+                licenseHeader.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedConfigFilePath = resourceDir.resolve(Paths.get("expected_gen",
+                "bearer_config.toml"));
+        String expectedConfig = "";
+        try (Stream<String> expectedSchemaLines = Files.lines(expectedConfigFilePath)) {
+            expectedConfig = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("client.bal")) &&
+                Files.exists(this.tmpDir.resolve("petstore_with_oauth_service.bal")) &&
+                Files.exists(this.tmpDir.resolve("types.bal")) &&
+                !Files.exists(this.tmpDir.resolve("tests/Config.toml")) &&
+                !Files.exists(this.tmpDir.resolve("tests/test.bal"))) {
+
+                Assert.assertTrue(true);
+                deleteGeneratedFiles(true);
+        } else {
+            Assert.fail("Code generation failed. : " + readOutput(true));
+        }
+    }
+
     @Test(description = "Test openapi gen-service for .yml file service generation")
     public void testSuccessfulServiceGenerationForYML() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yml"));
@@ -357,8 +383,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
         if (Files.exists(this.tmpDir.resolve("client.bal")) &&
                 Files.exists(this.tmpDir.resolve("petstore_service.bal")) &&
-                Files.exists(this.tmpDir.resolve("types.bal")) &&
-                Files.exists(this.tmpDir.resolve("tests/test.bal"))) {
+                Files.exists(this.tmpDir.resolve("types.bal"))) {
             //Compare schema contents
             String generatedSchema = "";
             try (Stream<String> generatedSchemaLines = Files.lines(this.tmpDir.resolve("types.bal"))) {
