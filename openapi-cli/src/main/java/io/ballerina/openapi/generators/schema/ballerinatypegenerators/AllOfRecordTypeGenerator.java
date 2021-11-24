@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.schema.schematypes;
+package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -26,8 +26,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.SchemaUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -46,63 +45,71 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for allOf schemas.
+ * -- ex:
+ * Sample OpenAPI :
+ * <pre>
+ *    schemas:
+ *     Dog:
+ *       allOf:
+ *       - $ref: "#/components/schemas/Pet"
+ *       - type: object
+ *         properties:
+ *           bark:
+ *             type: boolean
+ *  </pre>
+ * Generated Ballerina type for the allOf schema `Dog` :
+ * <pre>
+ *  public type Dog record {
+ *      *Pet;
+ *      boolean bark?;
+ *  };
+ * </pre>
  *
  * @since 2.0.0
  */
-public class AllOfSchemaType extends SchemaType {
-    private final OpenAPI openAPI;
-    private final boolean nullable;
+public class AllOfRecordTypeGenerator extends TypeGenerator {
 
-    public AllOfSchemaType(OpenAPI openAPI, boolean nullable) {
-        this.openAPI = openAPI;
-        this.nullable = nullable;
+    public AllOfRecordTypeGenerator(Schema schema) {
+        super(schema);
     }
 
     /**
      * Generate TypeDescriptorNode for allOf schemas.
      */
     @Override
-    public TypeDescriptorNode generateTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
+    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         assert schema instanceof ComposedSchema;
         ComposedSchema composedSchema = (ComposedSchema) schema;
+        List<Node> recordFieldList = generateAllOfRecordFields(composedSchema.getAllOf());
+        NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
+        return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD), createToken(OPEN_BRACE_TOKEN),
+                fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
+    }
+
+    private List<Node> generateAllOfRecordFields(List<Schema> allOfSchemas) throws BallerinaOpenApiException {
         List<Node> recordFieldList = new ArrayList<>();
-        for (Schema allOfSchema : composedSchema.getAllOf()) {
-            if (allOfSchema.getType() == null && allOfSchema.get$ref() != null) {
+        for (Schema allOfSchema : allOfSchemas) {
+            if (allOfSchema.get$ref() != null) {
                 Token typeRef = AbstractNodeFactory.createIdentifierToken(getValidName(
                         extractReferenceType(allOfSchema.get$ref()), true));
-                // Type Reference Nodes in record fields does not have documentation
                 TypeReferenceNode recordField = NodeFactory.createTypeReferenceNode(createToken(ASTERISK_TOKEN),
                         typeRef, createToken(SEMICOLON_TOKEN));
                 recordFieldList.add(recordField);
             } else if (allOfSchema.getProperties() != null) {
                 Map<String, Schema> properties = allOfSchema.getProperties();
-                for (Map.Entry<String, Schema> field : properties.entrySet()) {
-                    SchemaUtils.addRecordFields
-                            (allOfSchema.getRequired(), recordFieldList, field, nullable, openAPI);
+                List<String> required = allOfSchema.getRequired();
+                recordFieldList.addAll(TypeGeneratorUtils.addRecordFields(required, properties.entrySet()));
+            } else if (allOfSchema instanceof ComposedSchema) {
+                ComposedSchema nestedComposedSchema = (ComposedSchema) allOfSchema;
+                if (nestedComposedSchema.getAllOf() != null) {
+                    recordFieldList.addAll(generateAllOfRecordFields(nestedComposedSchema.getAllOf()));
+                } else {
+                    // TODO: Needs to improve the error message. Could not access the schema name at this level.
+                    throw new BallerinaOpenApiException(
+                            "Unsupported nested OneOf or AnyOf schema is found inside a AllOf schema.");
                 }
             }
-//            TODO: Address nested coposed schemas
-//            else if (allOfSchema instanceof ComposedSchema) {
-//                ComposedSchema allOfNested = (ComposedSchema) allOfSchema;
-//                if (allOfNested.getAllOf() != null) {
-//                    for (Schema nestedSchema : allOfNested.getAllOf()) {
-//                        if (nestedSchema instanceof ObjectSchema) {
-//                            ObjectSchema objectSchema = (ObjectSchema) nestedSchema;
-//                            List<String> requiredField = objectSchema.getRequired();
-//                            Map<String, Schema> properties = objectSchema.getProperties();
-//                            // TODO: add api documentation
-//                            for (Map.Entry<String, Schema> field : properties.entrySet()) {
-//                                SchemaUtils.addRecordFields
-//                                        (requiredField, recordFieldList, field, this.nullable, this.openAPI);
-//                            }
-//                        }
-//                    }
-//                }
-//                // TODO handle OneOf, AnyOf
-//            }
         }
-        NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
-        return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD), createToken(OPEN_BRACE_TOKEN),
-                fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
+        return recordFieldList;
     }
 }

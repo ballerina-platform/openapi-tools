@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.schema.schematypes;
+package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -24,11 +24,9 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.SchemaUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,31 +38,53 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for object type schema.
+ * -- ex:
+ * Sample OpenAPI :
+ * <pre>
+ *      components:
+ *          schemas:
+ *              Pet:
+ *                  required:
+ *                      - id
+ *                      - name
+ *                  properties:
+ *                      id:
+ *                          type: integer
+ *                          format: int64
+ *                      name:
+ *                          type: string
+ *                      tag:
+ *                          type: string
+ *                      type:
+ *                          type: string
+ *  </pre>
+ * Generated Ballerina type for the schema `Pet` :
+ * <pre>
+ * public type Pet record {
+ *      int id;
+ *      string name;
+ *      string tag?;
+ *      string 'type?;
+ * };
+ * </pre>
  *
  * @since 2.0.0
  */
-public class ObjectSchemaType extends SchemaType {
+public class RecordTypeGenerator extends TypeGenerator {
 
-    private final OpenAPI openAPI;
-    private final boolean nullable;
-
-    public ObjectSchemaType(OpenAPI openAPI, boolean nullable) {
-        this.openAPI = openAPI;
-        this.nullable = nullable;
+    public RecordTypeGenerator(Schema schema) {
+        super(schema);
     }
 
     /**
      * Generate TypeDescriptorNode for object type schemas.
      */
     @Override
-    public TypeDescriptorNode generateTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
+    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         if (schema.getProperties() != null) {
             Map<String, Schema> properties = schema.getProperties();
-            List<Node> recordFList = new ArrayList<>();
             List<String> required = schema.getRequired();
-            for (Map.Entry<String, Schema> property : properties.entrySet()) {
-                SchemaUtils.addRecordFields(required, recordFList, property, nullable, openAPI);
-            }
+            List<Node> recordFList = TypeGeneratorUtils.addRecordFields(required, properties.entrySet());
             NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     createToken(OPEN_BRACE_TOKEN), fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));

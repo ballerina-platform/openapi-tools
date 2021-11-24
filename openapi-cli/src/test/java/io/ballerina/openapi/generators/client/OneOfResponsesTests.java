@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -41,9 +41,9 @@ public class OneOfResponsesTests {
     @Test(description = "Tests for returnType when response has array oneOf")
     public void getReturnTypeOneOfArray() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_oneOf_response.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
-        FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
-                new ArrayList<>());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
+                ballerinaSchemaGenerator,  new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
                 true), "ChannelDetails[]|string[]|error");
     }
@@ -51,9 +51,9 @@ public class OneOfResponsesTests {
     @Test(description = "Tests for returnType when response has array oneOf when it has function body")
     public void getReturnTypeOneOfArrayInTargetType() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_oneOf_response.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
-        FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
-                new ArrayList<>());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
+                ballerinaSchemaGenerator, new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
                 false), "OneOfOperationId01Response|error");
     }

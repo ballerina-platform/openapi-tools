@@ -267,8 +267,8 @@ public class GeneratorConstants {
         typeMap.put("string", "string");
         typeMap.put("boolean", "boolean");
         typeMap.put("array", "[]");
-        typeMap.put("object", "record {}");
         typeMap.put("decimal", "decimal");
+        typeMap.put("object", "record {}");
         typeMap.put("number", "decimal");
         typeMap.put("double", "float");
         typeMap.put("float", "float");

@@ -16,11 +16,11 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.schema.schematypes;
+package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.SchemaUtils;
+import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.Schema;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -30,15 +30,25 @@ import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeT
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for primitive type schemas.
+ * -- ex:
+ * Sample OpenAPI :
+ * <pre>
+ *      components:
+ *          schemas:
+ *              PetName:
+ *                  type: string
+ *  </pre>
+ * Generated Ballerina type for the schema `PetName` :
+ * <pre>
+ *     public type PetName string;
+ * </pre>
  *
  * @since 2.0.0
  */
-public class PrimitiveSchemaType extends SchemaType {
+public class PrimitiveTypeGenerator extends TypeGenerator {
 
-    private final boolean nullable;
-
-    public PrimitiveSchemaType(boolean nullable) {
-        this.nullable = nullable;
+    public PrimitiveTypeGenerator(Schema schema) {
+        super(schema);
     }
 
     /**
@@ -46,14 +56,15 @@ public class PrimitiveSchemaType extends SchemaType {
      * public type PetName string;
      */
     @Override
-    public TypeDescriptorNode generateTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
+    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         String typeDescriptorName = convertOpenAPITypeToBallerina(schema.getType().trim());
+        // TODO: Need to the format of other primitive types too
         if (schema.getType().equals(NUMBER)) {
             if (schema.getFormat() != null) {
                 typeDescriptorName = convertOpenAPITypeToBallerina(schema.getFormat().trim());
             }
         }
-        typeDescriptorName = SchemaUtils.getNullableType(schema, typeDescriptorName, this.nullable);
+        typeDescriptorName = TypeGeneratorUtils.getNullableType(schema, typeDescriptorName);
         return createSimpleNameReferenceNode(createIdentifierToken(typeDescriptorName));
     }
 }

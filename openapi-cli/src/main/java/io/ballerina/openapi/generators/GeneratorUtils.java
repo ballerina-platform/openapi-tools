@@ -48,8 +48,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -368,50 +366,6 @@ public class GeneratorUtils {
                 return SyntaxKind.JSON_KEYWORD.stringValue();
             // TODO: fill other types
         }
-    }
-
-    /**
-     * This function for creating the UnionType string for handle oneOf data binding.
-     *
-     * @param oneOf - OneOf schema
-     * @return - UnionString
-     * @throws BallerinaOpenApiException
-     */
-    public static String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
-
-        StringBuilder unionType = new StringBuilder();
-        for (Schema oneOfSchema: oneOf) {
-            if (oneOfSchema.getType() != null) {
-                String oneOfSchemaType = oneOfSchema.getType();
-                String type = convertOpenAPITypeToBallerina(oneOfSchemaType);
-                if (oneOfSchema instanceof ArraySchema) {
-                    ArraySchema oneOfArraySchema = (ArraySchema) oneOfSchema;
-                    Schema<?> items = oneOfArraySchema.getItems();
-                    if (items.get$ref() != null) {
-                        String reference = items.get$ref();
-                        type = getValidName(extractReferenceType(reference), true) + "[]";
-                    } else if (items.getType() != null) {
-                        type = convertOpenAPITypeToBallerina(items.getType().trim()) + "[]";
-                    }
-                }
-                if (!type.equals("record")) {
-                    unionType.append("|");
-                    unionType.append(type);
-                }
-            } else if (oneOfSchema.get$ref() != null) {
-                String type = getValidName(extractReferenceType(oneOfSchema.get$ref()), true);
-                unionType.append("|");
-                unionType.append(type);
-            }
-//            else if (!oneOfSchema.getProperties().isEmpty()) {
-                // TODO: generate warning to move inline schema to schema
-//            }
-        }
-        String unionTypeCont = unionType.toString();
-        if (!unionTypeCont.isBlank() && unionTypeCont.startsWith("|")) {
-            unionTypeCont = unionTypeCont.replaceFirst("\\|", "");
-        }
-        return unionTypeCont;
     }
 
     /**

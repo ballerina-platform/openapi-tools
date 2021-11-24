@@ -30,9 +30,9 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.schematypes.SchemaType;
+import io.ballerina.openapi.generators.schema.ballerinatypegenerators.TypeGenerator;
+import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.Components;
@@ -51,10 +51,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
  * This class wraps the {@link Schema} from openapi models inorder to overcome complications
  * while populating syntax tree.
  */
-public class BallerinaSchemaGenerator {
-    private final boolean isNullable;
-    private final OpenAPI openAPI;
-    private final SchemaTypeFactory schemaFactory = new SchemaTypeFactory();
+public class BallerinaTypesGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeList;
 
     /**
@@ -64,9 +61,8 @@ public class BallerinaSchemaGenerator {
      * @param openAPI    OAS definition
      * @param isNullable nullable value
      */
-    public BallerinaSchemaGenerator(OpenAPI openAPI, boolean isNullable) {
-        this.openAPI = openAPI;
-        this.isNullable = isNullable;
+    public BallerinaTypesGenerator(OpenAPI openAPI, boolean isNullable) {
+        GeneratorMetaData.createInstance(openAPI, isNullable);
         this.typeDefinitionNodeList = new LinkedList<>();
     }
 
@@ -76,15 +72,9 @@ public class BallerinaSchemaGenerator {
      *
      * @param openAPI OAS definition
      */
-    public BallerinaSchemaGenerator(OpenAPI openAPI) {
+    public BallerinaTypesGenerator(OpenAPI openAPI) {
         this(openAPI, false);
-    }
-
-    /**
-     * Returns a list of type definition nodes.
-     */
-    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
-        return typeDefinitionNodeList;
+        GeneratorMetaData.createInstance(openAPI, false);
     }
 
     /**
@@ -98,7 +88,7 @@ public class BallerinaSchemaGenerator {
      * Generate syntaxTree for component schema.
      */
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
-
+        OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
         if (openAPI.getComponents() != null) {
             // Create typeDefinitionNode
             Components components = openAPI.getComponents();
@@ -140,20 +130,10 @@ public class BallerinaSchemaGenerator {
             throws BallerinaOpenApiException {
         IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(getValidName(
                 typeName.trim(), true));
-        SchemaType schemaType = schemaFactory.getType(openAPI, schema, isNullable);
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema);
         List<AnnotationNode> typeAnnotations = new ArrayList<>();
-        SchemaUtils.getRecordDocs(schemaDocs, schema, typeAnnotations);
-        return schemaType.generateTypeDefinitionNode(schema, typeNameToken,
+        TypeGeneratorUtils.getRecordDocs(schemaDocs, schema, typeAnnotations);
+        return typeGenerator.generateTypeDefinitionNode(typeNameToken,
                 schemaDocs, typeAnnotations);
-    }
-
-    /**
-     * @param schema OpenAPI schema
-     * @return {@link TypeDescriptorNode}
-     * @throws BallerinaOpenApiException when unsupported schema type is found
-     */
-    public TypeDescriptorNode getTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
-        SchemaType schemaType = schemaFactory.getType(openAPI, schema, isNullable);
-        return schemaType.generateTypeDescriptorNode(schema);
     }
 }

@@ -20,7 +20,7 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -62,7 +62,7 @@ public class FunctionBodyNodeTests {
                 display.getPaths().get(path).readOperationsMap().entrySet();
         Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
         FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(new ArrayList<>(),
-                new ArrayList<>(), display, new BallerinaSchemaGenerator(display),
+                new ArrayList<>(), display, new BallerinaTypesGenerator(display),
                 new BallerinaAuthConfigGenerator(false, false), new BallerinaUtilGenerator());
         FunctionBodyNode bodyNode = functionBodyGenerator.getFunctionBodyNode(path, iterator.next());
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");

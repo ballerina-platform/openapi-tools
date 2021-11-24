@@ -26,7 +26,6 @@ import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.MarkdownParameterDocumentationLineNode;
 import io.ballerina.compiler.syntax.tree.NilLiteralNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
@@ -39,7 +38,7 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.ballerina.openapi.generators.GeneratorUtils;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -82,7 +81,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.ErrorMessages.invalidPathParamType;
 import static io.ballerina.openapi.generators.GeneratorConstants.BINARY;
 import static io.ballerina.openapi.generators.GeneratorConstants.BYTE;
@@ -101,9 +99,9 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  */
 public class FunctionSignatureGenerator {
     private final OpenAPI openAPI;
-    private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
+    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
-    private FunctionReturnType functionReturnType;
+    private FunctionReturnTypeGenerator functionReturnType;
     private boolean deprecatedParamFound = false;
 
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
@@ -111,13 +109,14 @@ public class FunctionSignatureGenerator {
     }
 
     public FunctionSignatureGenerator(OpenAPI openAPI,
-                                      BallerinaSchemaGenerator ballerinaSchemaGenerator,
+                                      BallerinaTypesGenerator ballerinaSchemaGenerator,
                                       List<TypeDefinitionNode> typeDefinitionNodeList) {
 
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.typeDefinitionNodeList = typeDefinitionNodeList;
-        this.functionReturnType =  new FunctionReturnType(openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
+        this.functionReturnType =  new FunctionReturnTypeGenerator
+                (openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
 
     }
 
@@ -132,7 +131,8 @@ public class FunctionSignatureGenerator {
             throws BallerinaOpenApiException {
         // Store the parameters for method.
         List<Node> parameterList =  new ArrayList<>();
-        functionReturnType =  new FunctionReturnType(openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
+        functionReturnType =  new FunctionReturnTypeGenerator
+                (openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
         setFunctionParameters(operation, parameterList, createToken(COMMA_TOKEN), remoteFunctionDoc);
 
         if (parameterList.size() >= 2) {
@@ -451,15 +451,8 @@ public class FunctionSignatureGenerator {
             } else if (schema instanceof ArraySchema) {
                 //TODO: handle nested array - this is impossible to handle
                 ArraySchema arraySchema = (ArraySchema) schema;
-                paramType = getRequestBodyParameterForArraySchema(operationId, requestBody, next, paramType,
-                        arraySchema);
-            } else if (schema instanceof ComposedSchema) {
-                // The requestBody only can have oneOf and anyOf data types
-                ComposedSchema composedSchema = (ComposedSchema) schema;
-                paramType = getRequestBodyParameterForComposedSchema(operationId, paramType, composedSchema);
-            } else if (schema instanceof ObjectSchema || schema.getProperties() != null) {
-                paramType = generateRecordForInlineRequestBody(operationId, requestBody, schema, schema.getRequired());
-            } else {
+                paramType = getRequestBodyParameterForArraySchema(operationId, next, arraySchema);
+            } else { // composed and object schemas are handled by the flatten
                 paramType = GeneratorUtils.getBallerinaMediaType(next.getKey());
             }
             if (!paramType.isBlank()) {
@@ -485,76 +478,24 @@ public class FunctionSignatureGenerator {
     /**
      * Generate RequestBody for array type schema.
      */
-    private String getRequestBodyParameterForArraySchema(String operationId, RequestBody requestBody,
-                                                         Map.Entry<String, MediaType> next, String paramType,
+    private String getRequestBodyParameterForArraySchema(String operationId, Map.Entry<String, MediaType> next,
                                                          ArraySchema arraySchema) throws BallerinaOpenApiException {
 
+        String paramType;
         Schema<?> arrayItems = arraySchema.getItems();
         if (arrayItems.getType() != null) {
-            if (arrayItems.getType().equals("object") && arrayItems instanceof ObjectSchema) {
-                ObjectSchema objectSchema = (ObjectSchema) arrayItems;
-                if (objectSchema.getProperties() != null) {
-                    // Generate properties
-                    paramType = generateRecordForInlineRequestBody(operationId, requestBody,
-                            objectSchema, objectSchema.getRequired());
-                    paramType = paramType + "[]";
-                }
-            } else {
-                paramType = convertOpenAPITypeToBallerina(arrayItems.getType()) + "[]";
-            }
+            paramType = convertOpenAPITypeToBallerina(arrayItems.getType()) + SQUARE_BRACKETS;
         } else if (arrayItems.get$ref() != null) {
-            paramType = getValidName(extractReferenceType(arrayItems.get$ref()), true) + "[]";
+            paramType = getValidName(extractReferenceType(arrayItems.get$ref()), true) + SQUARE_BRACKETS;
         } else if (arrayItems instanceof ComposedSchema) {
             paramType = "CompoundArrayItem" +  getValidName(operationId, true) + "Request";
-            TypeDescriptorNode typeDescriptorNodeForArraySchema =
-                    ballerinaSchemaGenerator.getTypeDescriptorNode(arraySchema);
             // TODO - Add API doc by checking requestBody
-            TypeDefinitionNode arrayTypeNode = NodeFactory.createTypeDefinitionNode(null, null,
-                    createIdentifierToken("public type"),
-                    createIdentifierToken(paramType), typeDescriptorNodeForArraySchema, createToken(SEMICOLON_TOKEN));
+            TypeDefinitionNode arrayTypeNode =
+                    ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());
             functionReturnType.updateTypeDefinitionNodeList(paramType, arrayTypeNode);
         } else {
-            paramType = GeneratorUtils.getBallerinaMediaType(next.getKey().trim()) + "[]";
+            paramType = GeneratorUtils.getBallerinaMediaType(next.getKey().trim()) + SQUARE_BRACKETS;
         }
-        return paramType;
-    }
-
-    private String getRequestBodyParameterForComposedSchema(String operationId, String paramType,
-                                                            ComposedSchema composedSchema)
-            throws BallerinaOpenApiException {
-
-        if (composedSchema.getOneOf() != null) {
-            paramType = GeneratorUtils.getOneOfUnionType(composedSchema.getOneOf());
-        } else if (composedSchema.getAnyOf() != null) {
-            paramType = GeneratorUtils.getOneOfUnionType(composedSchema.getAnyOf());
-        } else if (composedSchema.getAllOf() != null) {
-            paramType = "Compound" +  getValidName(operationId, true) + "Request";
-            TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
-                    (composedSchema, paramType, new ArrayList<>());
-            functionReturnType.updateTypeDefinitionNodeList(paramType, allOfTypeDefinitionNode);
-        }
-        return paramType;
-    }
-
-    /**
-     * Handle inline record with request parameter OAS ObjectSchema.
-     */
-    private String generateRecordForInlineRequestBody(String operationId, RequestBody requestBody,
-                                                     Schema schema, List<String> required)
-            throws BallerinaOpenApiException {
-
-        String paramType;
-        operationId = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1);
-        String typeName = operationId + "Request";
-        List<Node> requestBodyDocs = new ArrayList<>();
-        if (requestBody.getDescription() != null) {
-            requestBodyDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
-                    requestBody.getDescription(), false));
-        }
-        TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNode
-                (schema, typeName, requestBodyDocs);
-        functionReturnType.updateTypeDefinitionNodeList(typeName, recordNode);
-        paramType = typeName;
         return paramType;
     }
 }

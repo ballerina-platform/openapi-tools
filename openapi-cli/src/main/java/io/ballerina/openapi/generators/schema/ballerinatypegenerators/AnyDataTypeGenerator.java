@@ -16,42 +16,44 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.schema.schematypes;
+package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorUtils;
-import io.ballerina.openapi.generators.schema.SchemaUtils;
-import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.ballerina.openapi.generators.GeneratorConstants;
+import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.Schema;
-
-import java.util.List;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 
 /**
- * Generate TypeDefinitionNode and TypeDescriptorNode for anyOf schemas.
+ * Generate TypeDefinitionNode and TypeDescriptorNode for schemas without type.
+ * -- ex:
+ * Sample OpenAPI :
+ * <pre>
+ *     Pet:
+ *       description: Details of the pet.
+ *  </pre>
+ * Generated Ballerina type for the schema `Pet` :
+ * <pre>
+ *      public type Pet anydata;
+ * </pre>
  *
  * @since 2.0.0
  */
-public class OneOfSchemaType extends SchemaType {
-    private final boolean nullable;
+public class AnyDataTypeGenerator extends TypeGenerator {
 
-    public OneOfSchemaType(boolean nullable) {
-        this.nullable = nullable;
+    public AnyDataTypeGenerator(Schema schema) {
+        super(schema);
     }
 
     /**
-     * Generate TypeDescriptorNode for allOf schemas.
+     * Generate TypeDescriptorNode schemas with no type.
      */
     @Override
-    public TypeDescriptorNode generateTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
-        assert schema instanceof ComposedSchema;
-        ComposedSchema composedSchema = (ComposedSchema) schema;
-        List<Schema> oneOf = composedSchema.getOneOf();
-        String unionTypeCont = GeneratorUtils.getOneOfUnionType(oneOf);
-        unionTypeCont = SchemaUtils.getNullableType(schema, unionTypeCont, this.nullable);
-        return createSimpleNameReferenceNode(createIdentifierToken(unionTypeCont));
+    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
+        String anyData = TypeGeneratorUtils.getNullableType(schema, GeneratorConstants.ANY_DATA);
+        return createSimpleNameReferenceNode(createIdentifierToken(anyData));
     }
 }

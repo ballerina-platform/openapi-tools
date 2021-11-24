@@ -20,11 +20,10 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.ballerina.openapi.generators.GeneratorUtils;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -38,7 +37,6 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +47,8 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
@@ -58,15 +58,15 @@ import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
 /**
  * This util class for maintain the operation response with ballerina return type.
  */
-public class FunctionReturnType {
+public class FunctionReturnTypeGenerator {
     private OpenAPI openAPI;
-    private BallerinaSchemaGenerator ballerinaSchemaGenerator;
+    private BallerinaTypesGenerator ballerinaSchemaGenerator;
     private List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
 
-    public FunctionReturnType() {}
+    public FunctionReturnTypeGenerator() {}
 
-    public FunctionReturnType(OpenAPI openAPI, BallerinaSchemaGenerator ballerinaSchemaGenerator,
-                              List<TypeDefinitionNode> typeDefinitionNodeList) {
+    public FunctionReturnTypeGenerator(OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
+                                       List<TypeDefinitionNode> typeDefinitionNodeList) {
 
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
@@ -85,9 +85,7 @@ public class FunctionReturnType {
         String returnType = "http:Response|error";
         if (operation.getResponses() != null) {
             ApiResponses responses = operation.getResponses();
-            Iterator<Map.Entry<String, ApiResponse>> iteratorRes = responses.entrySet().iterator();
-            while (iteratorRes.hasNext()) {
-                Map.Entry<String, ApiResponse> entry = iteratorRes.next();
+            for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
                 String statusCode = entry.getKey();
                 ApiResponse response = entry.getValue();
                 if (statusCode.startsWith("2") && response.getContent() != null) {
@@ -104,8 +102,8 @@ public class FunctionReturnType {
 
                         StringBuilder builder = new StringBuilder();
                         builder.append(type);
-                        builder.append("|");
-                        builder.append("error");
+                        builder.append(PIPE_TOKEN.stringValue());
+                        builder.append(ERROR_KEYWORD.stringValue());
                         returnType = builder.toString();
                         // Currently support for first media type
                         break;
@@ -198,18 +196,13 @@ public class FunctionReturnType {
                 type = generateCustomTypeDefine(type, typeName, isSignature);
             }
         } else {
-            String schemaType = arraySchema.getItems().getType();
             String typeName;
-            if (schemaType.equals(Constants.ARRAY) && (arraySchema.getItems() != null)) {
+            if (arraySchema.getItems() instanceof ArraySchema) {
                 Schema nestedSchema = arraySchema.getItems();
-                if (nestedSchema instanceof ArraySchema) {
-                    ArraySchema nestedArraySchema = (ArraySchema) nestedSchema;
-                    String inlineArrayType = convertOpenAPITypeToBallerina(nestedArraySchema.getItems().getType());
-                    typeName =  inlineArrayType + "NestedArr";
-                    type = inlineArrayType + "[][]";
-                } else {
-                    throw new BallerinaOpenApiException("Invalid two dimensional array found as response schema");
-                }
+                ArraySchema nestedArraySchema = (ArraySchema) nestedSchema;
+                String inlineArrayType = convertOpenAPITypeToBallerina(nestedArraySchema.getItems().getType());
+                typeName =  inlineArrayType + "NestedArr";
+                type = inlineArrayType + "[][]";
             } else {
                 typeName = convertOpenAPITypeToBallerina(Objects.requireNonNull(arraySchema.getItems()).getType()) +
                         "Arr";
@@ -227,16 +220,12 @@ public class FunctionReturnType {
                                                            ComposedSchema composedSchema, boolean isSignature)
             throws BallerinaOpenApiException {
         if (composedSchema.getOneOf() != null) {
-            List<Schema> oneOf = composedSchema.getOneOf();
-            type = GeneratorUtils.getOneOfUnionType(oneOf);
             // Get oneOfUnionType name
             String typeName = "OneOf" + getValidName(operation.getOperationId().trim(), true) +  "Response";
-            TypeDefinitionNode typeDefNode = createTypeDefinitionNode(null, null,
-                    createIdentifierToken("public type"),
-                    createIdentifierToken(typeName),
-                    createSimpleNameReferenceNode(createIdentifierToken(type)),
-                    createToken(SEMICOLON_TOKEN));
+            TypeDefinitionNode typeDefNode = ballerinaSchemaGenerator.getTypeDefinitionNode(
+                    composedSchema, typeName, new ArrayList<>());
             updateTypeDefinitionNodeList(typeName, typeDefNode);
+            type = typeDefNode.typeDescriptor().toString();
             if (!isSignature) {
                 type = typeName;
             }

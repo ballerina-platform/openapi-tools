@@ -42,7 +42,7 @@ import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.generators.client.BallerinaUtilGenerator;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.service.BallerinaServiceGenerator;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -447,7 +447,7 @@ public class CodeGenerator {
         }
 
         // Generate ballerina records to represent schemas.
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
@@ -597,7 +597,7 @@ public class CodeGenerator {
                 (ballerinaServiceGenerator.generateSyntaxTree(openAPIDef, filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
         String schemaContent = Formatter.format(
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME, schemaContent));

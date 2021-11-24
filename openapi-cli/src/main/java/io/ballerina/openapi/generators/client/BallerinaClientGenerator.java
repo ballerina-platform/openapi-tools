@@ -54,7 +54,7 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -124,7 +124,7 @@ public class BallerinaClientGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private List<String> apiKeyNameList = new ArrayList<>();
     private final OpenAPI openAPI;
-    private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
+    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final List<String> remoteFunctionNameList;
     private String serverURL;
@@ -163,7 +163,7 @@ public class BallerinaClientGenerator {
         this.imports = new ArrayList<>();
         this.typeDefinitionNodeList = new ArrayList<>();
         this.openAPI = openAPI;
-        this.ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI, nullable);
+        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, nullable);
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";

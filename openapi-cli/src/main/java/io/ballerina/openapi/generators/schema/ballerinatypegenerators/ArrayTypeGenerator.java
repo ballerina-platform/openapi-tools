@@ -16,57 +16,74 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.schema.schematypes;
+package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.SchemaUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
 import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.generators.GeneratorConstants.SQUARE_BRACKETS;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for array schemas.
+ * -- ex:
+ * Sample OpenAPI :
+ * <pre>
+ *     Pets:
+ *       type: array
+ *       items:
+ *         $ref: "#/components/schemas/Pet"
+ *  </pre>
+ * Generated Ballerina type for the schema `Pet` :
+ * <pre>
+ *      public type Pets Pet[];
+ * </pre>
  *
  * @since 2.0.0
  */
-public class ArraySchemaType extends SchemaType {
-    private final OpenAPI openAPI;
-    private final boolean nullable;
+public class ArrayTypeGenerator extends TypeGenerator {
 
-    public ArraySchemaType(OpenAPI openAPI, boolean nullable) {
-        this.openAPI = openAPI;
-        this.nullable = nullable;
+    public ArrayTypeGenerator(Schema schema) {
+        super(schema);
     }
 
     /**
      * Generate TypeDescriptorNode for array type schemas. If array type is not given, type will be `AnyData`
+     * public type StringArray string[];
      */
     @Override
-    public TypeDescriptorNode generateTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
+    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
-        String fieldTypeNameStr;
-        fieldTypeNameStr = SchemaUtils.getBallerinaTypeName
-                (arraySchema.getItems(), nullable, openAPI).toString().trim();
-        if (fieldTypeNameStr.endsWith(NILLABLE)) {
-            fieldTypeNameStr = fieldTypeNameStr.substring(0, fieldTypeNameStr.length() - 1);
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(arraySchema.getItems());
+        String arrayType = typeGenerator.generateTypeDescriptorNode().toString();
+        if (typeGenerator instanceof UnionTypeGenerator) {
+            arrayType = OPEN_PAREN_TOKEN.stringValue() + arrayType + CLOSE_PAREN_TOKEN.stringValue();
         }
-        String arrayBrackets = "[]";
+        if (arrayType.endsWith(NILLABLE)) {
+            arrayType = arrayType.substring(0, arrayType.length() - 1);
+        }
+        String arrayBrackets = SQUARE_BRACKETS;
         if (arraySchema.getMaxItems() != null) {
             if (arraySchema.getMaxItems() <= MAX_ARRAY_LENGTH) {
-                arrayBrackets = "[" + arraySchema.getMaxItems() + "]";
+                arrayBrackets = OPEN_BRACKET_TOKEN.stringValue() + arraySchema.getMaxItems() +
+                        CLOSE_BRACKET_TOKEN.stringValue();
             } else {
                 throw new BallerinaOpenApiException("Maximum item count defined in the definition exceeds the " +
                         "maximum ballerina array length.");
             }
         }
-        fieldTypeNameStr = SchemaUtils.getNullableType(arraySchema, fieldTypeNameStr + arrayBrackets, this.nullable);
-        return createSimpleNameReferenceNode(createIdentifierToken(fieldTypeNameStr));
+        arrayType = TypeGeneratorUtils.getNullableType(arraySchema, arrayType + arrayBrackets);
+        return createSimpleNameReferenceNode(createIdentifierToken(arrayType));
     }
 }

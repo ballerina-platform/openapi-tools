@@ -16,12 +16,12 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.schema.schematypes;
+package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.SchemaUtils;
-import io.swagger.v3.oas.models.OpenAPI;
+import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
+import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.Schema;
 
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
@@ -31,27 +31,37 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for referenced schemas.
+ * -- ex:
+ * Sample OpenAPI :
+ *  <pre>
+ *      components:
+ *          schemas:
+ *              PetName:
+ *                  type: string
+ *              DogName:
+ *                  $ref: "#/components/schemas/PetName"
+ *  </pre>
+ * Generated Ballerina type for the schema `DogName` :
+ * <pre>
+ *     public type DogName PetName;
+ * </pre>
  *
  * @since 2.0.0
  */
-public class ReferencedSchemaType extends SchemaType {
+public class ReferencedTypeGenerator extends TypeGenerator {
 
-    private final OpenAPI openAPI;
-    private final boolean nullable;
-
-    public ReferencedSchemaType(OpenAPI openAPI, boolean nullable) {
-        this.openAPI = openAPI;
-        this.nullable = nullable;
+    public ReferencedTypeGenerator(Schema schema) {
+        super(schema);
     }
 
     /**
      * Generate TypeDescriptorNode for referenced schemas.
      */
     @Override
-    public TypeDescriptorNode generateTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
+    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         String typeName = getValidName(extractReferenceType(schema.get$ref()), true);
-        Schema<?> refSchema = openAPI.getComponents().getSchemas().get(typeName);
-        typeName = SchemaUtils.getNullableType(refSchema, typeName, this.nullable);
+        Schema<?> refSchema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName);
+        typeName = TypeGeneratorUtils.getNullableType(refSchema, typeName);
         return createSimpleNameReferenceNode(createIdentifierToken(typeName));
     }
 }
