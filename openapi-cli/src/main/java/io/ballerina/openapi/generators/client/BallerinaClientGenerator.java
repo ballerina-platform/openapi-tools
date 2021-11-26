@@ -113,6 +113,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_API_KEY_DESC;
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
+import static io.ballerina.openapi.generators.GeneratorConstants.SELF;
 import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_INIT_DESCRIPTION;
 
 /**
@@ -137,6 +138,14 @@ public class BallerinaClientGenerator {
 
         return typeDefinitionNodeList;
     }
+
+    /**
+     * Returns ballerinaAuthConfigGenerator.
+     */
+    public BallerinaAuthConfigGenerator getBallerinaAuthConfigGenerator() {
+        return ballerinaAuthConfigGenerator;
+    }
+
     /**
      * Set the typeDefinitionNodeList.
      */
@@ -186,9 +195,16 @@ public class BallerinaClientGenerator {
         if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
             // Add authentication related records to module member nodes
             nodes.add(ballerinaAuthConfigGenerator.getConfigRecord(openAPI));
+            
+            // Add `AuthConfig` record if combination of ApiKey and HTTP/OAuth authentication is supported
+            if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
+                nodes.add(ballerinaAuthConfigGenerator.getAuthConfigRecord());
+            }
         }
+
         // Add class definition node to module member nodes
         nodes.add(getClassDefinitionNode());
+
         NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
         ModulePartNode modulePartNode =
                 createModulePartNode(importsList, createNodeList(nodes), createToken(EOF_TOKEN));
@@ -306,21 +322,30 @@ public class BallerinaClientGenerator {
      * @return  {@link FunctionBodyNode}
      */
     private FunctionBodyNode getInitFunctionBodyNode() {
+        List<StatementNode> assignmentNodes = new ArrayList<>();
+
+        // If both apiKey and httpOrOAuth is supported
+        if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
+            ballerinaAuthConfigGenerator.handleInitForMixOfApiKeyAndHTTPOrOAuth(assignmentNodes);
+        }
+
         // create initialization statement of http:Client class instance
         VariableDeclarationNode clientInitializationNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
         // create {@code self.clientEp = httpEp;} assignment node
         FieldAccessExpressionNode varRef = createFieldAccessExpressionNode(
-                createSimpleNameReferenceNode(createIdentifierToken("self")), createToken(DOT_TOKEN),
+                createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
                 createSimpleNameReferenceNode(createIdentifierToken("clientEp")));
         SimpleNameReferenceNode expr = createSimpleNameReferenceNode(createIdentifierToken("httpEp"));
         AssignmentStatementNode httpClientAssignmentStatementNode = createAssignmentStatementNode(varRef,
                 createToken(EQUAL_TOKEN), expr, createToken(SEMICOLON_TOKEN));
-        List<StatementNode> assignmentNodes = new ArrayList<>();
+
         assignmentNodes.add(clientInitializationNode);
         assignmentNodes.add(httpClientAssignmentStatementNode);
-        // Get API key assignment node if authentication mechanism type is `apiKey`
-        if (ballerinaAuthConfigGenerator.isApiKey()) {
+        // Get API key assignment node if authentication mechanism type is only `apiKey`
+        if (ballerinaAuthConfigGenerator.isApiKey() && !ballerinaAuthConfigGenerator.isHttpOROAuth()) {
             assignmentNodes.add(ballerinaAuthConfigGenerator.getApiKeyAssignmentNode());
+        }
+        if (ballerinaAuthConfigGenerator.isApiKey()) {
             List<String> apiKeyNames = new ArrayList<>();
             apiKeyNames.addAll(ballerinaAuthConfigGenerator.getHeaderApiKeyNameList().values());
             apiKeyNames.addAll(ballerinaAuthConfigGenerator.getQueryApiKeyNameList().values());
@@ -370,7 +395,11 @@ public class BallerinaClientGenerator {
         }
         //todo: setInitDocComment() pass the references
         docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(clientInitDocComment, true));
-        if (ballerinaAuthConfigGenerator.isApiKey()) {
+        if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
+            MarkdownParameterDocumentationLineNode authConfig = DocCommentsGenerator.createAPIParamDoc(
+                    "authConfig", "Configurations used for Authentication");
+            docs.add(authConfig);
+        } else if (ballerinaAuthConfigGenerator.isApiKey()) {
             MarkdownParameterDocumentationLineNode apiKeyConfig = DocCommentsGenerator.createAPIParamDoc(
                     "apiKeyConfig", DEFAULT_API_KEY_DESC);
             docs.add(apiKeyConfig);

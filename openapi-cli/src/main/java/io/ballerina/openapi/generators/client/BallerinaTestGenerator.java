@@ -233,11 +233,21 @@ public class BallerinaTestGenerator {
                     break;
                 case API_KEY:
                     isHttpOrOAuth = false;
-                    typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
-                            createIdentifierToken(GeneratorConstants.API_KEYS_CONFIG + " & readonly"));
-                    moduleVariableDeclarationNodes.add(getConfigurableVariable(typeBindingPattern));
-                    moduleVariableDeclarationNodes.add(getClientInitializationNode
-                            (GeneratorConstants.API_KEY_CONFIG_PARAM));
+                    boolean combinationOfApiKeyAndHTTPOAuth = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                            .isApiKey() && ballerinaClientGenerator.getBallerinaAuthConfigGenerator().isHttpOROAuth();
+                    if (combinationOfApiKeyAndHTTPOAuth) {
+                        typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
+                                createIdentifierToken(GeneratorConstants.AUTH_CONFIG_RECORD + " & readonly"));
+                        moduleVariableDeclarationNodes.add(getConfigurableVariable(typeBindingPattern));
+                        moduleVariableDeclarationNodes.add(getClientInitializationNode
+                                (GeneratorConstants.AUTH_CONFIG));
+                    } else {
+                        typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
+                                createIdentifierToken(GeneratorConstants.API_KEYS_CONFIG + " & readonly"));
+                        moduleVariableDeclarationNodes.add(getConfigurableVariable(typeBindingPattern));
+                        moduleVariableDeclarationNodes.add(getClientInitializationNode
+                                (GeneratorConstants.API_KEY_CONFIG_PARAM));
+                    }
                     configFileName = "api_key_config.toml";
                     break;
                 default:
@@ -279,6 +289,8 @@ public class BallerinaTestGenerator {
      *        {@code configurable http:BearerTokenConfig & readonly authConfig = ?;}
      * -- ex: Configurable variable for API Key auth mechanism.
      *        {@code configurable ApiKeysConfig & readonly apiKeyConfig = ?;}
+     * -- ex: Configurable variable for combination of ApiKey and HTTP/OAuth authentication mechanism.
+     *        {@code configurable AuthConfig & readonly authConfig = ?;}
      *
      * @param   typeBindingPattern                      Variable name
      * @return  {@link ModuleVariableDeclarationNode}   Configurable variable declaration node
@@ -289,7 +301,9 @@ public class BallerinaTestGenerator {
         Token configurableNode = createIdentifierToken("configurable");
         NodeList<Token> nodeList = createNodeList(configurableNode);
         CaptureBindingPatternNode bindingPattern;
-        if (isHttpOrOAuth) {
+        boolean combinationOfApiKeyAndHTTPOAuth = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
+                .isApiKey() && ballerinaClientGenerator.getBallerinaAuthConfigGenerator().isHttpOROAuth();
+        if (isHttpOrOAuth || combinationOfApiKeyAndHTTPOAuth) {
             bindingPattern = createCaptureBindingPatternNode(
                     createIdentifierToken(GeneratorConstants.AUTH_CONFIG));
         } else {

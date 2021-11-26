@@ -78,4 +78,16 @@ public class QueryParameterTests {
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
+
+    @Test(description = "Generate query parameters when both apikeys and http/OAuth is supported")
+    public void genQueryParamsForCombinationOfApiKeyAndHTTPOrOAuth() throws IOException, BallerinaOpenApiException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RES_DIR.resolve("swagger/combination_of_apikey_and_http_oauth.yaml");
+        Path expectedPath = RES_DIR.resolve("ballerina/combination_of_apikey_and_http_oauth.bal");
+
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
 }
