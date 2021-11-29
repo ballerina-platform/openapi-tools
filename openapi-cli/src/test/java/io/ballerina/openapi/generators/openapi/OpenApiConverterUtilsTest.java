@@ -166,6 +166,14 @@ public class OpenApiConverterUtilsTest {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
     }
 
+    @Test(description = "Test for non http services")
+    public void testForNonHttpServices() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("non_service.bal");
+        new OpenApiConverter().generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
+                , false);
+        Assert.assertTrue(!Files.exists(tempDir.resolve("query_openapi.yaml")));
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
