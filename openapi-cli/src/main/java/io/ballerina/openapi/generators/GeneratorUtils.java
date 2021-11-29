@@ -48,8 +48,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -71,6 +69,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.ws.rs.core.MediaType;
+
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
@@ -91,14 +91,18 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
+import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_PDF;
 import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.generators.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.generators.GeneratorConstants.GET;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
+import static io.ballerina.openapi.generators.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.generators.GeneratorConstants.OPTIONS;
 import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
+import static io.ballerina.openapi.generators.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.generators.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
 
@@ -351,67 +355,23 @@ public class GeneratorUtils {
      */
     public static String getBallerinaMediaType(String mediaType) {
         switch (mediaType) {
-            case "*/*":
-            case "application/json":
+            case MediaType.APPLICATION_JSON:
                 return SyntaxKind.JSON_KEYWORD.stringValue();
-            case "application/xml":
+            case MediaType.APPLICATION_XML:
                 return SyntaxKind.XML_KEYWORD.stringValue();
-            case "application/x-www-form-urlencoded":
-            case "text/html":
-            case "text/plain":
+            case MediaType.APPLICATION_FORM_URLENCODED:
+            case MediaType.TEXT_HTML:
+            case MediaType.TEXT_PLAIN:
                 return STRING_KEYWORD.stringValue();
-            case "image/png":
-            case "application/octet-stream":
-            case "application/pdf":
-                return SyntaxKind.BYTE_ARRAY_LITERAL.stringValue() + "[]";
+            case IMAGE_PNG:
+            case MediaType.APPLICATION_OCTET_STREAM:
+            case APPLICATION_PDF:
+            case ANY_TYPE:
+                return SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
             default:
                 return SyntaxKind.JSON_KEYWORD.stringValue();
             // TODO: fill other types
         }
-    }
-
-    /**
-     * This function for creating the UnionType string for handle oneOf data binding.
-     *
-     * @param oneOf - OneOf schema
-     * @return - UnionString
-     * @throws BallerinaOpenApiException
-     */
-    public static String getOneOfUnionType(List<Schema> oneOf) throws BallerinaOpenApiException {
-
-        StringBuilder unionType = new StringBuilder();
-        for (Schema oneOfSchema: oneOf) {
-            if (oneOfSchema.getType() != null) {
-                String oneOfSchemaType = oneOfSchema.getType();
-                String type = convertOpenAPITypeToBallerina(oneOfSchemaType);
-                if (oneOfSchema instanceof ArraySchema) {
-                    ArraySchema oneOfArraySchema = (ArraySchema) oneOfSchema;
-                    Schema<?> items = oneOfArraySchema.getItems();
-                    if (items.get$ref() != null) {
-                        String reference = items.get$ref();
-                        type = getValidName(extractReferenceType(reference), true) + "[]";
-                    } else if (items.getType() != null) {
-                        type = convertOpenAPITypeToBallerina(items.getType().trim()) + "[]";
-                    }
-                }
-                if (!type.equals("record")) {
-                    unionType.append("|");
-                    unionType.append(type);
-                }
-            } else if (oneOfSchema.get$ref() != null) {
-                String type = getValidName(extractReferenceType(oneOfSchema.get$ref()), true);
-                unionType.append("|");
-                unionType.append(type);
-            }
-//            else if (!oneOfSchema.getProperties().isEmpty()) {
-                // TODO: generate warning to move inline schema to schema
-//            }
-        }
-        String unionTypeCont = unionType.toString();
-        if (!unionTypeCont.isBlank() && unionTypeCont.startsWith("|")) {
-            unionTypeCont = unionTypeCont.replaceFirst("\\|", "");
-        }
-        return unionTypeCont;
     }
 
     /**

@@ -23,7 +23,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -67,7 +67,7 @@ public class TestUtils {
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree, OpenAPI openAPI,
                                                   BallerinaClientGenerator ballerinaClientGenerator)
             throws FormatterException, IOException, BallerinaOpenApiException {
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree();
         SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();

@@ -1,0 +1,90 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+        description: this value is assigned by the service provider
+  - url: https://{subdomain}.swagger.io:{port}/{basePath}
+    description: The production API server
+    variables:
+      subdomain:
+        default: petstore
+        description: this value is assigned by the service provider
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '443'
+      basePath:
+        default: v2
+tags:
+  - name: pets
+    description: Pets Tag
+  - name: list
+    description: List Tag
+
+paths:
+  /activities:
+    get:
+      summary: List all activities
+      description: Show a list of pets in the system
+      operationId: listActivities
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: A list of Activities
+          content:
+            application/json:
+              schema:
+                title: getActivitiesResponse200
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      title: activityResponseObject
+                      allOf:
+                        - $ref: "#/components/schemas/ActivityResponseObject"
+                        - $ref: "#/components/schemas/EmployeeDetails"
+components:
+  schemas:
+    ActivityResponseObject:
+      properties:
+        due_date:
+          description: 'Due date of the Activity. Format: YYYY-MM-DD'
+          type: string
+          format: date
+        due_time:
+          description: 'Due time of the Activity in UTC. Format: HH:MM'
+          type: string
+        duration:
+          description: 'Duration of the Activity. Format: HH:MM'
+          type: string
+        deal_id:
+          description: The ID of the Deal this Activity is associated with
+          type: integer
+    EmployeeDetails:
+      properties:
+        employee_id:
+          description: 'Employee ID'
+          type: string
+        employee_name:
+          description: 'Employee Name'
+          type: string
+

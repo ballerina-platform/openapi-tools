@@ -19,6 +19,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.BlockStatementNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -26,6 +27,7 @@ import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.IfElseStatementNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -42,7 +44,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.mime.MimeType;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -70,10 +72,14 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLitera
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createAssignmentStatementNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createBinaryExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createBlockStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createIfElseStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
@@ -87,18 +93,27 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.IF_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.IS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.openapi.generators.GeneratorConstants.API_KEYS_CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.generators.GeneratorConstants.ENCODING;
 import static io.ballerina.openapi.generators.GeneratorConstants.EXECUTE;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
+import static io.ballerina.openapi.generators.GeneratorConstants.HEADER;
+import static io.ballerina.openapi.generators.GeneratorConstants.HEADER_VALUES;
 import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.generators.GeneratorConstants.POST;
 import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
+import static io.ballerina.openapi.generators.GeneratorConstants.QUERY;
+import static io.ballerina.openapi.generators.GeneratorConstants.QUERY_PARAM;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESPONSE;
+import static io.ballerina.openapi.generators.GeneratorConstants.SELF;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
@@ -110,7 +125,7 @@ public class FunctionBodyGenerator {
     private boolean isHeader;
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
     private final OpenAPI openAPI;
-    private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
+    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
 
@@ -123,7 +138,7 @@ public class FunctionBodyGenerator {
     }
 
     public FunctionBodyGenerator(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
-                                 OpenAPI openAPI, BallerinaSchemaGenerator ballerinaSchemaGenerator,
+                                 OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
                                  BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator,
                                  BallerinaUtilGenerator ballerinaUtilGenerator) {
 
@@ -147,7 +162,7 @@ public class FunctionBodyGenerator {
     public FunctionBodyNode getFunctionBodyNode(String path, Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        FunctionReturnType functionReturnType = new FunctionReturnType(
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(
                 openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
         isHeader = false;
         // Create statements
@@ -199,61 +214,176 @@ public class FunctionBodyGenerator {
             }
         }
 
+        List<Parameter> queryParameters = new ArrayList<>();
+        List<Parameter> headerParameters = new ArrayList<>();
+
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
-            List<Parameter> queryParameters = new ArrayList<>();
-            List<Parameter> headerParameters = new ArrayList<>();
             for (Parameter parameter: parameters) {
-                if (parameter.getIn().trim().equals("query")) {
+                if (parameter.getIn().trim().equals(QUERY)) {
                     queryParameters.add(parameter);
-                } else if (parameter.getIn().trim().equals("header")) {
+                } else if (parameter.getIn().trim().equals(HEADER)) {
                     headerParameters.add(parameter);
                 }
             }
+        }
+        handleQueryParamsAndHeaders(queryParameters, headerParameters, statementsList, queryApiKeyNameList,
+                headerApiKeyNameList);
+    }
+
+    /**
+     * Handle query parameters and headers within a remote function.
+     */
+    public void handleQueryParamsAndHeaders(List<Parameter> queryParameters, List<Parameter> headerParameters,
+                                               List<StatementNode> statementsList, List<String> queryApiKeyNameList,
+                                               List<String> headerApiKeyNameList) throws BallerinaOpenApiException {
+        boolean combinationOfApiKeyAndHTTPOAuth = ballerinaAuthConfigGenerator.isHttpOROAuth() &&
+                ballerinaAuthConfigGenerator.isApiKey();
+        if (combinationOfApiKeyAndHTTPOAuth) {
+            addUpdatedPathAndHeaders(statementsList, queryApiKeyNameList, queryParameters,
+                    headerApiKeyNameList, headerParameters);
+        } else {
             if (!queryParameters.isEmpty() || !queryApiKeyNameList.isEmpty()) {
                 ballerinaUtilGenerator.setQueryParamsFound(true);
                 statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
-                        "queryParam", queryApiKeyNameList));
-                VariableDeclarationNode queryParamEncodingMap = getQueryParameterEncodingMap(queryParameters);
-                if (queryParamEncodingMap != null) {
-                    statementsList.add(queryParamEncodingMap);
-                    ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
-                            "path = path + check getPathForQueryParam(queryParam, queryParamEncoding)");
-                    statementsList.add(updatedPath);
-                } else {
-                    ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
-                            "path = path + check getPathForQueryParam(queryParam)");
-                    statementsList.add(updatedPath);
-                }
+                        QUERY_PARAM, queryApiKeyNameList));
+                getUpdatedPathHandlingQueryParamEncoding(statementsList, queryParameters);
             }
             if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
                 statementsList.add(getMapForParameters(headerParameters, "map<any>",
-                        "headerValues", headerApiKeyNameList));
+                        HEADER_VALUES, headerApiKeyNameList));
                 statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
                         "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
                 isHeader = true;
                 ballerinaUtilGenerator.setHeadersFound(true);
             }
-        } else {
+        }
+    }
+
+    /**
+     * Generate statements for query parameters and headers when a client supports both ApiKey and HTTPOrOAuth
+     * authentication.
+     */
+    private void addUpdatedPathAndHeaders(List<StatementNode> statementsList, List<String> queryApiKeyNameList,
+                                          List<Parameter> queryParameters, List<String> headerApiKeyNameList,
+                                          List<Parameter> headerParameters) throws BallerinaOpenApiException {
+        List<StatementNode> ifBodyStatementsList = new ArrayList<>();
+
+        if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
+            if (!headerParameters.isEmpty()) {
+                statementsList.add(getMapForParameters(headerParameters, "map<any>",
+                        HEADER_VALUES, new ArrayList<>()));
+            } else {
+                ExpressionStatementNode headerMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
+                        "map<any> " + HEADER_VALUES + " = {}");
+                statementsList.add(headerMapCreation);
+            }
+
+            if (!headerApiKeyNameList.isEmpty()) {
+                // update headerValues Map within the if block
+                // `headerValues["api-key"] = self.apiKeyConfig?.apiKey;`
+                addApiKeysToMap(HEADER_VALUES, headerApiKeyNameList, ifBodyStatementsList);
+            }
+            isHeader = true;
+            ballerinaUtilGenerator.setHeadersFound(true);
+        }
+
+        if (!queryParameters.isEmpty() || !queryApiKeyNameList.isEmpty()) {
+            ballerinaUtilGenerator.setQueryParamsFound(true);
+            if (!queryParameters.isEmpty()) {
+                statementsList.add(getMapForParameters(queryParameters, "map<anydata>",
+                        QUERY_PARAM, new ArrayList<>()));
+            } else {
+                ExpressionStatementNode queryParamMapCreation = GeneratorUtils.getSimpleExpressionStatementNode(
+                        "map<anydata> " + QUERY_PARAM + " = {}");
+                statementsList.add(queryParamMapCreation);
+            }
 
             if (!queryApiKeyNameList.isEmpty()) {
-                ballerinaUtilGenerator.setQueryParamsFound(true);
-                statementsList.add(getMapForParameters(new ArrayList<>(), "map<anydata>",
-                        "queryParam", queryApiKeyNameList));
-                // Add updated path
-                ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
-                        "path = path + check getPathForQueryParam(queryParam)");
-                statementsList.add(updatedPath);
+                // update queryParam Map within the if block
+                // `queryParam["api-key"] = self.apiKeyConfig?.apiKey;`
+                addApiKeysToMap(QUERY_PARAM, queryApiKeyNameList, ifBodyStatementsList);
             }
-            if (!headerApiKeyNameList.isEmpty()) {
-                statementsList.add(getMapForParameters(new ArrayList<>(), "map<any>",
-                        "headerValues", headerApiKeyNameList));
-                statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                        "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
-                isHeader = true;
-                ballerinaUtilGenerator.setHeadersFound(true);
-            }
+        }
 
+        generateIfBlockToAddApiKeysToMaps(statementsList, ifBodyStatementsList);
+
+        if (!queryParameters.isEmpty() || !queryApiKeyNameList.isEmpty()) {
+            getUpdatedPathHandlingQueryParamEncoding(statementsList, queryParameters);
+        }
+        if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
+            statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
+                    "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
+        }
+    }
+
+    /**
+     * Add apiKeys to a given map (queryParam or headerValues).
+     *
+     * `queryParam["api-key"] = self.apiKeyConfig?.apiKey;`
+     * `headerValues["api-key"] = self.apiKeyConfig?.apiKey;`
+     */
+    private void addApiKeysToMap(String mapName, List<String> apiKeyNames, List<StatementNode> statementNodeList) {
+        if (!apiKeyNames.isEmpty()) {
+            for (String apiKey : apiKeyNames) {
+                IdentifierToken fieldName = createIdentifierToken(mapName + "[" + '"' + apiKey.trim() + '"' + "]");
+                Token equal = createToken(EQUAL_TOKEN);
+                FieldAccessExpressionNode fieldExpr = createFieldAccessExpressionNode(
+                        createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
+                        createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_PARAM +
+                                QUESTION_MARK_TOKEN.stringValue())));
+                SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
+                        getValidName(getValidName(apiKey, false), false)));
+                ExpressionNode apiKeyExpr = createFieldAccessExpressionNode(
+                        fieldExpr, createToken(DOT_TOKEN), valueExpr);
+                statementNodeList.add(createAssignmentStatementNode(fieldName, equal, apiKeyExpr, createToken(
+                        SEMICOLON_TOKEN)));
+            }
+        }
+    }
+
+    /**
+     * Get updated path considering queryParamEncodingMap.
+     *
+     */
+    private void getUpdatedPathHandlingQueryParamEncoding(List<StatementNode> statementsList, List<Parameter>
+            queryParameters) throws BallerinaOpenApiException {
+        VariableDeclarationNode queryParamEncodingMap = getQueryParameterEncodingMap(queryParameters);
+        if (queryParamEncodingMap != null) {
+            statementsList.add(queryParamEncodingMap);
+            ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
+                    "path = path + check getPathForQueryParam(queryParam, queryParamEncoding)");
+            statementsList.add(updatedPath);
+        } else {
+            ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
+                    "path = path + check getPathForQueryParam(queryParam)");
+            statementsList.add(updatedPath);
+        }
+    }
+
+    /**
+     * Generate if block when a client supports both ApiKey and HTTPOrOAuth authentication.
+     *
+     * <pre>
+     * if self.apiKeyConfig is ApiKeysConfig {
+     *      --- given statements ---
+     * }
+     * </pre>
+     */
+    private void generateIfBlockToAddApiKeysToMaps(List<StatementNode> statementsList,
+                                                   List<StatementNode> ifBodyStatementsList) {
+        if (!ifBodyStatementsList.isEmpty()) {
+            NodeList<StatementNode> ifBodyStatementsNodeList = createNodeList(ifBodyStatementsList);
+            BlockStatementNode ifBody = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
+                    ifBodyStatementsNodeList, createToken(CLOSE_BRACE_TOKEN));
+
+            // Create expression `self.apiKeyConfig is ApiKeysConfig`
+            ExpressionNode condition = createBinaryExpressionNode(null, createIdentifierToken(SELF +
+                            DOT_TOKEN.stringValue() + API_KEY_CONFIG_PARAM),
+                    createToken(IS_KEYWORD),
+                    createIdentifierToken(API_KEYS_CONFIG));
+            IfElseStatementNode ifBlock = createIfElseStatementNode(createToken(IF_KEYWORD), condition, ifBody, null);
+            statementsList.add(ifBlock);
         }
     }
 
@@ -580,9 +710,16 @@ public class FunctionBodyGenerator {
             for (String apiKey : apiKeyNames) {
                 IdentifierToken fieldName = createIdentifierToken('"' + apiKey.trim() + '"');
                 Token colon = createToken(COLON_TOKEN);
+                IdentifierToken apiKeyConfigIdentifierToken = createIdentifierToken(API_KEY_CONFIG_PARAM);
+                if (ballerinaAuthConfigGenerator.isHttpOROAuth() && ballerinaAuthConfigGenerator.isApiKey()) {
+                    apiKeyConfigIdentifierToken = createIdentifierToken(API_KEY_CONFIG_PARAM +
+                            QUESTION_MARK_TOKEN.stringValue());
+                }
+                SimpleNameReferenceNode apiKeyConfigParamNode = createSimpleNameReferenceNode(
+                        apiKeyConfigIdentifierToken);
                 FieldAccessExpressionNode fieldExpr = createFieldAccessExpressionNode(
-                        createSimpleNameReferenceNode(createIdentifierToken("self")), createToken(DOT_TOKEN),
-                        createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_PARAM)));
+                        createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
+                        apiKeyConfigParamNode);
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
                         getValidName(getValidName(apiKey, false), false)));
                 SpecificFieldNode specificFieldNode;

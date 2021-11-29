@@ -81,6 +81,28 @@ public class RequestBodyTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
+    @Test(description = "Test for generate request body payload with array schema")
+    public void testForRequestBodyWithArraySchema() throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/request_body_array.bal");
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
+                RES_DIR.resolve("swagger/request_body_array.yaml"), true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Test for generate request body payload with empty array schema")
+    public void testForRequestBodyWithEmptyArraySchema() throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/request_body_empty_array.bal");
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
+                RES_DIR.resolve("swagger/request_body_empty_array.yaml"), true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
     @Test(description = "Test client generation for unsupported request body media type",
             expectedExceptions = BallerinaOpenApiException.class)
     public void testRequestBodyWithUnsupportedMediaType() throws IOException, BallerinaOpenApiException {
@@ -128,6 +150,28 @@ public class RequestBodyTests {
         CodeGenerator codeGenerator = new CodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/byte_format_octet_stream_payload.yaml"), true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Test for generating request body when operation has */* media type")
+    public void testRequestBodyWithAllTypeMediaType() throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/any_types_payload.bal");
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
+                RES_DIR.resolve("swagger/any_types_payload.yaml"), true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Test for generating request body when operation has vendor specific media type")
+    public void testRequestBodyWithVendorSpecificMimeType() throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/vendor_specific_payload.bal");
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
+                RES_DIR.resolve("swagger/vendor_specific_payload.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);

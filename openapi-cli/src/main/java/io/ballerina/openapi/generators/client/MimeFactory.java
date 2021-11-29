@@ -20,7 +20,8 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.client.mime.DefaultType;
+import io.ballerina.openapi.generators.client.mime.AnyType;
+import io.ballerina.openapi.generators.client.mime.CustomType;
 import io.ballerina.openapi.generators.client.mime.JsonType;
 import io.ballerina.openapi.generators.client.mime.MimeType;
 import io.ballerina.openapi.generators.client.mime.OctedStreamType;
@@ -33,10 +34,13 @@ import java.util.List;
 import java.util.Map;
 
 
+import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
+import static io.ballerina.openapi.generators.GeneratorConstants.IMAGE;
 import static io.ballerina.openapi.generators.GeneratorConstants.JSON;
 import static io.ballerina.openapi.generators.GeneratorConstants.PDF;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEXT_PREFIX;
 import static io.ballerina.openapi.generators.GeneratorConstants.UNSUPPORTED_MEDIA_ERROR;
+import static io.ballerina.openapi.generators.GeneratorConstants.VENDOR_SPECIFIC_TYPE;
 import static io.ballerina.openapi.generators.GeneratorConstants.XML;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
@@ -65,21 +69,25 @@ public class MimeFactory {
         if (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
                 || requestBodySchema.getProperties() != null) {
             String mediaType = mediaTypeEntry.getKey();
-            if (mediaType.contains(JSON)) {
+            if (mediaType.contains(VENDOR_SPECIFIC_TYPE)) {
+                return new CustomType();
+            } else if (mediaType.contains(JSON)) {
                 return new JsonType();
-            } else if (mediaType.startsWith(TEXT_PREFIX) || mediaType.contains(PDF)) {
-                return new DefaultType();
+            } else if (mediaType.startsWith(TEXT_PREFIX) || mediaType.contains(PDF) || mediaType.startsWith(IMAGE)) {
+                return new CustomType();
             } else if (mediaType.contains(XML)) {
                 return new XmlType(imports);
             } else if (mediaType.equals(APPLICATION_FORM_URLENCODED)) {
                 return new UrlEncodedType(ballerinaUtilGenerator);
             } else if (mediaType.equals(APPLICATION_OCTET_STREAM)) {
                 return new OctedStreamType();
+            } else if (mediaType.contains(ANY_TYPE)) {
+                return new AnyType();
             } else {
                 throw new BallerinaOpenApiException(String.format(UNSUPPORTED_MEDIA_ERROR, mediaType));
             }
         } else {
-            return new DefaultType();
+            return new CustomType();
         }
     }
 }
