@@ -152,14 +152,13 @@ task buildProject {
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
-
 task codeCoverageReport(type: JacocoReport) {
     dependsOn = subprojects.test
 
     executionData fileTree(project.rootDir.absolutePath).include("**/build/coverage-reports/*.exec")
 
-    subprojects.each {
-        sourceSets it.sourceSets.main
+    subprojects.each{
+            sourceSets it.sourceSets.main
     }
     reports {
         xml.enabled = true

@@ -42,7 +42,6 @@ dependencies {
 def ballerinaDistribution = file("$project.rootDir/module-ballerina-openapi/build/target/extracted-distributions/jballerina-tools-zip/")
 def bDistribution = file("$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
 def targetOpenApiModule = file("$project.rootDir/module-ballerina-openapi/build/")
-//def ballerinaDistribution = file("/home/hansani/Ballerina-OpenAPI-WorkPlace/ballerina-openapi/module-ballerina-openapi/build/target/extracted-distributions/jballerina-tools-zip/")
 task jBallerinaPack {
     doLast {
         copy {
@@ -73,8 +72,11 @@ task copyOpenAPI() {
 }
 
 test {
-    systemProperty "distributions.dir", bDistribution
-    systemProperty "target.dir", "$project.buildDir"
+    systemProperties =  [ jacocoAgentLine: "-javaagent:${configurations.jacocoRuntime.asPath}=destfile=${test.jacoco.destinationFile.absolutePath},append=true,inclnolocationclasses=true,exclclassloader=jdk.internal.reflect.DelegatingClassLoader" ,
+                        "distributions.dir": bDistribution,
+                        "target.dir": "$project.buildDir"
+    ]
+
     useTestNG() {
         suites "src/test/resources/testng.xml"
     }
