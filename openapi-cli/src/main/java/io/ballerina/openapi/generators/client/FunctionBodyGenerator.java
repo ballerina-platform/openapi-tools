@@ -44,7 +44,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.mime.MimeType;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -125,7 +125,7 @@ public class FunctionBodyGenerator {
     private boolean isHeader;
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
     private final OpenAPI openAPI;
-    private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
+    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
 
@@ -138,7 +138,7 @@ public class FunctionBodyGenerator {
     }
 
     public FunctionBodyGenerator(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
-                                 OpenAPI openAPI, BallerinaSchemaGenerator ballerinaSchemaGenerator,
+                                 OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
                                  BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator,
                                  BallerinaUtilGenerator ballerinaUtilGenerator) {
 
@@ -162,7 +162,7 @@ public class FunctionBodyGenerator {
     public FunctionBodyNode getFunctionBodyNode(String path, Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        FunctionReturnType functionReturnType = new FunctionReturnType(
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(
                 openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
         isHeader = false;
         // Create statements

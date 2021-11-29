@@ -25,7 +25,7 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
@@ -71,7 +71,7 @@ public class BallerinaTestGeneratorTests {
         codeGenerator.setIncludeTestFiles(true);
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
-        BallerinaSchemaGenerator schemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(openAPI);
         schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
         SyntaxTree syntaxTreeClient = ballerinaClientGenerator.generateSyntaxTree();
