@@ -33,6 +33,7 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -84,11 +85,13 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.ErrorMessages.invalidPathParamType;
+import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.generators.GeneratorConstants.BINARY;
 import static io.ballerina.openapi.generators.GeneratorConstants.BYTE;
 import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
+import static io.ballerina.openapi.generators.GeneratorConstants.VENDOR_SPECIFIC_TYPE;
 import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
@@ -437,7 +440,9 @@ public class FunctionSignatureGenerator {
             Schema schema = next.getValue().getSchema();
             String paramType = "";
             //Take payload type
-            if (schema.get$ref() != null) {
+            if (next.getKey().equals(ANY_TYPE) || next.getKey().contains(VENDOR_SPECIFIC_TYPE)) {
+                paramType = SyntaxKind.BYTE_KEYWORD.stringValue() + "[]";
+            } else if (schema.get$ref() != null) {
                 paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
             } else if (schema.getType() != null && !schema.getType().equals("array") && !schema.getType().equals(
                     "object")) {

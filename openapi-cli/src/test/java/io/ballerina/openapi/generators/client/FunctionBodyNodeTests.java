@@ -117,10 +117,14 @@ public class FunctionBodyNodeTests {
                         "http:Request request = new;" +
                         "request.setPayload(payload, \"application/pdf\");" +
                         "http:Response response = check self.clientEp->post(path, request);" +
+                        "return response;}"},
+                {"swagger/image_payload.yaml", "/pets", "{string path = string `/pets`;" +
+                        "http:Request request = new;" +
+                        "request.setPayload(payload, \"image/png\");" +
+                        "http:Response response = check self.clientEp->post(path, request);" +
                         "return response;}"}
         };
     }
-    //TODO:Different mediaType
 
     @AfterTest
     private void deleteGeneratedFiles() {

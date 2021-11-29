@@ -18,21 +18,25 @@
 
 package io.ballerina.openapi.generators.client.mime;
 
+import io.ballerina.compiler.syntax.tree.ExpressionStatementNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
+import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.media.MediaType;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Defines default payload structure.
+ * Defines payload that supports all types structure.
  *
  * @since 2.0.0
  */
-public class DefaultType extends MimeType {
+public class AnyType extends MimeType {
 
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
-        setPayload(statementsList, payloadName, mediaTypeEntry.getKey());
+        ExpressionStatementNode setPayloadExpression = GeneratorUtils.getSimpleExpressionStatementNode(
+                "request.setPayload(payload)");
+        statementsList.add(setPayloadExpression);
     }
 }

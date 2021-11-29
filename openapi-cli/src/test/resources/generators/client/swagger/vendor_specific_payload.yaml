@@ -1,0 +1,24 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+paths:
+  /pets:
+    post:
+      summary: Create a pet
+      operationId: createPet
+      requestBody:
+        content:
+          application/vnd.ms-excel:
+            schema:
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Null response
