@@ -42,7 +42,7 @@ import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.generators.client.BallerinaUtilGenerator;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.service.BallerinaServiceGenerator;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -117,6 +117,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.setGeneratedFileNam
 public class CodeGenerator {
     private String srcPackage;
     private String licenseHeader = "";
+    private boolean includeTestFiles;
 
     private static final PrintStream outStream = System.err;
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
@@ -447,7 +448,7 @@ public class CodeGenerator {
         }
 
         // Generate ballerina records to represent schemas.
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
@@ -461,15 +462,18 @@ public class CodeGenerator {
         }
 
         // Generate test boilerplate code for test cases
-        BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
-        String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
+        if (this.includeTestFiles) {
+            BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
+            String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
 
-        String configContent = ballerinaTestGenerator.getConfigTomlFile();
-        if (!configContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-                    GeneratorConstants.CONFIG_FILE_NAME, configContent));
+            String configContent = ballerinaTestGenerator.getConfigTomlFile();
+            if (!configContent.isBlank()) {
+                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
+                        GeneratorConstants.CONFIG_FILE_NAME, configContent));
+            }
         }
+
         return sourceFiles;
     }
 
@@ -597,7 +601,7 @@ public class CodeGenerator {
                 (ballerinaServiceGenerator.generateSyntaxTree(openAPIDef, filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
         String schemaContent = Formatter.format(
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME, schemaContent));
@@ -697,5 +701,14 @@ public class CodeGenerator {
      */
     public void setLicenseHeader(String licenseHeader) {
         this.licenseHeader = licenseHeader;
+    }
+
+    /**
+     * set whether to add test files or not.
+     *
+     * @param includeTestFiles value received from command line by "--with tests"
+     */
+    public void setIncludeTestFiles(boolean includeTestFiles) {
+        this.includeTestFiles = includeTestFiles;
     }
 }

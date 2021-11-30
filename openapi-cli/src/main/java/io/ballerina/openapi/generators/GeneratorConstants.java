@@ -136,10 +136,19 @@ public class GeneratorConstants {
     public static final String BINARY = "binary";
     public static final String DOUBLE = "double";
     public static final String FLOAT = "float";
+    public static final String HEADER = "header";
+    public static final String HEADER_VALUES = "headerValues";
     public static final String PAYLOAD = "payload";
     public static final String PDF = "pdf";
+    public static final String QUERY_PARAM = "queryParam";
+    public static final String SELF = "self";
     public static final String TEXT_PREFIX = "text/";
     public static final String XML_DATA = "xmldata";
+    public static final String IMAGE = "image";
+    public static final String ANY_TYPE = "*/*";
+    public static final String VENDOR_SPECIFIC_TYPE = "vnd.";
+    public static final String APPLICATION_PDF = "application/pdf";
+    public static final String IMAGE_PNG = "image/png";
 
     // auth related constants
     public static final String API_KEY = "apikey";
@@ -148,6 +157,7 @@ public class GeneratorConstants {
     public static final String API_KEY_CONFIG_RECORD_FIELD = "apiKeys";
     public static final String AUTH = "auth";
     public static final String AUTH_CONFIG = "authConfig";
+    public static final String AUTH_CONFIG_RECORD = "AuthConfig";
     public static final String BASIC = "basic";
     public static final String BEARER = "bearer";
     public static final String REFRESH_TOKEN = "refresh_token";
@@ -267,8 +277,8 @@ public class GeneratorConstants {
         typeMap.put("string", "string");
         typeMap.put("boolean", "boolean");
         typeMap.put("array", "[]");
-        typeMap.put("object", "record {}");
         typeMap.put("decimal", "decimal");
+        typeMap.put("object", "record {}");
         typeMap.put("number", "decimal");
         typeMap.put("double", "float");
         typeMap.put("float", "float");

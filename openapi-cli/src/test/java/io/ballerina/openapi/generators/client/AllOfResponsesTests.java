@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -41,18 +41,18 @@ public class AllOfResponsesTests {
     @Test(description = "Tests for returnType")
     public void getReturnTypeTests() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_allof_reference.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
-        FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
-                new ArrayList<>());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
+                ballerinaSchemaGenerator, new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true), "CompoundTestsProductsResponse|error");
     }
     @Test(description = "Tests for returnType")
     public void getReturnTypeForAllOf() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_all_of_response.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
-        FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
-                new ArrayList<>());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
+                ballerinaSchemaGenerator, new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/users/{userId}/meetings")
                         .getPost(), true), "CompoundCreateMeetingResponse|error");
     }
@@ -60,9 +60,9 @@ public class AllOfResponsesTests {
     public void getReturnTypeForObjectSchema() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
                 "response_without_properties_with_additional.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
-        FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
-                new ArrayList<>());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
+                ballerinaSchemaGenerator, new ArrayList<>());
 
         String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true);
@@ -73,9 +73,9 @@ public class AllOfResponsesTests {
     public void getReturnTypeForMapSchema() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_properties_with_additional" +
                 ".yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
-        FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
-                new ArrayList<>());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
+                ballerinaSchemaGenerator, new ArrayList<>());
 
         String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true);
@@ -86,9 +86,9 @@ public class AllOfResponsesTests {
     public void getReturnTypeForObjectSchemaWithOutAdditional() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type" +
                 "/response_without_properties_without_additional.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
-        FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
-                new ArrayList<>());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
+                ballerinaSchemaGenerator, new ArrayList<>());
 
         String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true);
@@ -99,9 +99,9 @@ public class AllOfResponsesTests {
     public void getReturnTypeForMapSchemaWithOutAdditionalProperties() throws IOException, BallerinaOpenApiException {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
                 "response_with_properties_without_additional.yaml"));
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(response);
-        FunctionReturnType functionReturnType = new FunctionReturnType(response, ballerinaSchemaGenerator,
-                new ArrayList<>());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(
+                response, ballerinaSchemaGenerator, new ArrayList<>());
 
         String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true);

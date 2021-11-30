@@ -10,6 +10,5 @@ public class OpenAPIBuildCompilerPlugin extends CompilerPlugin {
     @Override
     public void init(CompilerPluginContext compilerPluginContext) {
         compilerPluginContext.addCodeAnalyzer(new OpenAPIBuildCodeAnalyzer());
-//        compilerPluginContext.addCompilerLifecycleListener(new OpenAPIBuildCompilerLifecycleListener());
     }
 }
