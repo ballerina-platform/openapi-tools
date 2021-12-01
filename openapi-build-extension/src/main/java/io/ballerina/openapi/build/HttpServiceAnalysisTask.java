@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.projects.CompilationOptions;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
@@ -53,51 +54,53 @@ import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
  * SyntaxNodeAnalyzer for getting all service node.
  */
 public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
-
+    private CompilationOptions compilationOptions;
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
-        SemanticModel semanticModel = context.semanticModel();
-        SyntaxTree syntaxTree = context.syntaxTree();
-        Package currentPackage = context.currentPackage();
-        Project project = currentPackage.project();
-        // Take output path to target directory location in package.
-        Path outPath = project.targetDir();
-        Optional<Path> path = currentPackage.project().documentPath(context.documentId());
-        Path inputPath = path.orElse(null);
-        // Traverse the service declaration nodes
-        ModulePartNode modulePartNode = syntaxTree.rootNode();
-        List<OASResult> openAPIDefinitions = new ArrayList<>();
-        for (Node node : modulePartNode.members()) {
-            SyntaxKind syntaxKind = node.kind();
-            // Load a service declarations for the path part in the yaml spec
-            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                openAPIDefinitions.addAll(ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
-                        semanticModel, null, false, outPath, inputPath));
+        if (compilationOptions.exportOpenapi()) {
+            SemanticModel semanticModel = context.semanticModel();
+            SyntaxTree syntaxTree = context.syntaxTree();
+            Package currentPackage = context.currentPackage();
+            Project project = currentPackage.project();
+            // Take output path to target directory location in package.
+            Path outPath = project.targetDir();
+            Optional<Path> path = currentPackage.project().documentPath(context.documentId());
+            Path inputPath = path.orElse(null);
+            // Traverse the service declaration nodes
+            ModulePartNode modulePartNode = syntaxTree.rootNode();
+            List<OASResult> openAPIDefinitions = new ArrayList<>();
+            for (Node node : modulePartNode.members()) {
+                SyntaxKind syntaxKind = node.kind();
+                // Load a service declarations for the path part in the yaml spec
+                if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
+                    openAPIDefinitions.addAll(ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
+                            semanticModel, null, false, outPath, inputPath));
+                }
             }
-        }
-        List<Diagnostic> diagnostics = new ArrayList<>();
-        if (!openAPIDefinitions.isEmpty()) {
-            Map<String,String> yamls  = new HashMap<>();
-            for (OASResult oasResult: openAPIDefinitions) {
-                if (oasResult.getYaml().isPresent()) {
-                    yamls.put(oasResult.getServiceName(), oasResult.getYaml().get());
-                    try {
-                        String fileName = checkDuplicateFiles(outPath, oasResult.getServiceName(), false);
-                        writeFile(outPath.resolve(fileName), oasResult.getYaml().get());
-                    } catch (IOException e) {
+            List<Diagnostic> diagnostics = new ArrayList<>();
+            if (!openAPIDefinitions.isEmpty()) {
+                Map<String,String> yamls  = new HashMap<>();
+                for (OASResult oasResult: openAPIDefinitions) {
+                    if (oasResult.getYaml().isPresent()) {
+                        yamls.put(oasResult.getServiceName(), oasResult.getYaml().get());
+                        try {
+                            String fileName = checkDuplicateFiles(outPath, oasResult.getServiceName(), false);
+                            writeFile(outPath.resolve(fileName), oasResult.getYaml().get());
+                        } catch (IOException e) {
 
+                        }
                     }
-                }
-                if (!oasResult.getDiagnostics().isEmpty()) {
-                    for (OpenAPIConverterDiagnostic diagnostic: oasResult.getDiagnostics()) {
-                        diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
+                    if (!oasResult.getDiagnostics().isEmpty()) {
+                        for (OpenAPIConverterDiagnostic diagnostic: oasResult.getDiagnostics()) {
+                            diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
+                        }
                     }
                 }
             }
-        }
-        if (!diagnostics.isEmpty()) {
-            for (Diagnostic diagnostic : diagnostics) {
-                context.reportDiagnostic(diagnostic);
+            if (!diagnostics.isEmpty()) {
+                for (Diagnostic diagnostic : diagnostics) {
+                    context.reportDiagnostic(diagnostic);
+                }
             }
         }
     }
