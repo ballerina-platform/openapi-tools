@@ -48,8 +48,8 @@ public isolated client class Client {
             queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
         }
         path = path + check getPathForQueryParam(queryParam);
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->get(path, accHeaders);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        Pet response = check self.clientEp->get(path, httpHeaders);
         return response;
     }
     # Vote for a pet
@@ -64,10 +64,10 @@ public isolated client class Client {
             queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
         }
         path = path + check getPathForQueryParam(queryParam);
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         //TODO: Update the request as needed;
-        Pet response = check self.clientEp->post(path, request, headers = accHeaders);
+        Pet response = check self.clientEp->post(path, request, headers = httpHeaders);
         return response;
     }
     # Delete a pet
@@ -83,8 +83,8 @@ public isolated client class Client {
             queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
         }
         path = path + check getPathForQueryParam(queryParam);
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->delete(path, accHeaders);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        Pet response = check self.clientEp->delete(path, httpHeaders);
         return response;
     }
     # Delete a pet 2
@@ -100,8 +100,8 @@ public isolated client class Client {
             queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
         }
         path = path + check getPathForQueryParam(queryParam);
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->delete(path, accHeaders);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        Pet response = check self.clientEp->delete(path, httpHeaders);
         return response;
     }
 }

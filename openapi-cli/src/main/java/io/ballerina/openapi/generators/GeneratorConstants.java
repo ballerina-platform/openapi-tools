@@ -149,6 +149,7 @@ public class GeneratorConstants {
     public static final String VENDOR_SPECIFIC_TYPE = "vnd.";
     public static final String APPLICATION_PDF = "application/pdf";
     public static final String IMAGE_PNG = "image/png";
+    public static final String HTTP_HEADERS = "httpHeaders";
 
     // auth related constants
     public static final String API_KEY = "apikey";
