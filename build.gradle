@@ -50,6 +50,7 @@ ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
 ext.stdlibUrlVersion = project.stdlibUrlVersion
 ext.stdlibXmldataVersion = project.stdlibXmldataVersion
+ext.jacocoVersion = project.jacocoVersion
 ext.puppycrawlCheckstyleVersion = "8.18"
 
 allprojects {
@@ -155,7 +156,6 @@ task buildProject {
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
-
 task codeCoverageReport(type: JacocoReport) {
     dependsOn = subprojects.test
 

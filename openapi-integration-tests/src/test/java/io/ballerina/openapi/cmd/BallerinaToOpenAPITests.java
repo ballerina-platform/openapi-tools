@@ -115,6 +115,15 @@ public class BallerinaToOpenAPITests {
                 "project_10/result.yaml");
     }
 
+    @Test(description = "Test for service declaration with non http service")
+    public void nonHttpService() throws IOException, InterruptedException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add("project_11/service.bal");
+        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        Assert.assertTrue(!Files.exists(TEST_RESOURCE.resolve("query_openapi.yaml")));
+    }
+
     @AfterClass
     public void cleanUp() throws IOException {
         TestUtil.cleanDistribution();

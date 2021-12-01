@@ -20,7 +20,12 @@ package io.ballerina.openapi.converter.utils;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
@@ -61,10 +66,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.openapi.converter.Constants.BALLERINA;
 import static io.ballerina.openapi.converter.Constants.CONTRACT;
+import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.JSON_EXTENSION;
 import static io.ballerina.openapi.converter.Constants.OPENAPI_ANNOTATION;
 import static io.ballerina.openapi.converter.Constants.SLASH;
@@ -108,8 +114,7 @@ public class ServiceToOpenAPIConverterUtils {
         } else {
             ModulePartNode modulePartNode = syntaxTree.rootNode();
             extractListenersAndServiceNodes(serviceName, availableService, servicesToGenerate, modulePartNode,
-                    endpoints);
-
+                    endpoints, semanticModel);
             // If there are no services found for a given service name.
             if (serviceName != null && servicesToGenerate.isEmpty()) {
                 DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_107;
@@ -121,8 +126,6 @@ public class ServiceToOpenAPIConverterUtils {
             for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
                 String serviceNodeName = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
-                //  Checked old generated file with same name
-                openApiName = checkDuplicateFiles(outPath, openApiName, needJson);
                 OASResult oasDefinition = generateOAS(serviceNode, endpoints, semanticModel, openApiName, inputPath);
                 oasDefinition.setServiceName(openApiName);
                 outputs.add(oasDefinition);
@@ -146,7 +149,8 @@ public class ServiceToOpenAPIConverterUtils {
     private static void extractListenersAndServiceNodes(String serviceName, List<String> availableService,
                                                         List<ServiceDeclarationNode> servicesToGenerate,
                                                         ModulePartNode modulePartNode,
-                                                        List<ListenerDeclarationNode> endpoints) {
+                                                        List<ListenerDeclarationNode> endpoints,
+                                                        SemanticModel semanticModel) {
         for (Node node : modulePartNode.members()) {
             SyntaxKind syntaxKind = node.kind();
             // Load a listen_declaration for the server part in the yaml spec
@@ -154,10 +158,20 @@ public class ServiceToOpenAPIConverterUtils {
                 ListenerDeclarationNode listener = (ListenerDeclarationNode) node;
                 endpoints.add(listener);
             }
-            // Load a service Node
             if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
-                extractServiceDeclarationNodes(serviceName, availableService, servicesToGenerate, serviceNode);
+                /**
+                 * Here check the service is related to the http module by checking listener type that attached to
+                 * service endpoints.
+                 */
+                ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
+                Optional<Symbol> serviceSymOptional = semanticModel.symbol(serviceDeclarationNode);
+                if (serviceSymOptional.isPresent()) {
+                    List<TypeSymbol> listenerTypes = ((ServiceDeclarationSymbol) serviceSymOptional.get()).
+                            listenerTypes();
+                    listenerTypes.stream().filter(ServiceToOpenAPIConverterUtils::isListenerBelongsToHttpModule)
+                            .forEachOrdered(listenerType -> extractServiceDeclarationNodes(serviceName,
+                                    availableService, servicesToGenerate, serviceDeclarationNode));
+                }
             }
         }
     }
@@ -260,62 +274,6 @@ public class ServiceToOpenAPIConverterUtils {
             return cleanedServiceName + Constants.OPENAPI_SUFFIX + JSON_EXTENSION;
         }
         return cleanedServiceName + Constants.OPENAPI_SUFFIX + YAML_EXTENSION;
-    }
-
-    /**
-     * This method use for checking the duplicate files.
-     *
-     * @param outPath     output path for file generated
-     * @param openApiName given file name
-     * @return file name with duplicate number tag
-     */
-    private static String checkDuplicateFiles(Path outPath, String openApiName, Boolean isJson) {
-
-        if (outPath != null && Files.exists(outPath)) {
-            final File[] listFiles = new File(String.valueOf(outPath)).listFiles();
-            if (listFiles != null) {
-                openApiName = checkAvailabilityOfGivenName(openApiName, listFiles, isJson);
-            }
-        }
-        return openApiName;
-    }
-
-    private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
-
-        for (File file : listFiles) {
-            if (System.console() != null && file.getName().equals(openApiName)) {
-                String userInput = System.console().readLine("There is already a/an " + file.getName() +
-                        " in the location. Do you want to override the file? [y/N] ");
-                if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
-                    int duplicateCount = 0;
-                    openApiName = setGeneratedFileName(listFiles, openApiName, duplicateCount, isJson);
-                }
-            }
-        }
-        return openApiName;
-    }
-
-    /**
-     * This method for setting the file name for generated file.
-     *
-     * @param listFiles      generated files
-     * @param fileName       File name
-     * @param duplicateCount add the tag with duplicate number if file already exist
-     */
-    private static String setGeneratedFileName(File[] listFiles, String fileName, int duplicateCount, boolean isJson) {
-
-        for (File listFile : listFiles) {
-            String listFileName = listFile.getName();
-            if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2)
-                    && (listFileName.split("\\.")[0]
-                    .equals(fileName.split("\\.")[0]))) {
-                duplicateCount = 1 + duplicateCount;
-            }
-        }
-        if (isJson) {
-            return fileName.split("\\.")[0] + "." + (duplicateCount) + JSON_EXTENSION;
-        }
-        return fileName.split("\\.")[0] + "." + (duplicateCount) + YAML_EXTENSION;
     }
 
     /**
@@ -562,5 +520,23 @@ public class ServiceToOpenAPIConverterUtils {
             diagnostics.addAll(oasResult.getDiagnostics());
         }
         return new OASResult(openAPI, diagnostics);
+    }
+
+    private static boolean isListenerBelongsToHttpModule(TypeSymbol listenerType) {
+        if (listenerType.typeKind() == TypeDescKind.UNION) {
+            return ((UnionTypeSymbol) listenerType).memberTypeDescriptors().stream()
+                    .filter(typeDescriptor -> typeDescriptor instanceof TypeReferenceTypeSymbol)
+                    .map(typeReferenceTypeSymbol -> (TypeReferenceTypeSymbol) typeReferenceTypeSymbol)
+                    .anyMatch(typeReferenceTypeSymbol -> isHttpModule(typeReferenceTypeSymbol.getModule().get()));
+        }
+
+        if (listenerType.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+            return isHttpModule(((TypeReferenceTypeSymbol) listenerType).typeDescriptor().getModule().get());
+        }
+        return false;
+    }
+
+    private static boolean isHttpModule(ModuleSymbol moduleSymbol) {
+        return HTTP.equals(moduleSymbol.getName().get()) && BALLERINA.equals(moduleSymbol.id().orgName());
     }
 }
