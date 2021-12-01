@@ -24,6 +24,7 @@ import io.ballerina.openapi.generators.client.mime.AnyType;
 import io.ballerina.openapi.generators.client.mime.CustomType;
 import io.ballerina.openapi.generators.client.mime.JsonType;
 import io.ballerina.openapi.generators.client.mime.MimeType;
+import io.ballerina.openapi.generators.client.mime.MultipartFormData;
 import io.ballerina.openapi.generators.client.mime.OctedStreamType;
 import io.ballerina.openapi.generators.client.mime.UrlEncodedType;
 import io.ballerina.openapi.generators.client.mime.XmlType;
@@ -44,6 +45,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.VENDOR_SPECIFIC
 import static io.ballerina.openapi.generators.GeneratorConstants.XML;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
 
 /**
@@ -81,6 +83,8 @@ public class MimeFactory {
                 return new UrlEncodedType(ballerinaUtilGenerator);
             } else if (mediaType.equals(APPLICATION_OCTET_STREAM)) {
                 return new OctedStreamType();
+            } else if (mediaType.equals(MULTIPART_FORM_DATA)) {
+                return new MultipartFormData(imports, ballerinaUtilGenerator);
             } else if (mediaType.contains(ANY_TYPE)) {
                 return new AnyType();
             } else {
