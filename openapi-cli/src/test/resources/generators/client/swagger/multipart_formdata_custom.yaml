@@ -1,0 +1,71 @@
+# This file contains a post request definition with multipart form data with a custom header
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+paths:
+  /pets:
+    post:
+      summary: Create a pet
+      operationId: createPet
+      requestBody:
+        description: Pet
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  description: ID
+                name:
+                  type: string
+                  description: Name
+                address:
+                  type: object
+                  description: Address
+                  properties:
+                    street:
+                      type: string
+                      description: Street
+                    city:
+                      type: string
+                      description: City
+                profileImage:
+                  type: string
+                  format: binary
+                  description: Image
+            encoding:
+              profileImage:
+                contentType: image/png, image/jpeg
+                headers:
+                  X-Custom-Header:
+                    description: This is a custom header
+                    schema:
+                      type: string
+              id:
+                headers:
+                  X-Custom-Header:
+                    description: This is a custom header
+                    schema:
+                      type: string
+              address:
+                headers:
+                  X-Address-Header:
+                    description: This is a custom header
+                    schema:
+                      type: string
+                    required: true
+              name:
+                contentType: text/plain
+      responses:
+        '201':
+          description: Null response

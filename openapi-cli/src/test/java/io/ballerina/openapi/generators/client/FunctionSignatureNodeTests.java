@@ -18,12 +18,14 @@
 
 package io.ballerina.openapi.generators.client;
 
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
@@ -110,6 +112,34 @@ public class FunctionSignatureNodeTests {
 
         Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
         Assert.assertEquals(param01.typeName().toString(), "json");
+
+        ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
+        Assert.assertEquals(returnTypeNode.type().toString(), "http:Response|error");
+    }
+
+    @Test(description = "Test for generate function signature for multipart custom header")
+    public void testFunctionSignatureNodeForMultipartCustomHeader() throws IOException, BallerinaOpenApiException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
+                RESDIR.resolve("swagger/multipart_formdata_custom.yaml"), true);
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>());
+        FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/pets").getPost(), new ArrayList<>());
+        SeparatedNodeList<ParameterNode> parameters = signature.parameters();
+        Assert.assertFalse(parameters.isEmpty());
+
+        RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
+        Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
+        Assert.assertEquals(param01.typeName().toString(), "PetsBody");
+
+        RequiredParameterNode param02 = (RequiredParameterNode) parameters.get(1);
+        Assert.assertEquals(param02.paramName().orElseThrow().text(), "xAddressHeader");
+        Assert.assertEquals(param02.typeName().toString(), "string");
+
+        DefaultableParameterNode param03 = (DefaultableParameterNode) parameters.get(2);
+        Assert.assertEquals(param03.paramName().orElseThrow().text(), "xCustomHeader");
+        Assert.assertEquals(param03.typeName().toString(), "string?");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
         Assert.assertEquals(returnTypeNode.type().toString(), "http:Response|error");

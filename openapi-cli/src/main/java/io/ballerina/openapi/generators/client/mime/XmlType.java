@@ -27,9 +27,8 @@ import io.swagger.v3.oas.models.media.MediaType;
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
 import static io.ballerina.openapi.generators.GeneratorConstants.XML_DATA;
-import static io.ballerina.openapi.generators.GeneratorUtils.checkImportDuplicate;
+import static io.ballerina.openapi.generators.GeneratorUtils.addImport;
 
 /**
  * Defines the payload structure of xml mime type.
@@ -46,10 +45,8 @@ public class XmlType extends MimeType {
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
         payloadName = "xmlBody";
-        ImportDeclarationNode xmlImport = GeneratorUtils.getImportDeclarationNode(BALLERINA, XML_DATA);
-        if (!checkImportDuplicate(imports, XML_DATA)) {
-            imports.add(xmlImport);
-        }
+        addImport(imports, XML_DATA);
+
         VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json",
                 "jsonBody", "check payload.cloneWithType(json)");
         statementsList.add(jsonVariable);

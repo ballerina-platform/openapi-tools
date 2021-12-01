@@ -122,6 +122,16 @@ public class FunctionBodyNodeTests {
                         "http:Request request = new;" +
                         "request.setPayload(payload, \"image/png\");" +
                         "http:Response response = check self.clientEp->post(path, request);" +
+                        "return response;}"},
+                {"swagger/multipart_formdata_custom.yaml", "/pets", "{string path = string `/pets`;\n" +
+                        "http:Request request = new;\n" +
+                        "map<Encoding> encodingMap = {\"profileImage\": {contentType: \"image/png\", headers: " +
+                        "{\"X-Custom-Header\": xCustomHeader}}, \"id\":{headers: {\"X-Custom-Header\": " +
+                        "xCustomHeader}}, \"address\": {headers:{\"X-Address-Header\":xAddressHeader}}, \"name\":" +
+                        "{contentType:\"text/plain\"}};\n" +
+                        "mime:Entity[] bodyParts = check createBodyParts(payload, encodingMap);\n" +
+                        "request.setBodyParts(bodyParts);\n" +
+                        "http:Response response = check self.clientEp->post(path, request);\n" +
                         "return response;}"}
         };
     }

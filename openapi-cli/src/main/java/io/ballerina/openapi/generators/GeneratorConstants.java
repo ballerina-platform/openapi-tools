@@ -149,6 +149,7 @@ public class GeneratorConstants {
     public static final String VENDOR_SPECIFIC_TYPE = "vnd.";
     public static final String APPLICATION_PDF = "application/pdf";
     public static final String IMAGE_PNG = "image/png";
+    public static final String MIME = "mime";
 
     // auth related constants
     public static final String API_KEY = "apikey";
@@ -278,8 +279,8 @@ public class GeneratorConstants {
         typeMap.put("string", "string");
         typeMap.put("boolean", "boolean");
         typeMap.put("array", "[]");
-        typeMap.put("decimal", "decimal");
         typeMap.put("object", "record {}");
+        typeMap.put("decimal", "decimal");
         typeMap.put("number", "decimal");
         typeMap.put("double", "float");
         typeMap.put("float", "float");
