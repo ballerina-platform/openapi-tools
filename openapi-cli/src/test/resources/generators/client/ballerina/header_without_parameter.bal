@@ -26,8 +26,8 @@ public isolated client class Client {
     remote isolated function showPetById() returns http:Response|error {
         string  path = string `/pets`;
         map<any> headerValues = {"X-API-KEY": self.apiKeyConfig.xApiKey};
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
-        http:Response response = check self.clientEp-> get(path, accHeaders);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        http:Response response = check self.clientEp-> get(path, httpHeaders);
         return response;
     }
 }

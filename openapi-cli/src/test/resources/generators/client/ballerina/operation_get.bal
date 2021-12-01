@@ -52,8 +52,8 @@ public isolated client class Client {
     }
     remote isolated function  header(string XClient) returns http:Response | error {
         string  path = string `/header`;
-        map<string|string[]> accHeaders = {XClient: XClient};
-        http:Response  response = check self.clientEp->get(path, accHeaders );
+        map<string|string[]> httpHeaders = {XClient: XClient};
+        http:Response  response = check self.clientEp->get(path, httpHeaders );
         return response;
     }
 }
