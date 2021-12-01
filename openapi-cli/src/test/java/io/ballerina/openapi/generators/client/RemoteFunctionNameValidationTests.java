@@ -30,7 +30,8 @@ public class RemoteFunctionNameValidationTests {
 
     @Test(description = "When path parameter has given unmatch data type in ballerina",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "OperationId is missing for the resource path: .*")
+            expectedExceptionsMessageRegExp = "OpenAPI definition has errors: " +
+                    "\\R\\ROperationId is missing in the resource path: .*")
     public void testMissionOperationId() throws IOException, BallerinaOpenApiException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve("petstore_without_operation_id.yaml");

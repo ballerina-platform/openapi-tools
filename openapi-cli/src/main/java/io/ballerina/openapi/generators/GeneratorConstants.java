@@ -289,4 +289,8 @@ public class GeneratorConstants {
 
     //Error related
     public static final String UNSUPPORTED_MEDIA_ERROR = "Unsupported media type '%s' is given in the request body";
+
+    // OS specific line separator
+    public static final String LINE_SEPARATOR = System.lineSeparator();
+    public static final String DOUBLE_LINE_SEPARATOR = LINE_SEPARATOR + LINE_SEPARATOR;
 }
