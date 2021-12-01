@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.generators.schema.ballerinatypegenerators.TypeGenerator;
 import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -64,6 +65,18 @@ public class OneOfDataTypeTests {
         GeneratorMetaData.createInstance(openAPI, false);
         String oneOfUnionType = TypeGeneratorUtils.getUnionType(oneOf);
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
+    }
+
+    @Test(description = "Generate union type when nullable is true")
+    public void generateUnionTypeWhenNullableTrue() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        Schema schema = openAPI.getComponents().getSchemas().get("Error");
+        ComposedSchema composedSchema = (ComposedSchema) schema;
+        GeneratorMetaData.createInstance(openAPI, true);
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema);
+        String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString();
+        Assert.assertEquals(oneOfUnionType, "Activity|Profile?");
     }
 
     @Test(description = "Tests full schema genrations with oneOf type")

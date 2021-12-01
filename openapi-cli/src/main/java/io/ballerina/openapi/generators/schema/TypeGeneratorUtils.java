@@ -62,8 +62,10 @@ import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.generators.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.NUMBER;
+import static io.ballerina.openapi.generators.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
 /**
@@ -91,7 +93,8 @@ public class TypeGeneratorUtils {
             } else {
                 return new UnionTypeGenerator(schemaValue);
             }
-        } else if (schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null) {
+        } else if ((schemaValue.getType() != null && schemaValue.getType().equals(OBJECT)) ||
+                schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null) {
             return new RecordTypeGenerator(schemaValue);
         } else if (schemaValue instanceof ArraySchema) {
             return new ArrayTypeGenerator(schemaValue);
@@ -195,10 +198,18 @@ public class TypeGeneratorUtils {
      * @param typeAnnotations Annotation list of the record
      */
     public static void getRecordDocs(List<Node> documentation, Schema schemaValue,
-                                     List<AnnotationNode> typeAnnotations) {
+                                     List<AnnotationNode> typeAnnotations) throws BallerinaOpenApiException {
         if (schemaValue.getDescription() != null) {
             documentation.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                     schemaValue.getDescription(), false));
+        } else if (schemaValue.get$ref() != null) {
+            String typeName = getValidName(extractReferenceType(schemaValue.get$ref()), true);
+            Schema<?> refSchema = GeneratorMetaData.getInstance().getOpenAPI().
+                    getComponents().getSchemas().get(typeName);
+            if (refSchema.getDescription() != null) {
+                documentation.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
+                        refSchema.getDescription(), false));
+            }
         }
         if (schemaValue.getDeprecated() != null && schemaValue.getDeprecated()) {
             DocCommentsGenerator.extractDeprecatedAnnotation(schemaValue.getExtensions(),
@@ -218,7 +229,11 @@ public class TypeGeneratorUtils {
         for (Schema schema: schemas) {
             TypeGenerator typeGenerator = getTypeGenerator(schema);
             if (!(typeGenerator instanceof RecordTypeGenerator || typeGenerator instanceof AllOfRecordTypeGenerator)) {
-                unionType.append(getTypeGenerator(schema).generateTypeDescriptorNode());
+                String typeName = getTypeGenerator(schema).generateTypeDescriptorNode().toString();
+                if (typeName.endsWith(NILLABLE) && GeneratorMetaData.getInstance().isNullable()) {
+                    typeName = typeName.substring(0, typeName.length() - 1);
+                }
+                unionType.append(typeName);
                 unionType.append(PIPE_TOKEN.stringValue());
             } else {
                 // TODO: Needs to improve the error message
