@@ -42,9 +42,11 @@ import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -167,7 +169,6 @@ public class FunctionSignatureGenerator {
      */
     private void setFunctionParameters(Operation operation, List<Node> parameterList, Token comma,
                                         List<Node> remoteFunctionDoc) throws BallerinaOpenApiException {
-
         List<Parameter> parameters = operation.getParameters();
         List<Node> defaultable = new ArrayList<>();
         List<Node> deprecatedParamDocComments = new ArrayList<>();
@@ -220,17 +221,13 @@ public class FunctionSignatureGenerator {
         if (operation.getRequestBody() != null) {
             RequestBody requestBody = operation.getRequestBody();
             if (requestBody.getContent() != null) {
-                List<Node> requestBodyparam = setRequestBodyParameters(operation.getOperationId(), requestBody,
-                        remoteFunctionDoc);
-                parameterList.addAll(requestBodyparam);
-                parameterList.add(comma);
+                setRequestBodyParameters(operation.getOperationId(), requestBody, remoteFunctionDoc, parameterList,
+                        defaultable);
             } else if (requestBody.get$ref() != null) {
                 String requestBodyName = extractReferenceType(requestBody.get$ref());
                 RequestBody requestBodySchema = openAPI.getComponents().getRequestBodies().get(requestBodyName.trim());
-                List<Node> requestBodyparam = setRequestBodyParameters(operation.getOperationId(), requestBodySchema,
-                        remoteFunctionDoc);
-                parameterList.addAll(requestBodyparam);
-                parameterList.add(comma);
+                setRequestBodyParameters(operation.getOperationId(), requestBodySchema, remoteFunctionDoc,
+                        parameterList, defaultable);
             }
         }
         remoteFunctionDoc.addAll(deprecatedParamDocComments);
@@ -358,7 +355,7 @@ public class FunctionSignatureGenerator {
             }
         } else {
             type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
-            if (type.equals("anydata") || type.equals("[]") || type.equals("record {}")) {
+            if (type.equals("anydata") || type.equals(SQUARE_BRACKETS) || type.equals("record {}")) {
                 throw new BallerinaOpenApiException(invalidPathParamType(parameter.getName().trim()));
             }
         }
@@ -373,46 +370,76 @@ public class FunctionSignatureGenerator {
     private Node getHeaderParameter(Parameter parameter, NodeList<AnnotationNode> parameterAnnotationNodeList)
             throws BallerinaOpenApiException {
         Schema schema = parameter.getSchema();
-        String type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim());
-        if (schema instanceof ArraySchema) {
-            ArraySchema arraySchema = (ArraySchema) schema;
-            if (arraySchema.getItems().get$ref() != null) {
-                type = extractReferenceType(arraySchema.getItems().get$ref()) + SQUARE_BRACKETS;
-            } else {
-                type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType().trim()) + SQUARE_BRACKETS;
-            }
+        IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
+        return getHeader(parameter.getRequired(), schema, paramName, parameterAnnotationNodeList);
+    }
+
+    /**
+     * Create header when it comes under the multipart/form-data encoding section in swagger.
+     */
+    private Node getHeaderEncoding(Map.Entry<String, Header> parameter, List<Node> remoteFunctionDoc)
+            throws BallerinaOpenApiException {
+        boolean isRequired = false;
+        Schema schema = parameter.getValue().getSchema();
+        IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getKey(), false));
+        List<AnnotationNode> parameterAnnotationNodeList = new ArrayList<>();
+
+        if (parameter.getValue().getDescription() != null) {
+            MarkdownParameterDocumentationLineNode paramAPIDoc = DocCommentsGenerator.createAPIParamDoc(
+                    getValidName(parameter.getKey(), false), parameter.getValue().getDescription());
+            remoteFunctionDoc.add(paramAPIDoc);
         }
-        if (parameter.getRequired()) {
+        DocCommentsGenerator.extractDisplayAnnotation(parameter.getValue().getExtensions(),
+                parameterAnnotationNodeList);
+
+        if (parameter.getValue().getRequired() != null) {
+            isRequired = parameter.getValue().getRequired();
+        }
+        return getHeader(isRequired, schema, paramName, createNodeList(parameterAnnotationNodeList));
+    }
+
+    /**
+     * Create header for header parameter and encoding.
+     */
+    private Node getHeader(boolean isRequiredHeader, Schema schema, IdentifierToken paramName,
+                           NodeList<AnnotationNode> parameterAnnotationNodeList) throws BallerinaOpenApiException {
+        if (isRequiredHeader) {
+            String type = convertOpenAPITypeToBallerina(schema.getType().trim());
+            if (schema instanceof ArraySchema) {
+                ArraySchema arraySchema = (ArraySchema) schema;
+                if (arraySchema.getItems().get$ref() != null) {
+                    type = extractReferenceType(arraySchema.getItems().get$ref()) + SQUARE_BRACKETS;
+                } else {
+                    type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType().trim()) + SQUARE_BRACKETS;
+                }
+            }
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(type));
-            IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(),
-                    false));
             return createRequiredParameterNode(parameterAnnotationNodeList, typeName, paramName);
         } else {
-            IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(),
-                    false));
             if (schema.getDefault() != null) {
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim())));
+                        createIdentifierToken(convertOpenAPITypeToBallerina(schema.getType().trim())));
                 LiteralValueToken literalValueToken;
-                if (schema.getType().equals("string")) {
+                if (schema.getType().equals(STRING)) {
                     literalValueToken = createLiteralValueToken(null,
                             '"' + schema.getDefault().toString() + '"', createEmptyMinutiaeList(),
                             createEmptyMinutiaeList());
                 } else {
                     literalValueToken = createLiteralValueToken(null, schema.getDefault().toString(),
-                                    createEmptyMinutiaeList(), createEmptyMinutiaeList());
+                            createEmptyMinutiaeList(), createEmptyMinutiaeList());
                 }
                 return createDefaultableParameterNode(parameterAnnotationNodeList, typeName, paramName,
                         createToken(EQUAL_TOKEN), literalValueToken);
             } else {
-                type = convertOpenAPITypeToBallerina(parameter.getSchema().getType().trim()) + NILLABLE;
+                String type = convertOpenAPITypeToBallerina(schema.getType().trim()) + NILLABLE;
                 if (schema instanceof ArraySchema) {
                     ArraySchema arraySchema = (ArraySchema) schema;
                     if (arraySchema.getItems().get$ref() != null) {
-                        type = extractReferenceType(arraySchema.getItems().get$ref()) + "[]?";
+                        type = extractReferenceType(arraySchema.getItems().get$ref()) + SQUARE_BRACKETS + NILLABLE;
                     } else {
-                        type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType().trim()) + "[]?";
+                        type = convertOpenAPITypeToBallerina(arraySchema.getItems().getType().trim()) + SQUARE_BRACKETS
+                                + NILLABLE;
                     }
                 }
                 BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
@@ -428,10 +455,9 @@ public class FunctionSignatureGenerator {
     /**
      * Create request body parameter.
      */
-    private  List<Node> setRequestBodyParameters(String operationId, RequestBody requestBody,
-                                                 List<Node> requestBodyDoc)
+    private void setRequestBodyParameters(String operationId, RequestBody requestBody, List<Node> requestBodyDoc,
+                                          List<Node> parameterList, List<Node> defaultable)
             throws BallerinaOpenApiException {
-        List<Node> parameterList = new ArrayList<>();
         Content content = requestBody.getContent();
         Iterator<Map.Entry<String, MediaType>> iterator = content.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -474,10 +500,32 @@ public class FunctionSignatureGenerator {
                     requestBodyDoc.add(paramAPIDoc);
                 }
                 parameterList.add(payload);
+                parameterList.add(createToken((COMMA_TOKEN)));
+            }
+
+            if (next.getKey().equals(javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA)
+                    && next.getValue().getEncoding() != null) {
+                List<String> headerList = new ArrayList<>();
+                for (Map.Entry<String, Encoding> entry : next.getValue().getEncoding().entrySet()) {
+                    if (entry.getValue().getHeaders() != null) {
+                        for (Map.Entry<String, Header> header : entry.getValue().getHeaders().entrySet()) {
+                            if (!headerList.contains(header.getKey())) {
+                                Node headerParameter = getHeaderEncoding(header, requestBodyDoc);
+                                if (headerParameter instanceof RequiredParameterNode) {
+                                    parameterList.add(headerParameter);
+                                    parameterList.add(createToken((COMMA_TOKEN)));
+                                } else {
+                                    defaultable.add(headerParameter);
+                                    defaultable.add(createToken((COMMA_TOKEN)));
+                                }
+                                headerList.add(header.getKey());
+                            }
+                        }
+                    }
+                }
             }
             break;
         }
-        return parameterList;
     }
 
     /**

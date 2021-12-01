@@ -623,5 +623,10 @@ public class GeneratorUtils {
         return false;
     }
 
-
+    public static void addImport(List<ImportDeclarationNode> imports, String module) {
+        if (!checkImportDuplicate(imports, module)) {
+            ImportDeclarationNode importModule = GeneratorUtils.getImportDeclarationNode(BALLERINA, module);
+            imports.add(importModule);
+        }
+    }
 }

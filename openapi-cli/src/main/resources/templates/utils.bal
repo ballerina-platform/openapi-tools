@@ -1,4 +1,5 @@
 import ballerina/url;
+import ballerina/mime;
 
 # Represents encoding mechanism details.
 type Encoding record {
@@ -6,6 +7,10 @@ type Encoding record {
     string style = FORM;
     # Specifies whether arrays and objects should generate as separate fields
     boolean explode = true;
+    # Specifies the custom content type
+    string contentType?;
+    # Specifies the custom headers
+    map<string> headers?;
 };
 
 enum EncodingStyle {
@@ -15,9 +20,9 @@ enum EncodingStyle {
     PIPEDELIMITED
 }
 
-type SimpleBasicType string|boolean|int|float|decimal;
-
 final Encoding & readonly defaultEncoding = {};
+
+type SimpleBasicType string|boolean|int|float|decimal;
 
 # Generate client request when the media type is given as application/x-www-form-urlencoded.
 #
@@ -244,4 +249,33 @@ isolated function getMapForHeaders(map<any> headerParam) returns map<string|stri
         }
     }
     return headerMap;
+}
+
+isolated function createBodyParts(record {|anydata...; |} anyRecord, map<Encoding> encodingMap = {})
+returns mime:Entity[]|error {
+    mime:Entity[] entities = [];
+    foreach [string, anydata] [key, value] in anyRecord.entries() {
+       Encoding encodingData = encodingMap.hasKey(key) ? encodingMap.get(key) : {};
+        mime:Entity entity = new mime:Entity();
+        if value is byte[] {
+            entity.setByteArray(value);
+        } else if value is SimpleBasicType|SimpleBasicType[] {
+            entity.setText(value.toString());
+        } else if value is record {}|record {}[] {
+            entity.setJson(value.toJson());
+        }
+        if (encodingData?.contentType is string) {
+            check entity.setContentType(encodingData?.contentType.toString());
+        }
+        map<any>? headers = encodingData?.headers;
+        if (headers is map<any>) {
+            foreach var [headerName, headerValue] in headers.entries() {
+                if headerValue is SimpleBasicType {
+                    entity.setHeader(headerName, headerValue.toString());
+                }
+            }
+        }
+        entities.push(entity);
+    }
+    return entities;
 }

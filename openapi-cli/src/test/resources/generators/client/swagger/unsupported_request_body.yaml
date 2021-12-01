@@ -48,7 +48,7 @@ paths:
           required: true
       requestBody:
         content:
-          multipart/form-data:
+          multipart/byteranges:  # This mime is not supported for client generation
             schema:
               properties:
                 address:
