@@ -23,7 +23,7 @@ public class AnnotationTests {
     public void generateRecordsWithDeprecatedAnnotations() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/deprecated_schemas.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/deprecated_schemas.bal", syntaxTree);

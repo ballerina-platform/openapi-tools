@@ -95,6 +95,9 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Option(names = {"--json"}, description = "Generate json file")
     private boolean generatedFileType;
 
+    @CommandLine.Option(names = {"--with-tests"}, hidden = true, description = "Generate test files")
+    private boolean includeTestFiles;
+
     @CommandLine.Parameters
     private List<String> argList;
 
@@ -219,6 +222,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private void openApiToBallerina(String fileName, Filter filter) throws IOException {
         CodeGenerator generator = new CodeGenerator();
         generator.setLicenseHeader(this.setLicenseHeader());
+        generator.setIncludeTestFiles(this.includeTestFiles);
         final File openApiFile = new File(fileName);
         String serviceName;
         if (generatedServiceName != null) {

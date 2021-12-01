@@ -21,8 +21,9 @@ package io.ballerina.openapi.generators.schema;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.generators.schema.ballerinatypegenerators.TypeGenerator;
+import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -35,7 +36,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * All the tests related to OneOF data binding handling the {@link BallerinaSchemaGenerator}
+ * All the tests related to OneOF data binding handling the {@link BallerinaTypesGenerator}
  * util.
  */
 public class OneOfDataTypeTests {
@@ -49,7 +50,8 @@ public class OneOfDataTypeTests {
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> oneOf = composedSchema.getOneOf();
-        String oneOfUnionType = GeneratorUtils.getOneOfUnionType(oneOf);
+        GeneratorMetaData.createInstance(openAPI, false);
+        String oneOfUnionType = TypeGeneratorUtils.getUnionType(oneOf);
         Assert.assertEquals(oneOfUnionType, "Activity|Profile");
     }
 
@@ -60,17 +62,40 @@ public class OneOfDataTypeTests {
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> oneOf = composedSchema.getOneOf();
-        String oneOfUnionType = GeneratorUtils.getOneOfUnionType(oneOf);
+        GeneratorMetaData.createInstance(openAPI, false);
+        String oneOfUnionType = TypeGeneratorUtils.getUnionType(oneOf);
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
+    }
+
+    @Test(description = "Generate union type when nullable is true")
+    public void generateUnionTypeWhenNullableTrue() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        Schema schema = openAPI.getComponents().getSchemas().get("Error");
+        ComposedSchema composedSchema = (ComposedSchema) schema;
+        GeneratorMetaData.createInstance(openAPI, true);
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema);
+        String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString();
+        Assert.assertEquals(oneOfUnionType, "Activity|Profile?");
     }
 
     @Test(description = "Tests full schema genrations with oneOf type")
     public void generateOneOFTests() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/oneOf.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPI);
-
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/oneOf.bal", syntaxTree);
+    }
+
+    @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "" +
+                    "Unsupported object or composed schema is given inside a oneOf or anyOf schema.*")
+    public void arrayHasMaxItemsExceedLimit02() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/nested_oneOf_with_allOf.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
     }
 }

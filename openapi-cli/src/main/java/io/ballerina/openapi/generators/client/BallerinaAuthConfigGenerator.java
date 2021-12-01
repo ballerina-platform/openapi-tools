@@ -22,14 +22,17 @@ import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.BlockStatementNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.ElseBlockNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.IfElseStatementNode;
 import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -46,6 +49,8 @@ import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RequiredExpressionNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -71,11 +76,15 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyN
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createAssignmentStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBasicLiteralNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createBinaryExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createBlockStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCheckExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createElseBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createIfElseStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createImplicitNewExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIntersectionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
@@ -105,8 +114,11 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DECIMAL_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ELSE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FINAL_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.IF_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.IS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.NEW_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
@@ -123,6 +135,8 @@ import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEYS_CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.generators.GeneratorConstants.AUTH;
+import static io.ballerina.openapi.generators.GeneratorConstants.AUTH_CONFIG;
+import static io.ballerina.openapi.generators.GeneratorConstants.AUTH_CONFIG_RECORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.AuthConfigTypes;
 import static io.ballerina.openapi.generators.GeneratorConstants.BASIC;
 import static io.ballerina.openapi.generators.GeneratorConstants.BEARER;
@@ -133,6 +147,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAUTH2;
 import static io.ballerina.openapi.generators.GeneratorConstants.PASSWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.REFRESH_TOKEN;
+import static io.ballerina.openapi.generators.GeneratorConstants.SELF;
 import static io.ballerina.openapi.generators.GeneratorConstants.SSL_FIELD_NAME;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
@@ -160,6 +175,15 @@ public class BallerinaAuthConfigGenerator {
      */
     public boolean isApiKey() {
         return apiKey;
+    }
+
+    /**
+     * Returns `true` if HTTP or OAuth authentication is supported.
+     *
+     * @return {@link boolean}
+     */
+    public boolean isHttpOROAuth() {
+        return httpOROAuth;
     }
 
     /**
@@ -269,6 +293,33 @@ public class BallerinaAuthConfigGenerator {
     }
 
     /**
+     * Generate `AuthConfig` record when combination of ApiKey and HTTPOrOAuth authentication is supported.
+     *
+     * <pre>
+     *     # Provides Auth configurations needed when communicating with a remote HTTP endpoint.
+     *     public type AuthConfig record {|
+     *         # Auth Configuration
+     *         http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig|ApiKeysConfig auth;
+     *     |};
+     * </pre>
+     *
+     * @return {@link TypeDefinitionNode}   Syntax tree node of config record
+     */
+    public TypeDefinitionNode getAuthConfigRecord() {
+        Token typeName = AbstractNodeFactory.createIdentifierToken(AUTH_CONFIG_RECORD);
+        NodeList<Node> recordFieldList = createNodeList(getAuthConfigRecordFields());
+        MetadataNode configRecordMetadataNode = getMetadataNode("Provides Auth configurations needed when " +
+                "communicating with a remote HTTP endpoint.");
+        RecordTypeDescriptorNode recordTypeDescriptorNode =
+                NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                        createToken(OPEN_BRACE_PIPE_TOKEN), recordFieldList, null,
+                        createToken(CLOSE_BRACE_PIPE_TOKEN));
+        return NodeFactory.createTypeDefinitionNode(configRecordMetadataNode,
+                createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName,
+                recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    /**
      * Generate Class variable for api key map {@code final readonly & ApiKeysConfig apiKeyConfig;}.
      *
      * @return {@link List<ObjectFieldNode>}    syntax tree object field node list
@@ -279,6 +330,9 @@ public class BallerinaAuthConfigGenerator {
             TypeDescriptorNode readOnlyNode = createTypeReferenceTypeDescNode(createSimpleNameReferenceNode
                     (createToken(READONLY_KEYWORD)));
             TypeDescriptorNode apiKeyMapNode = createSimpleNameReferenceNode(createIdentifierToken(API_KEYS_CONFIG));
+            if (httpOROAuth) {
+                apiKeyMapNode = createOptionalTypeDescriptorNode(apiKeyMapNode, createToken(QUESTION_MARK_TOKEN));
+            }
             TypeDescriptorNode intersectionTypeDescriptorNode = createIntersectionTypeDescriptorNode(readOnlyNode,
                     createToken(BITWISE_AND_TOKEN), apiKeyMapNode);
             IdentifierToken fieldName = createIdentifierToken(API_KEY_CONFIG_PARAM);
@@ -304,6 +358,9 @@ public class BallerinaAuthConfigGenerator {
      *          string serviceUrl = "https://petstore.swagger.io:443/v2" }
      *        Config param when no authentication mechanism given with no server URL
      *          {@code string serviceUrl, http:ClientConfiguration clientConfig = {}}
+     * -- ex: Config param for combination of API Key and Http or OAuth 2.0 Authentication mechanisms.
+     *          {@code AuthConfig authConfig, http:ClientConfiguration clientConfig =  {},
+     *          string serviceUrl = "https://petstore.swagger.io:443/v2" }
      *
      * @return {@link List<Node>}  syntax tree node list of config parameters
      */
@@ -312,7 +369,7 @@ public class BallerinaAuthConfigGenerator {
         Node serviceURLNode = getServiceURLNode(serviceUrl);
         List<Node> parameters = new ArrayList<>();
         IdentifierToken equalToken = createIdentifierToken(GeneratorConstants.EQUAL);
-        if (httpOROAuth) {
+        if (httpOROAuth && !apiKey) {
             BuiltinSimpleNameReferenceNode typeName = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(CLIENT_CONFIG));
             IdentifierToken paramName = createIdentifierToken(CONFIG_RECORD_ARG);
@@ -321,7 +378,15 @@ public class BallerinaAuthConfigGenerator {
             parameters.add(createToken(COMMA_TOKEN));
             parameters.add(serviceURLNode);
         } else {
-            if (apiKey) {
+            if (apiKey && httpOROAuth) {
+                BuiltinSimpleNameReferenceNode authConfigTypeName = createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(AUTH_CONFIG_RECORD));
+                IdentifierToken authConfigParamName = createIdentifierToken(AUTH_CONFIG);
+                RequiredParameterNode authConfigParamNode = createRequiredParameterNode(annotationNodes,
+                        authConfigTypeName, authConfigParamName);
+                parameters.add(authConfigParamNode);
+                parameters.add(createToken(COMMA_TOKEN));
+            } else if (apiKey) {
                 BuiltinSimpleNameReferenceNode apiKeyConfigTypeName = createBuiltinSimpleNameReferenceNode(null,
                         createIdentifierToken(API_KEYS_CONFIG));
                 IdentifierToken apiKeyConfigParamName = createIdentifierToken(API_KEY_CONFIG_PARAM);
@@ -425,7 +490,7 @@ public class BallerinaAuthConfigGenerator {
     public AssignmentStatementNode getApiKeyAssignmentNode() {
         if (apiKey) {
             FieldAccessExpressionNode varRefApiKey = createFieldAccessExpressionNode(
-                    createSimpleNameReferenceNode(createIdentifierToken("self")), createToken(DOT_TOKEN),
+                    createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
                     createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_PARAM)));
             ExpressionNode fieldAccessExpressionNode = createRequiredExpressionNode(
                     createIdentifierToken(API_KEY_CONFIG_PARAM));
@@ -646,6 +711,98 @@ public class BallerinaAuthConfigGenerator {
         return recordFieldNodes;
     }
 
+    /**
+     * Generate statements for init function when combination of ApiKeys and HTTP/OAuth authentication is used.
+     *
+     * <pre>
+     *     if authConfig.auth is ApiKeysConfig {
+     *         self.apiKeyConfig = (<ApiKeysConfig>authConfig.auth).cloneReadOnly();
+     *     } else {
+     *         clientConfig.auth = http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig>authConfig.auth;
+     *         self.apiKeyConfig = ();
+     *     }
+     * </pre>
+     *
+     * @param assignmentNodes   List of Assignment Nodes
+     */
+    public void handleInitForMixOfApiKeyAndHTTPOrOAuth(List<StatementNode> assignmentNodes) {
+        List<StatementNode> apiKeyConfigAssignmentNodes = new ArrayList<>();
+
+        // `self.apiKeyConfig = (<ApiKeysConfig>authConfig.auth).cloneReadOnly();`
+        FieldAccessExpressionNode apiKeyConfigRef = createFieldAccessExpressionNode(
+                createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
+                createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_PARAM)));
+        SimpleNameReferenceNode apiKeyConfigExpr = createSimpleNameReferenceNode(createIdentifierToken(
+                "(<ApiKeysConfig>authConfig.auth).cloneReadOnly()"));
+        AssignmentStatementNode apiKeyConfigAssignmentStatementNode = createAssignmentStatementNode(apiKeyConfigRef,
+                createToken(EQUAL_TOKEN), apiKeyConfigExpr, createToken(SEMICOLON_TOKEN));
+        apiKeyConfigAssignmentNodes.add(apiKeyConfigAssignmentStatementNode);
+        NodeList<StatementNode> statementList = createNodeList(apiKeyConfigAssignmentNodes);
+        BlockStatementNode ifBody = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN), statementList,
+                createToken(CLOSE_BRACE_TOKEN));
+
+        List<StatementNode> clientConfigAssignmentNodes = new ArrayList<>();
+
+        // `clientConfig.auth = <http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig>authConfig.auth;
+        FieldAccessExpressionNode clientConfigAuthRef = createFieldAccessExpressionNode(
+                createSimpleNameReferenceNode(createIdentifierToken(CONFIG_RECORD_ARG)), createToken(DOT_TOKEN),
+                createSimpleNameReferenceNode(createIdentifierToken(AUTH)));
+        SimpleNameReferenceNode clientConfigExpr = createSimpleNameReferenceNode(
+                createIdentifierToken("<" + getAuthFieldTypeName() +
+                        ">" + AUTH_CONFIG + DOT_TOKEN.stringValue() + AUTH));
+        AssignmentStatementNode httpClientAuthConfigAssignment = createAssignmentStatementNode(clientConfigAuthRef,
+                createToken(EQUAL_TOKEN), clientConfigExpr, createToken(SEMICOLON_TOKEN));
+        clientConfigAssignmentNodes.add(httpClientAuthConfigAssignment);
+
+        // `self.apiKeyConfig = ();`
+        FieldAccessExpressionNode apiKeyConfigNilRef = createFieldAccessExpressionNode(
+                createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
+                createSimpleNameReferenceNode(createIdentifierToken(API_KEY_CONFIG_PARAM)));
+        SimpleNameReferenceNode apiKeyConfigNilExpr = createSimpleNameReferenceNode(
+                createIdentifierToken("()"));
+        AssignmentStatementNode apiKeyConfigNilAssignment = createAssignmentStatementNode(apiKeyConfigNilRef,
+                createToken(EQUAL_TOKEN), apiKeyConfigNilExpr, createToken(SEMICOLON_TOKEN));
+        clientConfigAssignmentNodes.add(apiKeyConfigNilAssignment);
+
+        NodeList<StatementNode> elseBodyNodeList = createNodeList(clientConfigAssignmentNodes);
+        StatementNode elseBodyStatement = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN), elseBodyNodeList,
+                createToken(CLOSE_BRACE_TOKEN));
+        ElseBlockNode elseBody = createElseBlockNode(createToken(ELSE_KEYWORD), elseBodyStatement);
+
+        ExpressionNode condition = createBinaryExpressionNode(null,
+                createIdentifierToken(AUTH_CONFIG + DOT_TOKEN.stringValue() + AUTH),
+                createToken(IS_KEYWORD),
+                createIdentifierToken(API_KEYS_CONFIG)
+        );
+        IfElseStatementNode ifElseStatementNode = createIfElseStatementNode(createToken(IF_KEYWORD), condition,
+                ifBody, elseBody);
+        assignmentNodes.add(ifElseStatementNode);
+    }
+
+    /**
+     * Generate fields for`AuthConfig` record when combination of ApiKey and HTTPOrOAuth authentication is supported.
+     *
+     * <pre>
+     *     # Auth Configuration
+     *     http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig|ApiKeysConfig auth;
+     * </pre>
+     *
+     * @return {@link List<Node>}   fields of AuthConfig record
+     */
+    private List<Node> getAuthConfigRecordFields() {
+        List<Node> recordFieldNodes = new ArrayList<>();
+        Token semicolonToken = createToken(SEMICOLON_TOKEN);
+
+        MetadataNode authMetadataNode = getMetadataNode("Auth Configuration");
+        IdentifierToken authFieldName = AbstractNodeFactory.createIdentifierToken(escapeIdentifier(AUTH));
+        TypeDescriptorNode authFieldTypeNode = createSimpleNameReferenceNode(
+                createIdentifierToken(getAuthFieldTypeName() + "|" + API_KEYS_CONFIG));
+        RecordFieldNode authFieldNode = NodeFactory.createRecordFieldNode(authMetadataNode, null,
+                authFieldTypeNode, authFieldName, null, semicolonToken);
+        recordFieldNodes.add(authFieldNode);
+        return recordFieldNodes;
+    }
+
     private MetadataNode getMetadataNode(String comment) {
         List<Node> docs = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(comment, false));
         MarkdownDocumentationNode authDocumentationNode = createMarkdownDocumentationNode(
@@ -709,9 +866,7 @@ public class BallerinaAuthConfigGenerator {
                 }
             }
         }
-        if (apiKey && httpOROAuth) {
-            throw new BallerinaOpenApiException("Unsupported combination of security schemes.");
-        } else if (!(apiKey || httpOROAuth)) {
+        if (!(apiKey || httpOROAuth)) {
             throw new BallerinaOpenApiException("Unsupported type of security schema");
         }
     }
@@ -741,7 +896,7 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link String}   Field type name of auth field
      *                          Ex: {@code http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig}
      */
-    private String getAuthFieldTypeName() {
+    public String getAuthFieldTypeName() {
         Set<String> httpFieldTypeNames = new HashSet<>();
         for (String authType : authTypes) {
             switch (authType) {

@@ -72,7 +72,6 @@ components:
           type: string
       title: optional_fields_address
       type: object
-      nullable: true
     customer:
       properties:
         address:
@@ -83,7 +82,6 @@ components:
               nullable: true
             - type: string
           description: The customer's address.
-          nullable: true
         name:
           type: string
       type: object

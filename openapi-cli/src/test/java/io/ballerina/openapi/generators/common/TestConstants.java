@@ -7,6 +7,8 @@ public class TestConstants {
     private static String clientConfigRecordDoc = "" +
             "# Provides a set of configurations for controlling the behaviours when communicating with a remote " +
             "HTTP endpoint.";
+    public static String authConfigRecordDoc = "" +
+            "#Provides Auth configurations needed when communicating with a remote HTTP endpoint.";
     private static String commonClientConfigurationFields = "# The HTTP version understood by the client\n" +
             "    string httpVersion = \"1.1\";\n" +
             "    # Configurations related to HTTP/1.x protocol\n" +
@@ -85,8 +87,12 @@ public class TestConstants {
             "  http:OAuth2PasswordGrantConfig|http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig auth;\n"
             + commonClientConfigurationFields;
     public static final String API_KEY_CONFIG_VAR = "final readonly & ApiKeysConfig apiKeyConfig;";
+    public static final String API_KEY_CONFIG_NILLABLE_VAR = "final readonly & ApiKeysConfig? apiKeyConfig;";
     public static final String API_KEY_CONFIG_PARAM = "" +
             "ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, " +
+            "string serviceUrl = \"https:localhost/8080\"";
+    public static final String AUTH_CONFIG_PARAM = "" +
+            "AuthConfig authConfig, http:ClientConfiguration clientConfig =  {}, " +
             "string serviceUrl = \"https:localhost/8080\"";
     public static final String API_KEY_CONFIG_PARAM_NO_URL = "" +
             "ApiKeysConfig apiKeyConfig, string serviceUrl, http:ClientConfiguration clientConfig =  {}";

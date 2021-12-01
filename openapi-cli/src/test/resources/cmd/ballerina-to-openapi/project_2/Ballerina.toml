@@ -1,0 +1,8 @@
+[package]
+org = "ballerina_to_openapi_test"
+name = "project_2"
+version = "0.1.0"
+
+[build-options]
+observabilityIncluded = true
+

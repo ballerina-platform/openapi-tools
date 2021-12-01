@@ -25,14 +25,7 @@ public class ResourceValidationError  extends ValidationError {
     public String resourceMethod;
     public String resourcePath;
 
-    public ResourceValidationError() {
-        this.position = null;
-        this.resourceMethod = null;
-        this.resourcePath = null;
-    }
-
-    public ResourceValidationError(Location position, String resourceMethod,
-                                   String resourcePath) {
+    public ResourceValidationError(Location position, String resourceMethod, String resourcePath) {
         this.position = position;
         this.resourceMethod = resourceMethod;
         this.resourcePath = resourcePath;
@@ -40,7 +33,7 @@ public class ResourceValidationError  extends ValidationError {
     public Location getPosition() {
         return position;
     }
-    public String getresourceMethod() {
+    public String getResourceMethod() {
         return resourceMethod;
     }
     public String getResourcePath() {

@@ -26,7 +26,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -57,7 +57,7 @@ public class FunctionSignatureNodeTests {
     public void getFunctionSignatureNodeTests() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/valid_operation.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaSchemaGenerator(openAPI), new ArrayList<>());
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>());
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/products/{country}").getGet(), new ArrayList<>());
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
@@ -83,7 +83,7 @@ public class FunctionSignatureNodeTests {
     public void testFunctionSignatureNodeForXMLPayload() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/xml_request_payload.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaSchemaGenerator(openAPI), new ArrayList<>());
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>());
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/pets").getPost(), new ArrayList<>());
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
@@ -101,7 +101,7 @@ public class FunctionSignatureNodeTests {
     public void testFunctionSignatureNodeForJSONPayload() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/json_request_payload.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaSchemaGenerator(openAPI), new ArrayList<>());
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>());
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/pets").getPost(), new ArrayList<>());
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
@@ -119,7 +119,7 @@ public class FunctionSignatureNodeTests {
     public void getFunctionSignatureForNestedArrayResponse() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/response_nested_array.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaSchemaGenerator(openAPI), new ArrayList<>());
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>());
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/timestags").getGet(), new ArrayList<>());
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
@@ -130,7 +130,7 @@ public class FunctionSignatureNodeTests {
     public void getFunctionSignatureForStringArrayResponse() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/response_string_array.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaSchemaGenerator(openAPI), new ArrayList<>());
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>());
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/timestags").getGet(), new ArrayList<>());
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();

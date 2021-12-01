@@ -1,0 +1,104 @@
+openapi: 3.0.0
+info:
+  version: 2.0.0
+  title: World Bank Data API
+  description: >
+    This is a generated connector from [World Bank API v2](https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation) OpenAPI Specification.
+    The World Bank Indicators API provides access to nearly 16,000 time series indicators. Most of these indicators are available online through tools such as `Databank` and the `Open Data` website. The API provides programmatic access to this same data. Many data series date back over 50 years, and can be used to create interesting applications.
+  x-ballerina-display:
+    label: World Bank
+    iconPath: "resources/worldbank.svg"
+  x-ballerina-init-description: >
+    The connector initialization doesn't require setting the API credentials.
+servers:
+  - description: Indicators represent data like total population, gross domestic product, energy use, and many more
+    url: http://api.worldbank.org/v2/
+
+paths:
+  /country/all/indicator/POP:
+    get:
+      tags: ["Population", "Total", "World"]
+      description: "Get population of each country"
+      operationId: getPopulation
+      x-ballerina-display:
+        label: "Get Population"
+      parameters:
+        - name: date
+          in: query
+          description: "Date-range by year, month or quarter that scopes the result-set."
+          required: false
+          schema:
+            type: string
+            default: "2010"
+          x-ballerina-display:
+            label: "Date"
+        - name: format
+          in: query
+          description: "Format of the response."
+          required: false
+          schema:
+            type: string
+            default: json
+          x-ballerina-display:
+            label: "Response Format"
+      responses:
+        '200':
+          description: "Population of each countries"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorldBankResponse"
+components:
+  schemas:
+    WorldBankResponse:
+      type: array
+      items:
+        oneOf:
+          - $ref: "#/components/schemas/PaginationData"
+          - type: array
+            items:
+              $ref: "#/components/schemas/Indicator"
+            nullable: true
+    PaginationData:
+      type: object
+      required:
+        - "page"
+        - "pages"
+        - "per_page"
+        - "total"
+        - "sourceid"
+        - "sourcename"
+        - "lastupdated"
+      properties:
+        page:
+          type: integer
+        pages:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        sourceid:
+          type: string
+          nullable: true
+        sourcename:
+          type: string
+          nullable: true
+        lastupdated:
+          type: string
+          nullable: true
+    Indicator:
+      type: object
+      description: "Data indicator"
+      required:
+        - id
+        - value
+      properties:
+        id:
+          type: string
+          description: "Id of the indicator"
+          example: SP.POP.TOTL
+        value:
+          type: string
+          description: "Value represent by the indicator"
+          example: Population, total
