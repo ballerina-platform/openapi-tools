@@ -36,10 +36,10 @@ public isolated client class Client {
     # + return - Successful response
     @display {label: "Current Weather"}
     remote isolated function getCurretWeatherData(@display {label: "CityName or StateCode or CountryCode"} string? q = (), @display {label: "City Id"} string? id = (), @display {label: "Latitude"} string? lat = (), @display {label: "Longitude"} string? lon = (), @display {label: "Zip Code"} string? zip = (), @display {label: "Units"} string units = "imperial", @display {label: "Language"} string lang = "en", @display {label: "Mode"} string mode = "json") returns CurrentWeatherData|error {
-        string  path = string `/weather`;
+        string resourcePath = string `/weather`;
         map<anydata> queryParam = {"q": q, "id": id, "lat": lat, "lon": lon, "zip": zip, "units": units, "lang": lang, "mode": mode, "appid": self.apiKeyConfig.appid};
-        path = path + check getPathForQueryParam(queryParam);
-        CurrentWeatherData response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        CurrentWeatherData response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # Provide weather forecast for any geographical coordinates
@@ -52,10 +52,10 @@ public isolated client class Client {
     # + return - Successful response
     @display {label: "Weather Forecast"}
     remote isolated function getWeatherForecast(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string? exclude = (), @display {label: "Units"} string? units = (), @display {label: "Language"} string? lang = ()) returns WeatherForecast|error {
-        string  path = string `/onecall`;
+        string resourcePath = string `/onecall`;
         map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, "lang": lang, "appid": self.apiKeyConfig.appid};
-        path = path + check getPathForQueryParam(queryParam);
-        WeatherForecast response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        WeatherForecast response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }

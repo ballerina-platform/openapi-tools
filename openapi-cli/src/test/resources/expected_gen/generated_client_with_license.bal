@@ -20,20 +20,20 @@ public isolated client class Client {
     # + 'limit - How many items to return at one time (max 100)
     # + return - An paged array of pets
     remote isolated function listPets(int? 'limit = ()) returns Pets|error {
-        string  path = string `/pets`;
+        string resourcePath = string `/pets`;
         map<anydata> queryParam = {"limit": 'limit};
-        path = path + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        Pets response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # Create a pet
     #
     # + return - Null response
     remote isolated function  createPet() returns http:Response|error {
-        string  path = string `/pets`;
+        string resourcePath = string `/pets`;
         http:Request request = new;
         //TODO: Update the request as needed;
-        http:Response response = check self.clientEp-> post(path, request);
+        http:Response response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
     # Info for a specific pet
@@ -41,8 +41,8 @@ public isolated client class Client {
     # + petId - The id of the pet to retrieve
     # + return - Expected response to a valid request
     remote isolated function showPetById(string petId) returns Pets|error {
-        string  path = string `/pets/${petId}`;
-        Pets response = check self.clientEp-> get(path);
+        string resourcePath = string `/pets/${petId}`;
+        Pets response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }

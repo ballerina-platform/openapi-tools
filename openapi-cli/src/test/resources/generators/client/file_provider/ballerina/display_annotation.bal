@@ -19,11 +19,11 @@ public isolated client class Client {
     # + payload - Pet object that needs to be added to the store
     # + return - Invalid ID supplied
     remote isolated function updatePet(Pet payload) returns http:Response|error {
-        string  path = string `/pet`;
+        string resourcePath = string `/pet`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp->put(path, request);
+        http:Response response = check self.clientEp->put(resourcePath, request);
         return response;
     }
 }

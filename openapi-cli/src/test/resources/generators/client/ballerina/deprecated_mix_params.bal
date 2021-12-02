@@ -27,10 +27,10 @@ public isolated client class Client {
     # + offset -
     # + return - Success
     remote isolated function getCommentsOnTrack(int trackId, int 'limit = 50, @deprecated int offset = 0, boolean? linkedPartitioning = ()) returns InlineResponse200|error {
-        string path = string `/tracks/${trackId}/comments`;
+        string resourcePath = string `/tracks/${trackId}/comments`;
         map<anydata> queryParam = {"limit": 'limit, "offset": offset, "linked_partitioning": linkedPartitioning};
-        path = path + check getPathForQueryParam(queryParam);
-        InlineResponse200 response = check self.clientEp->get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        InlineResponse200 response = check self.clientEp->get(resourcePath);
         return response;
     }
 }

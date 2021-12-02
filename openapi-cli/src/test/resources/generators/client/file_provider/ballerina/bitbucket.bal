@@ -28,10 +28,10 @@ public isolated client class Client {
     # + longitude - Longitude component of location.
     # + return - An array of products
     remote isolated function  products(float latitude, float longitude) returns ProductArr|error {
-        string  path = string `/products`;
+        string resourcePath = string `/products`;
         map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, server_token: self.apiKeys["server_token"]};
-        path = path + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        ProductArr response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # Price Estimates
@@ -42,10 +42,10 @@ public isolated client class Client {
     # + endLongitude - Longitude component of end location.
     # + return - An array of price estimates by product
     remote isolated function  price(float start_latitude, float start_longitude, float end_latitude, float end_longitude) returns PriceEstimateArr|error {
-        string  path = string `/estimates/price`;
+        string resourcePath = string `/estimates/price`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude, server_token: self.apiKeys["server_token"]};
-        path = path + check getPathForQueryParam(queryParam);
-        PriceEstimateArr response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        PriceEstimateArr response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # Time Estimates
@@ -56,20 +56,20 @@ public isolated client class Client {
     # + productId - Unique identifier representing a specific product for a given latitude & longitude.
     # + return - An array of products
     remote isolated function  time(float start_latitude, float start_longitude, string? customer_uuid = (), string? product_id = ()) returns ProductArr|error {
-        string  path = string `/estimates/time`;
+        string resourcePath = string `/estimates/time`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId, server_token: self.apiKeys["server_token"]};
-        path = path + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        ProductArr response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # User Profile
     #
     # + return - Profile information for a user
     remote isolated function  me() returns Profile|error {
-        string  path = string `/me`;
+        string resourcePath = string `/me`;
         map<anydata> queryParam = {server_token: self.apiKeys["server_token"]};
-        path = path + check getPathForQueryParam(queryParam);
-        Profile response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        Profile response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # User Activity
@@ -78,10 +78,10 @@ public isolated client class Client {
     # + limit - Number of items to retrieve. Default is 5, maximum is 100.
     # + return - History information for the given user
     remote isolated function  history(int? offset = (), int? 'limit = ()) returns Activities|error {
-        string  path = string `/history`;
+        string resourcePath = string `/history`;
         map<anydata> queryParam = {"offset": offset, "limit": 'limit, server_token: self.apiKeys["server_token"]};
-        path = path + check getPathForQueryParam(queryParam);
-        Activities response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        Activities response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }
