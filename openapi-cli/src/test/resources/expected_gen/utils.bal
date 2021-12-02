@@ -1,11 +1,17 @@
 import ballerina/url;
 
+type SimpleBasicType string|boolean|int|float|decimal;
+
 # Represents encoding mechanism details.
 type Encoding record {
     # Defines how multiple values are delimited
     string style = FORM;
     # Specifies whether arrays and objects should generate as separate fields
     boolean explode = true;
+    # Specifies the custom content type
+    string contentType?;
+    # Specifies the custom headers
+    map<any> headers?;
 };
 
 enum EncodingStyle {
@@ -16,8 +22,6 @@ enum EncodingStyle {
 }
 
 final Encoding & readonly defaultEncoding = {};
-
-type SimpleBasicType string|boolean|int|float|decimal;
 
 # Serialize the record according to the deepObject style.
 #

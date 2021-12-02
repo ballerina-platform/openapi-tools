@@ -17,16 +17,16 @@
 package io.ballerina.openapi.build;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
-import io.ballerina.projects.CompilationOptions;
+import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
@@ -40,10 +40,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -54,14 +52,14 @@ import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
  * SyntaxNodeAnalyzer for getting all service node.
  */
 public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
-    private CompilationOptions compilationOptions;
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
-        if (compilationOptions.exportOpenapi()) {
-            SemanticModel semanticModel = context.semanticModel();
-            SyntaxTree syntaxTree = context.syntaxTree();
-            Package currentPackage = context.currentPackage();
-            Project project = currentPackage.project();
+        SemanticModel semanticModel = context.semanticModel();
+        SyntaxTree syntaxTree = context.syntaxTree();
+        Package currentPackage = context.currentPackage();
+        Project project = currentPackage.project();
+        BuildOptions buildOptions = project.buildOptions();
+        if (buildOptions.exportOpenapi()) {
             // Take output path to target directory location in package.
             Path outPath = project.targetDir();
             Optional<Path> path = currentPackage.project().documentPath(context.documentId());
@@ -79,15 +77,16 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             }
             List<Diagnostic> diagnostics = new ArrayList<>();
             if (!openAPIDefinitions.isEmpty()) {
-                Map<String,String> yamls  = new HashMap<>();
                 for (OASResult oasResult: openAPIDefinitions) {
                     if (oasResult.getYaml().isPresent()) {
-                        yamls.put(oasResult.getServiceName(), oasResult.getYaml().get());
                         try {
                             String fileName = checkDuplicateFiles(outPath, oasResult.getServiceName(), false);
                             writeFile(outPath.resolve(fileName), oasResult.getYaml().get());
                         } catch (IOException e) {
-
+                            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
+                            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
+                                    error.getDescription(), null, e.toString());
+                            diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
                         }
                     }
                     if (!oasResult.getDiagnostics().isEmpty()) {
@@ -105,6 +104,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         }
     }
 
+    //TODO: use already define function in bal-service module for write file after merging #766 in openapi-tools
     /**
      * This method use for checking the duplicate files.
      *

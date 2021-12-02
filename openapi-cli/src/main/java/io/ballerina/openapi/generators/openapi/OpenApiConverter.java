@@ -115,7 +115,7 @@ public class OpenApiConverter {
                         } else {
                             content = definition.getYaml();
                         }
-                        String fileName = checkDuplicateFiles(outPath, definition.getServiceName(), needJson);
+                        String fileName = resolveContractFileName(outPath, definition.getServiceName(), needJson);
                         CodegenUtils.writeFile(outPath.resolve(fileName), content.get());
                     }
                 } catch (IOException e) {
@@ -136,7 +136,7 @@ public class OpenApiConverter {
      * @param openApiName given file name
      * @return file name with duplicate number tag
      */
-    private static String checkDuplicateFiles(Path outPath, String openApiName, Boolean isJson) {
+    private static String resolveContractFileName(Path outPath, String openApiName, Boolean isJson) {
         if (outPath != null && Files.exists(outPath)) {
             final File[] listFiles = new File(String.valueOf(outPath)).listFiles();
             if (listFiles != null) {
@@ -149,11 +149,10 @@ public class OpenApiConverter {
     private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
         for (File file : listFiles) {
             if (System.console() != null && file.getName().equals(openApiName)) {
-                String userInput = System.console().readLine("There is already a/an " + file.getName() +
-                        " in the location. Do you want to override the file? [y/N] ");
+                String userInput = System.console().readLine("There is already a file named ' " + file.getName() +
+                        "' in the target location. Do you want to overwrite the file? [y/N] ");
                 if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
-                    int duplicateCount = 0;
-                    openApiName = setGeneratedFileName(listFiles, openApiName, duplicateCount, isJson);
+                    openApiName = setGeneratedFileName(listFiles, openApiName, isJson);
                 }
             }
         }
@@ -165,20 +164,20 @@ public class OpenApiConverter {
      *
      * @param listFiles      generated files
      * @param fileName       File name
-     * @param duplicateCount add the tag with duplicate number if file already exist
      */
-    private static String setGeneratedFileName(File[] listFiles, String fileName, int duplicateCount, boolean isJson) {
+    private static String setGeneratedFileName(File[] listFiles, String fileName, boolean isJson) {
+        int duplicateCount = 0;
         for (File listFile : listFiles) {
             String listFileName = listFile.getName();
             if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2)
                     && (listFileName.split("\\.")[0]
                     .equals(fileName.split("\\.")[0]))) {
-                duplicateCount = 1 + duplicateCount;
+                duplicateCount++;
             }
         }
         if (isJson) {
-            return fileName.split("\\.")[0] + "." + (duplicateCount) + JSON_EXTENSION;
+            return fileName.split("\\.")[0] + "." + duplicateCount + JSON_EXTENSION;
         }
-        return fileName.split("\\.")[0] + "." + (duplicateCount) + YAML_EXTENSION;
+        return fileName.split("\\.")[0] + "." + duplicateCount + YAML_EXTENSION;
     }
 }

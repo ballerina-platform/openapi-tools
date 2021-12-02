@@ -164,11 +164,10 @@ public class ServiceToOpenAPIConverterUtils {
                  * service endpoints.
                  */
                 ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
-                Optional<Symbol> serviceSymOptional = semanticModel.symbol(serviceDeclarationNode);
-                if (serviceSymOptional.isPresent()) {
-                    List<TypeSymbol> listenerTypes = ((ServiceDeclarationSymbol) serviceSymOptional.get()).
-                            listenerTypes();
-                    listenerTypes.stream().filter(ServiceToOpenAPIConverterUtils::isListenerBelongsToHttpModule)
+                Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceDeclarationNode);
+                if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
+                    List<TypeSymbol> listenerTypes = ((ServiceDeclarationSymbol) serviceSymbol.get()).listenerTypes();
+                    listenerTypes.stream().filter(ServiceToOpenAPIConverterUtils::isHttpListener)
                             .forEachOrdered(listenerType -> extractServiceDeclarationNodes(serviceName,
                                     availableService, servicesToGenerate, serviceDeclarationNode));
                 }
@@ -522,7 +521,7 @@ public class ServiceToOpenAPIConverterUtils {
         return new OASResult(openAPI, diagnostics);
     }
 
-    private static boolean isListenerBelongsToHttpModule(TypeSymbol listenerType) {
+    private static boolean isHttpListener(TypeSymbol listenerType) {
         if (listenerType.typeKind() == TypeDescKind.UNION) {
             return ((UnionTypeSymbol) listenerType).memberTypeDescriptors().stream()
                     .filter(typeDescriptor -> typeDescriptor instanceof TypeReferenceTypeSymbol)
@@ -537,6 +536,10 @@ public class ServiceToOpenAPIConverterUtils {
     }
 
     private static boolean isHttpModule(ModuleSymbol moduleSymbol) {
-        return HTTP.equals(moduleSymbol.getName().get()) && BALLERINA.equals(moduleSymbol.id().orgName());
+        if (moduleSymbol.getName().isPresent()) {
+            return HTTP.equals(moduleSymbol.getName().get()) && BALLERINA.equals(moduleSymbol.id().orgName());
+        } else {
+            return false;
+        }
     }
 }

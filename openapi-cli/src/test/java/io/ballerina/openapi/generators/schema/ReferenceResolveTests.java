@@ -74,4 +74,14 @@ public class ReferenceResolveTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/referred_inclusion.bal", syntaxTree);
     }
+
+    @Test(description = "Test doc comment generation of record fields when property is reffered to another schema")
+    public void testDocCommentResolvingForRefferedSchemas() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/resolve_reference_docs.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/resolve_reference_docs.bal", syntaxTree);
+    }
 }

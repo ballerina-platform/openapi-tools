@@ -146,6 +146,29 @@ public class UtilGenerationTests {
         Assert.assertTrue(diagnostics.isEmpty());
     }
 
+    @Test(description = "Validate the util functions generated for OpenAPI definition with multi part request bodies")
+    public void testMultipartBodyParts() throws IOException, BallerinaOpenApiException, FormatterException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RESDIR.resolve("swagger/multipart_formdata.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
+        Assert.assertTrue(diagnostics.isEmpty());
+    }
+
+    @Test(description = "Validate the util functions generated for OpenAPI definition with multi part " +
+            "request custom bodies")
+    public void testMultipartCustomBodyParts() throws IOException, BallerinaOpenApiException, FormatterException {
+        CodeGenerator codeGenerator = new CodeGenerator();
+        Path definitionPath = RESDIR.resolve("swagger/multipart_formdata_custom.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
+        Assert.assertTrue(diagnostics.isEmpty());
+    }
+
     private boolean checkUtil(List<String> invalidFunctionNames, SyntaxTree utilSyntaxTree) {
         ModulePartNode modulePartNode = utilSyntaxTree.rootNode();
         NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();

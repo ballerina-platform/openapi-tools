@@ -149,6 +149,8 @@ public class GeneratorConstants {
     public static final String VENDOR_SPECIFIC_TYPE = "vnd.";
     public static final String APPLICATION_PDF = "application/pdf";
     public static final String IMAGE_PNG = "image/png";
+    public static final String MIME = "mime";
+    public static final String HTTP_HEADERS = "httpHeaders";
 
     // auth related constants
     public static final String API_KEY = "apikey";
@@ -262,6 +264,7 @@ public class GeneratorConstants {
     public static final String INTEGER = "integer";
     public static final String BOOLEAN = "boolean";
     public static final String NUMBER = "number";
+    public static final String OBJECT = "object";
     public static final Integer MAX_ARRAY_LENGTH = 2147483637;
     public static final String NILLABLE = "?";
     public static final String SQUARE_BRACKETS = "[]";
@@ -277,8 +280,8 @@ public class GeneratorConstants {
         typeMap.put("string", "string");
         typeMap.put("boolean", "boolean");
         typeMap.put("array", "[]");
-        typeMap.put("decimal", "decimal");
         typeMap.put("object", "record {}");
+        typeMap.put("decimal", "decimal");
         typeMap.put("number", "decimal");
         typeMap.put("double", "float");
         typeMap.put("float", "float");
@@ -289,4 +292,8 @@ public class GeneratorConstants {
 
     //Error related
     public static final String UNSUPPORTED_MEDIA_ERROR = "Unsupported media type '%s' is given in the request body";
+
+    // OS specific line separator
+    public static final String LINE_SEPARATOR = System.lineSeparator();
+    public static final String DOUBLE_LINE_SEPARATOR = LINE_SEPARATOR + LINE_SEPARATOR;
 }
