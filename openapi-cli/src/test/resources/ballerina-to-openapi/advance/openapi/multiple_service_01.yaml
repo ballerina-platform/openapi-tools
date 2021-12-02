@@ -1,0 +1,23 @@
+openapi: 3.0.1
+info:
+  title: Hello
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/hello"
+    variables:
+      server:
+        default: petstore.swagger.io
+      port:
+        default: "443"
+paths:
+  /hi:
+    post:
+      operationId: operation_post_/hi
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+      responses:
+        "202":
+          description: Accepted
+components: {}

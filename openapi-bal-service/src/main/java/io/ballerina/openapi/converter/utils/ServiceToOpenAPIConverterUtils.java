@@ -64,8 +64,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.openapi.converter.Constants.BALLERINA;
@@ -102,7 +104,7 @@ public class ServiceToOpenAPIConverterUtils {
                                                          Path inputPath) {
 
         List<ListenerDeclarationNode> endpoints = new ArrayList<>();
-        List<ServiceDeclarationNode> servicesToGenerate = new ArrayList<>();
+        Map<String, ServiceDeclarationNode> servicesToGenerate = new HashMap<>();
         List<String> availableService = new ArrayList<>();
         List<OpenAPIConverterDiagnostic> diagnostics = new ArrayList<>();
         List<OASResult> outputs = new ArrayList<>();
@@ -123,13 +125,13 @@ public class ServiceToOpenAPIConverterUtils {
                 diagnostics.add(error);
             }
             // Generating for the services
-            for (ServiceDeclarationNode serviceNode : servicesToGenerate) {
-                String serviceNodeName = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
-                String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNodeName, needJson);
-                OASResult oasDefinition = generateOAS(serviceNode, endpoints, semanticModel, openApiName, inputPath);
+            for (Map.Entry<String, ServiceDeclarationNode> serviceNode : servicesToGenerate.entrySet()) {
+                String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNode.getKey(), needJson);
+                OASResult oasDefinition = generateOAS(serviceNode.getValue(), endpoints, semanticModel, openApiName, inputPath);
                 oasDefinition.setServiceName(openApiName);
                 outputs.add(oasDefinition);
             }
+
         }
         if (!diagnostics.isEmpty()) {
             OASResult exceptions = new OASResult(null, diagnostics);
@@ -147,7 +149,7 @@ public class ServiceToOpenAPIConverterUtils {
      * Filter all the end points and service nodes.
      */
     private static void extractListenersAndServiceNodes(String serviceName, List<String> availableService,
-                                                        List<ServiceDeclarationNode> servicesToGenerate,
+                                                        Map<String, ServiceDeclarationNode> servicesToGenerate,
                                                         ModulePartNode modulePartNode,
                                                         List<ListenerDeclarationNode> endpoints,
                                                         SemanticModel semanticModel) {
@@ -163,34 +165,53 @@ public class ServiceToOpenAPIConverterUtils {
                  * Here check the service is related to the http module by checking listener type that attached to
                  * service endpoints.
                  */
-                ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
-                Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceDeclarationNode);
+                ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
+                Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
                 if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
-                    List<TypeSymbol> listenerTypes = ((ServiceDeclarationSymbol) serviceSymbol.get()).listenerTypes();
-                    listenerTypes.stream().filter(ServiceToOpenAPIConverterUtils::isHttpListener)
-                            .forEachOrdered(listenerType -> extractServiceDeclarationNodes(serviceName,
-                                    availableService, servicesToGenerate, serviceDeclarationNode));
+                    ServiceDeclarationSymbol serviceNodeSymbol = (ServiceDeclarationSymbol) serviceSymbol.get();
+                    List<TypeSymbol> listenerTypes = (serviceNodeSymbol).listenerTypes();
+                    for (TypeSymbol listenerType : listenerTypes) {
+                        if (isHttpListener(listenerType)) {
+                            String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
+                            /**
+                             * `String updateServiceName` used to track the service name for service file contains
+                             * multiple service node.
+                             * ex;
+                             * <pre>
+                             *     listener http:Listener ep1 = new (443, config = {host: "pets-tore.swagger.io"});
+                             *     service /hello on ep1 {
+                             *         resource function post hi(@http:Payload json payload) {
+                             *        }
+                             *     }
+                             *     service /hello on new http:Listener(9090) {
+                             *         resource function get hi() {
+                             *         }
+                             *     }
+                             * </pre>
+                             * Using absolute path we generate file name, therefore having same name may overwrite
+                             * the file, due to this suppose to use hashcode as identity factor for the file name.
+                             *
+                             * Generated file name for above example -> hello_openapi.yaml, hello_45673_openapi
+                             * .yaml
+                             */
+                            String updateServiceName = service;
+                            if (servicesToGenerate.containsKey(service)) {
+                                updateServiceName = service + "-" + serviceNodeSymbol.hashCode();
+                            }
+                            if (serviceName != null) {
+                                // Filtering by service name
+                                availableService.add(service);
+                                if (serviceName.equals(service)) {
+                                    servicesToGenerate.put(updateServiceName, serviceNode);
+                                }
+                            } else {
+                                // To generate for all services
+                                servicesToGenerate.put(updateServiceName, serviceNode);
+                            }
+                        }
+                    }
                 }
             }
-        }
-    }
-
-    /**
-     * Filter all the serviceNodes in syntax tree.
-     */
-    private static void extractServiceDeclarationNodes(String serviceName, List<String> availableService,
-                                                       List<ServiceDeclarationNode> servicesToGenerate,
-                                                       ServiceDeclarationNode serviceNode) {
-        if (serviceName != null) {
-            // Filtering by service name
-            String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
-            availableService.add(service);
-            if (serviceName.equals(service)) {
-                servicesToGenerate.add(serviceNode);
-            }
-        } else {
-            // To generate for all services
-            servicesToGenerate.add(serviceNode);
         }
     }
 
@@ -259,8 +280,15 @@ public class ServiceToOpenAPIConverterUtils {
     private static String getOpenApiFileName(String servicePath, String serviceName, boolean isJson) {
 
         String cleanedServiceName;
-        if (serviceName.isBlank() || serviceName.equals(SLASH)) {
+        if (serviceName.isBlank() || serviceName.equals(SLASH) || serviceName.startsWith(SLASH)) {
             cleanedServiceName = FilenameUtils.removeExtension(servicePath);
+            String[] fileName = serviceName.split(SLASH);
+            // This condition is to handle `service on ep1 {} ` multiple scenarios
+            if (fileName.length > 0 && !serviceName.isBlank()) {
+                cleanedServiceName = FilenameUtils.removeExtension(servicePath) + fileName[1];
+            } else {
+                cleanedServiceName = FilenameUtils.removeExtension(servicePath);
+            }
         } else {
             // Remove starting path separate if exists
             if (serviceName.startsWith(SLASH)) {
