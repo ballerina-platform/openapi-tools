@@ -36,8 +36,8 @@ public isolated client class Client {
         map<anydata> queryParam = {"lat": lat, "lon": lon, "appid": self.apiKeyConfig.appid};
         path = path + check getPathForQueryParam(queryParam);
         map<any> headerValues = {"exclude": exclude, "units": units};
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
-        WeatherForecast response = check self.clientEp-> get(path, accHeaders);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
+        WeatherForecast response = check self.clientEp-> get(path, httpHeaders);
         return response;
     }
 }

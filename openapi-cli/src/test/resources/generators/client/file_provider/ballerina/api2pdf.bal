@@ -31,11 +31,11 @@ public isolated client class Client {
     remote isolated function chromeFromHtmlPost(ChromeHtmlToPdfRequest payload) returns ApiResponseSuccess|error {
         string  path = string `/chrome/html`;
         map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = httpHeaders);
         return response;
     }
     # Convert URL to PDF
@@ -57,11 +57,11 @@ public isolated client class Client {
     remote isolated function chromeFromUrlPost(ChromeUrlToPdfRequest payload) returns ApiResponseSuccess|error {
         string  path = string `/chrome/url`;
         map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = httpHeaders);
         return response;
     }
     # Convert office document or image to PDF
@@ -71,11 +71,11 @@ public isolated client class Client {
     remote isolated function libreConvertPost(LibreOfficeConvertRequest payload) returns ApiResponseSuccess|error {
         string  path = string `/libreoffice/convert`;
         map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = httpHeaders);
         return response;
     }
     # Merge multiple PDFs together
@@ -85,11 +85,11 @@ public isolated client class Client {
     remote isolated function mergePost(MergeRequest payload) returns ApiResponseSuccess|error {
         string  path = string `/merge`;
         map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = httpHeaders);
         return response;
     }
     # Convert raw HTML to PDF
@@ -99,11 +99,11 @@ public isolated client class Client {
     remote isolated function wkhtmltopdfFromHtmlPost(WkHtmlToPdfHtmlToPdfRequest payload) returns ApiResponseSuccess|error {
         string  path = string `/wkhtmltopdf/html`;
         map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = httpHeaders);
         return response;
     }
     # Convert URL to PDF
@@ -125,11 +125,11 @@ public isolated client class Client {
     remote isolated function wkhtmltopdfFromUrlPost(WkHtmlToPdfUrlToPdfRequest payload) returns ApiResponseSuccess|error {
         string  path = string `/wkhtmltopdf/url`;
         map<any> headerValues = {"Authorization": self.apiKeyConfig.authorization};
-        map<string|string[]> accHeaders = getMapForHeaders(headerValues);
+        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = accHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(path, request, headers = httpHeaders);
         return response;
     }
     # Generate bar codes and QR codes with ZXING.

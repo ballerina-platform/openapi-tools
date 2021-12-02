@@ -7,7 +7,7 @@ public type CustomersCustomerBody record {
 
 public type Customer record {
     # The customer's address.
-    CustomerAddress[]|string? address?;
+    CustomerAddress[]?|string address?;
     string name?;
 };
 

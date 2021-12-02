@@ -44,7 +44,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.mime.MimeType;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -107,6 +107,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.EXECUTE;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEADER;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEADER_VALUES;
+import static io.ballerina.openapi.generators.GeneratorConstants.HTTP_HEADERS;
 import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.generators.GeneratorConstants.POST;
 import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
@@ -125,7 +126,7 @@ public class FunctionBodyGenerator {
     private boolean isHeader;
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
     private final OpenAPI openAPI;
-    private final BallerinaSchemaGenerator ballerinaSchemaGenerator;
+    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
 
@@ -138,7 +139,7 @@ public class FunctionBodyGenerator {
     }
 
     public FunctionBodyGenerator(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
-                                 OpenAPI openAPI, BallerinaSchemaGenerator ballerinaSchemaGenerator,
+                                 OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
                                  BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator,
                                  BallerinaUtilGenerator ballerinaUtilGenerator) {
 
@@ -162,7 +163,7 @@ public class FunctionBodyGenerator {
     public FunctionBodyNode getFunctionBodyNode(String path, Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
-        FunctionReturnType functionReturnType = new FunctionReturnType(
+        FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(
                 openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
         isHeader = false;
         // Create statements
@@ -253,7 +254,7 @@ public class FunctionBodyGenerator {
                 statementsList.add(getMapForParameters(headerParameters, "map<any>",
                         HEADER_VALUES, headerApiKeyNameList));
                 statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                        "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
+                        "map<string|string[]> " + HTTP_HEADERS + " = getMapForHeaders(headerValues)"));
                 isHeader = true;
                 ballerinaUtilGenerator.setHeadersFound(true);
             }
@@ -313,7 +314,7 @@ public class FunctionBodyGenerator {
         }
         if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
             statementsList.add(GeneratorUtils.getSimpleExpressionStatementNode(
-                    "map<string|string[]> accHeaders = getMapForHeaders(headerValues)"));
+                    "map<string|string[]> " + HTTP_HEADERS + " = getMapForHeaders(headerValues)"));
         }
     }
 
@@ -506,13 +507,13 @@ public class FunctionBodyGenerator {
                         "//TODO: Update the request as needed");
                 statementsList.add(expressionStatementNode);
                 clientCallStatement = "check self.clientEp->" + method + "(path, request, headers = " +
-                            "accHeaders)";
+                            "" + HTTP_HEADERS + ")";
 
             } else {
                 if (method.equals(HEAD)) {
-                    clientCallStatement = "check self.clientEp->" + method + "(path, accHeaders)";
+                    clientCallStatement = "check self.clientEp->" + method + "(path, " + HTTP_HEADERS + ")";
                 } else {
-                    clientCallStatement = "check self.clientEp->" + method + "(path, accHeaders)";
+                    clientCallStatement = "check self.clientEp->" + method + "(path, " + HTTP_HEADERS + ")";
                 }
             }
         } else if (isMethod) {
@@ -633,7 +634,7 @@ public class FunctionBodyGenerator {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
                 requestStatement = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
-                        "check self.clientEp->" + method + "(path, request, headers = accHeaders)");
+                        "check self.clientEp->" + method + "(path, request, headers = " + HTTP_HEADERS + ")");
                 statementsList.add(requestStatement);
                 Token returnKeyWord = createIdentifierToken("return");
                 SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));

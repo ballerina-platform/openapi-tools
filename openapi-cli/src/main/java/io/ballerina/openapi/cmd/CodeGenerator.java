@@ -42,7 +42,7 @@ import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.generators.client.BallerinaUtilGenerator;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.service.BallerinaServiceGenerator;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -93,12 +93,14 @@ import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG_FILE_NAM
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_CLIENT_PKG;
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_MOCK_PKG;
 import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
+import static io.ballerina.openapi.generators.GeneratorConstants.DOUBLE_LINE_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.ESCAPE_PATTERN;
 import static io.ballerina.openapi.generators.GeneratorConstants.GET;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_SERVICE;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.IDENTIFIER;
+import static io.ballerina.openapi.generators.GeneratorConstants.LINE_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEMPLATES_DIR_PATH_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEMPLATES_SUFFIX;
@@ -448,7 +450,7 @@ public class CodeGenerator {
         }
 
         // Generate ballerina records to represent schemas.
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
@@ -601,7 +603,7 @@ public class CodeGenerator {
                 (ballerinaServiceGenerator.generateSyntaxTree(openAPIDef, filter)).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
-        BallerinaSchemaGenerator ballerinaSchemaGenerator = new BallerinaSchemaGenerator(openAPIDef, nullable);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
         String schemaContent = Formatter.format(
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME, schemaContent));
@@ -650,16 +652,23 @@ public class CodeGenerator {
      * @throws BallerinaOpenApiException When operationId is missing in any path
      */
     private void validateOperationIds(Set<Map.Entry<String, PathItem>> paths) throws BallerinaOpenApiException {
+        List<String> errorList = new ArrayList<>();
         for (Map.Entry<String, PathItem> entry : paths) {
-            for (Operation operation : entry.getValue().readOperations()) {
-                if (operation.getOperationId() != null) {
-                    String operationId = getValidName(operation.getOperationId(), false);
-                    operation.setOperationId(operationId);
+            for (Map.Entry<PathItem.HttpMethod, Operation> operation :
+                    entry.getValue().readOperationsMap().entrySet()) {
+                if (operation.getValue().getOperationId() != null) {
+                    String operationId = getValidName(operation.getValue().getOperationId(), false);
+                    operation.getValue().setOperationId(operationId);
                 } else {
-                    throw new BallerinaOpenApiException("OperationId is missing for the resource path: "
-                            + entry.getKey());
+                    errorList.add(String.format("OperationId is missing in the resource path: %s(%s)", entry.getKey(),
+                            operation.getKey()));
                 }
             }
+        }
+        if (!errorList.isEmpty()) {
+            throw new BallerinaOpenApiException(
+                    "OpenAPI definition has errors: " +
+                            DOUBLE_LINE_SEPARATOR + String.join(LINE_SEPARATOR, errorList));
         }
     }
 
@@ -686,9 +695,9 @@ public class CodeGenerator {
         }
 
         if (!errorList.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: " + DOUBLE_LINE_SEPARATOR);
             for (String message : errorList) {
-                errorMessage.append(message).append("\n");
+                errorMessage.append(message).append(LINE_SEPARATOR);
             }
             throw new BallerinaOpenApiException(errorMessage.toString());
         }

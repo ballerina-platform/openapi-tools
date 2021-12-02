@@ -14,6 +14,7 @@ import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.ModuleVariableDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -60,6 +61,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModuleVariableDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createNilLiteralNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordFieldWithDefaultValueNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
@@ -76,6 +78,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EOF_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FINAL_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.READONLY_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -87,6 +90,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.ENCODING;
 import static io.ballerina.openapi.generators.GeneratorConstants.ENCODING_STYLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.generators.GeneratorConstants.FORM;
+import static io.ballerina.openapi.generators.GeneratorConstants.MIME;
 import static io.ballerina.openapi.generators.GeneratorConstants.PIPE_DELIMITED;
 import static io.ballerina.openapi.generators.GeneratorConstants.SPACE_DELIMITED;
 import static io.ballerina.openapi.generators.GeneratorConstants.STYLE;
@@ -100,6 +104,7 @@ public class BallerinaUtilGenerator {
     private boolean headersFound = false;
     private boolean queryParamsFound = false;
     private boolean requestBodyEncodingFound = false;
+    private boolean requestBodyMultipartFormDatafound = false;
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
 
     private static final String CREATE_FORM_URLENCODED_REQUEST_BODY = "createFormURLEncodedRequestBody";
@@ -111,7 +116,7 @@ public class BallerinaUtilGenerator {
     private static final String GET_PATH_FOR_QUERY_PARAM = "getPathForQueryParam";
     private static final String GET_MAP_FOR_HEADERS = "getMapForHeaders";
     private static final String GET_SERIALIZED_RECORD_ARRAY = "getSerializedRecordArray";
-
+    private static final String CREATE_MULTIPART_BODY_PARTS = "createBodyParts";
 
     /**
      * Set `queryParamsFound` flag to `true` when at least one query parameter found.
@@ -141,6 +146,16 @@ public class BallerinaUtilGenerator {
     }
 
     /**
+     * Set `setRequestBodyMultipartFormDatafound` flag to `true` when at least one function found with multipart
+     * form-data request body.
+     *
+     * @param flag     Function will be called only in the occasions where value needs to be set to `true`.
+     */
+    public void setRequestBodyMultipartFormDatafound(boolean flag) {
+        this.requestBodyMultipartFormDatafound = flag;
+    }
+
+    /**
      * Generates util file syntax tree.
      *
      * @return  Syntax tree of the util.bal file
@@ -160,9 +175,11 @@ public class BallerinaUtilGenerator {
                     GET_SERIALIZED_RECORD_ARRAY
             ));
         }
-
         if (headersFound) {
             functionNameList.add(GET_MAP_FOR_HEADERS);
+        }
+        if (requestBodyMultipartFormDatafound) {
+            functionNameList.add(CREATE_MULTIPART_BODY_PARTS);
         }
 
         List<ModuleMemberDeclarationNode> memberDeclarationNodes = new ArrayList<>();
@@ -190,11 +207,13 @@ public class BallerinaUtilGenerator {
         }
 
         List<ImportDeclarationNode> imports = new ArrayList<>();
-        if (!(functionNameList.size() == 0 ||
-                (functionNameList.size() == 1 && functionNameList.contains(GET_MAP_FOR_HEADERS)))) {
-            ImportDeclarationNode importForHttp =
-                    GeneratorUtils.getImportDeclarationNode(BALLERINA, URL);
-            imports.add(importForHttp);
+        if (functionNameList.contains(GET_ENCODED_URI)) {
+            ImportDeclarationNode importForUrl = GeneratorUtils.getImportDeclarationNode(BALLERINA, URL);
+            imports.add(importForUrl);
+        }
+        if (requestBodyMultipartFormDatafound) {
+            ImportDeclarationNode importMime =  GeneratorUtils.getImportDeclarationNode(BALLERINA, MIME);
+            imports.add(importMime);
         }
 
         NodeList<ImportDeclarationNode> importsList = createNodeList(imports);
@@ -211,11 +230,14 @@ public class BallerinaUtilGenerator {
      * @param memberDeclarationNodes    {@link ModuleMemberDeclarationNode}
      */
     private void getUtilTypeDeclarationNodes(List<ModuleMemberDeclarationNode> memberDeclarationNodes) {
-        if (requestBodyEncodingFound || queryParamsFound) {
-            memberDeclarationNodes.addAll(Arrays.asList(getEncodingRecord(), getStyleEnum(), getDefaultEncoding()));
-        }
-        if (requestBodyEncodingFound || queryParamsFound || headersFound) {
+        if (requestBodyEncodingFound || queryParamsFound || headersFound || requestBodyMultipartFormDatafound) {
             memberDeclarationNodes.add(getSimpleBasicTypeDefinitionNode());
+        }
+        if (requestBodyEncodingFound || queryParamsFound || requestBodyMultipartFormDatafound) {
+            memberDeclarationNodes.addAll(Arrays.asList(getEncodingRecord(), getStyleEnum()));
+        }
+        if (requestBodyEncodingFound || queryParamsFound) {
+            memberDeclarationNodes.add(getDefaultEncoding());
         }
     }
 
@@ -243,6 +265,7 @@ public class BallerinaUtilGenerator {
         RecordFieldWithDefaultValueNode styleFieldNode = createRecordFieldWithDefaultValueNode(styleMetadataNode,
                 null, createToken(STRING_KEYWORD), createIdentifierToken(STYLE),
                 createToken(EQUAL_TOKEN), styleExpressionNode, createToken(SEMICOLON_TOKEN));
+
         // create `explode` field
         List<Node> explodeDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
                 "Specifies whether arrays and objects should generate as separate fields", false));
@@ -253,17 +276,37 @@ public class BallerinaUtilGenerator {
         RecordFieldWithDefaultValueNode explodeFieldNode = createRecordFieldWithDefaultValueNode(explodeMetadataNode,
                 null, createToken(BOOLEAN_KEYWORD), createIdentifierToken(EXPLODE),
                 createToken(EQUAL_TOKEN), explodeExpressionNode, createToken(SEMICOLON_TOKEN));
+
+        // create `contentType` field
+        List<Node> contentTypeDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
+                "Specifies the custom content type", false));
+        MarkdownDocumentationNode contentTypeDocumentationNode = createMarkdownDocumentationNode(
+                createNodeList(contentTypeDoc));
+        MetadataNode contentTypeMetadataNode = createMetadataNode(contentTypeDocumentationNode, createEmptyNodeList());
+        RecordFieldNode contentTypeFieldNode = createRecordFieldNode(contentTypeMetadataNode,
+                null, createToken(STRING_KEYWORD), createIdentifierToken("contentType"),
+                createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
+
+        // create `contentType` field
+        List<Node> headerDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
+                "Specifies the custom headers", false));
+        MarkdownDocumentationNode headerDocumentationNode = createMarkdownDocumentationNode(createNodeList(headerDoc));
+        MetadataNode headerMetadataNode = createMetadataNode(headerDocumentationNode, createEmptyNodeList());
+        RecordFieldNode headerFieldNode = createRecordFieldNode(headerMetadataNode, null,
+                createIdentifierToken("map<any>"), createIdentifierToken("headers"),
+                createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
+
         // Assemble the TypeDefinitionNode
         List<Node> typeDoc = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(
                 "Represents encoding mechanism details.", false));
         MarkdownDocumentationNode typeDocumentationNode = createMarkdownDocumentationNode(createNodeList(typeDoc));
         MetadataNode typeMetadataNode = createMetadataNode(typeDocumentationNode, createEmptyNodeList());
-        NodeList<Node> fieldNodes = createNodeList(styleFieldNode, explodeFieldNode);
+        NodeList<Node> fieldNodes = createNodeList(styleFieldNode, explodeFieldNode, contentTypeFieldNode,
+                headerFieldNode);
         TypeDescriptorNode typeDescriptorNode = createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                 createToken(OPEN_BRACE_TOKEN), fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
-        return createTypeDefinitionNode(typeMetadataNode, null,
-                createToken(TYPE_KEYWORD), createIdentifierToken(ENCODING),
-                typeDescriptorNode, createToken(SEMICOLON_TOKEN));
+        return createTypeDefinitionNode(typeMetadataNode, null, createToken(TYPE_KEYWORD),
+                createIdentifierToken(ENCODING), typeDescriptorNode, createToken(SEMICOLON_TOKEN));
     }
 
     /**

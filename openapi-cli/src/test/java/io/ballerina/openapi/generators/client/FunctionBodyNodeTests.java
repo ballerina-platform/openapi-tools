@@ -20,7 +20,7 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.BallerinaSchemaGenerator;
+import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -62,7 +62,7 @@ public class FunctionBodyNodeTests {
                 display.getPaths().get(path).readOperationsMap().entrySet();
         Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
         FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(new ArrayList<>(),
-                new ArrayList<>(), display, new BallerinaSchemaGenerator(display),
+                new ArrayList<>(), display, new BallerinaTypesGenerator(display),
                 new BallerinaAuthConfigGenerator(false, false), new BallerinaUtilGenerator());
         FunctionBodyNode bodyNode = functionBodyGenerator.getFunctionBodyNode(path, iterator.next());
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
@@ -75,15 +75,15 @@ public class FunctionBodyNodeTests {
         return new Object[][]{
                 {"diagnostic_files/header_parameter.yaml", "/pets", "{stringpath=string`/pets`;map<any>headerValues=" +
                         "{\"X-Request-ID\":xRequestId,\"X-Request-Client\":xRequestClient};map<string|string[]>" +
-                        "accHeaders=getMapForHeaders(headerValues);http:Response response =checkself.clientEp->get" +
-                        "(path,accHeaders); return response;}"},
+                        "httpHeaders=getMapForHeaders(headerValues);http:Response response =checkself.clientEp->get" +
+                        "(path,httpHeaders); return response;}"},
                 {"diagnostic_files/head_operation.yaml", "/{filesystem}", "{string path=string`/${filesystem}`;" +
                         "map<anydata>queryParam={\"resource\":'resource,\"timeout\":timeout};" +
                         "path = path + check getPathForQueryParam(queryParam);" +
                         "map<any>headerValues={\"x-ms-client-request-id\":xMsClientRequestId," +
                         "\"x-ms-date\":xMsDate,\"x-ms-version\":xMsVersion};map<string|string[]> " +
-                        "accHeaders = getMapForHeaders(headerValues);" +
-                        "http:Responseresponse=check self.clientEp-> head(path, accHeaders);returnresponse;}"},
+                        "httpHeaders = getMapForHeaders(headerValues);" +
+                        "http:Responseresponse=check self.clientEp-> head(path, httpHeaders);returnresponse;}"},
                 {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string  path = string `/pets/${petId}`;" +
                         "http:Response response = check self.clientEp-> delete(path);" +
                         "return response;}"},
@@ -122,6 +122,16 @@ public class FunctionBodyNodeTests {
                         "http:Request request = new;" +
                         "request.setPayload(payload, \"image/png\");" +
                         "http:Response response = check self.clientEp->post(path, request);" +
+                        "return response;}"},
+                {"swagger/multipart_formdata_custom.yaml", "/pets", "{string path = string `/pets`;\n" +
+                        "http:Request request = new;\n" +
+                        "map<Encoding> encodingMap = {\"profileImage\": {contentType: \"image/png\", headers: " +
+                        "{\"X-Custom-Header\": xCustomHeader}}, \"id\":{headers: {\"X-Custom-Header\": " +
+                        "xCustomHeader}}, \"address\": {headers:{\"X-Address-Header\":xAddressHeader}}, \"name\":" +
+                        "{contentType:\"text/plain\"}};\n" +
+                        "mime:Entity[] bodyParts = check createBodyParts(payload, encodingMap);\n" +
+                        "request.setBodyParts(bodyParts);\n" +
+                        "http:Response response = check self.clientEp->post(path, request);\n" +
                         "return response;}"}
         };
     }
