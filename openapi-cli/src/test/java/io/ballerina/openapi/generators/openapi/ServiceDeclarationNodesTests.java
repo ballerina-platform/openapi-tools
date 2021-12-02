@@ -48,85 +48,24 @@ public class ServiceDeclarationNodesTests {
     @Test(description = "Multiple services with same absolute path")
     public void multipleServiceWithSameAbsolute() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services.bal");
-        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
-        try {
-            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("openapi"),
-                    "multiple_service_01.yaml");
-            OpenApiConverter openApiConverter = new OpenApiConverter();
-            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
-
-            if (Files.exists(tempDir.resolve("hello_openapi.yaml")) && findFile(tempDir, "hello-") != null) {
-                String generatedYaml = getStringFromGivenBalFile(tempDir, "hello_openapi.yaml");
-                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
-                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
-                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
-            } else {
-                Assert.fail("Yaml was not generated");
-            }
-        } catch (IOException e) {
-            Assert.fail("Error while generating the service. " + e.getMessage());
-        } finally {
-            deleteDirectory(tempDir);
-            System.gc();
-        }
+        executedMethod(ballerinaFilePath, "multiple_service_01.yaml", "hello_openapi.yaml",
+                "hello-");
     }
 
     @Test(description = "Multiple services with absolute path as '/'. ")
     public void multipleServiceWithOutAbsolute() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services_without_base_path.bal");
-        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
-        try {
-            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("openapi"),
-                    "multiple_service_02.yaml");
-            OpenApiConverter openApiConverter = new OpenApiConverter();
-            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null,
-                    false);
-
-            if (Files.exists(tempDir.resolve("multiple_services_without_base_path_openapi.yaml")) &&
-                    findFile(tempDir, "multiple_services_without_base_path-") != null) {
-                String generatedYaml = getStringFromGivenBalFile(tempDir,
-                        "multiple_services_without_base_path_openapi.yaml");
-                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
-                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
-                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
-            } else {
-                Assert.fail("Yaml was not generated");
-            }
-        } catch (IOException e) {
-            Assert.fail("Error while generating the service. " + e.getMessage());
-        } finally {
-            deleteDirectory(tempDir);
-            System.gc();
-        }
+        executedMethod(ballerinaFilePath, "multiple_service_02.yaml",
+                "multiple_services_without_base_path_openapi.yaml",
+                "multiple_services_without_base_path-");
     }
 
     @Test(description = "Multiple services with no absolute path")
     public void multipleServiceNoBasePath() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services_no_base_path.bal");
-        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
-        try {
-            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("openapi"),
-                    "multiple_service_03.yaml");
-            OpenApiConverter openApiConverter = new OpenApiConverter();
-            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null,
-                    false);
-
-            if (Files.exists(tempDir.resolve("multiple_services_no_base_path_openapi.yaml")) &&
-                    findFile(tempDir, "multiple_services_no_base_path-") != null) {
-                String generatedYaml = getStringFromGivenBalFile(tempDir,
-                        "multiple_services_no_base_path_openapi.yaml");
-                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
-                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
-                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
-            } else {
-                Assert.fail("Yaml was not generated");
-            }
-        } catch (IOException e) {
-            Assert.fail("Error while generating the service. " + e.getMessage());
-        } finally {
-            deleteDirectory(tempDir);
-            System.gc();
-        }
+        executedMethod(ballerinaFilePath, "multiple_service_03.yaml",
+                "multiple_services_no_base_path_openapi.yaml",
+                "multiple_services_no_base_path-");
     }
 
     private static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
@@ -140,5 +79,30 @@ public class ServiceDeclarationNodesTests {
         FilenameFilter fileNameFilter = (dir1, name) -> name.startsWith(dirName);
         String[] fileNames = Objects.requireNonNull(dir.toFile().list(fileNameFilter));
         return fileNames.length > 0 ? fileNames[0] : null;
+    }
+
+    private void executedMethod(Path ballerinaFilePath, String yamlFile, String generatedYamlFile,
+                                 String secondGeneratedFile) throws IOException {
+        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        try {
+            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("openapi"),
+                    yamlFile);
+            OpenApiConverter openApiConverter = new OpenApiConverter();
+            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
+
+            if (Files.exists(tempDir.resolve(generatedYamlFile)) && findFile(tempDir, secondGeneratedFile) != null) {
+                String generatedYaml = getStringFromGivenBalFile(tempDir, generatedYamlFile);
+                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+            } else {
+                Assert.fail("Yaml was not generated");
+            }
+        } catch (IOException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteDirectory(tempDir);
+            System.gc();
+        }
     }
 }
