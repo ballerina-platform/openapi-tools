@@ -16,12 +16,19 @@
 
 package io.ballerina.openapi.converter.utils;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
+import java.util.Objects;
+
+import static io.ballerina.openapi.converter.Constants.JSON_EXTENSION;
+import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
 
 /**
  * Utilities used by ballerina openapi code generator.
@@ -66,5 +73,57 @@ public final class CodegenUtils {
             outStream.write(data, 0, bytesRead);
             bytesRead = inputStream.read(data);
         }
+    }
+
+    /**
+     * This method use for checking the duplicate files.
+     *
+     * @param outPath     output path for file generated
+     * @param openApiName given file name
+     * @return file name with duplicate number tag
+     */
+    public static String resolveContractFileName(Path outPath, String openApiName, Boolean isJson) {
+        if (outPath != null && Files.exists(outPath)) {
+            final File[] listFiles = new File(String.valueOf(outPath)).listFiles();
+            if (listFiles != null) {
+                openApiName = checkAvailabilityOfGivenName(openApiName, listFiles, isJson);
+            }
+        }
+        return openApiName;
+    }
+
+    private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
+        for (File file : listFiles) {
+            if (System.console() != null && file.getName().equals(openApiName)) {
+                String userInput = System.console().readLine("There is already a file named ' " + file.getName() +
+                        "' in the target location. Do you want to overwrite the file? [y/N] ");
+                if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
+                    openApiName = setGeneratedFileName(listFiles, openApiName, isJson);
+                }
+            }
+        }
+        return openApiName;
+    }
+
+    /**
+     * This method for setting the file name for generated file.
+     *
+     * @param listFiles      generated files
+     * @param fileName       File name
+     */
+    private static String setGeneratedFileName(File[] listFiles, String fileName, boolean isJson) {
+        int duplicateCount = 0;
+        for (File listFile : listFiles) {
+            String listFileName = listFile.getName();
+            if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2)
+                    && (listFileName.split("\\.")[0]
+                    .equals(fileName.split("\\.")[0]))) {
+                duplicateCount++;
+            }
+        }
+        if (isJson) {
+            return fileName.split("\\.")[0] + "." + duplicateCount + JSON_EXTENSION;
+        }
+        return fileName.split("\\.")[0] + "." + duplicateCount + YAML_EXTENSION;
     }
 }

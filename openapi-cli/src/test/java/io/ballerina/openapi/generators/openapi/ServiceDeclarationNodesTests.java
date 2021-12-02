@@ -30,11 +30,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.ballerina.openapi.generators.openapi.TestUtils.compareWithGeneratedFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.deleteDirectory;
 
 /**
- * This class contain the service nodes related special scenarios.
+ * This test class contains the service nodes related special scenarios.
  */
 public class ServiceDeclarationNodesTests {
     private static final Path RES_DIR =
@@ -72,7 +71,7 @@ public class ServiceDeclarationNodesTests {
         }
     }
 
-    @Test(description = "Multiple services with same absolute path")
+    @Test(description = "Multiple services with absolute path as '/'. ")
     public void multipleServiceWithOutAbsolute() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services_without_base_path.bal");
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
@@ -101,7 +100,7 @@ public class ServiceDeclarationNodesTests {
         }
     }
 
-    @Test(description = "Multiple services with same absolute path")
+    @Test(description = "Multiple services with no absolute path")
     public void multipleServiceNoBasePath() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services_no_base_path.bal");
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
@@ -112,10 +111,10 @@ public class ServiceDeclarationNodesTests {
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null,
                     false);
 
-            if (Files.exists(tempDir.resolve("multiple_services_without_base_path_openapi.yaml")) &&
-                    findFile(tempDir, "multiple_services_without_base_path-") != null) {
+            if (Files.exists(tempDir.resolve("multiple_services_no_base_path_openapi.yaml")) &&
+                    findFile(tempDir, "multiple_services_no_base_path-") != null) {
                 String generatedYaml = getStringFromGivenBalFile(tempDir,
-                        "multiple_services_without_base_path_openapi.yaml");
+                        "multiple_services_no_base_path_openapi.yaml");
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
                 expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
@@ -134,7 +133,6 @@ public class ServiceDeclarationNodesTests {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
         expectedServiceLines.close();
-        System.out.println(expectedServiceContent);
         return expectedServiceContent;
     }
 

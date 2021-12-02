@@ -22,10 +22,6 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.TypeDescKind;
-import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
-import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
@@ -41,7 +37,6 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
@@ -56,7 +51,6 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,16 +64,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.converter.Constants.BALLERINA;
 import static io.ballerina.openapi.converter.Constants.CONTRACT;
-import static io.ballerina.openapi.converter.Constants.HTTP;
-import static io.ballerina.openapi.converter.Constants.JSON_EXTENSION;
+import static io.ballerina.openapi.converter.Constants.HYPHEN;
 import static io.ballerina.openapi.converter.Constants.OPENAPI_ANNOTATION;
 import static io.ballerina.openapi.converter.Constants.SLASH;
 import static io.ballerina.openapi.converter.Constants.SPECIAL_CHAR_REGEX;
 import static io.ballerina.openapi.converter.Constants.TITLE;
 import static io.ballerina.openapi.converter.Constants.VERSION;
-import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getOpenApiFileName;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.isHttpService;
 
 /**
  * The ServiceToOpenAPIConverterUtils provide API for convert ballerina service into openAPI specification.
@@ -95,14 +88,12 @@ public class ServiceToOpenAPIConverterUtils {
      * @param semanticModel - Semantic model related to ballerina module
      * @param serviceName   - Service name that need to generate the openAPI specification
      * @param needJson      - Flag for enabling the generated file format with json or YAML
-     * @param outPath       - Out put path to check given path has same named file
      * @param inputPath     - Input file path for resolve the annotation details
      * @return - {@link java.util.Map} with openAPI definitions for service nodes
      */
     public static List<OASResult> generateOAS3Definition(SyntaxTree syntaxTree, SemanticModel semanticModel,
-                                                         String serviceName, Boolean needJson, Path outPath,
+                                                         String serviceName, Boolean needJson,
                                                          Path inputPath) {
-
         List<ListenerDeclarationNode> endpoints = new ArrayList<>();
         Map<String, ServiceDeclarationNode> servicesToGenerate = new HashMap<>();
         List<String> availableService = new ArrayList<>();
@@ -124,14 +115,14 @@ public class ServiceToOpenAPIConverterUtils {
                         null, serviceName, availableService.toString());
                 diagnostics.add(error);
             }
-            // Generating for the services
+            // Generating openapi specification for selected services
             for (Map.Entry<String, ServiceDeclarationNode> serviceNode : servicesToGenerate.entrySet()) {
                 String openApiName = getOpenApiFileName(syntaxTree.filePath(), serviceNode.getKey(), needJson);
-                OASResult oasDefinition = generateOAS(serviceNode.getValue(), endpoints, semanticModel, openApiName, inputPath);
+                OASResult oasDefinition = generateOAS(serviceNode.getValue(), endpoints, semanticModel, openApiName,
+                        inputPath);
                 oasDefinition.setServiceName(openApiName);
                 outputs.add(oasDefinition);
             }
-
         }
         if (!diagnostics.isEmpty()) {
             OASResult exceptions = new OASResult(null, diagnostics);
@@ -161,53 +152,49 @@ public class ServiceToOpenAPIConverterUtils {
                 endpoints.add(listener);
             }
             if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                /**
-                 * Here check the service is related to the http module by checking listener type that attached to
-                 * service endpoints.
-                 */
                 ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
-                Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
-                if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
-                    ServiceDeclarationSymbol serviceNodeSymbol = (ServiceDeclarationSymbol) serviceSymbol.get();
-                    List<TypeSymbol> listenerTypes = (serviceNodeSymbol).listenerTypes();
-                    for (TypeSymbol listenerType : listenerTypes) {
-                        if (isHttpListener(listenerType)) {
-                            String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
-                            /**
-                             * `String updateServiceName` used to track the service name for service file contains
-                             * multiple service node.
-                             * ex;
-                             * <pre>
-                             *     listener http:Listener ep1 = new (443, config = {host: "pets-tore.swagger.io"});
-                             *     service /hello on ep1 {
-                             *         resource function post hi(@http:Payload json payload) {
-                             *        }
-                             *     }
-                             *     service /hello on new http:Listener(9090) {
-                             *         resource function get hi() {
-                             *         }
-                             *     }
-                             * </pre>
-                             * Using absolute path we generate file name, therefore having same name may overwrite
-                             * the file, due to this suppose to use hashcode as identity factor for the file name.
-                             *
-                             * Generated file name for above example -> hello_openapi.yaml, hello_45673_openapi
-                             * .yaml
-                             */
-                            String updateServiceName = service;
-                            if (servicesToGenerate.containsKey(service)) {
-                                updateServiceName = service + "-" + serviceNodeSymbol.hashCode();
-                            }
-                            if (serviceName != null) {
-                                // Filtering by service name
-                                availableService.add(service);
-                                if (serviceName.equals(service)) {
-                                    servicesToGenerate.put(updateServiceName, serviceNode);
-                                }
-                            } else {
-                                // To generate for all services
+                /*
+                  Here check the service is related to the http module by checking listener type that attached to
+                  service endpoints.
+                 */
+                if (isHttpService(serviceNode, semanticModel)) {
+                    Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
+                    if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
+                        String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
+                        /*
+                          `String updateServiceName` used to track the service name for service file contains
+                          multiple service node.
+                          ex;
+                          <pre>
+                              listener http:Listener ep1 = new (443, config = {host: "pets-tore.swagger.io"});
+                              service /hello on ep1 {
+                                  resource function post hi(@http:Payload json payload) {
+                                 }
+                              }
+                              service /hello on new http:Listener(9090) {
+                                  resource function get hi() {
+                                  }
+                              }
+                          </pre>
+                          Using absolute path we generate file name, therefore having same name may overwrite
+                          the file, due to this suppose to use hashcode as identity factor for the file name.
+
+                          Generated file name for above example -> hello_openapi.yaml, hello_45673_openapi
+                          .yaml
+                         */
+                        String updateServiceName = service;
+                        if (servicesToGenerate.containsKey(service)) {
+                            updateServiceName = service + HYPHEN + serviceSymbol.get().hashCode();
+                        }
+                        if (serviceName != null) {
+                            // Filtering by service name
+                            availableService.add(service);
+                            if (serviceName.equals(service)) {
                                 servicesToGenerate.put(updateServiceName, serviceNode);
                             }
+                        } else {
+                            // To generate for all services
+                            servicesToGenerate.put(updateServiceName, serviceNode);
                         }
                     }
                 }
@@ -260,7 +247,7 @@ public class ServiceToOpenAPIConverterUtils {
             if (openapi.getPaths() == null) {
                 // Take base path of service
                 OpenAPIServiceMapper openAPIServiceMapper = new OpenAPIServiceMapper(semanticModel);
-                // 02. Filter and set the ServerURLs according to endpoints. Complete the servers section in OAS
+                // 02. Filter and set the ServerURLs according to endpoints. Complete the server section in OAS
                 openapi = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServers(openapi, endpoints, serviceDefinition);
                 // 03. Filter path and component sections in OAS.
                 // Generate openApi string for the mentioned service name.
@@ -275,35 +262,6 @@ public class ServiceToOpenAPIConverterUtils {
     }
 
     /**
-     * Generate file name with service basePath.
-     */
-    private static String getOpenApiFileName(String servicePath, String serviceName, boolean isJson) {
-
-        String cleanedServiceName;
-        if (serviceName.isBlank() || serviceName.equals(SLASH) || serviceName.startsWith(SLASH)) {
-            cleanedServiceName = FilenameUtils.removeExtension(servicePath);
-            String[] fileName = serviceName.split(SLASH);
-            // This condition is to handle `service on ep1 {} ` multiple scenarios
-            if (fileName.length > 0 && !serviceName.isBlank()) {
-                cleanedServiceName = FilenameUtils.removeExtension(servicePath) + fileName[1];
-            } else {
-                cleanedServiceName = FilenameUtils.removeExtension(servicePath);
-            }
-        } else {
-            // Remove starting path separate if exists
-            if (serviceName.startsWith(SLASH)) {
-                serviceName = serviceName.substring(1);
-            }
-            // Replace rest of the path separators with hyphen
-            cleanedServiceName = serviceName.replaceAll(SLASH, "_");
-        }
-        if (isJson) {
-            return cleanedServiceName + Constants.OPENAPI_SUFFIX + JSON_EXTENSION;
-        }
-        return cleanedServiceName + Constants.OPENAPI_SUFFIX + YAML_EXTENSION;
-    }
-
-    /**
      * This function is for completing the OpenAPI info section with package details and annotation details.
      *
      * @param serviceNode   Service node for relevant service.
@@ -314,17 +272,17 @@ public class ServiceToOpenAPIConverterUtils {
      */
     private static OASResult fillOpenAPIInfoSection(ServiceDeclarationNode serviceNode, SemanticModel semanticModel,
                                                     String openapiFileName, Path ballerinaFilePath) {
-        /**
-         * First check the given service node has metadata with annotation details with `openapi:serviceInfo`,
-         * if it is there, then {@link #parseServiceInfoAnnotationAttachmentDetails(List, AnnotationNode, Path)}
-         * function extracts the annotation details and store details in {@code OpenAPIInfo} model using
-         * {@link #updateOpenAPIInfoModel(SeparatedNodeList)} function. If the annotation contains the valid contract
-         * path then we complete given OpenAPI specification using annotation details. if not we create new OpenAPI
-         * specification and fill openAPI info sections.
-         * If the annotation is not in the given service, then we filled the OpenAPI specification info section using
-         * package details and title with service base path.
-         * After completing these two process we normalized the OpenAPI specification by checking all the info
-         * details are completed, if in case not completed, we complete empty fields with default values.
+        /*
+          First check the given service node has metadata with annotation details with `openapi:serviceInfo`,
+          if it is there, then {@link #parseServiceInfoAnnotationAttachmentDetails(List, AnnotationNode, Path)}
+          function extracts the annotation details and store details in {@code OpenAPIInfo} model using
+          {@link #updateOpenAPIInfoModel(SeparatedNodeList)} function. If the annotation contains the valid contract
+          path then we complete given OpenAPI specification using annotation details. if not we create new OpenAPI
+          specification and fill openAPI info sections.
+          If the annotation is not in the given service, then we filled the OpenAPI specification info section using
+          package details and title with service base path.
+          After completing these two process we normalized the OpenAPI specification by checking all the info
+          details are completed, if in case not completed, we complete empty fields with default values.
          */
         Optional<MetadataNode> metadata = serviceNode.metadata();
         List<OpenAPIConverterDiagnostic> diagnostics = new ArrayList<>();
@@ -348,7 +306,7 @@ public class ServiceToOpenAPIConverterUtils {
                     }
                 }
             }
-        } else if (currentServiceName.equals(SLASH)) {
+        } else if (currentServiceName.equals(SLASH) || currentServiceName.isBlank()) {
             openAPI.setInfo(new Info().version(version).title(normalizeTitle(openapiFileName)));
         } else {
             openAPI.setInfo(new Info().version(version).title(normalizeTitle(currentServiceName)));
@@ -437,9 +395,9 @@ public class ServiceToOpenAPIConverterUtils {
            SeparatedNodeList<MappingFieldNode> fields = content.get().fields();
            if (!fields.isEmpty()) {
                OpenAPIInfo openAPIInfo = updateOpenAPIInfoModel(fields);
-               /**
-                * If in case ballerina file path is getting null, then openAPI specification will be generated for given
-                * services.
+               /*
+                 If in case ballerina file path is getting null, then openAPI specification will be generated for given
+                 services.
                 */
                if (openAPIInfo.getContractPath().isPresent() && ballerinaFilePath != null) {
                    return updateExistingContractOpenAPI(diagnostics, location, openAPIInfo, ballerinaFilePath);
@@ -547,27 +505,5 @@ public class ServiceToOpenAPIConverterUtils {
             diagnostics.addAll(oasResult.getDiagnostics());
         }
         return new OASResult(openAPI, diagnostics);
-    }
-
-    private static boolean isHttpListener(TypeSymbol listenerType) {
-        if (listenerType.typeKind() == TypeDescKind.UNION) {
-            return ((UnionTypeSymbol) listenerType).memberTypeDescriptors().stream()
-                    .filter(typeDescriptor -> typeDescriptor instanceof TypeReferenceTypeSymbol)
-                    .map(typeReferenceTypeSymbol -> (TypeReferenceTypeSymbol) typeReferenceTypeSymbol)
-                    .anyMatch(typeReferenceTypeSymbol -> isHttpModule(typeReferenceTypeSymbol.getModule().get()));
-        }
-
-        if (listenerType.typeKind() == TypeDescKind.TYPE_REFERENCE) {
-            return isHttpModule(((TypeReferenceTypeSymbol) listenerType).typeDescriptor().getModule().get());
-        }
-        return false;
-    }
-
-    private static boolean isHttpModule(ModuleSymbol moduleSymbol) {
-        if (moduleSymbol.getName().isPresent()) {
-            return HTTP.equals(moduleSymbol.getName().get()) && BALLERINA.equals(moduleSymbol.id().orgName());
-        } else {
-            return false;
-        }
     }
 }
