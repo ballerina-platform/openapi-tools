@@ -151,6 +151,7 @@ public class GeneratorConstants {
     public static final String IMAGE_PNG = "image/png";
     public static final String MIME = "mime";
     public static final String HTTP_HEADERS = "httpHeaders";
+    public static final String ERROR = "error";
 
     // auth related constants
     public static final String API_KEY = "apikey";
@@ -296,4 +297,5 @@ public class GeneratorConstants {
     // OS specific line separator
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String DOUBLE_LINE_SEPARATOR = LINE_SEPARATOR + LINE_SEPARATOR;
+    public static final String DEFAULT_RETURN = HTTP_RESPONSE + "|" + ERROR;
 }
