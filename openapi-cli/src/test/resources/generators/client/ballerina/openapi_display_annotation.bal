@@ -36,10 +36,10 @@ public isolated client class Client {
     # + return - Successful response
     @display {label: "Current weather"}
     remote isolated function currentWeatherData(@display {label: "City name"} string? q = (), string? id = (), string? lat = (), string? lon = (), string? zip = (), string units = "imperial", string lang = "en", string mode = "json") returns CurrentWeatherDataResponse|error {
-        string  path = string `/weather`;
+        string resourcePath = string `/weather`;
         map<anydata> queryParam = {"q": q, "id": id, "lat": lat, "lon": lon, "zip": zip, "units": units, "lang": lang, "mode": mode, "appid": self.apiKeyConfig.appid};
-        path = path + check getPathForQueryParam(queryParam);
-        CurrentWeatherDataResponse response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        CurrentWeatherDataResponse response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }

@@ -18,11 +18,11 @@ public isolated client class Client {
     # + payload - A JSON object containing pet information
     # + return - OK
     remote isolated function postXMLUser(Path01Body payload) returns http:Response|error {
-        string  path = string `/path01`;
+        string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp->post(path, request);
+        http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }

@@ -18,8 +18,8 @@ public isolated client class Client {
     # + name - test
     # + return - Ok
     remote isolated function pathParameter(int 'version, string name) returns string|error {
-        string  path = string `/v1/${'version}/v2/${name}`;
-        string response = check self.clientEp-> get(path);
+        string resourcePath = string `/v1/${'version}/v2/${name}`;
+        string response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }

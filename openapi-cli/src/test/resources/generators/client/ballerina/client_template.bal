@@ -16,15 +16,15 @@ public isolated client class Client {
         return;
     }
     remote isolated function listPets(int? 'limit) returns Pets|error {
-        string  path = string `/pets`;
+        string resourcePath = string `/pets`;
         map<anydata> queryParam = {'limit: 'limit};
-        path = path + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp->get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        Pets response = check self.clientEp->get(resourcePath);
         return response;
     }
     remote isolated function showPetById(string petId) returns Pets|error {
-        string  path = string `/pets/${petId}`;
-        Pets response = check self.clientEp->get(path);
+        string resourcePath = string `/pets/${petId}`;
+        Pets response = check self.clientEp->get(resourcePath);
         return response;
     }
 }

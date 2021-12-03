@@ -28,10 +28,10 @@ public isolated client class Client {
     # + longitude - Longitude component of location.
     # + return - An array of products
     remote isolated function getProducts(float latitude, float longitude) returns Product[]|error {
-        string  path = string `/products`;
+        string resourcePath = string `/products`;
         map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, "server_token": self.apiKeyConfig.serverToken};
-        path = path + check getPathForQueryParam(queryParam);
-        Product[] response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        Product[] response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # Price Estimates
@@ -42,10 +42,10 @@ public isolated client class Client {
     # + endLongitude - Longitude component of end location.
     # + return - An array of price estimates by product
     remote isolated function getPrice(float startLatitude, float startLongitude, float endLatitude, float endLongitude) returns PriceEstimate[]|error {
-        string  path = string `/estimates/price`;
+        string resourcePath = string `/estimates/price`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude};
-        path = path + check getPathForQueryParam(queryParam);
-        PriceEstimate[] response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        PriceEstimate[] response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # Time Estimates
@@ -56,18 +56,18 @@ public isolated client class Client {
     # + productId - Unique identifier representing a specific product for a given latitude & longitude.
     # + return - An array of products
     remote isolated function getTimeEstimates(float startLatitude, float startLongitude, string? customerUuid = (), string? productId = ()) returns Product[]|error {
-        string  path = string `/estimates/time`;
+        string resourcePath = string `/estimates/time`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId};
-        path = path + check getPathForQueryParam(queryParam);
-        Product[] response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        Product[] response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # User Profile
     #
     # + return - Profile information for a user
     remote isolated function getUserProfile() returns Profile|error {
-        string  path = string `/me`;
-        Profile response = check self.clientEp-> get(path);
+        string resourcePath = string `/me`;
+        Profile response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # User Activity
@@ -76,10 +76,10 @@ public isolated client class Client {
     # + 'limit - Number of items to retrieve. Default is 5, maximum is 100.
     # + return - History information for the given user
     remote isolated function getUserActivity(int? offset = (), int? 'limit = ()) returns Activities|error {
-        string  path = string `/history`;
+        string resourcePath = string `/history`;
         map<anydata> queryParam = {"offset": offset, "limit": 'limit};
-        path = path + check getPathForQueryParam(queryParam);
-        Activities response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        Activities response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }
