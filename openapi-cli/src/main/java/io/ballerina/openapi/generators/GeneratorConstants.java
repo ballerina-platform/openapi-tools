@@ -151,6 +151,7 @@ public class GeneratorConstants {
     public static final String IMAGE_PNG = "image/png";
     public static final String MIME = "mime";
     public static final String HTTP_HEADERS = "httpHeaders";
+    public static final String ARRAY = "array";
     public static final String ERROR = "error";
 
     // auth related constants
