@@ -11,7 +11,14 @@ public type ApiKeysConfig record {|
 # Provides Auth configurations needed when communicating with a remote HTTP endpoint.
 public type AuthConfig record {|
     # Auth Configuration
-    http:OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig|ApiKeysConfig auth;
+    OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig|ApiKeysConfig auth;
+|};
+
+# OAuth2 Client Credintials Grant Configs
+public type OAuth2ClientCredentialsGrantConfig record {|
+    *http:OAuth2ClientCredentialsGrantConfig;
+    # Token URL
+    string tokenUrl = "https://dev.to/oauth/token";
 |};
 
 public isolated client class Client {
@@ -27,7 +34,7 @@ public isolated client class Client {
         if authConfig.auth is ApiKeysConfig {
             self.apiKeyConfig = (<ApiKeysConfig>authConfig.auth).cloneReadOnly();
         } else {
-            clientConfig.auth = <http:OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig>authConfig.auth;
+            clientConfig.auth = <OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig>authConfig.auth;
             self.apiKeyConfig = ();
         }
         http:Client httpEp = check new (serviceUrl, clientConfig);

@@ -80,6 +80,11 @@ public class TestConstants {
             "public type ClientConfig record {|\n" +
             "   # Configurations related to client authentication\n" +
             "   http:OAuth2ClientCredentialsGrantConfig auth;\n" + commonClientConfigurationFields;
+    public static final String OAUTH2_CUSTOM_CLIENT_CRED_CONFIG_REC = "" +
+            clientConfigRecordDoc +
+            "public type ClientConfig record {|\n" +
+            "   # Configurations related to client authentication\n" +
+            "   OAuth2ClientCredentialsGrantConfig auth;\n" + commonClientConfigurationFields;
     public static final String OAUTH2_MULTI_FLOWS_CONFIG_REC = "" +
             clientConfigRecordDoc +
             "public type ClientConfig record {|\n" +
