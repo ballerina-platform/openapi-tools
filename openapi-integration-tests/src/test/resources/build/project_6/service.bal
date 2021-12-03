@@ -2,11 +2,13 @@ import ballerina/grpc;
 
 listener grpc:Listener ep = new (9090);
 
-@grpc:ServiceDescriptor {
-    descriptor: "ROOT_DESCRIPTOR_GRPC_UNARY"
-}
-service "" on ep {
-    remote function helloWorld(string value) returns string|error {
-        return "Hello Client";
+@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_HEALTH, descMap: getDescriptorMapHealth()}
+service "HealthServer" on ep {
+
+    remote function registerPatient(Patient value) returns boolean|error? {
+        return;
+    }
+    remote function getPatientInfo(string value) returns Patient|error? {
+        return;
     }
 }

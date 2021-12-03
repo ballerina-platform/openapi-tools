@@ -58,6 +58,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         SyntaxTree syntaxTree = context.syntaxTree();
         Package currentPackage = context.currentPackage();
         Project project = currentPackage.project();
+        //Used build option exportOpenapi() to enable plugin at the build time.
         BuildOptions buildOptions = project.buildOptions();
         if (buildOptions.exportOpenapi()) {
             // Take output path to target directory location in package.
@@ -77,28 +78,33 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             }
             List<Diagnostic> diagnostics = new ArrayList<>();
             if (!openAPIDefinitions.isEmpty()) {
-                for (OASResult oasResult: openAPIDefinitions) {
-                    if (oasResult.getYaml().isPresent()) {
-                        try {
-                            String fileName = checkDuplicateFiles(outPath, oasResult.getServiceName(), false);
-                            writeFile(outPath.resolve(fileName), oasResult.getYaml().get());
-                        } catch (IOException e) {
-                            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
-                            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
-                                    error.getDescription(), null, e.toString());
-                            diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
-                        }
-                    }
-                    if (!oasResult.getDiagnostics().isEmpty()) {
-                        for (OpenAPIConverterDiagnostic diagnostic: oasResult.getDiagnostics()) {
-                            diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
-                        }
-                    }
-                }
+                extractOpenAPIYamlFromOutputs(outPath, openAPIDefinitions, diagnostics);
             }
             if (!diagnostics.isEmpty()) {
                 for (Diagnostic diagnostic : diagnostics) {
                     context.reportDiagnostic(diagnostic);
+                }
+            }
+        }
+    }
+
+    private void extractOpenAPIYamlFromOutputs(Path outPath, List<OASResult> openAPIDefinitions,
+                                               List<Diagnostic> diagnostics) {
+        for (OASResult oasResult: openAPIDefinitions) {
+            if (oasResult.getYaml().isPresent()) {
+                try {
+                    String fileName = checkDuplicateFiles(outPath, oasResult.getServiceName(), false);
+                    writeFile(outPath.resolve(fileName), oasResult.getYaml().get());
+                } catch (IOException e) {
+                    DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
+                    ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
+                            error.getDescription(), null, e.toString());
+                    diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
+                }
+            }
+            if (!oasResult.getDiagnostics().isEmpty()) {
+                for (OpenAPIConverterDiagnostic diagnostic: oasResult.getDiagnostics()) {
+                    diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
                 }
             }
         }
