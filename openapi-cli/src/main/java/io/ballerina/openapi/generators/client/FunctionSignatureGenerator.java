@@ -86,9 +86,12 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.openapi.ErrorMessages.invalidPathParamType;
 import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
+import static io.ballerina.openapi.generators.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.generators.GeneratorConstants.BINARY;
 import static io.ballerina.openapi.generators.GeneratorConstants.BYTE;
 import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.generators.GeneratorConstants.OBJECT;
+import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorConstants.VENDOR_SPECIFIC_TYPE;
@@ -466,36 +469,40 @@ public class FunctionSignatureGenerator {
             Schema schema = next.getValue().getSchema();
             String paramType = "";
             //Take payload type
-            if (next.getKey().equals(ANY_TYPE) || next.getKey().contains(VENDOR_SPECIFIC_TYPE)) {
-                paramType = SyntaxKind.BYTE_KEYWORD.stringValue() + "[]";
-            } else if (schema.get$ref() != null) {
-                paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
-            } else if (schema.getType() != null && !schema.getType().equals("array") && !schema.getType().equals(
-                    "object")) {
-                String typeOfPayload = schema.getType().trim();
-                if (typeOfPayload.equals(STRING) && schema.getFormat() != null
-                        && (schema.getFormat().equals(BINARY) || schema.getFormat().equals(BYTE))) {
-                    paramType = convertOpenAPITypeToBallerina(schema.getFormat());
-                } else {
-                    paramType = convertOpenAPITypeToBallerina(typeOfPayload);
+            if (schema != null) {
+                if (next.getKey().equals(ANY_TYPE) || next.getKey().contains(VENDOR_SPECIFIC_TYPE)) {
+                    paramType = SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
+                } else if (schema.get$ref() != null) {
+                    paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
+                } else if (schema.getType() != null && !schema.getType().equals(ARRAY) && !schema.getType().equals(
+                        OBJECT)) {
+                    String typeOfPayload = schema.getType().trim();
+                    if (typeOfPayload.equals(STRING) && schema.getFormat() != null
+                            && (schema.getFormat().equals(BINARY) || schema.getFormat().equals(BYTE))) {
+                        paramType = convertOpenAPITypeToBallerina(schema.getFormat());
+                    } else {
+                        paramType = convertOpenAPITypeToBallerina(typeOfPayload);
+                    }
+                } else if (schema instanceof ArraySchema) {
+                    //TODO: handle nested array - this is impossible to handle
+                    ArraySchema arraySchema = (ArraySchema) schema;
+                    paramType = getRequestBodyParameterForArraySchema(operationId, next, arraySchema);
+                } else { // composed and object schemas are handled by the flatten
+                    paramType = GeneratorUtils.getBallerinaMediaType(next.getKey());
                 }
-            } else if (schema instanceof ArraySchema) {
-                //TODO: handle nested array - this is impossible to handle
-                ArraySchema arraySchema = (ArraySchema) schema;
-                paramType = getRequestBodyParameterForArraySchema(operationId, next, arraySchema);
-            } else { // composed and object schemas are handled by the flatten
+            } else {
                 paramType = GeneratorUtils.getBallerinaMediaType(next.getKey());
             }
             if (!paramType.isBlank()) {
                 List<AnnotationNode> annotationNodes  = new ArrayList<>();
                 DocCommentsGenerator.extractDisplayAnnotation(requestBody.getExtensions(), annotationNodes);
                 SimpleNameReferenceNode typeName = createSimpleNameReferenceNode(createIdentifierToken(paramType));
-                IdentifierToken paramName = createIdentifierToken("payload");
+                IdentifierToken paramName = createIdentifierToken(PAYLOAD);
                 RequiredParameterNode payload = createRequiredParameterNode(
                         createNodeList(annotationNodes), typeName, paramName);
                 if (requestBody.getDescription() != null) {
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGenerator.createAPIParamDoc(escapeIdentifier("payload"),
+                            DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(PAYLOAD),
                                     requestBody.getDescription().split("\n")[0]);
                     requestBodyDoc.add(paramAPIDoc);
                 }
