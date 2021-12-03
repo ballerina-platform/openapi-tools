@@ -18,35 +18,35 @@ public isolated client class Client {
     #
     # + return - OK
     remote isolated function updateXMLUser(Path01Body payload) returns http:Response|error {
-        string path = string `/path01`;
+        string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        http:Response response = check self.clientEp->put(path, request);
+        http:Response response = check self.clientEp->put(resourcePath, request);
         return response;
     }
     # Request Body has nested allOf.
     #
     # + return - OK
     remote isolated function postXMLUser(Path01Body1 payload) returns http:Response|error {
-        string path = string `/path01`;
+        string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp->post(path, request);
+        http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
     }
     # Request Body has Array type AllOf.
     #
     # + return - OK
     remote isolated function postXMLUserInLineArray(CompoundArrayItemPostXMLUserInLineArrayRequest payload) returns http:Response|error {
-        string path = string `/path02`;
+        string resourcePath = string `/path02`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        http:Response response = check self.clientEp->post(path, request);
+        http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }

@@ -32,10 +32,10 @@ public isolated client class Client {
     # + return - Successful response
     @display {label: "Weather Forecast"}
     remote isolated function getWeatherForecast(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string? exclude = (), @display {label: "Units"} int? units = ()) returns WeatherForecast|error {
-        string  path = string `/onecall`;
+        string resourcePath = string `/onecall`;
         map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, "appid": self.apiKeyConfig.appid};
-        path = path + check getPathForQueryParam(queryParam);
-        WeatherForecast response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        WeatherForecast response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }

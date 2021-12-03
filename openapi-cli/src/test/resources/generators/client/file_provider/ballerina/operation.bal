@@ -17,8 +17,8 @@ public isolated client class Client {
     #
     #+return-Default response with array of strings
     remote isolated function getCountryList() returns CountryInfo[]|error {
-        string  path = string `/api/v1/countries/list/`;
-        CountryInfo[] response = check self.clientEp-> get(path);
+        string resourcePath = string `/api/v1/countries/list/`;
+        CountryInfo[] response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }

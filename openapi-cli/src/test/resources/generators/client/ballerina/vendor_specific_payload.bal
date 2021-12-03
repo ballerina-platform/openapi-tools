@@ -16,10 +16,10 @@ public isolated client class Client {
     #
     # + return - Null response
     remote isolated function createPet(byte[] payload) returns http:Response|error {
-        string path = string `/pets`;
+        string resourcePath = string `/pets`;
         http:Request request = new;
         request.setPayload(payload, "application/vnd.ms-excel");
-        http:Response response = check self.clientEp->post(path, request);
+        http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }

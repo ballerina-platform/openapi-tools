@@ -17,11 +17,11 @@ public isolated client class Client {
     #
     # + return - OK
     remote isolated function createUser(User payload) returns http:Response|error {
-        string  path = string `/requestBody`;
+        string resourcePath = string `/requestBody`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp-> post(path, request);
+        http:Response response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
 }

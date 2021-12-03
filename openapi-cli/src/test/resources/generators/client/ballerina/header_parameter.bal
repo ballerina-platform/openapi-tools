@@ -27,10 +27,10 @@ public isolated client class Client {
     # + xRequestPet - Tests header 03
     # + return - Expected response to a valid request
     remote isolated function showPetById(string xRequestId, string[] xRequestClient, Pet[] xRequestPet) returns http:Response|error {
-        string  path = string `/pets`;
+        string resourcePath = string `/pets`;
         map<any> headerValues = {"X-Request-ID": xRequestId, "X-Request-Client": xRequestClient, "X-Request-Pet": xRequestPet, "X-API-KEY": self.apiKeyConfig.xApiKey};
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Response response = check self.clientEp-> get(path, httpHeaders);
+        http:Response response = check self.clientEp-> get(resourcePath, httpHeaders);
         return response;
     }
 }
