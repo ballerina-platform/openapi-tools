@@ -227,19 +227,12 @@ public class TypeGeneratorUtils {
     public static String getUnionType(List<Schema> schemas) throws BallerinaOpenApiException {
         StringBuilder unionType = new StringBuilder();
         for (Schema schema: schemas) {
-            TypeGenerator typeGenerator = getTypeGenerator(schema);
-            if (!(typeGenerator instanceof RecordTypeGenerator || typeGenerator instanceof AllOfRecordTypeGenerator)) {
-                String typeName = getTypeGenerator(schema).generateTypeDescriptorNode().toString();
-                if (typeName.endsWith(NILLABLE) && GeneratorMetaData.getInstance().isNullable()) {
-                    typeName = typeName.substring(0, typeName.length() - 1);
-                }
-                unionType.append(typeName);
-                unionType.append(PIPE_TOKEN.stringValue());
-            } else {
-                // TODO: Needs to improve the error message
-                throw new BallerinaOpenApiException(
-                        "Unsupported object or composed schema is given inside a oneOf or anyOf schema.");
+            String typeName = getTypeGenerator(schema).generateTypeDescriptorNode().toString().trim();
+            if (typeName.endsWith(NILLABLE) && GeneratorMetaData.getInstance().isNullable()) {
+                typeName = typeName.substring(0, typeName.length() - 1);
             }
+            unionType.append(typeName);
+            unionType.append(PIPE_TOKEN.stringValue());
         }
         unionType.deleteCharAt(unionType.length() - 1);
         return unionType.toString();

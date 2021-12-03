@@ -16,8 +16,8 @@ public isolated client class Client {
     #
     # + return - The status information is returned for the requested file upload.
     remote isolated function getPet() returns PetDetails02|PetDetails|error? {
-        string path = string `/pets`;
-        PetDetails02|PetDetails? response = check self.clientEp->get(path);
+        string resourcePath = string `/pets`;
+        PetDetails02|PetDetails? response = check self.clientEp->get(resourcePath);
         return response;
     }
 }
