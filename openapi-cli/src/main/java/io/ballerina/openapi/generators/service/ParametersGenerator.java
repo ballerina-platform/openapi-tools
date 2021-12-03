@@ -52,6 +52,9 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescr
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
+import static io.ballerina.openapi.generators.GeneratorConstants.ARRAY;
+import static io.ballerina.openapi.generators.GeneratorConstants.HEADER;
+import static io.ballerina.openapi.generators.GeneratorConstants.QUERY;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
@@ -80,13 +83,13 @@ public class ParametersGenerator {
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
             for (Parameter parameter: parameters) {
-                if (parameter.getIn().trim().equals("header")) {
+                if (parameter.getIn().trim().equals(HEADER)) {
                     RequiredParameterNode param = handleHeader(parameter);
                     params.add(param);
                     params.add(comma);
-                } else if (parameter.getIn().trim().equals("query")) {
+                } else if (parameter.getIn().trim().equals(QUERY)) {
                     // type  BasicType boolean|int|float|decimal|string ;
-                    // public type () |BasicType|BasicType [];
+                    // public type () |BasicType|BasicType []| map<json>;
                     Node param = createNodeForQueryParam(parameter);
                     params.add(param);
                     params.add(comma);
@@ -182,7 +185,7 @@ public class ParametersGenerator {
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
-            if (!(items instanceof ObjectSchema) && !(items.getType().equals("array"))) {
+            if (!(items instanceof ObjectSchema) && !(items.getType().equals(ARRAY))) {
                 // create arrayTypeDescriptor
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 // create Optional typedescriptor
@@ -212,19 +215,17 @@ public class ParametersGenerator {
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
-            if (!(items instanceof ArraySchema)) {
+            if (!(items instanceof ArraySchema) && items.getType() != null) {
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 return createRequiredParameterNode(annotations, arrayTypeName, parameterName);
+            } else if (items.getType() == null) {
+                // Resource function doesn't support to query parameters with array type which hasn't item type.
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_101;
+                throw new BallerinaOpenApiException(messages.getDescription());
             } else {
-                Token arrayName = createIdentifierToken(STRING, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
-                BuiltinSimpleNameReferenceNode memberTypeDesc =
-                        createBuiltinSimpleNameReferenceNode(null, arrayName);
-                ArrayTypeDescriptorNode arrayTypeName = createArrayTypeDescriptorNode(
-                        memberTypeDesc, createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                        createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-                OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
-                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-                return createRequiredParameterNode(annotations, optionalNode, parameterName);
+                // Resource function doesn't support to the nested array type query parameters.
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_100;
+                throw new BallerinaOpenApiException(messages.getDescription());
             }
         } else {
             Token name = createIdentifierToken(convertOpenAPITypeToBallerina(
@@ -235,9 +236,10 @@ public class ParametersGenerator {
     }
 
     // Create ArrayTypeDescriptorNode using Schema
-    private  ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) {
+    private  ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) throws BallerinaOpenApiException {
 
-        Token arrayName = createIdentifierToken(items.getType().trim(), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+        Token arrayName = createIdentifierToken(convertOpenAPITypeToBallerina(items.getType().toLowerCase(
+                        Locale.ENGLISH).trim()), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         BuiltinSimpleNameReferenceNode memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, arrayName);
         return createArrayTypeDescriptorNode(memberTypeDesc, createToken(SyntaxKind.OPEN_BRACKET_TOKEN),
                 null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
