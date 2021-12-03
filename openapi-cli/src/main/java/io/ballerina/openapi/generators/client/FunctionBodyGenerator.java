@@ -108,6 +108,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEADER;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEADER_VALUES;
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP_HEADERS;
+import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.generators.GeneratorConstants.POST;
 import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
@@ -682,10 +683,7 @@ public class FunctionBodyGenerator {
         String returnType;
         int index = rType.lastIndexOf("|");
         returnType = rType.substring(0, index);
-        if (returnType.contains("|")) {
-            returnType = returnType.replaceAll("\\|", "");
-        }
-        return returnType;
+        return (rType.contains(NILLABLE) ? returnType + NILLABLE : returnType);
     }
 
     /**
