@@ -621,13 +621,13 @@ public class FunctionBodyGenerator {
         VariableDeclarationNode requestVariable = GeneratorUtils.getSimpleStatement("http:Request",
                 "request", "new");
         statementsList.add(requestVariable);
-        if (next.getValue().getSchema() != null) {
+        if (next.getValue() != null) {
             genStatementsForRequestMediaType(statementsList, next);
             // TODO:Fill with other mime type
         } else {
             // Add default value comment
             ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
-                    "TODO: Update the request as needed");
+                    "// TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
         }
         // POST, PUT, PATCH, DELETE, EXECUTE

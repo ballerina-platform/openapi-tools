@@ -68,8 +68,8 @@ public class MimeFactory {
                                 BallerinaUtilGenerator ballerinaUtilGenerator, List<ImportDeclarationNode> imports)
             throws BallerinaOpenApiException {
         Schema requestBodySchema = mediaTypeEntry.getValue().getSchema();
-        if (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
-                || requestBodySchema.getProperties() != null) {
+        if (requestBodySchema != null && (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
+                || requestBodySchema.getProperties() != null)) {
             String mediaType = mediaTypeEntry.getKey();
             if (mediaType.contains(VENDOR_SPECIFIC_TYPE)) {
                 return new CustomType();

@@ -152,6 +152,7 @@ public class GeneratorConstants {
     public static final String MIME = "mime";
     public static final String HTTP_HEADERS = "httpHeaders";
     public static final String RESOURCE_PATH = "resourcePath";
+    public static final String ARRAY = "array";
 
     // auth related constants
     public static final String API_KEY = "apikey";
