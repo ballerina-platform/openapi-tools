@@ -22,6 +22,8 @@ import io.ballerina.projects.plugins.CodeAnalyzer;
 
 /**
  * CodeAnalyzer for openAPI build plugin.
+ *
+ * @since 2.0.0
  */
 public class OpenAPIBuildCodeAnalyzer extends CodeAnalyzer {
 

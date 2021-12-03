@@ -27,6 +27,8 @@ import io.ballerina.tools.text.TextRange;
 
 /**
  * Util class for contain build plugin related utils.
+ *
+ * @since 2.0.0
  */
 public class BuildExtensionUtil {
 

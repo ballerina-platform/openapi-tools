@@ -50,6 +50,8 @@ import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
 
 /**
  * SyntaxNodeAnalyzer for getting all service node.
+ *
+ * @since 2.0.0
  */
 public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
     @Override

@@ -21,6 +21,8 @@ import io.ballerina.projects.plugins.CompilerPluginContext;
 
 /**
  * OpenAPI build extension plugin for generating OpenAPI contract for all the services in the ballerina package.
+ *
+ * @since 2.0.0
  */
 public class OpenAPIBuildCompilerPlugin extends CompilerPlugin {
     @Override
