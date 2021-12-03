@@ -75,7 +75,8 @@ public class BallerinaDiagnosticTests {
                 {"petstore_with_oneOf_response.yaml"},
                 {"response_nested_array.yaml"},
                 {"xml_payload.yaml"},
-                {"xml_payload_with_ref.yaml"}
+                {"xml_payload_with_ref.yaml"},
+                {"complex_oneOf_schema.yaml"}
         };
     }
 }
