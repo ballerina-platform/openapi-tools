@@ -3,6 +3,7 @@ info:
   title: Azure Data Lake Storage
   description: Azure Data Lake Storage provides storage for Hadoop and other big data
     workloads.
+  version: 1.0.0
 servers:
   - url: https://azure.local/
 paths:

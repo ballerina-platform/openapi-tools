@@ -1,0 +1,51 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Petstore
+  license:
+    name: MIT
+servers:
+  - url: https://{subdomain}.swagger.io:{port}/{basePath}
+    description: The production API server
+    variables:
+      subdomain:
+        default: petstore
+        description: this value is assigned by the service provider
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '443'
+      basePath:
+        default: v2
+tags:
+  - name: pets
+    description: Pets Tag
+  - name: list
+    description: List Tag
+
+paths:
+  /pets:
+    get:
+      summary: Get a pet
+      operationId: getPet
+      tags:
+        - pets
+      responses:
+        '200':
+          description: The status information is returned for the requested file upload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetDetails'
+        '204':
+          description: The status information cannot be retrieved for the specified request ID.
+          content: {}
+components:
+  schemas:
+    PetDetails:
+      properties:
+        name:
+          type: string
+        age:
+          type: string
