@@ -56,6 +56,7 @@ public class GeneratorConstants {
         BASIC("http:CredentialsConfig"),
         BEARER("http:BearerTokenConfig"),
         CLIENT_CREDENTIAL("http:OAuth2ClientCredentialsGrantConfig"),
+        CUSTOM_CLIENT_CREDENTIAL("OAuth2ClientCredentialsGrantConfig"),
         REFRESH_TOKEN("http:OAuth2RefreshTokenGrantConfig"),
         PASSWORD("http:OAuth2PasswordGrantConfig");
 
