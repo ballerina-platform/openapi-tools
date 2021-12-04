@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
@@ -84,5 +101,27 @@ public class QueryParameterTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
         System.out.println(Formatter.format(syntaxTree));
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_06.bal", syntaxTree);
+    }
+
+    @Test(description = "07. Required query parameter has nested array data type",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Ballerina resource functions are not support to query parameters with " +
+                    "nested array.*")
+    public void optionalQueryParameterPrimitiveNestedArray()
+            throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/query/query_07.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
+    }
+
+    @Test(description = "08. Required query parameter has array data type with no item types",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Query parameter with no array item type can not be mapped to .*")
+    public void optionalQueryParameterArrayHasNoItemType() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/query/query_08.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
     }
 }

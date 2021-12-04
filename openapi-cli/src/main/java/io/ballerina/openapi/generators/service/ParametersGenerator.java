@@ -54,6 +54,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDe
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.openapi.generators.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEADER;
+import static io.ballerina.openapi.generators.GeneratorConstants.MAP_JSON;
+import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.QUERY;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
@@ -181,21 +183,33 @@ public class ParametersGenerator {
         }
     }
 
+    /*
+    This function is to handle query schema which is not have required true
+     */
     private Node handleOptionalQueryParameter(Schema schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
-            if (!(items instanceof ObjectSchema) && !(items.getType().equals(ARRAY))) {
+            if (items.getType() == null) {
+                // Resource function doesn't support to query parameters with array type which hasn't item type.
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_101;
+                throw new BallerinaOpenApiException(messages.getDescription());
+            } else if (!(items instanceof ObjectSchema) && !(items.getType().equals(ARRAY))) {
                 // create arrayTypeDescriptor
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
-                // create Optional typedescriptor
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
                 return createRequiredParameterNode(annotations, optionalNode, parameterName);
+            } else if (items.getType().equals(ARRAY)) {
+                // Resource function doesn't support to the nested array type query parameters.
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_100;
+                throw new BallerinaOpenApiException(messages.getDescription());
             } else {
-                // handle in case swagger has nested array or record type
                 // TODO create diagnostic after checking with team or map to map<json>.
-                Token name = createIdentifierToken("map<json>", SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+                Token name = createIdentifierToken(MAP_JSON, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+                if (items.getNullable()) {
+                    name = createIdentifierToken(MAP_JSON + NILLABLE, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+                }
                 BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
@@ -241,6 +255,14 @@ public class ParametersGenerator {
         Token arrayName = createIdentifierToken(convertOpenAPITypeToBallerina(items.getType().toLowerCase(
                         Locale.ENGLISH).trim()), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         BuiltinSimpleNameReferenceNode memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, arrayName);
+        if (items.getNullable() != null && items.getNullable()) {
+            // generate -> int?[]
+            OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(memberTypeDesc,
+                    createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+            return createArrayTypeDescriptorNode(optionalNode, createToken(SyntaxKind.OPEN_BRACKET_TOKEN),
+                    null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+        }
+        // generate -> int[]
         return createArrayTypeDescriptorNode(memberTypeDesc, createToken(SyntaxKind.OPEN_BRACKET_TOKEN),
                 null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
     }
