@@ -60,7 +60,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         Project project = currentPackage.project();
         //Used build option exportOpenapi() to enable plugin at the build time.
         BuildOptions buildOptions = project.buildOptions();
-        if (!buildOptions.exportOpenapi()) {
+        if (!buildOptions.exportOpenAPI()) {
             return;
         }
         // Take output path to target directory location in package.
