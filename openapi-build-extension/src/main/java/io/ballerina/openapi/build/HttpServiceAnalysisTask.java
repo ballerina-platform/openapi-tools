@@ -65,30 +65,31 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         Project project = currentPackage.project();
         //Used build option exportOpenapi() to enable plugin at the build time.
         BuildOptions buildOptions = project.buildOptions();
-        if (buildOptions.exportOpenapi()) {
-            // Take output path to target directory location in package.
-            Path outPath = project.targetDir();
-            Optional<Path> path = currentPackage.project().documentPath(context.documentId());
-            Path inputPath = path.orElse(null);
-            // Traverse the service declaration nodes
-            ModulePartNode modulePartNode = syntaxTree.rootNode();
-            List<OASResult> openAPIDefinitions = new ArrayList<>();
-            for (Node node : modulePartNode.members()) {
-                SyntaxKind syntaxKind = node.kind();
-                // Load a service declarations for the path part in the yaml spec
-                if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                    openAPIDefinitions.addAll(ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
-                            semanticModel, null, false, null, inputPath));
-                }
+        if (!buildOptions.exportOpenapi()) {
+            return;
+        }
+        // Take output path to target directory location in package.
+        Path outPath = project.targetDir();
+        Optional<Path> path = currentPackage.project().documentPath(context.documentId());
+        Path inputPath = path.orElse(null);
+        // Traverse the service declaration nodes
+        ModulePartNode modulePartNode = syntaxTree.rootNode();
+        List<OASResult> openAPIDefinitions = new ArrayList<>();
+        for (Node node : modulePartNode.members()) {
+            SyntaxKind syntaxKind = node.kind();
+            // Load a service declarations
+            if (syntaxKind == SyntaxKind.SERVICE_DECLARATION) {
+                openAPIDefinitions.addAll(ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
+                        semanticModel, null, false, null, inputPath));
             }
-            List<Diagnostic> diagnostics = new ArrayList<>();
-            if (!openAPIDefinitions.isEmpty()) {
-                extractOpenAPIYamlFromOutputs(outPath, openAPIDefinitions, diagnostics);
-            }
-            if (!diagnostics.isEmpty()) {
-                for (Diagnostic diagnostic : diagnostics) {
-                    context.reportDiagnostic(diagnostic);
-                }
+        }
+        List<Diagnostic> diagnostics = new ArrayList<>();
+        if (!openAPIDefinitions.isEmpty()) {
+            extractOpenAPIYamlFromOutputs(outPath, openAPIDefinitions, diagnostics);
+        }
+        if (!diagnostics.isEmpty()) {
+            for (Diagnostic diagnostic : diagnostics) {
+                context.reportDiagnostic(diagnostic);
             }
         }
     }
