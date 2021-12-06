@@ -33,9 +33,7 @@ import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,6 +44,7 @@ import java.util.Optional;
 import static io.ballerina.openapi.build.PluginConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.build.PluginConstants.OPENAPI;
 import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractFileName;
+import static io.ballerina.openapi.converter.utils.CodegenUtils.writeFile;
 
 /**
  * SyntaxNodeAnalyzer for getting all service node.
@@ -95,7 +94,6 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         for (OASResult oasResult: openAPIDefinitions) {
             if (oasResult.getYaml().isPresent()) {
                 try {
-//                    String fileName = checkDuplicateFiles(outPath, oasResult.getServiceName(), false);
                     // Create openapi directory if not exists in the path. If exists do not throw an error
                     Files.createDirectories(Paths.get(outPath + OAS_PATH_SEPARATOR + OPENAPI));
                     String fileName = resolveContractFileName(outPath.resolve(OPENAPI), oasResult.getServiceName(),
@@ -113,19 +111,6 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                     diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
                 }
             }
-        }
-    }
-
-    /**
-     * Writes a file with content to specified {@code filePath}.
-     *
-     * @param filePath valid file path to write the content
-     * @param content  content of the file
-     * @throws IOException when a file operation fails
-     */
-    public static void writeFile(Path filePath, String content) throws IOException {
-        try (FileWriter writer = new FileWriter(filePath.toString(), StandardCharsets.UTF_8)) {
-            writer.write(content);
         }
     }
 }

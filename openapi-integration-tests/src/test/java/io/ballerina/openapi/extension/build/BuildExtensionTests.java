@@ -51,7 +51,8 @@ public class BuildExtensionTests {
         executeCommand("project_1");
     }
 
-    @Test(description = "Check openapi build plugin in `bal build` command with `--export-openapi` flag", enabled = false)
+    @Test(description = "Check openapi build plugin in `bal build` command with `--export-openapi` flag",
+            enabled = false)
     public void annotationWithBuildOption() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");

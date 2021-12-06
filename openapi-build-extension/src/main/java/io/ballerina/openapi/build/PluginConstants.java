@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package io.ballerina.openapi.build;
+
 /**
  * All the constant related to build plugin.
  *
