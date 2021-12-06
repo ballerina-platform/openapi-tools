@@ -88,8 +88,11 @@ import static io.ballerina.openapi.ErrorMessages.invalidPathParamType;
 import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.generators.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.generators.GeneratorConstants.BINARY;
+import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.generators.GeneratorConstants.BYTE;
+import static io.ballerina.openapi.generators.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.generators.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.generators.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.SQUARE_BRACKETS;
@@ -286,22 +289,29 @@ public class FunctionSignatureGenerator {
             paramType = getValidName(extractReferenceType(parameterSchema.get$ref()), true);
         } else {
             paramType = convertOpenAPITypeToBallerina(parameterSchema.getType().trim());
-            if (parameterSchema.getType().equals("number")) {
+            if (parameterSchema.getType().equals(NUMBER)) {
                 if (parameterSchema.getFormat() != null) {
                     paramType = convertOpenAPITypeToBallerina(parameterSchema.getFormat().trim());
                 }
-            }
-            if (parameterSchema instanceof ArraySchema) {
+            } else if (parameterSchema instanceof ArraySchema) {
                 ArraySchema arraySchema = (ArraySchema) parameterSchema;
                 if (arraySchema.getItems().getType() != null) {
                     String itemType = arraySchema.getItems().getType();
-                    if (itemType.equals("string") || itemType.equals("integer") || itemType.equals("boolean")
-                            || itemType.equals("number")) {
+                    if (itemType.equals(STRING) || itemType.equals(INTEGER) || itemType.equals(BOOLEAN)) {
                         paramType = convertOpenAPITypeToBallerina(itemType) + SQUARE_BRACKETS;
+                    } else if (itemType.equals(NUMBER)) {
+                        paramType = convertOpenAPITypeToBallerina
+                                (arraySchema.getItems().getFormat().trim()) + SQUARE_BRACKETS;
+                    } else {
+                        throw new BallerinaOpenApiException("Unsupported parameter type is found in the parameter : " +
+                                parameter.getName());
                     }
                 } else if (arraySchema.getItems().get$ref() != null) {
                     paramType = getValidName(extractReferenceType(
                             arraySchema.getItems().get$ref().trim()), true) + SQUARE_BRACKETS;
+                } else {
+                    throw new BallerinaOpenApiException("Please define the array item type of the parameter : " +
+                            parameter.getName());
                 }
             }
         }
@@ -317,7 +327,7 @@ public class FunctionSignatureGenerator {
             if (parameterSchema.getDefault() != null) {
                 typeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(paramType));
                 LiteralValueToken literalValueToken;
-                if (parameterSchema.getType().equals("string")) {
+                if (parameterSchema.getType().equals(STRING)) {
                     literalValueToken = createLiteralValueToken(null,
                             '"' + parameterSchema.getDefault().toString() + '"', createEmptyMinutiaeList(),
                                     createEmptyMinutiaeList());
