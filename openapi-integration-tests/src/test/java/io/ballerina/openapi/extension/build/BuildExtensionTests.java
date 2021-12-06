@@ -51,7 +51,7 @@ public class BuildExtensionTests {
         executeCommand("project_1");
     }
 
-    @Test(description = "Check openapi build plugin in `bal build` command with `--export-openapi` flag")
+    @Test(description = "Check openapi build plugin in `bal build` command with `--export-openapi` flag", enabled = false)
     public void annotationWithBuildOption() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
@@ -69,7 +69,7 @@ public class BuildExtensionTests {
         Assert.assertTrue(Files.exists(RESOURCE.resolve("project_3/target/openapi/greeting_openapi.yaml")));
     }
 
-    @Test(description = "Check --export-openapi flag with package has service on module")
+    @Test(description = "Check --export-openapi flag with package has service on module", enabled = false)
     public void buildOptionWithSeparateModule() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
