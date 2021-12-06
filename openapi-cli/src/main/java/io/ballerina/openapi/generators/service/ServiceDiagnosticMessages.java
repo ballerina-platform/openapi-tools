@@ -27,33 +27,41 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
  * @since 2.0.0
  */
 public enum ServiceDiagnosticMessages {
-    OAS_SERVICE_100("OAS_SERVICE_100",
-            "Ballerina resource functions are not support to query parameters with nested array type.",
-            DiagnosticSeverity.ERROR),
+    OAS_SERVICE_100("OAS_SERVICE_100", "Ballerina resource functions are not support to query" +
+            " parameters with nested array type.", DiagnosticSeverity.ERROR),
     OAS_SERVICE_101("OAS_SERVICE_101",
-                            "Query parameter with no array item type can not be mapped to ballerina resource query " +
-                                    "parameter.",
-                    DiagnosticSeverity.ERROR);
+            "Query parameter with no array item type can not be mapped to ballerina resource query parameter.",
+            DiagnosticSeverity.ERROR),
+    OAS_SERVICE_102("OAS_SERVICE_102",
+            "Given OpenAPI query parameter type '%s' can not be map to the Ballerina query parameter.",
+            DiagnosticSeverity.ERROR),
+    OAS_SERVICE_103("OAS_SERVICE_103",
+            "Given OpenAPI query parameter '%s' type can not be map to the Ballerina query parameter.",
+            DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;
     private final DiagnosticSeverity severity;
 
     ServiceDiagnosticMessages(String code, String description, DiagnosticSeverity severity) {
+
         this.code = code;
         this.description = description;
         this.severity = severity;
     }
 
     public String getCode() {
+
         return code;
     }
 
     public String getDescription() {
+
         return description;
     }
 
     public DiagnosticSeverity getSeverity() {
+
         return severity;
     }
 }

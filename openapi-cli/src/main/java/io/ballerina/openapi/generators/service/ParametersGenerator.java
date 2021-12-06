@@ -50,12 +50,15 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultableParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.generators.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEADER;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAP_JSON;
 import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
+import static io.ballerina.openapi.generators.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.generators.GeneratorConstants.QUERY;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
@@ -69,6 +72,7 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.get
  * @since 2.0.0
  */
 public class ParametersGenerator {
+    boolean isNillableRequired = false;
 
     /**
      * This function for generating operation parameters.
@@ -119,16 +123,16 @@ public class ParametersGenerator {
      * This function for generating parameter ST node for header.
      */
     private RequiredParameterNode handleHeader(Parameter parameter)throws BallerinaOpenApiException {
-        Schema schema = parameter.getSchema();
+        Schema<?> schema = parameter.getSchema();
         TypeDescriptorNode headerTypeName;
         IdentifierToken parameterName = createIdentifierToken(escapeIdentifier(parameter.getName()
                 .toLowerCase(Locale.ENGLISH)), AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
         if (schema == null) {
-            /**
-             *01.<pre>in: header
-             *       name: X-Request-ID
-             *       schema: {}
-             * </pre>
+            /*
+             01.<pre>in: header
+                    name: X-Request-ID
+                    schema: {}
+              </pre>
              */
             return createRequiredParameterNode(createEmptyNodeList(), createIdentifierToken(STRING, SINGLE_WS_MINUTIAE,
                             SINGLE_WS_MINUTIAE), parameterName);
@@ -153,7 +157,7 @@ public class ParametersGenerator {
             MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
                     createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
                     createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
-            AnnotationNode headerNode = getAnnotationNode("Header", annotValue);
+            AnnotationNode headerNode = getAnnotationNode(HEADER, annotValue);
             NodeList<AnnotationNode> headerAnnotations = NodeFactory.createNodeList(headerNode);
 
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
@@ -162,31 +166,38 @@ public class ParametersGenerator {
 
     /**
      * This for generate query parameter nodes.
+     *
+     * Ballerina support query parameter types :
+     * type BasicType boolean|int|float|decimal|string ;
+     * public type  QueryParamType <map>json | () |BasicType|BasicType[];
      */
     private Node createNodeForQueryParam(Parameter parameter) throws BallerinaOpenApiException {
-        Schema schema = parameter.getSchema();
+        Schema<?> schema = parameter.getSchema();
         NodeList<AnnotationNode> annotations = createEmptyNodeList();
         IdentifierToken parameterName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()),
                 AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
-        if (schema == null || parameter.getContent() != null) {
-            //TODO throw a error by mentioning support query type
-            return createRequiredParameterNode(createEmptyNodeList(), createIdentifierToken(STRING,
-                    SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE), parameterName);
+        boolean isSchemaSupported = schema == null || parameter.getContent() != null || schema.get$ref() != null
+                || schema.getType() == null || schema.getType().equals(OBJECT) || schema instanceof ObjectSchema
+                || schema.getProperties() != null;
+        if (isSchemaSupported) {
+            ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_103;
+            throw new BallerinaOpenApiException(String.format(messages.getDescription(), parameter.getName()));
+        } else if (parameter.getSchema().getDefault() != null) {
+            // When query parameter has default value
+            return handleDefaultQueryParameter(schema, annotations, parameterName);
+        } else if (parameter.getRequired() != null && parameter.getRequired() == true && schema.getNullable() == null) {
+            // Required typeDescriptor
+            return handleRequiredQueryParameter(schema, annotations, parameterName);
         } else {
-            if (parameter.getRequired()) {
-                //Required typeDescriptor
-                return handleRequiredQueryParameter(schema, annotations, parameterName);
-            } else {
-                //Optional typeDescriptor
-                return handleOptionalQueryParameter(schema, annotations, parameterName);
-            }
+            // Optional typeDescriptor
+            return handleOptionalQueryParameter(schema, annotations, parameterName);
         }
     }
 
     /*
-    This function is to handle query schema which is not have required true
+    This function is to handle query schema which is not have required true.
      */
-    private Node handleOptionalQueryParameter(Schema schema, NodeList<AnnotationNode> annotations,
+    private Node handleOptionalQueryParameter(Schema<?> schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
@@ -225,7 +236,7 @@ public class ParametersGenerator {
         }
     }
 
-    private Node handleRequiredQueryParameter(Schema schema, NodeList<AnnotationNode> annotations,
+    private Node handleRequiredQueryParameter(Schema<?> schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
@@ -248,6 +259,51 @@ public class ParametersGenerator {
             return createRequiredParameterNode(annotations, rTypeName, parameterName);
         }
     }
+
+    /**
+     *  This function generate default query parameter when OAS gives default value.
+     *
+     *  OAS code example:
+     *  <pre>
+     *      parameters:
+     *         - name: limit
+     *           in: query
+     *           schema:
+     *             type: integer
+     *             default: 10
+     *             format: int32
+     *  </pre>
+     *  generated ballerina -> int limit = 10;
+     */
+
+    private Node handleDefaultQueryParameter(Schema<?> schema, NodeList<AnnotationNode> annotations,
+                                              IdentifierToken parameterName) throws BallerinaOpenApiException {
+        if (schema instanceof ArraySchema) {
+            Schema<?> items = ((ArraySchema) schema).getItems();
+            if (!(items instanceof ArraySchema) && items.getType() != null) {
+                ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
+                return createDefaultableParameterNode(annotations, arrayTypeName, parameterName,
+                        createToken(SyntaxKind.EQUAL_TOKEN),
+                        createSimpleNameReferenceNode(createIdentifierToken(schema.getDefault().toString())));
+            } else if (items.getType() == null) {
+                // Resource function doesn't support to query parameters with array type which hasn't item type.
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_101;
+                throw new BallerinaOpenApiException(messages.getDescription());
+            } else {
+                // Resource function doesn't support to the nested array type query parameters.
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_100;
+                throw new BallerinaOpenApiException(messages.getDescription());
+            }
+        } else {
+            Token name = createIdentifierToken(convertOpenAPITypeToBallerina(
+                    schema.getType().toLowerCase(Locale.ENGLISH).trim()), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+            BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
+            return createDefaultableParameterNode(annotations, rTypeName, parameterName,
+                    createToken(SyntaxKind.EQUAL_TOKEN),
+                    createSimpleNameReferenceNode(createIdentifierToken(schema.getDefault().toString())));
+        }
+    }
+
 
     // Create ArrayTypeDescriptorNode using Schema
     private  ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) throws BallerinaOpenApiException {
