@@ -359,29 +359,26 @@ public class ConverterCommonUtils {
      * Generate file name with service basePath.
      */
     public static String getOpenApiFileName(String servicePath, String serviceName, boolean isJson) {
-        String cleanedServiceName;
+        String openAPIFileName;
         if (serviceName.isBlank() || serviceName.equals(SLASH) || serviceName.startsWith(SLASH + HYPHEN)) {
             String[] fileName = serviceName.split(SLASH);
             // This condition is to handle `service on ep1 {} ` multiple scenarios
             if (fileName.length > 0 && !serviceName.isBlank()) {
-                cleanedServiceName = FilenameUtils.removeExtension(servicePath) + fileName[1];
+                openAPIFileName = FilenameUtils.removeExtension(servicePath) + fileName[1];
             } else {
-                cleanedServiceName = FilenameUtils.removeExtension(servicePath);
+                openAPIFileName = FilenameUtils.removeExtension(servicePath);
             }
         } else if (serviceName.startsWith(HYPHEN)) {
             // serviceName -> service on ep1 {} has multiple service ex: "-33456"
-            cleanedServiceName = FilenameUtils.removeExtension(servicePath) + serviceName;
+            openAPIFileName = FilenameUtils.removeExtension(servicePath) + serviceName;
         } else {
             // Remove starting path separate if exists
             if (serviceName.startsWith(SLASH)) {
                 serviceName = serviceName.substring(1);
             }
-            // Replace rest of the path separators with hyphen
-            cleanedServiceName = serviceName.replaceAll(SLASH, "_");
+            // Replace rest of the path separators with underscore
+            openAPIFileName = serviceName.replaceAll(SLASH, "_");
         }
-        if (isJson) {
-            return cleanedServiceName + Constants.OPENAPI_SUFFIX + JSON_EXTENSION;
-        }
-        return cleanedServiceName + Constants.OPENAPI_SUFFIX + YAML_EXTENSION;
+        return openAPIFileName + Constants.OPENAPI_SUFFIX + (isJson ? JSON_EXTENSION : YAML_EXTENSION);
     }
 }

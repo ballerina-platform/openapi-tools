@@ -153,36 +153,29 @@ public class ServiceToOpenAPIConverterUtils {
             }
             if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                 ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
-                /*
-                  Here check the service is related to the http module by checking listener type that attached to
-                  service endpoints.
-                 */
-                if (isHttpService(serviceNode, semanticModel)) {
+                if (isHttpService(serviceNode, semanticModel)) { //Here check the service is related to the http
+                    // module by checking listener type that attached to service endpoints.
                     Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
                     if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
                         String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
-                        /*
-                          `String updateServiceName` used to track the service name for service file contains
-                          multiple service node.
-                          ex;
-                          <pre>
-                              listener http:Listener ep1 = new (443, config = {host: "pets-tore.swagger.io"});
-                              service /hello on ep1 {
-                                  resource function post hi(@http:Payload json payload) {
-                                 }
-                              }
-                              service /hello on new http:Listener(9090) {
-                                  resource function get hi() {
-                                  }
-                              }
-                          </pre>
-                          Using absolute path we generate file name, therefore having same name may overwrite
-                          the file, due to this suppose to use hashcode as identity factor for the file name.
-
-                          Generated file name for above example -> hello_openapi.yaml, hello_45673_openapi
-                          .yaml
-                         */
-                        String updateServiceName = service;
+                        String updateServiceName = service; //`String updateServiceName` used to track the service
+                        // name for service file contains multiple service node.
+                        //example:
+                        //<pre>
+                        //    listener http:Listener ep1 = new (443, config = {host: "pets-tore.swagger.io"});
+                        //    service /hello on ep1 {
+                        //        resource function post hi(@http:Payload json payload) {
+                        //       }
+                        //    }
+                        //    service /hello on new http:Listener(9090) {
+                        //        resource function get hi() {
+                        //        }
+                        //    }
+                        //</pre>
+                        // Using absolute path we generate file name, therefore having same name may overwrite
+                        // the file, due to this suppose to use hashcode as identity factor for the file name.
+                        // Generated file name for above example -> hello_openapi.yaml, hello_45673_openapi
+                        //.yaml
                         if (servicesToGenerate.containsKey(service)) {
                             updateServiceName = service + HYPHEN + serviceSymbol.get().hashCode();
                         }
@@ -264,6 +257,17 @@ public class ServiceToOpenAPIConverterUtils {
     /**
      * This function is for completing the OpenAPI info section with package details and annotation details.
      *
+     * First check the given service node has metadata with annotation details with `openapi:serviceInfo`,
+     * if it is there, then {@link #parseServiceInfoAnnotationAttachmentDetails(List, AnnotationNode, Path)}
+     * function extracts the annotation details and store details in {@code OpenAPIInfo} model using
+     * {@link #updateOpenAPIInfoModel(SeparatedNodeList)} function. If the annotation contains the valid contract
+     * path then we complete given OpenAPI specification using annotation details. if not we create new OpenAPI
+     * specification and fill openAPI info sections.
+     * If the annotation is not in the given service, then we filled the OpenAPI specification info section using
+     * package details and title with service base path.
+     * After completing these two process we normalized the OpenAPI specification by checking all the info
+     * details are completed, if in case not completed, we complete empty fields with default values.
+     *
      * @param serviceNode   Service node for relevant service.
      * @param semanticModel Semantic model for relevant project.
      * @param openapiFileName OpenAPI generated file name.
@@ -272,18 +276,6 @@ public class ServiceToOpenAPIConverterUtils {
      */
     private static OASResult fillOpenAPIInfoSection(ServiceDeclarationNode serviceNode, SemanticModel semanticModel,
                                                     String openapiFileName, Path ballerinaFilePath) {
-        /*
-          First check the given service node has metadata with annotation details with `openapi:serviceInfo`,
-          if it is there, then {@link #parseServiceInfoAnnotationAttachmentDetails(List, AnnotationNode, Path)}
-          function extracts the annotation details and store details in {@code OpenAPIInfo} model using
-          {@link #updateOpenAPIInfoModel(SeparatedNodeList)} function. If the annotation contains the valid contract
-          path then we complete given OpenAPI specification using annotation details. if not we create new OpenAPI
-          specification and fill openAPI info sections.
-          If the annotation is not in the given service, then we filled the OpenAPI specification info section using
-          package details and title with service base path.
-          After completing these two process we normalized the OpenAPI specification by checking all the info
-          details are completed, if in case not completed, we complete empty fields with default values.
-         */
         Optional<MetadataNode> metadata = serviceNode.metadata();
         List<OpenAPIConverterDiagnostic> diagnostics = new ArrayList<>();
         OpenAPI openAPI = new OpenAPI();
