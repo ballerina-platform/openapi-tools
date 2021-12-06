@@ -22,20 +22,20 @@ public isolated client class Client {
     @display {label: "List Pets"}
     @deprecated
     remote isolated function listPets(int? 'limit = ()) returns Pets|error {
-        string  path = string `/pets`;
+        string resourcePath = string `/pets`;
         map<anydata> queryParam = {"limit": 'limit};
-        path = path + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        Pets response = check self.clientEp-> get(resourcePath);
         return response;
     }
     # Create a pet
     #
     # + return - Null response
     remote isolated function createPet() returns http:Response|error {
-        string  path = string `/pets`;
+        string resourcePath = string `/pets`;
         http:Request request = new;
         //TODO: Update the request as needed;
-        http:Response response = check self.clientEp-> post(path, request);
+        http:Response response = check self.clientEp-> post(resourcePath, request);
         return response;
     }
     # Info for a specific pet
@@ -49,10 +49,10 @@ public isolated client class Client {
     # # Deprecated
     @deprecated
     remote isolated function showPetById(string petId, @display {label: "Result limit"} @deprecated string 'limit) returns Pets|error {
-        string  path = string `/pets/${petId}`;
+        string resourcePath = string `/pets/${petId}`;
         map<anydata> queryParam = {"limit": 'limit};
-        path = path + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp-> get(path);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        Pets response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }

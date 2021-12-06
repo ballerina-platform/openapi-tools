@@ -112,6 +112,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
 public class GeneratorUtils {
 
     public static final MinutiaeList SINGLE_WS_MINUTIAE = getSingleWSMinutiae();
+    public static final MinutiaeList SINGLE_EMPTY_MINUTIAE = getEmptyMinutiae();
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
 
@@ -561,6 +562,12 @@ public class GeneratorUtils {
         Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
         MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
         return leading;
+    }
+
+    private static MinutiaeList getEmptyMinutiae() {
+        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae("");
+        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
+        return trailing;
     }
 
     /**

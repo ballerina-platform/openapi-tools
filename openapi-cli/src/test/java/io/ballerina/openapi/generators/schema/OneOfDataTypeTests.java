@@ -75,7 +75,7 @@ public class OneOfDataTypeTests {
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, true);
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema);
-        String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString();
+        String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile?");
     }
 
@@ -88,14 +88,13 @@ public class OneOfDataTypeTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/oneOf.bal", syntaxTree);
     }
 
-    @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "" +
-                    "Unsupported object or composed schema is given inside a oneOf or anyOf schema.*")
+    @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema")
     public void arrayHasMaxItemsExceedLimit02() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/nested_oneOf_with_allOf.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/nested_oneOf_with_allOf.bal", syntaxTree);
     }
 }

@@ -192,15 +192,8 @@ public class BallerinaClientGenerator {
                 , GeneratorConstants.HTTP);
         imports.add(importForHttp);
         List<ModuleMemberDeclarationNode> nodes =  new ArrayList<>();
-        if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
-            // Add authentication related records to module member nodes
-            nodes.add(ballerinaAuthConfigGenerator.getConfigRecord(openAPI));
-            
-            // Add `AuthConfig` record if combination of ApiKey and HTTP/OAuth authentication is supported
-            if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
-                nodes.add(ballerinaAuthConfigGenerator.getAuthConfigRecord());
-            }
-        }
+        // Add authentication related records
+        ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI, nodes);
 
         // Add class definition node to module member nodes
         nodes.add(getClassDefinitionNode());

@@ -16,11 +16,11 @@ public isolated client class Client {
     #
     # + return - Null response
     remote isolated function createPet(byte[] payload) returns http:Response|error {
-        string path = string `/pets`;
+        string resourcePath = string `/pets`;
         http:Request request = new;
         string encodedRequestBody = payload.toBase64();
         request.setPayload(encodedRequestBody, "application/octet-stream");
-        http:Response response = check self.clientEp->post(path, request);
+        http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }

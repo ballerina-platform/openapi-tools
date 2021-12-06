@@ -17,8 +17,8 @@ public isolated client class Client {
     #
     #+return-A list of countries with all informtion included.
     remote isolated function getCovidinAllCountries() returns Countries[]|error {
-        string  path = string `/api`;
-        Countries[] response = check self.clientEp-> get(path);
+        string resourcePath = string `/api`;
+        Countries[] response = check self.clientEp-> get(resourcePath);
         return response;
     }
 }

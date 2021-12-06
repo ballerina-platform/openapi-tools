@@ -66,7 +66,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(arraySchema.getItems());
-        String arrayType = typeGenerator.generateTypeDescriptorNode().toString();
+        String arrayType = typeGenerator.generateTypeDescriptorNode().toString().trim();
         if (typeGenerator instanceof UnionTypeGenerator) {
             arrayType = OPEN_PAREN_TOKEN.stringValue() + arrayType + CLOSE_PAREN_TOKEN.stringValue();
         }
