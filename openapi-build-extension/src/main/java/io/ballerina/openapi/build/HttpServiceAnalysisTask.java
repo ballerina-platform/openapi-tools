@@ -33,7 +33,6 @@ import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -42,14 +41,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.openapi.build.PluginConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.build.PluginConstants.OPENAPI;
-import static io.ballerina.openapi.converter.Constants.JSON_EXTENSION;
-import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
+import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractFileName;
 
 /**
  * SyntaxNodeAnalyzer for getting all service node.
@@ -80,7 +76,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             // Load a service declarations
             if (syntaxKind == SyntaxKind.SERVICE_DECLARATION) {
                 openAPIDefinitions.addAll(ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
-                        semanticModel, null, false, null, inputPath));
+                        semanticModel, null, false, inputPath));
             }
         }
         List<Diagnostic> diagnostics = new ArrayList<>();
@@ -99,9 +95,11 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         for (OASResult oasResult: openAPIDefinitions) {
             if (oasResult.getYaml().isPresent()) {
                 try {
-                    String fileName = checkDuplicateFiles(outPath, oasResult.getServiceName(), false);
+//                    String fileName = checkDuplicateFiles(outPath, oasResult.getServiceName(), false);
                     // Create openapi directory if not exists in the path. If exists do not throw an error
                     Files.createDirectories(Paths.get(outPath + OAS_PATH_SEPARATOR + OPENAPI));
+                    String fileName = resolveContractFileName(outPath.resolve(OPENAPI), oasResult.getServiceName(),
+                            false);
                     writeFile(outPath.resolve(OPENAPI + OAS_PATH_SEPARATOR + fileName), oasResult.getYaml().get());
                 } catch (IOException e) {
                     DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
@@ -116,60 +114,6 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 }
             }
         }
-    }
-
-    //TODO: use already define function in bal-service module for write file after merging #766 in openapi-tools
-    /**
-     * This method use for checking the duplicate files.
-     *
-     * @param outPath     output path for file generated
-     * @param openApiName given file name
-     * @return file name with duplicate number tag
-     */
-    private static String checkDuplicateFiles(Path outPath, String openApiName, Boolean isJson) {
-        if (outPath != null && Files.exists(outPath)) {
-            final File[] listFiles = new File(String.valueOf(outPath)).listFiles();
-            if (listFiles != null) {
-                openApiName = checkAvailabilityOfGivenName(openApiName, listFiles, isJson);
-            }
-        }
-        return openApiName;
-    }
-
-    private static String checkAvailabilityOfGivenName(String openApiName, File[] listFiles, Boolean isJson) {
-        for (File file : listFiles) {
-            if (System.console() != null && file.getName().equals(openApiName)) {
-                String userInput = System.console().readLine("There is already a/an " + file.getName() +
-                        " in the location. Do you want to override the file? [y/N] ");
-                if (!Objects.equals(userInput.toLowerCase(Locale.ENGLISH), "y")) {
-                    int duplicateCount = 0;
-                    openApiName = setGeneratedFileName(listFiles, openApiName, duplicateCount, isJson);
-                }
-            }
-        }
-        return openApiName;
-    }
-
-    /**
-     * This method for setting the file name for generated file.
-     *
-     * @param listFiles      generated files
-     * @param fileName       File name
-     * @param duplicateCount add the tag with duplicate number if file already exist
-     */
-    private static String setGeneratedFileName(File[] listFiles, String fileName, int duplicateCount, boolean isJson) {
-        for (File listFile : listFiles) {
-            String listFileName = listFile.getName();
-            if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2)
-                    && (listFileName.split("\\.")[0]
-                    .equals(fileName.split("\\.")[0]))) {
-                duplicateCount = 1 + duplicateCount;
-            }
-        }
-        if (isJson) {
-            return fileName.split("\\.")[0] + "." + (duplicateCount) + JSON_EXTENSION;
-        }
-        return fileName.split("\\.")[0] + "." + (duplicateCount) + YAML_EXTENSION;
     }
 
     /**

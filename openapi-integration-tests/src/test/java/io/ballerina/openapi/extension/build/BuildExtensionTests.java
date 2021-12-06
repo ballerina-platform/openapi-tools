@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.cmd.TestUtil.RESOURCE;
 import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
 
 /**
@@ -56,7 +57,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_2"), buildArgs);
-        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("project_2/target/openapi/greeting_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_2/target/openapi/greeting_openapi.yaml")));
     }
 
     @Test(description = "Check --export-openapi flag with graphQl service", enabled = false)
@@ -65,7 +66,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_3"), buildArgs);
-        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("project_3/target/openapi/greeting_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_3/target/openapi/greeting_openapi.yaml")));
     }
 
     @Test(description = "Check --export-openapi flag with package has service on module")
@@ -74,8 +75,8 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_4"), buildArgs);
-        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("project_4/target/openapi/greeting_openapi.yaml")));
-        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("project_4/target/openapi/mod_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_4/target/openapi/greeting_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_4/target/openapi/mod_openapi.yaml")));
     }
 
     @Test(description = "Check --export-openapi flag with single service file build", enabled = false)

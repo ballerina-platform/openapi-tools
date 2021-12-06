@@ -100,7 +100,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 response.setError(null);
                 List<OASResult> yamlContent = ServiceToOpenAPIConverterUtils.generateOAS3Definition(
                         syntaxTree.get(), semanticModel.get(), null, false,
-                        null, Path.of(request.getDocumentFilePath()));
+                        Path.of(request.getDocumentFilePath()));
                 //Response should handle
                 if (!yamlContent.isEmpty() && (yamlContent.get(0).getOpenAPI().isPresent())) {
                     Optional<String> yaml = yamlContent.get(0).getYaml();
@@ -141,7 +141,7 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 Path inputPath = path.orElse(null);
                 SyntaxTree syntaxTree = document.syntaxTree();
                 List<OASResult> oasResults = ServiceToOpenAPIConverterUtils.generateOAS3Definition(
-                        syntaxTree, semanticModel.get(), null, false, null, inputPath);
+                        syntaxTree, semanticModel.get(), null, false, inputPath);
 
                 generateServiceJson(response, document.syntaxTree().filePath(), oasResults, specs);
             }

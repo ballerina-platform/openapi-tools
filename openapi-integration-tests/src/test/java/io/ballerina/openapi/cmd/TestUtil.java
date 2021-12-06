@@ -43,6 +43,7 @@ public class TestUtil {
     public static final Path DISTRIBUTIONS_DIR = Paths.get(System.getProperty("distributions.dir"));
     public static final Path TEST_DISTRIBUTION_PATH = TARGET_DIR.resolve("test-distribution");
     public static final Path RESOURCES_PATH = TARGET_DIR.resolve("resources/test");
+    public static final Path RESOURCE = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test/build");
     private static String balFile = "bal";
 
     /**
