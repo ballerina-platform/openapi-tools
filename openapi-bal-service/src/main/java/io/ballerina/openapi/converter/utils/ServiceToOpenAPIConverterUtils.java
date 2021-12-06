@@ -153,12 +153,14 @@ public class ServiceToOpenAPIConverterUtils {
             }
             if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                 ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) node;
-                if (isHttpService(serviceNode, semanticModel)) { //Here check the service is related to the http
+                if (isHttpService(serviceNode, semanticModel)) {
+                    // Here check the service is related to the http
                     // module by checking listener type that attached to service endpoints.
                     Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
                     if (serviceSymbol.isPresent() && serviceSymbol.get() instanceof ServiceDeclarationSymbol) {
                         String service = OpenAPIEndpointMapper.ENDPOINT_MAPPER.getServiceBasePath(serviceNode);
-                        String updateServiceName = service; //`String updateServiceName` used to track the service
+                        String updateServiceName = service;
+                        //`String updateServiceName` used to track the service
                         // name for service file contains multiple service node.
                         //example:
                         //<pre>
@@ -387,10 +389,8 @@ public class ServiceToOpenAPIConverterUtils {
            SeparatedNodeList<MappingFieldNode> fields = content.get().fields();
            if (!fields.isEmpty()) {
                OpenAPIInfo openAPIInfo = updateOpenAPIInfoModel(fields);
-               /*
-                 If in case ballerina file path is getting null, then openAPI specification will be generated for given
-                 services.
-                */
+               // If in case ballerina file path is getting null, then openAPI specification will be generated for
+               // given services.
                if (openAPIInfo.getContractPath().isPresent() && ballerinaFilePath != null) {
                    return updateExistingContractOpenAPI(diagnostics, location, openAPIInfo, ballerinaFilePath);
                } else if (openAPIInfo.getTitle().isPresent() && openAPIInfo.getVersion().isPresent()) {

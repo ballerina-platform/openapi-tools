@@ -381,4 +381,10 @@ public class ConverterCommonUtils {
         }
         return openAPIFileName + Constants.OPENAPI_SUFFIX + (isJson ? JSON_EXTENSION : YAML_EXTENSION);
     }
+
+    public static boolean isHttpService(ModuleSymbol moduleSymbol) {
+        Optional<String> moduleNameOpt = moduleSymbol.getName();
+        return moduleNameOpt.isPresent() && Constants.HTTP.equals(moduleNameOpt.get())
+                && Constants.BALLERINA.equals(moduleSymbol.id().orgName());
+    }
 }

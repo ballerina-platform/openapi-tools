@@ -43,6 +43,7 @@ public class TestUtil {
     public static final Path DISTRIBUTIONS_DIR = Paths.get(System.getProperty("distributions.dir"));
     public static final Path TEST_DISTRIBUTION_PATH = TARGET_DIR.resolve("test-distribution");
     public static final Path RESOURCES_PATH = TARGET_DIR.resolve("resources/test");
+    public static final Path RESOURCE = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test/build");
     private static String balFile = "bal";
 
     /**
@@ -68,7 +69,7 @@ public class TestUtil {
      * @throws InterruptedException Interrupted error executing build command.
      */
     public static InputStream executeOpenapiBuild(String distributionName, Path sourceDirectory,
-                                                  List<String> args) throws IOException, InterruptedException {
+                                                  List<String> args) throws IOException {
         args.add(0, "build");
         Process process = getProcessBuilderResults(distributionName, sourceDirectory, args);
         return process.getErrorStream();
@@ -101,10 +102,9 @@ public class TestUtil {
      * @param args             The arguments to be passed to the build command.
      * @return process
      * @throws IOException          Error executing build command.
-     * @throws InterruptedException Interrupted error executing build command.
      */
     public static Process getProcessBuilderResults(String distributionName, Path sourceDirectory, List<String> args)
-            throws IOException, InterruptedException {
+            throws IOException {
 
         if (System.getProperty("os.name").startsWith("Windows")) {
             balFile = "bal.bat";

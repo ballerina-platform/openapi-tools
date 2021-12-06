@@ -50,6 +50,7 @@ public class Constants {
     public static final String FORM = "form";
     public static final String HTTP_PAYLOAD = "http:Payload";
     public static final String HTTP = "http";
+    public static final String BALLERINA = "ballerina";
     public static final String PAYLOAD = "payload";
     public static final String TYPEREFERENCE = "typeReference";
     public static final String HTTP_HEADER = "http:Header";
@@ -220,5 +221,4 @@ public class Constants {
     public static final String JSON_EXTENSION = ".json";
     public static final String YML_EXTENSION = ".yml";
 
-    public static final String BALLERINA = "ballerina";
 }
