@@ -39,12 +39,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.ballerina.openapi.build.PluginConstants.OAS_PATH_SEPARATOR;
+import static io.ballerina.openapi.build.PluginConstants.OPENAPI;
 import static io.ballerina.openapi.converter.Constants.JSON_EXTENSION;
 import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
 
@@ -75,7 +78,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 // Load a service declarations for the path part in the yaml spec
                 if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
                     openAPIDefinitions.addAll(ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
-                            semanticModel, null, false, outPath, inputPath));
+                            semanticModel, null, false, null, inputPath));
                 }
             }
             List<Diagnostic> diagnostics = new ArrayList<>();
@@ -96,7 +99,9 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             if (oasResult.getYaml().isPresent()) {
                 try {
                     String fileName = checkDuplicateFiles(outPath, oasResult.getServiceName(), false);
-                    writeFile(outPath.resolve(fileName), oasResult.getYaml().get());
+                    // Create openapi directory if not exists in the path. If exists do not throw an error
+                    Files.createDirectories(Paths.get(outPath + OAS_PATH_SEPARATOR + OPENAPI));
+                    writeFile(outPath.resolve(OPENAPI + OAS_PATH_SEPARATOR + fileName), oasResult.getYaml().get());
                 } catch (IOException e) {
                     DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
                     ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
