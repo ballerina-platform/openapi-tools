@@ -209,6 +209,7 @@ public class Constants {
     public static final String TRUE = "true";
     public static final String FALSE = "false";
     public static final String SLASH = "/";
+    public static final String HYPHEN = "-";
     public static final String CONTRACT = "contract";
     public static final String VERSION = "'version";
     public static final String TITLE = "title";

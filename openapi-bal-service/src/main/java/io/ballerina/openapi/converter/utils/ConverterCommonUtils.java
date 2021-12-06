@@ -18,6 +18,14 @@
 
 package io.ballerina.openapi.converter.utils;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -52,6 +60,7 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -62,7 +71,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import static io.ballerina.openapi.converter.Constants.BALLERINA;
+import static io.ballerina.openapi.converter.Constants.HTTP;
+import static io.ballerina.openapi.converter.Constants.HYPHEN;
+import static io.ballerina.openapi.converter.Constants.JSON_EXTENSION;
+import static io.ballerina.openapi.converter.Constants.SLASH;
 import static io.ballerina.openapi.converter.Constants.SPECIAL_CHAR_REGEX;
+import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
 
 /**
  * Utilities used in Ballerina  to OpenAPI converter.
@@ -297,5 +312,73 @@ public class ConverterCommonUtils {
             title = stringBuilder.toString().trim();
         }
         return title;
+    }
+
+    /**
+     * This util function is to check the given service is http service.
+     *
+     * @param serviceNode    Service node for analyse
+     * @param semanticModel  Semantic model
+     * @return  boolean output
+     */
+    public static boolean isHttpService(ServiceDeclarationNode serviceNode, SemanticModel semanticModel) {
+        Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
+        ServiceDeclarationSymbol serviceNodeSymbol = (ServiceDeclarationSymbol) serviceSymbol.get();
+        List<TypeSymbol> listenerTypes = (serviceNodeSymbol).listenerTypes();
+        for (TypeSymbol listenerType : listenerTypes) {
+            if (isHttpListener(listenerType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isHttpListener(TypeSymbol listenerType) {
+        if (listenerType.typeKind() == TypeDescKind.UNION) {
+            return ((UnionTypeSymbol) listenerType).memberTypeDescriptors().stream()
+                    .filter(typeDescriptor -> typeDescriptor instanceof TypeReferenceTypeSymbol)
+                    .map(typeReferenceTypeSymbol -> (TypeReferenceTypeSymbol) typeReferenceTypeSymbol)
+                    .anyMatch(typeReferenceTypeSymbol -> isHttpModule(typeReferenceTypeSymbol.getModule().get()));
+        }
+
+        if (listenerType.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+            return isHttpModule(((TypeReferenceTypeSymbol) listenerType).typeDescriptor().getModule().get());
+        }
+        return false;
+    }
+
+    private static boolean isHttpModule(ModuleSymbol moduleSymbol) {
+        if (moduleSymbol.getName().isPresent()) {
+            return HTTP.equals(moduleSymbol.getName().get()) && BALLERINA.equals(moduleSymbol.id().orgName());
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Generate file name with service basePath.
+     */
+    public static String getOpenApiFileName(String servicePath, String serviceName, boolean isJson) {
+        String openAPIFileName;
+        if (serviceName.isBlank() || serviceName.equals(SLASH) || serviceName.startsWith(SLASH + HYPHEN)) {
+            String[] fileName = serviceName.split(SLASH);
+            // This condition is to handle `service on ep1 {} ` multiple scenarios
+            if (fileName.length > 0 && !serviceName.isBlank()) {
+                openAPIFileName = FilenameUtils.removeExtension(servicePath) + fileName[1];
+            } else {
+                openAPIFileName = FilenameUtils.removeExtension(servicePath);
+            }
+        } else if (serviceName.startsWith(HYPHEN)) {
+            // serviceName -> service on ep1 {} has multiple service ex: "-33456"
+            openAPIFileName = FilenameUtils.removeExtension(servicePath) + serviceName;
+        } else {
+            // Remove starting path separate if exists
+            if (serviceName.startsWith(SLASH)) {
+                serviceName = serviceName.substring(1);
+            }
+            // Replace rest of the path separators with underscore
+            openAPIFileName = serviceName.replaceAll(SLASH, "_");
+        }
+        return openAPIFileName + Constants.OPENAPI_SUFFIX + (isJson ? JSON_EXTENSION : YAML_EXTENSION);
     }
 }
