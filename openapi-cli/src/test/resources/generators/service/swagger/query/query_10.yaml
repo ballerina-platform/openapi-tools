@@ -30,8 +30,7 @@ paths:
           in: query
           schema:
             type: array
-            items:
-              type: string
+            items: {}
             default: ["dog", "cat"]
       responses:
         '200':

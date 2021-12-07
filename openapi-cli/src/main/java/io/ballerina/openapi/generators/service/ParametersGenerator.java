@@ -72,8 +72,12 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.get
  * @since 2.0.0
  */
 public class ParametersGenerator {
-    boolean isNillableRequired = false;
 
+    boolean isNullableRequired = false;
+
+    public boolean isNullableRequired() {
+        return isNullableRequired;
+    }
     /**
      * This function for generating operation parameters.
      *
@@ -94,6 +98,10 @@ public class ParametersGenerator {
                     params.add(param);
                     params.add(comma);
                 } else if (parameter.getIn().trim().equals(QUERY)) {
+                    if (parameter.getRequired() != null && parameter.getRequired() &&
+                            (parameter.getSchema().getNullable() != null &&  parameter.getSchema().getNullable())) {
+                        isNullableRequired = true;
+                    }
                     // type  BasicType boolean|int|float|decimal|string ;
                     // public type () |BasicType|BasicType []| map<json>;
                     Node param = createNodeForQueryParam(parameter);
@@ -185,7 +193,7 @@ public class ParametersGenerator {
         } else if (parameter.getSchema().getDefault() != null) {
             // When query parameter has default value
             return handleDefaultQueryParameter(schema, annotations, parameterName);
-        } else if (parameter.getRequired() != null && parameter.getRequired() == true && schema.getNullable() == null) {
+        } else if (parameter.getRequired() != null && parameter.getRequired() && schema.getNullable() == null) {
             // Required typeDescriptor
             return handleRequiredQueryParameter(schema, annotations, parameterName);
         } else {

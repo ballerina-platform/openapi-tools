@@ -15,9 +15,10 @@ paths:
       parameters:
         - name: limit
           in: query
+          required: true
           schema:
             type: integer
-            default: 10
+            nullable: true
             format: int32
       responses:
         '200':

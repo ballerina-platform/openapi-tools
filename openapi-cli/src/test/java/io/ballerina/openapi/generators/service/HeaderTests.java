@@ -38,7 +38,6 @@ import java.util.List;
  */
 public class HeaderTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
-    BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator();
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
@@ -49,7 +48,8 @@ public class HeaderTests {
     public void generateHeaderParameter() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/headers/multiHeaderParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_parameters.bal",
                 syntaxTree);
     }

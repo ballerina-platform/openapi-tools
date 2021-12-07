@@ -37,7 +37,6 @@ import java.util.List;
  */
 public class ParameterGeneratorTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/service/").toAbsolutePath();
-    BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator();
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
@@ -47,7 +46,8 @@ public class ParameterGeneratorTest {
     public void generateService() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_service.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("service_gen.bal", syntaxTree);
     }
 
@@ -56,7 +56,8 @@ public class ParameterGeneratorTest {
             FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/petstore_service_with_special_characters.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("service_gen_special_characters.bal",
                 syntaxTree);
     }
@@ -64,51 +65,57 @@ public class ParameterGeneratorTest {
     public void generateMultipleOperations() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/multiOperations.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("multi_operations.bal", syntaxTree);
     }
 
     @Test(description = "Generate functionDefinitionNode for multiple paths")
-    public void generateMultiplePath() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateMultiplePath() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPaths.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("multi_paths.bal", syntaxTree);
     }
 
     //Scenario 01 - Path parameters.
     @Test(description = "Generate functionDefinitionNode for Path parameters")
-    public void generatePathparameter() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generatePathparameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPathParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("path_parameters.bal", syntaxTree);
     }
 
     //Scenario 02 - Path parameters.
     @Test(description = "Generate functionDefinitionNode for only Path parameters")
-    public void generatePathparameter02() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generatePathparameter02() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPathParam02.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("path_parameters02.bal", syntaxTree);
     }
 
     //Scenario 02 - Query parameters.
     @Test(description = "Generate functionDefinitionNode for Query parameters")
-    public void generateQueryparameter() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateQueryparameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/multiQueryParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query_parameters.bal", syntaxTree);
 
     }
 
     @Test(description = "Generate functionDefinitionNode for paramter for content instead of schema")
-    public void generateParameterHasContent() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateParameterHasContent() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameterTypehasContent.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("param_type_with_content.bal", syntaxTree);
     }
 }
