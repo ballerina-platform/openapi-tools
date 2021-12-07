@@ -153,6 +153,7 @@ public class GeneratorConstants {
     public static final String HTTP_HEADERS = "httpHeaders";
     public static final String ARRAY = "array";
     public static final String MAP_JSON = "map<json>";
+    public static final String APPLICATION_JSON = "application/json";
 
     // auth related constants
     public static final String API_KEY = "apikey";
@@ -298,5 +299,11 @@ public class GeneratorConstants {
     // OS specific line separator
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String DOUBLE_LINE_SEPARATOR = LINE_SEPARATOR + LINE_SEPARATOR;
+
+    // Service Generation
+    public static final String TREAT_NILABLE_AS_OPTIONAL = "treatNilableAsOptional";
+    public static final String SERVICE_CONFIG = "http:ServiceConfig";
+    public static final String FALSE = "false";
+
 
 }

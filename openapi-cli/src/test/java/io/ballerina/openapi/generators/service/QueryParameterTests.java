@@ -22,7 +22,6 @@ import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
@@ -32,6 +31,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This test class contains all the query parameter tests.
+ */
 public class QueryParameterTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/service").toAbsolutePath();
     List<String> list1 = new ArrayList<>();
@@ -147,8 +149,7 @@ public class QueryParameterTests {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_09.bal", syntaxTree);
     }
 
     @Test(description = "10. Optional query parameter has array data type with no item types",
@@ -163,12 +164,20 @@ public class QueryParameterTests {
     }
 
     @Test(description = "11. Required query parameter has nullable true")
-    public void requiredNullableQueryParameter() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void requiredNullableQueryParameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_11.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_11.bal", syntaxTree);
+    }
+
+    @Test(description = "12. Required query parameter has map<json> type")
+    public void mapJsonQueryParameter() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/query/query_12.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_12.bal", syntaxTree);
     }
 }

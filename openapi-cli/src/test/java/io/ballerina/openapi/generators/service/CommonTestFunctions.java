@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.generators.service;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 
 import java.io.IOException;

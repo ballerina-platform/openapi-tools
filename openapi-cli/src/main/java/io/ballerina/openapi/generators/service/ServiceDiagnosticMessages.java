@@ -33,10 +33,7 @@ public enum ServiceDiagnosticMessages {
             "Query parameter with no array item type can not be mapped to ballerina resource query parameter.",
             DiagnosticSeverity.ERROR),
     OAS_SERVICE_102("OAS_SERVICE_102",
-            "Given OpenAPI query parameter type '%s' can not be map to the Ballerina query parameter.",
-            DiagnosticSeverity.ERROR),
-    OAS_SERVICE_103("OAS_SERVICE_103",
-            "Given OpenAPI query parameter '%s' type can not be map to the Ballerina query parameter.",
+            "Given OpenAPI query parameter type '%s' can not be mapped to the Ballerina query parameter.",
             DiagnosticSeverity.ERROR);
 
     private final String code;

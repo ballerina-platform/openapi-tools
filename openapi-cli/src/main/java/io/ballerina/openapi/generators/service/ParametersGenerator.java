@@ -35,6 +35,9 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MapSchema;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -54,10 +57,10 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createDefaultablePar
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_JSON;
 import static io.ballerina.openapi.generators.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEADER;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAP_JSON;
-import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.generators.GeneratorConstants.QUERY;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
@@ -184,11 +187,15 @@ public class ParametersGenerator {
         NodeList<AnnotationNode> annotations = createEmptyNodeList();
         IdentifierToken parameterName = createIdentifierToken(escapeIdentifier(parameter.getName().trim()),
                 AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
-        boolean isSchemaSupported = schema == null || parameter.getContent() != null || schema.get$ref() != null
-                || schema.getType() == null || schema.getType().equals(OBJECT) || schema instanceof ObjectSchema
-                || schema.getProperties() != null;
-        if (isSchemaSupported) {
-            ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_103;
+        boolean isSchemaSupported = schema == null || schema.get$ref() != null || schema.getType() == null
+                || schema.getType().equals(OBJECT) || schema instanceof ObjectSchema || schema.getProperties() != null;
+        if (parameter.getContent() != null) {
+            Content content = parameter.getContent();
+            for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
+                return handleMapJsonQueryParameter(parameter, annotations, parameterName, mediaTypeEntry);
+            }
+        } else if (isSchemaSupported) {
+            ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
             throw new BallerinaOpenApiException(String.format(messages.getDescription(), parameter.getName()));
         } else if (parameter.getSchema().getDefault() != null) {
             // When query parameter has default value
@@ -200,10 +207,49 @@ public class ParametersGenerator {
             // Optional typeDescriptor
             return handleOptionalQueryParameter(schema, annotations, parameterName);
         }
+        return null;
     }
 
-    /*
-    This function is to handle query schema which is not have required true.
+    /**
+     * Handle query parameter for content type which has application/json.
+     * example:
+     * <pre>
+     *     parameters:
+     *         - name: petType
+     *           in: query
+     *           content:
+     *             application/json:
+     *               schema:
+     *                 type: object
+     *                 additionalProperties: true
+     * </pre>
+     */
+    private RequiredParameterNode handleMapJsonQueryParameter(Parameter parameter, NodeList<AnnotationNode> annotations,
+                                                           IdentifierToken parameterName,
+                                                           Map.Entry<String, MediaType> mediaTypeEntry)
+            throws BallerinaOpenApiException {
+
+        if (mediaTypeEntry.getKey().equals(APPLICATION_JSON) &&
+                mediaTypeEntry.getValue().getSchema() instanceof MapSchema) {
+            if (parameter.getRequired()) {
+                BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(MAP_JSON));
+                return createRequiredParameterNode(annotations, rTypeName, parameterName);
+            } else {
+                BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null,
+                        createIdentifierToken(MAP_JSON));
+                OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
+                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+                return createRequiredParameterNode(annotations, optionalNode, parameterName);
+            }
+        } else {
+            ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
+            throw new BallerinaOpenApiException(String.format(messages.getDescription(), parameter.getName()));
+        }
+    }
+
+    /**
+     * This function is to handle query schema which is not have required true.
      */
     private Node handleOptionalQueryParameter(Schema<?> schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
@@ -224,15 +270,8 @@ public class ParametersGenerator {
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_100;
                 throw new BallerinaOpenApiException(messages.getDescription());
             } else {
-                // TODO create diagnostic after checking with team or map to map<json>.
-                Token name = createIdentifierToken(MAP_JSON, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
-                if (items.getNullable()) {
-                    name = createIdentifierToken(MAP_JSON + NILLABLE, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
-                }
-                BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
-                OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
-                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-                return createRequiredParameterNode(annotations, optionalNode, parameterName);
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
+                throw new BallerinaOpenApiException(String.format(messages.getDescription(), parameterName.toString()));
             }
         } else {
             Token name = createIdentifierToken(convertOpenAPITypeToBallerina(
@@ -255,6 +294,9 @@ public class ParametersGenerator {
                 // Resource function doesn't support to query parameters with array type which hasn't item type.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_101;
                 throw new BallerinaOpenApiException(messages.getDescription());
+            } else if (items instanceof ObjectSchema) {
+                ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
+                throw new BallerinaOpenApiException(String.format(messages.getDescription(), parameterName.toString()));
             } else {
                 // Resource function doesn't support to the nested array type query parameters.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_100;
