@@ -31,7 +31,7 @@ jobs:
           packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
         run: |
-          ./gradlew clean build --stacktrace --scan --console=plain --no-daemon
+          ./gradlew clean build --stacktrace --scan --console=plain 
           ./gradlew publish --scan
           ./gradlew codeCoverageReport --no-daemon
       - name: Generate CodeCov Report
