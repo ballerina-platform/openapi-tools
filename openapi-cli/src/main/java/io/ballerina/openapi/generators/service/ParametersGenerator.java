@@ -139,12 +139,12 @@ public class ParametersGenerator {
         IdentifierToken parameterName = createIdentifierToken(escapeIdentifier(parameter.getName()
                 .toLowerCase(Locale.ENGLISH)), AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
         if (schema == null) {
-            /*
-             01.<pre>in: header
-                    name: X-Request-ID
-                    schema: {}
-              </pre>
-             */
+             // Header example:
+             // 01.<pre>
+             //       in: header
+             //       name: X-Request-ID
+             //       schema: {}
+             //  </pre>
             return createRequiredParameterNode(createEmptyNodeList(), createIdentifierToken(STRING, SINGLE_WS_MINUTIAE,
                             SINGLE_WS_MINUTIAE), parameterName);
         } else {
@@ -168,7 +168,7 @@ public class ParametersGenerator {
             MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
                     createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
                     createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
-            AnnotationNode headerNode = getAnnotationNode(HEADER, annotValue);
+            AnnotationNode headerNode = getAnnotationNode("Header", annotValue);
             NodeList<AnnotationNode> headerAnnotations = NodeFactory.createNodeList(headerNode);
 
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);

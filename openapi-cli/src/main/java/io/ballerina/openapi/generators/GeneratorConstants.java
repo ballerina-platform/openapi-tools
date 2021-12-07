@@ -308,6 +308,4 @@ public class GeneratorConstants {
     public static final String TREAT_NILABLE_AS_OPTIONAL = "treatNilableAsOptional";
     public static final String SERVICE_CONFIG = "http:ServiceConfig";
     public static final String FALSE = "false";
-
-
 }

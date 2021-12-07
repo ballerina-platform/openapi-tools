@@ -22,7 +22,6 @@ import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -45,7 +44,7 @@ public class HeaderTests {
 
     //Scenario 03 - Header parameters.
     @Test(description = "Generate functionDefinitionNode for Header parameters")
-    public void generateHeaderParameter() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateHeaderParameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/headers/multiHeaderParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);

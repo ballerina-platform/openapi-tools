@@ -41,24 +41,20 @@ public enum ServiceDiagnosticMessages {
     private final DiagnosticSeverity severity;
 
     ServiceDiagnosticMessages(String code, String description, DiagnosticSeverity severity) {
-
         this.code = code;
         this.description = description;
         this.severity = severity;
     }
 
     public String getCode() {
-
         return code;
     }
 
     public String getDescription() {
-
         return description;
     }
 
     public DiagnosticSeverity getSeverity() {
-
         return severity;
     }
 }
