@@ -33,6 +33,6 @@ jobs:
         run: |
           ./gradlew clean build --stacktrace --scan --console=plain 
           ./gradlew publish --scan
-          ./gradlew codeCoverageReport --no-daemon
+          ./gradlew codeCoverageReport
       - name: Generate CodeCov Report
         uses: codecov/codecov-action@v1
