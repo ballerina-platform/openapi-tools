@@ -37,6 +37,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +48,11 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_RETURN;
+import static io.ballerina.openapi.generators.GeneratorConstants.ERROR;
+import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
@@ -82,37 +85,47 @@ public class FunctionReturnTypeGenerator {
      */
     public String getReturnType(Operation operation, boolean isSignature) throws BallerinaOpenApiException {
         //TODO: Handle multiple media-type
-        String returnType = "http:Response|error";
+        Set<String> returnTypes = new HashSet<>();
+        boolean noContentResponseFound = false;
         if (operation.getResponses() != null) {
             ApiResponses responses = operation.getResponses();
             for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
                 String statusCode = entry.getKey();
                 ApiResponse response = entry.getValue();
-                if (statusCode.startsWith("2") && response.getContent() != null) {
+                if (statusCode.startsWith("2")) {
                     Content content = response.getContent();
-                    Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
-                    for (Map.Entry<String, MediaType> media : mediaTypes) {
-                        String type = "";
-                        if (media.getValue().getSchema() != null) {
-                            Schema schema = media.getValue().getSchema();
-                            type = getDataType(operation, isSignature, response, media, type, schema);
-                        } else {
-                            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
+                    if (content != null && content.size() > 0) {
+                        Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
+                        for (Map.Entry<String, MediaType> media : mediaTypes) {
+                            String type = "";
+                            if (media.getValue().getSchema() != null) {
+                                Schema schema = media.getValue().getSchema();
+                                type = getDataType(operation, isSignature, response, media, type, schema);
+                            } else {
+                                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
+                            }
+                            returnTypes.add(type);
+                            // Currently support for first media type
+                            break;
                         }
-
-                        StringBuilder builder = new StringBuilder();
-                        builder.append(type);
-                        builder.append(PIPE_TOKEN.stringValue());
-                        builder.append(ERROR_KEYWORD.stringValue());
-                        returnType = builder.toString();
-                        // Currently support for first media type
-                        break;
+                    } else {
+                        noContentResponseFound = true;
                     }
-                    break;
                 }
             }
         }
-        return returnType;
+        if (returnTypes.size() > 0) {
+            StringBuilder finalReturnType = new StringBuilder();
+            finalReturnType.append(String.join(PIPE_TOKEN.stringValue(), returnTypes));
+            finalReturnType.append(PIPE_TOKEN.stringValue());
+            finalReturnType.append(ERROR);
+            if (noContentResponseFound) {
+                finalReturnType.append(NILLABLE);
+            }
+            return finalReturnType.toString();
+        } else {
+            return DEFAULT_RETURN;
+        }
     }
 
     /**

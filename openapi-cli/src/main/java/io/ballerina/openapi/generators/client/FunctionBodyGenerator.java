@@ -108,11 +108,13 @@ import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEADER;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEADER_VALUES;
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP_HEADERS;
+import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.generators.GeneratorConstants.POST;
 import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
 import static io.ballerina.openapi.generators.GeneratorConstants.QUERY;
 import static io.ballerina.openapi.generators.GeneratorConstants.QUERY_PARAM;
+import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE_PATH;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESPONSE;
 import static io.ballerina.openapi.generators.GeneratorConstants.SELF;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
@@ -353,11 +355,12 @@ public class FunctionBodyGenerator {
         if (queryParamEncodingMap != null) {
             statementsList.add(queryParamEncodingMap);
             ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
-                    "path = path + check getPathForQueryParam(queryParam, queryParamEncoding)");
+                    RESOURCE_PATH + " = " + RESOURCE_PATH + " + check getPathForQueryParam(queryParam, " +
+                            "queryParamEncoding)");
             statementsList.add(updatedPath);
         } else {
             ExpressionStatementNode updatedPath = GeneratorUtils.getSimpleExpressionStatementNode(
-                    "path = path + check getPathForQueryParam(queryParam)");
+                    RESOURCE_PATH + " = " + RESOURCE_PATH + " + check getPathForQueryParam(queryParam)");
             statementsList.add(updatedPath);
         }
     }
@@ -506,14 +509,16 @@ public class FunctionBodyGenerator {
                 ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "//TODO: Update the request as needed");
                 statementsList.add(expressionStatementNode);
-                clientCallStatement = "check self.clientEp->" + method + "(path, request, headers = " +
-                            "" + HTTP_HEADERS + ")";
+                clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH +
+                        ", request, headers = " + HTTP_HEADERS + ")";
 
             } else {
                 if (method.equals(HEAD)) {
-                    clientCallStatement = "check self.clientEp->" + method + "(path, " + HTTP_HEADERS + ")";
+                    clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", " +
+                            HTTP_HEADERS + ")";
                 } else {
-                    clientCallStatement = "check self.clientEp->" + method + "(path, " + HTTP_HEADERS + ")";
+                    clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", " +
+                            HTTP_HEADERS + ")";
                 }
             }
         } else if (isMethod) {
@@ -524,9 +529,9 @@ public class FunctionBodyGenerator {
                     "//TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
             clientCallStatement =
-                        "check self.clientEp-> " + method + "(path, request)";
+                        "check self.clientEp-> " + method + "(" + RESOURCE_PATH + ", request)";
         } else {
-            clientCallStatement = "check self.clientEp->" + method + "(path)";
+            clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ")";
         }
         //Return Variable
         VariableDeclarationNode clientCall = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
@@ -552,8 +557,8 @@ public class FunctionBodyGenerator {
     private VariableDeclarationNode getPathStatement(String path, NodeList<AnnotationNode> annotationNodes) {
 
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(createSimpleNameReferenceNode(
-                createIdentifierToken("string")), createCaptureBindingPatternNode(
-                createIdentifierToken("path")));
+                createToken(STRING_KEYWORD)), createCaptureBindingPatternNode(
+                createIdentifierToken(RESOURCE_PATH)));
         // Create initializer
         // Content  should decide with /pet and /pet/{pet}
         path = generatePathWithPathParameter(path);
@@ -629,12 +634,13 @@ public class FunctionBodyGenerator {
         // POST, PUT, PATCH, DELETE, EXECUTE
         VariableDeclarationNode requestStatement =
                 GeneratorUtils.getSimpleStatement(returnType, RESPONSE, "check self.clientEp->"
-                        + method + "(path," + " request)");
+                        + method + "(" + RESOURCE_PATH + ", request)");
         if (isHeader) {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
                 requestStatement = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
-                        "check self.clientEp->" + method + "(path, request, headers = " + HTTP_HEADERS + ")");
+                        "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", request, headers = " +
+                                HTTP_HEADERS + ")");
                 statementsList.add(requestStatement);
                 Token returnKeyWord = createIdentifierToken("return");
                 SimpleNameReferenceNode returns = createSimpleNameReferenceNode(createIdentifierToken(RESPONSE));
@@ -677,10 +683,7 @@ public class FunctionBodyGenerator {
         String returnType;
         int index = rType.lastIndexOf("|");
         returnType = rType.substring(0, index);
-        if (returnType.contains("|")) {
-            returnType = returnType.replaceAll("\\|", "");
-        }
-        return returnType;
+        return (rType.contains(NILLABLE) ? returnType + NILLABLE : returnType);
     }
 
     /**

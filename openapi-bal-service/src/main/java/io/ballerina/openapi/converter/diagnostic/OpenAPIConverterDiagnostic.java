@@ -34,4 +34,6 @@ public interface OpenAPIConverterDiagnostic {
     String getMessage();
 
     Optional<Location> getLocation();
+
+    String getCode();
 }

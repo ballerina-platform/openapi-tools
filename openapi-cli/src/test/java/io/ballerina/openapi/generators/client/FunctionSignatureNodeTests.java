@@ -67,6 +67,7 @@ public class FunctionSignatureNodeTests {
         RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
         RequiredParameterNode param02 = (RequiredParameterNode) parameters.get(1);
         RequiredParameterNode param03 = (RequiredParameterNode) parameters.get(2);
+        RequiredParameterNode param04 = (RequiredParameterNode) parameters.get(3);
 
         Assert.assertEquals(param01.paramName().orElseThrow().text(), "latitude");
         Assert.assertEquals(param01.typeName().toString(), "float");
@@ -76,6 +77,9 @@ public class FunctionSignatureNodeTests {
 
         Assert.assertEquals(param03.paramName().orElseThrow().text(), "country");
         Assert.assertEquals(param03.typeName().toString(), "string");
+
+        Assert.assertEquals(param04.paramName().orElseThrow().text(), "pages");
+        Assert.assertEquals(param04.typeName().toString(), "int[]");
 
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
         Assert.assertEquals(returnTypeNode.type().toString(), "Product[]|error");
@@ -167,6 +171,28 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(returnTypeNode.type().toString(), "string[]|error");
     }
 
+    @Test(description = "Test unsupported nested array type query parameter generation",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Unsupported parameter type is found in the parameter : .*")
+    public void testNestedArrayQueryParamGeneration() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/invalid_array_query_params.yaml"));
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>());
+        functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/pets").getGet(), new ArrayList<>());
+    }
+
+    @Test(description = "Test generation of array type query parameter when type of the parameter not given",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Please define the array item type of the parameter : .*")
+    public void testArrayQueryParamWithNoTypeGeneration() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/invalid_array_query_params.yaml"));
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>());
+        functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/dogs").getGet(), new ArrayList<>());
+    }
+
     @AfterTest
     private void deleteGeneratedFiles() {
         try {
@@ -175,5 +201,4 @@ public class FunctionSignatureNodeTests {
         } catch (IOException ignored) {
         }
     }
-
 }

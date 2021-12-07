@@ -21,6 +21,7 @@
 <suite name="ballerina-integration-tests">
     <test name="integration-tests" preserve-order="true" parallel="false">
         <classes>
+            <class name="io.ballerina.openapi.extension.build.BuildExtensionTests"/>
             <class name="io.ballerina.openapi.cmd.BallerinaToOpenAPITests"/>
         </classes>
     </test>

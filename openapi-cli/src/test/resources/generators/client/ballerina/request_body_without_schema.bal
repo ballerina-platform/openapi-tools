@@ -17,12 +17,12 @@ public isolated client class Client {
     # + 'limit - How many items to return at one time (max 100)
     # + payload - Pet
     remote isolated function listPets(json payload, int? 'limit = ()) returns json|error {
-        string path = string `/pets`;
+        string resourcePath = string `/pets`;
         map<anydata> queryParam = {"limit": 'limit};
-        path = path + check getPathForQueryParam(queryParam);
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Request request = new;
         request.setPayload(payload, "application/json");
-        json response = check self.clientEp->post(path, request);
+        json response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }

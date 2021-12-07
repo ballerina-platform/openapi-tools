@@ -18,11 +18,11 @@ public isolated client class Client {
     # + payload - Pet
     # + return - Null response
     remote isolated function createPet(PetsBody payload) returns http:Response|error {
-        string path = string `/pets`;
+        string resourcePath = string `/pets`;
         http:Request request = new;
         mime:Entity[] bodyParts = check createBodyParts(payload);
         request.setBodyParts(bodyParts);
-        http:Response response = check self.clientEp->post(path, request);
+        http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }

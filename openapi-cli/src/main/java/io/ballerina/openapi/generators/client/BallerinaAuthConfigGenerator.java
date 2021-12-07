@@ -36,6 +36,7 @@ import io.ballerina.compiler.syntax.tree.IfElseStatementNode;
 import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NilLiteralNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -86,6 +87,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createElseBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIfElseStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createImplicitNewExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createIncludedRecordParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIntersectionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
@@ -106,6 +108,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceTypeDescNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ASTERISK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.BITWISE_AND_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CHECK_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_PIPE_TOKEN;
@@ -161,6 +164,7 @@ public class BallerinaAuthConfigGenerator {
     private final List<Node> apiKeysConfigRecordFields = new ArrayList<>();
     private boolean apiKey;
     private boolean httpOROAuth;
+    private String clientCredGrantTokenUrl;
     private final Set<String> authTypes = new LinkedHashSet<>();
 
     public BallerinaAuthConfigGenerator(boolean isAPIKey, boolean isHttpOROAuth) {
@@ -211,6 +215,31 @@ public class BallerinaAuthConfigGenerator {
      */
     public Set<String> getAuthType() {
         return authTypes;
+    }
+
+    /**
+     * Add authentication related records.
+     *
+     * @param openAPI   OpenAPI object received from swagger open-api parser
+     * @param nodes     List of ModuleMemberDeclarationNode nodes
+     * @throws BallerinaOpenApiException    When function fails
+     */
+    public void addAuthRelatedRecords (OpenAPI openAPI, List<ModuleMemberDeclarationNode> nodes) throws
+            BallerinaOpenApiException {
+        if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
+            // Add ApiKeysConfig or ClientConfig record
+            nodes.add(getConfigRecord(openAPI));
+
+            // Add `AuthConfig` record if combination of ApiKey and HTTP/OAuth authentication is supported
+            if (isApiKey() && isHttpOROAuth()) {
+                nodes.add(getAuthConfigRecord());
+            }
+
+            // Add custom `OAuth2ClientCredentialsGrantConfig` record with default tokenUrl if `tokenUrl` is available
+            if (clientCredGrantTokenUrl != null) {
+                nodes.add(getOAuth2ClientCredsGrantConfigRecord());
+            }
+        }
     }
 
     /**
@@ -290,6 +319,65 @@ public class BallerinaAuthConfigGenerator {
                 createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName,
                 recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
 
+    }
+
+    /**
+     * Create `OAuth2ClientCredentialsGrantConfig` record with default tokenUrl.
+     *
+     * <pre>
+     *      # OAuth2 Client Credintials Grant Configs
+     *      public type OAuth2ClientCredentialsGrantConfig record {|
+     *          *http:OAuth2ClientCredentialsGrantConfig;
+     *          # Token URL
+     *          string tokenUrl = "https://zoom.us/oauth/token";
+     *      |};
+     * </pre>
+     *
+     * @return {@link TypeDefinitionNode}   Custom `OAuth2ClientCredentialsGrantConfig` record with default tokenUrl
+     */
+    public TypeDefinitionNode getOAuth2ClientCredsGrantConfigRecord() {
+        Token typeName = AbstractNodeFactory.createIdentifierToken(AuthConfigTypes.CUSTOM_CLIENT_CREDENTIAL.getValue());
+        NodeList<Node> recordFieldList = createNodeList(getClientCredsGrantConfigFields());
+        MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Client Credintials Grant Configs");
+        RecordTypeDescriptorNode recordTypeDescriptorNode =
+                NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                        createToken(OPEN_BRACE_PIPE_TOKEN), recordFieldList, null,
+                        createToken(CLOSE_BRACE_PIPE_TOKEN));
+        return NodeFactory.createTypeDefinitionNode(configRecordMetadataNode,
+                createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName,
+                recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    /**
+     * Generates fields of `OAuth2ClientCredentialsGrantConfig` record with default tokenUrl.
+     *
+     * <pre>
+     *      *http:OAuth2ClientCredentialsGrantConfig;
+     *      # Token URL
+     *      string tokenUrl = "https://zoom.us/oauth/token";
+     * </pre>
+     *
+     * @return {@link List<Node>}
+     */
+    private List<Node> getClientCredsGrantConfigFields() {
+        List<Node> recordFieldNodes = new ArrayList<>();
+        Token semicolonToken = createToken(SEMICOLON_TOKEN);
+        Token equalToken = createToken(EQUAL_TOKEN);
+
+        recordFieldNodes.add(createIncludedRecordParameterNode(createEmptyNodeList(),
+                createIdentifierToken(ASTERISK_TOKEN.stringValue()),
+                createIdentifierToken("http:OAuth2ClientCredentialsGrantConfig;"), null));
+
+        MetadataNode metadataNode = getMetadataNode("Token URL");
+        TypeDescriptorNode stringType = createSimpleNameReferenceNode(createToken(STRING_KEYWORD));
+        IdentifierToken fieldNameTokenUrl = createIdentifierToken("tokenUrl");
+        ExpressionNode defaultValue = createRequiredExpressionNode(createIdentifierToken("\"" +
+                clientCredGrantTokenUrl + "\""));
+        RecordFieldWithDefaultValueNode fieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, stringType, fieldNameTokenUrl, equalToken, defaultValue,
+                semicolonToken);
+        recordFieldNodes.add(fieldNode);
+        return recordFieldNodes;
     }
 
     /**
@@ -835,6 +923,9 @@ public class BallerinaAuthConfigGenerator {
                     case OAUTH2:
                         httpOROAuth = true;
                         if (schemaValue.getFlows().getClientCredentials() != null) {
+                            if (schemaValue.getFlows().getClientCredentials().getTokenUrl() != null) {
+                                clientCredGrantTokenUrl = schemaValue.getFlows().getClientCredentials().getTokenUrl();
+                            }
                             authTypes.add(CLIENT_CRED);
                         }
                         if (schemaValue.getFlows().getPassword() != null) {
@@ -907,7 +998,11 @@ public class BallerinaAuthConfigGenerator {
                     httpFieldTypeNames.add(AuthConfigTypes.BASIC.getValue());
                     break;
                 case CLIENT_CRED:
-                    httpFieldTypeNames.add(AuthConfigTypes.CLIENT_CREDENTIAL.getValue());
+                    if (clientCredGrantTokenUrl != null) {
+                        httpFieldTypeNames.add(AuthConfigTypes.CUSTOM_CLIENT_CREDENTIAL.getValue());
+                    } else {
+                        httpFieldTypeNames.add(AuthConfigTypes.CLIENT_CREDENTIAL.getValue());
+                    }
                     break;
                 case PASSWORD:
                     httpFieldTypeNames.add(AuthConfigTypes.PASSWORD.getValue());

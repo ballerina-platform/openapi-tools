@@ -26,6 +26,8 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_EMPTY_MINUTIAE;
+import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
@@ -62,6 +64,7 @@ public class ReferencedTypeGenerator extends TypeGenerator {
         String typeName = getValidName(extractReferenceType(schema.get$ref()), true);
         Schema<?> refSchema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName);
         typeName = TypeGeneratorUtils.getNullableType(refSchema, typeName);
-        return createSimpleNameReferenceNode(createIdentifierToken(typeName));
+        return createSimpleNameReferenceNode(createIdentifierToken(typeName,
+                SINGLE_EMPTY_MINUTIAE, SINGLE_WS_MINUTIAE));
     }
 }

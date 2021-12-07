@@ -15,45 +15,45 @@ public isolated client class Client {
         return;
     }
     remote isolated function  pet() returns http:Response | error {
-        string  path = string `/pet`;
-        http:Response  response = check self.clientEp->get(path );
+        string resourcePath = string `/pet`;
+        http:Response  response = check self.clientEp->get(resourcePath);
         return response;
     }
     remote isolated function getPetId(string petId) returns http:Response | error {
-        string  path = string `/pets/${petId}`;
-        http:Response  response = check self.clientEp->get(path );
+        string resourcePath = string `/pets/${petId}`;
+        http:Response  response = check self.clientEp->get(resourcePath);
         return response;
     }
     remote isolated function  ImageByimageId(int petId, string imageId) returns http:Response | error {
-        string  path = string `/pets/${petId}/Image/${imageId}`;
-        http:Response  response = check self.clientEp->get(path );
+        string resourcePath = string `/pets/${petId}/Image/${imageId}`;
+        http:Response  response = check self.clientEp->get(resourcePath);
         return response;
     }
     remote isolated function  pets(int offset) returns http:Response | error {
-        string  path = string `/pets`;
+        string resourcePath = string `/pets`;
         map<anydata> queryParam = {offset: offset};
-        path = path + check getPathForQueryParam(queryParam);
-        http:Response  response = check self.clientEp->get(path );
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        http:Response  response = check self.clientEp->get(resourcePath);
         return response;
     }
     remote isolated function  users(string[]? offset) returns http:Response | error {
-        string  path = string `/users`;
+        string resourcePath = string `/users`;
         map<anydata> queryParam = {offset: offset};
-        path = path + getPathForQueryParam(queryParam);
-        http:Response  response = check self.clientEp->get(path );
+        resourcePath = resourcePath + getPathForQueryParam(queryParam);
+        http:Response  response = check self.clientEp->get(resourcePath);
         return response;
     }
     remote isolated function getImage(string? tag, int? 'limit) returns http:Response | error {
-        string  path = string `/image`;
+        string resourcePath = string `/image`;
         map<anydata> queryParam = {tag: tag, 'limit: 'limit};
-        path = path + check getPathForQueryParam(queryParam);
-        http:Response  response = check self.clientEp->get(path );
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        http:Response  response = check self.clientEp->get(resourcePath);
         return response;
     }
     remote isolated function  header(string XClient) returns http:Response | error {
-        string  path = string `/header`;
+        string resourcePath = string `/header`;
         map<string|string[]> httpHeaders = {XClient: XClient};
-        http:Response  response = check self.clientEp->get(path, httpHeaders );
+        http:Response  response = check self.clientEp->get(resourcePath, httpHeaders);
         return response;
     }
 }

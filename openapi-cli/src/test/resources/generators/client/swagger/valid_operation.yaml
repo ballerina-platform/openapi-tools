@@ -34,6 +34,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: pages
+          in: query
+          required: true
+          description: pages to fetch
+          schema:
+            type: array
+            items:
+              type: number
+              format: integer
       tags:
         - Products
       responses:

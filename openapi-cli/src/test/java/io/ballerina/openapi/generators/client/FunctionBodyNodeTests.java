@@ -35,7 +35,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,8 +48,6 @@ public class FunctionBodyNodeTests {
     private static final Path RESDIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
     private static final Path clientPath = RESDIR.resolve("ballerina_project/client.bal");
     private static final Path schemaPath = RESDIR.resolve("ballerina_project/types.bal");
-    List<String> list1 = new ArrayList<>();
-    List<String> list2 = new ArrayList<>();
 
     @Test(description = "Tests functionBodyNodes including statements according to the different scenarios",
             dataProvider = "dataProviderForFunctionBody")
@@ -73,57 +70,60 @@ public class FunctionBodyNodeTests {
     @DataProvider(name = "dataProviderForFunctionBody")
     public Object[][] dataProviderForFunctionBody() {
         return new Object[][]{
-                {"diagnostic_files/header_parameter.yaml", "/pets", "{stringpath=string`/pets`;map<any>headerValues=" +
+                {"diagnostic_files/header_parameter.yaml", "/pets", "{string resourcePath=string`/pets`;" +
+                        "map<any>headerValues=" +
                         "{\"X-Request-ID\":xRequestId,\"X-Request-Client\":xRequestClient};map<string|string[]>" +
                         "httpHeaders=getMapForHeaders(headerValues);http:Response response =checkself.clientEp->get" +
-                        "(path,httpHeaders); return response;}"},
-                {"diagnostic_files/head_operation.yaml", "/{filesystem}", "{string path=string`/${filesystem}`;" +
+                        "(resourcePath,httpHeaders); return response;}"},
+                {"diagnostic_files/head_operation.yaml", "/{filesystem}",
+                        "{string resourcePath=string`/${filesystem}`;" +
                         "map<anydata>queryParam={\"resource\":'resource,\"timeout\":timeout};" +
-                        "path = path + check getPathForQueryParam(queryParam);" +
+                        "resourcePath = resourcePath + check getPathForQueryParam(queryParam);" +
                         "map<any>headerValues={\"x-ms-client-request-id\":xMsClientRequestId," +
                         "\"x-ms-date\":xMsDate,\"x-ms-version\":xMsVersion};map<string|string[]> " +
                         "httpHeaders = getMapForHeaders(headerValues);" +
-                        "http:Responseresponse=check self.clientEp-> head(path, httpHeaders);returnresponse;}"},
-                {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string  path = string `/pets/${petId}`;" +
-                        "http:Response response = check self.clientEp-> delete(path);" +
+                        "http:Responseresponse=check self.clientEp-> head(resourcePath, httpHeaders);returnresponse;}"},
+                {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string resourcePath = " +
+                        "string `/pets/${petId}`;" +
+                        "http:Response response = check self.clientEp-> delete(resourcePath);" +
                         "return response;}"},
-                {"diagnostic_files/json_payload.yaml", "/pets", "{string  path = string `/pets`;" +
+                {"diagnostic_files/json_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "http:Request request = new; request.setPayload(payload, \"application/json\"); " +
                         "http:Response response = check self.clientEp->" +
-                        "post(path, request); " +
+                        "post(resourcePath, request); " +
                         "return response;}"},
-                {"diagnostic_files/xml_payload.yaml", "/pets", "{string  path = string `/pets`; " +
+                {"diagnostic_files/xml_payload.yaml", "/pets", "{string resourcePath = string `/pets`; " +
                         "http:Request request = new;" +
                         "request.setPayload(payload, \"application/xml\"); " +
-                        "http:Response response = check self.clientEp->post(path, request);" +
+                        "http:Response response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
-                {"diagnostic_files/xml_payload_with_ref.yaml", "/pets", "{string  path = string `/pets`;" +
+                {"diagnostic_files/xml_payload_with_ref.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
                         "json jsonBody = check payload.cloneWithType(json);" +
                         "xml? xmlBody = check xmldata:fromJson(jsonBody);" +
                         "request.setPayload(xmlBody, \"application/xml\");" +
-                        "http:Response response = check self.clientEp->post(path, request);" +
+                        "http:Response response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
-                {"swagger/response_type_order.yaml", "/pet/{petId}", "{string path = string `/pet/${petId}`;" +
-                        "Pet response = check self.clientEp->get(path);" +
+                {"swagger/response_type_order.yaml", "/pet/{petId}", "{string resourcePath = string `/pet/${petId}`;" +
+                        "Pet response = check self.clientEp->get(resourcePath);" +
                         "return response;}"},
-                {"swagger/text_request_payload.yaml", "/pets", "{string path = string `/pets`;" +
+                {"swagger/text_request_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
                         "json jsonBody = check payload.cloneWithType(json);" +
                         "request.setPayload(jsonBody, \"text/json\");" +
-                        "json response = check self.clientEp->post(path, request);" +
+                        "json response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
-                {"swagger/pdf_payload.yaml", "/pets", "{string path = string `/pets`;" +
+                {"swagger/pdf_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
                         "request.setPayload(payload, \"application/pdf\");" +
-                        "http:Response response = check self.clientEp->post(path, request);" +
+                        "http:Response response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
-                {"swagger/image_payload.yaml", "/pets", "{string path = string `/pets`;" +
+                {"swagger/image_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
                         "request.setPayload(payload, \"image/png\");" +
-                        "http:Response response = check self.clientEp->post(path, request);" +
+                        "http:Response response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
-                {"swagger/multipart_formdata_custom.yaml", "/pets", "{string path = string `/pets`;\n" +
+                {"swagger/multipart_formdata_custom.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "http:Request request = new;\n" +
                         "map<Encoding> encodingMap = {\"profileImage\": {contentType: \"image/png\", headers: " +
                         "{\"X-Custom-Header\": xCustomHeader}}, \"id\":{headers: {\"X-Custom-Header\": " +
@@ -131,7 +131,7 @@ public class FunctionBodyNodeTests {
                         "{contentType:\"text/plain\"}};\n" +
                         "mime:Entity[] bodyParts = check createBodyParts(payload, encodingMap);\n" +
                         "request.setBodyParts(bodyParts);\n" +
-                        "http:Response response = check self.clientEp->post(path, request);\n" +
+                        "http:Response response = check self.clientEp->post(resourcePath, request);\n" +
                         "return response;}"}
         };
     }

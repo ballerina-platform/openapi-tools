@@ -167,7 +167,7 @@ public class OpenApiConverterUtilsTest {
     }
 
     @Test(description = "Test for non http services")
-    public void testForNonHttpServices() throws IOException {
+    public void testForNonHttpServices() {
         Path ballerinaFilePath = RES_DIR.resolve("non_service.bal");
         new OpenApiConverter().generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);

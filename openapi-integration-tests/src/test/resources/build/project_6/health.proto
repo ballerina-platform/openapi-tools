@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+
+service HealthServer {
+    rpc registerPatient (Patient) returns (google.protobuf.BoolValue);
+    rpc getPatientInfo (google.protobuf.StringValue) returns (Patient);
+}
+
+message Patient {
+    string id = 1;
+    string name = 2;
+    enum Gender {
+        MALE = 0;
+        FEMALE = 1;
+        OTHER = 2;
+    }
+    Gender gender = 3;
+    string disease = 4;
+}

@@ -45,6 +45,7 @@ public class IncompatibleResourceDiagnostic implements OpenAPIConverterDiagnosti
     public IncompatibleResourceDiagnostic(DiagnosticMessages details, Location location) {
         this(details, location, details.getDescription());
     }
+    @Override
     public String getCode() {
         return code;
     }
