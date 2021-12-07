@@ -25,8 +25,7 @@ jobs:
           packageUser: ${{ github.actor }}
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
         run: |
-            ./gradlew build --stacktrace --scan --console=plain --no-daemon
-            ./gradlew codeCoverageReport --no-daemon
+            ./gradlew build codeCoverageReport --stacktrace --scan --console=plain --no-daemon
       - name: Generate Codecov Report
         if:  github.event_name == 'pull_request'
         uses: codecov/codecov-action@v1
