@@ -44,8 +44,6 @@ import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.model.OpenAPIInfo;
 import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.service.OpenAPIServiceMapper;
-import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
@@ -71,6 +69,7 @@ import static io.ballerina.openapi.converter.Constants.SLASH;
 import static io.ballerina.openapi.converter.Constants.SPECIAL_CHAR_REGEX;
 import static io.ballerina.openapi.converter.Constants.TITLE;
 import static io.ballerina.openapi.converter.Constants.VERSION;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.containErrors;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getOpenApiFileName;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.isHttpService;
 
@@ -129,11 +128,6 @@ public class ServiceToOpenAPIConverterUtils {
             outputs.add(exceptions);
         }
         return outputs;
-    }
-
-    private static boolean containErrors(List<Diagnostic> diagnostics) {
-        return diagnostics != null && diagnostics.stream().anyMatch(diagnostic ->
-                diagnostic.diagnosticInfo().severity() == DiagnosticSeverity.ERROR);
     }
 
     /**

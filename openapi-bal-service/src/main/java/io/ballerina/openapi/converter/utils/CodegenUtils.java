@@ -34,6 +34,7 @@ import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
  * Utilities used by ballerina openapi code generator.
  */
 public final class CodegenUtils {
+    private static final String LINE_SEPARATOR = System.lineSeparator();
     /**
      * Resolves path to write generated implementation source files.
      *
