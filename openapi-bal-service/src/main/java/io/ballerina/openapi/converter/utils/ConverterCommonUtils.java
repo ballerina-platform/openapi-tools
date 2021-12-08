@@ -45,6 +45,8 @@ import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.ballerina.tools.text.LinePosition;
 import io.ballerina.tools.text.LineRange;
@@ -386,5 +388,10 @@ public class ConverterCommonUtils {
         Optional<String> moduleNameOpt = moduleSymbol.getName();
         return moduleNameOpt.isPresent() && Constants.HTTP.equals(moduleNameOpt.get())
                 && Constants.BALLERINA.equals(moduleSymbol.id().orgName());
+    }
+
+    public static boolean containErrors(List<Diagnostic> diagnostics) {
+        return diagnostics != null && diagnostics.stream().anyMatch(diagnostic ->
+                diagnostic.diagnosticInfo().severity() == DiagnosticSeverity.ERROR);
     }
 }

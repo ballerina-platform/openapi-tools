@@ -23,4 +23,5 @@ package io.ballerina.openapi.build;
 public class PluginConstants {
     public static final String OPENAPI = "openapi";
     public static final String OAS_PATH_SEPARATOR = "/";
+    public static final String UNDERSCORE = "_";
 }
