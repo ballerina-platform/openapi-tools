@@ -93,8 +93,8 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 extractListenersAndServiceNodes(syntaxTree.rootNode(), endpoints, services, semanticModel);
                 OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(serviceNode, endpoints,
                         semanticModel, services.get(serviceSymbol.get().hashCode()), inputPath);
-                setFileName(syntaxTree, services, serviceSymbol, oasResult);
-                extractOpenAPIYamlFromOutputs(outPath, oasResult, diagnostics);
+                oasResult.setServiceName(constructFileName(syntaxTree, services, serviceSymbol.get()));
+                writeOpenAPIYaml(outPath, oasResult, diagnostics);
             }
         }
         if (!diagnostics.isEmpty()) {
@@ -104,21 +104,26 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         }
     }
 
-    private void setFileName(SyntaxTree syntaxTree, Map<Integer, String> services, Optional<Symbol> serviceSymbol,
-                           OASResult oasResult) {
-        String fileName = services.get(serviceSymbol.get().hashCode());
+    /**
+     * This util function is to construct the generated file name.
+     *
+     * @param syntaxTree syntax tree for check the multiple services
+     * @param services   service map for maintain the file name with updated name
+     * @param serviceSymbol symbol for taking the hash code of services
+     */
+    private String constructFileName(SyntaxTree syntaxTree, Map<Integer, String> services, Symbol serviceSymbol) {
+        String fileName = services.get(serviceSymbol.hashCode());
         if (fileName.equals(SLASH)) {
-            oasResult.setServiceName(syntaxTree.filePath().split("\\.")[0]);
+            return syntaxTree.filePath().split("\\.")[0];
         } else if (fileName.contains(HYPHEN) && fileName.split(HYPHEN)[0].equals(SLASH)) {
-            oasResult.setServiceName(syntaxTree.filePath().split("\\.")[0] + UNDERSCORE +
-                     services.get(serviceSymbol.get().hashCode()).split(HYPHEN)[1]);
+            return syntaxTree.filePath().split("\\.")[0] + UNDERSCORE +
+                     services.get(serviceSymbol.hashCode()).split(HYPHEN)[1];
         } else {
-            oasResult.setServiceName(services.get(serviceSymbol.get().hashCode()));
+            return services.get(serviceSymbol.hashCode());
         }
     }
 
-    private void extractOpenAPIYamlFromOutputs(Path outPath, OASResult oasResult,
-                                               List<Diagnostic> diagnostics) {
+    private void writeOpenAPIYaml(Path outPath, OASResult oasResult, List<Diagnostic> diagnostics) {
         if (oasResult.getYaml().isPresent()) {
             try {
                 // Create openapi directory if not exists in the path. If exists do not throw an error
@@ -138,7 +143,6 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 diagnostics.add(BuildExtensionUtil.getDiagnostics(diagnostic));
             }
         }
-
     }
 
     /**
@@ -178,4 +182,3 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         }
     }
 }
-
