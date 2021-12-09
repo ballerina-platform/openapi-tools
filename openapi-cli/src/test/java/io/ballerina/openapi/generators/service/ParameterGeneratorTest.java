@@ -102,8 +102,7 @@ public class ParameterGeneratorTest {
     //Scenario 02 - Query parameters.
     @Test(description = "Generate functionDefinitionNode for Query parameters",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Ballerina resource functions are not support to query parameters" +
-                    " with nested array .*")
+            expectedExceptionsMessageRegExp = "Query parameters with nested array types are not supported in.*")
     public void generateQueryParameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/multiQueryParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -115,8 +114,8 @@ public class ParameterGeneratorTest {
 
     @Test(description = "Generate functionDefinitionNode for paramter for content instead of schema",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Given OpenAPI query parameter type 'filter' can not be" +
-                    " mapped to the Ballerina query .*")
+            expectedExceptionsMessageRegExp = "Query parameters with type 'content' can not be mapped to the " +
+                    "Ballerina query.*")
     public void generateParameterHasContent() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/parameterTypehasContent.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

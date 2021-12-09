@@ -196,7 +196,8 @@ public class ParametersGenerator {
             }
         } else if (isSchemaSupported) {
             ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
-            throw new BallerinaOpenApiException(String.format(messages.getDescription(), parameter.getName()));
+            throw new BallerinaOpenApiException(String.format(messages.getDescription(),
+                    parameter.getSchema().getType()));
         } else if (parameter.getSchema().getDefault() != null) {
             // When query parameter has default value
             return handleDefaultQueryParameter(schema, annotations, parameterName);
@@ -244,7 +245,8 @@ public class ParametersGenerator {
             }
         } else {
             ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
-            throw new BallerinaOpenApiException(String.format(messages.getDescription(), parameter.getName()));
+            throw new BallerinaOpenApiException(String.format(messages.getDescription(),
+                    "content"));
         }
     }
 
@@ -256,7 +258,8 @@ public class ParametersGenerator {
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
             if (items.getType() == null) {
-                // Resource function doesn't support to query parameters with array type which hasn't item type.
+                // Resource function doesn't support to query parameters with array type which doesn't have an
+                // item type.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_101;
                 throw new BallerinaOpenApiException(messages.getDescription());
             } else if (!(items instanceof ObjectSchema) && !(items.getType().equals(ARRAY))) {
@@ -271,7 +274,7 @@ public class ParametersGenerator {
                 throw new BallerinaOpenApiException(messages.getDescription());
             } else {
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
-                throw new BallerinaOpenApiException(String.format(messages.getDescription(), parameterName.toString()));
+                throw new BallerinaOpenApiException(String.format(messages.getDescription(), "object"));
             }
         } else {
             Token name = createIdentifierToken(convertOpenAPITypeToBallerina(
@@ -291,12 +294,12 @@ public class ParametersGenerator {
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 return createRequiredParameterNode(annotations, arrayTypeName, parameterName);
             } else if (items.getType() == null) {
-                // Resource function doesn't support to query parameters with array type which hasn't item type.
+                // Resource function doesn't support query parameters for array types that doesn't have an item type.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_101;
                 throw new BallerinaOpenApiException(messages.getDescription());
             } else if (items instanceof ObjectSchema) {
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_102;
-                throw new BallerinaOpenApiException(String.format(messages.getDescription(), parameterName.toString()));
+                throw new BallerinaOpenApiException(String.format(messages.getDescription(), "object"));
             } else {
                 // Resource function doesn't support to the nested array type query parameters.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_100;

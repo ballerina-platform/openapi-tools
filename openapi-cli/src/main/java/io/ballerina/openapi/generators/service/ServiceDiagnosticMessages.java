@@ -27,13 +27,14 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
  * @since 2.0.0
  */
 public enum ServiceDiagnosticMessages {
-    OAS_SERVICE_100("OAS_SERVICE_100", "Ballerina resource functions are not support to query" +
-            " parameters with nested array type.", DiagnosticSeverity.ERROR),
+    OAS_SERVICE_100("OAS_SERVICE_100", "Query parameters with nested array types are not " +
+            "supported in Ballerina.", DiagnosticSeverity.ERROR),
     OAS_SERVICE_101("OAS_SERVICE_101",
-            "Query parameter with no array item type can not be mapped to ballerina resource query parameter.",
+            "Query parameters with no array item type can not be mapped to Ballerina resource" +
+                    " query parameters.",
             DiagnosticSeverity.ERROR),
     OAS_SERVICE_102("OAS_SERVICE_102",
-            "Given OpenAPI query parameter type '%s' can not be mapped to the Ballerina query parameter.",
+            "Query parameters with type '%s' can not be mapped to the Ballerina query parameters.",
             DiagnosticSeverity.ERROR);
 
     private final String code;

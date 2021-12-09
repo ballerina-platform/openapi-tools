@@ -61,8 +61,7 @@ public class QueryParameterTests {
 
     @Test(description = "03. Required query parameter has nested array data type",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Ballerina resource functions are not support to query parameters with " +
-                    "nested array.*")
+            expectedExceptionsMessageRegExp = "Query parameters with nested array types are not supported in.*")
     public void requiredQueryParameterPrimitiveNestedArray()
             throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_03.yaml");
@@ -74,7 +73,7 @@ public class QueryParameterTests {
 
     @Test(description = "04. Required query parameter has array data type with no item types",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Query parameter with no array item type can not be mapped to .*")
+            expectedExceptionsMessageRegExp = "Query parameters with no array item type can not be mapped to.*")
     public void requiredQueryParameterArrayHasNoItemType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_04.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -111,8 +110,7 @@ public class QueryParameterTests {
 
     @Test(description = "07. Optional query parameter has nested array data type",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Ballerina resource functions are not support to query parameters with " +
-                    "nested array.*")
+            expectedExceptionsMessageRegExp = "Query parameters with nested array types are not supported in.*")
     public void optionalQueryParameterPrimitiveNestedArray()
             throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_07.yaml");
@@ -124,7 +122,7 @@ public class QueryParameterTests {
 
     @Test(description = "08. Optional query parameter has array data type with no item types",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Query parameter with no array item type can not be mapped to .*")
+            expectedExceptionsMessageRegExp = "Query parameters with no array item type can not be mapped to .*")
     public void optionalQueryParameterArrayHasNoItemType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_08.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -154,7 +152,8 @@ public class QueryParameterTests {
 
     @Test(description = "10. Optional query parameter has array data type with no item types",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Query parameter with no array item type can not be mapped to .*")
+            expectedExceptionsMessageRegExp = "Query parameters with no array item type can not be mapped to" +
+                    " Ballerina resource query .*")
     public void defaultQueryParameterArrayHasNoItemType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_10.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

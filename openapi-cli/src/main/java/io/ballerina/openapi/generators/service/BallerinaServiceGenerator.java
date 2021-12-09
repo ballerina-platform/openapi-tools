@@ -100,7 +100,7 @@ public class BallerinaServiceGenerator {
         List<Node> functions = createResourceFunctions(openAPI, filter);
 
         NodeList<Node> members = NodeFactory.createNodeList(functions);
-        // Create annotation if nullable enable
+        // Create annotation if nullable property is enabled
         // @http:ServiceConfig {
         //     treatNilableAsOptional : false
         //}

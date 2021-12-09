@@ -243,6 +243,14 @@ public class ServiceGenerationUtils {
         }
     }
 
+    /**
+     * This util function is for generating service config annotation.
+     * <pre>
+     *     @http:ServiceConfig {
+     *          treatNilableAsOptional : false
+     *      }
+     * </pre>
+     */
     public static MetadataNode generateServiceConfigAnnotation() {
         MetadataNode metadataNode;
         BasicLiteralNode valueExpr = createBasicLiteralNode(STRING_LITERAL,
@@ -259,6 +267,9 @@ public class ServiceGenerationUtils {
         return metadataNode;
     }
 
+    /**
+     * This util function is for generating the import node for http module.
+     */
     public static NodeList<ImportDeclarationNode> createImportDeclarationNodes() {
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
                 , GeneratorConstants.HTTP);
