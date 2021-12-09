@@ -88,13 +88,24 @@ public class OneOfDataTypeTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/oneOf.bal", syntaxTree);
     }
 
-    @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema")
-    public void arrayHasMaxItemsExceedLimit02() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/nested_oneOf_with_allOf.yaml");
+    @Test(description = "Tests record generation for oneOf schemas with inline object schemas")
+    public void oneOfWithInlineObject() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/oneOf_with_inline_schemas.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-                "schema/ballerina/nested_oneOf_with_allOf.bal", syntaxTree);
+                "schema/ballerina/oneOf_with_inline_schemas.bal", syntaxTree);
+    }
+
+    @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "" +
+                    "Unsupported scenario is found. AllOf schema is given inside a oneOf or anyOf schema.")
+    public void oneOfWithNestedAllOf() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("generators/schema/swagger/nested_oneOf_with_allOf.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
     }
 }
