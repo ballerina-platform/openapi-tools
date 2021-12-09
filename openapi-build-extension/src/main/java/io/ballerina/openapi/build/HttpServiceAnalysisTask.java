@@ -52,7 +52,9 @@ import static io.ballerina.openapi.build.PluginConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.build.PluginConstants.OPENAPI;
 import static io.ballerina.openapi.build.PluginConstants.UNDERSCORE;
 import static io.ballerina.openapi.converter.Constants.HYPHEN;
+import static io.ballerina.openapi.converter.Constants.OPENAPI_SUFFIX;
 import static io.ballerina.openapi.converter.Constants.SLASH;
+import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
 import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractFileName;
 import static io.ballerina.openapi.converter.utils.CodegenUtils.writeFile;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.containErrors;
@@ -114,12 +116,12 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
     private String constructFileName(SyntaxTree syntaxTree, Map<Integer, String> services, Symbol serviceSymbol) {
         String fileName = services.get(serviceSymbol.hashCode());
         if (fileName.equals(SLASH)) {
-            return syntaxTree.filePath().split("\\.")[0];
+            return syntaxTree.filePath().split("\\.")[0] + OPENAPI_SUFFIX + YAML_EXTENSION;
         } else if (fileName.contains(HYPHEN) && fileName.split(HYPHEN)[0].equals(SLASH)) {
             return syntaxTree.filePath().split("\\.")[0] + UNDERSCORE +
-                     services.get(serviceSymbol.hashCode()).split(HYPHEN)[1];
+                     services.get(serviceSymbol.hashCode()).split(HYPHEN)[1] + OPENAPI_SUFFIX + YAML_EXTENSION;
         } else {
-            return services.get(serviceSymbol.hashCode());
+            return services.get(serviceSymbol.hashCode()) + OPENAPI_SUFFIX + YAML_EXTENSION;
         }
     }
 
@@ -128,8 +130,8 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             try {
                 // Create openapi directory if not exists in the path. If exists do not throw an error
                 Files.createDirectories(Paths.get(outPath + OAS_PATH_SEPARATOR + OPENAPI));
-                String fileName = resolveContractFileName(outPath.resolve(OPENAPI), oasResult.getServiceName(),
-                        false);
+                String fileName = resolveContractFileName(outPath.resolve(OPENAPI),
+                        oasResult.getServiceName(), false);
                 writeFile(outPath.resolve(OPENAPI + OAS_PATH_SEPARATOR + fileName), oasResult.getYaml().get());
             } catch (IOException e) {
                 DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;
