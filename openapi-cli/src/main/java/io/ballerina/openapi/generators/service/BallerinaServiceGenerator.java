@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -41,7 +42,6 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -63,36 +63,55 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.generators.GeneratorConstants.FUNCTION;
+import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
+import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
+import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.generateServiceConfigAnnotation;
 
 /**
  * This Util class use for generating ballerina service file according to given yaml file.
  */
 public class BallerinaServiceGenerator {
-    // Add basicLiteralNode
-    public SyntaxTree generateSyntaxTree(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {
+    private boolean isNullableRequired;
+    private OpenAPI openAPI;
+    private Filter filter;
+
+    public BallerinaServiceGenerator(OpenAPI openApi, Filter filter) {
+            this.openAPI = openApi;
+            this.filter = filter;
+            this.isNullableRequired = false;
+    }
+
+    public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
         // Create imports http and openapi
         NodeList<ImportDeclarationNode> imports = createImportDeclarationNodes();
         // Need to Generate Base path
         ListenerGenerator listener = new ListenerGenerator();
-        ListenerDeclarationNode listenerDeclarationNode = listener.getListenerDeclarationNodes(openApi.getServers());
+        ListenerDeclarationNode listenerDeclarationNode = listener.getListenerDeclarationNodes(openAPI.getServers());
         NodeList<Node> absoluteResourcePath = createBasePathNodeList(listener);
 
         SimpleNameReferenceNode listenerName = createSimpleNameReferenceNode(listenerDeclarationNode.variableName());
         SeparatedNodeList<ExpressionNode> expressions = NodeFactory.createSeparatedNodeList(listenerName);
 
         // Fill the members with function
-        List<Node> functions = createResourceFunctions(openApi, filter);
+        List<Node> functions = createResourceFunctions(openAPI, filter);
 
         NodeList<Node> members = NodeFactory.createNodeList(functions);
-
+        // Create annotation if nullable property is enabled
+        // @http:ServiceConfig {
+        //     treatNilableAsOptional : false
+        //}
+        MetadataNode metadataNode = null;
+        if (isNullableRequired) {
+            metadataNode = generateServiceConfigAnnotation();
+        }
         ServiceDeclarationNode serviceDeclarationNode = NodeFactory.createServiceDeclarationNode(
-                null, createEmptyNodeList(), createIdentifierToken("service", SINGLE_WS_MINUTIAE,
-                        SINGLE_WS_MINUTIAE),
-                null, absoluteResourcePath, createIdentifierToken("on",
+                metadataNode, createEmptyNodeList(), createToken(SyntaxKind.SERVICE_KEYWORD,
+                        SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE),
+                null, absoluteResourcePath, createToken(SyntaxKind.ON_KEYWORD,
                         SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE), expressions,
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
@@ -106,12 +125,6 @@ public class BallerinaServiceGenerator {
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         return syntaxTree.modifyWith(modulePartNode);
-    }
-
-    private NodeList<ImportDeclarationNode> createImportDeclarationNodes() {
-        ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
-                , GeneratorConstants.HTTP);
-        return AbstractNodeFactory.createNodeList(importForHttp);
     }
 
     private List<Node> createResourceFunctions(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {
@@ -130,12 +143,13 @@ public class BallerinaServiceGenerator {
     }
 
     private NodeList<Node> createBasePathNodeList(ListenerGenerator listener) {
-        if ("/".equals(listener.getBasePath())) {
+        if (OAS_PATH_SEPARATOR.equals(listener.getBasePath())) {
             return AbstractNodeFactory.createNodeList(createIdentifierToken(listener.getBasePath()));
         } else {
-            String[] basePathNode = listener.getBasePath().split("/");
+            String[] basePathNode = listener.getBasePath().split(OAS_PATH_SEPARATOR);
             List<Node> basePath = Arrays.stream(basePathNode).filter(node -> !node.isBlank())
-                    .map(node -> createIdentifierToken("/" + escapeIdentifier(node))).collect(Collectors.toList());
+                    .map(node -> createIdentifierToken(OAS_PATH_SEPARATOR +
+                            escapeIdentifier(node))).collect(Collectors.toList());
             return AbstractNodeFactory.createNodeList(basePath);
         }
     }
@@ -195,7 +209,9 @@ public class BallerinaServiceGenerator {
         NodeList<Node> relativeResourcePath = NodeFactory.createNodeList(pathNodes);
         ParametersGenerator parametersGenerator = new ParametersGenerator();
         List<Node> params = parametersGenerator.generateResourcesInputs(operation);
-
+        if (!isNullableRequired) {
+            isNullableRequired = parametersGenerator.isNullableRequired();
+        }
         SeparatedNodeList<ParameterNode> parameters = AbstractNodeFactory.createSeparatedNodeList(params);
         ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
