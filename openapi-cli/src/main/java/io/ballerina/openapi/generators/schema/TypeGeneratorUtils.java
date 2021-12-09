@@ -25,6 +25,7 @@ import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
+import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -56,7 +57,10 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeLi
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.generators.GeneratorConstants.INTEGER;
@@ -132,7 +136,8 @@ public class TypeGeneratorUtils {
     /**
      * This util for generating record field with given schema properties.
      */
-    public static List<Node> addRecordFields(List<String> required, Set<Map.Entry<String, Schema>> fields)
+    public static List<Node> addRecordFields(List<String> required, Set<Map.Entry<String, Schema>> fields,
+                                             boolean generateDocs)
             throws BallerinaOpenApiException {
         // TODO: Handle allOf , oneOf, anyOf
         List<Node> recordFieldList = new ArrayList<>();
@@ -140,11 +145,15 @@ public class TypeGeneratorUtils {
             RecordFieldNode recordFieldNode;
             String fieldN = escapeIdentifier(field.getKey().trim());
             // API doc generations
-            List<Node> schemaDoc = getFieldApiDocs(field.getValue());
+            NodeList<Node> schemaDocNodes = createEmptyNodeList();
+            if (generateDocs) {
+                List<Node> schemaDoc = getFieldApiDocs(field.getValue());
+                schemaDocNodes = createNodeList(schemaDoc);
+            }
             IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldN);
             TypeDescriptorNode fieldTypeName = getTypeGenerator(field.getValue()).generateTypeDescriptorNode();
             Token questionMarkToken = AbstractNodeFactory.createIdentifierToken(NILLABLE);
-            MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
+            MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
             MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
             if (required != null) {
                 if (!required.contains(field.getKey().trim())) {
@@ -227,11 +236,35 @@ public class TypeGeneratorUtils {
     public static String getUnionType(List<Schema> schemas) throws BallerinaOpenApiException {
         StringBuilder unionType = new StringBuilder();
         for (Schema schema: schemas) {
-            String typeName = getTypeGenerator(schema).generateTypeDescriptorNode().toString().trim();
-            if (typeName.endsWith(NILLABLE) && GeneratorMetaData.getInstance().isNullable()) {
-                typeName = typeName.substring(0, typeName.length() - 1);
+            TypeGenerator typeGenerator = getTypeGenerator(schema);
+            if (!(typeGenerator instanceof RecordTypeGenerator || typeGenerator instanceof AllOfRecordTypeGenerator)) {
+                String typeName = getTypeGenerator(schema).generateTypeDescriptorNode().toString().trim();
+                if (typeName.endsWith(NILLABLE) && GeneratorMetaData.getInstance().isNullable()) {
+                    typeName = typeName.substring(0, typeName.length() - 1);
+                }
+                unionType.append(typeName);
+            } else if (typeGenerator instanceof RecordTypeGenerator) {
+                TypeDescriptorNode recordDescriptorNode;
+                if (schema.getProperties() != null) {
+                    Map<String, Schema> properties = schema.getProperties();
+                    List<String> required = schema.getRequired();
+                    List<Node> recordFList = TypeGeneratorUtils.addRecordFields(required,
+                            properties.entrySet(), false);
+                    NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
+                    recordDescriptorNode = NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                            createToken(OPEN_BRACE_TOKEN), fieldNodes, null,
+                            createToken(CLOSE_BRACE_TOKEN));
+                } else {
+                    NodeList<Node> fieldNodes = createEmptyNodeList();
+                    recordDescriptorNode = NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                            createToken(OPEN_BRACE_TOKEN), fieldNodes,
+                            null, createToken(CLOSE_BRACE_TOKEN));
+                }
+                unionType.append(recordDescriptorNode);
+            } else {
+                throw new BallerinaOpenApiException("Unsupported scenario is found. AllOf schema is given inside a " +
+                        "oneOf or anyOf schema.");
             }
-            unionType.append(typeName);
             unionType.append(PIPE_TOKEN.stringValue());
         }
         unionType.deleteCharAt(unionType.length() - 1);

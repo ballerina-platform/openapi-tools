@@ -98,7 +98,7 @@ public class AllOfRecordTypeGenerator extends TypeGenerator {
             } else if (allOfSchema.getProperties() != null) {
                 Map<String, Schema> properties = allOfSchema.getProperties();
                 List<String> required = allOfSchema.getRequired();
-                recordFieldList.addAll(TypeGeneratorUtils.addRecordFields(required, properties.entrySet()));
+                recordFieldList.addAll(TypeGeneratorUtils.addRecordFields(required, properties.entrySet(), true));
             } else if (allOfSchema instanceof ComposedSchema) {
                 ComposedSchema nestedComposedSchema = (ComposedSchema) allOfSchema;
                 if (nestedComposedSchema.getAllOf() != null) {

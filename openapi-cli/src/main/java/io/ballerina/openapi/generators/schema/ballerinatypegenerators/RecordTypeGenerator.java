@@ -84,7 +84,7 @@ public class RecordTypeGenerator extends TypeGenerator {
         if (schema.getProperties() != null) {
             Map<String, Schema> properties = schema.getProperties();
             List<String> required = schema.getRequired();
-            List<Node> recordFList = TypeGeneratorUtils.addRecordFields(required, properties.entrySet());
+            List<Node> recordFList = TypeGeneratorUtils.addRecordFields(required, properties.entrySet(), true);
             NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     createToken(OPEN_BRACE_TOKEN), fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
