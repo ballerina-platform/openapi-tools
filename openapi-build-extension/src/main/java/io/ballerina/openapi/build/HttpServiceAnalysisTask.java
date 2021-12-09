@@ -131,8 +131,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
                 // Create openapi directory if not exists in the path. If exists do not throw an error
                 Files.createDirectories(Paths.get(outPath + OAS_PATH_SEPARATOR + OPENAPI));
                 String fileName = resolveContractFileName(outPath.resolve(OPENAPI),
-                        oasResult.getServiceName(),
-                        false);
+                        oasResult.getServiceName(), false);
                 writeFile(outPath.resolve(OPENAPI + OAS_PATH_SEPARATOR + fileName), oasResult.getYaml().get());
             } catch (IOException e) {
                 DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;

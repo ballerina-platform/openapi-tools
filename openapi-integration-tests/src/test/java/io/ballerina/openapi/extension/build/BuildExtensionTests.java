@@ -22,7 +22,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -30,7 +29,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 
 import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
 import static io.ballerina.openapi.cmd.TestUtil.RESOURCE;
@@ -49,11 +47,12 @@ public class BuildExtensionTests {
     }
 
     @Test(description = "Check openapi build plugin in `bal build` command")
-    public void onlyBuildCommand() throws IOException {
+    public void testBuildCommandWithOutFlag() throws IOException {
         executeCommand("project_1");
     }
 
-    @Test(description = "Check openapi build plugin in `bal build` command with `--export-openapi` flag", enabled = false)
+    @Test(description = "Check openapi build plugin in `bal build` command with `--export-openapi` flag",
+            enabled = false)
     public void flagWithBuildOption() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
