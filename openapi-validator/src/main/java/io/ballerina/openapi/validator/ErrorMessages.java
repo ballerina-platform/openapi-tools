@@ -88,8 +88,8 @@ class ErrorMessages {
     static String[] unimplementedParameterForOperation(String paramName, String method, String path) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0009;
-        error[1] =  String.format("Missing OpenAPI contract parameter `%s` in the counterpart Ballerina service " +
-                "resource (method: `%s`, path: `%s`)", paramName, method, path);
+        error[1] =  String.format("Missing OpenAPI contract parameter ''%s'' in the counterpart Ballerina service " +
+                "resource (method: ''%s'', path: ''%s'')", paramName, method, path);
         return  error;
     }
 
