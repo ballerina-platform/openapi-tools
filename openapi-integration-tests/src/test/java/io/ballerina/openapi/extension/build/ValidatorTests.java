@@ -54,8 +54,8 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_1");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(4:1,19:2)] Missing OpenAPI contract parameter `q` in the counterpart" +
-                " Ballerina service resource (method: `get`, path: `/weather`)";
+        String msg = " ERROR [service.bal:(4:1,19:2)] Missing OpenAPI contract parameter 'q' in the counterpart" +
+                " Ballerina service resource (method: 'get', path: '/weather')";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
