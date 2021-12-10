@@ -80,7 +80,7 @@ class ErrorMessages {
     static String[] unimplementedOpenAPIOperationsForPath(String methods, String path) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0008;
-        error[1] =  String.format("Couldn't find Ballerina service resource(s) for http method(s) '%s' " +
+        error[1] =  String.format("Could not find Ballerina service resource(s) for http method(s) '%s' " +
                 "for the path '%s' which is documented in the OpenAPI contract.", methods, path);
         return  error;
     }
@@ -88,8 +88,8 @@ class ErrorMessages {
     static String[] unimplementedParameterForOperation(String paramName, String method, String path) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0009;
-        error[1] =  String.format("Couldn't find '%s' parameter in the Ballerina service resource for the method '%s' "
-                + "of the path '%s' which is documented in the OpenAPI contract.", paramName, method, path);
+        error[1] =  String.format("Missing OpenAPI contract parameter ''%s'' in the counterpart Ballerina service " +
+                "resource (method: ''%s'', path: ''%s'')", paramName, method, path);
         return  error;
     }
 
@@ -105,7 +105,7 @@ class ErrorMessages {
     static String[] unimplementedFieldInOperation(String fieldName, String paramName, String operation, String path) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0011;
-        error[1] =  String.format("Couldn't find the '%s' field in the record type of the parameter '%s' " +
+        error[1] =  String.format("Could not find the '%s' field in the record type of the parameter '%s' " +
                         "for the method '%s' of the path '%s' which is documented in the OpenAPI contract.",
                 fieldName, paramName, operation, path);
         return  error;
