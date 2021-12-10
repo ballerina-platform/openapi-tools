@@ -91,6 +91,7 @@ public class ParametersGenerator {
     public List<Node> generateResourcesInputs(Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
         List<Node> params = new ArrayList<>();
+        List<Node> defaultable = new ArrayList<>();
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
         // Handle header and query parameters
         if (operation.getValue().getParameters() != null) {
@@ -108,8 +109,13 @@ public class ParametersGenerator {
                     // type  BasicType boolean|int|float|decimal|string ;
                     // public type () |BasicType|BasicType []| map<json>;
                     Node param = createNodeForQueryParam(parameter);
-                    params.add(param);
-                    params.add(comma);
+                    if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
+                        defaultable.add(param);
+                        defaultable.add(comma);
+                    } else {
+                        params.add(param);
+                        params.add(comma);
+                    }
                 }
             }
         }
@@ -123,6 +129,9 @@ public class ParametersGenerator {
                 params.add(requestBodyGen.createNodeForRequestBody(requestBody));
                 params.add(comma);
             }
+        }
+        if (!defaultable.isEmpty()) {
+            params.addAll(defaultable);
         }
         if (params.size() > 1) {
             params.remove(params.size() - 1);
@@ -351,6 +360,12 @@ public class ParametersGenerator {
             Token name = createIdentifierToken(convertOpenAPITypeToBallerina(
                     schema.getType().toLowerCase(Locale.ENGLISH).trim()), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
+            if (schema.getType().equals(STRING)) {
+                return createDefaultableParameterNode(annotations, rTypeName, parameterName,
+                        createToken(SyntaxKind.EQUAL_TOKEN),
+                        createSimpleNameReferenceNode(createIdentifierToken('"' +
+                                schema.getDefault().toString() + '"')));
+            }
             return createDefaultableParameterNode(annotations, rTypeName, parameterName,
                     createToken(SyntaxKind.EQUAL_TOKEN),
                     createSimpleNameReferenceNode(createIdentifierToken(schema.getDefault().toString())));
