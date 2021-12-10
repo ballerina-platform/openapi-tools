@@ -60,6 +60,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_JSON;
 import static io.ballerina.openapi.generators.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEADER;
+import static io.ballerina.openapi.generators.GeneratorConstants.HEADER_ANNOT;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAP_JSON;
 import static io.ballerina.openapi.generators.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.generators.GeneratorConstants.QUERY;
@@ -132,6 +133,7 @@ public class ParametersGenerator {
 
     /**
      * This function for generating parameter ST node for header.
+     * <pre> resource function get pets(@http:Header {name:"x-request-id"} string header) </pre>
      */
     private RequiredParameterNode handleHeader(Parameter parameter)throws BallerinaOpenApiException {
         Schema<?> schema = parameter.getSchema();
@@ -149,7 +151,7 @@ public class ParametersGenerator {
                             SINGLE_WS_MINUTIAE), parameterName);
         } else {
             if (!schema.getType().equals(STRING) && !(schema instanceof ArraySchema)) {
-                //TO-DO: Generate diagnostic about to error type
+                //TODO: Generate diagnostic about to error type throws exception
                 headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(STRING,
                         SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE));
             } else if (schema instanceof ArraySchema) {
@@ -168,7 +170,7 @@ public class ParametersGenerator {
             MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
                     createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
                     createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
-            AnnotationNode headerNode = getAnnotationNode("Header", annotValue);
+            AnnotationNode headerNode = getAnnotationNode(HEADER_ANNOT, annotValue);
             NodeList<AnnotationNode> headerAnnotations = NodeFactory.createNodeList(headerNode);
 
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
