@@ -90,8 +90,8 @@ public class ParametersGenerator {
      */
     public List<Node> generateResourcesInputs(Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
-        List<Node> params = new ArrayList<>();
-        List<Node> defaultable = new ArrayList<>();
+        List<Node> requiredParams = new ArrayList<>();
+        List<Node> defaultableParams = new ArrayList<>();
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
         // Handle header and query parameters
         if (operation.getValue().getParameters() != null) {
@@ -99,8 +99,8 @@ public class ParametersGenerator {
             for (Parameter parameter: parameters) {
                 if (parameter.getIn().trim().equals(HEADER)) {
                     RequiredParameterNode param = handleHeader(parameter);
-                    params.add(param);
-                    params.add(comma);
+                    requiredParams.add(param);
+                    requiredParams.add(comma);
                 } else if (parameter.getIn().trim().equals(QUERY)) {
                     if (parameter.getRequired() != null && parameter.getRequired() &&
                             (parameter.getSchema().getNullable() != null &&  parameter.getSchema().getNullable())) {
@@ -110,11 +110,11 @@ public class ParametersGenerator {
                     // public type () |BasicType|BasicType []| map<json>;
                     Node param = createNodeForQueryParam(parameter);
                     if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
-                        defaultable.add(param);
-                        defaultable.add(comma);
+                        defaultableParams.add(param);
+                        defaultableParams.add(comma);
                     } else {
-                        params.add(param);
-                        params.add(comma);
+                        requiredParams.add(param);
+                        requiredParams.add(comma);
                     }
                 }
             }
@@ -126,17 +126,17 @@ public class ParametersGenerator {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGen = new RequestBodyGenerator();
-                params.add(requestBodyGen.createNodeForRequestBody(requestBody));
-                params.add(comma);
+                requiredParams.add(requestBodyGen.createNodeForRequestBody(requestBody));
+                requiredParams.add(comma);
             }
         }
-        if (!defaultable.isEmpty()) {
-            params.addAll(defaultable);
+        if (!defaultableParams.isEmpty()) {
+            requiredParams.addAll(defaultableParams);
         }
-        if (params.size() > 1) {
-            params.remove(params.size() - 1);
+        if (requiredParams.size() > 1) {
+            requiredParams.remove(requiredParams.size() - 1);
         }
-        return params;
+        return requiredParams;
     }
 
     /**
