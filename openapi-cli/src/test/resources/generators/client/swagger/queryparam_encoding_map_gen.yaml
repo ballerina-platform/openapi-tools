@@ -1,0 +1,84 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Stripe API
+  license:
+    name: MIT
+servers:
+  - url: 'https://api.stripe.com/'
+tags:
+  - name: pets
+    description: Pets Tag
+  - name: list
+    description: List Tag
+
+paths:
+  "/v1/invoices":
+    get:
+      description: "<p>You can list all invoices, or list the invoices for a specific
+        customer. The invoices are returned sorted by creation date, with the most
+        recently created invoices appearing first.</p>"
+      operationId: ListInvoices
+      tags:
+        - "Invoices"
+      parameters:
+        - description: The collection method of the invoice to retrieve. Either `charge_automatically`
+            or `send_invoice`.
+          in: query
+          name: collection_method
+          required: false
+          schema:
+            enum:
+              - charge_automatically
+              - send_invoice
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: created
+          required: false
+          schema:
+            anyOf:
+              - $ref: '#/components/schemas/CreatedFilterOptions'
+              - type: integer
+          style: deepObject
+          description: A filter on the list based on the object created field. The value can be a string with an integer Unix timestamp, or it can be a dictionary
+        - explode: true
+          in: query
+          name: due_date
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: integer
+          style: deepObject
+          description: A filter on the list based on the object due_date field. The value can be an integer Unix timestamp, or it can be a dictionary
+        - description: Only return invoices for the subscription specified by this subscription
+            ID.
+          in: query
+          name: subscriptions
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json: {}
+          description: Response
+components:
+  schemas:
+    CreatedFilterOptions:
+      properties:
+        gt:
+          type: integer
+        gte:
+          type: integer
+        lt:
+          type: integer
+        lte:
+          type: integer
+      title: range_query_specs
+      type: object
