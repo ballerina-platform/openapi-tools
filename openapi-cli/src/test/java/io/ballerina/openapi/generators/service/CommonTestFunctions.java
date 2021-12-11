@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.generators.service;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 
 import java.io.IOException;
@@ -44,7 +43,7 @@ public class CommonTestFunctions {
     }
 
     public static void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String balfile, SyntaxTree syntaxTree)
-            throws IOException, FormatterException {
+            throws IOException {
         String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve("generators/service/ballerina"),
                 balfile);
         String generatedSyntaxTree = syntaxTree.toString();

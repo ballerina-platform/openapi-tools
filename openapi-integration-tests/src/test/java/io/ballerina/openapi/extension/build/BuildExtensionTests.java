@@ -47,18 +47,18 @@ public class BuildExtensionTests {
     }
 
     @Test(description = "Check openapi build plugin in `bal build` command")
-    public void annotationWithOutBuildOption() throws IOException {
+    public void testBuildCommandWithOutFlag() throws IOException {
         executeCommand("project_1");
     }
 
     @Test(description = "Check openapi build plugin in `bal build` command with `--export-openapi` flag",
             enabled = false)
-    public void annotationWithBuildOption() throws IOException {
+    public void flagWithBuildOption() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_2"), buildArgs);
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_2/target/openapi/greeting_openapi.yaml")));
+        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("project_2/target/openapi/greeting_openapi.yaml")));
     }
 
     @Test(description = "Check --export-openapi flag with graphQl service", enabled = false)

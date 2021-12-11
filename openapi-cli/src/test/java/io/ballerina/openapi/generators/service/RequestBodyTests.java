@@ -37,7 +37,6 @@ import java.util.List;
  */
 public class RequestBodyTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/service").toAbsolutePath();
-    BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator();
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
@@ -48,7 +47,8 @@ public class RequestBodyTests {
     public void generateJsonPayload() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario01_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_01_rb.bal",
                 syntaxTree);
     }
@@ -57,7 +57,8 @@ public class RequestBodyTests {
     public void generateOtherPayload() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario01_02_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_0102_rb.bal",
                 syntaxTree);
     }
@@ -66,7 +67,8 @@ public class RequestBodyTests {
     public void generateRBsameDataBindingPayload() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario02_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_02_rb.bal",
                 syntaxTree);
     }
@@ -75,7 +77,8 @@ public class RequestBodyTests {
     public void generateMultipleContent() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario03_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("requestBody/scenario_03_rb.bal",
                 syntaxTree);
     }
@@ -84,7 +87,8 @@ public class RequestBodyTests {
     public void generateRecordName() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/record_name_refactor.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/refactor_record_name.bal", syntaxTree);
     }
