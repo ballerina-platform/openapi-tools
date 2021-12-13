@@ -18,21 +18,26 @@
 
 package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
+import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
-import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
-import static io.ballerina.openapi.generators.GeneratorConstants.SQUARE_BRACKETS;
+import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNullableType;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for array schemas.
@@ -66,24 +71,29 @@ public class ArrayTypeGenerator extends TypeGenerator {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(arraySchema.getItems());
-        String arrayType = typeGenerator.generateTypeDescriptorNode().toString().trim();
+        TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
         if (typeGenerator instanceof UnionTypeGenerator) {
-            arrayType = OPEN_PAREN_TOKEN.stringValue() + arrayType + CLOSE_PAREN_TOKEN.stringValue();
+            typeDescriptorNode = createParenthesisedTypeDescriptorNode(
+                    createToken(OPEN_PAREN_TOKEN), typeDescriptorNode, createToken(CLOSE_PAREN_TOKEN));
         }
-        if (arrayType.endsWith(NILLABLE)) {
-            arrayType = arrayType.substring(0, arrayType.length() - 1);
+        if (typeDescriptorNode instanceof OptionalTypeDescriptorNode) {
+            Node node = ((OptionalTypeDescriptorNode) typeDescriptorNode).typeDescriptor();
+            typeDescriptorNode = (TypeDescriptorNode) node;
         }
-        String arrayBrackets = SQUARE_BRACKETS;
+
+        Token arrayLengthToken = null;
         if (arraySchema.getMaxItems() != null) {
             if (arraySchema.getMaxItems() <= MAX_ARRAY_LENGTH) {
-                arrayBrackets = OPEN_BRACKET_TOKEN.stringValue() + arraySchema.getMaxItems() +
-                        CLOSE_BRACKET_TOKEN.stringValue();
+                arrayLengthToken = createIdentifierToken(String.valueOf(arraySchema.getMaxItems()));
             } else {
                 throw new BallerinaOpenApiException("Maximum item count defined in the definition exceeds the " +
                         "maximum ballerina array length.");
             }
         }
-        arrayType = TypeGeneratorUtils.getNullableType(arraySchema, arrayType + arrayBrackets);
-        return createSimpleNameReferenceNode(createIdentifierToken(arrayType));
+        ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(
+                typeDescriptorNode, createToken(OPEN_BRACKET_TOKEN), arrayLengthToken,
+                createToken(CLOSE_BRACKET_TOKEN));
+
+        return getNullableType(arraySchema, arrayTypeDescriptorNode);
     }
 }

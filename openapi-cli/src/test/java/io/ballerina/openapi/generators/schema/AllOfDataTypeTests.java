@@ -64,6 +64,16 @@ public class AllOfDataTypeTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/allOfWithNoType.bal", syntaxTree);
     }
 
+    @Test(description = "Generate record for allOf type array schemas with inline object schemas")
+    public void generateArrayAllOfInlineObjects() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/array_with_inline_allOf.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/array_with_inline_allOf.bal", syntaxTree);
+    }
+
     @Test(description = "Generate record for allOf schema with empty object schema")
     public void generateAllOfWithEmptyObjectSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/allOfWithEmptyObject.yaml");

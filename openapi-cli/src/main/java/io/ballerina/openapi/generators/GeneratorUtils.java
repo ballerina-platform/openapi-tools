@@ -99,6 +99,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.generators.GeneratorConstants.GET;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.IMAGE_PNG;
+import static io.ballerina.openapi.generators.GeneratorConstants.LINE_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.OPTIONS;
 import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
@@ -113,6 +114,7 @@ public class GeneratorUtils {
 
     public static final MinutiaeList SINGLE_WS_MINUTIAE = getSingleWSMinutiae();
     public static final MinutiaeList SINGLE_EMPTY_MINUTIAE = getEmptyMinutiae();
+    public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
 
@@ -561,6 +563,12 @@ public class GeneratorUtils {
     private static MinutiaeList getSingleWSMinutiae() {
         Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae(" ");
         MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(whitespace);
+        return leading;
+    }
+
+    private static MinutiaeList getEndOfLineMinutiae() {
+        Minutiae endOfLineMinutiae = AbstractNodeFactory.createEndOfLineMinutiae(LINE_SEPARATOR);
+        MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(endOfLineMinutiae);
         return leading;
     }
 

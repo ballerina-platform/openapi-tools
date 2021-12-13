@@ -8,7 +8,7 @@ public class TestConstants {
             "# Provides a set of configurations for controlling the behaviours when communicating with a remote " +
             "HTTP endpoint.";
     public static String authConfigRecordDoc = "" +
-            "#Provides Auth configurations needed when communicating with a remote HTTP endpoint.";
+            "# Provides Auth configurations needed when communicating with a remote HTTP endpoint.";
     private static String commonClientConfigurationFields = "# The HTTP version understood by the client\n" +
             "    string httpVersion = \"1.1\";\n" +
             "    # Configurations related to HTTP/1.x protocol\n" +

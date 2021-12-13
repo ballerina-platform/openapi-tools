@@ -26,8 +26,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.openapi.generators.GeneratorConstants.NUMBER;
-import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_EMPTY_MINUTIAE;
-import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 
 /**
@@ -66,8 +64,8 @@ public class PrimitiveTypeGenerator extends TypeGenerator {
                 typeDescriptorName = convertOpenAPITypeToBallerina(schema.getFormat().trim());
             }
         }
-        typeDescriptorName = TypeGeneratorUtils.getNullableType(schema, typeDescriptorName);
-        return createSimpleNameReferenceNode(createIdentifierToken(typeDescriptorName, SINGLE_EMPTY_MINUTIAE,
-                SINGLE_WS_MINUTIAE));
+        TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(
+                createIdentifierToken(typeDescriptorName));
+        return TypeGeneratorUtils.getNullableType(schema, typeDescriptorNode);
     }
 }

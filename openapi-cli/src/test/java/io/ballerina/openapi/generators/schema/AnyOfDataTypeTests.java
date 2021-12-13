@@ -52,7 +52,7 @@ public class AnyOfDataTypeTests {
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> anyOf = composedSchema.getAnyOf();
         GeneratorMetaData.createInstance(openAPI, false);
-        String anyOfUnionType = TypeGeneratorUtils.getUnionType(anyOf);
+        String anyOfUnionType = TypeGeneratorUtils.getUnionType(anyOf).toString().trim();
         Assert.assertEquals(anyOfUnionType, "User|Activity");
     }
 

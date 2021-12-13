@@ -26,9 +26,10 @@ import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
-import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.ballerina.openapi.generators.schema.ballerinatypegenerators.AllOfRecordTypeGenerator;
@@ -57,14 +58,13 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeLi
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.generators.GeneratorConstants.INTEGER;
-import static io.ballerina.openapi.generators.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.generators.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.generators.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
@@ -118,54 +118,50 @@ public class TypeGeneratorUtils {
      * Scenario 6 : schema.getNullable() == null && nullable == false -> string
      *
      * @param schema Schema of the property
-     * @param type   Type name
+     * @param originalTypeDesc   Type name
      * @return Final type of the field
      */
-    public static String getNullableType(Schema schema, String type) {
+    public static TypeDescriptorNode getNullableType(Schema schema, TypeDescriptorNode originalTypeDesc) {
+        TypeDescriptorNode nillableType = originalTypeDesc;
         boolean nullable = GeneratorMetaData.getInstance().isNullable();
         if (schema.getNullable() != null) {
             if (schema.getNullable()) {
-                type = type + NILLABLE;
+                nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
             }
         } else if (nullable) {
-            type = type + NILLABLE;
+            nillableType = createOptionalTypeDescriptorNode(originalTypeDesc, createToken(QUESTION_MARK_TOKEN));
         }
-        return type;
+        return nillableType;
     }
 
     /**
      * This util for generating record field with given schema properties.
      */
-    public static List<Node> addRecordFields(List<String> required, Set<Map.Entry<String, Schema>> fields,
-                                             boolean generateDocs)
+    public static List<Node> addRecordFields(List<String> required, Set<Map.Entry<String, Schema>> fields)
             throws BallerinaOpenApiException {
         // TODO: Handle allOf , oneOf, anyOf
         List<Node> recordFieldList = new ArrayList<>();
         for (Map.Entry<String, Schema> field : fields) {
             RecordFieldNode recordFieldNode;
-            String fieldN = escapeIdentifier(field.getKey().trim());
+            String fieldNameStr = escapeIdentifier(field.getKey().trim());
             // API doc generations
-            NodeList<Node> schemaDocNodes = createEmptyNodeList();
-            if (generateDocs) {
-                List<Node> schemaDoc = getFieldApiDocs(field.getValue());
-                schemaDocNodes = createNodeList(schemaDoc);
-            }
-            IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldN);
+            List<Node> schemaDoc = getFieldApiDocs(field.getValue());
+            NodeList<Node> schemaDocNodes = createNodeList(schemaDoc);
+            IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldNameStr);
             TypeDescriptorNode fieldTypeName = getTypeGenerator(field.getValue()).generateTypeDescriptorNode();
-            Token questionMarkToken = AbstractNodeFactory.createIdentifierToken(NILLABLE);
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
             MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
             if (required != null) {
                 if (!required.contains(field.getKey().trim())) {
                     recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
-                            fieldTypeName, fieldName, questionMarkToken, createToken(SEMICOLON_TOKEN));
+                            fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
                 } else {
                     recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
                             fieldTypeName, fieldName, null, createToken(SEMICOLON_TOKEN));
                 }
             } else {
                 recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
-                        fieldTypeName, fieldName, questionMarkToken, createToken(SEMICOLON_TOKEN));
+                        fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
             }
             recordFieldList.add(recordFieldNode);
         }
@@ -233,41 +229,29 @@ public class TypeGeneratorUtils {
      * @return Union type
      * @throws BallerinaOpenApiException when unsupported combination of schemas found
      */
-    public static String getUnionType(List<Schema> schemas) throws BallerinaOpenApiException {
-        StringBuilder unionType = new StringBuilder();
+    public static TypeDescriptorNode getUnionType(List<Schema> schemas) throws BallerinaOpenApiException {
+        List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema schema: schemas) {
-            TypeGenerator typeGenerator = getTypeGenerator(schema);
-            if (!(typeGenerator instanceof RecordTypeGenerator || typeGenerator instanceof AllOfRecordTypeGenerator)) {
-                String typeName = getTypeGenerator(schema).generateTypeDescriptorNode().toString().trim();
-                if (typeName.endsWith(NILLABLE) && GeneratorMetaData.getInstance().isNullable()) {
-                    typeName = typeName.substring(0, typeName.length() - 1);
-                }
-                unionType.append(typeName);
-            } else if (typeGenerator instanceof RecordTypeGenerator) {
-                TypeDescriptorNode recordDescriptorNode;
-                if (schema.getProperties() != null) {
-                    Map<String, Schema> properties = schema.getProperties();
-                    List<String> required = schema.getRequired();
-                    List<Node> recordFList = TypeGeneratorUtils.addRecordFields(required,
-                            properties.entrySet(), false);
-                    NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
-                    recordDescriptorNode = NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                            createToken(OPEN_BRACE_TOKEN), fieldNodes, null,
-                            createToken(CLOSE_BRACE_TOKEN));
-                } else {
-                    NodeList<Node> fieldNodes = createEmptyNodeList();
-                    recordDescriptorNode = NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                            createToken(OPEN_BRACE_TOKEN), fieldNodes,
-                            null, createToken(CLOSE_BRACE_TOKEN));
-                }
-                unionType.append(recordDescriptorNode);
-            } else {
-                throw new BallerinaOpenApiException("Unsupported scenario is found. AllOf schema is given inside a " +
-                        "oneOf or anyOf schema.");
+            TypeDescriptorNode typeDescriptorNode = getTypeGenerator(schema).generateTypeDescriptorNode();
+            if (typeDescriptorNode instanceof OptionalTypeDescriptorNode &&
+                    GeneratorMetaData.getInstance().isNullable()) {
+                Node internalTypeDesc = ((OptionalTypeDescriptorNode) typeDescriptorNode).typeDescriptor();
+                typeDescriptorNode = (TypeDescriptorNode) internalTypeDesc;
             }
-            unionType.append(PIPE_TOKEN.stringValue());
+            typeDescriptorNodes.add(typeDescriptorNode);
         }
-        unionType.deleteCharAt(unionType.length() - 1);
-        return unionType.toString();
+        if (typeDescriptorNodes.size() > 1) {
+            UnionTypeDescriptorNode unionTypeDescriptorNode = null;
+            TypeDescriptorNode leftTypeDesc = typeDescriptorNodes.get(0);
+            for (int i = 1; i < typeDescriptorNodes.size(); i++) {
+                TypeDescriptorNode rightTypeDesc = typeDescriptorNodes.get(i);
+                unionTypeDescriptorNode = createUnionTypeDescriptorNode(leftTypeDesc, createToken(PIPE_TOKEN),
+                        rightTypeDesc);
+                leftTypeDesc = unionTypeDescriptorNode;
+            }
+            return unionTypeDescriptorNode;
+        } else {
+            return typeDescriptorNodes.get(0);
+        }
     }
 }

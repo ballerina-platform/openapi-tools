@@ -8,9 +8,6 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for anyOf and oneOf schemas.
  * -- ex:
@@ -45,8 +42,7 @@ public class UnionTypeGenerator extends TypeGenerator {
         } else {
             schemas = composedSchema.getAnyOf();
         }
-        String unionTypeCont = TypeGeneratorUtils.getUnionType(schemas);
-        unionTypeCont = TypeGeneratorUtils.getNullableType(schema, unionTypeCont);
-        return createSimpleNameReferenceNode(createIdentifierToken(unionTypeCont));
+        TypeDescriptorNode unionTypeDesc = TypeGeneratorUtils.getUnionType(schemas);
+        return TypeGeneratorUtils.getNullableType(schema, unionTypeDesc);
     }
 }
