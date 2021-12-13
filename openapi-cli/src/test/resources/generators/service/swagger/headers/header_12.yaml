@@ -1,0 +1,28 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Petstoe
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+paths:
+  /ping:
+    get:
+      operationId: operation_get_/ping
+      parameters:
+        - name: x-client
+          in: header
+          schema:
+            type: string
+            nullable: true
+        - name: offest
+          in: query
+          schema:
+            type: string
+            default: "abc"
+      responses:
+        "200":
+          description: Ok

@@ -21,6 +21,7 @@ import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -190,9 +191,10 @@ public class ParametersGenerator {
             }
             // Create annotation for header
             // This code block is to be enabled when handle the headers handle additional parameters
-          // MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
-          //        createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
-          //        createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+            // MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
+            //        createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
+            //        createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+
             AnnotationNode headerNode = getAnnotationNode(HEADER_ANNOT, null);
             NodeList<AnnotationNode> headerAnnotations = NodeFactory.createNodeList(headerNode);
             // Handle optional values in headers
@@ -203,17 +205,9 @@ public class ParametersGenerator {
             }
             // Handle default values in headers
             if (schema.getDefault() != null) {
-                if (!schema.getType().equals(ARRAY)) {
-                    return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
-                            createToken(SyntaxKind.EQUAL_TOKEN),
-                            createSimpleNameReferenceNode(createIdentifierToken("\"" +
-                                    schema.getDefault().toString() + "\"")));
-                }
-                return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
-                        createToken(SyntaxKind.EQUAL_TOKEN),
-                        createSimpleNameReferenceNode(createIdentifierToken(schema.getDefault().toString())));
+                return getDefaultableHeaderNode(schema, headerTypeName, parameterName, headerAnnotations);
             }
-            // Handle nullable ture ex: (string? header)
+            // Handle header with parameter required true and nullable ture ex: (string? header)
             if (parameter.getRequired() && schema.getNullable() != null && schema.getNullable().equals(true)) {
                 isNullableRequired = true;
                 headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
@@ -221,6 +215,24 @@ public class ParametersGenerator {
             }
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
         }
+    }
+
+    /**
+     * Generate ballerina default headers.
+     */
+    private DefaultableParameterNode getDefaultableHeaderNode(Schema<?> schema, TypeDescriptorNode headerTypeName,
+                                                                 IdentifierToken parameterName,
+                                                                 NodeList<AnnotationNode> headerAnnotations) {
+
+        if (!schema.getType().equals(ARRAY)) {
+            return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
+                    createToken(SyntaxKind.EQUAL_TOKEN),
+                    createSimpleNameReferenceNode(createIdentifierToken("\"" +
+                            schema.getDefault().toString() + "\"")));
+        }
+        return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
+                createToken(SyntaxKind.EQUAL_TOKEN),
+                createSimpleNameReferenceNode(createIdentifierToken(schema.getDefault().toString())));
     }
 
     /**
