@@ -197,16 +197,9 @@ public class ParametersGenerator {
             NodeList<AnnotationNode> headerAnnotations = NodeFactory.createNodeList(headerNode);
             // Handle optional values in headers
             if (!parameter.getRequired()) {
-                // If optional it behaves like default value with null ex:(string? header = ())
+                // If optional it behaves like default value with null ex:(string? header)
                 headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-                boolean condition = (schema.getDefault()) == null && (schema.getNullable() == null ||
-                        (schema.getNullable() != null && schema.getNullable().equals(false)));
-                if (condition) {
-                    return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
-                            createToken(SyntaxKind.EQUAL_TOKEN),
-                            createSimpleNameReferenceNode(createIdentifierToken("()")));
-                }
             }
             // Handle default values in headers
             if (schema.getDefault() != null) {
@@ -322,12 +315,7 @@ public class ParametersGenerator {
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-                if (schema.getNullable() != null && schema.getNullable().equals(true)) {
-                    return createRequiredParameterNode(annotations, optionalNode, parameterName);
-                }
-                return createDefaultableParameterNode(annotations, optionalNode, parameterName,
-                        createToken(SyntaxKind.EQUAL_TOKEN),
-                        createSimpleNameReferenceNode(createIdentifierToken("()")));
+                return createRequiredParameterNode(annotations, optionalNode, parameterName);
             } else if (items.getType().equals(ARRAY)) {
                 // Resource function doesn't support to the nested array type query parameters.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_100;
@@ -342,13 +330,7 @@ public class ParametersGenerator {
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
                     createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-            if (schema.getNullable() != null && schema.getNullable().equals(true)) {
-                return createRequiredParameterNode(annotations, optionalNode, parameterName);
-            }
-            return createDefaultableParameterNode(annotations, optionalNode, parameterName,
-                    createToken(SyntaxKind.EQUAL_TOKEN),
-                    createSimpleNameReferenceNode(createIdentifierToken("()")));
-
+            return createRequiredParameterNode(annotations, optionalNode, parameterName);
         }
     }
 
