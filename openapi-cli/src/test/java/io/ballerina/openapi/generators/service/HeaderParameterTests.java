@@ -62,8 +62,8 @@ public class HeaderParameterTests {
 
     @Test(description = "03. Header parameter with unsupported header data type",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Header 'x-request-id' with type 'integer' can not be mapped to the" +
-                    " Ballerina headers.*")
+            expectedExceptionsMessageRegExp = "Header 'x-request-id' with type 'integer' can not be mapped" +
+                    " as a valid Ballerina.*")
     public void headerWithNoSupportType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_03.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -74,8 +74,8 @@ public class HeaderParameterTests {
 
     @Test(description = "04. Header parameter with array type with no item type",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Header 'x-request-id' with no array item type can not be" +
-                    " mapped to Ballerina.*")
+            expectedExceptionsMessageRegExp = "Header 'x-request-id' with no array item type can not be mapped " +
+                    "as a valid Ballerina header.*")
     public void headerNoItemType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_04.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
@@ -86,8 +86,8 @@ public class HeaderParameterTests {
 
     @Test(description = "05. Header parameter has array type with not support item type",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Header 'x-request-id' with 'integer' array item type are not supported" +
-                    ".*")
+            expectedExceptionsMessageRegExp = "Header 'x-request-id' with array item type: 'integer' is not" +
+                    " supported.*")
     public void headerNoSupportArrayItemType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_05.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

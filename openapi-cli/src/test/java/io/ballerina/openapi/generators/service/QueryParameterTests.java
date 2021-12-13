@@ -198,7 +198,7 @@ public class QueryParameterTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_14.bal", syntaxTree);
     }
 
-    @Test(description = "14. Fix the optional query parameter")
+    @Test(description = "14.Optional query parameter")
     public void optionalQueryParameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/query/query_15.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

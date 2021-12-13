@@ -27,6 +27,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
@@ -103,7 +104,7 @@ public class ParametersGenerator {
             List<Parameter> parameters = operation.getValue().getParameters();
             for (Parameter parameter: parameters) {
                 if (parameter.getIn().trim().equals(HEADER)) {
-                    Node param = handleHeader(parameter);
+                    ParameterNode param = handleHeader(parameter);
                     if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
                         defaultableParams.add(param);
                         defaultableParams.add(comma);
@@ -153,7 +154,7 @@ public class ParametersGenerator {
      * This function for generating parameter ST node for header.
      * <pre> resource function get pets(@http:Header {name:"x-request-id"} string header) </pre>
      */
-    private Node handleHeader(Parameter parameter)throws BallerinaOpenApiException {
+    private ParameterNode handleHeader(Parameter parameter)throws BallerinaOpenApiException {
         Schema<?> schema = parameter.getSchema();
         TypeDescriptorNode headerTypeName;
         IdentifierToken parameterName = createIdentifierToken(escapeIdentifier(parameter.getName()
@@ -190,7 +191,7 @@ public class ParametersGenerator {
                         SINGLE_WS_MINUTIAE));
             }
             // Create annotation for header
-            // This code block is to be enabled when handle the headers handle additional parameters
+            // TODO: This code block is to be enabled when handle the headers handle additional parameters
             // MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
             //        createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
             //        createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
