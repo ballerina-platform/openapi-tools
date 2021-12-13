@@ -48,6 +48,7 @@ import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -404,7 +405,7 @@ public class FunctionBodyGenerator {
      * @return                              {@link VariableDeclarationNode}
      * @throws BallerinaOpenApiException    When invalid referenced schema is given.
      */
-    public VariableDeclarationNode getQueryParameterEncodingMap(List<Parameter> queryParameters)
+    private VariableDeclarationNode getQueryParameterEncodingMap(List<Parameter> queryParameters)
             throws BallerinaOpenApiException {
         List<Node> filedOfMap = new ArrayList<>();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
@@ -416,10 +417,12 @@ public class FunctionBodyGenerator {
         for (Parameter parameter: queryParameters) {
             Schema paramSchema = parameter.getSchema();
             if (paramSchema.get$ref() != null) {
-                paramSchema  = openAPI.getComponents().getSchemas().get(extractReferenceType(paramSchema.get$ref()));
+                paramSchema  = openAPI.getComponents().getSchemas().get(
+                        getValidName(extractReferenceType(paramSchema.get$ref()), true));
             }
             if (paramSchema != null && (paramSchema.getProperties() != null ||
-                    (paramSchema.getType() != null && paramSchema.getType().equals("array")))) {
+                    (paramSchema.getType() != null && paramSchema.getType().equals("array")) ||
+                    (paramSchema instanceof ComposedSchema))) {
                 if (parameter.getStyle() != null || parameter.getExplode() != null) {
                     GeneratorUtils.createEncodingMap(filedOfMap, parameter.getStyle().toString(),
                             parameter.getExplode(), parameter.getName().trim());

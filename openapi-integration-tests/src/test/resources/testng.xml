@@ -23,6 +23,7 @@
         <classes>
             <class name="io.ballerina.openapi.extension.build.BuildExtensionTests"/>
             <class name="io.ballerina.openapi.cmd.BallerinaToOpenAPITests"/>
+            <class name="io.ballerina.openapi.extension.build.ValidatorTests"/>
         </classes>
     </test>
 </suite>
