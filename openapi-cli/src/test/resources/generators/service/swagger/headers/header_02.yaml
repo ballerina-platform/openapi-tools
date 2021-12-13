@@ -1,0 +1,25 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: OpenApi Petstoe
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+paths:
+  /pets:
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
+      parameters:
+        - in: header
+          name: x-request-id
+          schema: {}
+          required: true
+      responses:
+        '200':
+          description: An paged array of pets

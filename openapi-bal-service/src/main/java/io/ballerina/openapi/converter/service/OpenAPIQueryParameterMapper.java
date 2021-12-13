@@ -146,6 +146,9 @@ public class OpenAPIQueryParameterMapper {
         if (Arrays.stream(validExpressionKind).anyMatch(syntaxKind -> syntaxKind ==
                 defaultableQueryParam.expression().kind())) {
             String defaultValue = defaultableQueryParam.expression().toString().replaceAll("\"", "");
+            if (defaultableQueryParam.expression().kind() == NIL_LITERAL) {
+                defaultValue = null;
+            }
             if (queryParameter.getContent() != null) {
                 Content content = queryParameter.getContent();
                 for (Map.Entry<String, MediaType> stringMediaTypeEntry : content.entrySet()) {

@@ -31,10 +31,20 @@ public enum ServiceDiagnosticMessages {
             "supported in Ballerina.", DiagnosticSeverity.ERROR),
     OAS_SERVICE_101("OAS_SERVICE_101",
             "Query parameters with no array item type can not be mapped to Ballerina resource" +
-                    " query parameters.",
-            DiagnosticSeverity.ERROR),
+                    " query parameters.", DiagnosticSeverity.ERROR),
     OAS_SERVICE_102("OAS_SERVICE_102",
             "Query parameters with type '%s' can not be mapped to the Ballerina query parameters.",
+            DiagnosticSeverity.ERROR),
+    OAS_SERVICE_103("OAS_SERVICE_103", "Header '%s' with array item type: '%s' is not " +
+            "supported in Ballerina.", DiagnosticSeverity.ERROR),
+    OAS_SERVICE_104("OAS_SERVICE_104",
+            "Header '%s' with no array item type can not be mapped as a valid Ballerina" +
+                    " header parameter.", DiagnosticSeverity.ERROR),
+    OAS_SERVICE_105("OAS_SERVICE_105",
+            "Header '%s' with type '%s' can not be mapped as a valid Ballerina header parameter.",
+            DiagnosticSeverity.ERROR),
+    OAS_SERVICE_106("OAS_SERVICE_106",
+            "Header '%s' with no header type can not be mapped to the Ballerina headers.",
             DiagnosticSeverity.ERROR);
 
     private final String code;

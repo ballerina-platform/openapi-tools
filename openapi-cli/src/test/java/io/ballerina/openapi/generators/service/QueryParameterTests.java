@@ -197,4 +197,13 @@ public class QueryParameterTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_14.bal", syntaxTree);
     }
+
+    @Test(description = "14.Optional query parameter")
+    public void optionalQueryParameter() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/query/query_15.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query_15.bal", syntaxTree);
+    }
 }
