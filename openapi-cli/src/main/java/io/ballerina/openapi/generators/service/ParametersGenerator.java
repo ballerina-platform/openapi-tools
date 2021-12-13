@@ -177,21 +177,41 @@ public class ParametersGenerator {
             }
             // Create annotation for header
             // This code block is to be enabled when handle the headers handle additional parameters
-//            MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
-//                    createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
-//                    createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+          // MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
+          //        createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
+          //        createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             AnnotationNode headerNode = getAnnotationNode(HEADER_ANNOT, null);
             NodeList<AnnotationNode> headerAnnotations = NodeFactory.createNodeList(headerNode);
             // Handle optional values in headers
             if (!parameter.getRequired()) {
+                // If optional it behaves like default value with null ex:(string? header = ())
                 headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+                boolean condition = (schema.getDefault()) == null && (schema.getNullable() == null ||
+                        (schema.getNullable() != null && schema.getNullable().equals(false)));
+                if (condition) {
+                    return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
+                            createToken(SyntaxKind.EQUAL_TOKEN),
+                            createSimpleNameReferenceNode(createIdentifierToken("()")));
+                }
             }
             // Handle default values in headers
             if (schema.getDefault() != null) {
+                if (!schema.getType().equals(ARRAY)) {
+                    return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
+                            createToken(SyntaxKind.EQUAL_TOKEN),
+                            createSimpleNameReferenceNode(createIdentifierToken("\"" +
+                                    schema.getDefault().toString() + "\"")));
+                }
                 return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
                         createToken(SyntaxKind.EQUAL_TOKEN),
                         createSimpleNameReferenceNode(createIdentifierToken(schema.getDefault().toString())));
+            }
+            // Handle nullable ture ex: (string? header)
+            if (parameter.getRequired() && schema.getNullable() != null && schema.getNullable().equals(true)) {
+                isNullableRequired = true;
+                headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
+                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
             }
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
         }

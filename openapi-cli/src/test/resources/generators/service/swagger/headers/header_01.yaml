@@ -9,16 +9,18 @@ servers:
       host:
         default: openapi
 paths:
-  /ping:
+  /pets:
     get:
-      operationId: operation_get_/ping
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
       parameters:
-        - name: x-client
-          in: header
+        - in: header
+          name: x-request-id
           schema:
             type: string
-            default: "foo"
           required: true
       responses:
-        "200":
-          description: Ok
+        '200':
+          description: An paged array of pets

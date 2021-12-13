@@ -17,7 +17,7 @@ paths:
           in: header
           schema:
             type: string
-            default: "foo"
+            nullable: true
           required: true
       responses:
         "200":
