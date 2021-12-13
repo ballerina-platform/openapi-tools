@@ -22,7 +22,6 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -104,8 +103,13 @@ public class ParametersGenerator {
             for (Parameter parameter: parameters) {
                 if (parameter.getIn().trim().equals(HEADER)) {
                     Node param = handleHeader(parameter);
-                    requiredParams.add(param);
-                    requiredParams.add(comma);
+                    if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
+                        defaultableParams.add(param);
+                        defaultableParams.add(comma);
+                    } else {
+                        requiredParams.add(param);
+                        requiredParams.add(comma);
+                    }
                 } else if (parameter.getIn().trim().equals(QUERY)) {
                     if (parameter.getRequired() != null && parameter.getRequired() &&
                             (parameter.getSchema().getNullable() != null &&  parameter.getSchema().getNullable())) {
@@ -252,7 +256,7 @@ public class ParametersGenerator {
         } else if (parameter.getSchema().getDefault() != null) {
             // When query parameter has default value
             return handleDefaultQueryParameter(schema, annotations, parameterName);
-        } else if (parameter.getRequired() != null && parameter.getRequired() && schema.getNullable() == null) {
+        } else if (parameter.getRequired() && schema.getNullable() == null) {
             // Required typeDescriptor
             return handleRequiredQueryParameter(schema, annotations, parameterName);
         } else {
@@ -318,7 +322,12 @@ public class ParametersGenerator {
                 ArrayTypeDescriptorNode arrayTypeName = getArrayTypeDescriptorNode(items);
                 OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(arrayTypeName,
                         createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-                return createRequiredParameterNode(annotations, optionalNode, parameterName);
+                if (schema.getNullable() != null && schema.getNullable().equals(true)) {
+                    return createRequiredParameterNode(annotations, optionalNode, parameterName);
+                }
+                return createDefaultableParameterNode(annotations, optionalNode, parameterName,
+                        createToken(SyntaxKind.EQUAL_TOKEN),
+                        createSimpleNameReferenceNode(createIdentifierToken("()")));
             } else if (items.getType().equals(ARRAY)) {
                 // Resource function doesn't support to the nested array type query parameters.
                 ServiceDiagnosticMessages messages = ServiceDiagnosticMessages.OAS_SERVICE_100;
@@ -333,7 +342,13 @@ public class ParametersGenerator {
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
                     createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-            return createRequiredParameterNode(annotations, optionalNode, parameterName);
+            if (schema.getNullable() != null && schema.getNullable().equals(true)) {
+                return createRequiredParameterNode(annotations, optionalNode, parameterName);
+            }
+            return createDefaultableParameterNode(annotations, optionalNode, parameterName,
+                    createToken(SyntaxKind.EQUAL_TOKEN),
+                    createSimpleNameReferenceNode(createIdentifierToken("()")));
+
         }
     }
 
