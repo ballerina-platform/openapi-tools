@@ -53,7 +53,7 @@ public class AnyDataTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
-        String anyData = TypeGeneratorUtils.getNullableType(schema, GeneratorConstants.ANY_DATA);
-        return createSimpleNameReferenceNode(createIdentifierToken(anyData));
+        return TypeGeneratorUtils.getNullableType(schema, createSimpleNameReferenceNode(
+                createIdentifierToken(GeneratorConstants.ANY_DATA)));
     }
 }

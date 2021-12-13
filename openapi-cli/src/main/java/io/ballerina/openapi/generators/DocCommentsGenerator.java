@@ -27,6 +27,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.Token;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -52,10 +53,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOCUMENTATION_DESCRIPTION;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.HASH_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.MARKDOWN_DOCUMENTATION_LINE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DEPRECATED_REASON;
 import static io.ballerina.openapi.generators.GeneratorConstants.X_BALLERINA_DISPLAY;
+import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_END_OF_LINE_MINUTIAE;
+import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 
 /**
  * This class util for maintain the API doc comment related functions.
@@ -139,14 +144,17 @@ public class DocCommentsGenerator {
             String description, boolean addExtraLine) {
         String[] descriptionLines = description.split("\n");
         List<MarkdownDocumentationLineNode> documentElements = new ArrayList<>();
+        Token hashToken = createToken(HASH_TOKEN, createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
         for (String line : descriptionLines) {
             MarkdownDocumentationLineNode documentationLineNode =
-                    createMarkdownDocumentationLineNode(DOCUMENTATION_DESCRIPTION,
-                            createToken(SyntaxKind.HASH_TOKEN), createNodeList(createIdentifierToken(line)));
+                    createMarkdownDocumentationLineNode(MARKDOWN_DOCUMENTATION_LINE, hashToken,
+                            createNodeList(createLiteralValueToken(DOCUMENTATION_DESCRIPTION, line,
+                                    createEmptyMinutiaeList(),
+                                    SINGLE_END_OF_LINE_MINUTIAE)));
             documentElements.add(documentationLineNode);
         }
         if (addExtraLine) {
-            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(null,
+            MarkdownDocumentationLineNode newLine = createMarkdownDocumentationLineNode(MARKDOWN_DOCUMENTATION_LINE,
                     createToken(SyntaxKind.HASH_TOKEN), createEmptyNodeList());
             documentElements.add(newLine);
         }

@@ -58,13 +58,21 @@ components:
             - properties:
                 streetNo:
                   type: string
+                  description: Street No
                 houseNo:
                   type: string
+                  description: House number
+              description: Address line 1
             - properties:
                 streatName:
                   type: string
+                  description: Street Name
                 country:
                   type: string
+                  description: Countri Name
+              description: Address line 2
         - properties:
             zipCode:
               type: integer
+              description: Zip code
+          description: Other details
