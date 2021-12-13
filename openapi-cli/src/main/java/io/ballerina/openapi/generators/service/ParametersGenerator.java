@@ -67,6 +67,10 @@ import static io.ballerina.openapi.generators.GeneratorConstants.QUERY;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_103;
+import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_104;
+import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_105;
+import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_106;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
 
@@ -98,7 +102,7 @@ public class ParametersGenerator {
             List<Parameter> parameters = operation.getValue().getParameters();
             for (Parameter parameter: parameters) {
                 if (parameter.getIn().trim().equals(HEADER)) {
-                    RequiredParameterNode param = handleHeader(parameter);
+                    Node param = handleHeader(parameter);
                     params.add(param);
                     params.add(comma);
                 } else if (parameter.getIn().trim().equals(QUERY)) {
@@ -135,29 +139,34 @@ public class ParametersGenerator {
      * This function for generating parameter ST node for header.
      * <pre> resource function get pets(@http:Header {name:"x-request-id"} string header) </pre>
      */
-    private RequiredParameterNode handleHeader(Parameter parameter)throws BallerinaOpenApiException {
+    private Node handleHeader(Parameter parameter)throws BallerinaOpenApiException {
         Schema<?> schema = parameter.getSchema();
         TypeDescriptorNode headerTypeName;
         IdentifierToken parameterName = createIdentifierToken(escapeIdentifier(parameter.getName()
                 .toLowerCase(Locale.ENGLISH)), AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
-        if (schema == null) {
+        if (schema.getType() == null) {
              // Header example:
              // 01.<pre>
              //       in: header
              //       name: X-Request-ID
              //       schema: {}
              //  </pre>
-            return createRequiredParameterNode(createEmptyNodeList(), createIdentifierToken(STRING, SINGLE_WS_MINUTIAE,
-                            SINGLE_WS_MINUTIAE), parameterName);
+            throw new BallerinaOpenApiException(String.format(OAS_SERVICE_106.getDescription(), parameter.getName()));
         } else {
             if (!schema.getType().equals(STRING) && !(schema instanceof ArraySchema)) {
-                //TODO: Generate diagnostic about to error type throws exception
-                headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(STRING,
-                        SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE));
+                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_105.getDescription(),
+                        parameter.getName(), schema.getType()));
             } else if (schema instanceof ArraySchema) {
-                String arrayType = ((ArraySchema) schema).getItems().getType();
+                Schema<?> items = ((ArraySchema) schema).getItems();
+                if (items.getType() == null) {
+                    throw new BallerinaOpenApiException(String.format(OAS_SERVICE_104.getDescription(),
+                            parameter.getName()));
+                } else if (!items.getType().equals(STRING)) {
+                    throw new BallerinaOpenApiException(String.format(OAS_SERVICE_103.getDescription(),
+                            parameter.getName(), items.getType()));
+                }
                 BuiltinSimpleNameReferenceNode headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(
-                        null, createIdentifierToken(arrayType));
+                        null, createIdentifierToken(STRING));
                 headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName,
                         createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
@@ -167,12 +176,23 @@ public class ParametersGenerator {
                         SINGLE_WS_MINUTIAE));
             }
             // Create annotation for header
-            MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
-                    createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
-                    createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
-            AnnotationNode headerNode = getAnnotationNode(HEADER_ANNOT, annotValue);
+            // This code block is to be enabled when handle the headers handle additional parameters
+//            MappingConstructorExpressionNode annotValue = NodeFactory.createMappingConstructorExpressionNode(
+//                    createToken(SyntaxKind.OPEN_BRACE_TOKEN), NodeFactory.createSeparatedNodeList(),
+//                    createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+            AnnotationNode headerNode = getAnnotationNode(HEADER_ANNOT, null);
             NodeList<AnnotationNode> headerAnnotations = NodeFactory.createNodeList(headerNode);
-
+            // Handle optional values in headers
+            if (!parameter.getRequired()) {
+                headerTypeName = createOptionalTypeDescriptorNode(headerTypeName,
+                        createToken(SyntaxKind.QUESTION_MARK_TOKEN));
+            }
+            // Handle default values in headers
+            if (schema.getDefault() != null) {
+                return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
+                        createToken(SyntaxKind.EQUAL_TOKEN),
+                        createSimpleNameReferenceNode(createIdentifierToken(schema.getDefault().toString())));
+            }
             return createRequiredParameterNode(headerAnnotations, headerTypeName, parameterName);
         }
     }
