@@ -325,10 +325,15 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
     }
 
     private static String normalizedPath(String path) {
-        if (path.contains("{")) {
-            path = path.replaceAll("\\{", "\'{")
-                    .replaceAll("\\}", "\\}'");
-        }
+        path = path.replaceAll("\'\\{", "{")
+                .replaceAll("\\{", "\'{")
+                .replaceAll("\\}'", "\\}")
+                .replaceAll("\\}", "\\}'");
+//        if (path.contains("{")) {
+//            path = path.replaceAll("\\{", "\'{")
+//                    .replaceAll("\\}", "\\}'");
+//        }
+        System.out.println(path);
         return path;
     }
 

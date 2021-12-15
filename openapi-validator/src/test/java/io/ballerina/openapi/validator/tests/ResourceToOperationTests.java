@@ -136,25 +136,6 @@ public class ResourceToOperationTests {
         Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeBallerinaType(), Constants.Type.STRING);
     }
 
-    @Test(description = "Invalid test for RequestPayload parameter: when request payload parameters")
-    public void testTypeMissMatchRequestPayloadParam() throws OpenApiValidatorException, IOException {
-        Path contractPath = RES_DIR.resolve("swagger/invalid/petstore_payload_user.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
-        project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_rb_jsonpayload.bal"));
-        operation = api.getPaths().get("/pets").getPost();
-        resourceMethod = ValidatorTest.getResourceMethod(project, "/pets", "post");
-        syntaxTree = ValidatorTest.getSyntaxTree(project);
-        semanticModel = ValidatorTest.getSemanticModel(project);
-        validationError = ResourceValidator.validateResourceAgainstOperation(operation, resourceMethod, semanticModel
-                , syntaxTree);
-        Assert.assertTrue(validationError.get(0) instanceof TypeMismatch);
-        Assert.assertEquals(validationError.get(0).getFieldName(), "userName");
-        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
-        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeBallerinaType(), Constants.Type.INT);
-    }
-
-
-
     @Test(description = "Invalid test for RequestPayload parameter: when request payload parameters has missing field.")
     public void testMissingFieldMatchRequestPayloadParam() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstore_payload_missfield.yaml");

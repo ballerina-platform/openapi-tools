@@ -82,6 +82,52 @@ public class ValidatorTests {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
             logLines.close();
+            System.out.println(generatedLog);
+            generatedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            msg = (msg.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            if (generatedLog.contains(msg)) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.fail("OpenAPIValidator execution fail.");
+            }
+        }
+    }
+
+    @Test(description = "OpenAPI validator plugin test for multiple diagnostic with path parameter")
+    public void withComplexParameter() throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("project_4");
+        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        String msg = " ERROR [service.bal:(11:49,11:60)] Type mismatch with parameter 'obsId' for the method 'get' " +
+                "of the path /applications/{obsId}/metrics.In OpenAPI contract its type is 'string' " +
+                "and resources type is 'int'.";
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
+            Stream<String> logLines = br.lines();
+            String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
+            logLines.close();
+            System.out.println(generatedLog);
+            generatedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            msg = (msg.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            if (generatedLog.contains(msg)) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.fail("OpenAPIValidator execution fail.");
+            }
+        }
+    }
+
+    @Test(description = "Invalid test for RequestPayload parameter: when request payload parameters")
+    public void typeMisMatchingInRecord() throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("project_3");
+        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        String msg = " WARNING [service.bal:(5:10,5:18)] Type mismatching 'userName' field in the record type of the" +
+                " parameter 'User' for the method 'post' of the path '/pets'.In OpenAPI contract its type " +
+                "is 'string' and resources type is 'int'.";
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
+            Stream<String> logLines = br.lines();
+            String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
+            logLines.close();
             generatedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
             msg = (msg.trim()).replaceAll(WHITESPACE_PATTERN, "");
             if (generatedLog.contains(msg)) {

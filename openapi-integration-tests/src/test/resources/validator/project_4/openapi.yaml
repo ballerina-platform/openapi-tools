@@ -1,0 +1,152 @@
+openapi: 3.0.3
+info:
+  title: System API
+  version: 0.1.0
+servers:
+  - url: https://{hostname}/sysobsapi
+    variables:
+      hostname:
+        default: "localhost"
+paths:
+  /applications/'{obsId}'/metrics/{startTime}:
+    get:
+      operationId: getMetrics
+      parameters:
+        - $ref: "#/components/parameters/startTimeQueryParam"
+        - $ref: "#/components/parameters/endTimeQueryParam"
+        - $ref: "#/components/parameters/intervalQueryParam"
+        - $ref: "#/components/parameters/obsIdPathParam"
+      responses:
+        "200":
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimeseriesTable"
+        "400":
+          description: Response indicating an invalid input.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Response indicating an unauthorized request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "404":
+          description: Response indicating a not found error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "500":
+          description: Response indicating an internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /healthz:
+    get:
+      summary: Retrieve health of the sysobsapi
+      operationId: checkHealth
+      responses:
+        "200":
+          description: Response indicating an ok status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthOkResponse"
+        "503":
+          description: Response indicating a service unavailable status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthErrorResponse"
+components:
+  schemas:
+    TimeseriesTable:
+      type: object
+      properties:
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/Column"
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Row"
+    Column:
+      description: Represents a column in the returned table
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [datetime, dynamic]
+    Row:
+      type: array
+      items:
+        type: string
+        format: json
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          $ref: "#/components/schemas/BackendErrorCodes"
+        message:
+          type: string
+          description: The summarized error message
+        description:
+          type: string
+          description: Description about the error occurred
+    HealthOkResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [OK]
+    HealthErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ERROR]
+    BackendErrorCodes:
+      type: integer
+  parameters:
+    startTimeQueryParam:
+      name: startTime
+      in: path
+      required: true
+      schema:
+        type: string
+        format: date
+    endTimeQueryParam:
+      name: endTime
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date
+    intervalQueryParam:
+      name: interval
+      in: query
+      schema:
+        type: integer
+        default: 1
+    obsIdPathParam:
+      name: obsId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        pattern: "^.{8}-.{4}-.{4}-.{4}-.{12}$"
