@@ -728,7 +728,7 @@ public class FunctionBodyGenerator {
                         createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
                         apiKeyConfigParamNode);
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
-                        getValidName(getValidName(apiKey, false), false)));
+                        getValidName(apiKey, false)));
                 SpecificFieldNode specificFieldNode;
                 ExpressionNode apiKeyExpr = createFieldAccessExpressionNode(
                         fieldExpr, createToken(DOT_TOKEN), valueExpr);
