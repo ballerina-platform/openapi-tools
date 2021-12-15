@@ -296,7 +296,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                             String[] errorMsg = ErrorMessages.unimplementedFieldInOperation(
                                                             error.getFieldName(), ((MissingFieldInBallerinaType) error)
                                                                     .getRecordName(), operation.getKey(),
-                                                            openAPIPathSummary.getPath());
+                                                    normalizedPath(openAPIPathSummary.getPath()));
                                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(errorMsg[0],
                                                     errorMsg[1], kind);
                                             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
@@ -304,10 +304,9 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                             validations.add(diagnostic);
                                         } else if (!(error instanceof TypeMismatch) &&
                                                 (!(error instanceof MissingFieldInJsonSchema))) {
-
                                             String[] errorMsg = ErrorMessages.unimplementedParameterForOperation(
                                                     error.getFieldName(), operation.getKey(),
-                                                    openAPIPathSummary.getPath());
+                                                    normalizedPath(openAPIPathSummary.getPath()));
 
                                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(errorMsg[0],
                                                     errorMsg[1], kind);
@@ -323,6 +322,14 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 }
             }
         }
+    }
+
+    private static String normalizedPath(String path) {
+        if (path.contains("{")) {
+            path = path.replaceAll("\\{", "\'{")
+                    .replaceAll("\\}", "\\}'");
+        }
+        return path;
     }
 
     //Extract details from openapi annotation.

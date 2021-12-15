@@ -69,4 +69,26 @@ public class ValidatorTests {
             }
         }
     }
+
+    @Test(description = "OpenAPI validator plugin test for multiple diagnostic with path parameter")
+    public void typeMisMatchPathParameterWithQueryParameter() throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("project_2");
+        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        String msg = " ERROR [service.bal:(11:49,11:60)] Type mismatch with parameter 'obsId' for the method 'get' " +
+                "of the path /applications/{obsId}/metrics.In OpenAPI contract its type is 'string' " +
+                "and resources type is 'int'.";
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
+            Stream<String> logLines = br.lines();
+            String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
+            logLines.close();
+            generatedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            msg = (msg.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            if (generatedLog.contains(msg)) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.fail("OpenAPIValidator execution fail.");
+            }
+        }
+    }
 }

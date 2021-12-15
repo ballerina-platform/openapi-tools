@@ -55,8 +55,8 @@ class ErrorMessages {
     static String[] undocumentedResourceParameter(String paramName, String method, String path) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0005;
-        error[1] =  String.format("'%s' parameter for the method '%s' " +
-                "of the resource associated with the path '%s' " +
+        error[1] =  String.format("'%s' parameter for the method ''%s'' " +
+                "of the resource associated with the path ''%s'' " +
                 "is not documented in the OpenAPI contract.", paramName, method, path);
         return  error;
     }
@@ -72,7 +72,7 @@ class ErrorMessages {
     static String[] unimplementedOpenAPIPath(String path) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0007;
-        error[1] =  String.format("Could not find a Ballerina service resource for the path '%s' " +
+        error[1] =  String.format("Could not find a Ballerina service resource for the path ''%s'' " +
                 "which is documented in the OpenAPI contract.", path);
         return  error;
     }
@@ -80,7 +80,7 @@ class ErrorMessages {
     static String[] unimplementedOpenAPIOperationsForPath(String methods, String path) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0008;
-        error[1] =  String.format("Could not find Ballerina service resource(s) for http method(s) '%s' " +
+        error[1] =  String.format("Could not find Ballerina service resource(s) for http method(s) ''%s'' " +
                 "for the path '%s' which is documented in the OpenAPI contract.", methods, path);
         return  error;
     }
@@ -96,8 +96,8 @@ class ErrorMessages {
     static String[] undocumentedFieldInRecordParam(String fieldName, String paramName, String method, String path) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0010;
-        error[1] =  String.format("The '%s' field in the '%s' type record of the parameter " +
-                        "is not documented in the OpenAPI contract for the method '%s' of the path '%s'.",
+        error[1] =  String.format("The ''%s'' field in the ''%s'' type record of the parameter " +
+                        "is not documented in the OpenAPI contract for the method ''%s'' of the path ''%s''.",
                 fieldName, paramName, method, path);
         return  error;
     }
@@ -132,8 +132,9 @@ class ErrorMessages {
                                   String method, String path) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0014;
-        error[1] =  String.format("Type mismatch with parameter '%s' for the method" +
-                        " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
+        error[1] =  String.format("Type mismatch with parameter ''%s'' for the method" +
+                        " ''%s'' of the path '%s'.In OpenAPI contract its type is ''%s'' and resources type " +
+                        "is ''%s''. ",
                 fieldName, method,  path, openapiType, ballerinType);
         return  error;
     }
@@ -142,8 +143,9 @@ class ErrorMessages {
                                         String method, String path) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0015;
-        error[1] =  String.format("Type mismatching '%s' field in the record type of the parameter '%s' for the method"
-                        + " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
+        error[1] =  String.format("Type mismatching ''%s'' field in the record type of the parameter " +
+                        "''%s'' for the method ''%s'' of the path ''%s''.In OpenAPI contract its type is ''%s'' and " +
+                        "resources type is ''%s''. ",
                 fieldName, paramName, method,  path, openapiType , ballerinType);
         return  error;
     }
