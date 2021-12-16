@@ -214,6 +214,7 @@ public class ServiceGenerationUtils {
         }
         return createSimpleNameReferenceNode(identifierToken);
     }
+
     /**
      * Generate TypeDescriptor for all the mediaTypes.
      */
@@ -230,6 +231,8 @@ public class ServiceGenerationUtils {
                 identifierToken = createIdentifierToken(GeneratorConstants.XML);
                 return createSimpleNameReferenceNode(identifierToken);
             case "text/plain":
+            case "text/html":
+            case "text/csv":
                 identifierToken = createIdentifierToken(GeneratorConstants.STRING);
                 return createSimpleNameReferenceNode(identifierToken);
             case "application/octet-stream":
