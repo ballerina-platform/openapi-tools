@@ -23,6 +23,7 @@ import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
@@ -91,5 +92,15 @@ public class RequestBodyTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/refactor_record_name.bal", syntaxTree);
+    }
+
+    @Test(description = "Scenario 05 - Request Body has text/* mediatype.")
+    public void generateForMediaType() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario04_rb.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/scenario_04_rb.bal", syntaxTree);
     }
 }
