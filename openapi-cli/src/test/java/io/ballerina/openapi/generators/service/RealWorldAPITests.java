@@ -29,21 +29,18 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * All the tests related to the {@code io.ballerina.openapi.generators.service.ReturnTypeGenerator} util.
  */
-public class RealAPITests {
+public class RealWorldAPITests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/service").toAbsolutePath();
-    List<String> list1 = new ArrayList<>();
-    List<String> list2 = new ArrayList<>();
-    Filter filter = new Filter(list1, list2);
+    Filter filter = new Filter(new ArrayList<>(), new ArrayList<>());
     SyntaxTree syntaxTree;
 
     @Test(description = "Scenario 01 - Response has unsupported http status code",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Http status code '429' won't support in Ballerina."
+            expectedExceptionsMessageRegExp = "HTTP status code '429' is not supported in Ballerina."
     )
     public void generateResponseScenario01() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/real_apis/box.yaml");
