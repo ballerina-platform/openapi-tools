@@ -61,6 +61,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescr
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
+import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getUnionNodeForOneOf;
@@ -219,7 +220,12 @@ public class ReturnTypeGenerator {
         while (responseIter.hasNext()) {
             Map.Entry<String, ApiResponse> response = responseIter.next();
             String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
-            if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
+            if (code == null && !response.getKey().trim().equals("default")) {
+                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_107.getDescription(),
+                        response.getKey().trim()));
+            }
+            if (response.getValue().getContent() == null && response.getValue().get$ref() == null ||
+                    response.getValue().getContent() != null && response.getValue().getContent().size() == 0) {
                 //key and value
                 QualifiedNameReferenceNode node = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
                 qualifiedNodes.add(node);
