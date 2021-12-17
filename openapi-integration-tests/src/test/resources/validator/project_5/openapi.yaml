@@ -8,11 +8,13 @@ servers:
       hostname:
         default: "localhost"
 paths:
-  /applications/'{obsId}'/metrics/'{startTime}':
+  /applications/{obsId}/metrics/{startTime}:
     get:
       operationId: getMetrics
       parameters:
         - $ref: "#/components/parameters/startTimeQueryParam"
+        - $ref: "#/components/parameters/endTimeQueryParam"
+        - $ref: "#/components/parameters/intervalQueryParam"
         - $ref: "#/components/parameters/obsIdPathParam"
       responses:
         "200":
@@ -125,8 +127,7 @@ components:
       in: path
       required: true
       schema:
-        type: string
-        format: date
+        type: integer
     endTimeQueryParam:
       name: endTime
       in: query

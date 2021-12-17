@@ -12,9 +12,6 @@ paths:
     get:
       operationId: getMetrics
       parameters:
-        - $ref: "#/components/parameters/startTimeQueryParam"
-        - $ref: "#/components/parameters/endTimeQueryParam"
-        - $ref: "#/components/parameters/intervalQueryParam"
         - $ref: "#/components/parameters/obsIdPathParam"
       responses:
         "200":

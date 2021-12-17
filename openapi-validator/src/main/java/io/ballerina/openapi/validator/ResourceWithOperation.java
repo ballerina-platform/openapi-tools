@@ -219,11 +219,13 @@ public class ResourceWithOperation {
                         }
                         if (!isMethodExit) {
                             OpenapiServiceValidationError openapiServiceValidationError =
-                                    new OpenapiServiceValidationError(method, openAPIPathSummary.getPath(),
+                                    new OpenapiServiceValidationError(method,
+                                            openAPIPathSummary.getPath(),
                                             openAPIPathSummary.getOperations().get(method).getTags(),
                                             openAPIPathSummary);
                             operationsValidationErrors.add(openapiServiceValidationError);
                         }
+
                     }
                     break;
                 }

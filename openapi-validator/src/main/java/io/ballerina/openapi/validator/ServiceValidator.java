@@ -183,15 +183,15 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 if (!openApiMissingServiceMethod.isEmpty()) {
                     for (OpenapiServiceValidationError openApiMissingError: openApiMissingServiceMethod) {
                         if (openApiMissingError.getServiceOperation() == null) {
-                            String[] error = ErrorMessages.unimplementedOpenAPIPath(openApiMissingError.
-                                    getServicePath());
+                            String[] error = ErrorMessages.unimplementedOpenAPIPath(normalizedPath(openApiMissingError.
+                                    getServicePath()));
                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
                                     serviceDeclarationNode.location());
                             validations.add(diagnostic);
                         } else {
                             String[] error = ErrorMessages.unimplementedOpenAPIOperationsForPath(openApiMissingError.
-                                    getServiceOperation(), openApiMissingError.getServicePath());
+                                    getServiceOperation(), normalizedPath(openApiMissingError.getServicePath()));
                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
                                     serviceDeclarationNode.location());
@@ -323,25 +323,15 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
             }
         }
     }
-
-    private static String normalizedPath(String path) {
-        path = path.replaceAll("\'\\{", "{")
-                .replaceAll("\\{", "\'{")
-                .replaceAll("\\}'", "\\}")
-                .replaceAll("\\}", "\\}'");
-//        if (path.contains("{")) {
-//            path = path.replaceAll("\\{", "\'{")
-//                    .replaceAll("\\}", "\\}'");
-//        }
-        System.out.println(path);
-        return path;
+    public static String normalizedPath(String path) {
+        return path.replaceAll("\\{", "\'{").replaceAll("\\}", "\\}'")
+                .replaceAll("''", "\\'''");
     }
 
     //Extract details from openapi annotation.
     private DiagnosticSeverity extractOpenAPIAnnotation(DiagnosticSeverity kind, Filters filters,
                                                         AnnotationNode annotationNode, Path ballerinaFilePath,
-                                                        List<Diagnostic> validations)
-            throws IOException {
+                                                        List<Diagnostic> validations) throws IOException {
         SeparatedNodeList<MappingFieldNode> fields = annotationNode.annotValue().orElseThrow().fields();
         for (MappingFieldNode fieldNode: fields) {
             if (fieldNode instanceof SpecificFieldNode) {
@@ -532,7 +522,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                     }
                 } else if (!(postErr instanceof MissingFieldInBallerinaType)) {
                     String[] error = ErrorMessages.undocumentedResourceParameter(postErr.getFieldName(),
-                                    method.getKey(), resourcePathSummary.getPath());
+                                    method.getKey(), normalizedPath(resourcePathSummary.getPath()));
                     DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                     Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
                             postErr.getParameterPos());
@@ -547,7 +537,6 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                                                    Map.Entry<String, ResourceMethod> method,
                                                                    MissingFieldInJsonSchema postErr,
                                                                    List<Diagnostic> validations) {
-
         String[] error = ErrorMessages.undocumentedFieldInRecordParam(postErr.getFieldName(),
                         postErr.getRecordName(), method.getKey(), resourcePathSummary.getPath());
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
@@ -575,7 +564,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                         (TypeMismatch) postErr).getTypeJsonSchema()),
                                 TypeSymbolToJsonValidatorUtil.convertEnumTypeToString(((
                                         TypeMismatch) postErr).getTypeBallerinaType()), method.getKey(),
-                                resourcePathSummary.getPath());
+                                normalizedPath(resourcePathSummary.getPath()));
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                 Diagnostic diagnostic =
                         DiagnosticFactory.createDiagnostic(diagnosticInfo, ((TypeMismatch) postErr).getLocation());
@@ -586,7 +575,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                         (((TypeMismatch) postErr).getTypeJsonSchema()),
                                 TypeSymbolToJsonValidatorUtil.convertEnumTypeToString
                                         (((TypeMismatch) postErr).getTypeBallerinaType()), method.getKey(),
-                                resourcePathSummary.getPath());
+                        normalizedPath(resourcePathSummary.getPath()));
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                 Diagnostic diagnostic =
                         DiagnosticFactory.createDiagnostic(diagnosticInfo, ((TypeMismatch) postErr).getLocation());

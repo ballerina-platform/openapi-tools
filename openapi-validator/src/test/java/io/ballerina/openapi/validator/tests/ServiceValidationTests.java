@@ -115,7 +115,7 @@ public class ServiceValidationTests {
         Assert.assertTrue(openApiMissingServiceMethod.isEmpty());
     }
 
-    @Test(description = "test for undocumented TypeMisMatch in Path parameter")
+    @Test(description = "test for undocumented TypeMisMatch in Path parameter", enabled = false)
     public void testParameterTypeMismatch() throws OpenApiValidatorException, IOException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstoreParameterTM.bal"));
         ServiceDeclarationNode serviceDeclarationNode = ValidatorTest.getServiceDeclarationNode(project);
