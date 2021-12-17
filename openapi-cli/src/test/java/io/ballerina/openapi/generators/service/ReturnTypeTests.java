@@ -244,4 +244,16 @@ public class ReturnTypeTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "response/different_status_code.bal", syntaxTree);
     }
+
+    @Test(description = "Response has unsupported http status code",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "HTTP status code '429' is not supported in Ballerina."
+    )
+    public void testForNotSupportedStatusCode() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/real_apis/box.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("real_apis/box.bal", syntaxTree);
+    }
 }
