@@ -61,6 +61,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescr
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
+import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getUnionNodeForOneOf;
@@ -218,17 +219,23 @@ public class ReturnTypeGenerator {
         Token pipeToken = createIdentifierToken("|");
         while (responseIter.hasNext()) {
             Map.Entry<String, ApiResponse> response = responseIter.next();
-            String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
-            if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
+            String responseCode = response.getKey().trim();
+            String code = GeneratorConstants.HTTP_CODES_DES.get(responseCode);
+            if (code == null && !responseCode.equals("default")) {
+                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_107.getDescription(),
+                        responseCode));
+            }
+            if (response.getValue().getContent() == null && response.getValue().get$ref() == null ||
+                    response.getValue().getContent() != null && response.getValue().getContent().size() == 0) {
                 //key and value
                 QualifiedNameReferenceNode node = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
                 qualifiedNodes.add(node);
             } else if (response.getValue().getContent() != null) {
                 TypeDescriptorNode record = getMediaTypeToken(response.getValue().getContent().entrySet()
                         .iterator().next());
-                if (response.getKey().trim().equals(GeneratorConstants.HTTP_200))  {
+                if (responseCode.equals(GeneratorConstants.HTTP_200))  {
                     qualifiedNodes.add(record);
-                } else if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
+                } else if (responseCode.equals(GeneratorConstants.DEFAULT)) {
                     record = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
                     qualifiedNodes.add(record);
                 } else {

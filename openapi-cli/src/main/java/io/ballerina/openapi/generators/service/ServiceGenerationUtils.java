@@ -214,14 +214,18 @@ public class ServiceGenerationUtils {
         }
         return createSimpleNameReferenceNode(identifierToken);
     }
+
     /**
      * Generate TypeDescriptor for all the mediaTypes.
      */
     public static TypeDescriptorNode getMediaTypeToken(Map.Entry<String, MediaType> mediaType)
             throws BallerinaOpenApiException {
         String mediaTypeContent = mediaType.getKey().trim();
+        if (mediaTypeContent.matches("text/.*")) {
+            mediaTypeContent = "text";
+        }
         MediaType value = mediaType.getValue();
-        Schema schema = value.getSchema();
+        Schema<?> schema = value.getSchema();
         IdentifierToken identifierToken;
         switch (mediaTypeContent) {
             case "application/json":
@@ -229,7 +233,7 @@ public class ServiceGenerationUtils {
             case "application/xml":
                 identifierToken = createIdentifierToken(GeneratorConstants.XML);
                 return createSimpleNameReferenceNode(identifierToken);
-            case "text/plain":
+            case "text":
                 identifierToken = createIdentifierToken(GeneratorConstants.STRING);
                 return createSimpleNameReferenceNode(identifierToken);
             case "application/octet-stream":
