@@ -19,11 +19,13 @@ package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -50,6 +52,7 @@ import java.util.Optional;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createLiteralValueToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createAnnotationNode;
@@ -190,8 +193,11 @@ public class ServiceGenerationUtils {
                                 createIdentifierToken(convertOpenAPITypeToBallerina(
                                         ((ArraySchema) schema).getItems().getType())));
                     }
-                    return  createArrayTypeDescriptorNode(member, createToken(SyntaxKind.OPEN_BRACKET_TOKEN),
-                            null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                    ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+                            createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                            createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                    NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
+                    return  createArrayTypeDescriptorNode(member, nodeList);
                 } else {
                     identifierToken =  createIdentifierToken(schema.getType(),
                             AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
@@ -237,10 +243,12 @@ public class ServiceGenerationUtils {
                 identifierToken = createIdentifierToken(GeneratorConstants.STRING);
                 return createSimpleNameReferenceNode(identifierToken);
             case "application/octet-stream":
-                return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(
-                        null, createIdentifierToken(GeneratorConstants.BYTE)),
+                ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                         createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(
+                        null, createIdentifierToken(GeneratorConstants.BYTE)),
+                        NodeFactory.createNodeList(dimensionNode));
             default:
                 identifierToken = createIdentifierToken(GeneratorConstants.JSON);
                 return createSimpleNameReferenceNode(identifierToken);
