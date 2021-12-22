@@ -32,7 +32,6 @@ import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedTypeDescriptorNode;
@@ -93,11 +92,19 @@ public class ArrayTypeGenerator extends TypeGenerator {
                         "maximum ballerina array length.");
             }
         }
-        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+        NodeList<ArrayDimensionNode> arrayDimensions = NodeFactory.createEmptyNodeList();
+        if (typeDescriptorNode.kind() == SyntaxKind.ARRAY_TYPE_DESC) {
+            ArrayTypeDescriptorNode innerArrayType = (ArrayTypeDescriptorNode) typeDescriptorNode;
+            arrayDimensions = innerArrayType.dimensions();
+            typeDescriptorNode = innerArrayType.memberTypeDesc();
+        }
+
+        ArrayDimensionNode arrayDimension = NodeFactory.createArrayDimensionNode(
                 createToken(SyntaxKind.OPEN_BRACKET_TOKEN), arrayLengthToken,
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-        NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
-        ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(typeDescriptorNode, nodeList);
+        arrayDimensions = arrayDimensions.add(arrayDimension);
+        ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(typeDescriptorNode
+                , arrayDimensions);
 
         return getNullableType(arraySchema, arrayTypeDescriptorNode);
     }
