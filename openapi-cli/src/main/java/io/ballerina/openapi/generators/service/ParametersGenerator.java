@@ -19,6 +19,7 @@ package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
@@ -51,6 +52,7 @@ import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
@@ -182,9 +184,11 @@ public class ParametersGenerator {
                 }
                 BuiltinSimpleNameReferenceNode headerArrayItemTypeName = createBuiltinSimpleNameReferenceNode(
                         null, createIdentifierToken(STRING));
-                headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName,
-                        createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                        createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                ArrayDimensionNode dimensionNode =
+                        NodeFactory.createArrayDimensionNode(createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                                createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
+                headerTypeName = createArrayTypeDescriptorNode(headerArrayItemTypeName, nodeList);
             } else {
                 headerTypeName = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
                         convertOpenAPITypeToBallerina(schema.getType().trim()), SINGLE_WS_MINUTIAE,
@@ -197,7 +201,7 @@ public class ParametersGenerator {
             //        createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
             AnnotationNode headerNode = getAnnotationNode(HEADER_ANNOT, null);
-            NodeList<AnnotationNode> headerAnnotations = NodeFactory.createNodeList(headerNode);
+            NodeList<AnnotationNode> headerAnnotations = createNodeList(headerNode);
             // Handle optional values in headers
             if (!parameter.getRequired()) {
                 // If optional it behaves like default value with null ex:(string? header)
@@ -431,15 +435,18 @@ public class ParametersGenerator {
         Token arrayName = createIdentifierToken(convertOpenAPITypeToBallerina(items.getType().toLowerCase(
                         Locale.ENGLISH).trim()), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         BuiltinSimpleNameReferenceNode memberTypeDesc = createBuiltinSimpleNameReferenceNode(null, arrayName);
+        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+        NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
+
         if (items.getNullable() != null && items.getNullable()) {
             // generate -> int?[]
             OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(memberTypeDesc,
                     createToken(SyntaxKind.QUESTION_MARK_TOKEN));
-            return createArrayTypeDescriptorNode(optionalNode, createToken(SyntaxKind.OPEN_BRACKET_TOKEN),
-                    null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+            return createArrayTypeDescriptorNode(optionalNode, nodeList);
         }
         // generate -> int[]
-        return createArrayTypeDescriptorNode(memberTypeDesc, createToken(SyntaxKind.OPEN_BRACKET_TOKEN),
-                null, createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+        return createArrayTypeDescriptorNode(memberTypeDesc, nodeList);
     }
 }

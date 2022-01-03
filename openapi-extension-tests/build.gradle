@@ -28,7 +28,7 @@ dependencies {
     testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
-    testRuntime group: 'commons-io', name: 'commons-io', version: "${ballerinaLangVersion}"
+    testRuntime group: 'commons-io', name: 'commons-io', version: "${commonsIoVersion}"
     testRuntime project(':openapi-bal-service')
     testRuntime project(':openapi-extension')
     testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"

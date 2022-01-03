@@ -18,9 +18,13 @@
 
 package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
+import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeFactory;
+import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -32,9 +36,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescr
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
 import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNullableType;
@@ -90,9 +92,19 @@ public class ArrayTypeGenerator extends TypeGenerator {
                         "maximum ballerina array length.");
             }
         }
-        ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(
-                typeDescriptorNode, createToken(OPEN_BRACKET_TOKEN), arrayLengthToken,
-                createToken(CLOSE_BRACKET_TOKEN));
+        NodeList<ArrayDimensionNode> arrayDimensions = NodeFactory.createEmptyNodeList();
+        if (typeDescriptorNode.kind() == SyntaxKind.ARRAY_TYPE_DESC) {
+            ArrayTypeDescriptorNode innerArrayType = (ArrayTypeDescriptorNode) typeDescriptorNode;
+            arrayDimensions = innerArrayType.dimensions();
+            typeDescriptorNode = innerArrayType.memberTypeDesc();
+        }
+
+        ArrayDimensionNode arrayDimension = NodeFactory.createArrayDimensionNode(
+                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), arrayLengthToken,
+                createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+        arrayDimensions = arrayDimensions.add(arrayDimension);
+        ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(typeDescriptorNode
+                , arrayDimensions);
 
         return getNullableType(arraySchema, arrayTypeDescriptorNode);
     }

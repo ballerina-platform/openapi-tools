@@ -196,6 +196,24 @@ public class ReturnTypeTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_19_rs.bal", syntaxTree);
     }
 
+    @Test(description = "Scenario 20 - MediaType has text/html")
+    public void generateResponseScenario20() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/response/scenario_20_rs.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_20_rs.bal", syntaxTree);
+    }
+
+    @Test(description = "Scenario 21 - MediaType has text/csv")
+    public void generateResponseScenario21() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/response/scenario_21_rs.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_21_rs.bal", syntaxTree);
+    }
+
     @Test(description = "Default response handling")
     public void generateResponseDefault() throws IOException, BallerinaOpenApiException,
             FormatterException {
@@ -225,5 +243,17 @@ public class ReturnTypeTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "response/different_status_code.bal", syntaxTree);
+    }
+
+    @Test(description = "Response has unsupported http status code",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "HTTP status code '429' is not supported in Ballerina."
+    )
+    public void testForNotSupportedStatusCode() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/real_apis/box.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("real_apis/box.bal", syntaxTree);
     }
 }
