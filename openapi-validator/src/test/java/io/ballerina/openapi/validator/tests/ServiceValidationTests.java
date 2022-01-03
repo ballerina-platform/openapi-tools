@@ -24,7 +24,7 @@ import io.ballerina.openapi.validator.OpenApiValidatorException;
 import io.ballerina.openapi.validator.ResourcePathSummary;
 import io.ballerina.openapi.validator.ResourceValidator;
 import io.ballerina.openapi.validator.ResourceWithOperation;
-import io.ballerina.openapi.validator.ServiceValidator;
+import io.ballerina.openapi.validator.ValidatorUtils;
 import io.ballerina.openapi.validator.error.MissingFieldInJsonSchema;
 import io.ballerina.openapi.validator.error.OpenapiServiceValidationError;
 import io.ballerina.openapi.validator.error.TypeMismatch;
@@ -66,7 +66,7 @@ public class ServiceValidationTests {
         List<FunctionDefinitionNode> functions = getFunctionDefinitionNodes(serviceDeclarationNode);
         Filters filters = new Filters(tag, excludeTag, operation, excludeOperation, DiagnosticSeverity.ERROR);
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstore.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         // Make resourcePath summary
         Map<String, ResourcePathSummary> resourcePathMap = ResourceWithOperation.summarizeResources(functions);
         //  Filter openApi operation according to given filters
@@ -85,7 +85,7 @@ public class ServiceValidationTests {
         List<FunctionDefinitionNode> functions = getFunctionDefinitionNodes(serviceDeclarationNode);
         Filters filters = new Filters(tag, excludeTag, operation, excludeOperation, DiagnosticSeverity.ERROR);
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreMethod.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         // Make resourcePath summary
         Map<String, ResourcePathSummary> resourcePathMap = ResourceWithOperation.summarizeResources(functions);
         //  Filter openApi operation according to given filters
@@ -105,7 +105,7 @@ public class ServiceValidationTests {
         List<FunctionDefinitionNode> functions = getFunctionDefinitionNodes(serviceDeclarationNode);
         Filters filters = new Filters(tag, excludeTag, operation, excludeOperation, DiagnosticSeverity.ERROR);
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         // Make resourcePath summary
         Map<String, ResourcePathSummary> resourcePathMap = ResourceWithOperation.summarizeResources(functions);
         //  Filter openApi operation according to given filters
@@ -122,7 +122,7 @@ public class ServiceValidationTests {
         List<FunctionDefinitionNode> functions = getFunctionDefinitionNodes(serviceDeclarationNode);
         Filters filters = new Filters(tag, excludeTag, operation, excludeOperation, DiagnosticSeverity.ERROR);
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreParameterTM.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         // Make resourcePath summary
         Map<String, ResourcePathSummary> resourcePathMap = ResourceWithOperation.summarizeResources(functions);
         //  Filter openApi operation according to given filters
@@ -160,7 +160,7 @@ public class ServiceValidationTests {
         List<FunctionDefinitionNode> functions = getFunctionDefinitionNodes(serviceDeclarationNode);
         Filters filters = new Filters(tag, excludeTag, operation, excludeOperation, DiagnosticSeverity.ERROR);
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordFieldMiss.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         // Make resourcePath summary
         Map<String, ResourcePathSummary> resourcePathMap = ResourceWithOperation.summarizeResources(functions);
         //  Filter openApi operation according to given filters

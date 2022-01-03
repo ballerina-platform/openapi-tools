@@ -5,7 +5,6 @@ import ballerina/openapi;
     contract: "openapi.yaml",
     excludeTags: ["Weather Forecast"]
 }
-// @http:ServiceConfig { mediaTypeSubtypePrefix: "vnd.snowpeak.reservation"}
 
 service /data on new http:Listener(90) {
     resource function get weather(string? id, string? lat, string? lon, string? zip, string? units, string? lang, int? mode) returns string {

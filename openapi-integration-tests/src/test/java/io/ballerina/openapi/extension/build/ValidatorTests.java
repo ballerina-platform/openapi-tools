@@ -142,12 +142,11 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_6");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(11:115,11:124)] Type mismatch with parameter 'mode' for the" +
-                " method 'get' of the path '/weather'.In OpenAPI contract its type is 'string' " +
-                "and resources type is 'int'. \n" +
-                "    ERROR [service.bal:(4:1,17:2)] Missing OpenAPI contract parameter 'q' in the counterpart" +
-                " Ballerina service resource (method: 'get', path: '/weather')\n" +
-                "    error: compilation contains errors";
+        String msg = "ERROR [service.bal:(10:115,10:124)] Type mismatch with parameter 'mode' for " +
+                "the method 'get' of the path '/weather'.In OpenAPI contract its type is 'string' and" +
+                " resources type is 'int'. \n" +
+                "    ERROR [service.bal:(4:1,16:2)] Missing OpenAPI contract parameter 'q' in the" +
+                " counterpart Ballerina service resource (method: 'get', path: '/weather')";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));

@@ -23,7 +23,7 @@ import io.ballerina.openapi.validator.Constants;
 import io.ballerina.openapi.validator.OpenApiValidatorException;
 import io.ballerina.openapi.validator.ResourceMethod;
 import io.ballerina.openapi.validator.ResourceValidator;
-import io.ballerina.openapi.validator.ServiceValidator;
+import io.ballerina.openapi.validator.ValidatorUtils;
 import io.ballerina.openapi.validator.error.MissingFieldInBallerinaType;
 import io.ballerina.openapi.validator.error.MissingFieldInJsonSchema;
 import io.ballerina.openapi.validator.error.TypeMismatch;
@@ -57,7 +57,7 @@ public class ResourceToOperationTests {
     @Test(description = "valid test for Path parameter")
     public void testPathParameterValid() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstore_path_parameter.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/valid/petstore_path_parameter.bal"));
         operation = api.getPaths().get("/pets/{petId}").getGet();
         resourceMethod = ValidatorTest.getResourceMethod(project, "/pets/{petId}", "get");
@@ -71,7 +71,7 @@ public class ResourceToOperationTests {
     @Test(description = "invalid test for Path parameter: type miss matching")
     public void testPathParameterInvalid() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstore_path_parameter.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_path_parameter.bal"));
         operation = api.getPaths().get("/pets/{petId}").getGet();
         resourceMethod = ValidatorTest.getResourceMethod(project, "/pets/{petId}", "get");
@@ -88,7 +88,7 @@ public class ResourceToOperationTests {
     @Test(description = "invalid test for Path parameter: parameter miss -  ")
     public void testMissingPathParam() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstore_path_parameter.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_path_parameter.bal"));
         operation = api.getPaths().get("/pets/{petId}").getGet();
         resourceMethod = ValidatorTest.getResourceMethod(project, "/pets/{petId}", "get");
@@ -105,7 +105,7 @@ public class ResourceToOperationTests {
     @Test(description = "invalid test for Path parameter: when path has two path parameters")
     public void testTypeMissMatchTwoPathParam() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstore_path_2parameter.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_path_2parameter.bal"));
         operation = api.getPaths().get("/pets/{petId}/{petName}").getGet();
         resourceMethod = ValidatorTest.getResourceMethod(project, "/pets/{petId}/{petName}", "get");
@@ -122,7 +122,7 @@ public class ResourceToOperationTests {
     @Test(description = "Query param supports only for 'int', 'string', 'float', 'boolean', 'decimal' types")
     public void testTypeMissMatchQueryParam() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstore_query_parameter.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_query_parameter.bal"));
         operation = api.getPaths().get("/pets").getGet();
         resourceMethod = ValidatorTest.getResourceMethod(project, "/pets", "get");
@@ -139,7 +139,7 @@ public class ResourceToOperationTests {
     @Test(description = "Invalid test for RequestPayload parameter: when request payload parameters has missing field.")
     public void testMissingFieldMatchRequestPayloadParam() throws OpenApiValidatorException, IOException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstore_payload_missfield.yaml");
-        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/petstore_rb_missfieldpayload.bal"));
         operation = api.getPaths().get("/pets").getPost();
         resourceMethod = ValidatorTest.getResourceMethod(project, "/pets", "post");

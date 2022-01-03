@@ -53,9 +53,6 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.ParseOptions;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,9 +65,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.validator.Constants.ATTRIBUTE_CONTRACT;
+import static io.ballerina.openapi.validator.Constants.FALSE;
 import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0018;
 import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019;
 import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0020;
+import static io.ballerina.openapi.validator.ValidatorUtils.getNormalizedPath;
+import static io.ballerina.openapi.validator.ValidatorUtils.parseOpenAPIFile;
 
 /**
  * This model used to filter and validate all the operations according to the given filter and filter the service
@@ -186,15 +187,15 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 if (!openApiMissingServiceMethod.isEmpty()) {
                     for (OpenapiServiceValidationError openApiMissingError: openApiMissingServiceMethod) {
                         if (openApiMissingError.getServiceOperation() == null) {
-                            String[] error = ErrorMessages.unimplementedOpenAPIPath(normalizedPath(openApiMissingError.
-                                    getServicePath()));
+                            String[] error = ErrorMessages.unimplementedOpenAPIPath(getNormalizedPath(
+                                    openApiMissingError.getServicePath()));
                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
                                     serviceDeclarationNode.location());
                             validations.add(diagnostic);
                         } else {
                             String[] error = ErrorMessages.unimplementedOpenAPIOperationsForPath(openApiMissingError.
-                                    getServiceOperation(), normalizedPath(openApiMissingError.getServicePath()));
+                                    getServiceOperation(), getNormalizedPath(openApiMissingError.getServicePath()));
                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
                                     serviceDeclarationNode.location());
@@ -299,7 +300,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                             String[] errorMsg = ErrorMessages.unimplementedFieldInOperation(
                                                             error.getFieldName(), ((MissingFieldInBallerinaType) error)
                                                                     .getRecordName(), operation.getKey(),
-                                                    normalizedPath(openAPIPathSummary.getPath()));
+                                                    getNormalizedPath(openAPIPathSummary.getPath()));
                                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(errorMsg[0],
                                                     errorMsg[1], kind);
                                             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
@@ -309,7 +310,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                                 (!(error instanceof MissingFieldInJsonSchema))) {
                                             String[] errorMsg = ErrorMessages.unimplementedParameterForOperation(
                                                     error.getFieldName(), operation.getKey(),
-                                                    normalizedPath(openAPIPathSummary.getPath()));
+                                                    getNormalizedPath(openAPIPathSummary.getPath()));
 
                                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(errorMsg[0],
                                                     errorMsg[1], kind);
@@ -326,10 +327,6 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
             }
         }
     }
-    public static String normalizedPath(String path) {
-        return path.replaceAll("\\{", "\'{").replaceAll("\\}", "\\}'")
-                .replaceAll("''", "\\'''");
-    }
 
     //Extract details from openapi annotation.
     private DiagnosticSeverity extractOpenAPIAnnotation(DiagnosticSeverity kind, Filters filters,
@@ -342,7 +339,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                 Optional<ExpressionNode> expressionNode = specificFieldNode.valueExpr();
                 //Handle openapi contract path if path is empty return exceptions.
                 ExpressionNode openAPIAnnotation = expressionNode.orElseThrow();
-                if (specificFieldNode.fieldName().toString().trim().equals("contract")) {
+                if (specificFieldNode.fieldName().toString().trim().equals(ATTRIBUTE_CONTRACT)) {
                     this.contractPathExist = true;
                     Path openapiPath = Paths.get(openAPIAnnotation.toString().replaceAll("\"", "").trim());
                     Path relativePath = null;
@@ -364,7 +361,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                     }
                     if (relativePath != null && Files.exists(relativePath)) {
                         try {
-                            openAPI = ServiceValidator.parseOpenAPIFile(relativePath.toString());
+                            openAPI = parseOpenAPIFile(relativePath.toString());
                         } catch (OpenApiValidatorException e) {
                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
                                     BAL_OPENAPI_VALIDATOR_0019, e.getMessage(),
@@ -381,29 +378,30 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                 fieldNode.location());
                         validations.add(diagnostic);
                     }
-                } else if (specificFieldNode.fieldName().toString().trim().equals("failOnErrors")) {
+                } else if (specificFieldNode.fieldName().toString().trim().equals(Constants.ATTRIBUTE_FAIL_ON_ERRORS)) {
                     String failOnErrors = openAPIAnnotation.toString();
-                    if (failOnErrors.trim().equals("false")) {
+                    if (failOnErrors.trim().equals(FALSE)) {
                         kind = DiagnosticSeverity.WARNING;
                         filters.setKind(kind);
                     }
                 } else if (openAPIAnnotation instanceof ListConstructorExpressionNode) {
                     ListConstructorExpressionNode list = (ListConstructorExpressionNode) openAPIAnnotation;
-                    String attributeName = specificFieldNode.fieldName().toString().trim();
+                    Node field = specificFieldNode.fieldName();
+                    String attributeName = ((Token) field).text();
                     switch (attributeName) {
-                        case "tags":
+                        case Constants.ATTRIBUTE_TAGS:
                             List<String> tags = setFilters(list);
                             filters.setTag(tags);
                             break;
-                        case "excludeTags":
+                        case Constants.ATTRIBUTE_EXCLUDE_TAGS:
                             List<String> eTags = setFilters(list);
                             filters.setExcludeTag(eTags);
                             break;
-                        case "operations":
+                        case Constants.ATTRIBUTE_OPERATIONS:
                             List<String> operations = setFilters(list);
                             filters.setOperation(operations);
                             break;
-                        case "excludeOperations":
+                        case Constants.ATTRIBUTE_EXCLUDE_OPERATIONS:
                             List<String> eOperations = setFilters(list);
                             filters.setExcludeOperation(eOperations);
                             break;
@@ -425,7 +423,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
             if (item.kind() == SyntaxKind.STRING_LITERAL) {
                Token stringItem = ((BasicLiteralNode) item).literalToken();
                String text = stringItem.text();
-                if (text.length() > 1 && text.charAt(text.length() - 1) == '"') {
+                if (text.length() > 1 && text.charAt(0) == '"' && text.charAt(text.length() - 1) == '"') {
                     text = text.substring(1, text.length() - 1);
                 } else {
                     // Missing end quote case
@@ -543,7 +541,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                     }
                 } else if (!(postErr instanceof MissingFieldInBallerinaType)) {
                     String[] error = ErrorMessages.undocumentedResourceParameter(postErr.getFieldName(),
-                                    method.getKey(), normalizedPath(resourcePathSummary.getPath()));
+                                    method.getKey(), getNormalizedPath(resourcePathSummary.getPath()));
                     DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                     Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
                             postErr.getParameterPos());
@@ -585,7 +583,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                         (TypeMismatch) postErr).getTypeJsonSchema()),
                                 TypeSymbolToJsonValidatorUtil.convertEnumTypeToString(((
                                         TypeMismatch) postErr).getTypeBallerinaType()), method.getKey(),
-                                normalizedPath(resourcePathSummary.getPath()));
+                                getNormalizedPath(resourcePathSummary.getPath()));
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                 Diagnostic diagnostic =
                         DiagnosticFactory.createDiagnostic(diagnosticInfo, ((TypeMismatch) postErr).getLocation());
@@ -596,41 +594,12 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                                         (((TypeMismatch) postErr).getTypeJsonSchema()),
                                 TypeSymbolToJsonValidatorUtil.convertEnumTypeToString
                                         (((TypeMismatch) postErr).getTypeBallerinaType()), method.getKey(),
-                        normalizedPath(resourcePathSummary.getPath()));
+                        getNormalizedPath(resourcePathSummary.getPath()));
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
                 Diagnostic diagnostic =
                         DiagnosticFactory.createDiagnostic(diagnosticInfo, ((TypeMismatch) postErr).getLocation());
                 validations.add(diagnostic);
             }
         }
-    }
-
-    /**
-     * Parse and get the {@link OpenAPI} for the given OpenAPI contract.
-     *
-     * @param definitionURI     URI for the OpenAPI contract
-     * @return {@link OpenAPI}  OpenAPI model
-     * @throws OpenApiValidatorException in case of exception
-     */
-    public static OpenAPI parseOpenAPIFile(String definitionURI) throws OpenApiValidatorException, IOException {
-        Path contractPath = Paths.get(definitionURI);
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        parseOptions.setResolveFully(true);
-
-        if (!Files.exists(contractPath)) {
-            throw new OpenApiValidatorException(ErrorMessages.invalidFilePath(definitionURI)[1]);
-        }
-        if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json"))) {
-            throw new OpenApiValidatorException(ErrorMessages.invalidFile()[1]);
-        }
-        String openAPIFileContent = Files.readString(Paths.get(definitionURI));
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null,
-                parseOptions);
-        OpenAPI api = parseResult.getOpenAPI();
-        if (api == null) {
-            throw new OpenApiValidatorException(ErrorMessages.parserException(definitionURI)[1]);
-        }
-        return api;
     }
 }
