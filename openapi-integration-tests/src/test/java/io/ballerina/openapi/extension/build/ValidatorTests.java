@@ -137,6 +137,31 @@ public class ValidatorTests {
         }
     }
 
+    @Test(description = "OpenAPI validator plugin test for exclude tags filter")
+    public void validatorWithExcludeTagFilter() throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("project_6");
+        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        String msg = " ERROR [service.bal:(11:115,11:124)] Type mismatch with parameter 'mode' for the" +
+                " method 'get' of the path '/weather'.In OpenAPI contract its type is 'string' " +
+                "and resources type is 'int'. \n" +
+                "    ERROR [service.bal:(4:1,17:2)] Missing OpenAPI contract parameter 'q' in the counterpart" +
+                " Ballerina service resource (method: 'get', path: '/weather')\n" +
+                "    error: compilation contains errors";
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
+            Stream<String> logLines = br.lines();
+            String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
+            logLines.close();
+            generatedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            msg = (msg.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            if (generatedLog.contains(msg)) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.fail("OpenAPIValidator execution fail.");
+            }
+        }
+    }
+
     @Test(description = "Invalid test for RequestPayload parameter: when request payload parameters", enabled = false)
     public void typeMisMatchingInRecord() throws IOException {
         List<String> buildArgs = new LinkedList<>();

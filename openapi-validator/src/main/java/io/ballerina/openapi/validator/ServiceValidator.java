@@ -20,6 +20,7 @@ package io.ballerina.openapi.validator;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
@@ -31,7 +32,9 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.validator.error.MissingFieldInBallerinaType;
 import io.ballerina.openapi.validator.error.MissingFieldInJsonSchema;
 import io.ballerina.openapi.validator.error.OneOfTypeValidation;
@@ -396,6 +399,14 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
                             List<String> eTags = setFilters(list);
                             filters.setExcludeTag(eTags);
                             break;
+                        case "operations":
+                            List<String> operations = setFilters(list);
+                            filters.setOperation(operations);
+                            break;
+                        case "excludeOperations":
+                            List<String> eOperations = setFilters(list);
+                            filters.setExcludeOperation(eOperations);
+                            break;
                         default:
                             break;
                     }
@@ -408,12 +419,22 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
     private static List<String> setFilters(ListConstructorExpressionNode list) {
         SeparatedNodeList<Node> expressions = list.expressions();
         Iterator<Node> iterator = expressions.iterator();
-        List<String> tags = new ArrayList<>();
+        List<String> values = new ArrayList<>();
         while (iterator.hasNext()) {
             Node item = iterator.next();
-            tags.add(item.toString());
+            if (item.kind() == SyntaxKind.STRING_LITERAL) {
+               Token stringItem = ((BasicLiteralNode) item).literalToken();
+               String text = stringItem.text();
+                if (text.length() > 1 && text.charAt(text.length() - 1) == '"') {
+                    text = text.substring(1, text.length() - 1);
+                } else {
+                    // Missing end quote case
+                    text = text.substring(1);
+                }
+               values.add(text);
+            }
         }
-        return tags;
+        return values;
     }
 
     /**
