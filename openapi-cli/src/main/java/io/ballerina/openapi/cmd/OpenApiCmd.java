@@ -37,11 +37,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.generators.GeneratorConstants.BAL_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorConstants.YML_EXTENSION;
+import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
 /**
  * Main class to implement "openapi" command for ballerina. Commands for Client Stub, Service file and OpenApi contract
@@ -144,7 +146,11 @@ public class OpenApiCmd implements BLauncherCmd {
                     tag.addAll(Arrays.asList(tags.split(",")));
                 }
                 if (operations != null) {
-                    operation.addAll(Arrays.asList(operations.split(",")));
+                    String[] ids = operations.split(",");
+                    List<String> normalizedOperationIds =
+                            Arrays.stream(ids).map(operationId -> getValidName(operationId, false))
+                                    .collect(Collectors.toList());
+                    operation.addAll(normalizedOperationIds);
                 }
                 Filter filter = new Filter(tag, operation);
                 try {
