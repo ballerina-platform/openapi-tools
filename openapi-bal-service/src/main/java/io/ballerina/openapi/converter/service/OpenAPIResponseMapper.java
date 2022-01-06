@@ -474,7 +474,6 @@ public class OpenAPIResponseMapper {
                 updateResponseWithArraySchema(responses);
                 apiResponses.putAll(responses);
             }
-            return Optional.of(apiResponses);
         } else {
             ArraySchema arraySchema = new ArraySchema();
             String type02 = array.memberTypeDesc().kind().toString().trim().split("_")[0].
@@ -493,7 +492,11 @@ public class OpenAPIResponseMapper {
         return Optional.of(apiResponses);
     }
 
-    // Update given response schema type with array schema
+    /**
+     * Update given response schema type with array schema.
+     *
+     * @param responses api responses related to return type.
+     */
     private void updateResponseWithArraySchema(ApiResponses responses) {
 
         for (Map.Entry<String, ApiResponse> responseEntry : responses.entrySet()) {
