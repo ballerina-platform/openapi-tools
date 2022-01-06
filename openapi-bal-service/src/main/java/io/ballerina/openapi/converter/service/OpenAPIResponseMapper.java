@@ -465,6 +465,16 @@ public class OpenAPIResponseMapper {
         if (array.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
             handleReferenceResponse(operationAdaptor, (SimpleNameReferenceNode) array.memberTypeDesc(),
                     schemas02, apiResponses, customMediaPrefix, headers);
+        } else if (array.memberTypeDesc().kind() == QUALIFIED_NAME_REFERENCE) {
+            Optional<ApiResponses> optionalAPIResponses =
+                    handleQualifiedNameType(new ApiResponses(), customMediaPrefix, headers, apiResponse,
+                            (QualifiedNameReferenceNode) array.memberTypeDesc());
+            if (optionalAPIResponses.isPresent()) {
+                ApiResponses responses = optionalAPIResponses.get();
+                updateResponseWithArraySchema(responses);
+                apiResponses.putAll(responses);
+            }
+            return Optional.of(apiResponses);
         } else {
             ArraySchema arraySchema = new ArraySchema();
             String type02 = array.memberTypeDesc().kind().toString().trim().split("_")[0].
@@ -481,6 +491,27 @@ public class OpenAPIResponseMapper {
             apiResponses.put(HTTP_200, apiResponse);
         }
         return Optional.of(apiResponses);
+    }
+
+    // Update given response schema type with array schema
+    private void updateResponseWithArraySchema(ApiResponses responses) {
+
+        for (Map.Entry<String, ApiResponse> responseEntry : responses.entrySet()) {
+            Content content = responseEntry.getValue().getContent();
+            for (Map.Entry<String, io.swagger.v3.oas.models.media.MediaType> mediaTypeEntry :
+                    content.entrySet()) {
+                io.swagger.v3.oas.models.media.MediaType value = mediaTypeEntry.getValue();
+                Schema<?> schema = value.getSchema();
+                ArraySchema arraySchema = new ArraySchema();
+                arraySchema.setItems(schema);
+                value.setSchema(arraySchema);
+                content.remove(mediaTypeEntry.getKey());
+                content.put(mediaTypeEntry.getKey(), value);
+            }
+            responses.remove(responseEntry.getKey());
+            responses.addApiResponse(responseEntry.getKey(),
+                    new ApiResponse().content(content).description(responseEntry.getValue().getDescription()));
+        }
     }
 
     /**
