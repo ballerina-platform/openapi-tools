@@ -38,9 +38,12 @@ import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -100,6 +103,10 @@ public class OpenAPIParameterMapper {
                         IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(messages,
                                 functionDefinitionNode.location());
                         errors.add(error);
+                        RequestBody requestBody = new RequestBody();
+                        requestBody.setContent(new Content().addMediaType("*/*",
+                                new io.swagger.v3.oas.models.media.MediaType().addExamples("suumary", new Example().summary(""))));
+                        operationAdaptor.getOperation().setRequestBody(requestBody);
                     }
                 }
                 if (requiredParameterNode.typeName().kind() != SyntaxKind.QUALIFIED_NAME_REFERENCE &&
