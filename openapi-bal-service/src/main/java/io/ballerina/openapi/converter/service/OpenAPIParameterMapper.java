@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.openapi.converter.Constants.HTTP_REQUEST;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_CONTENT_KEY;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_SUMMARY;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
@@ -99,13 +101,10 @@ public class OpenAPIParameterMapper {
                             (QualifiedNameReferenceNode) requiredParameterNode.typeName();
                     String typeName = (referenceNode).modulePrefix().text() + ":" + (referenceNode).identifier().text();
                     if (typeName.equals(HTTP_REQUEST)) {
-                        DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_104;
-                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(messages,
-                                functionDefinitionNode.location());
-                        errors.add(error);
                         RequestBody requestBody = new RequestBody();
-                        requestBody.setContent(new Content().addMediaType("*/*",
-                                new io.swagger.v3.oas.models.media.MediaType().addExamples("suumary", new Example().summary(""))));
+                        requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY,
+                                new io.swagger.v3.oas.models.media.MediaType().example(
+                                        new Example().summary(WILD_CARD_SUMMARY))));
                         operationAdaptor.getOperation().setRequestBody(requestBody);
                     }
                 }

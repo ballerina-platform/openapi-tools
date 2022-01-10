@@ -1,0 +1,13 @@
+paths:
+  /pets:
+    post:
+      operationId: operation_post_/pets
+      requestBody:
+        content:
+          '*/*':
+            example:
+              summary: Any type of entity body
+      responses:
+        "200":
+          description: Ok
+components: {}
