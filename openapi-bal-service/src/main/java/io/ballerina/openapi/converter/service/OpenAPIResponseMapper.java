@@ -425,6 +425,7 @@ public class OpenAPIResponseMapper {
             String typeName = qNode.modulePrefix().text() + ":" + qNode.identifier().text();
             if (typeName.equals(HTTP_RESPONSE)) {
                 apiResponse = new ApiResponse();
+                apiResponse.description("Any Response");
                 Content content = new Content();
                 content.put(WILD_CARD_CONTENT_KEY, new io.swagger.v3.oas.models.media.MediaType().example(new Example()
                         .summary(WILD_CARD_SUMMARY)));

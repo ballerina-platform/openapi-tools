@@ -4,6 +4,7 @@ paths:
       operationId: operation_get_/pet
       responses:
         default:
+          description: Any Response
           content:
             '*/*':
               example:

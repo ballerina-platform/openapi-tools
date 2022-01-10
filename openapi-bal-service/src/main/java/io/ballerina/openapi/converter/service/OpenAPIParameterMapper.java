@@ -173,7 +173,8 @@ public class OpenAPIParameterMapper {
                 OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper();
                 parameters.addAll(openAPIHeaderMapper.setHeaderParameter(requiredParameterNode));
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
-                    (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
+                    (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
+                            operationAdaptor.getHttpOperation()))) {
                 Map<String, Schema> schema = components.getSchemas();
                 // Handle request payload.
                 Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
