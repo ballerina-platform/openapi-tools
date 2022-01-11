@@ -6,14 +6,14 @@ paths:
         "200":
           description: Ok
           headers:
-            X-Rate-Limit-Id:
+            x-rate-limit-id:
               schema:
                 type: string
-            X-Rate-Limit-Remaining:
+            x-rate-limit-remaining:
               schema:
                 type: integer
                 format: int32
-            X-Rate-Limit-Types:
+            x-rate-limit-types:
               schema:
                 type: array
                 items:

@@ -800,7 +800,6 @@ public class OpenAPIResponseMapper {
             if (headerType.typeDescriptor() instanceof RecordTypeSymbol) {
                 RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) headerType.typeDescriptor();
                 Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
-                Map<String, Header> responseHeaders = new HashMap<>();
                 for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
                     Header headerSchema = new Header();
                     TypeSymbol fieldType = field.getValue().typeDescriptor();
@@ -822,38 +821,19 @@ public class OpenAPIResponseMapper {
                     }
                     // Normalized header key values
                     String headerKey = getValidHeaderKey(field);
-                    responseHeaders.put(headerKey, headerSchema);
+                    headers.put(headerKey, headerSchema);
                 }
-                headers.putAll(responseHeaders);
             }
         }
     }
 
     /**
      * This function to normalized header key value to OAS key value.
-     * ex: ballerina header key x\-rate\-limit\-id -> X-Rate-Limit-Id
+     * ex: ballerina header key x\-rate\-limit\-id -> x-rate-limit-id
      * @param field header flied
      */
     private String getValidHeaderKey(Map.Entry<String, RecordFieldSymbol> field) {
-        String headerKey = field.getKey();
-        String[] split = headerKey.split("\\\\-");
-        if (split.length > 1) {
-            StringBuilder validKeyValue = new StringBuilder();
-            for (String keyPiece : split) {
-                if (!keyPiece.isBlank()) {
-                    if (split.length > 2) {
-                        keyPiece = keyPiece.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-                                keyPiece.substring(1).toLowerCase(Locale.ENGLISH);
-                    }
-                    validKeyValue.append(keyPiece).append("-");
-                }
-            }
-            headerKey = validKeyValue.toString().substring(0, validKeyValue.toString().length() - 1);
-        } else {
-            headerKey = split[0].substring(0, 1).toUpperCase(Locale.ENGLISH) +
-                    split[0].substring(1).toLowerCase(Locale.ENGLISH);
-        }
-        return headerKey;
+        return field.getKey().replaceAll("\\\\", "");
     }
 
     /**
