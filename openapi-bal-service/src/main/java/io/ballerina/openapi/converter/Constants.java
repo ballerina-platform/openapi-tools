@@ -79,6 +79,7 @@ public class Constants {
     public static final String HTTP_REQUEST = "http:Request";
     public static final String DEFAULT = "default";
     public static final String HTTP_RESPONSE = "http:Response";
+    public static final String RESPONSE_HEADERS = "headers";
 
     /**
      * Enum to select the Ballerina Type.

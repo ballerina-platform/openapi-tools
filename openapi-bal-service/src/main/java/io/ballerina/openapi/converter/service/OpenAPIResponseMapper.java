@@ -19,6 +19,9 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
+import io.ballerina.compiler.api.symbols.Documentable;
+import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -100,6 +103,7 @@ import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.PRIVATE;
 import static io.ballerina.openapi.converter.Constants.PROXY_REVALIDATE;
 import static io.ballerina.openapi.converter.Constants.PUBLIC;
+import static io.ballerina.openapi.converter.Constants.RESPONSE_HEADERS;
 import static io.ballerina.openapi.converter.Constants.S_MAX_AGE;
 import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
@@ -740,8 +744,11 @@ public class OpenAPIResponseMapper {
                 if (code.isEmpty()) {
                     return Optional.empty();
                 }
-                apiResponse = setCacheHeader(headers, apiResponse, code.get());
                 Map<String, RecordFieldSymbol> fieldsOfRecord = returnRecord.fieldDescriptors();
+                // Handle the response headers
+                RecordFieldSymbol header = fieldsOfRecord.get(RESPONSE_HEADERS);
+                extractResponseHeaders(headers, header);
+                apiResponse = setCacheHeader(headers, apiResponse, code.get());
                 // Handle the content of the response
                 RecordFieldSymbol body = fieldsOfRecord.get(BODY);
                 if (body.typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
@@ -778,6 +785,75 @@ public class OpenAPIResponseMapper {
             apiResponses.put(HTTP_200, apiResponse);
         }
         return Optional.of(apiResponses);
+    }
+
+    /**
+     * This function is to handle headers which come with response.
+     *
+     * @param headers   Headers already generated for cache config
+     * @param header    Response header field
+     */
+    private void extractResponseHeaders(Map<String, Header> headers, RecordFieldSymbol header) {
+
+        if (header.typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
+            TypeReferenceTypeSymbol headerType = (TypeReferenceTypeSymbol) header.typeDescriptor();
+            if (headerType.typeDescriptor() instanceof RecordTypeSymbol) {
+                RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) headerType.typeDescriptor();
+                Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
+                Map<String, Header> responseHeaders = new HashMap<>();
+                for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
+                    Header headerSchema = new Header();
+                    TypeSymbol fieldType = field.getValue().typeDescriptor();
+                    String type = fieldType.typeKind().toString().trim().toLowerCase(Locale.ENGLISH);
+                    Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(type);
+                    if (fieldType instanceof ArrayTypeSymbol) {
+                        ArrayTypeSymbol array = (ArrayTypeSymbol) fieldType;
+                        TypeSymbol itemType = array.memberTypeDescriptor();
+                        String item = itemType.typeKind().toString().trim().toLowerCase(Locale.ENGLISH);
+                        Schema<?> itemSchema = ConverterCommonUtils.getOpenApiSchema(item);
+                        if (openApiSchema instanceof ArraySchema) {
+                            ((ArraySchema) openApiSchema).setItems(itemSchema);
+                        }
+                    }
+                    headerSchema.setSchema(openApiSchema);
+                    Optional<Documentation> fieldDoc = ((Documentable) field.getValue()).documentation();
+                    if (fieldDoc.isPresent() && fieldDoc.get().description().isPresent()) {
+                        headerSchema.setDescription(fieldDoc.get().description().get().trim());
+                    }
+                    // Normalized header key values
+                    String headerKey = getValidHeaderKey(field);
+                    responseHeaders.put(headerKey, headerSchema);
+                }
+                headers.putAll(responseHeaders);
+            }
+        }
+    }
+
+    /**
+     * This function to normalized header key value to OAS key value.
+     * ex: ballerina header key x\-rate\-limit\-id -> X-Rate-Limit-Id
+     * @param field header flied
+     */
+    private String getValidHeaderKey(Map.Entry<String, RecordFieldSymbol> field) {
+        String headerKey = field.getKey();
+        String[] split = headerKey.split("\\\\-");
+        if (split.length > 1) {
+            StringBuilder validKeyValue = new StringBuilder();
+            for (String keyPiece : split) {
+                if (!keyPiece.isBlank()) {
+                    if (split.length > 2) {
+                        keyPiece = keyPiece.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+                                keyPiece.substring(1).toLowerCase(Locale.ENGLISH);
+                    }
+                    validKeyValue.append(keyPiece).append("-");
+                }
+            }
+            headerKey = validKeyValue.toString().substring(0, validKeyValue.toString().length() - 1);
+        } else {
+            headerKey = split[0].substring(0, 1).toUpperCase(Locale.ENGLISH) +
+                    split[0].substring(1).toLowerCase(Locale.ENGLISH);
+        }
+        return headerKey;
     }
 
     /**

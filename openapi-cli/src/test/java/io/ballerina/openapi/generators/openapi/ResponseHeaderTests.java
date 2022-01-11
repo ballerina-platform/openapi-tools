@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
@@ -43,9 +42,8 @@ public class ResponseHeaderTests {
     @Test(description = "Response with header")
     public void testResponse01() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_with_header.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario01.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_with_headers.yaml");
     }
-
 
     @AfterMethod
     public void cleanUp() {
