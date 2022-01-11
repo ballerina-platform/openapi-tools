@@ -111,9 +111,12 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         try {
             cmd.execute();
             output = readOutput(true);
-            Assert.assertTrue(output.contains("WARNING [http_response.bal:(4:5,7:6)] Generated OpenAPI definition" +
-                    " does not contain details for the resource function which has `http:Response` as return type" +
-                    " in the Ballerina service."));
+            Path definitionPath = resourceDir.resolve("cmd/ballerina-to-openapi/http_response.yaml");
+            if (Files.exists(this.tmpDir.resolve("v1_openapi.yaml"))) {
+                String generatedOpenAPI = getStringFromGivenBalFile(this.tmpDir.resolve("v1_openapi.yaml"));
+                String expectedYaml = getStringFromGivenBalFile(definitionPath);
+                Assert.assertEquals(expectedYaml, generatedOpenAPI);
+            }
         } catch (BLauncherException | IOException e) {
             output = e.toString();
             Assert.fail(output);
@@ -131,9 +134,12 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         try {
             cmd.execute();
             output = readOutput(true);
-            Assert.assertTrue(output.trim().contains("WARNING [http_request.bal:(4:5,6:6)] Generated OpenAPI " +
-                    "definition does not contain details for the resource function which has `http:Request`" +
-                    " parameters in the Ballerina service."));
+            Path definitionPath = resourceDir.resolve("cmd/ballerina-to-openapi/http_request.yaml");
+            if (Files.exists(this.tmpDir.resolve("v1_openapi.yaml"))) {
+                String generatedOpenAPI = getStringFromGivenBalFile(this.tmpDir.resolve("v1_openapi.yaml"));
+                String expectedYaml = getStringFromGivenBalFile(definitionPath);
+                Assert.assertEquals(expectedYaml, generatedOpenAPI);
+            }
         } catch (BLauncherException | IOException e) {
             output = e.toString();
             Assert.fail(output);

@@ -198,15 +198,13 @@ public class RequestBodyTest {
     }
 
     @Test(description = "Generate OpenAPI spec for request body with http:Request req")
-    public void testRequestBodyWithDefault() {
+    public void testRequestBodyWithDefault() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario13.bal");
         OpenApiConverter openApiConverterUtils = new OpenApiConverter();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertFalse(openApiConverterUtils.getErrors().isEmpty());
-        Assert.assertEquals(openApiConverterUtils.getErrors().get(0).getMessage(),
-                "Generated OpenAPI definition does not contain details for the resource function which has" +
-                        " `http:Request` parameters in the Ballerina service.");
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "request_body/rb_scenario13.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with json file")
