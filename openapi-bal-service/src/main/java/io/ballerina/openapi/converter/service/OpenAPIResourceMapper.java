@@ -210,8 +210,7 @@ public class OpenAPIResourceMapper {
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
-        if ((!openAPIParameterMapper.getErrors().isEmpty() && openAPIParameterMapper.getErrors().size() > 1)
-                || (openAPIParameterMapper.getErrors().size() == 1 &&
+        if (openAPIParameterMapper.getErrors().size() > 1 || (openAPIParameterMapper.getErrors().size() == 1 &&
                 !openAPIParameterMapper.getErrors().get(0).getCode().equals("OAS_CONVERTOR_113"))) {
             errors.addAll(openAPIParameterMapper.getErrors());
             return Optional.empty();

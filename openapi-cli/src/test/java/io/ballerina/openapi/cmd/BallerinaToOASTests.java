@@ -124,7 +124,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test to get method has request body type")
+    @Test(description = "Test for get methods having a request body type")
     public void testHttpRequest() {
         Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/http_request.bal"));
         String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
@@ -135,9 +135,9 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         try {
             cmd.execute();
             output = readOutput(true);
-            Assert.assertTrue(output.trim().contains("WARNING [http_request.bal:(4:31,4:44)] OAS does not allow" +
-                            " to have requestBody for `GET` method. Therefore generated OpenAPI definition does" +
-                            " not contain details for the request body in `GET` method."));
+            Assert.assertTrue(output.trim().contains("WARNING [http_request.bal:(4:31,4:44)] Generated OpenAPI " +
+                    "definition does not contain request body information of the `GET` method," +
+                    " as its not supported by the OpenAPI specification."));
         } catch (BLauncherException | IOException e) {
             output = e.toString();
             Assert.fail(output);

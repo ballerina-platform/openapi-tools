@@ -207,16 +207,16 @@ public class RequestBodyTest {
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario13.yaml");
     }
 
-    @Test(description = "Generate OpenAPI spec for request body with GET method")
+    @Test(description = "Generate OpenAPI spec for GET method having a request body")
     public void testRequestBodyWithGETMethod() {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario14.bal");
         OpenApiConverter openApiConverterUtils = new OpenApiConverter();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
         Assert.assertFalse(openApiConverterUtils.getErrors().isEmpty());
-        Assert.assertEquals(openApiConverterUtils.getErrors().get(0).getMessage(), "OAS does not allow to" +
-                " have requestBody for `GET` method. Therefore generated OpenAPI definition does not contain details" +
-                " for the request body in `GET` method.");
+        Assert.assertEquals(openApiConverterUtils.getErrors().get(0).getMessage(), "Generated OpenAPI" +
+                " definition does not contain request body information of the `GET` method, as it's not supported" +
+                " by the OpenAPI specification.");
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario14.yaml");
     }
 
