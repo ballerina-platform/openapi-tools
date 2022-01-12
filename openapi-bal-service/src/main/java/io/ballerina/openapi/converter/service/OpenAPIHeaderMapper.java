@@ -31,14 +31,17 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
+import static io.ballerina.openapi.converter.Constants.UNDERSCORE;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
 
 /**
@@ -57,7 +60,9 @@ public class OpenAPIHeaderMapper {
         String headerName = headerParam.paramName().get().text().replaceAll("\\\\", "");
         HeaderParameter headerParameter = new HeaderParameter();
         Node node = headerParam.typeName();
-        StringSchema stringSchema = new StringSchema();
+        Schema<?> headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(
+                headerParam.typeName().toString().replaceAll("\\?", "").
+                        replaceAll("\\[", "").replaceAll("\\]", "").trim());
         NodeList<AnnotationNode> annotations = getAnnotationNodesFromServiceNode(headerParam);
         String isOptional = Constants.TRUE;
         if (!annotations.isEmpty()) {
@@ -67,8 +72,8 @@ public class OpenAPIHeaderMapper {
                 isOptional = values.get();
             }
         }
-        enableHeaderRequiredOption(headerParameter, node, stringSchema, isOptional);
-        completeHeaderParameter(parameters, headerName, headerParameter, stringSchema, headerParam.annotations(),
+        enableHeaderRequiredOption(headerParameter, node, headerTypeSchema, isOptional);
+        completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
                 headerParam.typeName());
         return parameters;
     }
@@ -82,14 +87,23 @@ public class OpenAPIHeaderMapper {
         List<Parameter> parameters = new ArrayList<>();
         String headerName = headerParam.paramName().get().text().replaceAll("\\\\", "");
         HeaderParameter headerParameter = new HeaderParameter();
-        StringSchema stringSchema = new StringSchema();
-        if (headerParam.expression().kind() == SyntaxKind.STRING_LITERAL) {
-            stringSchema.setDefault(headerParam.expression().toString().replaceAll("\"", ""));
+        Schema<?> headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(
+                headerParam.typeName().toString().replaceAll("\\?", "").
+                        replaceAll("\\[", "").replaceAll("\\]", "").trim());
+        String defaultValue = headerParam.expression().toString().trim().replaceAll("\"", "");
+        List<SyntaxKind> allowedTypes = new ArrayList<>();
+        allowedTypes.addAll(Arrays.asList(SyntaxKind.STRING_LITERAL, SyntaxKind.NUMERIC_LITERAL,
+                SyntaxKind.BOOLEAN_LITERAL));
+        if (allowedTypes.contains(headerParam.expression().kind())) {
+            headerTypeSchema.setDefault(defaultValue);
+        } else if (headerParam.expression().kind() == SyntaxKind.LIST_CONSTRUCTOR) {
+            headerTypeSchema = new Schema<>();
+            headerTypeSchema.setDefault(defaultValue);
         }
         if (headerParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
-            stringSchema.setNullable(true);
+            headerTypeSchema.setNullable(true);
         }
-        completeHeaderParameter(parameters, headerName, headerParameter, stringSchema, headerParam.annotations(),
+        completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
                 headerParam.typeName());
         return parameters;
     }
@@ -98,7 +112,7 @@ public class OpenAPIHeaderMapper {
      * Assign header values to OAS header parameter.
      */
     private void completeHeaderParameter(List<Parameter> parameters, String headerName, HeaderParameter headerParameter,
-                                         StringSchema stringSchema, NodeList<AnnotationNode> annotations, Node node) {
+                                         Schema<?> headerSchema, NodeList<AnnotationNode> annotations, Node node) {
 
         if (!annotations.isEmpty()) {
             AnnotationNode annotationNode = annotations.get(0);
@@ -106,24 +120,28 @@ public class OpenAPIHeaderMapper {
         }
         if (node instanceof ArrayTypeDescriptorNode) {
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) node;
-            if (arrayNode.memberTypeDesc().kind() == SyntaxKind.STRING_TYPE_DESC) {
-                ArraySchema arraySchema = new ArraySchema();
-                arraySchema.setItems(stringSchema);
-                headerParameter.schema(arraySchema);
-                headerParameter.setName(headerName);
-                parameters.add(headerParameter);
+            ArraySchema arraySchema = new ArraySchema();
+            SyntaxKind kind = arrayNode.memberTypeDesc().kind();
+            String item = kind.toString().split(UNDERSCORE)[0].trim().toLowerCase(Locale.ENGLISH);
+            Schema<?> itemSchema = ConverterCommonUtils.getOpenApiSchema(item);
+            if (headerSchema.getDefault() != null) {
+                arraySchema.setDefault(headerSchema.getDefault());
             }
+            arraySchema.setItems(itemSchema);
+            headerParameter.schema(arraySchema);
+            headerParameter.setName(headerName);
+            parameters.add(headerParameter);
         } else {
-            headerParameter.schema(stringSchema);
+            headerParameter.schema(headerSchema);
             headerParameter.setName(headerName);
             parameters.add(headerParameter);
         }
     }
 
-    private void enableHeaderRequiredOption(HeaderParameter headerParameter, Node node, StringSchema stringSchema,
+    private void enableHeaderRequiredOption(HeaderParameter headerParameter, Node node, Schema<?> headerSchema,
                                             String isOptional) {
         if (node.kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
-            stringSchema.setNullable(true);
+            headerSchema.setNullable(true);
             if (isOptional.equals(Constants.FALSE)) {
                 headerParameter.setRequired(true);
             }
