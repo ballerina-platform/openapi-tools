@@ -18,6 +18,9 @@ paths:
                 type: array
                 items:
                   type: string
+            x-rate-limit-enable:
+              schema:
+                type: boolean
           content:
             text/plain:
               schema:
