@@ -36,6 +36,7 @@ import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,6 +54,7 @@ public class OpenApiConverter {
     private SemanticModel semanticModel;
     private Project project;
     private List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
+    private PrintStream outStream = System.out;
 
     /**
      * Initialize constructor.
@@ -100,6 +102,7 @@ public class OpenApiConverter {
                 semanticModel, serviceName, needJson, inputPath);
 
         if (!openAPIDefinitions.isEmpty()) {
+            List<String> fileNames = new ArrayList<>();
             for (OASResult definition : openAPIDefinitions) {
                 try {
                     this.errors.addAll(definition.getDiagnostics());
@@ -112,6 +115,7 @@ public class OpenApiConverter {
                         }
                         String fileName = resolveContractFileName(outPath, definition.getServiceName(), needJson);
                         CodegenUtils.writeFile(outPath.resolve(fileName), content.get());
+                        fileNames.add(fileName);
                     }
                 } catch (IOException e) {
                     DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_108;
@@ -120,6 +124,11 @@ public class OpenApiConverter {
                             null);
                     this.errors.add(error);
                 }
+            }
+            outStream.println("OpenAPI definition(s) generated successfully and copy to :");
+            Iterator<String> iterator = fileNames.iterator();
+            while (iterator.hasNext()) {
+                outStream.println("-- " + iterator.next());
             }
         }
     }

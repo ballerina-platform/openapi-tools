@@ -80,6 +80,8 @@ public class Constants {
     public static final String DEFAULT = "default";
     public static final String HTTP_RESPONSE = "http:Response";
     public static final String RESPONSE_HEADERS = "headers";
+    public static final String WILD_CARD_CONTENT_KEY = "*/*";
+    public static final String WILD_CARD_SUMMARY = "Any type of entity body";
 
     /**
      * Enum to select the Ballerina Type.

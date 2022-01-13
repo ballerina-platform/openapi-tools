@@ -53,6 +53,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.validator.TypeSymbolToJsonValidatorUtil.convertTypeToEnum;
+
 /**
  * This util is checking the availability of services and the operations in contract and ballerina file.
  */
@@ -149,7 +151,7 @@ public class ResourceValidator {
                 if (!isParameterExit) {
 
                     ValidationError validationError = new ValidationError(resourceParameter.getKey(),
-                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(paramType),
+                            convertTypeToEnum(paramType),
                             resourceParameter.getValue().location());
 
                     validationErrorList.add(validationError);
@@ -191,28 +193,10 @@ public class ResourceValidator {
                             }
 
                         }
-                        //  Check whether it is path parameter
+                        //  Check path parameter available
                         if ((parameter instanceof PathParameter) && (parameter.getName().equals(resourceParam.getKey()))
                                 && paramNode instanceof ResourcePathParameterNode) {
                             isOParameterExist = true;
-                            TypeDescriptorNode typeNode =
-                                    (TypeDescriptorNode) ((ResourcePathParameterNode) paramNode).typeDescriptor();
-                            Token paramName = ((ResourcePathParameterNode) paramNode).paramName();
-                            if (typeNode instanceof BuiltinSimpleNameReferenceNode) {
-                                Optional<Symbol> symbol = semanticModel.symbol(paramName);
-                                TypeSymbol typeSymbol = null;
-                                if (symbol.isPresent() && symbol.orElseThrow().kind().equals(SymbolKind.VARIABLE)) {
-                                    VariableSymbol symbol1 = (VariableSymbol) symbol.orElseThrow();
-                                    typeSymbol = symbol1.typeDescriptor();
-                                }
-                                List<ValidationError> validationErrors =
-                                        TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
-                                                typeSymbol, syntaxTree, semanticModel,
-                                                resourceParam.getKey(), location);
-                                if (!validationErrors.isEmpty()) {
-                                    validationErrorList.addAll(validationErrors);
-                                }
-                            }
                             break;
                         }
                     }
@@ -220,7 +204,7 @@ public class ResourceValidator {
 
                 if (!isOParameterExist) {
                     ValidationError validationError = new ValidationError(parameter.getName(),
-                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(parameter.getSchema().getType()), location);
+                            convertTypeToEnum(parameter.getSchema().getType()), location);
                     validationErrorList.add(validationError);
                 }
             }
@@ -243,7 +227,7 @@ public class ResourceValidator {
                         type = operationRB.getValue().getType();
                     }
                     ValidationError validationError = new ValidationError(operationRB.getKey(),
-                            TypeSymbolToJsonValidatorUtil.convertTypeToEnum(type), location);
+                            convertTypeToEnum(type), location);
                     validationErrorList.add(validationError);
                 }
             }
