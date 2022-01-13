@@ -25,7 +25,7 @@ import io.ballerina.openapi.validator.OpenApiValidatorException;
 import io.ballerina.openapi.validator.ResourcePathSummary;
 import io.ballerina.openapi.validator.ResourceValidator;
 import io.ballerina.openapi.validator.ResourceWithOperation;
-import io.ballerina.openapi.validator.ServiceValidator;
+import io.ballerina.openapi.validator.ValidatorUtils;
 import io.ballerina.openapi.validator.error.TypeMismatch;
 import io.ballerina.openapi.validator.error.ValidationError;
 import io.ballerina.projects.Project;
@@ -63,7 +63,7 @@ public class TypeMisMatchTests {
         Filters filters = new Filters(dummy, dummy, dummy, dummy, DiagnosticSeverity.ERROR);
 
         Path contractPath = RES_DIR.resolve("swagger/recordField.yaml");
-        OpenAPI api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
+        OpenAPI api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
         // Make resourcePath summary
         Map<String, ResourcePathSummary> resourcePathMap = ResourceWithOperation.summarizeResources(functions);
         //  Filter openApi operation according to given filters
