@@ -97,7 +97,7 @@ public class OpenAPIComponentMapper {
         Optional<Documentation> documentation = ((Documentable) recordSymbol).documentation();
         if (documentation.isPresent() && documentation.get().description().isPresent()) {
             Optional<String> description = (documentation.get().description());
-            apiDocs.put(componentName, description.get());
+            apiDocs.put(componentName, description.get().trim());
         }
         // Record field apidoc mapping
         TypeReferenceTypeSymbol recordTypeReference = typeSymbol;
