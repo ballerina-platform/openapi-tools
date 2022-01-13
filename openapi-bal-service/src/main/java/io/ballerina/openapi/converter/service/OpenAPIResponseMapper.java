@@ -53,6 +53,7 @@ import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -104,6 +105,8 @@ import static io.ballerina.openapi.converter.Constants.S_MAX_AGE;
 import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
 import static io.ballerina.openapi.converter.Constants.TRUE;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_CONTENT_KEY;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_SUMMARY;
 import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
@@ -421,9 +424,14 @@ public class OpenAPIResponseMapper {
         if (qNode.modulePrefix().text().equals(HTTP)) {
             String typeName = qNode.modulePrefix().text() + ":" + qNode.identifier().text();
             if (typeName.equals(HTTP_RESPONSE)) {
-                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_105;
-                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, location);
-                errors.add(error);
+                apiResponse = new ApiResponse();
+                apiResponse.description("Any Response");
+                Content content = new Content();
+                content.put(WILD_CARD_CONTENT_KEY, new io.swagger.v3.oas.models.media.MediaType().example(new Example()
+                        .summary(WILD_CARD_SUMMARY)));
+                apiResponse.setContent(content);
+                apiResponses.put(Constants.DEFAULT, apiResponse);
+                return Optional.of(apiResponses);
             } else {
                 Optional<String> code = generateApiResponseCode(qNode.identifier().toString().trim());
                 if (code.isPresent()) {
