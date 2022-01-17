@@ -14,13 +14,13 @@ paths:
     get:
       operationId: operation_get_/ping
       parameters:
-        - name: headerValue
+        - name: x-client
           in: header
           schema:
-            type: integer
-            format: int32
-            nullable: true
-            default: 3
+            type: array
+            items:
+              type: boolean
+            default: "[true, false]"
       responses:
         "200":
           description: Ok

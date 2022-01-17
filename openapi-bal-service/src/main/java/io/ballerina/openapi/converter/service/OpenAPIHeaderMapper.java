@@ -38,10 +38,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
-import static io.ballerina.openapi.converter.Constants.UNDERSCORE;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
 
 /**
@@ -57,7 +55,7 @@ public class OpenAPIHeaderMapper {
      */
     public List<Parameter> setHeaderParameter(RequiredParameterNode headerParam) {
         List<Parameter> parameters = new ArrayList<>();
-        String headerName = headerParam.paramName().get().text().replaceAll("\\\\", "");
+        String headerName = extractHeaderName(headerParam.paramName().get().text());
         HeaderParameter headerParameter = new HeaderParameter();
         Node node = headerParam.typeName();
         Schema<?> headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(
@@ -78,6 +76,11 @@ public class OpenAPIHeaderMapper {
         return parameters;
     }
 
+    private String extractHeaderName(String headerParam) {
+        String headerName = headerParam.replaceAll("\\\\", "");
+        return headerName;
+    }
+
     /**
      * Handle header parameters in ballerina data type.
      *
@@ -85,12 +88,17 @@ public class OpenAPIHeaderMapper {
      */
     public List<Parameter> setHeaderParameter(DefaultableParameterNode headerParam) {
         List<Parameter> parameters = new ArrayList<>();
-        String headerName = headerParam.paramName().get().text().replaceAll("\\\\", "");
+        String headerName = extractHeaderName(headerParam.paramName().get().text());
         HeaderParameter headerParameter = new HeaderParameter();
         Schema<?> headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(
                 headerParam.typeName().toString().replaceAll("\\?", "").
                         replaceAll("\\[", "").replaceAll("\\]", "").trim());
-        String defaultValue = headerParam.expression().toString().trim().replaceAll("\"", "");
+
+        String defaultValue = headerParam.expression().toString().trim();
+        if (defaultValue.length() > 1 && defaultValue.charAt(0) == '"' &&
+                defaultValue.charAt(defaultValue.length() - 1) == '"') {
+            defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
+        }
         List<SyntaxKind> allowedTypes = new ArrayList<>();
         allowedTypes.addAll(Arrays.asList(SyntaxKind.STRING_LITERAL, SyntaxKind.NUMERIC_LITERAL,
                 SyntaxKind.BOOLEAN_LITERAL));
@@ -122,8 +130,7 @@ public class OpenAPIHeaderMapper {
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) node;
             ArraySchema arraySchema = new ArraySchema();
             SyntaxKind kind = arrayNode.memberTypeDesc().kind();
-            String item = kind.toString().split(UNDERSCORE)[0].trim().toLowerCase(Locale.ENGLISH);
-            Schema<?> itemSchema = ConverterCommonUtils.getOpenApiSchema(item);
+            Schema<?> itemSchema = ConverterCommonUtils.getOpenApiSchema(kind);
             if (headerSchema.getDefault() != null) {
                 arraySchema.setDefault(headerSchema.getDefault());
             }

@@ -19,7 +19,7 @@ paths:
           required: true
           schema:
             type: integer
-            format: int32
+            format: int64
       responses:
         "200":
           description: Ok
@@ -34,6 +34,20 @@ paths:
             type: array
             items:
               type: boolean
+      responses:
+        "200":
+          description: Ok
+  /ping03:
+    get:
+      operationId: operation_get_/ping03
+      parameters:
+        - name: headerValue
+          in: header
+          schema:
+            type: integer
+            format: int64
+            nullable: true
+            default: 3
       responses:
         "200":
           description: Ok

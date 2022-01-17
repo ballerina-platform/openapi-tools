@@ -103,22 +103,17 @@ public class HeaderTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario10.yaml");
     }
 
-    @Test(description = "Tests for header parameter has int and boolean type")
+    @Test(description = "Tests for header parameters having int and boolean types with array, default and nullable " +
+            "scenarios")
     public void testHeaderWithIntAndBoolean() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario11.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario11.yaml");
     }
 
-    @Test(description = "Tests for header parameter has int and boolean type")
-    public void testIntHeaderWithDefualtValue() throws IOException {
+    @Test(description = "Test for header parameters having boolean array type")
+    public void testBooleanHeaderArray() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("header_scenario12.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario12.yaml");
-    }
-
-    @Test(description = "Tests for boolean type header array")
-    public void testBooleanHeaderArray() throws IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("header_scenario13.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "header_scenario13.yaml");
     }
     @AfterMethod
     public void cleanUp() {

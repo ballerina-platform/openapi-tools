@@ -12,6 +12,10 @@ service /payloadV on helloEp {
         http:Ok ok = {body: ()};
         return ok;
     }
+    resource function get ping03(@http:Header int? headerValue = 3) returns http:Ok {
+            http:Ok ok = {body: ()};
+            return ok;
+    }
 }
 
 function getHeader() returns string {

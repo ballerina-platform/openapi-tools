@@ -47,7 +47,7 @@ components:
         count:
           type: integer
           description: Number of rooms
-          format: int32
+          format: int64
       description: Represents rooms be reserved
     Reservation:
       required:

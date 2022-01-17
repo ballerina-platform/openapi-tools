@@ -29,7 +29,7 @@ paths:
           in: query
           schema:
             type: integer
-            format: int32
+            format: int64
       responses:
         "200":
           description: Ok

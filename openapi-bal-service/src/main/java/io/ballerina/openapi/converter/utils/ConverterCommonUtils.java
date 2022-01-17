@@ -108,6 +108,7 @@ public class ConverterCommonUtils {
             case Constants.INT:
             case Constants.INTEGER:
                 schema = new IntegerSchema();
+                schema.setFormat("int64");
                 break;
             case Constants.BYTE_ARRAY:
             case Constants.OCTET_STREAM:
@@ -130,6 +131,50 @@ public class ConverterCommonUtils {
             case Constants.TYPEREFERENCE:
             case Constants.XML:
             case Constants.JSON:
+            default:
+                schema = new Schema();
+                break;
+        }
+        return schema;
+    }
+
+    /**
+     * Retrieves a matching OpenApi {@link Schema} for a provided ballerina type.
+     *
+     * @param type ballerina type with SYNTAX KIND
+     * @return OpenApi {@link Schema} for type defined by {@code type}
+     */
+    public static Schema<?> getOpenApiSchema(SyntaxKind type) {
+        Schema<?> schema;
+        switch (type) {
+            case STRING_TYPE_DESC:
+                schema = new StringSchema();
+                break;
+            case BOOLEAN_TYPE_DESC:
+                schema = new BooleanSchema();
+                break;
+            case ARRAY_TYPE_DESC:
+                schema = new ArraySchema();
+                break;
+            case INT_TYPE_DESC:
+                schema = new IntegerSchema();
+                schema.setFormat("int64");
+                break;
+            case BYTE_TYPE_DESC:
+                schema = new StringSchema();
+                schema.setFormat("uuid");
+                break;
+            case DECIMAL_TYPE_DESC:
+                schema = new NumberSchema();
+                schema.setFormat(Constants.DOUBLE);
+                break;
+            case FLOAT_TYPE_DESC:
+                schema = new NumberSchema();
+                schema.setFormat(Constants.FLOAT);
+                break;
+            case MAP_TYPE_DESC:
+                schema = new ObjectSchema();
+                break;
             default:
                 schema = new Schema();
                 break;
