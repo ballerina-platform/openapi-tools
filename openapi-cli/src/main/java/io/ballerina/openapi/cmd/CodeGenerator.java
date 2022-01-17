@@ -621,12 +621,13 @@ public class CodeGenerator {
      */
     public OpenAPI normalizeOpenAPI(Path openAPIPath, boolean isClient) throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
+        io.swagger.v3.oas.models.Paths openAPIPaths = openAPI.getPaths();
         if (isClient) {
-            validateOperationIds(openAPI.getPaths().entrySet());
-            validateRequestBody(openAPI.getPaths().entrySet());
+            validateOperationIds(openAPIPaths.entrySet());
         } else {
-            GeneratorUtils.setOperationId(openAPI.getPaths());
+            GeneratorUtils.setOperationId(openAPIPaths);
         }
+        validateRequestBody(openAPIPaths.entrySet());
 
         if (openAPI.getComponents() != null) {
             // Refactor schema name with valid name

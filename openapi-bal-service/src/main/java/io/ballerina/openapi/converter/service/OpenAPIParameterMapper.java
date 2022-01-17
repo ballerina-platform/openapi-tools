@@ -38,9 +38,12 @@ import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -50,6 +53,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.openapi.converter.Constants.HTTP_REQUEST;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_CONTENT_KEY;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_SUMMARY;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
@@ -96,10 +101,11 @@ public class OpenAPIParameterMapper {
                             (QualifiedNameReferenceNode) requiredParameterNode.typeName();
                     String typeName = (referenceNode).modulePrefix().text() + ":" + (referenceNode).identifier().text();
                     if (typeName.equals(HTTP_REQUEST)) {
-                        DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_104;
-                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(messages,
-                                functionDefinitionNode.location());
-                        errors.add(error);
+                        RequestBody requestBody = new RequestBody();
+                        requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY,
+                                new io.swagger.v3.oas.models.media.MediaType().example(
+                                        new Example().summary(WILD_CARD_SUMMARY))));
+                        operationAdaptor.getOperation().setRequestBody(requestBody);
                     }
                 }
                 if (requiredParameterNode.typeName().kind() != SyntaxKind.QUALIFIED_NAME_REFERENCE &&
@@ -167,7 +173,8 @@ public class OpenAPIParameterMapper {
                 OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper();
                 parameters.addAll(openAPIHeaderMapper.setHeaderParameter(requiredParameterNode));
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
-                    (!"GET".toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
+                    (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
+                            operationAdaptor.getHttpOperation()))) {
                 Map<String, Schema> schema = components.getSchemas();
                 // Handle request payload.
                 Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
@@ -177,6 +184,12 @@ public class OpenAPIParameterMapper {
                         operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
                         operationAdaptor, semanticModel));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
+            } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
+                    (Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
+                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                        annotation.location());
+                errors.add(error);
             }
         }
     }

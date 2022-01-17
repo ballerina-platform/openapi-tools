@@ -19,6 +19,9 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
+import io.ballerina.compiler.api.symbols.Documentable;
+import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -53,6 +56,7 @@ import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -100,10 +104,13 @@ import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.PRIVATE;
 import static io.ballerina.openapi.converter.Constants.PROXY_REVALIDATE;
 import static io.ballerina.openapi.converter.Constants.PUBLIC;
+import static io.ballerina.openapi.converter.Constants.RESPONSE_HEADERS;
 import static io.ballerina.openapi.converter.Constants.S_MAX_AGE;
 import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
 import static io.ballerina.openapi.converter.Constants.TRUE;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_CONTENT_KEY;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_SUMMARY;
 import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
@@ -421,9 +428,14 @@ public class OpenAPIResponseMapper {
         if (qNode.modulePrefix().text().equals(HTTP)) {
             String typeName = qNode.modulePrefix().text() + ":" + qNode.identifier().text();
             if (typeName.equals(HTTP_RESPONSE)) {
-                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_105;
-                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, location);
-                errors.add(error);
+                apiResponse = new ApiResponse();
+                apiResponse.description("Any Response");
+                Content content = new Content();
+                content.put(WILD_CARD_CONTENT_KEY, new io.swagger.v3.oas.models.media.MediaType().example(new Example()
+                        .summary(WILD_CARD_SUMMARY)));
+                apiResponse.setContent(content);
+                apiResponses.put(Constants.DEFAULT, apiResponse);
+                return Optional.of(apiResponses);
             } else {
                 Optional<String> code = generateApiResponseCode(qNode.identifier().toString().trim());
                 if (code.isPresent()) {
@@ -465,6 +477,15 @@ public class OpenAPIResponseMapper {
         if (array.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
             handleReferenceResponse(operationAdaptor, (SimpleNameReferenceNode) array.memberTypeDesc(),
                     schemas02, apiResponses, customMediaPrefix, headers);
+        } else if (array.memberTypeDesc().kind() == QUALIFIED_NAME_REFERENCE) {
+            Optional<ApiResponses> optionalAPIResponses =
+                    handleQualifiedNameType(new ApiResponses(), customMediaPrefix, headers, apiResponse,
+                            (QualifiedNameReferenceNode) array.memberTypeDesc());
+            if (optionalAPIResponses.isPresent()) {
+                ApiResponses responses = optionalAPIResponses.get();
+                updateResponseWithArraySchema(responses);
+                apiResponses.putAll(responses);
+            }
         } else {
             ArraySchema arraySchema = new ArraySchema();
             String type02 = array.memberTypeDesc().kind().toString().trim().split("_")[0].
@@ -481,6 +502,31 @@ public class OpenAPIResponseMapper {
             apiResponses.put(HTTP_200, apiResponse);
         }
         return Optional.of(apiResponses);
+    }
+
+    /**
+     * Update given response schema type with array schema.
+     *
+     * @param responses api responses related to return type.
+     */
+    private void updateResponseWithArraySchema(ApiResponses responses) {
+
+        for (Map.Entry<String, ApiResponse> responseEntry : responses.entrySet()) {
+            Content content = responseEntry.getValue().getContent();
+            for (Map.Entry<String, io.swagger.v3.oas.models.media.MediaType> mediaTypeEntry :
+                    content.entrySet()) {
+                io.swagger.v3.oas.models.media.MediaType value = mediaTypeEntry.getValue();
+                Schema<?> schema = value.getSchema();
+                ArraySchema arraySchema = new ArraySchema();
+                arraySchema.setItems(schema);
+                value.setSchema(arraySchema);
+                content.remove(mediaTypeEntry.getKey());
+                content.put(mediaTypeEntry.getKey(), value);
+            }
+            responses.remove(responseEntry.getKey());
+            responses.addApiResponse(responseEntry.getKey(),
+                    new ApiResponse().content(content).description(responseEntry.getValue().getDescription()));
+        }
     }
 
     /**
@@ -740,8 +786,11 @@ public class OpenAPIResponseMapper {
                 if (code.isEmpty()) {
                     return Optional.empty();
                 }
-                apiResponse = setCacheHeader(headers, apiResponse, code.get());
                 Map<String, RecordFieldSymbol> fieldsOfRecord = returnRecord.fieldDescriptors();
+                // Handle the response headers
+                RecordFieldSymbol header = fieldsOfRecord.get(RESPONSE_HEADERS);
+                extractResponseHeaders(headers, header);
+                apiResponse = setCacheHeader(headers, apiResponse, code.get());
                 // Handle the content of the response
                 RecordFieldSymbol body = fieldsOfRecord.get(BODY);
                 if (body.typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
@@ -778,6 +827,55 @@ public class OpenAPIResponseMapper {
             apiResponses.put(HTTP_200, apiResponse);
         }
         return Optional.of(apiResponses);
+    }
+
+    /**
+     * This function is to handle headers which come with response.
+     *
+     * @param headers   Headers already generated for cache config
+     * @param header    Response header field
+     */
+    private void extractResponseHeaders(Map<String, Header> headers, RecordFieldSymbol header) {
+
+        if (header.typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
+            TypeReferenceTypeSymbol headerType = (TypeReferenceTypeSymbol) header.typeDescriptor();
+            if (headerType.typeDescriptor() instanceof RecordTypeSymbol) {
+                RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) headerType.typeDescriptor();
+                Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
+                for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
+                    Header headerSchema = new Header();
+                    TypeSymbol fieldType = field.getValue().typeDescriptor();
+                    String type = fieldType.typeKind().toString().trim().toLowerCase(Locale.ENGLISH);
+                    Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(type);
+                    if (fieldType instanceof ArrayTypeSymbol) {
+                        ArrayTypeSymbol array = (ArrayTypeSymbol) fieldType;
+                        TypeSymbol itemType = array.memberTypeDescriptor();
+                        String item = itemType.typeKind().toString().trim().toLowerCase(Locale.ENGLISH);
+                        Schema<?> itemSchema = ConverterCommonUtils.getOpenApiSchema(item);
+                        if (openApiSchema instanceof ArraySchema) {
+                            ((ArraySchema) openApiSchema).setItems(itemSchema);
+                        }
+                    }
+                    headerSchema.setSchema(openApiSchema);
+                    Optional<Documentation> fieldDoc = ((Documentable) field.getValue()).documentation();
+                    if (fieldDoc.isPresent() && fieldDoc.get().description().isPresent()) {
+                        headerSchema.setDescription(fieldDoc.get().description().get().trim());
+                    }
+                    // Normalized header key values
+                    String headerKey = getValidHeaderKey(field);
+                    headers.put(headerKey, headerSchema);
+                }
+            }
+        }
+    }
+
+    /**
+     * This function to normalized header key value to OAS key value.
+     * ex: ballerina header key x\-rate\-limit\-id -> x-rate-limit-id
+     * @param field header flied
+     */
+    private String getValidHeaderKey(Map.Entry<String, RecordFieldSymbol> field) {
+        return field.getKey().replaceAll("\\\\", "");
     }
 
     /**

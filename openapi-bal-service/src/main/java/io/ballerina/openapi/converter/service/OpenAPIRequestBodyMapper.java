@@ -262,7 +262,6 @@ public class OpenAPIRequestBodyMapper {
             ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) payloadNode.typeName();
             handleArrayTypePayload(schema, arrayTypeDescriptorNode, mimeType, requestBody);
         } else {
-
             io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
             Schema mimeSchema = ConverterCommonUtils.getOpenApiSchema(mimeType.split("/")[1]
                     .toLowerCase(Locale.ENGLISH));

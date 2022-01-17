@@ -23,7 +23,7 @@ package io.ballerina.openapi.validator;
 public class Constants {
     public static final String PACKAGE = "openapi";
     public static final String ANNOTATION_NAME = "ServiceInfo";
-    public static final String CONTRACT = "contract";
+    public static final String ATTRIBUTE_CONTRACT = "contract";
     public static final String HTTP = "http";
     public static final String RESOURCE_CONFIG = "ResourceConfig";
     public static final String PATH = "path";
@@ -36,12 +36,12 @@ public class Constants {
     public static final String PATCH = "patch";
     public static final String OPTIONS = "options";
     public static final String TRACE = "trace";
-    public static final String TAGS = "tags";
-    public static final String OPERATIONS = "operations";
+    public static final String ATTRIBUTE_TAGS = "tags";
+    public static final String ATTRIBUTE_OPERATIONS = "operations";
     public static final String BODY = "body";
-    public static final String FAILONERRORS = "failOnErrors";
-    public static final String EXCLUDETAGS = "excludeTags";
-    public static final String EXCLUDEOPERATIONS = "excludeOperations";
+    public static final String ATTRIBUTE_FAIL_ON_ERRORS = "failOnErrors";
+    public static final String ATTRIBUTE_EXCLUDE_TAGS = "excludeTags";
+    public static final String ATTRIBUTE_EXCLUDE_OPERATIONS = "excludeOperations";
     public static final String METHOD = "method";
     public static final String ARRAY = "array";
     public static final String STRING = "string";
@@ -53,6 +53,7 @@ public class Constants {
     public static final String NUMBER = "number";
     public static final String INT = "int";
     public static final String USER_DIR = "user.dir";
+    public static final String FALSE = "false";
 
     /**
      * Enum Type for handle the validation error types.
