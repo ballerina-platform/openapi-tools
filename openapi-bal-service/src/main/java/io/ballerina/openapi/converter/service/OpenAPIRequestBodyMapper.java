@@ -24,7 +24,7 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
-import io.ballerina.compiler.syntax.tree.ChildNodeList;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
@@ -33,6 +33,7 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
@@ -40,7 +41,9 @@ import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.Locale;
@@ -51,10 +54,12 @@ import javax.ws.rs.core.MediaType;
 
 import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
 import static io.ballerina.openapi.converter.Constants.JSON_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.MEDIA_TYPE;
 import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
 import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.X_WWW_FROM_URLENCODED_POSTFIX;
 
 /**
  * OpenAPIRequestBodyMapper provides functionality for converting ballerina payload to OAS request body model.
@@ -159,6 +164,16 @@ public class OpenAPIRequestBodyMapper {
                         APPLICATION_PREFIX + customMediaPrefix + OCTECT_STREAM_POSTFIX;
                 addConsumes(operationAdaptor, bodyParameter, mediaTypeString);
                 break;
+            case Constants.MAP_STRING:
+                mediaTypeString = customMediaPrefix == null ? MediaType.APPLICATION_FORM_URLENCODED :
+                        APPLICATION_PREFIX + customMediaPrefix + X_WWW_FROM_URLENCODED_POSTFIX;
+                Schema objectSchema = new ObjectSchema();
+                objectSchema.additionalProperties(new StringSchema());
+                io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
+                mediaType.setSchema(objectSchema);
+                bodyParameter.setContent(new Content().addMediaType(mediaTypeString, mediaType));
+                operationAdaptor.getOperation().setRequestBody(bodyParameter);
+                break;
             default:
                 Node node = payloadNode.typeName();
                 mediaTypeString = customMediaPrefix == null ? MediaType.APPLICATION_JSON :
@@ -228,19 +243,25 @@ public class OpenAPIRequestBodyMapper {
                                          RequiredParameterNode payloadNode, Map<String, Schema> schema) {
 
         for (MappingFieldNode fieldNode: fields) {
-            if (fieldNode.children() != null) {
-                ChildNodeList nodeList = fieldNode.children();
-                for (Node nextNode : nodeList) {
-                    if (nextNode instanceof ListConstructorExpressionNode) {
-                        SeparatedNodeList mimeList = ((ListConstructorExpressionNode) nextNode).expressions();
-                        if (mimeList.size() != 0) {
-                            RequestBody requestBody = new RequestBody();
-                            for (Object mime : mimeList) {
-                                if (mime instanceof BasicLiteralNode) {
-                                    createRequestBody(bodyParameter, payloadNode, schema, requestBody,
-                                            (BasicLiteralNode) mime);
+            if (((SpecificFieldNode) fieldNode).fieldName().toString().equals(MEDIA_TYPE)) {
+                if (fieldNode.children() != null) {
+                    RequestBody requestBody = new RequestBody();
+                    SpecificFieldNode field = (SpecificFieldNode) fieldNode;
+                    if (field.valueExpr().isPresent()) {
+                        ExpressionNode valueNode = field.valueExpr().get();
+                        if (valueNode instanceof ListConstructorExpressionNode) {
+                            SeparatedNodeList mimeList = ((ListConstructorExpressionNode) valueNode).expressions();
+                            if (mimeList.size() != 0) {
+                                for (Object mime : mimeList) {
+                                    if (mime instanceof BasicLiteralNode) {
+                                        createRequestBody(bodyParameter, payloadNode, schema, requestBody,
+                                                ((BasicLiteralNode) mime).literalToken().text());
+                                    }
                                 }
                             }
+                        } else {
+                            createRequestBody(bodyParameter, payloadNode, schema, requestBody,
+                                    valueNode.toString());
                         }
                     }
                 }
@@ -249,10 +270,9 @@ public class OpenAPIRequestBodyMapper {
     }
 
     private void createRequestBody(RequestBody bodyParameter, RequiredParameterNode payloadNode,
-                                   Map<String, Schema> schema, RequestBody requestBody, BasicLiteralNode mime) {
+                                   Map<String, Schema> schema, RequestBody requestBody, String mime) {
 
-        String mimeType = mime.literalToken().text().
-                replaceAll("\"", "");
+        String mimeType = mime.replaceAll("\"", "");
         if (payloadNode.typeName().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
             SimpleNameReferenceNode record = (SimpleNameReferenceNode) payloadNode.typeName();
             TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(record));
