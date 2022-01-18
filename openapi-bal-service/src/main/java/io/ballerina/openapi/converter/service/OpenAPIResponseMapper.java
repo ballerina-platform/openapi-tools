@@ -113,7 +113,7 @@ import static io.ballerina.openapi.converter.Constants.TRUE;
 import static io.ballerina.openapi.converter.Constants.WILD_CARD_CONTENT_KEY;
 import static io.ballerina.openapi.converter.Constants.WILD_CARD_SUMMARY;
 import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
-import static io.ballerina.openapi.converter.Constants.X_WWW_FROM_URLENCODED_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.X_WWW_FORM_URLENCODED_POSTFIX;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
@@ -813,7 +813,7 @@ public class OpenAPIResponseMapper {
                     apiResponse.content(new Content().addMediaType(mediaTypeString, media));
                 } else if (body.typeDescriptor().typeKind() == TypeDescKind.MAP &&
                         (((MapTypeSymbol) body.typeDescriptor()).typeParam().typeKind() == TypeDescKind.STRING)) {
-                    mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s + X_WWW_FROM_URLENCODED_POSTFIX)
+                    mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s + X_WWW_FORM_URLENCODED_POSTFIX)
                             .orElse(MediaType.APPLICATION_FORM_URLENCODED);
                     Schema objectSchema = new ObjectSchema();
                     objectSchema.additionalProperties(new StringSchema());

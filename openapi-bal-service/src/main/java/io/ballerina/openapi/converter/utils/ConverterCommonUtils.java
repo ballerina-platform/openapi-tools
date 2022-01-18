@@ -126,7 +126,7 @@ public class ConverterCommonUtils {
             case Constants.MAP_JSON:
                 schema = new ObjectSchema();
                 break;
-            case Constants.X_WWW_FROM_URLENCODED:
+            case Constants.X_WWW_FORM_URLENCODED:
                 schema = new ObjectSchema();
                 schema.setAdditionalProperties(new StringSchema());
                 break;

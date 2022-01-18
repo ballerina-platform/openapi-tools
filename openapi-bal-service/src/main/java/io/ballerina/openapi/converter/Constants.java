@@ -74,8 +74,8 @@ public class Constants {
     public static final String XML_POSTFIX = "+xml";
     public static final String TEXT_POSTFIX = "+plain";
     public static final String OCTECT_STREAM_POSTFIX = "+octet-stream";
-    public static final String X_WWW_FROM_URLENCODED_POSTFIX = "+x-www-form-urlencoded";
-    public static final String X_WWW_FROM_URLENCODED = "x-www-form-urlencoded";
+    public static final String X_WWW_FORM_URLENCODED_POSTFIX = "+x-www-form-urlencoded";
+    public static final String X_WWW_FORM_URLENCODED = "x-www-form-urlencoded";
 
     public static final String TEXT_PREFIX = "text/";
     public static final String MAP_JSON = "map<json>";

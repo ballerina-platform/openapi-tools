@@ -59,7 +59,7 @@ import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
 import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
-import static io.ballerina.openapi.converter.Constants.X_WWW_FROM_URLENCODED_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.X_WWW_FORM_URLENCODED_POSTFIX;
 
 /**
  * OpenAPIRequestBodyMapper provides functionality for converting ballerina payload to OAS request body model.
@@ -166,7 +166,7 @@ public class OpenAPIRequestBodyMapper {
                 break;
             case Constants.MAP_STRING:
                 mediaTypeString = customMediaPrefix == null ? MediaType.APPLICATION_FORM_URLENCODED :
-                        APPLICATION_PREFIX + customMediaPrefix + X_WWW_FROM_URLENCODED_POSTFIX;
+                        APPLICATION_PREFIX + customMediaPrefix + X_WWW_FORM_URLENCODED_POSTFIX;
                 Schema objectSchema = new ObjectSchema();
                 objectSchema.additionalProperties(new StringSchema());
                 io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
@@ -243,31 +243,28 @@ public class OpenAPIRequestBodyMapper {
                                          RequiredParameterNode payloadNode, Map<String, Schema> schema) {
 
         for (MappingFieldNode fieldNode: fields) {
-            if (fieldNode instanceof SpecificFieldNode) {
-                if (!((SpecificFieldNode) fieldNode).fieldName().toString().equals(MEDIA_TYPE) ||
-                        fieldNode.children() == null) {
-                    continue;
-                }
-                RequestBody requestBody = new RequestBody();
-                SpecificFieldNode field = (SpecificFieldNode) fieldNode;
-                if (field.valueExpr().isEmpty()) {
-                    continue;
-                }
-                ExpressionNode valueNode = field.valueExpr().get();
-                if (valueNode instanceof ListConstructorExpressionNode) {
-                    SeparatedNodeList mimeList = ((ListConstructorExpressionNode) valueNode).expressions();
-                    if (mimeList.size() != 0) {
-                        for (Object mime : mimeList) {
-                            if (mime instanceof BasicLiteralNode) {
-                                createRequestBody(bodyParameter, payloadNode, schema, requestBody,
-                                        ((BasicLiteralNode) mime).literalToken().text());
-                            }
-                        }
+            if (!(fieldNode instanceof SpecificFieldNode) ||
+                    !((SpecificFieldNode) fieldNode).fieldName().toString().equals(MEDIA_TYPE) ||
+                    fieldNode.children() == null) {
+                continue;
+            }
+            RequestBody requestBody = new RequestBody();
+            SpecificFieldNode field = (SpecificFieldNode) fieldNode;
+            if (field.valueExpr().isEmpty()) {
+                continue;
+            }
+            ExpressionNode valueNode = field.valueExpr().get();
+            if (valueNode instanceof ListConstructorExpressionNode) {
+                SeparatedNodeList mimeList = ((ListConstructorExpressionNode) valueNode).expressions();
+                for (Object mime : mimeList) {
+                    if (mime instanceof BasicLiteralNode) {
+                        createRequestBody(bodyParameter, payloadNode, schema, requestBody,
+                                ((BasicLiteralNode) mime).literalToken().text());
                     }
-                } else {
-                    createRequestBody(bodyParameter, payloadNode, schema, requestBody,
-                            valueNode.toString());
                 }
+            } else {
+                createRequestBody(bodyParameter, payloadNode, schema, requestBody,
+                        valueNode.toString());
             }
         }
     }
