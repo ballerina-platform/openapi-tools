@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
+import io.ballerina.compiler.api.symbols.MapTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -112,6 +113,7 @@ import static io.ballerina.openapi.converter.Constants.TRUE;
 import static io.ballerina.openapi.converter.Constants.WILD_CARD_CONTENT_KEY;
 import static io.ballerina.openapi.converter.Constants.WILD_CARD_SUMMARY;
 import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.X_WWW_FROM_URLENCODED_POSTFIX;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
@@ -808,7 +810,26 @@ public class OpenAPIResponseMapper {
                     apiResponse.content(new Content().addMediaType(mediaTypeString, media));
                     apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
                     apiResponses.put(code.get(), apiResponse);
-                } else {
+                } else if (body.typeDescriptor().typeKind() == TypeDescKind.XML){
+                    media.setSchema(new ObjectSchema());
+                    mediaTypeString = customMediaPrefix.isPresent() ?
+                            APPLICATION_PREFIX + customMediaPrefix.get() + XML_POSTFIX : MediaType.APPLICATION_XML;
+                    apiResponse.content(new Content().addMediaType(mediaTypeString, media));
+                    apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
+                    apiResponses.put(code.get(), apiResponse);
+                } else if (body.typeDescriptor().typeKind() == TypeDescKind.MAP &&
+                        (((MapTypeSymbol)body.typeDescriptor()).typeParam().typeKind() == TypeDescKind.STRING)){
+                        mediaTypeString = customMediaPrefix.isPresent() ?
+                                APPLICATION_PREFIX + customMediaPrefix.get() + X_WWW_FROM_URLENCODED_POSTFIX :
+                                MediaType.APPLICATION_FORM_URLENCODED;
+                        Schema objectSchema = new ObjectSchema();
+                        objectSchema.additionalProperties(new StringSchema());
+                        media.setSchema(objectSchema);
+                        apiResponse.content(new Content().addMediaType(mediaTypeString, media));
+                        apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
+                        apiResponses.put(code.get(), apiResponse);
+
+                }  else {
                     apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
                     apiResponses.put(code.get(), apiResponse);
                 }
