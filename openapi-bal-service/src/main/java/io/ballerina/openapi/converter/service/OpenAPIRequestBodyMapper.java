@@ -243,27 +243,30 @@ public class OpenAPIRequestBodyMapper {
                                          RequiredParameterNode payloadNode, Map<String, Schema> schema) {
 
         for (MappingFieldNode fieldNode: fields) {
-            if (((SpecificFieldNode) fieldNode).fieldName().toString().equals(MEDIA_TYPE)) {
-                if (fieldNode.children() != null) {
-                    RequestBody requestBody = new RequestBody();
-                    SpecificFieldNode field = (SpecificFieldNode) fieldNode;
-                    if (field.valueExpr().isPresent()) {
-                        ExpressionNode valueNode = field.valueExpr().get();
-                        if (valueNode instanceof ListConstructorExpressionNode) {
-                            SeparatedNodeList mimeList = ((ListConstructorExpressionNode) valueNode).expressions();
-                            if (mimeList.size() != 0) {
-                                for (Object mime : mimeList) {
-                                    if (mime instanceof BasicLiteralNode) {
-                                        createRequestBody(bodyParameter, payloadNode, schema, requestBody,
-                                                ((BasicLiteralNode) mime).literalToken().text());
-                                    }
-                                }
+            if (fieldNode instanceof SpecificFieldNode) {
+                if (!((SpecificFieldNode) fieldNode).fieldName().toString().equals(MEDIA_TYPE) ||
+                        fieldNode.children() == null) {
+                    continue;
+                }
+                RequestBody requestBody = new RequestBody();
+                SpecificFieldNode field = (SpecificFieldNode) fieldNode;
+                if (field.valueExpr().isEmpty()) {
+                    continue;
+                }
+                ExpressionNode valueNode = field.valueExpr().get();
+                if (valueNode instanceof ListConstructorExpressionNode) {
+                    SeparatedNodeList mimeList = ((ListConstructorExpressionNode) valueNode).expressions();
+                    if (mimeList.size() != 0) {
+                        for (Object mime : mimeList) {
+                            if (mime instanceof BasicLiteralNode) {
+                                createRequestBody(bodyParameter, payloadNode, schema, requestBody,
+                                        ((BasicLiteralNode) mime).literalToken().text());
                             }
-                        } else {
-                            createRequestBody(bodyParameter, payloadNode, schema, requestBody,
-                                    valueNode.toString());
                         }
                     }
+                } else {
+                    createRequestBody(bodyParameter, payloadNode, schema, requestBody,
+                            valueNode.toString());
                 }
             }
         }
