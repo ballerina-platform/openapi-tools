@@ -798,41 +798,30 @@ public class OpenAPIResponseMapper {
                 if (body.typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
                     componentMapper.createComponentSchema(schema, body.typeDescriptor());
                     media.setSchema(new Schema().$ref(body.typeDescriptor().getName().orElseThrow().trim()));
-                    mediaTypeString = customMediaPrefix.isPresent() ?
-                            APPLICATION_PREFIX + customMediaPrefix.get() + JSON_POSTFIX : MediaType.APPLICATION_JSON;
+                    mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s + JSON_POSTFIX)
+                            .orElse(MediaType.APPLICATION_JSON);
                     apiResponse.content(new Content().addMediaType(mediaTypeString, media));
-                    apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
-                    apiResponses.put(code.get(), apiResponse);
                 } else if (body.typeDescriptor().typeKind() == TypeDescKind.STRING) {
                     media.setSchema(new StringSchema());
-                    mediaTypeString = customMediaPrefix.isPresent() ? "text/" + customMediaPrefix.get() + "+plain" :
-                            MediaType.TEXT_PLAIN;
+                    mediaTypeString = customMediaPrefix.map(s -> TEXT_PREFIX + s +
+                            TEXT_POSTFIX).orElse(MediaType.TEXT_PLAIN);
                     apiResponse.content(new Content().addMediaType(mediaTypeString, media));
-                    apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
-                    apiResponses.put(code.get(), apiResponse);
-                } else if (body.typeDescriptor().typeKind() == TypeDescKind.XML){
+                } else if (body.typeDescriptor().typeKind() == TypeDescKind.XML) {
                     media.setSchema(new ObjectSchema());
-                    mediaTypeString = customMediaPrefix.isPresent() ?
-                            APPLICATION_PREFIX + customMediaPrefix.get() + XML_POSTFIX : MediaType.APPLICATION_XML;
+                    mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s + XML_POSTFIX)
+                            .orElse(MediaType.APPLICATION_XML);
                     apiResponse.content(new Content().addMediaType(mediaTypeString, media));
-                    apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
-                    apiResponses.put(code.get(), apiResponse);
                 } else if (body.typeDescriptor().typeKind() == TypeDescKind.MAP &&
-                        (((MapTypeSymbol)body.typeDescriptor()).typeParam().typeKind() == TypeDescKind.STRING)){
-                        mediaTypeString = customMediaPrefix.isPresent() ?
-                                APPLICATION_PREFIX + customMediaPrefix.get() + X_WWW_FROM_URLENCODED_POSTFIX :
-                                MediaType.APPLICATION_FORM_URLENCODED;
-                        Schema objectSchema = new ObjectSchema();
-                        objectSchema.additionalProperties(new StringSchema());
-                        media.setSchema(objectSchema);
-                        apiResponse.content(new Content().addMediaType(mediaTypeString, media));
-                        apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
-                        apiResponses.put(code.get(), apiResponse);
-
-                }  else {
-                    apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
-                    apiResponses.put(code.get(), apiResponse);
+                        (((MapTypeSymbol) body.typeDescriptor()).typeParam().typeKind() == TypeDescKind.STRING)) {
+                    mediaTypeString = customMediaPrefix.map(s -> APPLICATION_PREFIX + s + X_WWW_FROM_URLENCODED_POSTFIX)
+                            .orElse(MediaType.APPLICATION_FORM_URLENCODED);
+                    Schema objectSchema = new ObjectSchema();
+                    objectSchema.additionalProperties(new StringSchema());
+                    media.setSchema(objectSchema);
+                    apiResponse.content(new Content().addMediaType(mediaTypeString, media));
                 }
+                apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
+                apiResponses.put(code.get(), apiResponse);
             }
         }
         if (!isHttpModule) {
