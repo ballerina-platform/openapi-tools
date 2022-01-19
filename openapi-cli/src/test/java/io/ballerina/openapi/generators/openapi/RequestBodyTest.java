@@ -220,6 +220,15 @@ public class RequestBodyTest {
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario14.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for request body having map<string> type")
+    public void testRequestBodyWithMapString() {
+        Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario15.bal");
+        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , true);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario15.yaml");
+    }
     @Test(description = "Generate OpenAPI spec with json file")
     public void testNestedRecordPayLoadJson() {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/nestedRecord_payload_service.bal");
