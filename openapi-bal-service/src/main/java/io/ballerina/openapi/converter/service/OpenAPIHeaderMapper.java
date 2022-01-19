@@ -24,6 +24,7 @@ import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
@@ -55,12 +56,10 @@ public class OpenAPIHeaderMapper {
      */
     public List<Parameter> setHeaderParameter(RequiredParameterNode headerParam) {
         List<Parameter> parameters = new ArrayList<>();
-        String headerName = extractHeaderName(headerParam.paramName().get().text());
+        String headerName = extractHeaderName(headerParam);
         HeaderParameter headerParameter = new HeaderParameter();
         Node node = headerParam.typeName();
-        Schema<?> headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(
-                headerParam.typeName().toString().replaceAll("\\?", "").
-                        replaceAll("\\[", "").replaceAll("\\]", "").trim());
+        Schema<?> headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
         NodeList<AnnotationNode> annotations = getAnnotationNodesFromServiceNode(headerParam);
         String isOptional = Constants.TRUE;
         if (!annotations.isEmpty()) {
@@ -76,9 +75,11 @@ public class OpenAPIHeaderMapper {
         return parameters;
     }
 
-    private String extractHeaderName(String headerParam) {
-        String headerName = headerParam.replaceAll("\\\\", "");
-        return headerName;
+    private String extractHeaderName(ParameterNode headerParam) {
+        if (headerParam instanceof DefaultableParameterNode) {
+            return ((DefaultableParameterNode) headerParam).paramName().get().text().replaceAll("\\\\", "");
+        }
+        return ((RequiredParameterNode) headerParam).paramName().get().text().replaceAll("\\\\", "");
     }
 
     /**
@@ -88,12 +89,9 @@ public class OpenAPIHeaderMapper {
      */
     public List<Parameter> setHeaderParameter(DefaultableParameterNode headerParam) {
         List<Parameter> parameters = new ArrayList<>();
-        String headerName = extractHeaderName(headerParam.paramName().get().text());
+        String headerName = extractHeaderName(headerParam);
         HeaderParameter headerParameter = new HeaderParameter();
-        Schema<?> headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(
-                headerParam.typeName().toString().replaceAll("\\?", "").
-                        replaceAll("\\[", "").replaceAll("\\]", "").trim());
-
+        Schema<?> headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
         String defaultValue = headerParam.expression().toString().trim();
         if (defaultValue.length() > 1 && defaultValue.charAt(0) == '"' &&
                 defaultValue.charAt(defaultValue.length() - 1) == '"') {
@@ -114,6 +112,18 @@ public class OpenAPIHeaderMapper {
         completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
                 headerParam.typeName());
         return parameters;
+    }
+
+    /**
+     * Extract header type by removing its optional and array types.
+     */
+    private String getHeaderType(ParameterNode headerParam) {
+        if (headerParam instanceof DefaultableParameterNode) {
+            return ((DefaultableParameterNode) headerParam).typeName().toString().replaceAll("\\?", "").
+                    replaceAll("\\[", "").replaceAll("\\]", "").trim();
+        }
+        return ((RequiredParameterNode) headerParam).typeName().toString().replaceAll("\\?", "").
+                replaceAll("\\[", "").replaceAll("\\]", "").trim();
     }
 
     /**
