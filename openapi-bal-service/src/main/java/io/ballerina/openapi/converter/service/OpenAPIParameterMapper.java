@@ -33,14 +33,15 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
-import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.examples.Example;
+import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -50,6 +51,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.openapi.converter.Constants.HTTP_REQUEST;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_CONTENT_KEY;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_SUMMARY;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
@@ -96,10 +99,11 @@ public class OpenAPIParameterMapper {
                             (QualifiedNameReferenceNode) requiredParameterNode.typeName();
                     String typeName = (referenceNode).modulePrefix().text() + ":" + (referenceNode).identifier().text();
                     if (typeName.equals(HTTP_REQUEST)) {
-                        DiagnosticMessages messages = DiagnosticMessages.OAS_CONVERTOR_104;
-                        IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(messages,
-                                functionDefinitionNode.location());
-                        errors.add(error);
+                        RequestBody requestBody = new RequestBody();
+                        requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY,
+                                new io.swagger.v3.oas.models.media.MediaType().example(
+                                        new Example().summary(WILD_CARD_SUMMARY))));
+                        operationAdaptor.getOperation().setRequestBody(requestBody);
                     }
                 }
                 if (requiredParameterNode.typeName().kind() != SyntaxKind.QUALIFIED_NAME_REFERENCE &&
@@ -171,7 +175,6 @@ public class OpenAPIParameterMapper {
                 Map<String, Schema> schema = components.getSchemas();
                 // Handle request payload.
                 Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
-                
                 OpenAPIRequestBodyMapper openAPIRequestBodyMapper = customMediaType.map(
                         value -> new OpenAPIRequestBodyMapper(components,
                         operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,

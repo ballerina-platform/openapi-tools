@@ -53,6 +53,7 @@ import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -104,6 +105,8 @@ import static io.ballerina.openapi.converter.Constants.S_MAX_AGE;
 import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
 import static io.ballerina.openapi.converter.Constants.TRUE;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_CONTENT_KEY;
+import static io.ballerina.openapi.converter.Constants.WILD_CARD_SUMMARY;
 import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
@@ -184,11 +187,11 @@ public class OpenAPIResponseMapper {
             annotation.annotValue().ifPresentOrElse(
                     (value) -> {
                         updateResponseHeaderWithCacheValues(headers, setCacheConfigValues(value.fields()));
-                        },
+                    },
                     ()-> {
                         updateResponseHeaderWithCacheValues(headers, cacheConfigAnn);
                     }
-            );
+                                                   );
 
             // Update headers with cache annotation details.
             Optional<ApiResponses> responses = getAPIResponses(operationAdaptor, apiResponses, typeNode,
@@ -332,8 +335,8 @@ public class OpenAPIResponseMapper {
      * @return {@link io.swagger.v3.oas.models.responses.ApiResponses} for operation.
      */
     private Optional<ApiResponses> getAPIResponses(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
-                                         Node typeNode, Optional<String> customMediaPrefix,
-                                         Map<String, Header> headers) {
+                                                   Node typeNode, Optional<String> customMediaPrefix,
+                                                   Map<String, Header> headers) {
 
         ApiResponse apiResponse = new ApiResponse();
         io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
@@ -371,7 +374,7 @@ public class OpenAPIResponseMapper {
                 apiResponse = setCacheHeader(headers, apiResponse, HTTP_200);
                 mediaType.setSchema(new ObjectSchema());
                 mediaTypeString = customMediaPrefix.isPresent() ? APPLICATION_PREFIX + customMediaPrefix.get() +
-                       XML_POSTFIX  : MediaType.APPLICATION_XML;
+                        XML_POSTFIX  : MediaType.APPLICATION_XML;
                 apiResponse.content(new Content().addMediaType(mediaTypeString, mediaType));
                 apiResponse.description(HTTP_200_DESCRIPTION);
                 apiResponses.put(HTTP_200, apiResponse);
@@ -421,9 +424,14 @@ public class OpenAPIResponseMapper {
         if (qNode.modulePrefix().text().equals(HTTP)) {
             String typeName = qNode.modulePrefix().text() + ":" + qNode.identifier().text();
             if (typeName.equals(HTTP_RESPONSE)) {
-                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_105;
-                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, location);
-                errors.add(error);
+                apiResponse = new ApiResponse();
+                apiResponse.description("Any Response");
+                Content content = new Content();
+                content.put(WILD_CARD_CONTENT_KEY, new io.swagger.v3.oas.models.media.MediaType().example(new Example()
+                        .summary(WILD_CARD_SUMMARY)));
+                apiResponse.setContent(content);
+                apiResponses.put(Constants.DEFAULT, apiResponse);
+                return Optional.of(apiResponses);
             } else {
                 Optional<String> code = generateApiResponseCode(qNode.identifier().toString().trim());
                 if (code.isPresent()) {
@@ -460,7 +468,8 @@ public class OpenAPIResponseMapper {
                                                                 ApiResponses apiResponses,
                                                                 ArrayTypeDescriptorNode array, ApiResponse apiResponse,
                                                                 io.swagger.v3.oas.models.media.MediaType mediaType,
-                                                      Optional<String> customMediaPrefix, Map<String, Header> headers) {
+                                                                Optional<String> customMediaPrefix,
+                                                                Map<String, Header> headers) {
         Map<String, Schema> schemas02 = components.getSchemas();
         if (array.memberTypeDesc().kind() == SIMPLE_NAME_REFERENCE) {
             handleReferenceResponse(operationAdaptor, (SimpleNameReferenceNode) array.memberTypeDesc(),
@@ -468,7 +477,7 @@ public class OpenAPIResponseMapper {
         } else {
             ArraySchema arraySchema = new ArraySchema();
             String type02 = array.memberTypeDesc().kind().toString().trim().split("_")[0].
-                            toLowerCase(Locale.ENGLISH);
+                    toLowerCase(Locale.ENGLISH);
             Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(type02);
             Optional<String> mimeType = convertBallerinaMIMEToOASMIMETypes(type02, customMediaPrefix);
             if (mimeType.isEmpty()) {
@@ -487,9 +496,10 @@ public class OpenAPIResponseMapper {
      * Handle response has inline record as return type.
      */
     private Optional<ApiResponses> mapInlineRecordInReturn(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
-                                                 RecordTypeDescriptorNode typeNode, ApiResponse apiResponse,
-                                                 io.swagger.v3.oas.models.media.MediaType mediaType,
-                                                 Optional<String> customMediaPrefix, Map<String, Header> headers) {
+                                                           RecordTypeDescriptorNode typeNode, ApiResponse apiResponse,
+                                                           io.swagger.v3.oas.models.media.MediaType mediaType,
+                                                           Optional<String> customMediaPrefix,
+                                                           Map<String, Header> headers) {
 
         NodeList<Node> fields = typeNode.fields();
         Optional<String> httpCode = Optional.of(HTTP_200);
@@ -570,7 +580,7 @@ public class OpenAPIResponseMapper {
      * </pre>
      */
     private Optional<ApiResponses> mapUnionReturns(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
-                                         UnionTypeDescriptorNode typeNode, Optional<String> customMediaPrefix
+                                                   UnionTypeDescriptorNode typeNode, Optional<String> customMediaPrefix
             , Map<String, Header> headers) {
 
         TypeDescriptorNode rightNode = typeNode.rightTypeDesc();
@@ -724,8 +734,9 @@ public class OpenAPIResponseMapper {
 
     private Optional<ApiResponses> handleRecordHasHttpTypeInclusionField(Map<String, Schema> schema,
                                                                          TypeSymbol typeSymbol,
-                                                       OpenAPIComponentMapper componentMapper,
-                                                       RecordTypeSymbol returnRecord, List<TypeSymbol> typeInclusions,
+                                                                         OpenAPIComponentMapper componentMapper,
+                                                                         RecordTypeSymbol returnRecord,
+                                                                         List<TypeSymbol> typeInclusions,
                                                                          Optional<String> customMediaPrefix, Map<String,
             Header> headers) {
         ApiResponses apiResponses = new ApiResponses();
