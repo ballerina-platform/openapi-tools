@@ -74,13 +74,20 @@ public class Constants {
     public static final String XML_POSTFIX = "+xml";
     public static final String TEXT_POSTFIX = "+plain";
     public static final String OCTECT_STREAM_POSTFIX = "+octet-stream";
+    public static final String X_WWW_FORM_URLENCODED_POSTFIX = "+x-www-form-urlencoded";
+    public static final String X_WWW_FORM_URLENCODED = "x-www-form-urlencoded";
+
     public static final String TEXT_PREFIX = "text/";
     public static final String MAP_JSON = "map<json>";
+    public static final String MAP_STRING = "map<string>";
     public static final String HTTP_REQUEST = "http:Request";
     public static final String DEFAULT = "default";
     public static final String HTTP_RESPONSE = "http:Response";
+    public static final String RESPONSE_HEADERS = "headers";
     public static final String WILD_CARD_CONTENT_KEY = "*/*";
     public static final String WILD_CARD_SUMMARY = "Any type of entity body";
+    public static final String MEDIA_TYPE = "mediaType";
+
     /**
      * Enum to select the Ballerina Type.
      * Ballerina service, mock and client generation is available

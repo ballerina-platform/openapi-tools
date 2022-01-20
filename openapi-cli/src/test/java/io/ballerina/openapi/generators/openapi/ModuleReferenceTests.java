@@ -53,4 +53,10 @@ public class ModuleReferenceTests {
         Path ballerinaFilePath = RES_DIR.resolve("snowpeak_service_config.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak_service_config.yaml");
     }
+
+    @Test(description = "Response has array type the array item type in separate module")
+    public void testResponse05() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("arrayTypeResponse.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "arrayTypeResponse.yaml");
+    }
 }

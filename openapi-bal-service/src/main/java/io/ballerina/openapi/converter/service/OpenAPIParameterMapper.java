@@ -33,6 +33,8 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
@@ -171,7 +173,8 @@ public class OpenAPIParameterMapper {
                 OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper();
                 parameters.addAll(openAPIHeaderMapper.setHeaderParameter(requiredParameterNode));
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
-                    (!"GET".toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
+                    (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
+                            operationAdaptor.getHttpOperation()))) {
                 Map<String, Schema> schema = components.getSchemas();
                 // Handle request payload.
                 Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
@@ -180,6 +183,12 @@ public class OpenAPIParameterMapper {
                         operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
                         operationAdaptor, semanticModel));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
+            } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
+                    (Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
+                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                        annotation.location());
+                errors.add(error);
             }
         }
     }

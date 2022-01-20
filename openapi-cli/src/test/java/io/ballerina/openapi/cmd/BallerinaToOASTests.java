@@ -111,11 +111,12 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         try {
             cmd.execute();
             output = readOutput(true);
-            Path definitionPath = resourceDir.resolve("cmd/ballerina-to-openapi/http_response.yaml");
+            Path definitionPath = resourceDir.resolve("cmd/ballerina-to-openapi/response.yaml");
             if (Files.exists(this.tmpDir.resolve("v1_openapi.yaml"))) {
                 String generatedOpenAPI = getStringFromGivenBalFile(this.tmpDir.resolve("v1_openapi.yaml"));
                 String expectedYaml = getStringFromGivenBalFile(definitionPath);
                 Assert.assertEquals(expectedYaml, generatedOpenAPI);
+
             }
         } catch (BLauncherException | IOException e) {
             output = e.toString();
@@ -123,7 +124,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         }
     }
 
-    @Test(description = "Test to request body has http:Request type")
+    @Test(description = "Test for get methods having a request body type")
     public void testHttpRequest() {
         Path filePath = resourceDir.resolve(Paths.get("cmd/ballerina-to-openapi/http_request.bal"));
         String[] args = {"--input", filePath.toString(), "-o", this.tmpDir.toString()};
@@ -134,12 +135,9 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         try {
             cmd.execute();
             output = readOutput(true);
-            Path definitionPath = resourceDir.resolve("cmd/ballerina-to-openapi/http_request.yaml");
-            if (Files.exists(this.tmpDir.resolve("v1_openapi.yaml"))) {
-                String generatedOpenAPI = getStringFromGivenBalFile(this.tmpDir.resolve("v1_openapi.yaml"));
-                String expectedYaml = getStringFromGivenBalFile(definitionPath);
-                Assert.assertEquals(expectedYaml, generatedOpenAPI);
-            }
+            Assert.assertTrue(output.trim().contains("WARNING [http_request.bal:(4:31,4:44)] Generated OpenAPI " +
+                    "definition does not contain request body information of the `GET` method," +
+                    " as its not supported by the OpenAPI specification."));
         } catch (BLauncherException | IOException e) {
             output = e.toString();
             Assert.fail(output);

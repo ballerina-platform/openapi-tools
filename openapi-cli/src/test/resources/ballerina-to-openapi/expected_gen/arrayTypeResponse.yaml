@@ -1,0 +1,59 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "8080"
+paths:
+  /:
+    get:
+      summary: List all products
+      operationId: operation_get
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+components:
+  schemas:
+    Price:
+      required:
+        - amount
+        - currency
+      type: object
+      properties:
+        currency:
+          type: string
+          enum:
+            - GBP
+            - SGD
+            - LKR
+            - USD
+        amount:
+          type: number
+          format: float
+    Product:
+      required:
+        - description
+        - name
+        - price
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          $ref: '#/components/schemas/Price'
+      description: Represents a product
