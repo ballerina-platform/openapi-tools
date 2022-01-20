@@ -184,7 +184,8 @@ public class OpenAPIComponentMapper {
                         typeReference));
                 schema = components.getSchemas();
             } else if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.UNION) {
-                property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property, componentName);
+                property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property,
+                        componentName);
                 schema = components.getSchemas();
             }
             if (property instanceof ArraySchema) {
@@ -266,6 +267,9 @@ public class OpenAPIComponentMapper {
     }
 
     private boolean isSameRecord(String parentComponentName, TypeReferenceTypeSymbol typeReferenceTypeSymbol) {
+        if (parentComponentName == null) {
+            return false;
+        }
         return typeReferenceTypeSymbol.getName().isPresent() &&
                 parentComponentName.equals(typeReferenceTypeSymbol.getName().get().trim());
     }
