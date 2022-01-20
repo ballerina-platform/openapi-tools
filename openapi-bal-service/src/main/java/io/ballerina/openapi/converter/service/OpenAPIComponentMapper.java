@@ -180,10 +180,11 @@ public class OpenAPIComponentMapper {
             Schema property = ConverterCommonUtils.getOpenApiSchema(type);
             if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
                 TypeReferenceTypeSymbol typeReference = (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
-                property = handleTypeReference(schema, typeReference, property);
+                property = handleTypeReference(schema, typeReference, property, isSameRecord(componentName,
+                        typeReference));
                 schema = components.getSchemas();
             } else if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.UNION) {
-                property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property);
+                property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property, componentName);
                 schema = components.getSchemas();
             }
             if (property instanceof ArraySchema) {
@@ -214,13 +215,15 @@ public class OpenAPIComponentMapper {
      * This function uses to handle the field datatype has TypeReference(ex: Record or Enum).
      */
     private Schema handleTypeReference(Map<String, Schema> schema, TypeReferenceTypeSymbol typeReferenceSymbol,
-                                       Schema property) {
+                                       Schema property, boolean isCyclicRecord) {
         if (typeReferenceSymbol.definition().kind() == SymbolKind.ENUM) {
             EnumSymbol enumSymbol = (EnumSymbol) typeReferenceSymbol.definition();
             property = mapEnumValues(enumSymbol);
         } else {
             property.set$ref(typeReferenceSymbol.getName().orElseThrow().trim());
-            createComponentSchema(schema, typeReferenceSymbol);
+            if (!isCyclicRecord) {
+                createComponentSchema(schema, typeReferenceSymbol);
+            }
         }
         return property;
     }
@@ -233,7 +236,7 @@ public class OpenAPIComponentMapper {
      *     };
      * </pre>
      */
-    private Schema handleUnionType(UnionTypeSymbol unionType, Schema property) {
+    private Schema handleUnionType(UnionTypeSymbol unionType, Schema property, String parentComponentName) {
         List<TypeSymbol> unionTypes = unionType.userSpecifiedMemberTypes();
         List<Schema> properties = new ArrayList<>();
         boolean nullable = false;
@@ -243,7 +246,8 @@ public class OpenAPIComponentMapper {
             } else if (union.typeKind() == TypeDescKind.TYPE_REFERENCE) {
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
                 TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) union;
-                property = handleTypeReference(this.components.getSchemas(), typeReferenceTypeSymbol, property);
+                property = handleTypeReference(this.components.getSchemas(), typeReferenceTypeSymbol, property,
+                        isSameRecord(parentComponentName, typeReferenceTypeSymbol));
                 properties.add(property);
                 // TODO: uncomment after fixing ballerina lang union type handling issue
 //            } else if (union.typeKind() == TypeDescKind.UNION) {
@@ -259,6 +263,11 @@ public class OpenAPIComponentMapper {
             property.setNullable(true);
         }
         return property;
+    }
+
+    private boolean isSameRecord(String parentComponentName, TypeReferenceTypeSymbol typeReferenceTypeSymbol) {
+        return typeReferenceTypeSymbol.getName().isPresent() &&
+                parentComponentName.equals(typeReferenceTypeSymbol.getName().get().trim());
     }
 
     /**
