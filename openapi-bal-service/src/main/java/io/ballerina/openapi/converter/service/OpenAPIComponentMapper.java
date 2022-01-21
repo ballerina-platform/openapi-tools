@@ -321,21 +321,11 @@ public class OpenAPIComponentMapper {
         Schema symbolProperty  = ConverterCommonUtils.getOpenApiSchema(symbol.typeKind().getName());
         // Handle record fields have union type array (ex: string[]? name)
         if (symbol.typeKind() == TypeDescKind.UNION) {
-            symbolProperty = getSchemaForUnionType((UnionTypeSymbol) symbol, symbolProperty);
+            symbolProperty = getSchemaForUnionType((UnionTypeSymbol) symbol, symbolProperty, componentName, schema);
         }
         // Set the record model to the definition
         if (symbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
-            if (((TypeReferenceTypeSymbol) symbol).definition().kind() == SymbolKind.ENUM) {
-                TypeReferenceTypeSymbol typeRefEnum = (TypeReferenceTypeSymbol) symbol;
-                EnumSymbol enumSymbol = (EnumSymbol) typeRefEnum.definition();
-                symbolProperty = mapEnumValues(enumSymbol);
-            } else {
-                symbolProperty.set$ref(symbol.getName().orElseThrow().trim());
-                TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) symbol;
-                if (!isSameRecord(componentName, typeRecord)) {
-                    createComponentSchema(schema, typeRecord);
-                }
-            }
+            symbolProperty = getSchemaForTypeReferenceSymbol(symbol, symbolProperty, componentName, schema);
         }
         // Handle nested array type
         if (arrayDimensions > 1) {
@@ -352,14 +342,41 @@ public class OpenAPIComponentMapper {
      * `string[]? name` here it takes union member types as array and nil,fix should do with array type and map to
      * oneOf OAS.
      */
-    private Schema getSchemaForUnionType(UnionTypeSymbol symbol, Schema symbolProperty) {
+    private Schema getSchemaForUnionType(UnionTypeSymbol symbol, Schema symbolProperty, String componentName,
+                                         Map<String, Schema> schema) {
         List<TypeSymbol> typeSymbols = symbol.userSpecifiedMemberTypes();
         for (TypeSymbol typeSymbol: typeSymbols) {
             if (typeSymbol.typeKind() == TypeDescKind.ARRAY) {
                 TypeSymbol arrayType = ((ArrayTypeSymbol) typeSymbol).memberTypeDescriptor();
-                symbolProperty = ConverterCommonUtils.getOpenApiSchema(arrayType.typeKind().getName());
+                // Set the record model to the definition
+                if (arrayType.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
+                    symbolProperty = getSchemaForTypeReferenceSymbol(arrayType, symbolProperty, componentName, schema);
+                } else {
+                    symbolProperty = ConverterCommonUtils.getOpenApiSchema(arrayType.typeKind().getName());
+                }
             } else if (typeSymbol.typeKind() != TypeDescKind.NIL) {
                 symbolProperty = ConverterCommonUtils.getOpenApiSchema(typeSymbol.typeKind().getName());
+            }
+        }
+        return symbolProperty;
+    }
+
+    /**
+     * This util function is to handle the type reference symbol is record type or enum type.
+     *
+     */
+    private Schema getSchemaForTypeReferenceSymbol(TypeSymbol arrayType, Schema symbolProperty, String componentName,
+                                                   Map<String, Schema> schema) {
+
+        if (((TypeReferenceTypeSymbol) arrayType).definition().kind() == SymbolKind.ENUM) {
+            TypeReferenceTypeSymbol typeRefEnum = (TypeReferenceTypeSymbol) arrayType;
+            EnumSymbol enumSymbol = (EnumSymbol) typeRefEnum.definition();
+            symbolProperty = mapEnumValues(enumSymbol);
+        } else {
+            symbolProperty.set$ref(arrayType.getName().orElseThrow().trim());
+            TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) arrayType;
+            if (!isSameRecord(componentName, typeRecord)) {
+                createComponentSchema(schema, typeRecord);
             }
         }
         return symbolProperty;
