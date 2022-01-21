@@ -189,7 +189,7 @@ public class OpenAPIComponentMapper {
                 schema = components.getSchemas();
             }
             if (property instanceof ArraySchema) {
-                mapArrayToArraySchema(schema, field.getValue(), (ArraySchema) property);
+                mapArrayToArraySchema(schema, field.getValue(), (ArraySchema) property, componentName);
                 schema = components.getSchemas();
             }
             // Add API documentation for record field
@@ -307,7 +307,8 @@ public class OpenAPIComponentMapper {
     /**
      * Generate arraySchema for ballerina record  as array type.
      */
-    private void mapArrayToArraySchema(Map<String, Schema> schema, RecordFieldSymbol field, ArraySchema property) {
+    private void mapArrayToArraySchema(Map<String, Schema> schema, RecordFieldSymbol field, ArraySchema property,
+                                       String componentName) {
 
         TypeSymbol symbol = field.typeDescriptor();
         int arrayDimensions = 0;
@@ -331,7 +332,9 @@ public class OpenAPIComponentMapper {
             } else {
                 symbolProperty.set$ref(symbol.getName().orElseThrow().trim());
                 TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) symbol;
-                createComponentSchema(schema, typeRecord);
+                if (!isSameRecord(componentName, typeRecord)) {
+                    createComponentSchema(schema, typeRecord);
+                }
             }
         }
         // Handle nested array type
