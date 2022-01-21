@@ -32,8 +32,7 @@ import java.nio.file.Paths;
  * This test class for the covering the unit tests for record scenarios.
  */
 public class RecordTests {
-    private static final Path RES_DIR =
-            Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
+    private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
     private Path tempDir;
 
     @BeforeMethod
@@ -87,6 +86,12 @@ public class RecordTests {
     public void testUnionTypeWithNullable() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("record/union_with_nullable.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/union.yaml");
+    }
+
+    @Test(description = "When the record field has cyclic record type")
+    public void testCyclicRecord() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/cyclic_record.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/cyclic_record.yaml");
     }
 
     @AfterMethod
