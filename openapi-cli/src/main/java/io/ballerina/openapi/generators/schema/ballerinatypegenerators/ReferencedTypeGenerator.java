@@ -62,6 +62,10 @@ public class ReferencedTypeGenerator extends TypeGenerator {
         String typeName = getValidName(extractReferenceType(schema.get$ref()), true);
         Schema<?> refSchema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName);
         TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(createIdentifierToken(typeName));
+        if (refSchema == null) {
+            throw new BallerinaOpenApiException(String.format("'%s' $refs must reference a valid location in" +
+                    " the OpenAPI document.", typeDescriptorNode.toString().trim()));
+        }
         return TypeGeneratorUtils.getNullableType(refSchema, typeDescriptorNode);
     }
 }
