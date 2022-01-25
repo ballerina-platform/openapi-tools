@@ -22,21 +22,26 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NonTerminalNode;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -178,22 +183,81 @@ public class ConverterCommonUtils {
     public static Optional<String> extractServiceAnnotationDetails(NodeList<AnnotationNode> annotations,
                                                                    String annotationReference, String annotationField) {
         for (AnnotationNode annotation : annotations) {
-            Node annotReference = annotation.annotReference();
-            if (annotReference.toString().trim().equals(annotationReference) && annotation.annotValue().isPresent()) {
-                MappingConstructorExpressionNode listOfAnnotValue = annotation.annotValue().get();
-                for (MappingFieldNode field : listOfAnnotValue.fields()) {
-                    SpecificFieldNode fieldNode = (SpecificFieldNode) field;
-                    if ((fieldNode).fieldName().toString().trim().equals(annotationField)
-                            && fieldNode.valueExpr().isPresent()) {
-                        ExpressionNode expressionNode = fieldNode.valueExpr().get();
-                        return Optional.of(expressionNode.toString().trim().replaceAll("\"", ""));
-                    }
-                }
+            List<String> expressionNode = extractAnnotationFieldDetails(annotationReference, annotationField,
+                    annotation);
+            if (!expressionNode.isEmpty()) {
+                return Optional.of(expressionNode.get(0));
             }
         }
         return Optional.empty();
     }
 
+    public static List<String> extractAnnotationFieldDetails(String annotationReference, String annotationField,
+                                              AnnotationNode annotation) {
+        List<String> mediaTypes = new ArrayList<>();
+        Node annotReference = annotation.annotReference();
+        if (annotReference.toString().trim().equals(annotationReference) && annotation.annotValue().isPresent()) {
+            MappingConstructorExpressionNode listOfAnnotValue = annotation.annotValue().get();
+            for (MappingFieldNode field : listOfAnnotValue.fields()) {
+                SpecificFieldNode fieldNode = (SpecificFieldNode) field;
+                if (!((fieldNode).fieldName().toString().trim().equals(annotationField)) &&
+                        fieldNode.valueExpr().isEmpty()) {
+                    continue;
+                }
+                ExpressionNode expressionNode = fieldNode.valueExpr().get();
+                if (expressionNode instanceof ListConstructorExpressionNode) {
+                    SeparatedNodeList mimeList = ((ListConstructorExpressionNode) expressionNode).expressions();
+                    for (Object mime : mimeList) {
+                        if (!(mime instanceof BasicLiteralNode)) {
+                            continue;
+                        }
+                        mediaTypes.add(((BasicLiteralNode) mime).literalToken().text().trim().replaceAll("\"", ""));
+                    }
+                } else {
+                    mediaTypes.add(expressionNode.toString().trim().replaceAll("\"", ""));
+                }
+            }
+        }
+        return mediaTypes;
+    }
+
+    public static List<String> extractAnnotationFieldDetails(String annotationReference, String annotationField,
+                                                             AnnotationNode annotation, SemanticModel semanticModel) {
+        List<String> mediaTypes = new ArrayList<>();
+        Node annotReference = annotation.annotReference();
+        if (annotReference.toString().trim().equals(annotationReference) && annotation.annotValue().isPresent()) {
+            MappingConstructorExpressionNode listOfAnnotValue = annotation.annotValue().get();
+            for (MappingFieldNode field : listOfAnnotValue.fields()) {
+                SpecificFieldNode fieldNode = (SpecificFieldNode) field;
+                if (!((fieldNode).fieldName().toString().trim().equals(annotationField)) &&
+                        fieldNode.valueExpr().isEmpty()) {
+                    continue;
+                }
+                ExpressionNode expressionNode = fieldNode.valueExpr().get();
+                if (expressionNode instanceof ListConstructorExpressionNode) {
+                    SeparatedNodeList mimeList = ((ListConstructorExpressionNode) expressionNode).expressions();
+                    for (Object mime : mimeList) {
+                        if (!(mime instanceof BasicLiteralNode)) {
+                            continue;
+                        }
+                        mediaTypes.add(((BasicLiteralNode) mime).literalToken().text().trim().replaceAll("\"", ""));
+                    }
+                } else if (expressionNode instanceof QualifiedNameReferenceNode) {
+                    QualifiedNameReferenceNode moduleRef = (QualifiedNameReferenceNode) expressionNode;
+                    Optional<Symbol> refSymbol = semanticModel.symbol(moduleRef);
+                    if (refSymbol.isPresent()) {
+                        Symbol symbol = refSymbol.get();
+                        if (symbol.kind() == SymbolKind.CONSTANT) {
+
+                        }
+                    }
+                } else {
+                    mediaTypes.add(expressionNode.toString().trim().replaceAll("\"", ""));
+                }
+            }
+        }
+        return mediaTypes;
+    }
     /**
      * This function uses to take the service declaration node from given required node and return all the annotation
      * nodes that attached to service node.

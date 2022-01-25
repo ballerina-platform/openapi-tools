@@ -179,6 +179,26 @@ public class ResponseTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_with_url_encode.yaml");
     }
 
+    @Test(description = "When the response has payload annotation")
+    public void responseHasPayload() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/rs_with_payload.bal");
+        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_with_payload.yaml");
+    }
+
+    @Test(description = "When the response has payload annotation and service config annotaion")
+    public void responseHasPayloadWithServiceConfig() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/rs_with_payload_service_config.bal");
+        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_with_payload_service_config.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
