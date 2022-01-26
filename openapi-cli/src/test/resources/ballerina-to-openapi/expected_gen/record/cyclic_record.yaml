@@ -103,7 +103,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
           nullable: true
         resError:
           $ref: '#/components/schemas/ResponseError'
@@ -114,7 +114,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
           nullable: true
         resError:
           oneOf:
@@ -127,7 +127,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
           nullable: true
         resError:
           type: array
@@ -140,7 +140,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
           nullable: true
         resError:
           type: array
@@ -155,7 +155,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
           nullable: true
         resError:
           nullable: true
@@ -168,7 +168,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
           nullable: true
         resError:
           type: array
@@ -183,7 +183,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
           nullable: true
         resError:
           type: array
