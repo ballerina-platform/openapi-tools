@@ -24,7 +24,7 @@ components:
           type: string
         count:
           type: integer
-          format: int32
+          format: int64
         startDate:
           type: string
         endDate:

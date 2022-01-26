@@ -12,7 +12,7 @@ paths:
             x-rate-limit-remaining:
               schema:
                 type: integer
-                format: int32
+                format: int64
             x-rate-limit-types:
               schema:
                 type: array
