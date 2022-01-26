@@ -10,16 +10,17 @@ servers:
       port:
         default: "9090"
 paths:
-  /pets:
+  /ping:
     get:
-      operationId: operation_get_/pets
+      operationId: operation_get_/ping
       parameters:
-        - name: offset
-          in: query
-          required: true
+        - name: x-client
+          in: header
           schema:
-            type: integer
-            format: int64
+            type: array
+            items:
+              type: boolean
+            default: "[true, false]"
       responses:
         "200":
           description: Ok

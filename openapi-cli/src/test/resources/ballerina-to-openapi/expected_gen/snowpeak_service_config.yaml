@@ -39,7 +39,7 @@ components:
         cardNumber:
           type: integer
           description: Card number
-          format: int32
+          format: int64
         expiryMonth:
           type: string
           description: Expiration month of the card in mm
