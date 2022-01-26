@@ -99,7 +99,7 @@ public class ParameterGeneratorTest {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("path_parameters02.bal", syntaxTree);
     }
 
-    @Test(description = "When the multiple path parameter has key word as a path parameter")
+    @Test(description = "Tests when path parameter(s) having a keyword as the parameter name")
     public void generatePathParameter03() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPathParam03.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
