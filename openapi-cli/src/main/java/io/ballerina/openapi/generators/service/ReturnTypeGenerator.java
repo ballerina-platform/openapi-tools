@@ -98,8 +98,13 @@ public class ReturnTypeGenerator {
                     if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
                         String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
                         // Scenario 01: Response has single response without content type
-                        QualifiedNameReferenceNode statues = getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
-                                code);
+                        TypeDescriptorNode statues;
+                        if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
+                            statues = createSimpleNameReferenceNode(createIdentifierToken(
+                                    GeneratorConstants.HTTP_RESPONSE));
+                        } else {
+                            statues = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
+                        }
                         returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotations, statues);
                     } else if (response.getValue().getContent() != null) {
                         if (response.getKey().trim().equals(GeneratorConstants.HTTP_200)) {
@@ -221,11 +226,14 @@ public class ReturnTypeGenerator {
             Map.Entry<String, ApiResponse> response = responseIter.next();
             String responseCode = response.getKey().trim();
             String code = GeneratorConstants.HTTP_CODES_DES.get(responseCode);
-            if (code == null && !responseCode.equals("default")) {
-                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_107.getDescription(),
-                        responseCode));
+            if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
+                throw new BallerinaOpenApiException(String.format(OAS_SERVICE_107.getDescription(), responseCode));
             }
-            if (response.getValue().getContent() == null && response.getValue().get$ref() == null ||
+            if (responseCode.equals(GeneratorConstants.DEFAULT)) {
+                TypeDescriptorNode record = createSimpleNameReferenceNode(createIdentifierToken(
+                        GeneratorConstants.HTTP_RESPONSE));
+                qualifiedNodes.add(record);
+            } else if (response.getValue().getContent() == null && response.getValue().get$ref() == null ||
                     response.getValue().getContent() != null && response.getValue().getContent().size() == 0) {
                 //key and value
                 QualifiedNameReferenceNode node = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
@@ -235,10 +243,7 @@ public class ReturnTypeGenerator {
                         .iterator().next());
                 if (responseCode.equals(GeneratorConstants.HTTP_200))  {
                     qualifiedNodes.add(record);
-                } else if (responseCode.equals(GeneratorConstants.DEFAULT)) {
-                    record = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
-                    qualifiedNodes.add(record);
-                } else {
+                }  else {
                     RecordTypeDescriptorNode node = createReturnTypeInclusionRecord(code, record);
                     qualifiedNodes.add(node);
                 }
