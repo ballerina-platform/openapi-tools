@@ -92,7 +92,12 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         Filters filters = new Filters(kind);
         SemanticModel semanticModel = syntaxNodeAnalysisContext.semanticModel();
         SyntaxTree syntaxTree = syntaxNodeAnalysisContext.syntaxTree();
-
+        List<Diagnostic> diagnostics = syntaxNodeAnalysisContext.semanticModel().diagnostics();
+        boolean erroneousCompilation = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        if (erroneousCompilation) {
+            return;
+        }
         // Generate ballerina file path
         Package aPackage = syntaxNodeAnalysisContext.currentPackage();
         DocumentId documentId = syntaxNodeAnalysisContext.documentId();
