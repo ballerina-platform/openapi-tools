@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.validator.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.validator.TypeSymbolToJsonValidatorUtil.convertTypeToEnum;
 
 /**
@@ -130,35 +131,51 @@ public class ResourceValidator {
                 }
                 // Handle Request Body
                 if (operation.getRequestBody() != null && bodyNode != null) {
-                    Map<String, Schema> requestBodyForOperation = getRequestBodyForOperation(operation);
-                    for (Map.Entry<String, Schema> requestBody: requestBodyForOperation.entrySet()) {
-                        if (resourceParameter.getKey().equals("payload")) {
-                            isParameterExit = true;
-                            Schema value = requestBody.getValue();
-                            TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
-
-                            List<ValidationError> validationErrors =
-                                    TypeSymbolToJsonValidatorUtil.validate(value, typeSymbol, syntaxTree, semanticModel,
-                                            bodyNode.typeName().toString().trim(),
-                                            resourceParameter.getValue().location());
-
-                            if (!validationErrors.isEmpty()) {
-                                validationErrorList.addAll(validationErrors);
-                            }
-                        }
-                    }
+                    isParameterExit = validateRequestBody(operation, semanticModel,
+                            syntaxTree, validationErrorList, resourceParameter, bodyNode);
                 }
                 if (!isParameterExit) {
-
                     ValidationError validationError = new ValidationError(resourceParameter.getKey(),
                             convertTypeToEnum(paramType),
                             resourceParameter.getValue().location());
-
                     validationErrorList.add(validationError);
                 }
             }
         }
         return validationErrorList;
+    }
+
+    /**
+     * This util function validate the http:Payload against to request body in given OAS.
+     */
+    private static boolean validateRequestBody(Operation operation, SemanticModel semanticModel, SyntaxTree syntaxTree,
+                                               List<ValidationError> validationErrorList,
+                                               Map.Entry<String, Node> resourceParameter,
+                                               RequiredParameterNode bodyNode) throws OpenApiValidatorException {
+        Map<String, Schema> requestBodyForOperation = getRequestBodyForOperation(operation);
+        boolean isParameterExit = false;
+        for (Map.Entry<String, Schema> requestBody: requestBodyForOperation.entrySet()) {
+            if (bodyNode.annotations().isEmpty()) {
+                continue;
+            }
+            for (AnnotationNode annotation : bodyNode.annotations()) {
+                if (!(annotation.annotReference().toString()).trim().equals(HTTP_PAYLOAD)) {
+                    continue;
+                }
+                isParameterExit = true;
+                Schema value = requestBody.getValue();
+                TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
+                List<ValidationError> validationErrors = TypeSymbolToJsonValidatorUtil.validate(
+                        value, typeSymbol, syntaxTree, semanticModel,
+                        bodyNode.typeName().toString().trim(),
+                        resourceParameter.getValue().location());
+
+                if (!validationErrors.isEmpty()) {
+                    validationErrorList.addAll(validationErrors);
+                }
+            }
+        }
+        return isParameterExit;
     }
 
     static List<ValidationError> validateOperationAgainstResource(Operation operation,
@@ -180,18 +197,17 @@ public class ResourceValidator {
                                 && paramNode instanceof RequiredParameterNode) {
                             RequiredParameterNode queryParam = (RequiredParameterNode) paramNode;
                             //equals or contains
-                            if (!queryParam.toString().equals("http:Payload")) {
-                                isOParameterExist = true;
-                                TypeSymbol typeSymbol = getTypeSymbol(semanticModel, queryParam);
-                                List<ValidationError> validationErrors =
-                                        TypeSymbolToJsonValidatorUtil.validate(parameter.getSchema(),
-                                                typeSymbol, syntaxTree, semanticModel,
-                                                resourceParam.getKey(), location);
-                                if (!validationErrors.isEmpty()) {
-                                    validationErrorList.addAll(validationErrors);
-                                }
+                            if (!queryParam.annotations().isEmpty()) {
+                                continue;
                             }
-
+                            isOParameterExist = true;
+                            TypeSymbol typeSymbol = getTypeSymbol(semanticModel, queryParam);
+                            List<ValidationError> validationErrors = TypeSymbolToJsonValidatorUtil.
+                                    validate(parameter.getSchema(), typeSymbol, syntaxTree, semanticModel,
+                                            resourceParam.getKey(), location);
+                            if (!validationErrors.isEmpty()) {
+                                validationErrorList.addAll(validationErrors);
+                            }
                         }
                         //  Check path parameter available
                         if ((parameter instanceof PathParameter) && (parameter.getName().equals(resourceParam.getKey()))
@@ -272,36 +288,36 @@ public class ResourceValidator {
 
         if (!resourceParam.isEmpty()) {
             for (Map.Entry<String, Node> resourceParameter : resourceParam.entrySet()) {
-                if (resourceParameter.getValue() instanceof RequiredParameterNode) {
-                    RequiredParameterNode bodyNode = (RequiredParameterNode) resourceParameter.getValue();
-                    Iterator<AnnotationNode> iterator = bodyNode.annotations().iterator();
-                    boolean isPayLoad = false;
-                    while (iterator.hasNext()) {
-                        AnnotationNode anno = iterator.next();
-                        Node node = anno.annotReference();
-                        if (node.toString().trim().equals("http:Payload")) {
-                            isPayLoad = true;
-                        }
+                if (!(resourceParameter.getValue() instanceof RequiredParameterNode)) {
+                    continue;
+                }
+                RequiredParameterNode bodyNode = (RequiredParameterNode) resourceParameter.getValue();
+                Iterator<AnnotationNode> iterator = bodyNode.annotations().iterator();
+                boolean isPayLoad = false;
+                while (iterator.hasNext()) {
+                    AnnotationNode anno = iterator.next();
+                    Node node = anno.annotReference();
+                    if (node.toString().trim().equals(HTTP_PAYLOAD)) {
+                        isPayLoad = true;
                     }
-
-                    if (isPayLoad) {
-                        Schema value = operationRB.getValue();
-                        TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
-                        List<ValidationError> validationErrors =
-                                TypeSymbolToJsonValidatorUtil.validate(value, typeSymbol, syntaxTree, semanticModel,
-                                        bodyNode.typeName().toString().trim(), location);
-                        if (validationErrors.isEmpty()) {
+                }
+                if (!isPayLoad) {
+                    continue;
+                }
+                Schema<?> value = operationRB.getValue();
+                TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
+                List<ValidationError> validationErrors =
+                        TypeSymbolToJsonValidatorUtil.validate(value, typeSymbol, syntaxTree, semanticModel,
+                                bodyNode.typeName().toString().trim(), location);
+                if (validationErrors.isEmpty()) {
+                    isOParamExit = true;
+                } else {
+                    for (ValidationError validEr: validationErrors) {
+                        if ((validEr instanceof MissingFieldInBallerinaType) ||
+                                (validEr instanceof OneOfTypeValidation) || (validEr instanceof TypeMismatch)) {
+                            validationErrorList.add(validEr);
                             isOParamExit = true;
-                        } else {
-                            for (ValidationError validEr: validationErrors) {
-                                if ((validEr instanceof MissingFieldInBallerinaType) ||
-                                        (validEr instanceof OneOfTypeValidation) ||
-                                        (validEr instanceof TypeMismatch)) {
-                                    validationErrorList.add(validEr);
-                                    isOParamExit = true;
-                                    break;
-                                }
-                            }
+                            break;
                         }
                     }
                 }

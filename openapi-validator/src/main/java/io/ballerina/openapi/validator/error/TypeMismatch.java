@@ -34,14 +34,10 @@ public class TypeMismatch extends ValidationError {
 
     public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType,
                         Location location) {
-        this.fieldName = fieldName;
-        this.typeJsonSchema = typeJsonSchema;
-        this.typeBallerinaType = typeBallerinaType;
-        this.recordName = null;
-        this.location = location;
+        this (fieldName, typeJsonSchema, typeBallerinaType, null, location);
     }
-    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType,
-                        String recordName, Location location) {
+    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema,
+                        Constants.Type typeBallerinaType, String recordName, Location location) {
         this.fieldName = fieldName;
         this.typeJsonSchema = typeJsonSchema;
         this.typeBallerinaType = typeBallerinaType;
