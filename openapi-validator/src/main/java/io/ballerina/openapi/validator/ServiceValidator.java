@@ -94,7 +94,7 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         SyntaxTree syntaxTree = syntaxNodeAnalysisContext.syntaxTree();
         List<Diagnostic> diagnostics = syntaxNodeAnalysisContext.semanticModel().diagnostics();
         boolean erroneousCompilation = diagnostics.stream()
-                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+                .anyMatch(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity());
         if (erroneousCompilation) {
             return;
         }
