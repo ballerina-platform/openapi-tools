@@ -68,7 +68,7 @@ public class OpenAPIComponentMapper {
      */
     public void createComponentSchema(Map<String, Schema> schema, TypeSymbol typeSymbol) {
         // Getting main record description
-        String componentName = typeSymbol.getName().orElseThrow().trim();
+        String componentName = ConverterCommonUtils.removeEscapeIdentifier(typeSymbol.getName().orElseThrow().trim());
         Map<String, String> apiDocs = getRecordFieldsAPIDocsMap((TypeReferenceTypeSymbol) typeSymbol, componentName);
         TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
         // Handle record type request body
@@ -108,7 +108,8 @@ public class OpenAPIComponentMapper {
             for (Map.Entry<String , RecordFieldSymbol> fields: recordFieldSymbols.entrySet()) {
                 Optional<Documentation> fieldDoc = ((Documentable) fields.getValue()).documentation();
                 if (fieldDoc.isPresent() && fieldDoc.get().description().isPresent()) {
-                    apiDocs.put(fields.getKey(), fieldDoc.get().description().get());
+                    apiDocs.put(ConverterCommonUtils.removeEscapeIdentifier(fields.getKey()),
+                            fieldDoc.get().description().get());
                 }
             }
         }
@@ -129,7 +130,7 @@ public class OpenAPIComponentMapper {
         for (TypeSymbol typeInclusion: typeInclusions) {
             Schema<?> referenceSchema = new Schema();
             String typeInclusionName = typeInclusion.getName().orElseThrow();
-            referenceSchema.set$ref(typeInclusionName);
+            referenceSchema.set$ref(ConverterCommonUtils.removeEscapeIdentifier(typeInclusionName));
             allOfSchemaList.add(referenceSchema);
             if (typeInclusion.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
                 TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) typeInclusion;
@@ -145,8 +146,10 @@ public class OpenAPIComponentMapper {
             }
         }
         Map<String, RecordFieldSymbol> filteredField = new LinkedHashMap<>();
-        rfields.forEach((key1, value) -> unionKeys.stream().filter(key -> key1.trim().equals(key)).forEach(key ->
-                filteredField.put(key1, value)));
+        rfields.forEach((key1, value) -> unionKeys.stream().filter(key ->
+                ConverterCommonUtils.removeEscapeIdentifier(key1.trim()).
+                        equals(ConverterCommonUtils.removeEscapeIdentifier(key))).forEach(key ->
+                filteredField.put(ConverterCommonUtils.removeEscapeIdentifier(key1), value)));
         ObjectSchema objectSchema = generateObjectSchemaFromRecordFields(schema, null, filteredField, apiDocs);
         allOfSchemaList.add(objectSchema);
         allOfSchema.setAllOf(allOfSchemaList);
@@ -173,8 +176,9 @@ public class OpenAPIComponentMapper {
         componentSchema.setDescription(apiDocs.get(componentName));
         Map<String, Schema> schemaProperties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
+            String fieldName = ConverterCommonUtils.removeEscapeIdentifier(field.getKey().trim());
             if (!field.getValue().isOptional()) {
-                required.add(field.getKey().trim());
+                required.add(fieldName);
             }
             String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
             Schema property = ConverterCommonUtils.getOpenApiSchema(type);
@@ -193,10 +197,10 @@ public class OpenAPIComponentMapper {
                 schema = components.getSchemas();
             }
             // Add API documentation for record field
-            if (apiDocs.containsKey(field.getKey().trim())) {
-                property.setDescription(apiDocs.get(field.getKey().trim()));
+            if (apiDocs.containsKey(fieldName)) {
+                property.setDescription(apiDocs.get(fieldName));
             }
-            schemaProperties.put(field.getKey(), property);
+            schemaProperties.put(fieldName, property);
         }
         componentSchema.setProperties(schemaProperties);
         componentSchema.setRequired(required);
@@ -221,7 +225,8 @@ public class OpenAPIComponentMapper {
             EnumSymbol enumSymbol = (EnumSymbol) typeReferenceSymbol.definition();
             property = mapEnumValues(enumSymbol);
         } else {
-            property.set$ref(typeReferenceSymbol.getName().orElseThrow().trim());
+            property.set$ref(ConverterCommonUtils.removeEscapeIdentifier(
+                    typeReferenceSymbol.getName().orElseThrow().trim()));
             if (!isCyclicRecord) {
                 createComponentSchema(schema, typeReferenceSymbol);
             }
@@ -372,7 +377,8 @@ public class OpenAPIComponentMapper {
             EnumSymbol enumSymbol = (EnumSymbol) typeRefEnum.definition();
             symbolProperty = mapEnumValues(enumSymbol);
         } else {
-            symbolProperty.set$ref(arrayType.getName().orElseThrow().trim());
+            symbolProperty.set$ref(ConverterCommonUtils.removeEscapeIdentifier(
+                    arrayType.getName().orElseThrow().trim()));
             TypeReferenceTypeSymbol typeRecord = (TypeReferenceTypeSymbol) arrayType;
             if (!isSameRecord(componentName, typeRecord)) {
                 createComponentSchema(schema, typeRecord);
