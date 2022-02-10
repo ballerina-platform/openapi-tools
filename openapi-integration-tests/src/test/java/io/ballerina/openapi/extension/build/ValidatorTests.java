@@ -167,8 +167,8 @@ public class ValidatorTests {
         buildArgs.add("project_7");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
         String msg = " ERROR [service.bal:(7:1,7:1)] missing identifier\n" +
-                "    ERROR [service.bal:(7:1,7:1)] undefined field '$missingNode$_0' in record " +
-                "'ballerina/openapi:1.0.0:ServiceInformation' error: compilation contains errors";
+                "    ERROR [service.bal:(7:1,7:1)] undefined field '$missingNode$_0' in record" +
+                " 'ballerina/openapi:";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
