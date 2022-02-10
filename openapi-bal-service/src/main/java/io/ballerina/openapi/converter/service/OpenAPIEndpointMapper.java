@@ -36,6 +36,7 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
+import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -137,7 +138,7 @@ public class OpenAPIEndpointMapper {
 
     // Function for handle both ExplicitNewExpressionNode and ImplicitNewExpressionNode in listener.
     private OpenAPI extractServerForExpressionNode(OpenAPI openAPI, SeparatedNodeList<ExpressionNode> bTypeExplicit,
-                                                                    ServiceDeclarationNode service) {
+                                                   ServiceDeclarationNode service) {
         String serviceBasePath = getServiceBasePath(service);
         Optional<ParenthesizedArgList> list;
         List<Server> servers = new ArrayList<>();
@@ -243,7 +244,7 @@ public class OpenAPIEndpointMapper {
             host = concatenateServerURL(host, recordFields);
         }
         if (!host.equals("")) {
-           host = host.replaceAll("\"", "");
+            host = host.replaceAll("\"", "");
         }
         return host;
     }
@@ -273,7 +274,7 @@ public class OpenAPIEndpointMapper {
         StringBuilder currentServiceName = new StringBuilder();
         NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
         for (Node serviceBasedPathNode : serviceNameNodes) {
-            currentServiceName.append(serviceBasedPathNode.toString());
+            currentServiceName.append(ConverterCommonUtils.removeEscapeIdentifier(serviceBasedPathNode.toString()));
         }
         return currentServiceName.toString().trim();
     }

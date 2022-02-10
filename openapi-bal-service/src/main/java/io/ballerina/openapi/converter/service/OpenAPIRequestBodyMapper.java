@@ -202,7 +202,8 @@ public class OpenAPIRequestBodyMapper {
             OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
             componentMapper.createComponentSchema(schema, typeSymbol);
             Schema itemSchema = new Schema();
-            arraySchema.setItems(itemSchema.$ref(referenceNode.name().text().trim()));
+            arraySchema.setItems(itemSchema.$ref(ConverterCommonUtils.removeEscapeIdentifier(
+                    referenceNode.name().text().trim())));
             io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
             media.setSchema(arraySchema);
             if (requestBody.getContent() != null) {
@@ -262,7 +263,6 @@ public class OpenAPIRequestBodyMapper {
             ArrayTypeDescriptorNode arrayTypeDescriptorNode = (ArrayTypeDescriptorNode) payloadNode.typeName();
             handleArrayTypePayload(schema, arrayTypeDescriptorNode, mimeType, requestBody);
         } else {
-
             io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
             Schema mimeSchema = ConverterCommonUtils.getOpenApiSchema(mimeType.split("/")[1]
                     .toLowerCase(Locale.ENGLISH));
@@ -286,7 +286,7 @@ public class OpenAPIRequestBodyMapper {
         OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
         componentMapper.createComponentSchema(schema, typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
-        media.setSchema(new Schema().$ref(recordName));
+        media.setSchema(new Schema().$ref(ConverterCommonUtils.removeEscapeIdentifier(recordName)));
         if (bodyParameter.getContent() != null) {
             Content content = bodyParameter.getContent();
             content.addMediaType(mediaType, media);

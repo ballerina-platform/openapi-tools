@@ -34,13 +34,13 @@ import java.util.stream.Stream;
 public class TestUtils {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
 
-    private static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
+    public static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
         String expectedServiceContent = expectedServiceLines.collect(Collectors.joining("\n"));
         expectedServiceLines.close();
         return expectedServiceContent;
     }
-    private static void deleteGeneratedFiles(String filename, Path tempDir) {
+    public static void deleteGeneratedFiles(String filename, Path tempDir) {
         try {
             Files.deleteIfExists(tempDir.resolve(filename));
             Files.deleteIfExists(tempDir.resolve("schema.bal"));
