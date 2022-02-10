@@ -202,7 +202,7 @@ public class OpenAPIRequestBodyMapper {
             OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
             componentMapper.createComponentSchema(schema, typeSymbol);
             Schema itemSchema = new Schema();
-            arraySchema.setItems(itemSchema.$ref(ConverterCommonUtils.removeEscapeIdentifier(
+            arraySchema.setItems(itemSchema.$ref(ConverterCommonUtils.unescapeIdentifier(
                     referenceNode.name().text().trim())));
             io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
             media.setSchema(arraySchema);
@@ -286,7 +286,7 @@ public class OpenAPIRequestBodyMapper {
         OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
         componentMapper.createComponentSchema(schema, typeSymbol);
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
-        media.setSchema(new Schema().$ref(ConverterCommonUtils.removeEscapeIdentifier(recordName)));
+        media.setSchema(new Schema().$ref(ConverterCommonUtils.unescapeIdentifier(recordName)));
         if (bodyParameter.getContent() != null) {
             Content content = bodyParameter.getContent();
             content.addMediaType(mediaType, media);

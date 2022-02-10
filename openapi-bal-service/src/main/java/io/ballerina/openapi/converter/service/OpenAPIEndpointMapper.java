@@ -274,7 +274,7 @@ public class OpenAPIEndpointMapper {
         StringBuilder currentServiceName = new StringBuilder();
         NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
         for (Node serviceBasedPathNode : serviceNameNodes) {
-            currentServiceName.append(ConverterCommonUtils.removeEscapeIdentifier(serviceBasedPathNode.toString()));
+            currentServiceName.append(ConverterCommonUtils.unescapeIdentifier(serviceBasedPathNode.toString()));
         }
         return currentServiceName.toString().trim();
     }

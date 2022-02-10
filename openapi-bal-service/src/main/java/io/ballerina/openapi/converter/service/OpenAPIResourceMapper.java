@@ -97,7 +97,7 @@ public class OpenAPIResourceMapper {
      * @param httpMethods   Sibling methods related to operation.
      */
     private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods) {
-        String path = ConverterCommonUtils.removeEscapeIdentifier(generateRelativePath(resource));
+        String path = ConverterCommonUtils.unescapeIdentifier(generateRelativePath(resource));
         Operation operation;
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.

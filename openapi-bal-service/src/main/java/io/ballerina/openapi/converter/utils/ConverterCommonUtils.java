@@ -395,7 +395,7 @@ public class ConverterCommonUtils {
                 diagnostic.diagnosticInfo().severity() == DiagnosticSeverity.ERROR);
     }
 
-    public static String removeEscapeIdentifier(String parameterName) {
+    public static String unescapeIdentifier(String parameterName) {
         return parameterName.replaceAll("\\\\", "");
     }
 }
