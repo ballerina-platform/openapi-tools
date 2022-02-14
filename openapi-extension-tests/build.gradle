@@ -17,6 +17,11 @@
  */
 
 description = 'Ballerina - OpenAPI Extension Tests'
+apply from: "$rootDir/gradle/javaProject.gradle"
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java'
+
 
 def ballerinaOpenApiModulePath = "${project.rootDir}/module-ballerina-openapi/"
 def openApiExtensionJar = "${project.rootDir}/openapi-extension/build/libs/openapi-extension-${version}.jar"
@@ -60,9 +65,29 @@ task copyPackageBala {
 }
 
 test {
-    systemProperty "ballerina.offline.flag", "true"
-    useTestNG()
+    systemProperties =  [ jacocoAgentLine: "-javaagent:${configurations.jacocoRuntime.asPath}=destfile=${test.jacoco.destinationFile.absolutePath},append=true,inclnolocationclasses=true,exclclassloader=jdk.internal.reflect.DelegatingClassLoader" ,
+                          "distributions.dir": ballerinaDistPath,
+                          "target.dir": "$project.buildDir"
+    ]
+
+    useTestNG() {
+        suites "src/test/resources/testng.xml"
+    }
+    finalizedBy jacocoTestReport
 }
 
+jacocoTestReport {
+    dependsOn test
+    def classFiles = new File("${rootDir}/openapi-extension/build/classes/java/main/io/ballerina/openapi/extension")
+    additionalClassDirs(classFiles)
+    reports {
+        xml.enabled = true
+        html.enabled = true
+        csv.enabled = true
+        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
+        html.destination = new File("${buildDir}/reports/jacoco/report.html")
+        csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
+    }
+}
 copyPackageBala.dependsOn copyDistribution
 test.dependsOn copyPackageBala

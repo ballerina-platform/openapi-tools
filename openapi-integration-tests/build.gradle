@@ -86,11 +86,14 @@ test {
 
 jacocoTestReport {
     dependsOn test
-    def classFiles = new File("${rootDir}/openapi-bal-service/build/classes/java/main/io/ballerina/openapi/converter")
+    def classFiles = new File("${rootDir}/openapi-cli/build/classes/java/main/io/ballerina/openapi")
     def validatorClassFiles = new File("${rootDir}/openapi-validator/build/classes/java/main/io/ballerina/openapi" +
             "/validator")
+    def buildClassFiles = new File("${rootDir}/openapi-build-extension/build/classes/java/main/io/ballerina" +
+            "/openapi/build")
     additionalClassDirs(classFiles)
     additionalClassDirs(validatorClassFiles)
+    additionalClassDirs(buildClassFiles)
     reports {
         xml.enabled = true
         html.enabled = true
