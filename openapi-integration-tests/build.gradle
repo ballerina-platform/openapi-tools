@@ -81,12 +81,16 @@ test {
     useTestNG() {
         suites "src/test/resources/testng.xml"
     }
+    finalizedBy jacocoTestReport
 }
 
 jacocoTestReport {
     dependsOn test
     def classFiles = new File("${rootDir}/openapi-bal-service/build/classes/java/main/io/ballerina/openapi/converter")
+    def validatorClassFiles = new File("${rootDir}/openapi-validator/build/classes/java/main/io/ballerina/openapi" +
+            "/validator")
     additionalClassDirs(classFiles)
+    additionalClassDirs(validatorClassFiles)
     reports {
         xml.enabled = true
         html.enabled = true
