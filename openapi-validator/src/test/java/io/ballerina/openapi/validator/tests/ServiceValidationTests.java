@@ -175,7 +175,6 @@ public class ServiceValidationTests {
 
     }
 
-
     /**
      * OneOf - Invalid Scenario examples
      */

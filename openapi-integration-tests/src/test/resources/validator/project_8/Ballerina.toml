@@ -1,0 +1,8 @@
+[package]
+org = "openapi_validator"
+name = "project_7"
+version = "0.1.0"
+
+[build-options]
+observabilityIncluded = true
+
