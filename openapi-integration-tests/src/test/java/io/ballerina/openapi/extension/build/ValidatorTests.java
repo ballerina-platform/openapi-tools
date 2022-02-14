@@ -161,6 +161,28 @@ public class ValidatorTests {
         }
     }
 
+    @Test(description = "OpenAPI validator plugin test for compilation issue")
+    public void validatorWithCompilationIssue() throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("project_7");
+        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        String msg = " ERROR [service.bal:(7:1,7:1)] missing identifier\n" +
+                "    ERROR [service.bal:(7:1,7:1)] undefined field '$missingNode$_0' in record" +
+                " 'ballerina/openapi:";
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
+            Stream<String> logLines = br.lines();
+            String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
+            logLines.close();
+            generatedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            msg = (msg.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            if (generatedLog.contains(msg)) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.fail("OpenAPIValidator execution fail.");
+            }
+        }
+    }
+
     @Test(description = "Invalid test for RequestPayload parameter: when request payload parameters", enabled = false)
     public void typeMisMatchingInRecord() throws IOException {
         List<String> buildArgs = new LinkedList<>();

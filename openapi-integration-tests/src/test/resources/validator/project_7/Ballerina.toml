@@ -1,6 +1,6 @@
 [package]
-org = "openapi_validator"
-name = "project_8"
+org = "openapi_extension_test"
+name = "project_1"
 version = "0.1.0"
 
 [build-options]
