@@ -1,0 +1,40 @@
+openapi: 3.0.1
+info:
+  title: Storage Space
+  version: 1.0.0
+paths:
+  /storage-spaces/{storageSpaceName}/keys/{key}:
+    get:
+      summary: Get key value
+      operationId: getKey
+      parameters:
+        - name: storageSpaceName
+          in: path
+          description: name of the storage space
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: name of the key to retrieve the value
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+        400:
+          description: Invalid key supplied
+security:
+  - authorization: []
+components:
+  securitySchemes:
+    authorization:
+      type: apiKey
+      description: Represents API Key `authorization`
+      name: Authorization
+      in: header

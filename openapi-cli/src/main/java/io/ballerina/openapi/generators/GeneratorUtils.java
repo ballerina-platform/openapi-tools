@@ -159,7 +159,7 @@ public class GeneratorUtils {
                             if (parameter.getIn() == null) {
                                 break;
                             }
-                            if (pathParam.trim().equals(parameter.getName().trim())
+                            if (pathParam.trim().equals(escapeIdentifier(parameter.getName().trim()))
                                     && parameter.getIn().equals("path")) {
 
                                 Token ppOpenB = AbstractNodeFactory.createIdentifierToken("[");
