@@ -40,7 +40,7 @@ public class TestUtils {
         expectedServiceLines.close();
         return expectedServiceContent;
     }
-    private static void deleteGeneratedFiles(String filename, Path tempDir) {
+    public static void deleteGeneratedFiles(String filename, Path tempDir) {
         try {
             Files.deleteIfExists(tempDir.resolve(filename));
             Files.deleteIfExists(tempDir.resolve("schema.bal"));
