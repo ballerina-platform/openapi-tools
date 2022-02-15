@@ -18,13 +18,8 @@
 package io.ballerina.openapi.validator;
 
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,67 +57,6 @@ public class OpenAPIPathSummary {
         this.availableOperations.add(operation);
     }
 
-    public boolean hasTags(List<String> tags, String method) {
-        Operation operation = operations.get(method);
-        if (operation == null) {
-            return false;
-        }
-        return !Collections.disjoint(tags, operation.getTags());
-    }
-
-    public boolean hasOperations(List<String> operationslist, String method) {
-        Operation operation = operations.get(method);
-        if (operation == null) {
-            return false;
-        }
-        return operationslist.contains(operation.getOperationId());
-
-    }
-
-    public List<OpenAPIParameter> getParamNamesForOperation(String operation) {
-        List<OpenAPIParameter> paramNames = new ArrayList<>();
-        for (Map.Entry<String, Operation> entry : this.operations.entrySet()) {
-            if (entry.getKey().equals(operation)
-                    && entry.getValue() != null
-                    && entry.getValue().getParameters() != null) {
-                for (Parameter parameter : entry.getValue().getParameters()) {
-                    if (parameter.getIn() != null && parameter.getIn().equals(Constants.PATH)) {
-                        OpenAPIParameter openAPIParameter = new OpenAPIParameter();
-                        openAPIParameter.setName(parameter.getName());
-                        openAPIParameter.setParamType(Constants.PATH);
-                        openAPIParameter.setParameter(parameter);
-
-
-                        if (parameter.getSchema() != null) {
-                            Schema schema = parameter.getSchema();
-                            String type = schema.getType();
-                            openAPIParameter.setType(type);
-                        }
-
-                        paramNames.add(openAPIParameter);
-                    }
-                }
-                break;
-            }
-        }
-        return paramNames;
-    }
-
-    public Map<String, Schema> getRequestBodyForOperation(String operation) {
-        Map<String, Schema> requestBodySchemas = new HashMap<>();
-        for (Map.Entry<String, Operation> entry : this.operations.entrySet()) {
-            if (entry.getKey().equals(operation)) {
-                if (entry.getValue().getRequestBody() != null) {
-                    Content content = entry.getValue().getRequestBody().getContent();
-                    for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
-                        requestBodySchemas.put(mediaTypeEntry.getKey(), mediaTypeEntry.getValue().getSchema());
-                    }
-                }
-                break;
-            }
-        }
-        return requestBodySchemas;
-    }
     public Map<String, Operation> getOperations() {
         return this.operations;
     }
