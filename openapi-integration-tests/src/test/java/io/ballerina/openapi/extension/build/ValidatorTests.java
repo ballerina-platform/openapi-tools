@@ -183,14 +183,13 @@ public class ValidatorTests {
         }
     }
 
-    @Test(description = "Invalid test for RequestPayload parameter: when request payload parameters", enabled = false)
+    @Test(description = "Type mismatch with record field.")
     public void typeMisMatchingInRecord() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_3");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " WARNING [service.bal:(5:10,5:18)] Type mismatching 'userName' field in the record type of the" +
-                " parameter 'User' for the method 'post' of the path '/pets'.In OpenAPI contract its type " +
-                "is 'string' and resources type is 'int'.";
+        String msg = "WARNING [service.bal:(5:10,5:18)] Type mismatch with 'userName' field in the record 'User'" +
+                ".In OpenAPI contract its type is 'string' and resources type is 'int'.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));

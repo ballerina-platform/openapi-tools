@@ -82,7 +82,7 @@ public class ResourceToOperationTests {
         Assert.assertTrue(validationError.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationError.get(0).getFieldName(), "petId");
         Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
-        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeBallerinaType(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getBallerinaType(), Constants.Type.INT);
     }
     //paramName change
     @Test(description = "invalid test for Path parameter: parameter miss -  ")
@@ -99,7 +99,7 @@ public class ResourceToOperationTests {
         Assert.assertTrue(validationError.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationError.get(0).getFieldName(), "petId");
         Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
-        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeBallerinaType(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getBallerinaType(), Constants.Type.INT);
     }
 
     @Test(description = "invalid test for Path parameter: when path has two path parameters")
@@ -116,7 +116,7 @@ public class ResourceToOperationTests {
         Assert.assertTrue(validationError.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationError.get(0).getFieldName(), "petId");
         Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
-        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeBallerinaType(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getBallerinaType(), Constants.Type.INT);
     }
 
     @Test(description = "Query param supports only for 'int', 'string', 'float', 'boolean', 'decimal' types")
@@ -133,7 +133,7 @@ public class ResourceToOperationTests {
         Assert.assertTrue(validationError.get(0) instanceof TypeMismatch);
         Assert.assertEquals(validationError.get(0).getFieldName(), "'limit");
         Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
-        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getTypeBallerinaType(), Constants.Type.STRING);
+        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getBallerinaType(), Constants.Type.STRING);
     }
 
     @Test(description = "Invalid test for RequestPayload parameter: when request payload parameters has missing field.")

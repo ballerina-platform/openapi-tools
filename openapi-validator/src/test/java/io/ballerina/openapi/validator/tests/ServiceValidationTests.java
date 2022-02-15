@@ -134,11 +134,11 @@ public class ServiceValidationTests {
         Assert.assertTrue(!error.isEmpty());
         Assert.assertTrue(error.get(0) instanceof TypeMismatch);
         Assert.assertEquals(error.get(0).getFieldName(), "petId");
-        Assert.assertEquals(((TypeMismatch) error.get(0)).getTypeBallerinaType(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) error.get(0)).getBallerinaType(), Constants.Type.INT);
         Assert.assertEquals(((TypeMismatch) error.get(0)).getTypeJsonSchema(), Constants.Type.STRING);
     }
 
-    @Test(description = "Test for having type mismatch field in record which given as payload")
+    @Test(description = "Negative test for checking type mismatches in payload record fields")
     public void testRecordTypeMismatch() throws IOException, OpenApiValidatorException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/all_petstore.bal"));
         ServiceDeclarationNode serviceDeclarationNode = ValidatorTest.getServiceDeclarationNode(project);
@@ -159,12 +159,12 @@ public class ServiceValidationTests {
         Assert.assertTrue(error.get(0) instanceof TypeMismatch);
         Assert.assertEquals(error.get(0).getFieldName(), "name");
         Assert.assertEquals(((TypeMismatch) error.get(0)).getRecordName(), "NewPet");
-        Assert.assertEquals(((TypeMismatch) error.get(0)).getTypeBallerinaType(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) error.get(0)).getBallerinaType(), Constants.Type.INT);
         Assert.assertEquals(((TypeMismatch) error.get(0)).getTypeJsonSchema(), Constants.Type.STRING);
 
     }
 
-    @Test(description = "Test for having type mismatch field in record which given as payload")
+    @Test(description = "Negative test for checking type mismatches in query parameter")
     public void testQueryParameterTypeMismatch() throws IOException, OpenApiValidatorException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/all_petstore.bal"));
         ServiceDeclarationNode serviceDeclarationNode = ValidatorTest.getServiceDeclarationNode(project);
@@ -184,7 +184,7 @@ public class ServiceValidationTests {
         Assert.assertTrue(error.size() == 1);
         Assert.assertTrue(error.get(0) instanceof TypeMismatch);
         Assert.assertEquals(error.get(0).getFieldName(), "'limit");
-        Assert.assertEquals(((TypeMismatch) error.get(0)).getTypeBallerinaType(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) error.get(0)).getBallerinaType(), Constants.Type.INT);
         Assert.assertEquals(((TypeMismatch) error.get(0)).getTypeJsonSchema(), Constants.Type.STRING);
     }
 

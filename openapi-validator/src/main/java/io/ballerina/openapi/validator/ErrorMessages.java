@@ -140,14 +140,13 @@ class ErrorMessages {
         return error;
     }
 
-    static String[] typeMismatchingRecord(String fieldName, String recordName, String openapiType, String ballerinType,
-                                          String method, String path) {
+    static String[] typeMismatchingRecord(String fieldName, String recordName, String openapiType,
+                                          String ballerinType) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0015;
-        error[1] = String.format("Type mismatching record field ''%s'' in the ''%s'' record of the parameter " +
-                        "for the method ''%s'' of the path ''%s''.In OpenAPI contract its type is ''%s'' and " +
-                        "resources type is ''%s''. ",
-                fieldName, recordName, method, path, openapiType, ballerinType);
+        error[1] = String.format("Type mismatch with ''%s'' field in the record ''%s''." +
+                        "In OpenAPI contract its type is ''%s'' and resources type is ''%s''. ",
+                fieldName, recordName, openapiType, ballerinType);
         return error;
     }
 

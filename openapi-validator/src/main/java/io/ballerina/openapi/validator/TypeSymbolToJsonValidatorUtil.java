@@ -47,6 +47,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.validator.Constants.ARRAY;
+import static io.ballerina.openapi.validator.Constants.ARRAY_BRACKETS;
+import static io.ballerina.openapi.validator.Constants.BOOLEAN;
+import static io.ballerina.openapi.validator.Constants.DECIMAL;
+import static io.ballerina.openapi.validator.Constants.INT;
+import static io.ballerina.openapi.validator.Constants.INTEGER;
+import static io.ballerina.openapi.validator.Constants.OBJECT;
+import static io.ballerina.openapi.validator.Constants.RECORD;
+import static io.ballerina.openapi.validator.Constants.STRING;
 import static io.ballerina.openapi.validator.ErrorMessages.couldNotFindLocation;
 
 /**
@@ -346,7 +355,7 @@ public class TypeSymbolToJsonValidatorUtil {
             case Constants.INTEGER:
                 convertedType = Constants.Type.INTEGER;
                 break;
-            case Constants.INT:
+            case INT:
                 convertedType = Constants.Type.INT;
                 break;
             case Constants.STRING:
@@ -385,17 +394,17 @@ public class TypeSymbolToJsonValidatorUtil {
     private static Optional<String> convertOpenAPITypeToBallerina(String type) {
         switch (type) {
             case Constants.INTEGER:
-                return Optional.of("int");
+                return Optional.of(INT);
             case Constants.STRING:
-                return Optional.of("string");
+                return Optional.of(STRING);
             case Constants.BOOLEAN:
-                return Optional.of("boolean");
+                return Optional.of(BOOLEAN);
             case Constants.ARRAY:
-                return Optional.of("[]");
+                return Optional.of(ARRAY_BRACKETS);
             case Constants.OBJECT:
-                return Optional.of("record");
+                return Optional.of(RECORD);
             case Constants.DECIMAL:
-                return Optional.of("decimal");
+                return Optional.of(DECIMAL);
             default:
                 return Optional.empty();
         }
@@ -410,28 +419,28 @@ public class TypeSymbolToJsonValidatorUtil {
         String convertedType;
         switch (type) {
             case INT:
-                convertedType = "int";
+                convertedType = INT;
                 break;
             case INTEGER:
-                convertedType = "integer";
+                convertedType = INTEGER;
                 break;
             case STRING:
-                convertedType = "string";
+                convertedType = STRING;
                 break;
             case BOOLEAN:
-                convertedType = "boolean";
+                convertedType = BOOLEAN;
                 break;
             case ARRAY:
-                convertedType = "array";
+                convertedType = ARRAY;
                 break;
             case OBJECT:
-                convertedType = "object";
+                convertedType = OBJECT;
                 break;
             case RECORD:
-                convertedType = "record";
+                convertedType = RECORD;
                 break;
             case DECIMAL:
-                convertedType = "decimal";
+                convertedType = DECIMAL;
                 break;
             default:
                 convertedType = "";

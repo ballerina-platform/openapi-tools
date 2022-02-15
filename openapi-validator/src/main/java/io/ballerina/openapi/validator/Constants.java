@@ -44,6 +44,7 @@ public class Constants {
     public static final String ATTRIBUTE_EXCLUDE_OPERATIONS = "excludeOperations";
     public static final String METHOD = "method";
     public static final String ARRAY = "array";
+    public static final String ARRAY_BRACKETS = "[]";
     public static final String STRING = "string";
     public static final String BOOLEAN = "boolean";
     public static final String INTEGER = "integer";

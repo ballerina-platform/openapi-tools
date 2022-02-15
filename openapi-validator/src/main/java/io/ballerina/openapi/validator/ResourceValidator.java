@@ -153,7 +153,7 @@ public class ResourceValidator {
                                                Map.Entry<String, Node> resourceParameter,
                                                RequiredParameterNode bodyNode) throws OpenApiValidatorException {
         Map<String, Schema> requestBodyForOperation = getRequestBodyForOperation(operation);
-        boolean isParameterExit = false;
+        boolean isParameterExist = false;
         for (Map.Entry<String, Schema> requestBody: requestBodyForOperation.entrySet()) {
             if (bodyNode.annotations().isEmpty()) {
                 continue;
@@ -162,7 +162,7 @@ public class ResourceValidator {
                 if (!(annotation.annotReference().toString()).trim().equals(HTTP_PAYLOAD)) {
                     continue;
                 }
-                isParameterExit = true;
+                isParameterExist = true;
                 Schema value = requestBody.getValue();
                 TypeSymbol typeSymbol = getTypeSymbol(semanticModel, bodyNode);
                 List<ValidationError> validationErrors = TypeSymbolToJsonValidatorUtil.validate(
@@ -175,7 +175,7 @@ public class ResourceValidator {
                 }
             }
         }
-        return isParameterExit;
+        return isParameterExist;
     }
 
     static List<ValidationError> validateOperationAgainstResource(Operation operation,
@@ -187,7 +187,7 @@ public class ResourceValidator {
         List<ValidationError> validationErrorList = new ArrayList<>();
         if (operation.getParameters() != null) {
             for (Parameter parameter: operation.getParameters()) {
-                boolean isOParameterExist = false;
+                boolean isOASParameterExist = false;
                 if (!resourceMethod.getParameters().isEmpty()) {
                     Map<String, Node> parameters = resourceMethod.getParameters();
                     for (Map.Entry<String, Node> resourceParam: parameters.entrySet()) {
@@ -200,7 +200,7 @@ public class ResourceValidator {
                             if (!queryParam.annotations().isEmpty()) {
                                 continue;
                             }
-                            isOParameterExist = true;
+                            isOASParameterExist = true;
                             TypeSymbol typeSymbol = getTypeSymbol(semanticModel, queryParam);
                             List<ValidationError> validationErrors = TypeSymbolToJsonValidatorUtil.
                                     validate(parameter.getSchema(), typeSymbol, syntaxTree, semanticModel,
@@ -212,13 +212,13 @@ public class ResourceValidator {
                         //  Check path parameter available
                         if ((parameter instanceof PathParameter) && (parameter.getName().equals(resourceParam.getKey()))
                                 && paramNode instanceof ResourcePathParameterNode) {
-                            isOParameterExist = true;
+                            isOASParameterExist = true;
                             break;
                         }
                     }
                 }
 
-                if (!isOParameterExist) {
+                if (!isOASParameterExist) {
                     ValidationError validationError = new ValidationError(parameter.getName(),
                             convertTypeToEnum(parameter.getSchema().getType()), location);
                     validationErrorList.add(validationError);
@@ -230,12 +230,12 @@ public class ResourceValidator {
             Map<String, Node> resourceParams = resourceMethod.getParameters();
             Map<String, Schema> requestBodySchemas = getRequestBodyForOperation(operation);
             for (Map.Entry<String, Schema> operationRB: requestBodySchemas.entrySet()) {
-                boolean isOParamExit = false;
+                boolean isOASParamExist = false;
                 if (resourceMethod.getBody()) {
-                    isOParamExit = validateRequestBodyOpenApiToResource(validationErrorList, resourceParams,
-                            operationRB, isOParamExit, semanticModel, syntaxTree, location);
+                    isOASParamExist = validateRequestBodyOpenApiToResource(validationErrorList, resourceParams,
+                            operationRB, isOASParamExist, semanticModel, syntaxTree, location);
                 }
-                if (!isOParamExit) {
+                if (!isOASParamExist) {
                     String type = "";
                     if (operationRB.getValue().getType() == null && (operationRB.getValue().getProperties() != null)) {
                         type = "object";
@@ -281,7 +281,7 @@ public class ResourceValidator {
     private static Boolean validateRequestBodyOpenApiToResource(List<ValidationError> validationErrorList,
                                                                 Map<String, Node> resourceParam,
                                                                 Map.Entry<String, Schema> operationRB,
-                                                                Boolean isOParamExit,
+                                                                Boolean isOASParamExist,
                                                                 SemanticModel semanticModel,
                                                                 SyntaxTree syntaxTree,
                                                                 Location location) throws OpenApiValidatorException {
@@ -295,9 +295,9 @@ public class ResourceValidator {
                 Iterator<AnnotationNode> iterator = bodyNode.annotations().iterator();
                 boolean isPayLoad = false;
                 while (iterator.hasNext()) {
-                    AnnotationNode anno = iterator.next();
-                    Node node = anno.annotReference();
-                    if (node.toString().trim().equals(HTTP_PAYLOAD)) {
+                    AnnotationNode annotationNode = iterator.next();
+                    Node referenceNode = annotationNode.annotReference();
+                    if (referenceNode.toString().trim().equals(HTTP_PAYLOAD)) {
                         isPayLoad = true;
                     }
                 }
@@ -310,19 +310,19 @@ public class ResourceValidator {
                         TypeSymbolToJsonValidatorUtil.validate(value, typeSymbol, syntaxTree, semanticModel,
                                 bodyNode.typeName().toString().trim(), location);
                 if (validationErrors.isEmpty()) {
-                    isOParamExit = true;
+                    isOASParamExist = true;
                 } else {
-                    for (ValidationError validEr: validationErrors) {
-                        if ((validEr instanceof MissingFieldInBallerinaType) ||
-                                (validEr instanceof OneOfTypeValidation) || (validEr instanceof TypeMismatch)) {
-                            validationErrorList.add(validEr);
-                            isOParamExit = true;
+                    for (ValidationError error: validationErrors) {
+                        if ((error instanceof MissingFieldInBallerinaType) ||
+                                (error instanceof OneOfTypeValidation) || (error instanceof TypeMismatch)) {
+                            validationErrorList.add(error);
+                            isOASParamExist = true;
                             break;
                         }
                     }
                 }
             }
         }
-        return isOParamExit;
+        return isOASParamExist;
     }
 }
