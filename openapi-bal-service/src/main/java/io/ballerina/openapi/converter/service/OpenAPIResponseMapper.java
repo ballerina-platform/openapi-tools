@@ -337,7 +337,6 @@ public class OpenAPIResponseMapper {
     private Optional<ApiResponses> getAPIResponses(OperationAdaptor operationAdaptor, ApiResponses apiResponses,
                                                    Node typeNode, Optional<String> customMediaPrefix,
                                                    Map<String, Header> headers) {
-
         ApiResponse apiResponse = new ApiResponse();
         io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
         String mediaTypeString;
@@ -536,7 +535,8 @@ public class OpenAPIResponseMapper {
                     handleReferenceResponse(operationAdaptor, nameRefNode, componentsSchemas, apiResponses,
                             customMediaPrefix, headers);
                     Schema referenceSchema = new Schema();
-                    referenceSchema.set$ref(recordField.typeName().toString().trim());
+                    referenceSchema.set$ref(ConverterCommonUtils.unescapeIdentifier(
+                            recordField.typeName().toString().trim()));
                     properties.put(recordField.fieldName().text(), referenceSchema);
                 } else {
                     //TODO array fields handling
@@ -664,7 +664,8 @@ public class OpenAPIResponseMapper {
             io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
             ArraySchema arraySchema = new ArraySchema();
             componentMapper.createComponentSchema(schema, typeSymbol);
-            arraySchema.setItems(new Schema().$ref(referenceNode.name().toString().trim()));
+            arraySchema.setItems(new Schema().$ref(ConverterCommonUtils.unescapeIdentifier(
+                    referenceNode.name().toString().trim())));
             media.setSchema(arraySchema);
             apiResponse.description(HTTP_200_DESCRIPTION);
             mediaTypeString = customMediaPrefix.isPresent() ? APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX :
@@ -719,7 +720,7 @@ public class OpenAPIResponseMapper {
         ApiResponses apiResponses = new ApiResponses();
         String mediaTypeString;
         componentMapper.createComponentSchema(schema, typeSymbol);
-        media.setSchema(new Schema().$ref(referenceName));
+        media.setSchema(new Schema().$ref(ConverterCommonUtils.unescapeIdentifier(referenceName)));
         mediaTypeString = MediaType.APPLICATION_JSON;
         if (customMediaPrefix.isPresent()) {
             mediaTypeString = APPLICATION_PREFIX + customMediaPrefix.get() + JSON_POSTFIX;
@@ -757,7 +758,8 @@ public class OpenAPIResponseMapper {
                 RecordFieldSymbol body = fieldsOfRecord.get(BODY);
                 if (body.typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
                     componentMapper.createComponentSchema(schema, body.typeDescriptor());
-                    media.setSchema(new Schema().$ref(body.typeDescriptor().getName().orElseThrow().trim()));
+                    media.setSchema(new Schema().$ref(ConverterCommonUtils.unescapeIdentifier(
+                            body.typeDescriptor().getName().orElseThrow().trim())));
                     mediaTypeString = customMediaPrefix.isPresent() ?
                             APPLICATION_PREFIX + customMediaPrefix.get() + JSON_POSTFIX : MediaType.APPLICATION_JSON;
                     apiResponse.content(new Content().addMediaType(mediaTypeString, media));
@@ -778,7 +780,7 @@ public class OpenAPIResponseMapper {
         }
         if (!isHttpModule) {
             componentMapper.createComponentSchema(schema, typeSymbol);
-            media.setSchema(new Schema().$ref(typeSymbol.getName().get()));
+            media.setSchema(new Schema().$ref(ConverterCommonUtils.unescapeIdentifier(typeSymbol.getName().get())));
             mediaTypeString = MediaType.APPLICATION_JSON;
             if (customMediaPrefix.isPresent()) {
                 mediaTypeString = APPLICATION_PREFIX + customMediaPrefix.get() + JSON_POSTFIX;

@@ -143,7 +143,7 @@ public class OpenAPIParameterMapper {
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
                 pathParameterOAS.schema(ConverterCommonUtils.getOpenApiSchema(
                         pathParam.typeDescriptor().toString().trim()));
-                pathParameterOAS.setName(pathParam.paramName().text());
+                pathParameterOAS.setName(ConverterCommonUtils.unescapeIdentifier(pathParam.paramName().text()));
 
                 // Check the parameter has doc
                 if (!apidocs.isEmpty() && apidocs.containsKey(pathParam.paramName().text().trim())) {

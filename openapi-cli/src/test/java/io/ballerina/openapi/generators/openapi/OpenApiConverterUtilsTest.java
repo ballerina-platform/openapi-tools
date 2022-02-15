@@ -29,6 +29,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.ballerina.openapi.generators.openapi.TestUtils.deleteDirectory;
+import static io.ballerina.openapi.generators.openapi.TestUtils.deleteGeneratedFiles;
+import static io.ballerina.openapi.generators.openapi.TestUtils.getStringFromGivenBalFile;
+
 /**
  * Ballerina conversion to OpenApi will test in this class.
  */
@@ -166,6 +170,33 @@ public class OpenApiConverterUtilsTest {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
     }
 
+    @Test(description = "Given ballerina service has escape character")
+    public void testForRemovingEscapeIdentifier() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("escape_identifier.bal");
+        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        try {
+            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
+                    "escape_identifier.yaml");
+            OpenApiConverter openApiConverter = new OpenApiConverter();
+            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
+                    , false);
+            if (Files.exists(tempDir.resolve("v1_abc-hello_openapi.yaml"))) {
+                String generatedYaml = getStringFromGivenBalFile(tempDir, "v1_abc-hello_openapi.yaml");
+                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+            } else {
+                Assert.fail("Yaml was not generated");
+            }
+        } catch (IOException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("v1_abc-hello_openapi.yaml", tempDir);
+            deleteDirectory(tempDir);
+            System.gc();
+        }
+    }
+
     @Test(description = "Test for non http services")
     public void testForNonHttpServices() {
         Path ballerinaFilePath = RES_DIR.resolve("non_service.bal");
@@ -176,7 +207,7 @@ public class OpenApiConverterUtilsTest {
 
     @AfterMethod
     public void cleanUp() {
-        TestUtils.deleteDirectory(this.tempDir);
+        deleteDirectory(this.tempDir);
     }
 
     @AfterTest
