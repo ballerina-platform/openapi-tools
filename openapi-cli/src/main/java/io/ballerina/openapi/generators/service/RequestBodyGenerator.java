@@ -17,14 +17,12 @@
  */
 
 package io.ballerina.openapi.generators.service;
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -36,7 +34,10 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
@@ -48,12 +49,16 @@ import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.generators.GeneratorConstants.MEDIA_TYPE_KEYWORD;
+import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD;
+import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getIdentifierTokenForJsonSchema;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
 
 /**
@@ -65,17 +70,18 @@ public class RequestBodyGenerator {
     /**
      * This for creating request Body for given request object.
      */
-    public RequiredParameterNode createNodeForRequestBody(RequestBody requestBody) throws BallerinaOpenApiException {
+    public RequiredParameterNode createNodeForRequestBody(Components components, RequestBody requestBody)
+            throws BallerinaOpenApiException {
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
         List<Node> literals = new ArrayList<>();
         MappingConstructorExpressionNode annotValue;
         TypeDescriptorNode typeName;
         if (requestBody.getContent().entrySet().size() > 1) {
-            IdentifierToken mediaType = createIdentifierToken("mediaType");
+            IdentifierToken mediaType = createIdentifierToken(MEDIA_TYPE_KEYWORD);
             // Filter same data type
             HashSet<Map.Entry<String, MediaType>> equalDataType = filterMediaTypes(requestBody);
             if (!equalDataType.isEmpty()) {
-                typeName = getIdentifierTokenForJsonSchema(equalDataType.iterator().next().getValue().getSchema());
+                typeName = getNodeForPayloadType(components, equalDataType.iterator().next());
                 SeparatedNodeList<MappingFieldNode> fields = fillRequestAnnotationValues(comma, literals, mediaType,
                         equalDataType);
                 annotValue = NodeFactory.createMappingConstructorExpressionNode(
@@ -87,16 +93,57 @@ public class RequestBodyGenerator {
             }
         } else {
             Iterator<Map.Entry<String, MediaType>> content = requestBody.getContent().entrySet().iterator();
-            Map.Entry<String, MediaType> next = createBasicLiteralNodeList(comma,
-                    AbstractNodeFactory.createEmptyMinutiaeList(), AbstractNodeFactory.createEmptyMinutiaeList(),
-                    literals, content);
-            typeName = getMediaTypeToken(next);
+            Map.Entry<String, MediaType> mediaType = content.next();
+            typeName = getNodeForPayloadType(components, mediaType);
             annotValue = null;
         }
-        AnnotationNode annotationNode = getAnnotationNode("Payload", annotValue);
+        AnnotationNode annotationNode = getAnnotationNode(PAYLOAD_KEYWORD, annotValue);
         NodeList<AnnotationNode> annotation =  NodeFactory.createNodeList(annotationNode);
-        Token paramName = createIdentifierToken("payload", SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+        Token paramName = createIdentifierToken(PAYLOAD, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         return createRequiredParameterNode(annotation, typeName, paramName);
+    }
+
+    private TypeDescriptorNode getNodeForPayloadType(Components components, Map.Entry<String, MediaType> mediaType)
+            throws BallerinaOpenApiException {
+        TypeDescriptorNode typeName;
+        if (mediaType.getValue().getSchema().get$ref() != null) {
+            String schemaName = extractReferenceType(mediaType.getValue().getSchema().get$ref());
+            Schema<?> schema = components.getSchemas().get(schemaName);
+            if (schema instanceof ComposedSchema && (((ComposedSchema) schema).getOneOf() != null)) {
+                String mediaTypeContent = mediaType.getKey().trim();
+                if (mediaTypeContent.matches("text/.*")) {
+                    mediaTypeContent = "text";
+                }
+                IdentifierToken identifierToken;
+                switch (mediaTypeContent) {
+                    case "application/xml":
+                        identifierToken = createIdentifierToken(GeneratorConstants.XML);
+                        typeName = createSimpleNameReferenceNode(identifierToken);
+                        break;
+                    case "text":
+                        identifierToken = createIdentifierToken(GeneratorConstants.STRING);
+                        typeName = createSimpleNameReferenceNode(identifierToken);
+                        break;
+                    case "application/octet-stream":
+                        ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+                                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                                createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                        typeName = createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(
+                                        null, createIdentifierToken(GeneratorConstants.BYTE)),
+                                NodeFactory.createNodeList(dimensionNode));
+                        break;
+                    case "application/json":
+                    default:
+                        identifierToken = createIdentifierToken(GeneratorConstants.JSON);
+                        typeName = createSimpleNameReferenceNode(identifierToken);
+                }
+            } else {
+                typeName = getMediaTypeToken(mediaType);
+            }
+        } else {
+            typeName = getMediaTypeToken(mediaType);
+        }
+        return typeName;
     }
 
     private SeparatedNodeList<MappingFieldNode> fillRequestAnnotationValues(Token comma, List<Node> literals,
@@ -156,17 +203,5 @@ public class RequestBodyGenerator {
                 }
             }
         }
-    }
-
-    private Map.Entry<String, MediaType> createBasicLiteralNodeList(Token comma, MinutiaeList leading,
-                                                                    MinutiaeList trailing, List<Node> literals,
-                                                                    Iterator<Map.Entry<String, MediaType>> con) {
-        Map.Entry<String, MediaType> next = con.next();
-        String text = next.getKey();
-        Token literalToken = AbstractNodeFactory.createLiteralValueToken(null, text, leading, trailing);
-        BasicLiteralNode basicLiteralNode = NodeFactory.createBasicLiteralNode(null, literalToken);
-        literals.add(basicLiteralNode);
-        literals.add(comma);
-        return next;
     }
 }

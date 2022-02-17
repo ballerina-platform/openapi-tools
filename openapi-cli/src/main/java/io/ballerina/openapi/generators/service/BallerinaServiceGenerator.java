@@ -207,7 +207,7 @@ public class BallerinaServiceGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
                 .toLowerCase(Locale.ENGLISH), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         NodeList<Node> relativeResourcePath = NodeFactory.createNodeList(pathNodes);
-        ParametersGenerator parametersGenerator = new ParametersGenerator();
+        ParametersGenerator parametersGenerator = new ParametersGenerator(false, openAPI.getComponents());
         List<Node> params = parametersGenerator.generateResourcesInputs(operation);
         if (!isNullableRequired) {
             isNullableRequired = parametersGenerator.isNullableRequired();

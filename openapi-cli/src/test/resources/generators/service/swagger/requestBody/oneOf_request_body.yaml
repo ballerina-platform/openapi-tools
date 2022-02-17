@@ -1,0 +1,108 @@
+openapi: 3.0.1
+info:
+  title:  Storage Space
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+paths:
+  /storageSpaces01:
+    put:
+      summary: "Unsupported scenario 01: Customised request body with empty schema"
+      operationId: putKey
+      requestBody:
+        description: "Customised request body with empty schema"
+        content:
+          application/snowflake+json:
+            schema: {}
+      responses:
+        200:
+          description: Successful operation.
+    post:
+      summary: "Unsupported scenario 02: Customised request body with oneOf schema"
+      operationId: post
+      requestBody:
+        description: "Customised request body"
+        content:
+          application/snowflake+json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/HandleRequest_RequestBody"
+                - $ref: "#/components/schemas/HandleRequest_RequestBody02"
+      responses:
+        200:
+          description: Successful operation.
+  /storageSpaces02:
+    post:
+      summary: "Unsupported scenario 03: Request body with oneOf schema"
+      operationId: postKey
+      requestBody:
+        description: "Ballerina not support for oneOf data type in request body"
+        content:
+          application/xml:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/HandleRequest_RequestBody"
+                - $ref: "#/components/schemas/HandleRequest_RequestBody02"
+      responses:
+        200:
+          description: Successful operation.
+    put:
+      summary: "Unsupported scenario 04: Request body with oneOf schema with integer, number"
+      operationId: put
+      requestBody:
+        description: "Ballerina not support for oneOf data type in request body"
+        content:
+          text/plain:
+            schema:
+              oneOf:
+                - type: string
+                - type: integer
+                - type: number
+      responses:
+        200:
+          description: Successful operation.
+  /storageSpaces/{name}:
+    put:
+      summary: Put key value
+      operationId: key
+      parameters:
+        - name: name
+          in: path
+          description: name of the storage space
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Value to be added
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: string
+                - type: integer
+                - type: number
+                - type: object
+      responses:
+        200:
+          description: Successful operation.
+        400:
+          description: Invalid storage space name supplied
+components:
+  schemas:
+    HandleRequest_RequestBody:
+      title: Request/Response handler
+      type: object
+      properties:
+        headers:
+          type: string
+        body:
+          type: string
+    HandleRequest_RequestBody02:
+      title: Request/Response handler
+      type: object
+      properties:
+        headers:
+          type: string
+        body:
+          type: string

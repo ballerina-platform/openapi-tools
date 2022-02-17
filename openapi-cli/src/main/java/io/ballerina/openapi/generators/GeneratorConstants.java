@@ -140,6 +140,7 @@ public class GeneratorConstants {
     public static final String HEADER = "header";
     public static final String HEADER_VALUES = "headerValues";
     public static final String PAYLOAD = "payload";
+    public static final String PAYLOAD_KEYWORD = "Payload";
     public static final String PDF = "pdf";
     public static final String QUERY_PARAM = "queryParam";
     public static final String SELF = "self";
@@ -157,6 +158,7 @@ public class GeneratorConstants {
     public static final String ERROR = "error";
     public static final String MAP_JSON = "map<json>";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String MEDIA_TYPE_KEYWORD = "mediaType";
 
     // auth related constants
     public static final String API_KEY = "apikey";
