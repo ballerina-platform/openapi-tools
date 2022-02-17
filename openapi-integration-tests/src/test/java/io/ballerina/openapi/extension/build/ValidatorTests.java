@@ -183,13 +183,14 @@ public class ValidatorTests {
         }
     }
 
-    @Test(description = "Type mismatch with record field.")
+    @Test(description = "Negative test to assert validator warnings on type mismatch errors between OAS schema and " +
+            "Ballerina records.")
     public void typeMisMatchingInRecord() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_3");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = "WARNING [service.bal:(5:10,5:18)] Type mismatch with 'userName' field in the record 'User'" +
-                ".In OpenAPI contract its type is 'string' and resources type is 'int'.";
+        String msg = "WARNING [service.bal:(5:10,5:18)] Implementation type does not match with OAS contract type" +
+                " (expected 'int', found 'string') for the field 'userName' of type 'User'";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));

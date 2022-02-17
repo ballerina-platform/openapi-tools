@@ -141,12 +141,12 @@ class ErrorMessages {
     }
 
     static String[] typeMismatchingRecord(String fieldName, String recordName, String openapiType,
-                                          String ballerinType) {
+                                          String ballerinaType) {
         String[] error = new String[2];
         error[0] = ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0015;
-        error[1] = String.format("Type mismatch with ''%s'' field in the record ''%s''." +
-                        "In OpenAPI contract its type is ''%s'' and resources type is ''%s''. ",
-                fieldName, recordName, openapiType, ballerinType);
+        error[1] = String.format("Implementation type does not match with OAS contract type (expected ''%s''," +
+                        " found ''%s'') for the field ''%s'' of type ''%s''",
+                ballerinaType, openapiType, fieldName, recordName);
         return error;
     }
 
