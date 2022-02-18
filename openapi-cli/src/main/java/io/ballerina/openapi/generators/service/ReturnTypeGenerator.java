@@ -41,7 +41,6 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -167,8 +166,6 @@ public class ReturnTypeGenerator {
                     dataType = extractReferenceType(schema.get$ref().trim());
                     type = createBuiltinSimpleNameReferenceNode(null,
                             createIdentifierToken(dataType));
-                } else if (schema instanceof ObjectSchema) {
-                    type = ServiceGenerationUtils.getRecordTypeDescriptorNode(schema);
                 } else if (schema instanceof ComposedSchema) {
                     Iterator<Schema> iterator = ((ComposedSchema) schema).getOneOf().iterator();
                     type = getUnionNodeForOneOf(iterator);

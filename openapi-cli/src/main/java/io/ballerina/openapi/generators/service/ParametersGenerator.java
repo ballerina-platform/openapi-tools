@@ -93,9 +93,6 @@ public class ParametersGenerator {
         this.components = components;
     }
 
-    public Components getComponents() {
-        return components;
-    }
     public boolean isNullableRequired() {
         return isNullableRequired;
     }

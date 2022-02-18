@@ -107,7 +107,7 @@ public class RequestBodyTests {
             expectedExceptions = BallerinaOpenApiException.class)
     public void testRequestBodyWithUnsupportedMediaType() throws IOException, BallerinaOpenApiException {
         CodeGenerator codeGenerator = new CodeGenerator();
-        Path definitionPath = RES_DIR.resolve("swagger/oneOf_request_body.yaml");
+        Path definitionPath = RES_DIR.resolve("swagger/unsupported_request_body.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         ballerinaClientGenerator.generateSyntaxTree();

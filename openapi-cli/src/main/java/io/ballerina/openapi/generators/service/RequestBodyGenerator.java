@@ -53,9 +53,13 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescr
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_JSON;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_OCTET_STREAM;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_XML;
 import static io.ballerina.openapi.generators.GeneratorConstants.MEDIA_TYPE_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD_KEYWORD;
+import static io.ballerina.openapi.generators.GeneratorConstants.TEXT;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
@@ -103,6 +107,9 @@ public class RequestBodyGenerator {
         return createRequiredParameterNode(annotation, typeName, paramName);
     }
 
+    /**
+     * This util function is for generating type node for request payload in resource function.
+     */
     private TypeDescriptorNode getNodeForPayloadType(Components components, Map.Entry<String, MediaType> mediaType)
             throws BallerinaOpenApiException {
         TypeDescriptorNode typeName;
@@ -112,19 +119,19 @@ public class RequestBodyGenerator {
             if (schema instanceof ComposedSchema && (((ComposedSchema) schema).getOneOf() != null)) {
                 String mediaTypeContent = mediaType.getKey().trim();
                 if (mediaTypeContent.matches("text/.*")) {
-                    mediaTypeContent = "text";
+                    mediaTypeContent = TEXT;
                 }
                 IdentifierToken identifierToken;
                 switch (mediaTypeContent) {
-                    case "application/xml":
+                    case APPLICATION_XML:
                         identifierToken = createIdentifierToken(GeneratorConstants.XML);
                         typeName = createSimpleNameReferenceNode(identifierToken);
                         break;
-                    case "text":
+                    case TEXT:
                         identifierToken = createIdentifierToken(GeneratorConstants.STRING);
                         typeName = createSimpleNameReferenceNode(identifierToken);
                         break;
-                    case "application/octet-stream":
+                    case APPLICATION_OCTET_STREAM:
                         ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                                 createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
@@ -132,7 +139,7 @@ public class RequestBodyGenerator {
                                         null, createIdentifierToken(GeneratorConstants.BYTE)),
                                 NodeFactory.createNodeList(dimensionNode));
                         break;
-                    case "application/json":
+                    case APPLICATION_JSON:
                     default:
                         identifierToken = createIdentifierToken(GeneratorConstants.JSON);
                         typeName = createSimpleNameReferenceNode(identifierToken);

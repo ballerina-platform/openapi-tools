@@ -147,18 +147,23 @@ public class GeneratorConstants {
     public static final String TEXT_PREFIX = "text/";
     public static final String XML_DATA = "xmldata";
     public static final String IMAGE = "image";
-    public static final String ANY_TYPE = "*/*";
     public static final String VENDOR_SPECIFIC_TYPE = "vnd.";
-    public static final String APPLICATION_PDF = "application/pdf";
-    public static final String IMAGE_PNG = "image/png";
     public static final String MIME = "mime";
     public static final String HTTP_HEADERS = "httpHeaders";
     public static final String RESOURCE_PATH = "resourcePath";
     public static final String ARRAY = "array";
     public static final String ERROR = "error";
     public static final String MAP_JSON = "map<json>";
-    public static final String APPLICATION_JSON = "application/json";
     public static final String MEDIA_TYPE_KEYWORD = "mediaType";
+
+    public static final String ANY_TYPE = "*/*";
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_PDF = "application/pdf";
+    public static final String APPLICATION_XML = "application/xml";
+    public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+    public static final String TEXT = "text";
+    public static final String IMAGE_PNG = "image/png";
+    public static final String TEXT_PLAIN = "text/plain";
 
     // auth related constants
     public static final String API_KEY = "apikey";

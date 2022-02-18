@@ -25,11 +25,9 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -42,7 +40,6 @@ import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
@@ -71,8 +68,12 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_JSON;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_OCTET_STREAM;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_XML;
 import static io.ballerina.openapi.generators.GeneratorConstants.FALSE;
 import static io.ballerina.openapi.generators.GeneratorConstants.SERVICE_CONFIG;
+import static io.ballerina.openapi.generators.GeneratorConstants.TEXT;
 import static io.ballerina.openapi.generators.GeneratorConstants.TREAT_NILABLE_AS_OPTIONAL;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
@@ -181,9 +182,7 @@ public class ServiceGenerationUtils {
             String schemaName = getValidName(extractReferenceType(schema.get$ref()), true);
             return createSimpleNameReferenceNode(createIdentifierToken(schemaName));
         } else if (schema.getType() != null) {
-            if (schema instanceof ObjectSchema) {
-                return getRecordTypeDescriptorNode(schema);
-            } else if (schema instanceof ArraySchema) {
+            if (schema instanceof ArraySchema) {
                 TypeDescriptorNode member;
                 if (((ArraySchema) schema).getItems().get$ref() != null) {
                     member = createBuiltinSimpleNameReferenceNode(null,
@@ -220,21 +219,21 @@ public class ServiceGenerationUtils {
             throws BallerinaOpenApiException {
         String mediaTypeContent = mediaType.getKey().trim();
         if (mediaTypeContent.matches("text/.*")) {
-            mediaTypeContent = "text";
+            mediaTypeContent = TEXT;
         }
         MediaType value = mediaType.getValue();
         Schema<?> schema = value.getSchema();
         IdentifierToken identifierToken;
         switch (mediaTypeContent) {
-            case "application/json":
+            case APPLICATION_JSON:
                 return generateNodeForOASSchema(schema);
-            case "application/xml":
+            case APPLICATION_XML:
                 identifierToken = createIdentifierToken(GeneratorConstants.XML);
                 return createSimpleNameReferenceNode(identifierToken);
-            case "text":
+            case TEXT:
                 identifierToken = createIdentifierToken(GeneratorConstants.STRING);
                 return createSimpleNameReferenceNode(identifierToken);
-            case "application/octet-stream":
+            case APPLICATION_OCTET_STREAM:
                 ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                         createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
@@ -278,39 +277,5 @@ public class ServiceGenerationUtils {
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
                 , GeneratorConstants.HTTP);
         return AbstractNodeFactory.createNodeList(importForHttp);
-    }
-
-    /**
-     * This for generate record node for object schema.
-     */
-    public static TypeDescriptorNode getRecordTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
-        TypeDescriptorNode type;
-        Token recordKeyWord = createIdentifierToken("record", AbstractNodeFactory.createEmptyMinutiaeList(),
-                SINGLE_WS_MINUTIAE);
-        Token bodyStartDelimiter = createIdentifierToken("{|");
-        // Create record fields
-        List<Node> recordFields = new ArrayList<>();
-        if (schema.getProperties() != null) {
-            Map<String, Schema> properties = schema.getProperties();
-            for (Map.Entry<String, Schema> field: properties.entrySet()) {
-                Token fieldName = createIdentifierToken(field.getKey().trim());
-                String typeProperty;
-                if (field.getValue().get$ref() != null) {
-                    typeProperty = extractReferenceType(field.getValue().get$ref());
-                } else {
-                    typeProperty = convertOpenAPITypeToBallerina(field.getValue().getType());
-                }
-                Token typeRecordField = createIdentifierToken(typeProperty,
-                        AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
-                RecordFieldNode recordFieldNode =  NodeFactory.createRecordFieldNode(null, null,
-                        typeRecordField, fieldName, null, createToken(SyntaxKind.SEMICOLON_TOKEN));
-                recordFields.add(recordFieldNode);
-            }
-        }
-        NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordFields);
-        Token bodyEndDelimiter = createIdentifierToken("|}");
-        type = NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter, fieldsList,
-                null, bodyEndDelimiter);
-        return type;
     }
 }
