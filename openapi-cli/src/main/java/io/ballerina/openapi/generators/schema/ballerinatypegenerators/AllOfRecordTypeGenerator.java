@@ -80,10 +80,17 @@ public class AllOfRecordTypeGenerator extends TypeGenerator {
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         assert schema instanceof ComposedSchema;
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        List<Node> recordFieldList = generateAllOfRecordFields(composedSchema.getAllOf());
-        NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
-        return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD), createToken(OPEN_BRACE_TOKEN),
-                fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
+        List<Schema> allOfSchemas = composedSchema.getAllOf();
+        if (allOfSchemas.size() == 1 && allOfSchemas.get(0).get$ref() != null) {
+            ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(allOfSchemas.get(0));
+            return referencedTypeGenerator.generateTypeDescriptorNode();
+        } else {
+            List<Node> recordFieldList = generateAllOfRecordFields(allOfSchemas);
+            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
+            return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                    createToken(OPEN_BRACE_TOKEN), fieldNodes, null,
+                    createToken(CLOSE_BRACE_TOKEN));
+        }
     }
 
     private List<Node> generateAllOfRecordFields(List<Schema> allOfSchemas) throws BallerinaOpenApiException {
