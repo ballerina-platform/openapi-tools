@@ -203,12 +203,32 @@ public class RequestBodyTest {
         OpenApiConverter openApiConverterUtils = new OpenApiConverter();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertFalse(openApiConverterUtils.getErrors().isEmpty());
-        Assert.assertEquals(openApiConverterUtils.getErrors().get(0).getMessage(),
-                "Generated OpenAPI definition does not contain details for the resource function which has" +
-                        " `http:Request` parameters in the Ballerina service.");
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario13.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for GET method having a request body")
+    public void testRequestBodyWithGETMethod() {
+        Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario14.bal");
+        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , true);
+        Assert.assertFalse(openApiConverterUtils.getErrors().isEmpty());
+        Assert.assertEquals(openApiConverterUtils.getErrors().get(0).getMessage(), "Generated OpenAPI" +
+                " definition does not contain request body information of the `GET` method, as it's not supported" +
+                " by the OpenAPI specification.");
+        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario14.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for request body having map<string> type")
+    public void testRequestBodyWithMapString() {
+        Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario15.bal");
+        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , true);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        compareWithGeneratedFile(ballerinaFilePath, "rb_scenario15.yaml");
+    }
     @Test(description = "Generate OpenAPI spec with json file")
     public void testNestedRecordPayLoadJson() {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/nestedRecord_payload_service.bal");

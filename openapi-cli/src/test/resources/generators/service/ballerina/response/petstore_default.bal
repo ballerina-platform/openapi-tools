@@ -1,12 +1,16 @@
 import ballerina/http;
 
-listener http:Listener ep0 = new (80, config = {host: "petstore.openapi.io"});
+listener http:Listener ep0 = new (9090, config = {host: "localhost"});
 
-service /v1 on ep0 {
-    resource function get pets(int? 'limit) returns http:Response {
+service / on ep0 {
+    resource function post user(@http:Payload User payload) returns http:Response {
     }
-    resource function post pets() returns http:Created|http:Response {
+    resource function put user/[string username](@http:Payload User payload) returns http:Response {
     }
-    resource function get pets/[string petId]() returns Pets|http:Response {
+    resource function get pet/findByStatus(string status = "available") returns http:BadRequest|http:Response {
+    }
+    resource function post user/createWithList(@http:Payload User[] payload) returns User|http:Response {
+    }
+    resource function get user/logout() returns User|http:Response {
     }
 }

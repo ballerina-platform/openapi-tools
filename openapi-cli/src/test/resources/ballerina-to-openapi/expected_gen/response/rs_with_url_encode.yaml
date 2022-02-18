@@ -1,0 +1,25 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /accepted:
+    get:
+      operationId: operation_get_/accepted
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+components: {}

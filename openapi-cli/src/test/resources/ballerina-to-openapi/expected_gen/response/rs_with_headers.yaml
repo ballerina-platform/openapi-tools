@@ -1,0 +1,27 @@
+paths:
+  /status:
+    get:
+      operationId: operation_get_/status
+      responses:
+        "200":
+          description: Ok
+          headers:
+            x-rate-limit-id:
+              schema:
+                type: string
+            x-rate-limit-remaining:
+              schema:
+                type: integer
+                format: int64
+            x-rate-limit-types:
+              schema:
+                type: array
+                items:
+                  type: string
+            x-rate-limit-enable:
+              schema:
+                type: boolean
+          content:
+            text/plain:
+              schema:
+                type: string

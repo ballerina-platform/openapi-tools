@@ -33,6 +33,7 @@ import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
+import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -96,7 +97,7 @@ public class OpenAPIResourceMapper {
      * @param httpMethods   Sibling methods related to operation.
      */
     private void getResourcePath(FunctionDefinitionNode resource, List<String> httpMethods) {
-        String path = generateRelativePath(resource);
+        String path = ConverterCommonUtils.unescapeIdentifier(generateRelativePath(resource));
         Operation operation;
         for (String httpMethod : httpMethods) {
             //Iterate through http methods and fill path map.
@@ -210,10 +211,13 @@ public class OpenAPIResourceMapper {
         //Add path parameters if in path and query parameters
         OpenAPIParameterMapper openAPIParameterMapper = new OpenAPIParameterMapper(resource, op, apiDocs);
         openAPIParameterMapper.getResourceInputs(components, semanticModel);
-        if (!openAPIParameterMapper.getErrors().isEmpty()) {
+        if (openAPIParameterMapper.getErrors().size() > 1 || (openAPIParameterMapper.getErrors().size() == 1 &&
+                !openAPIParameterMapper.getErrors().get(0).getCode().equals("OAS_CONVERTOR_113"))) {
             errors.addAll(openAPIParameterMapper.getErrors());
             return Optional.empty();
         }
+        errors.addAll(openAPIParameterMapper.getErrors());
+
         OpenAPIResponseMapper openAPIResponseMapper = new OpenAPIResponseMapper(semanticModel, components,
                 resource.location());
         openAPIResponseMapper.getResourceOutput(resource, op);

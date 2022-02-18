@@ -54,7 +54,11 @@ public enum DiagnosticMessages {
             "file in .yaml or .json format.",
             DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_112("OAS_CONVERTOR_112", "Provided OpenAPI contract contains parsing error(s).",
-                      DiagnosticSeverity.ERROR);
+                      DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_113("OAS_CONVERTOR_113",
+            "Generated OpenAPI definition does not contain request body information of the `GET` method," +
+                    " as it's not supported by the OpenAPI specification.",
+            DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;

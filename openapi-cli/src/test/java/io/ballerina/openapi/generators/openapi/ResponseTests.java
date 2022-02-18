@@ -150,27 +150,33 @@ public class ResponseTests {
     }
 
     @Test(description = "Test for return type has `http:Response`.")
-    public void testHttpResponse() {
+    public void testHttpResponse() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario19.bal");
         OpenApiConverter openApiConverterUtils = new OpenApiConverter();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertFalse(openApiConverterUtils.getErrors().isEmpty());
-        Assert.assertEquals(openApiConverterUtils.getErrors().get(0).getMessage(),
-                "Generated OpenAPI definition does not contain details for the " +
-                        "resource function which has `http:Response` as return type in the Ballerina service.");
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario19.yaml");
     }
 
     @Test(description = "Test for return type has `http:Response|error?`.")
-    public void testUnionHttpResponse() {
+    public void testUnionHttpResponse() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_scenario20.bal");
         OpenApiConverter openApiConverterUtils = new OpenApiConverter();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
-        Assert.assertFalse(openApiConverterUtils.getErrors().isEmpty());
-        Assert.assertEquals(openApiConverterUtils.getErrors().get(0).getMessage(),
-                "Generated OpenAPI definition does not contain details for the " +
-                        "resource function which has `http:Response` as return type in the Ballerina service.");
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_scenario20.yaml");
+    }
+
+    @Test(description = "Test for return type having form value content.")
+    public void urlEncodeResponse() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/rs_with_url_encode.bal");
+        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_with_url_encode.yaml");
     }
 
     @AfterMethod
