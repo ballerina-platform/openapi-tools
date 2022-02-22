@@ -205,7 +205,7 @@ public class ValidatorTests {
         }
     }
 
-    @Test(description = "Validator for resource path has root path '.'")
+    @Test(description = "Test to assert validator errors for resources having the root path ('.')")
     public void validatorWithRootPath() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_8");
