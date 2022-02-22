@@ -221,7 +221,7 @@ public class ValidatorTests {
             if (generatedLog.contains(msg)) {
                 Assert.assertTrue(true);
             } else {
-                Assert.fail("OpenAPIValidator execution fail.");
+                Assert.fail("OpenAPIValidator execution failed.");
             }
         }
     }
