@@ -45,7 +45,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
+import static io.ballerina.openapi.validator.Constants.ARRAY;
+import static io.ballerina.openapi.validator.Constants.ARRAY_BRACKETS;
+import static io.ballerina.openapi.validator.Constants.BOOLEAN;
+import static io.ballerina.openapi.validator.Constants.DECIMAL;
+import static io.ballerina.openapi.validator.Constants.INT;
+import static io.ballerina.openapi.validator.Constants.INTEGER;
+import static io.ballerina.openapi.validator.Constants.OBJECT;
+import static io.ballerina.openapi.validator.Constants.RECORD;
+import static io.ballerina.openapi.validator.Constants.STRING;
 import static io.ballerina.openapi.validator.ErrorMessages.couldNotFindLocation;
 
 /**
@@ -82,8 +92,8 @@ public class TypeSymbolToJsonValidatorUtil {
             } else {
                 paramName = "simpleParam";
             }
-
-            if (typeSymbol.typeKind().getName().equals(convertOpenAPITypeToBallerina(schema.getType()))) {
+            Optional<String> convertType = convertOpenAPITypeToBallerina(schema.getType());
+            if (convertType.isPresent() && typeSymbol.typeKind().getName().equals(convertType.get())) {
                 // type mismatch
                 isExitType = true;
             } else {
@@ -98,9 +108,9 @@ public class TypeSymbolToJsonValidatorUtil {
             }
             ArrayTypeSymbol arrayTypeSymbol = (ArrayTypeSymbol) typeSymbol;
             ArraySchema arraySchema = (ArraySchema) schema;
-            
-            if (arrayTypeSymbol.memberTypeDescriptor().typeKind().getName().toLowerCase(Locale.ENGLISH)
-                    .equals(convertOpenAPITypeToBallerina(arraySchema.getItems().getType()))) {
+            Optional<String> arrayType = convertOpenAPITypeToBallerina(arraySchema.getItems().getType());
+            if (arrayType.isPresent() && arrayTypeSymbol.memberTypeDescriptor().typeKind().getName()
+                    .toLowerCase(Locale.ENGLISH).equals(arrayType.get())) {
                 isExitType = true;
             } else if ((arraySchema.getItems() instanceof ObjectSchema) &&
                     (arrayTypeSymbol.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol)) {
@@ -165,9 +175,10 @@ public class TypeSymbolToJsonValidatorUtil {
             for (Map.Entry<String, Schema> entry : properties.entrySet()) {
                 if (fieldSymbol.getValue().getName().orElseThrow().equals(entry.getKey())) {
                     isExist = true;
-                    if (!fieldSymbol.getValue().typeDescriptor().typeKind().getName()
-                            .equals(TypeSymbolToJsonValidatorUtil.convertOpenAPITypeToBallerina(entry.getValue()
-                                    .getType())) && (!(entry.getValue() instanceof ObjectSchema)) &&
+                    Optional<String> convertType = TypeSymbolToJsonValidatorUtil.convertOpenAPITypeToBallerina(
+                            entry.getValue().getType());
+                    if (convertType.isPresent() && !fieldSymbol.getValue().typeDescriptor().typeKind().getName()
+                            .equals(convertType.get()) && (!(entry.getValue() instanceof ObjectSchema)) &&
                             (!(fieldSymbol.getValue().typeDescriptor() instanceof ArrayTypeSymbol))) {
 
                         TypeMismatch validationError = new TypeMismatch(fieldSymbol.getValue().getName().orElseThrow(),
@@ -287,9 +298,12 @@ public class TypeSymbolToJsonValidatorUtil {
                             recordRefSymbol.typeDescriptor(), syntaxTree, semanticModel, componentName, location);
                     validationErrorList.addAll(recordItemErrors);
 
-                } else if (!traverseNestedArraySymbol.memberTypeDescriptor().typeKind().getName().equals(
-                        TypeSymbolToJsonValidatorUtil.convertOpenAPITypeToBallerina(
-                                traverseNestedArraySchema.getItems().getType()))) {
+                } else if (convertOpenAPITypeToBallerina(
+                        traverseNestedArraySchema.getItems().getType()).isEmpty() ||
+                        (convertOpenAPITypeToBallerina(traverseNestedArraySchema.getItems().getType()).isPresent() &&
+                        !traverseNestedArraySymbol.memberTypeDescriptor().typeKind().getName().
+                                equals(convertOpenAPITypeToBallerina(traverseNestedArraySchema.getItems().getType())
+                                        .get()))) {
                     TypeMismatch typeMismatch = new TypeMismatch(fieldSymbol.getName().orElseThrow(),
                             convertTypeToEnum(traverseNestedArraySchema.getItems().getType()),
                             convertTypeToEnum(traverseNestedArraySymbol.memberTypeDescriptor().typeKind().getName()),
@@ -341,7 +355,7 @@ public class TypeSymbolToJsonValidatorUtil {
             case Constants.INTEGER:
                 convertedType = Constants.Type.INTEGER;
                 break;
-            case Constants.INT:
+            case INT:
                 convertedType = Constants.Type.INT;
                 break;
             case Constants.STRING:
@@ -377,31 +391,23 @@ public class TypeSymbolToJsonValidatorUtil {
      * @param type  OpenApi parameter types
      * @return ballerina type
      */
-    private static String convertOpenAPITypeToBallerina(String type) {
-        String convertedType;
+    private static Optional<String> convertOpenAPITypeToBallerina(String type) {
         switch (type) {
             case Constants.INTEGER:
-                convertedType = "int";
-                break;
+                return Optional.of(INT);
             case Constants.STRING:
-                convertedType = "string";
-                break;
+                return Optional.of(STRING);
             case Constants.BOOLEAN:
-                convertedType = "boolean";
-                break;
+                return Optional.of(BOOLEAN);
             case Constants.ARRAY:
-                convertedType = "[]";
-                break;
+                return Optional.of(ARRAY_BRACKETS);
             case Constants.OBJECT:
-                convertedType = "record";
-                break;
+                return Optional.of(RECORD);
             case Constants.DECIMAL:
-                convertedType = "decimal";
-                break;
+                return Optional.of(DECIMAL);
             default:
-                convertedType = "";
+                return Optional.empty();
         }
-        return convertedType;
     }
 
     /**
@@ -413,28 +419,28 @@ public class TypeSymbolToJsonValidatorUtil {
         String convertedType;
         switch (type) {
             case INT:
-                convertedType = "int";
+                convertedType = INT;
                 break;
             case INTEGER:
-                convertedType = "integer";
+                convertedType = INTEGER;
                 break;
             case STRING:
-                convertedType = "string";
+                convertedType = STRING;
                 break;
             case BOOLEAN:
-                convertedType = "boolean";
+                convertedType = BOOLEAN;
                 break;
             case ARRAY:
-                convertedType = "array";
+                convertedType = ARRAY;
                 break;
             case OBJECT:
-                convertedType = "object";
+                convertedType = OBJECT;
                 break;
             case RECORD:
-                convertedType = "record";
+                convertedType = RECORD;
                 break;
             case DECIMAL:
-                convertedType = "decimal";
+                convertedType = DECIMAL;
                 break;
             default:
                 convertedType = "";

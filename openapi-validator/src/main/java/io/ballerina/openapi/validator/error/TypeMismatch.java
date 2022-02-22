@@ -30,21 +30,17 @@ public class TypeMismatch extends ValidationError {
     private String fieldName;
     private Location location;
     private Constants.Type typeJsonSchema;
-    private Constants.Type typeBallerinaType;
+    private Constants.Type ballerinaType;
 
-    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType,
+    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type ballerinaType,
                         Location location) {
-        this.fieldName = fieldName;
-        this.typeJsonSchema = typeJsonSchema;
-        this.typeBallerinaType = typeBallerinaType;
-        this.recordName = null;
-        this.location = location;
+        this(fieldName, typeJsonSchema, ballerinaType, null, location);
     }
-    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType,
-                        String recordName, Location location) {
+    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema,
+                        Constants.Type ballerinaType, String recordName, Location location) {
         this.fieldName = fieldName;
         this.typeJsonSchema = typeJsonSchema;
-        this.typeBallerinaType = typeBallerinaType;
+        this.ballerinaType = ballerinaType;
         this.recordName = recordName;
         this.location = location;
     }
@@ -65,8 +61,8 @@ public class TypeMismatch extends ValidationError {
         this.typeJsonSchema = typeJsonSchema;
     }
 
-    public void setTypeBallerinaType(Constants.Type typeBallerinaType) {
-        this.typeBallerinaType = typeBallerinaType;
+    public void setBallerinaType(Constants.Type ballerinaType) {
+        this.ballerinaType = ballerinaType;
     }
 
     public String getFieldName() {
@@ -77,8 +73,8 @@ public class TypeMismatch extends ValidationError {
         return typeJsonSchema;
     }
 
-    public  Constants.Type getTypeBallerinaType() {
-        return typeBallerinaType;
+    public  Constants.Type getBallerinaType() {
+        return ballerinaType;
     }
 
     public String getRecordName() {
