@@ -17,47 +17,19 @@
  */
 package io.ballerina.openapi.validator.error;
 
-import io.ballerina.openapi.validator.Constants;
 import io.ballerina.tools.diagnostics.Location;
 
 /**
  * This model for identify the validation errors.
  */
 public class ValidationError {
-    String fieldName;
-    Constants.Type type;
-    Location parameterPos;
-    
-    public ValidationError() {
-        fieldName = null;
-        type = null;
-    }
-    public ValidationError(String fieldName, Constants.Type type, Location location) {
-        this.fieldName = fieldName;
-        this.type = type;
+    private final Location parameterPos;
+
+    public ValidationError(Location location) {
         this.parameterPos = location;
-    }
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
-
-    public void setType(Constants.Type type) {
-        this.type = type;
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public  Constants.Type getType() {
-        return type;
     }
 
     public Location getParameterPos() {
         return parameterPos;
-    }
-
-    public void setParameterPos(Location parameterPos) {
-        this.parameterPos = parameterPos;
     }
 }

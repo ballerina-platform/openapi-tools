@@ -54,9 +54,14 @@ public class Validator implements AnalysisTask<SyntaxNodeAnalysisContext> {
         Optional<MetadataNode> metadata = serviceNode.metadata();
         if (metadata.isPresent()) {
             Location location = serviceNode.location();
-            // Check annotation is available
-            getDiagnosticFromServiceNode(functions, kind, filters, semanticModel, syntaxTree,
-                    ballerinaFilePath, serviceNode, validations);
+            // 1. Check openapi annotation is available
+            // 2. Check contract path is available and exist
+//            getDiagnosticFromServiceNode(functions, kind, filters, semanticModel, syntaxTree,
+//                    ballerinaFilePath, serviceNode, validations);
+            MetadataNode serviceMetadata  = metadata.orElseThrow();
+
+
+
         }
 
 

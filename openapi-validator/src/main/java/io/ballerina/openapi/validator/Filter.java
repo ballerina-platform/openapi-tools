@@ -24,6 +24,8 @@ import java.util.List;
 
 /**
  * This for model the all tag, operations, excludeTags and excludeOperations filters.
+ *
+ * @since 2.0.0.
  */
 public class Filter {
     private final List<String> tag;
