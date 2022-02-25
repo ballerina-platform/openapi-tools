@@ -10,6 +10,6 @@ import io.ballerina.projects.plugins.CodeAnalyzer;
 public  class OpenAPICodeAnalyzer extends CodeAnalyzer {
     @Override
     public void init(CodeAnalysisContext codeAnalysisContext) {
-        codeAnalysisContext.addSyntaxNodeAnalysisTask(new ServiceValidator(), SyntaxKind.SERVICE_DECLARATION);
+        codeAnalysisContext.addSyntaxNodeAnalysisTask(new ServiceAnalysisTask(), SyntaxKind.SERVICE_DECLARATION);
     }
 }

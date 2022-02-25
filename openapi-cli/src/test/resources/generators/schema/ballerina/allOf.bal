@@ -9,7 +9,7 @@ public type Activity record {
     string uuid?;
 };
 
-public type Profile01 record {
+public type Profile record {
     # First name of the Uber user.
     string first_name?;
     # Last name of the Uber user.
@@ -19,5 +19,5 @@ public type Profile01 record {
 public type Subject record {
     int id?;
     string name?;
-    record {*Activity;} subject_type?;
+    record {*Activity; *Profile;} subject_type?;
 };

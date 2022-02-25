@@ -18,6 +18,7 @@
 package io.ballerina.openapi.validator.tests;
 
 import io.ballerina.projects.DiagnosticResult;
+import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.Project;
 import org.testng.annotations.Test;
 
@@ -27,20 +28,20 @@ import java.nio.file.Paths;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getCompilation;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
-public class PreValidationTests {
-    //1. compilation issue tests error,
-    //2. compilation issue tests warning,
-    //3. annotation is empty
-    //4. annotation is with only embed field
-    //5. multiple service node - not to repeat diagnostic
-    //6. multiple service node with multiple annotation
-    private static final Path RES_DIR = Paths.get("src/test/resources/pre-processing")
+public class OpenAPIAnnotationNegativeTests {
+    private static final Path RES_DIR = Paths.get("src/test/resources/annotation")
             .toAbsolutePath();
-    @Test(description = "Annotation with non http service")
-    public void nonHttpService() {
-        Path path = RES_DIR.resolve("non_http.bal");
+    //1. contract path " "
+    //2. contract path location invaild
+    //3. contract in invalid
+    //4. contract path missing with filters enable
+    @Test(description = "contract attribute has path empty string")
+    public void contractPathEmptyString() {
+        Path path = RES_DIR.resolve("negative/contract_path_empty.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         int i = diagnostic.diagnosticCount();
     }
+
+
 }

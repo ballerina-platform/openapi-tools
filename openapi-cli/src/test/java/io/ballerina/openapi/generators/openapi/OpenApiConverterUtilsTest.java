@@ -29,6 +29,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.ballerina.openapi.generators.common.TestUtils.getStringFromGivenBalFile;
+import static io.ballerina.openapi.generators.openapi.TestUtils.compareWithGeneratedFile;
+import static io.ballerina.openapi.generators.openapi.TestUtils.deleteDirectory;
+import static io.ballerina.openapi.generators.openapi.TestUtils.deleteGeneratedFiles;
+
 /**
  * Ballerina conversion to OpenApi will test in this class.
  */
@@ -118,25 +123,25 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec for resource has .")
     public void testPathscenario01() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("path_scenario01.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "path_scenario01.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "path_scenario01.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec multiple resource")
     public void testPathscenario02() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("path_scenario02.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "path_scenario02.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "path_scenario02.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with multipath including .")
     public void testPathscenario03() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("path_scenario03.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "path_scenario03.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "path_scenario03.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec with path parameter including .")
     public void testPathscenario04() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("path_scenario04.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "path_scenario04.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "path_scenario04.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for build project")
@@ -151,19 +156,19 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Generate OpenAPI spec for build project")
     public void testForResponse01() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("scenario01.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response01.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "response01.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for build project")
     public void testForResponse02() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("scenario02.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response02.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "response02.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for given ballerina file has only compiler warning")
     public void testForCompilerWarning() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("compiler_warning.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
+        compareWithGeneratedFile(ballerinaFilePath, "compiler_warning.yaml");
     }
 
     @Test(description = "Test for non http services")
@@ -174,9 +179,36 @@ public class OpenApiConverterUtilsTest {
         Assert.assertTrue(!Files.exists(tempDir.resolve("query_openapi.yaml")));
     }
 
+    @Test(description = "Given ballerina service has escape character")
+    public void testForRemovingEscapeIdentifier() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("escape_identifier.bal");
+        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        try {
+            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
+                    "escape_identifier.yaml");
+            OpenApiConverter openApiConverter = new OpenApiConverter();
+            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
+                    , false);
+            if (Files.exists(tempDir.resolve("v1_abc-hello_openapi.yaml"))) {
+                String generatedYaml = getStringFromGivenBalFile(tempDir, "v1_abc-hello_openapi.yaml");
+                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+            } else {
+                Assert.fail("Yaml was not generated");
+            }
+        } catch (IOException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("v1_abc-hello_openapi.yaml", tempDir);
+            deleteDirectory(tempDir);
+            System.gc();
+        }
+    }
+
     @AfterMethod
     public void cleanUp() {
-        TestUtils.deleteDirectory(this.tempDir);
+        deleteDirectory(this.tempDir);
     }
 
     @AfterTest

@@ -25,9 +25,7 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.validator.ResourceMethod;
-import io.ballerina.openapi.validator.ResourcePathSummary;
-import io.ballerina.openapi.validator.ResourceWithOperation;
+import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -67,149 +65,140 @@ public class ValidatorTest {
         return project;
     }
 
-    public static Schema getComponet(OpenAPI api, String componentName) {
-        return api.getComponents().getSchemas().get(componentName);
-    }
+//    // Summaries the all the functions
+//    public static ResourceMethod getResourceMethod(Project project, String path, String method) {
+//        List<FunctionDefinitionNode> functions = new ArrayList<>();
+//        Map<String, ResourcePathSummary> resourcePathSummaryMap = new HashMap<>();
+//        SyntaxTree syntaxTree;
+//        Package packageName = project.currentPackage();
+//        DocumentId docId;
+//        Document doc;
+//        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
+//            docId = project.documentId(project.sourceRoot());
+//            ModuleId moduleId = docId.moduleId();
+//            doc = project.currentPackage().module(moduleId).document(docId);
+//        } else {
+//            // Take module instance for traversing the syntax tree
+//            Module currentModule = packageName.getDefaultModule();
+//            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
+//
+//            docId = documentIterator.next();
+//            doc = currentModule.document(docId);
+//        }
+//        syntaxTree = doc.syntaxTree();
+//        ModulePartNode modulePartNode = syntaxTree.rootNode();
+//        for (Node node : modulePartNode.members()) {
+//            SyntaxKind syntaxKind = node.kind();
+//            // Load a listen_declaration for the server part in the yaml spec
+//            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
+//                ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
+//                // Check annotation is available
+//                Optional<MetadataNode> metadata = serviceDeclarationNode.metadata();
+//                MetadataNode openApi = metadata.orElseThrow();
+//                if (!openApi.annotations().isEmpty()) {
+//                    NodeList<AnnotationNode> annotations = openApi.annotations();
+//
+//                    //summaries functions
+//                    NodeList<Node> members = serviceDeclarationNode.members();
+//                    Iterator<Node> iterator = members.iterator();
+//                    while (iterator.hasNext()) {
+//                        Node next = iterator.next();
+//                        if (next instanceof FunctionDefinitionNode) {
+//                            functions.add((FunctionDefinitionNode) next);
+//                        }
+//                    }
+//                    // Make resourcePath summery
+//                    resourcePathSummaryMap = ResourceWithOperation.summarizeResources(functions);
+//                }
+//            }
+//        }
+//        ResourcePathSummary resourcePathSummary = resourcePathSummaryMap.get(path);
+//        Map<String, ResourceMethod> methods = resourcePathSummary.getMethods();
+//        return methods.get(method);
+//    }
+//
+//    // Take semantic model
+//    public static SemanticModel getSemanticModel(Project project) {
+//        Package packageName = project.currentPackage();
+//        DocumentId docId;
+//        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
+//            docId = project.documentId(project.sourceRoot());
+//            ModuleId moduleId = docId.moduleId();
+//        } else {
+//            // Take module instance for traversing the syntax tree
+//            Module currentModule = packageName.getDefaultModule();
+//            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
+//            docId = documentIterator.next();
+//        }
+//        return project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
+//    }
+//
+//    //Take syntax tree
+//    public static SyntaxTree getSyntaxTree(Project project) {
+//        //Travers and filter service
+//        //Take package name for project
+//        Package packageName = project.currentPackage();
+//        DocumentId docId;
+//        Document doc;
+//        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
+//            docId = project.documentId(project.sourceRoot());
+//            ModuleId moduleId = docId.moduleId();
+//            doc = project.currentPackage().module(moduleId).document(docId);
+//        } else {
+//            // Take module instance for traversing the syntax tree
+//            Module currentModule = packageName.getDefaultModule();
+//            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
+//
+//            docId = documentIterator.next();
+//            doc = currentModule.document(docId);
+//        }
+//        return doc.syntaxTree();
+//    }
+//
+//    public static ServiceDeclarationNode getServiceDeclarationNode(Project project) {
+//        SyntaxTree syntaxTree;
+//        Package packageName = project.currentPackage();
+//        DocumentId docId;
+//        Document doc;
+//        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
+//            docId = project.documentId(project.sourceRoot());
+//            ModuleId moduleId = docId.moduleId();
+//            doc = project.currentPackage().module(moduleId).document(docId);
+//        } else {
+//            // Take module instance for traversing the syntax tree
+//            Module currentModule = packageName.getDefaultModule();
+//            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
+//
+//            docId = documentIterator.next();
+//            doc = currentModule.document(docId);
+//        }
+//        syntaxTree = doc.syntaxTree();
+//        ModulePartNode modulePartNode = syntaxTree.rootNode();
+//        for (Node node : modulePartNode.members()) {
+//            SyntaxKind syntaxKind = node.kind();
+//            // Load a listen_declaration for the server part in the yaml spec
+//            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
+//                return (ServiceDeclarationNode) node;
+//            }
+//        }
+//        return null;
+//    }
+//    public static AnnotationNode getAnnotationNode(ServiceDeclarationNode serviceDeclarationNode) {
+//        // Check annotation is available
+//        Optional<MetadataNode> metadata = serviceDeclarationNode.metadata();
+//        MetadataNode openApi  = metadata.orElseThrow();
+//        if (!openApi.annotations().isEmpty()) {
+//            NodeList<AnnotationNode> annotations = openApi.annotations();
+//            for (AnnotationNode annotationNode : annotations) {
+//                return annotationNode;
+//            }
+//        }
+//        return null;
+//    }
 
-    public static Schema getSchema(OpenAPI api, String path) {
-        return  api.getPaths().get(path).getGet().getParameters().get(0).getSchema();
-    }
-
-    // Summaries the all the functions
-    public static ResourceMethod getResourceMethod(Project project, String path, String method) {
-        List<FunctionDefinitionNode> functions = new ArrayList<>();
-        Map<String, ResourcePathSummary> resourcePathSummaryMap = new HashMap<>();
-        SyntaxTree syntaxTree;
-        Package packageName = project.currentPackage();
-        DocumentId docId;
-        Document doc;
-        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
-            docId = project.documentId(project.sourceRoot());
-            ModuleId moduleId = docId.moduleId();
-            doc = project.currentPackage().module(moduleId).document(docId);
-        } else {
-            // Take module instance for traversing the syntax tree
-            Module currentModule = packageName.getDefaultModule();
-            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
-
-            docId = documentIterator.next();
-            doc = currentModule.document(docId);
-        }
-        syntaxTree = doc.syntaxTree();
-        ModulePartNode modulePartNode = syntaxTree.rootNode();
-        for (Node node : modulePartNode.members()) {
-            SyntaxKind syntaxKind = node.kind();
-            // Load a listen_declaration for the server part in the yaml spec
-            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
-                // Check annotation is available
-                Optional<MetadataNode> metadata = serviceDeclarationNode.metadata();
-                MetadataNode openApi = metadata.orElseThrow();
-                if (!openApi.annotations().isEmpty()) {
-                    NodeList<AnnotationNode> annotations = openApi.annotations();
-
-                    //summaries functions
-                    NodeList<Node> members = serviceDeclarationNode.members();
-                    Iterator<Node> iterator = members.iterator();
-                    while (iterator.hasNext()) {
-                        Node next = iterator.next();
-                        if (next instanceof FunctionDefinitionNode) {
-                            functions.add((FunctionDefinitionNode) next);
-                        }
-                    }
-                    // Make resourcePath summery
-                    resourcePathSummaryMap = ResourceWithOperation.summarizeResources(functions);
-                }
-            }
-        }
-        ResourcePathSummary resourcePathSummary = resourcePathSummaryMap.get(path);
-        Map<String, ResourceMethod> methods = resourcePathSummary.getMethods();
-        return methods.get(method);
-    }
-
-    // Take semantic model
-    public static SemanticModel getSemanticModel(Project project) {
-        Package packageName = project.currentPackage();
-        DocumentId docId;
-        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
-            docId = project.documentId(project.sourceRoot());
-            ModuleId moduleId = docId.moduleId();
-        } else {
-            // Take module instance for traversing the syntax tree
-            Module currentModule = packageName.getDefaultModule();
-            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
-            docId = documentIterator.next();
-        }
-        return project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
-    }
-
-    //Take syntax tree
-    public static SyntaxTree getSyntaxTree(Project project) {
-        //Travers and filter service
-        //Take package name for project
-        Package packageName = project.currentPackage();
-        DocumentId docId;
-        Document doc;
-        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
-            docId = project.documentId(project.sourceRoot());
-            ModuleId moduleId = docId.moduleId();
-            doc = project.currentPackage().module(moduleId).document(docId);
-        } else {
-            // Take module instance for traversing the syntax tree
-            Module currentModule = packageName.getDefaultModule();
-            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
-
-            docId = documentIterator.next();
-            doc = currentModule.document(docId);
-        }
-        return doc.syntaxTree();
-    }
-
-    public static ServiceDeclarationNode getServiceDeclarationNode(Project project) {
-        SyntaxTree syntaxTree;
-        Package packageName = project.currentPackage();
-        DocumentId docId;
-        Document doc;
-        if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
-            docId = project.documentId(project.sourceRoot());
-            ModuleId moduleId = docId.moduleId();
-            doc = project.currentPackage().module(moduleId).document(docId);
-        } else {
-            // Take module instance for traversing the syntax tree
-            Module currentModule = packageName.getDefaultModule();
-            Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
-
-            docId = documentIterator.next();
-            doc = currentModule.document(docId);
-        }
-        syntaxTree = doc.syntaxTree();
-        ModulePartNode modulePartNode = syntaxTree.rootNode();
-        for (Node node : modulePartNode.members()) {
-            SyntaxKind syntaxKind = node.kind();
-            // Load a listen_declaration for the server part in the yaml spec
-            if (syntaxKind.equals(SyntaxKind.SERVICE_DECLARATION)) {
-                return (ServiceDeclarationNode) node;
-            }
-        }
-        return null;
-    }
-    public static AnnotationNode getAnnotationNode(ServiceDeclarationNode serviceDeclarationNode) {
-        // Check annotation is available
-        Optional<MetadataNode> metadata = serviceDeclarationNode.metadata();
-        MetadataNode openApi  = metadata.orElseThrow();
-        if (!openApi.annotations().isEmpty()) {
-            NodeList<AnnotationNode> annotations = openApi.annotations();
-            for (AnnotationNode annotationNode : annotations) {
-                return annotationNode;
-            }
-        }
-        return null;
-    }
-
-    public static PackageCompilation getCompilation(Project project) {
-
+    public static DiagnosticResult getCompilation(Project project) {
         Package cPackage = project.currentPackage();
-        return  cPackage.getCompilation();
+        return  cPackage.getCompilation().diagnosticResult();
 
     }
 

@@ -17,6 +17,15 @@
  */
 package io.ballerina.openapi.validator;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -26,6 +35,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
+
+import static io.ballerina.openapi.validator.Constants.BALLERINA;
+import static io.ballerina.openapi.validator.Constants.HTTP;
 
 /**
  * This util class contain the common util functions that use in validator process.
@@ -59,18 +73,59 @@ public class ValidatorUtils {
         parseOptions.setResolveFully(true);
 
         if (!Files.exists(contractPath)) {
-            throw new OpenApiValidatorException(ErrorMessages.invalidFilePath(definitionURI)[1]);
+//            throw new OpenApiValidatorException(ErrorMessages.invalidFilePath(definitionURI)[1]);
         }
         if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json"))) {
-            throw new OpenApiValidatorException(ErrorMessages.invalidFile()[1]);
+//            throw new OpenApiValidatorException(ErrorMessages.invalidFile()[1]);
         }
         String openAPIFileContent = Files.readString(Paths.get(definitionURI));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null,
                 parseOptions);
         OpenAPI api = parseResult.getOpenAPI();
         if (api == null) {
-            throw new OpenApiValidatorException(ErrorMessages.parserException(definitionURI)[1]);
+//            throw new OpenApiValidatorException(ErrorMessages.parserException(definitionURI)[1]);
         }
         return api;
+    }
+
+    /**
+     * This util function is to check the given service is http service.
+     *
+     * @param serviceNode    Service node for analyse
+     * @param semanticModel  Semantic model
+     * @return  boolean output
+     */
+    public static boolean isHttpService(ServiceDeclarationNode serviceNode, SemanticModel semanticModel) {
+        Optional<Symbol> serviceSymbol = semanticModel.symbol(serviceNode);
+        ServiceDeclarationSymbol serviceNodeSymbol = (ServiceDeclarationSymbol) serviceSymbol.get();
+        List<TypeSymbol> listenerTypes = (serviceNodeSymbol).listenerTypes();
+        for (TypeSymbol listenerType : listenerTypes) {
+            if (isHttpListener(listenerType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isHttpListener(TypeSymbol listenerType) {
+        if (listenerType.typeKind() == TypeDescKind.UNION) {
+            return ((UnionTypeSymbol) listenerType).memberTypeDescriptors().stream()
+                    .filter(typeDescriptor -> typeDescriptor instanceof TypeReferenceTypeSymbol)
+                    .map(typeReferenceTypeSymbol -> (TypeReferenceTypeSymbol) typeReferenceTypeSymbol)
+                    .anyMatch(typeReferenceTypeSymbol -> isHttpModule(typeReferenceTypeSymbol.getModule().get()));
+        }
+
+        if (listenerType.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+            return isHttpModule(((TypeReferenceTypeSymbol) listenerType).typeDescriptor().getModule().get());
+        }
+        return false;
+    }
+
+    private static boolean isHttpModule(ModuleSymbol moduleSymbol) {
+        if (moduleSymbol.getName().isPresent()) {
+            return HTTP.equals(moduleSymbol.getName().get()) && BALLERINA.equals(moduleSymbol.id().orgName());
+        } else {
+            return false;
+        }
     }
 }
