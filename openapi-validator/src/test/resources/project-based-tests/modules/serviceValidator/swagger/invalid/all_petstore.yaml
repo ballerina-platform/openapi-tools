@@ -34,8 +34,7 @@ paths:
           description: maximum number of results to return
           required: false
           schema:
-            type: integer
-            format: int32
+            type: string
       responses:
         '200':
           description: pet response
