@@ -134,23 +134,58 @@ public class ServiceValidationTests {
         Assert.assertTrue(!error.isEmpty());
         Assert.assertTrue(error.get(0) instanceof TypeMismatch);
         Assert.assertEquals(error.get(0).getFieldName(), "petId");
-        Assert.assertEquals(((TypeMismatch) error.get(0)).getTypeBallerinaType(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) error.get(0)).getBallerinaType(), Constants.Type.INT);
         Assert.assertEquals(((TypeMismatch) error.get(0)).getTypeJsonSchema(), Constants.Type.STRING);
     }
 
-    @Test(description = "test for all the Path , Query, Payload scenarios", enabled = false)
-    public void testRecordTypeMismatch() {
+    @Test(description = "Negative test for checking type mismatches in payload record fields")
+    public void testRecordTypeMismatch() throws IOException, OpenApiValidatorException {
         project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/all_petstore.bal"));
-        Assert.assertTrue(!diagnostics.isEmpty());
-        Assert.assertEquals(diagnostics.get(0).message(), "Type mismatch with parameter ''id'' for " +
-                "the method ''delete'' of the path ''/pets/{id}''.In OpenAPI contract its type is ''integer'' and " +
-                "resources type is ''string''. ");
-        Assert.assertEquals(diagnostics.get(1).message(), "Type mismatching ''name'' field in the record " +
-                "type of the parameter ''NewPet'' for the method ''post'' of the path ''/pets''.In OpenAPI " +
-                "contract its type is ''string'' and resources type is ''int''. ");
-        Assert.assertEquals(diagnostics.get(2).message(), "'''limit1'' parameter for the method ''get'' of " +
-                "the resource associated with the path ''/pets'' is not documented in the OpenAPI contract");
-        diagnostics.clear();
+        ServiceDeclarationNode serviceDeclarationNode = ValidatorTest.getServiceDeclarationNode(project);
+        assert serviceDeclarationNode != null;
+        List<FunctionDefinitionNode> functions = getFunctionDefinitionNodes(serviceDeclarationNode);
+        Filters filters = new Filters(DiagnosticSeverity.ERROR);
+        Path contractPath = RES_DIR.resolve("swagger/invalid/all_petstore.yaml");
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
+        // Make resourcePath summary
+        Map<String, ResourcePathSummary> resourcePathMap = ResourceWithOperation.summarizeResources(functions);
+        //  Filter openApi operation according to given filters
+        List<OpenAPIPathSummary> openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filters);
+        List<ValidationError> error =
+                ResourceValidator.validateResourceAgainstOperation(openAPIPathSummaries.get(0).getOperations().get(
+                                "post"), resourcePathMap.get("/pets").getMethods().get("post"),
+                        ValidatorTest.getSemanticModel(project), ValidatorTest.getSyntaxTree(project));
+        Assert.assertTrue(error.size() == 1);
+        Assert.assertTrue(error.get(0) instanceof TypeMismatch);
+        Assert.assertEquals(error.get(0).getFieldName(), "name");
+        Assert.assertEquals(((TypeMismatch) error.get(0)).getRecordName(), "NewPet");
+        Assert.assertEquals(((TypeMismatch) error.get(0)).getBallerinaType(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) error.get(0)).getTypeJsonSchema(), Constants.Type.STRING);
+
+    }
+
+    @Test(description = "Negative test for checking type mismatches in query parameter")
+    public void testQueryParameterTypeMismatch() throws IOException, OpenApiValidatorException {
+        project = ValidatorTest.getProject(RES_DIR.resolve("ballerina/invalid/all_petstore.bal"));
+        ServiceDeclarationNode serviceDeclarationNode = ValidatorTest.getServiceDeclarationNode(project);
+        assert serviceDeclarationNode != null;
+        List<FunctionDefinitionNode> functions = getFunctionDefinitionNodes(serviceDeclarationNode);
+        Filters filters = new Filters(DiagnosticSeverity.ERROR);
+        Path contractPath = RES_DIR.resolve("swagger/invalid/all_petstore.yaml");
+        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
+        // Make resourcePath summary
+        Map<String, ResourcePathSummary> resourcePathMap = ResourceWithOperation.summarizeResources(functions);
+        //  Filter openApi operation according to given filters
+        List<OpenAPIPathSummary> openAPIPathSummaries = ResourceWithOperation.filterOpenapi(api, filters);
+        List<ValidationError> error =
+                ResourceValidator.validateResourceAgainstOperation(openAPIPathSummaries.get(0).getOperations().get(
+                                "get"), resourcePathMap.get("/pets").getMethods().get("get"),
+                        ValidatorTest.getSemanticModel(project), ValidatorTest.getSyntaxTree(project));
+        Assert.assertTrue(error.size() == 1);
+        Assert.assertTrue(error.get(0) instanceof TypeMismatch);
+        Assert.assertEquals(error.get(0).getFieldName(), "'limit");
+        Assert.assertEquals(((TypeMismatch) error.get(0)).getBallerinaType(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) error.get(0)).getTypeJsonSchema(), Constants.Type.STRING);
     }
 
     @Test(description = "test for undocumented record field  in contract")
@@ -172,7 +207,6 @@ public class ServiceValidationTests {
         Assert.assertTrue(!error.isEmpty());
         Assert.assertTrue(error.get(0) instanceof MissingFieldInJsonSchema);
         Assert.assertEquals(error.get(0).getFieldName(), "name02");
-
     }
 
 
