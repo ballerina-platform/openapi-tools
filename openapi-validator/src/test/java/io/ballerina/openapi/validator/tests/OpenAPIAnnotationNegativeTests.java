@@ -18,7 +18,6 @@
 package io.ballerina.openapi.validator.tests;
 
 import io.ballerina.projects.DiagnosticResult;
-import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.Project;
 import org.testng.annotations.Test;
 
@@ -28,6 +27,9 @@ import java.nio.file.Paths;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getCompilation;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
+/**
+ * This test set for covering the all the negative behaviours of the annotation.
+ */
 public class OpenAPIAnnotationNegativeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/annotation")
             .toAbsolutePath();
@@ -35,7 +37,9 @@ public class OpenAPIAnnotationNegativeTests {
     //2. contract path location invaild
     //3. contract in invalid
     //4. contract path missing with filters enable
-    @Test(description = "contract attribute has path empty string")
+    //5. annotation is empty
+    //6. annotation is with only embed field
+    @Test(description = "Contract attribute has path empty string")
     public void contractPathEmptyString() {
         Path path = RES_DIR.resolve("negative/contract_path_empty.bal");
         Project project = getProject(path);

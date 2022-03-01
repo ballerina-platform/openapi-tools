@@ -19,6 +19,7 @@ package io.ballerina.openapi.validator.tests;
 
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Project;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.nio.file.Path;
@@ -28,10 +29,8 @@ import static io.ballerina.openapi.validator.tests.ValidatorTest.getCompilation;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
 public class PreValidationTests {
-    //1. compilation issue tests error,
-    //2. compilation issue tests warning,
-    //3. annotation is empty
-    //4. annotation is with only embed field
+    //1. compilation issue tests error -done,
+    //2. compilation issue tests warning -done,
     //5. multiple service node - not to repeat diagnostic
     //6. multiple service node with multiple annotation
     private static final Path RES_DIR = Paths.get("src/test/resources/pre-processing")
@@ -43,4 +42,23 @@ public class PreValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         int i = diagnostic.diagnosticCount();
     }
+
+    @Test(description = "Given ballerina file has compilation issue")
+    public void compilationIssue() {
+        Path path = RES_DIR.resolve("compilation_error.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        int i = diagnostic.diagnosticCount();
+        Assert.assertEquals(i, 2);
+    }
+
+    @Test(description = "Given ballerina file has compilation issue as warning")
+    public void compilationWarnings() {
+        Path path = RES_DIR.resolve("compilation_error.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        int i = diagnostic.diagnosticCount();
+//        Assert.assertEquals(i, 2);
+    }
+
 }

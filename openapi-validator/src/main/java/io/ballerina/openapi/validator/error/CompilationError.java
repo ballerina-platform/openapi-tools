@@ -24,13 +24,13 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
  *
  * @since 2.0.0
  */
-public enum CompilationErrors {
+public enum CompilationError {
     INVALID_CONTRACT_PATH(ErrorCode.OPENAPI_VALIDATOR_001, ErrorMessage.ERROR_001,
             DiagnosticSeverity.ERROR),
     INVALID_CONTRACT_FORMAT(ErrorCode.OPENAPI_VALIDATOR_002, ErrorMessage.ERROR_002,
             DiagnosticSeverity.ERROR),
     EMPTY_CONTRACT_PATH(ErrorCode.OPENAPI_VALIDATOR_003, ErrorMessage.ERROR_003,
-            DiagnosticSeverity.ERROR),
+            DiagnosticSeverity.WARNING),
     NON_HTTP_SERVICE(ErrorCode.OPENAPI_VALIDATOR_004, ErrorMessage.ERROR_004,
             DiagnosticSeverity.WARNING),
     TYPE_MISMATCH_FIELD(ErrorCode.OPENAPI_VALIDATOR_005, ErrorMessage.ERROR_005,
@@ -50,7 +50,7 @@ public enum CompilationErrors {
     private final String description;
     private final DiagnosticSeverity severity;
 
-    CompilationErrors(ErrorCode code, ErrorMessage description, DiagnosticSeverity severity) {
+    CompilationError(ErrorCode code, ErrorMessage description, DiagnosticSeverity severity) {
 
         this.code = code.name();
         this.description = description.getMessage();

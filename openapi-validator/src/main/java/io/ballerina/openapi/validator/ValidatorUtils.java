@@ -26,6 +26,12 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.openapi.validator.error.CompilationError;
+import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticFactory;
+import io.ballerina.tools.diagnostics.DiagnosticInfo;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -127,5 +133,22 @@ public class ValidatorUtils {
         } else {
             return false;
         }
+    }
+
+    public void updateContext(SyntaxNodeAnalysisContext context, CompilationError error, Location location) {
+
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(),
+                error.getDescription(), error.getSeverity());
+        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
+                , location);
+        context.reportDiagnostic(diagnostic);
+    }
+
+    public static void updateContext(SyntaxNodeAnalysisContext context, CompilationError error,
+                                     Location location, Object... args) {
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error.getDescription(),
+                error.getSeverity());
+        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location, args);
+        context.reportDiagnostic(diagnostic);
     }
 }

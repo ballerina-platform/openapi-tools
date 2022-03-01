@@ -1,5 +1,4 @@
 import ballerina/openapi;
-import ballerina/http;
 import ballerina/graphql;
 
 // Non-http service

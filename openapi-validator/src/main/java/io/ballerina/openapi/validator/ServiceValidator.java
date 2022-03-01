@@ -27,13 +27,9 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.ballerina.openapi.validator.error.CompilationErrors;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticFactory;
-import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.Location;
 
 import java.nio.file.Path;
@@ -42,13 +38,14 @@ import java.util.Optional;
 import static io.ballerina.openapi.validator.Constants.EMBED;
 import static io.ballerina.openapi.validator.Constants.OPENAPI_ANNOTATION;
 import static io.ballerina.openapi.validator.ValidatorUtils.isHttpService;
-import static io.ballerina.openapi.validator.error.CompilationErrors.NON_HTTP_SERVICE;
+import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
+import static io.ballerina.openapi.validator.error.CompilationError.NON_HTTP_SERVICE;
 
 /**
  * This model used to filter and validate all the operations according to the given filter and filter the service
  * resource in the resource file.
  *
- * @since 2.0.0
+ * @since 2201.0.1
  */
 public class ServiceValidator {
     private SyntaxNodeAnalysisContext context;
@@ -76,18 +73,13 @@ public class ServiceValidator {
             for (AnnotationNode annotation: annotations) {
                 Node node = annotation.annotReference();
                 if (node.toString().trim().equals(OPENAPI_ANNOTATION)) {
-                    // Test given service is http service.
+                    // Test given service is http service, if not this will return WARNING and execute the ballerina
+                    // file.
                     if (!isHttpService(serviceNode, context.semanticModel())) {
-                        CompilationErrors error = NON_HTTP_SERVICE;
-                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(),
-                                error.getDescription(), error.getSeverity());
-                        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
-                                , location);
-                        context.reportDiagnostic(diagnostic);
+                        updateContext(context, NON_HTTP_SERVICE, location);
                         return;
                     }
-                    Optional<MappingConstructorExpressionNode> mappingNode =
-                            annotation.annotValue();
+                    Optional<MappingConstructorExpressionNode> mappingNode = annotation.annotValue();
                     if (mappingNode.isEmpty()) {
                         return;
                     }
@@ -97,10 +89,11 @@ public class ServiceValidator {
                     // disable.
                     boolean isEmbed = (fields.size() == 1 &&
                             (((SpecificFieldNode) fields.get(0)).fieldName().toString().trim().equals(EMBED)));
-                    if (!isEmbed) {
-                        // Check openapi contract path
-
+                    if (isEmbed) {
+                        return;
                     }
+                    // Annotation fields extract details
+
                 }
             }
         } else {
