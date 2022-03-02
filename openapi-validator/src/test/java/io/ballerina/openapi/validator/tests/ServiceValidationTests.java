@@ -209,7 +209,6 @@ public class ServiceValidationTests {
         Assert.assertEquals(error.get(0).getFieldName(), "name02");
     }
 
-
     /**
      * OneOf - Invalid Scenario examples
      */

@@ -38,6 +38,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.openapi.validator.Constants.FULL_STOP;
+import static io.ballerina.openapi.validator.Constants.SLASH;
+
 /**
  * This for finding out the all the filtered operations are documented as services in the ballerina file and all the
  * ballerina services are documented in the contract yaml file.
@@ -288,35 +291,43 @@ public class ResourceWithOperation {
             NodeList<Node> nodes = functionDefinitionNode.relativeResourcePath();
             String functionMethod = functionDefinitionNode.functionName().text().trim();
             Map<String, Node> parameterNodeMap = new HashMap<>();
-
-            StringBuilder stringBuilder = new StringBuilder();
-            String functionPath = "/";
-            stringBuilder.append(functionPath);
-            Iterator<Node> pathNodeIter = nodes.iterator();
-            while (pathNodeIter.hasNext()) {
-                Node next = pathNodeIter.next();
-                String node = next.toString().trim();
-                if (next instanceof ResourcePathParameterNode) {
-                    ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) next;
-                    String paramName = pathParameterNode.paramName().text().trim();
-                    node = "{" + paramName + "}";
-                    parameterNodeMap.put(paramName, next);
-                }
-                stringBuilder.append(node);
-            }
-            if (resourceSummaryList.containsKey(stringBuilder.toString())) {
+            String path = generatePath(nodes, parameterNodeMap);
+            if (resourceSummaryList.containsKey(path)) {
                 setParametersToMethod(functionDefinitionNode, functionMethod, parameterNodeMap,
-                        resourceSummaryList.get(stringBuilder.toString()));
+                        resourceSummaryList.get(path));
             } else {
                 ResourcePathSummary resourcePathSummary = new ResourcePathSummary();
                 //Set location as first function location
-                resourcePathSummary.setPath(stringBuilder.toString());
+                resourcePathSummary.setPath(path);
                 resourcePathSummary.setPathPosition(functionDefinitionNode.location());
                 setParametersToMethod(functionDefinitionNode, functionMethod, parameterNodeMap, resourcePathSummary);
-                resourceSummaryList.put(stringBuilder.toString(), resourcePathSummary);
+                resourceSummaryList.put(path, resourcePathSummary);
             }
         }
         return resourceSummaryList;
+    }
+
+    /**
+     * This function generates resource function path that align to OAS format.
+     */
+    private static String generatePath(NodeList<Node> nodes, Map<String, Node> parameterNodeMap) {
+        StringBuilder pathBuilder = new StringBuilder();
+        pathBuilder.append(SLASH);
+        for (Node next : nodes) {
+            String node = next.toString().trim();
+            if (next instanceof ResourcePathParameterNode) {
+                ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) next;
+                String paramName = pathParameterNode.paramName().text().trim();
+                node = "{" + paramName + "}";
+                parameterNodeMap.put(paramName, next);
+            }
+            pathBuilder.append(node);
+        }
+        String path = pathBuilder.toString();
+        if (!path.endsWith(FULL_STOP)) {
+            return path;
+        }
+        return path.substring(0, path.length() - 1);
     }
 
     private static void setParametersToMethod(FunctionDefinitionNode functionDefinitionNode, String functionMethod,
