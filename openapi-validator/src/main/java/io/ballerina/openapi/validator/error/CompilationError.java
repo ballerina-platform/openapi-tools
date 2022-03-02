@@ -44,6 +44,14 @@ public enum CompilationError {
     UNDOCUMENTED_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_009, ErrorMessage.ERROR_009,
             DiagnosticSeverity.ERROR),
     UNIMPLEMENTED_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_010, ErrorMessage.ERROR_010,
+            DiagnosticSeverity.ERROR),
+    UNEXPECTED_EXCEPTIONS(ErrorCode.OPENAPI_VALIDATOR_011, ErrorMessage.ERROR_011,
+            DiagnosticSeverity.ERROR),
+    PARSER_EXCEPTION(ErrorCode.OPENAPI_VALIDATOR_012, ErrorMessage.ERROR_012,
+            DiagnosticSeverity.ERROR),
+    BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES(ErrorCode.OPENAPI_VALIDATOR_013, ErrorMessage.ERROR_013,
+            DiagnosticSeverity.ERROR),
+    BOTH_OPERATIONS_AND_EXCLUDE_OPERATIONS_ENABLES(ErrorCode.OPENAPI_VALIDATOR_014, ErrorMessage.ERROR_014,
             DiagnosticSeverity.ERROR);
 
     private final String code;

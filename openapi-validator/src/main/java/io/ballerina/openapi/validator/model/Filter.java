@@ -15,11 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.validator;
+package io.ballerina.openapi.validator.model;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

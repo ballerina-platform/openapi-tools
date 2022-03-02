@@ -19,9 +19,9 @@
 //import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 //import io.ballerina.openapi.validator.Constants;
 //import io.ballerina.openapi.validator.Filters;
-//import io.ballerina.openapi.validator.OpenAPIPathSummary;
+//import io.ballerina.openapi.validator.model.OpenAPIPathSummary;
 //import io.ballerina.openapi.validator.OpenApiValidatorException;
-//import io.ballerina.openapi.validator.ResourcePathSummary;
+//import io.ballerina.openapi.validator.model.ResourcePathSummary;
 //import io.ballerina.openapi.validator.ResourceValidator;
 //import io.ballerina.openapi.validator.ResourceWithOperation;
 //import io.ballerina.openapi.validator.ValidatorUtils;

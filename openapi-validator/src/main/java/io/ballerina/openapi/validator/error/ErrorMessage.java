@@ -28,7 +28,11 @@ public enum ErrorMessage {
     ERROR_007(""),
     ERROR_008(""),
     ERROR_009(""),
-    ERROR_010("");
+    ERROR_010(""),
+    ERROR_011("Unexpected error occur while reading the contract : %s"),
+    ERROR_012("Couldn't read the OpenAPI contract from the given file: %s"),
+    ERROR_013("bOTH TAGS AN DE TAGS"),
+    ERROR_014("BOTH OPERATION AND E OPERATIONS");
 
     private final String message;
 

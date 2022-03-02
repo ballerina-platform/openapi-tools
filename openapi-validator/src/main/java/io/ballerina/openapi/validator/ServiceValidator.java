@@ -18,28 +18,20 @@
 
 package io.ballerina.openapi.validator;
 
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.ballerina.projects.DocumentId;
-import io.ballerina.projects.Package;
+import io.ballerina.openapi.validator.model.Filter;
+import io.ballerina.openapi.validator.model.OpenAPIPathSummary;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import io.ballerina.tools.diagnostics.Location;
+import io.swagger.v3.oas.models.OpenAPI;
 
-import java.nio.file.Path;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
-import static io.ballerina.openapi.validator.Constants.EMBED;
-import static io.ballerina.openapi.validator.Constants.OPENAPI_ANNOTATION;
-import static io.ballerina.openapi.validator.ValidatorUtils.isHttpService;
-import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
-import static io.ballerina.openapi.validator.error.CompilationError.NON_HTTP_SERVICE;
+import static io.ballerina.openapi.validator.ValidatorUtils.summarizeOpenAPI;
 
 /**
  * This model used to filter and validate all the operations according to the given filter and filter the service
@@ -49,56 +41,31 @@ import static io.ballerina.openapi.validator.error.CompilationError.NON_HTTP_SER
  */
 public class ServiceValidator {
     private SyntaxNodeAnalysisContext context;
+    private OpenAPI openAPI;
+    private Filter filter;
 
-    public void initialize(SyntaxNodeAnalysisContext context) {
+    public void initialize(SyntaxNodeAnalysisContext context,OpenAPI openAPI, Filter filter) {
         this.context = context;
+        this.openAPI = openAPI;
+        this.filter = filter;
     }
-    public void validate() {
-        ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) this.context.node();
-        Package aPackage = context.currentPackage();
-        DocumentId documentId = context.documentId();
-        Optional<Path> path = aPackage.project().documentPath(documentId);
-        Path ballerinaFilePath = path.orElse(null);
-        Optional<MetadataNode> metadata = serviceNode.metadata();
-        if (metadata.isPresent()) {
-            Location location = serviceNode.location();
-            // 1. Check openapi annotation is available
-            // 2. Check contract path is available and exist
-            MetadataNode serviceMetadata  = metadata.orElseThrow();
-            NodeList<AnnotationNode> annotations = serviceMetadata.annotations();
-            if (annotations.isEmpty()) {
-                return;
-            }
-            boolean validatorEnable = false;
-            for (AnnotationNode annotation: annotations) {
-                Node node = annotation.annotReference();
-                if (node.toString().trim().equals(OPENAPI_ANNOTATION)) {
-                    // Test given service is http service, if not this will return WARNING and execute the ballerina
-                    // file.
-                    if (!isHttpService(serviceNode, context.semanticModel())) {
-                        updateContext(context, NON_HTTP_SERVICE, location);
-                        return;
-                    }
-                    Optional<MappingConstructorExpressionNode> mappingNode = annotation.annotValue();
-                    if (mappingNode.isEmpty()) {
-                        return;
-                    }
-                    MappingConstructorExpressionNode exprNode = mappingNode.get();
-                    SeparatedNodeList<MappingFieldNode> fields = exprNode.fields();
-                    // This condition for check the annotation has `embed` field only, if there, then validation
-                    // disable.
-                    boolean isEmbed = (fields.size() == 1 &&
-                            (((SpecificFieldNode) fields.get(0)).fieldName().toString().trim().equals(EMBED)));
-                    if (isEmbed) {
-                        return;
-                    }
-                    // Annotation fields extract details
 
-                }
+    public void validate() {
+        SemanticModel semanticModel = context.semanticModel();
+        ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) this.context.node();
+
+        // 1. Summaries the OAS operations and return the filtered operations
+        List<OpenAPIPathSummary> openAPIPathSummaries = summarizeOpenAPI(openAPI, context, filter);
+        // 2. Summaries the ballerina resource
+        NodeList<Node> members = serviceNode.members();
+        List<FunctionDefinitionNode> resourceFunctions = new ArrayList<>();
+        for (Node next : members) {
+            if (next instanceof FunctionDefinitionNode) {
+                resourceFunctions.add((FunctionDefinitionNode) next);
             }
-        } else {
-            return;
         }
+        // 3. Summaries the resource functions
 
     }
 }
+

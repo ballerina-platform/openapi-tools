@@ -31,14 +31,21 @@ import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
  * This test set for covering the all the negative behaviours of the annotation.
  */
 public class OpenAPIAnnotationNegativeTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/annotation")
-            .toAbsolutePath();
+    private static final Path RES_DIR = Paths.get("src/test/resources/annotation").toAbsolutePath();
     //1. contract path " "
     //2. contract path location invaild
     //3. contract in invalid
     //4. contract path missing with filters enable
     //5. annotation is empty
     //6. annotation is with only embed field
+    @Test(description = "Contract attribute has path empty string")
+    public void annotationWithoutFields() {
+        Path path = RES_DIR.resolve("negative/annotation_without_fields.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        int i = diagnostic.diagnosticCount();
+    }
+
     @Test(description = "Contract attribute has path empty string")
     public void contractPathEmptyString() {
         Path path = RES_DIR.resolve("negative/contract_path_empty.bal");
