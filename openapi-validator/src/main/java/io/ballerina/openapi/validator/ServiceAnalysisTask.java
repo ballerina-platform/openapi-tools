@@ -17,13 +17,8 @@
  */
 package io.ballerina.openapi.validator;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-
-import java.util.List;
 
 /**
  * This model used to filter and validate all the operations according to the given filter and filter the service
@@ -33,21 +28,21 @@ import java.util.List;
  */
 public class ServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
     private final ServiceValidator serviceValidator;
+    private final PreValidator preValidator;
 
     public ServiceAnalysisTask() {
+        this.preValidator = new PreValidator();
         this.serviceValidator = new ServiceValidator();
     }
+
     @Override
     public void perform(SyntaxNodeAnalysisContext syntaxContext) {
-        // Checking receive service node has compilation issue
-        SemanticModel semanticModel = syntaxContext.semanticModel();
-        List<Diagnostic> diagnostics = semanticModel.diagnostics();
-        boolean erroneousCompilation = diagnostics.stream()
-                .anyMatch(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity());
-        if (erroneousCompilation) {
+        this.preValidator.initialize(syntaxContext);
+        this.preValidator.preValidation();
+        if (this.preValidator.getOpenAPI() == null) {
             return;
         }
-        this.serviceValidator.initialize(syntaxContext);
+        this.serviceValidator.initialize(syntaxContext, this.preValidator.getOpenAPI(), this.preValidator.getFilter());
         this.serviceValidator.validate();
 
     }

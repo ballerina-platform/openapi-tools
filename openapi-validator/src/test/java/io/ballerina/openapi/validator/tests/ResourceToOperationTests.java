@@ -21,7 +21,7 @@
 //import io.ballerina.compiler.syntax.tree.SyntaxTree;
 //import io.ballerina.openapi.validator.Constants;
 //import io.ballerina.openapi.validator.OpenApiValidatorException;
-//import io.ballerina.openapi.validator.ResourceMethod;
+//import io.ballerina.openapi.validator.model.ResourceMethod;
 //import io.ballerina.openapi.validator.ResourceValidator;
 //import io.ballerina.openapi.validator.ValidatorUtils;
 //import io.ballerina.openapi.validator.error.MissingFieldInBallerinaType;
