@@ -61,4 +61,23 @@ public class PreValidationTests {
 //        Assert.assertEquals(i, 2);
     }
 
+
+    @Test(description = "Given ballerina file has compilation issue as warning")
+    public void unImplementedPathAndOperations() {
+        Path path = RES_DIR.resolve("unimplemented_resources.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        int i = diagnostic.diagnosticCount();
+        Assert.assertEquals(i, 4);
+    }
+
+    @Test(description = "Given ballerina file has compilation issue as warning")
+    public void undocumentedPathAndOperations() {
+        Path path = RES_DIR.resolve("undocumented_resources.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        int i = diagnostic.diagnosticCount();
+        Assert.assertEquals(i, 6);
+    }
+
 }

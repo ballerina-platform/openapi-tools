@@ -49,5 +49,17 @@ public class Constants {
     public static final String SLASH = "/";
     public static final String HTTP_HEADER = "http:Header";
     public static final String HTTP_PAYLOAD = "http:Payload";
+    public static final String HTTP_REQUEST = "http:Request";
+    public static final String ARRAY = "array";
+    public static final String ARRAY_BRACKETS = "[]";
+    public static final String STRING = "string";
+    public static final String BOOLEAN = "boolean";
+    public static final String INTEGER = "integer";
+    public static final String OBJECT = "object";
+    public static final String DECIMAL = "decimal";
+    public static final String RECORD = "record";
+    public static final String NUMBER = "number";
+    public static final String INT = "int";
+    public static final String FLOAT = "float";
 
 }

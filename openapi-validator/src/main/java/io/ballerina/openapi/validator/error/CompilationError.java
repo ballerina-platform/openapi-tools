@@ -52,7 +52,16 @@ public enum CompilationError {
     BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES(ErrorCode.OPENAPI_VALIDATOR_013, ErrorMessage.ERROR_013,
             DiagnosticSeverity.ERROR),
     BOTH_OPERATIONS_AND_EXCLUDE_OPERATIONS_ENABLES(ErrorCode.OPENAPI_VALIDATOR_014, ErrorMessage.ERROR_014,
+            DiagnosticSeverity.ERROR),
+    UNIMPLEMENTED_RESOURCE_FUNCTION(ErrorCode.OPENAPI_VALIDATOR_015, ErrorMessage.ERROR_015,
+            DiagnosticSeverity.ERROR),
+    UNDOCUMENTED_RESOURCE_FUNCTIONS(ErrorCode.OPENAPI_VALIDATOR_016, ErrorMessage.ERROR_016,
+            DiagnosticSeverity.ERROR),
+    UNIMPLEMENTED_RESOURCE_PATH(ErrorCode.OPENAPI_VALIDATOR_017, ErrorMessage.ERROR_017,
+            DiagnosticSeverity.ERROR),
+    UNDOCUMENTED_RESOURCE_PATH(ErrorCode.OPENAPI_VALIDATOR_018, ErrorMessage.ERROR_018,
             DiagnosticSeverity.ERROR);
+
 
     private final String code;
     private final String description;

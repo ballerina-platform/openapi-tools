@@ -208,7 +208,6 @@ public class PreValidator {
             }
             if (relativePath != null && Files.exists(relativePath)) {
                 return parseOpenAPIFile(context, relativePath.toString(), location);
-
             }
         } catch (IOException e) {
             updateContext(context, UNEXPECTED_EXCEPTIONS, location, e.getMessage());

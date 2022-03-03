@@ -64,11 +64,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.openapi.validator.Constants.ARRAY_BRACKETS;
 import static io.ballerina.openapi.validator.Constants.BALLERINA;
+import static io.ballerina.openapi.validator.Constants.BOOLEAN;
+import static io.ballerina.openapi.validator.Constants.DECIMAL;
+import static io.ballerina.openapi.validator.Constants.FLOAT;
 import static io.ballerina.openapi.validator.Constants.FULL_STOP;
 import static io.ballerina.openapi.validator.Constants.HTTP;
+import static io.ballerina.openapi.validator.Constants.INT;
 import static io.ballerina.openapi.validator.Constants.JSON;
+import static io.ballerina.openapi.validator.Constants.NUMBER;
+import static io.ballerina.openapi.validator.Constants.RECORD;
 import static io.ballerina.openapi.validator.Constants.SLASH;
+import static io.ballerina.openapi.validator.Constants.STRING;
 import static io.ballerina.openapi.validator.Constants.YAML;
 import static io.ballerina.openapi.validator.Constants.YML;
 
@@ -115,7 +123,7 @@ public class ValidatorUtils {
                 parseOptions);
         OpenAPI api = parseResult.getOpenAPI();
         if (api == null) {
-            updateContext(context, CompilationError.PARSER_EXCEPTION, location);
+            updateContext(context, CompilationError.PARSER_EXCEPTION, location, definitionURI);
         }
         return api;
     }
@@ -281,17 +289,15 @@ public class ValidatorUtils {
     public static Map<String, ResourcePathSummary> summarizeResources(List<FunctionDefinitionNode> functions) {
         // Iterate resources available in a service and extract details to be validated.
         Map<String, ResourcePathSummary> resourceSummaryList = new HashMap<>();
-        for (FunctionDefinitionNode functionDefinitionNode: functions) {
-            NodeList<Node> relativeResourcePathNodes = functionDefinitionNode.relativeResourcePath();
-//            String functionMethod = functionDefinitionNode.functionName().text().trim();
+        for (FunctionDefinitionNode resourceNode: functions) {
+            NodeList<Node> relativeResourcePathNodes = resourceNode.relativeResourcePath();
             Map<String, Node> parameterNodeMap = new HashMap<>();
             String path = generatePath(relativeResourcePathNodes, parameterNodeMap);
             if (resourceSummaryList.containsKey(path)) {
-                extractResourceMethodDetails(functionDefinitionNode,
-                        resourceSummaryList.get(path));
+                extractResourceMethodDetails(resourceNode, path, resourceSummaryList.get(path));
             } else {
                 ResourcePathSummary resourcePathSummary = new ResourcePathSummary(path);
-                extractResourceMethodDetails(functionDefinitionNode, resourcePathSummary);
+                extractResourceMethodDetails(resourceNode, path, resourcePathSummary);
                 resourceSummaryList.put(path, resourcePathSummary);
             }
         }
@@ -321,54 +327,91 @@ public class ValidatorUtils {
         return path.substring(0, path.length() - 1);
     }
 
+    /**
+     * This util function is to extract the function node and summarised relevant details in resource model.
+     *
+     * @param resourceNode  FunctionNode for resource
+     * @param path          Resource path
+     * @param resourcePath {@link ResourcePathSummary} that collection of resource method for specific path.
+     */
     private static void extractResourceMethodDetails(FunctionDefinitionNode resourceNode, String path,
                                                      ResourcePathSummary resourcePath) {
 
         FunctionSignatureNode signatureNode = resourceNode.functionSignature();
+        String httpMethod = resourceNode.functionName().text().trim();
         SeparatedNodeList<ParameterNode> parameters = signatureNode.parameters();
-        Iterator<ParameterNode> parameterIterator = parameters.iterator();
+        // Create resource builder
         ResourceMethod.ResourceMethodBuilder resourceMethodBuilder = new ResourceMethod.ResourceMethodBuilder();
-        resourceMethodBuilder.method(resourceNode.functionName().text().trim());
-        resourceMethodBuilder.resourcePosition(resourceNode.location());
-        while (parameterIterator.hasNext()) {
-            ParameterNode param = parameterIterator.next();
-            Map<String, Node> headers = new HashMap<>();
+        resourceMethodBuilder.path(path);
+        resourceMethodBuilder.method(httpMethod);
+        resourceMethodBuilder.location(resourceNode.location());
 
+        Map<String, ParameterNode> parameterNodes = new HashMap<>();
+        Map<String, Node> headers = new HashMap<>();
+
+        for (ParameterNode param : parameters) {
+            // To avoid the http:Caller validation and filter the headers and payload.
             if (param instanceof RequiredParameterNode) {
                 RequiredParameterNode requiredParamNode = (RequiredParameterNode) param;
                 NodeList<AnnotationNode> annotations = requiredParamNode.annotations();
                 // Set payloads and headers
-                for (AnnotationNode annotation: annotations) {
-                    if((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
-                        headers.put(requiredParamNode.paramName().orElse(null).text(), requiredParamNode);
+                for (AnnotationNode annotation : annotations) {
+                    if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
+                        headers.put(requiredParamNode.paramName().orElseThrow().text(), requiredParamNode);
                     } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
                         resourceMethodBuilder.body(requiredParamNode);
                     }
                 }
+                if (annotations.isEmpty()) {
+                    parameterNodes.put(requiredParamNode.paramName().orElseThrow().text(), requiredParamNode);
+                }
 
             } else if (param instanceof DefaultableParameterNode) {
-
-            }
-            resourceMethodBuilder.headers(headers);
-
-            if (!param.toString().contains("http:Caller") && !param.toString().contains("http:Request")) {
-                String[] qParam = param.toString().trim().split(" ");
-                String paramName;
-                if (qParam.length > 1) {
-                    paramName = qParam[qParam.length - 1];
-                } else {
-                    paramName = param.toString().trim();
+                DefaultableParameterNode defaultParam = (DefaultableParameterNode) param;
+                NodeList<AnnotationNode> annotations = defaultParam.annotations();
+                // Set payloads and headers
+                for (AnnotationNode annotation : annotations) {
+                    if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
+                        headers.put(defaultParam.paramName().orElseThrow().text(), defaultParam);
+                    }
                 }
-                if (param.toString().contains("http:Payload")) {
-                    resourceMethod.setBody(true);
+                if (annotations.isEmpty()) {
+                    parameterNodes.put(defaultParam.paramName().orElseThrow().text(), defaultParam);
                 }
-                parameterNodeMap.put(paramName, param);
             }
         }
-//        resourceMethod.setMethod(functionMethod);
-//        resourceMethod.setParameters(parameterNodeMap);
-//        resourceMethod.setResourcePosition(resourceNode.location());
-//        resourcePathSummary2.addMethod(functionMethod, resourceMethod);
+        resourceMethodBuilder.headers(headers);
+        resourceMethodBuilder.parameters(parameterNodes);
+        resourceMethodBuilder.returnNode(signatureNode.returnTypeDesc().orElse(null));
+        resourcePath.addMethod(httpMethod, resourceMethodBuilder.build());
+    }
+
+    /**
+     * Method for convert openApi type to ballerina type.
+     *
+     * @param type  OpenApi parameter types
+     * @return ballerina type
+     */
+    public static Optional<String> convertOpenAPITypeToBallerina(String type) {
+        switch (type) {
+            case Constants.INTEGER:
+                return Optional.of(INT);
+            case STRING:
+                return Optional.of(STRING);
+            case BOOLEAN:
+                return Optional.of(BOOLEAN);
+            case Constants.ARRAY:
+                return Optional.of(ARRAY_BRACKETS);
+            case Constants.OBJECT:
+                return Optional.of(RECORD);
+            case DECIMAL:
+            case NUMBER:
+                return Optional.of(DECIMAL);
+            case FLOAT:
+                return Optional.of(FLOAT);
+            default:
+                return Optional.empty();
+        }
     }
 
 }

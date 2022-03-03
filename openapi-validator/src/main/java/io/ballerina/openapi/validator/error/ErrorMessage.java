@@ -32,7 +32,13 @@ public enum ErrorMessage {
     ERROR_011("Unexpected error occur while reading the contract : %s"),
     ERROR_012("Couldn't read the OpenAPI contract from the given file: %s"),
     ERROR_013("bOTH TAGS AN DE TAGS"),
-    ERROR_014("BOTH OPERATION AND E OPERATIONS");
+    ERROR_014("BOTH OPERATION AND E OPERATIONS"),
+    ERROR_015("Could not find Ballerina service resource(s) for HTTP method(s) ''%s'' for the path ''%s'' which is " +
+            "documented in the OpenAPI contract"),
+    ERROR_016("Ballerina service contains  ''%s'' resource/s with ''%s'' that is not documented in the " +
+            "OpenAPI contract."),
+    ERROR_017("Could not find a Ballerina service resource for the path ''%s'' which is documented in the OpenAPI contract."),
+    ERROR_018("Ballerina service contains resource/s with ''%s'' that is not documented in the OpenAPI contract.");
 
     private final String message;
 

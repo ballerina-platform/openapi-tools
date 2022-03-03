@@ -95,7 +95,7 @@ public class ResourceMethod {
             return this;
         }
 
-        public ResourceMethodBuilder resourcePosition(Location resourcePosition) {
+        public ResourceMethodBuilder location(Location resourcePosition) {
             this.location = resourcePosition;
             return this;
         }
@@ -119,9 +119,15 @@ public class ResourceMethod {
             this.headers = headers;
             return this;
         }
+
         public ResourceMethodBuilder returnNode(ReturnTypeDescriptorNode returnNode) {
             this.returnNode = returnNode;
             return this;
+        }
+
+        public ResourceMethod build() {
+            ResourceMethod resourceMethod = new ResourceMethod(this);
+            return resourceMethod;
         }
     }
 }
