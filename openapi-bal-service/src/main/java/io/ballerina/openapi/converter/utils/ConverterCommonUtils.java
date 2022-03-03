@@ -19,6 +19,7 @@
 package io.ballerina.openapi.converter.utils;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -290,11 +291,10 @@ public class ConverterCommonUtils {
                 } else if (expressionNode instanceof QualifiedNameReferenceNode) {
                     QualifiedNameReferenceNode moduleRef = (QualifiedNameReferenceNode) expressionNode;
                     Optional<Symbol> refSymbol = semanticModel.symbol(moduleRef);
-                    if (refSymbol.isPresent()) {
-                        Symbol symbol = refSymbol.get();
-                        if (symbol.kind() == SymbolKind.CONSTANT) {
-
-                        }
+                    if (refSymbol.isPresent() && (refSymbol.get().kind() == SymbolKind.CONSTANT)
+                            && ((ConstantSymbol) refSymbol.get()).resolvedValue().isPresent()) {
+                        String mediaType = ((ConstantSymbol) refSymbol.get()).resolvedValue().get();
+                        mediaTypes.add(mediaType.replaceAll("\"", ""));
                     }
                 } else {
                     mediaTypes.add(expressionNode.toString().trim().replaceAll("\"", ""));

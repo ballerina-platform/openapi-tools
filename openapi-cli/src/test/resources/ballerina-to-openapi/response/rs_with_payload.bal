@@ -15,7 +15,7 @@ service /payloadV on helloEp {
         };
         return user;
     }
-    resource function get pet02() returns @http:Payload {mediaType: "application/xml"} json {
+    resource function get pet02() returns @http:Payload {mediaType: "application/fake+xml"} json {
         return {};
     }
     resource function get pet03() returns @http:Payload {mediaType: "application/json"} string {

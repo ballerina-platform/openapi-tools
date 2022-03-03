@@ -249,11 +249,21 @@ public class OpenAPIResponseMapper {
                         if (media.isPresent()) {
                             mediaType = media.get();
                         } else {
-                            // TODO: enable after discussing to generate all the details
-//                            DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_114;
-//                            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-//                                    location, mediaType);
-//                            errors.add(error);
+                            /** This else block capture the below scenarios
+                             * @http:ServiceConfig{
+                             *     mediaTypeSubtypePrefix: "snowflake"
+                             * }
+                             * service /payloadV on helloEp {
+                             *  resource function get pet02() returns @http:Payload {mediaType: "application/fake+xml"}
+                             *  User {
+                             *         return {};
+                             *     }
+                             *  }
+                             */
+                            DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_114;
+                            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                                    location, mediaType);
+                            errors.add(error);
                         }
                     }
                     updatedContent.addMediaType(mediaType, currentMedia.getValue());
@@ -702,35 +712,6 @@ public class OpenAPIResponseMapper {
         return Optional.of(apiResponses);
     }
 
-    /**
-     * This util function is used to get the mediaType after adding customised media type content.
-     */
-//    private String refactorMediaType(String mediaType, String customMedia) {
-//        switch (mediaType) {
-//            case MediaType.APPLICATION_JSON:
-//                mediaType = APPLICATION_PREFIX + customMedia + JSON_POSTFIX;
-//                break;
-//            case MediaType.APPLICATION_XML:
-//                mediaType = APPLICATION_PREFIX + customMedia + XML_POSTFIX;
-//                break;
-//            case MediaType.TEXT_PLAIN:
-//                mediaType = TEXT_PREFIX + customMedia + TEXT_POSTFIX;
-//                break;
-//            case MediaType.TEXT_HTML:
-//                mediaType = TEXT_PREFIX + customMedia + HTML_POSTFIX;
-//                break;
-//            case MediaType.TEXT_XML:
-//                mediaType = TEXT_PREFIX + customMedia + XML_POSTFIX;
-//                break;
-//            default:
-//                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_102;
-//                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(
-//                        errorMessage, this.location, mediaType);
-//                errors.add(error);
-//                break;
-//        }
-//        return mediaType;
-//    }
     /**
      * Convert ballerina MIME types to OAS MIME types.
      */

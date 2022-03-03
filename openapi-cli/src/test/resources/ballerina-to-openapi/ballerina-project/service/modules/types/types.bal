@@ -37,3 +37,5 @@ public type BadRequest record {|
 
     ErrorResponse body;
 |};
+
+public const string TEXT_HTML = "text/html";
