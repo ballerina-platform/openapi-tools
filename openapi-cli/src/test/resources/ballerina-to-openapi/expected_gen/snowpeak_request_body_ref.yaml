@@ -88,7 +88,7 @@ components:
         count:
           type: integer
           description: Number of rooms
-          format: int32
+          format: int64
       description: Represents rooms be reserved
     Reservation:
       required:
@@ -194,7 +194,7 @@ components:
         cardNumber:
           type: integer
           description: Card number
-          format: int32
+          format: int64
         expiryMonth:
           type: string
           description: Expiration month of the card in mm
@@ -227,7 +227,7 @@ components:
         capacity:
           type: integer
           description: Number of people that can be accommodate
-          format: int32
+          format: int64
         wifi:
           type: boolean
           description: Availability of wifi
@@ -248,7 +248,7 @@ components:
         count:
           type: integer
           description: Number of rooms as per the status
-          format: int32
+          format: int64
       description: Represents resort room
     PaymentReceipt:
       required:

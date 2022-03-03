@@ -23,7 +23,7 @@ paths:
                 properties:
                   id:
                     type: integer
-                    format: int32
+                    format: int64
                   body:
                     type: string
 components: {}

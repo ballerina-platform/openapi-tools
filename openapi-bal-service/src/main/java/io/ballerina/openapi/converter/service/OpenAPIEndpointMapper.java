@@ -36,6 +36,7 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.Constants;
+import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -273,7 +274,7 @@ public class OpenAPIEndpointMapper {
         StringBuilder currentServiceName = new StringBuilder();
         NodeList<Node> serviceNameNodes = serviceDefinition.absoluteResourcePath();
         for (Node serviceBasedPathNode : serviceNameNodes) {
-            currentServiceName.append(serviceBasedPathNode.toString());
+            currentServiceName.append(ConverterCommonUtils.unescapeIdentifier(serviceBasedPathNode.toString()));
         }
         return currentServiceName.toString().trim();
     }

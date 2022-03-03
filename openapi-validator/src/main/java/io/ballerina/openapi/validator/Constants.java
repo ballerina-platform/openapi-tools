@@ -44,6 +44,7 @@ public class Constants {
     public static final String ATTRIBUTE_EXCLUDE_OPERATIONS = "excludeOperations";
     public static final String METHOD = "method";
     public static final String ARRAY = "array";
+    public static final String ARRAY_BRACKETS = "[]";
     public static final String STRING = "string";
     public static final String BOOLEAN = "boolean";
     public static final String INTEGER = "integer";
@@ -54,6 +55,9 @@ public class Constants {
     public static final String INT = "int";
     public static final String USER_DIR = "user.dir";
     public static final String FALSE = "false";
+    public static final String SLASH = "/";
+    public static final String FULL_STOP = ".";
+    public static final String HTTP_PAYLOAD = "http:Payload";
 
     /**
      * Enum Type for handle the validation error types.

@@ -27,7 +27,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
         category:
           type: array
           items:
@@ -41,7 +41,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
         name:
           type: string
         tagType:
@@ -57,7 +57,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
         name:
           type: string
         tag:

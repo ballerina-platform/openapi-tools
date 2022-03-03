@@ -1,0 +1,54 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /ping:
+    get:
+      operationId: operation_get_/ping
+      parameters:
+        - name: headerValue
+          in: header
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Ok
+  /ping02:
+    get:
+      operationId: operation_get_/ping02
+      parameters:
+        - name: headerValue
+          in: header
+          required: true
+          schema:
+            type: array
+            items:
+              type: boolean
+      responses:
+        "200":
+          description: Ok
+  /ping03:
+    get:
+      operationId: operation_get_/ping03
+      parameters:
+        - name: headerValue
+          in: header
+          schema:
+            type: integer
+            format: int64
+            nullable: true
+            default: 3
+      responses:
+        "200":
+          description: Ok
+components: {}

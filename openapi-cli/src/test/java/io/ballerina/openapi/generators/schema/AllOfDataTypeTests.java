@@ -55,6 +55,27 @@ public class AllOfDataTypeTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/allOf.bal", syntaxTree);
     }
 
+    @Test(description = "Generate record when allOf schema has only one references schema")
+    public void generateTypeForSingleAllOfSchema() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/allOf_with_one_ref.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/allOf_with_one_ref.bal", syntaxTree);
+    }
+
+    @Test(description = "Generate record when allOf schema has only one references schema with cyclic dependency " +
+            "schema")
+    public void generateCyclicSchemaAllOfSchema() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/allOf_with_cyclic.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "schema/ballerina/allOf_with_cyclic.bal", syntaxTree);
+    }
+
     @Test(description = "Generate record for allOf schema with array schema")
     public void generateAllOfWithTypeUnSpecifiedObjectSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/allOfWithNoType.yaml");

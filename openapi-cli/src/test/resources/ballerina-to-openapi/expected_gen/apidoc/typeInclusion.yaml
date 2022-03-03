@@ -53,7 +53,7 @@ components:
             $ref: '#/components/schemas/Link'
         linkid:
           type: integer
-          format: int32
+          format: int64
     ReservationReceipt:
       allOf:
         - $ref: '#/components/schemas/Links'

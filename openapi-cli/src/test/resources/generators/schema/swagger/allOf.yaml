@@ -26,7 +26,7 @@ paths:
                 items: {}
 components:
   schemas:
-    Profile01:
+    Profile:
       properties:
         first_name:
           type: string
@@ -58,4 +58,5 @@ components:
           type: string
         subject_type:
           allOf:
-           - $ref: '#/components/schemas/Activity'
+            - $ref: '#/components/schemas/Activity'
+            - $ref: '#/components/schemas/Profile'

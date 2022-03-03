@@ -1,0 +1,82 @@
+openapi: 3.0.1
+info:
+  title: V1 Abc Hello
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/v1/abc-hello"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /say-hello/{path-param}:
+    get:
+      summary: Description
+      operationId: "operation_get_/say-hello/{path-param}"
+      parameters:
+        - name: path-param
+          in: path
+          description: Path Parameter Description
+          required: true
+          schema:
+            type: string
+        - name: q-paramter
+          in: query
+          description: Query Parameter Description
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet-Task'
+  /v2/say-hello:
+    post:
+      summary: Description
+      operationId: operation_post_/v2/say-hello
+      parameters:
+        - name: x-client
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Body Parameter Description
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet-Task'
+      responses:
+        "202":
+          description: Accepted
+components:
+  schemas:
+    Pet-Store:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+    Pet-Task:
+      required:
+        - pet-id
+      type: object
+      properties:
+        pet-id:
+          type: integer
+          description: Field id Description
+          format: int64
+        pet-types:
+          type: array
+          description: Field type Description
+          items:
+            type: string
+        store:
+          $ref: '#/components/schemas/Pet-Store'
+      description: Description

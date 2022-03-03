@@ -19,7 +19,7 @@ paths:
           required: true
           schema:
             type: integer
-            format: int32
+            format: int64
       responses:
         "202":
           description: Accepted
@@ -37,7 +37,7 @@ paths:
           required: true
           schema:
             type: integer
-            format: int32
+            format: int64
         - name: name
           in: path
           required: true

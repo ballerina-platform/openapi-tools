@@ -1,5 +1,4 @@
 import ballerina/http;
-import ballerina/openapi;
 
 type Pet record {
     *NewPet;
@@ -15,12 +14,6 @@ type Error record {
 };
 
 listener http:Listener ep0 = new(80, config = {host: "petstore.swagger.io"});
-@openapi:ServiceInfo {
-    contract: "../../swagger/invalid/all_petstore.yaml",
-    tags: [],
-    operations: [],
-    failOnErrors: false
-}
 
 service /api on ep0 {
 
@@ -29,7 +22,7 @@ service /api on ep0 {
 # + req    - Req represents the message, which came over the network
 # + tags - tags to filter by# + 'limit - maximum number of results to return
 # + return - Error value if an error occurred or return `()` otherwise
-    resource function get pets(http:Caller caller, http:Request req , string[]?  tags,  int ?  'limit1) returns error? {
+    resource function get pets(http:Caller caller, http:Request req , string[]?  tags,  int ?  'limit) returns error? {
 
     }
 
@@ -38,7 +31,7 @@ service /api on ep0 {
 # + req    - Req represents the message, which came over the network
 # + payload - Request body payload
 # + return - Error value if an error occurred or return `()` otherwise
-    resource function post pets(http:Caller caller, http:Request req , @http:Payload {} NewPet  payload) returns error? {
+    resource function post pets(http:Caller caller, http:Request req , @http:Payload {} NewPet  pet) returns error? {
 
     }
 

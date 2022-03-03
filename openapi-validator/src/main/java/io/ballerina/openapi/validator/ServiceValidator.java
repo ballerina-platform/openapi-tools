@@ -67,6 +67,7 @@ import java.util.Optional;
 
 import static io.ballerina.openapi.validator.Constants.ATTRIBUTE_CONTRACT;
 import static io.ballerina.openapi.validator.Constants.FALSE;
+import static io.ballerina.openapi.validator.TypeSymbolToJsonValidatorUtil.convertEnumTypeToString;
 import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0018;
 import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0019;
 import static io.ballerina.openapi.validator.ValidatorErrorCode.BAL_OPENAPI_VALIDATOR_0020;
@@ -92,7 +93,12 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
         Filters filters = new Filters(kind);
         SemanticModel semanticModel = syntaxNodeAnalysisContext.semanticModel();
         SyntaxTree syntaxTree = syntaxNodeAnalysisContext.syntaxTree();
-
+        List<Diagnostic> diagnostics = syntaxNodeAnalysisContext.semanticModel().diagnostics();
+        boolean erroneousCompilation = diagnostics.stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity());
+        if (erroneousCompilation) {
+            return;
+        }
         // Generate ballerina file path
         Package aPackage = syntaxNodeAnalysisContext.currentPackage();
         DocumentId documentId = syntaxNodeAnalysisContext.documentId();
@@ -568,36 +574,30 @@ public class ServiceValidator implements AnalysisTask<SyntaxNodeAnalysisContext>
      * @param kind                  message type to need to display
      * @param resourcePathSummary   current validating resourcePath
      * @param method                current validating method
-     * @param postErr               TypeMisMatchError type validation error
+     * @param validationError               TypeMisMatchError type validation error
      */
     private static void generateTypeMisMatchDiagnostic(DiagnosticSeverity kind,
                                                  ResourcePathSummary resourcePathSummary,
-                                                 Map.Entry<String, ResourceMethod> method, ValidationError postErr,
-                                                       List<Diagnostic> validations) {
-
-        if (postErr instanceof TypeMismatch) {
-            if (((TypeMismatch) postErr).getRecordName() != null) {
-                String[] error = ErrorMessages.typeMismatchingRecord(postErr.getFieldName(),
-                                ((TypeMismatch) postErr).getRecordName(),
-                                TypeSymbolToJsonValidatorUtil.convertEnumTypeToString((
-                                        (TypeMismatch) postErr).getTypeJsonSchema()),
-                                TypeSymbolToJsonValidatorUtil.convertEnumTypeToString(((
-                                        TypeMismatch) postErr).getTypeBallerinaType()), method.getKey(),
-                                getNormalizedPath(resourcePathSummary.getPath()));
+                                                 Map.Entry<String, ResourceMethod> method,
+                                                       ValidationError validationError, List<Diagnostic> validations) {
+        if (validationError instanceof TypeMismatch) {
+            if (((TypeMismatch) validationError).getRecordName() != null) {
+                String[] error = ErrorMessages.typeMismatchingRecord(validationError.getFieldName(),
+                                ((TypeMismatch) validationError).getRecordName(),
+                                convertEnumTypeToString(((TypeMismatch) validationError).getTypeJsonSchema()),
+                                convertEnumTypeToString(((TypeMismatch) validationError).getBallerinaType()));
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
-                Diagnostic diagnostic =
-                        DiagnosticFactory.createDiagnostic(diagnosticInfo, ((TypeMismatch) postErr).getLocation());
+                Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                                ((TypeMismatch) validationError).getLocation());
                 validations.add(diagnostic);
             } else {
-                String[] error = ErrorMessages.typeMismatching(postErr.getFieldName(),
-                                TypeSymbolToJsonValidatorUtil.convertEnumTypeToString
-                                        (((TypeMismatch) postErr).getTypeJsonSchema()),
-                                TypeSymbolToJsonValidatorUtil.convertEnumTypeToString
-                                        (((TypeMismatch) postErr).getTypeBallerinaType()), method.getKey(),
-                        getNormalizedPath(resourcePathSummary.getPath()));
+                String[] error = ErrorMessages.typeMismatching(validationError.getFieldName(),
+                                convertEnumTypeToString(((TypeMismatch) validationError).getTypeJsonSchema()),
+                                convertEnumTypeToString(((TypeMismatch) validationError).getBallerinaType()),
+                        method.getKey(), getNormalizedPath(resourcePathSummary.getPath()));
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error[0], error[1], kind);
-                Diagnostic diagnostic =
-                        DiagnosticFactory.createDiagnostic(diagnosticInfo, ((TypeMismatch) postErr).getLocation());
+                Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                        ((TypeMismatch) validationError).getLocation());
                 validations.add(diagnostic);
             }
         }
