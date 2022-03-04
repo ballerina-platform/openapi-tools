@@ -111,6 +111,7 @@ import static io.ballerina.openapi.converter.Constants.PRIVATE;
 import static io.ballerina.openapi.converter.Constants.PROXY_REVALIDATE;
 import static io.ballerina.openapi.converter.Constants.PUBLIC;
 import static io.ballerina.openapi.converter.Constants.RESPONSE_HEADERS;
+import static io.ballerina.openapi.converter.Constants.SLASH;
 import static io.ballerina.openapi.converter.Constants.S_MAX_AGE;
 import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
@@ -260,10 +261,11 @@ public class OpenAPIResponseMapper {
                              *     }
                              *  }
                              */
-                            DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_114;
-                            IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
-                                    location, mediaType);
-                            errors.add(error);
+                            StringBuilder stringBuilder = new StringBuilder();
+                            String[] splits = mediaType.split(SLASH);
+                            stringBuilder.append(splits[0]).append(SLASH).append(customMediaType.get())
+                                    .append("+").append(splits[1]);
+                            mediaType = stringBuilder.toString();
                         }
                     }
                     updatedContent.addMediaType(mediaType, currentMedia.getValue());
@@ -746,7 +748,9 @@ public class OpenAPIResponseMapper {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_102;
                 IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, this.location,
                         type);
-                errors.add(error);
+                if (customMediaPrefix.isEmpty()) {
+                    errors.add(error);
+                }
                 return Optional.empty();
         }
     }

@@ -189,7 +189,7 @@ public class ResponseTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_with_payload.yaml");
     }
 
-    @Test(description = "When the response has payload annotation and service config annotaion")
+    @Test(description = "When the response has payload annotation and service config annotation")
     public void responseHasPayloadWithServiceConfig() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/rs_with_payload_service_config.bal");
         OpenApiConverter openApiConverterUtils = new OpenApiConverter();
@@ -197,6 +197,18 @@ public class ResponseTests {
                 , false);
         Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/rs_with_payload_service_config.yaml");
+    }
+
+    @Test(description = "When the response has payload annotation with custom media type and " +
+            "service config annotation")
+    public void responseWithCustomMediaType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/rs_with_service_and_payload_annotation.bal");
+        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath,
+                "response/rs_with_service_and_payload_annotation.yaml");
     }
 
     @AfterMethod
