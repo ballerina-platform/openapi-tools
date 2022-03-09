@@ -55,6 +55,8 @@ public class Constants {
     public static final String INT = "int";
     public static final String USER_DIR = "user.dir";
     public static final String FALSE = "false";
+    public static final String SLASH = "/";
+    public static final String FULL_STOP = ".";
     public static final String HTTP_PAYLOAD = "http:Payload";
 
     /**

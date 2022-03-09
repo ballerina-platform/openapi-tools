@@ -69,11 +69,13 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.stream.Collectors;
 
@@ -89,23 +91,28 @@ import static io.ballerina.openapi.converter.Constants.BODY;
 import static io.ballerina.openapi.converter.Constants.CACHE_CONTROL;
 import static io.ballerina.openapi.converter.Constants.ETAG;
 import static io.ballerina.openapi.converter.Constants.FALSE;
+import static io.ballerina.openapi.converter.Constants.HTML_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.HTTP_200;
 import static io.ballerina.openapi.converter.Constants.HTTP_200_DESCRIPTION;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
+import static io.ballerina.openapi.converter.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.converter.Constants.HTTP_RESPONSE;
 import static io.ballerina.openapi.converter.Constants.JSON_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.LAST_MODIFIED;
 import static io.ballerina.openapi.converter.Constants.MAX_AGE;
+import static io.ballerina.openapi.converter.Constants.MEDIA_TYPE;
 import static io.ballerina.openapi.converter.Constants.MUST_REVALIDATE;
 import static io.ballerina.openapi.converter.Constants.NO_CACHE;
 import static io.ballerina.openapi.converter.Constants.NO_STORE;
 import static io.ballerina.openapi.converter.Constants.NO_TRANSFORM;
 import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.PLUS;
 import static io.ballerina.openapi.converter.Constants.PRIVATE;
 import static io.ballerina.openapi.converter.Constants.PROXY_REVALIDATE;
 import static io.ballerina.openapi.converter.Constants.PUBLIC;
 import static io.ballerina.openapi.converter.Constants.RESPONSE_HEADERS;
+import static io.ballerina.openapi.converter.Constants.SLASH;
 import static io.ballerina.openapi.converter.Constants.S_MAX_AGE;
 import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
@@ -114,6 +121,7 @@ import static io.ballerina.openapi.converter.Constants.WILD_CARD_CONTENT_KEY;
 import static io.ballerina.openapi.converter.Constants.WILD_CARD_SUMMARY;
 import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.X_WWW_FORM_URLENCODED_POSTFIX;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractAnnotationFieldDetails;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
 
 /**
@@ -187,6 +195,7 @@ public class OpenAPIResponseMapper {
     private ApiResponses extractReturnAnnotationDetails(OperationAdaptor operationAdaptor,
                                                         Optional<String> customMediaType, Node typeNode,
                                                         Map<String, Header> headers, AnnotationNode annotation) {
+        List<String> overrideMediaType = new ArrayList<>();
         ApiResponses apiResponses = new ApiResponses();
         if (annotation.annotReference().toString().trim().equals("http:Cache")) {
             CacheConfigAnnotation cacheConfigAnn = new CacheConfigAnnotation();
@@ -198,17 +207,77 @@ public class OpenAPIResponseMapper {
                         updateResponseHeaderWithCacheValues(headers, cacheConfigAnn);
                     }
                     );
-
-            // Update headers with cache annotation details.
-            Optional<ApiResponses> responses = getAPIResponses(operationAdaptor, apiResponses, typeNode,
-                    customMediaType, headers);
-            responses.ifPresent(apiResponses::putAll);
+        } else if (annotation.annotReference().toString().trim().equals(HTTP_PAYLOAD)) {
+            overrideMediaType = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE, annotation, semanticModel);
+        }
+        Optional<ApiResponses> responses = getAPIResponses(operationAdaptor, apiResponses, typeNode,
+                customMediaType, headers);
+        // Override the mediaType with given type
+        if (responses.isPresent() && !overrideMediaType.isEmpty()) {
+            ApiResponses updatedResponse = overrideMediaType(customMediaType, overrideMediaType, responses.get());
+            apiResponses.putAll(updatedResponse);
         } else {
-            ApiResponse apiResponse = new ApiResponse();
-            apiResponse.description("Accepted");
-            apiResponses.put("202", apiResponse);
+            responses.ifPresent(apiResponses::putAll);
         }
         return apiResponses;
+    }
+
+    /**
+     * This util function is used to override the MediaType with given mediaType inside the payload annotation.
+     * ex: <pre>
+     *     @http:Payload {mediaType: ["application/json", "application/xml"]}
+     * </pre>
+     * @param customMediaType       This customMediaType comes from service configure annotation.
+     * @param overrideMediaType     MediaTypes inside payload annotation.
+     * @param responses             Generated response.
+     */
+    private ApiResponses overrideMediaType(Optional<String> customMediaType, List<String> overrideMediaType,
+                                         ApiResponses responses) {
+        ApiResponses updatedResponse = new ApiResponses();
+        for (Map.Entry<String, ApiResponse> next : responses.entrySet()) {
+            ApiResponse response = next.getValue();
+            Content content = response.getContent();
+            if (content == null) {
+                continue;
+            }
+            Set<Map.Entry<String, io.swagger.v3.oas.models.media.MediaType>> entries = content.entrySet();
+            Iterator<Map.Entry<String, io.swagger.v3.oas.models.media.MediaType>> iterMediaType = entries.iterator();
+            Content updatedContent = new Content();
+            while (iterMediaType.hasNext()) {
+                Map.Entry<String, io.swagger.v3.oas.models.media.MediaType> currentMedia = iterMediaType.next();
+                for (String mediaType : overrideMediaType) {
+                    if (customMediaType.isPresent()) {
+                        Optional<String> media = convertBallerinaMIMEToOASMIMETypes(mediaType, customMediaType);
+                        if (media.isPresent()) {
+                            mediaType = media.get();
+                        } else {
+                            /** if both the return type annotation and the HTTP serviceConfig annotation contains media
+                             *  type prefixes, need to combine both when generating OAS media type. (e.g. for the below
+                             *  scenario, the media type will be 'application/snowflake+fake+xml' )
+                             * @http:ServiceConfig{
+                             *     mediaTypeSubtypePrefix: "snowflake"
+                             * }
+                             * service /payloadV on helloEp {
+                             *  resource function get pet02() returns @http:Payload {mediaType: "application/fake+xml"}
+                             *  User {
+                             *         return {};
+                             *     }
+                             *  }
+                             */
+                            StringBuilder mediaTypeBuilder = new StringBuilder();
+                            String[] splits = mediaType.split(SLASH);
+                            mediaTypeBuilder.append(splits[0]).append(SLASH).append(customMediaType.get())
+                                    .append(PLUS).append(splits[1]);
+                            mediaType = mediaTypeBuilder.toString();
+                        }
+                    }
+                    updatedContent.addMediaType(mediaType, currentMedia.getValue());
+                }
+            }
+            response.setContent(updatedContent);
+            updatedResponse.addApiResponse(next.getKey(), response);
+        }
+        return updatedResponse;
     }
 
     /**
@@ -653,6 +722,7 @@ public class OpenAPIResponseMapper {
      */
     private Optional<String> convertBallerinaMIMEToOASMIMETypes(String type, Optional<String> customMediaPrefix) {
         switch (type) {
+            case MediaType.APPLICATION_JSON:
             case Constants.JSON:
             case Constants.INT:
             case Constants.FLOAT:
@@ -660,20 +730,30 @@ public class OpenAPIResponseMapper {
             case Constants.BOOLEAN:
                 return Optional.of(customMediaPrefix.map(s -> APPLICATION_PREFIX + s + JSON_POSTFIX)
                         .orElse(MediaType.APPLICATION_JSON));
+            case MediaType.APPLICATION_XML:
             case Constants.XML:
                 return Optional.of(customMediaPrefix.map(s -> APPLICATION_PREFIX + s + XML_POSTFIX).
                         orElse(MediaType.APPLICATION_XML));
             case Constants.BYTE_ARRAY:
                 return Optional.of(customMediaPrefix.map(s -> APPLICATION_PREFIX + s + OCTECT_STREAM_POSTFIX)
                         .orElse(MediaType.APPLICATION_OCTET_STREAM));
+            case MediaType.TEXT_PLAIN:
             case Constants.STRING:
                 return Optional.of(customMediaPrefix.map(s -> TEXT_PREFIX + s +
                         TEXT_POSTFIX).orElse(MediaType.TEXT_PLAIN));
+            case MediaType.TEXT_HTML:
+                return Optional.of(customMediaPrefix.map(s -> TEXT_PREFIX + s +
+                        HTML_POSTFIX).orElse(MediaType.TEXT_HTML));
+            case MediaType.TEXT_XML:
+                return Optional.of(customMediaPrefix.map(s -> TEXT_PREFIX + s +
+                        XML_POSTFIX).orElse(MediaType.TEXT_XML));
             default:
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_102;
                 IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, this.location,
                         type);
-                errors.add(error);
+                if (customMediaPrefix.isEmpty()) {
+                    errors.add(error);
+                }
                 return Optional.empty();
         }
     }

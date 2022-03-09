@@ -204,4 +204,25 @@ public class ValidatorTests {
             }
         }
     }
+
+    @Test(description = "Test to assert validator errors for resources having the root path ('.')")
+    public void validatorWithRootPath() throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("project_8");
+        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        String msg = "ERROR [service.bal:(12:30,12:36)] Type mismatch with parameter 'id' for the" +
+                " method 'get' of the path '/'.In OpenAPI contract its type is 'string' and resources type is 'int'.";
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
+            Stream<String> logLines = br.lines();
+            String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
+            logLines.close();
+            generatedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            msg = (msg.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            if (generatedLog.contains(msg)) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.fail("OpenAPIValidator execution failed.");
+            }
+        }
+    }
 }

@@ -73,6 +73,7 @@ public class Constants {
     public static final String JSON_POSTFIX = "+json";
     public static final String XML_POSTFIX = "+xml";
     public static final String TEXT_POSTFIX = "+plain";
+    public static final String HTML_POSTFIX = "+plain";
     public static final String OCTECT_STREAM_POSTFIX = "+octet-stream";
     public static final String X_WWW_FORM_URLENCODED_POSTFIX = "+x-www-form-urlencoded";
     public static final String X_WWW_FORM_URLENCODED = "x-www-form-urlencoded";
@@ -228,6 +229,5 @@ public class Constants {
     public static final String YAML_EXTENSION = ".yaml";
     public static final String JSON_EXTENSION = ".json";
     public static final String YML_EXTENSION = ".yml";
-    public static final String UNDERSCORE = "_";
-
+    public static final String PLUS = "+";
 }

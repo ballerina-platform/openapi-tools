@@ -41,7 +41,6 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -59,7 +58,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDesc
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
-import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
@@ -168,8 +166,6 @@ public class ReturnTypeGenerator {
                     dataType = extractReferenceType(schema.get$ref().trim());
                     type = createBuiltinSimpleNameReferenceNode(null,
                             createIdentifierToken(dataType));
-                } else if (schema instanceof ObjectSchema) {
-                    type = getRecordTypeDescriptorNode(schema);
                 } else if (schema instanceof ComposedSchema) {
                     Iterator<Schema> iterator = ((ComposedSchema) schema).getOneOf().iterator();
                     type = getUnionNodeForOneOf(iterator);
@@ -178,40 +174,6 @@ public class ReturnTypeGenerator {
                 }
             }
         }
-        return type;
-    }
-
-    /**
-     * This for generate record node for object schema.
-     */
-    public TypeDescriptorNode getRecordTypeDescriptorNode(Schema schema) throws BallerinaOpenApiException {
-        TypeDescriptorNode type;
-        Token recordKeyWord = createIdentifierToken("record", AbstractNodeFactory.createEmptyMinutiaeList(),
-                SINGLE_WS_MINUTIAE);
-        Token bodyStartDelimiter = createIdentifierToken("{|");
-        // Create record fields
-        List<Node> recordFields = new ArrayList<>();
-        if (schema.getProperties() != null) {
-            Map<String, Schema> properties = schema.getProperties();
-            for (Map.Entry<String, Schema> field: properties.entrySet()) {
-                Token fieldName = createIdentifierToken(field.getKey().trim());
-                String typeProperty;
-                if (field.getValue().get$ref() != null) {
-                    typeProperty = extractReferenceType(field.getValue().get$ref());
-                } else {
-                    typeProperty = convertOpenAPITypeToBallerina(field.getValue().getType());
-                }
-                Token typeRecordField = createIdentifierToken(typeProperty,
-                        AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
-                RecordFieldNode recordFieldNode =  NodeFactory.createRecordFieldNode(null, null,
-                        typeRecordField, fieldName, null, createToken(SyntaxKind.SEMICOLON_TOKEN));
-                recordFields.add(recordFieldNode);
-            }
-        }
-        NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordFields);
-        Token bodyEndDelimiter = createIdentifierToken("|}");
-        type = NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter, fieldsList,
-                null, bodyEndDelimiter);
         return type;
     }
 
