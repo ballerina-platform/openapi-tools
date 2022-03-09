@@ -107,6 +107,7 @@ import static io.ballerina.openapi.converter.Constants.NO_CACHE;
 import static io.ballerina.openapi.converter.Constants.NO_STORE;
 import static io.ballerina.openapi.converter.Constants.NO_TRANSFORM;
 import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
+import static io.ballerina.openapi.converter.Constants.PLUS;
 import static io.ballerina.openapi.converter.Constants.PRIVATE;
 import static io.ballerina.openapi.converter.Constants.PROXY_REVALIDATE;
 import static io.ballerina.openapi.converter.Constants.PUBLIC;
@@ -250,7 +251,9 @@ public class OpenAPIResponseMapper {
                         if (media.isPresent()) {
                             mediaType = media.get();
                         } else {
-                            /** if both the return type annotation and the HTTP serviceConfig annotation contains media type prefixes, need to combine both when generating OAS media type. (e.g. for the below scenario, the media type will be 'application/snowflake+fake+xml' )
+                            /** if both the return type annotation and the HTTP serviceConfig annotation contains media
+                             *  type prefixes, need to combine both when generating OAS media type. (e.g. for the below
+                             *  scenario, the media type will be 'application/snowflake+fake+xml' )
                              * @http:ServiceConfig{
                              *     mediaTypeSubtypePrefix: "snowflake"
                              * }
@@ -261,11 +264,11 @@ public class OpenAPIResponseMapper {
                              *     }
                              *  }
                              */
-                            StringBuilder stringBuilder = new StringBuilder();
+                            StringBuilder mediaTypeBuilder = new StringBuilder();
                             String[] splits = mediaType.split(SLASH);
-                            stringBuilder.append(splits[0]).append(SLASH).append(customMediaType.get())
-                                    .append("+").append(splits[1]);
-                            mediaType = stringBuilder.toString();
+                            mediaTypeBuilder.append(splits[0]).append(SLASH).append(customMediaType.get())
+                                    .append(PLUS).append(splits[1]);
+                            mediaType = mediaTypeBuilder.toString();
                         }
                     }
                     updatedContent.addMediaType(mediaType, currentMedia.getValue());

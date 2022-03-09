@@ -60,7 +60,7 @@ public class ModuleReferenceTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "arrayTypeResponse.yaml");
     }
 
-    @Test(description = "Response has payload annotation with media type define in the separate module.")
+    @Test(description = "Response has payload annotation with media type defined in a separate module.")
     public void testResponse06() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response_annotation.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/response_annotation.yaml");

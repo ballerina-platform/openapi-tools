@@ -230,7 +230,7 @@ public class ConverterCommonUtils {
                                                                    String annotationReference, String annotationField) {
         for (AnnotationNode annotation : annotations) {
             List<String> expressionNode = extractAnnotationFieldDetails(annotationReference, annotationField,
-                    annotation);
+                    annotation, null);
             if (!expressionNode.isEmpty()) {
                 return Optional.of(expressionNode.get(0));
             }
@@ -238,34 +238,14 @@ public class ConverterCommonUtils {
         return Optional.empty();
     }
 
-    public static List<String> extractAnnotationFieldDetails(String annotationReference, String annotationField,
-                                              AnnotationNode annotation) {
-        List<String> mediaTypes = new ArrayList<>();
-        Node annotReference = annotation.annotReference();
-        if (annotReference.toString().trim().equals(annotationReference) && annotation.annotValue().isPresent()) {
-            MappingConstructorExpressionNode listOfAnnotValue = annotation.annotValue().get();
-            for (MappingFieldNode field : listOfAnnotValue.fields()) {
-                SpecificFieldNode fieldNode = (SpecificFieldNode) field;
-                if (!((fieldNode).fieldName().toString().trim().equals(annotationField)) &&
-                        fieldNode.valueExpr().isEmpty()) {
-                    continue;
-                }
-                ExpressionNode expressionNode = fieldNode.valueExpr().get();
-                if (expressionNode instanceof ListConstructorExpressionNode) {
-                    SeparatedNodeList mimeList = ((ListConstructorExpressionNode) expressionNode).expressions();
-                    for (Object mime : mimeList) {
-                        if (!(mime instanceof BasicLiteralNode)) {
-                            continue;
-                        }
-                        mediaTypes.add(((BasicLiteralNode) mime).literalToken().text().trim().replaceAll("\"", ""));
-                    }
-                } else {
-                    mediaTypes.add(expressionNode.toString().trim().replaceAll("\"", ""));
-                }
-            }
-        }
-        return mediaTypes;
-    }
+    /**
+     * This util functions is used to extract the details of annotation field.
+     *
+     * @param annotationReference   Annotation reference name that need to extract
+     * @param annotationField       Annotation field name that need to extract details.
+     * @param annotation            Annotation node
+     * @return List of string
+     */
 
     public static List<String> extractAnnotationFieldDetails(String annotationReference, String annotationField,
                                                              AnnotationNode annotation, SemanticModel semanticModel) {
@@ -288,7 +268,7 @@ public class ConverterCommonUtils {
                         }
                         mediaTypes.add(((BasicLiteralNode) mime).literalToken().text().trim().replaceAll("\"", ""));
                     }
-                } else if (expressionNode instanceof QualifiedNameReferenceNode) {
+                } else if (expressionNode instanceof QualifiedNameReferenceNode && semanticModel != null) {
                     QualifiedNameReferenceNode moduleRef = (QualifiedNameReferenceNode) expressionNode;
                     Optional<Symbol> refSymbol = semanticModel.symbol(moduleRef);
                     if (refSymbol.isPresent() && (refSymbol.get().kind() == SymbolKind.CONSTANT)
