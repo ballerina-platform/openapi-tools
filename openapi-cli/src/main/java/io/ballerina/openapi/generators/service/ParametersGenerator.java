@@ -86,7 +86,7 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.get
 public class ParametersGenerator {
 
     private boolean isNullableRequired;
-    private Components components;
+    private final Components components;
 
     public ParametersGenerator(boolean isNullableRequired, Components components) {
         this.isNullableRequired = isNullableRequired;
