@@ -250,7 +250,7 @@ public class OpenAPIResponseMapper {
                         if (media.isPresent()) {
                             mediaType = media.get();
                         } else {
-                            /** This else block capture the below scenarios
+                            /** if both the return type annotation and the HTTP serviceConfig annotation contains media type prefixes, need to combine both when generating OAS media type. (e.g. for the below scenario, the media type will be 'application/snowflake+fake+xml' )
                              * @http:ServiceConfig{
                              *     mediaTypeSubtypePrefix: "snowflake"
                              * }
