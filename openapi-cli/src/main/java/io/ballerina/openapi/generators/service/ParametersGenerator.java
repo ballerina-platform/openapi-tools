@@ -34,6 +34,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -84,7 +85,13 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.get
  */
 public class ParametersGenerator {
 
-    boolean isNullableRequired = false;
+    private boolean isNullableRequired;
+    private final Components components;
+
+    public ParametersGenerator(boolean isNullableRequired, Components components) {
+        this.isNullableRequired = isNullableRequired;
+        this.components = components;
+    }
 
     public boolean isNullableRequired() {
         return isNullableRequired;
@@ -139,7 +146,7 @@ public class ParametersGenerator {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGen = new RequestBodyGenerator();
-                requiredParams.add(requestBodyGen.createNodeForRequestBody(requestBody));
+                requiredParams.add(requestBodyGen.createNodeForRequestBody(this.components, requestBody));
                 requiredParams.add(comma);
             }
         }
