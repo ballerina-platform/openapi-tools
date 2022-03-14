@@ -51,6 +51,7 @@ import java.util.Optional;
 import javax.ws.rs.core.MediaType;
 
 import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
+import static io.ballerina.openapi.converter.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.converter.Constants.JSON_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.MEDIA_TYPE;
 import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
@@ -242,8 +243,7 @@ public class OpenAPIRequestBodyMapper {
                                          RequiredParameterNode payloadNode, Map<String, Schema> schema) {
         List<String> mimeTypes = new ArrayList<>();
         for (AnnotationNode annotation : payloadNode.annotations()) {
-            mimeTypes = extractAnnotationFieldDetails("http:Payload", MEDIA_TYPE,
-                    annotation, semanticModel);
+            mimeTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE, annotation, semanticModel);
         }
         RequestBody requestBody = new RequestBody();
 

@@ -35,6 +35,7 @@ import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MapTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -123,6 +124,7 @@ import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.X_WWW_FORM_URLENCODED_POSTFIX;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractAnnotationFieldDetails;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractCustomMediaType;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getOpenApiSchema;
 
 /**
  * This class uses to map the Ballerina return details to the OAS response.
@@ -478,6 +480,19 @@ public class OpenAPIResponseMapper {
             case OPTIONAL_TYPE_DESC:
                 return getAPIResponses(operationAdaptor, apiResponses,
                         ((OptionalTypeDescriptorNode) typeNode).typeDescriptor(), customMediaPrefix, headers);
+            case MAP_TYPE_DESC:
+                apiResponse = setCacheHeader(headers, apiResponse, HTTP_200);
+                MapTypeDescriptorNode mapNode = (MapTypeDescriptorNode) typeNode;
+                ObjectSchema objectSchema = new ObjectSchema();
+                Schema<?> apiSchema = getOpenApiSchema(mapNode.mapTypeParamsNode().typeNode().kind());
+                objectSchema.additionalProperties(apiSchema);
+                mediaType.setSchema(objectSchema);
+                mediaTypeString = customMediaPrefix.isPresent() ? APPLICATION_PREFIX + customMediaPrefix.get() +
+                        JSON_POSTFIX : MediaType.APPLICATION_JSON;
+                apiResponse.content(new Content().addMediaType(mediaTypeString, mediaType));
+                apiResponse.description(HTTP_200_DESCRIPTION);
+                apiResponses.put(HTTP_200, apiResponse);
+                return Optional.of(apiResponses);
             default:
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_101;
                 IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage, this.location,

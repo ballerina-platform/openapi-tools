@@ -18,4 +18,25 @@ service /payloadV on helloEp {
             }
         };
     }
+    resource function get foo() returns @http:Payload {mediaType: mime:APPLICATION_FORM_URLENCODED} map<string> {
+        map<string> ms = {
+            "x": "abc",
+            "y": "cdf"
+        };
+        return ms;
+    }
+    resource function get baa() returns @http:Payload map<string> {
+        map<string> ms = {
+            "x": "abc",
+            "y": "cdf"
+        };
+        return ms;
+    }
+    resource function get baaint() returns @http:Payload map<int> {
+        map<int> ms = {
+            "x": 1,
+            "y": 2
+        };
+        return ms;
+    }
 }
