@@ -34,9 +34,9 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-  /baa:
+  /bar:
     get:
-      operationId: operation_get_/baa
+      operationId: operation_get_/bar
       responses:
         "200":
           description: Ok
@@ -46,9 +46,9 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
-  /baaint:
+  /barint:
     get:
-      operationId: operation_get_/baaint
+      operationId: operation_get_/barint
       responses:
         "200":
           description: Ok

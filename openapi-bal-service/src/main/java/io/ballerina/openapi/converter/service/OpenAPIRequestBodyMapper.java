@@ -42,7 +42,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -122,8 +121,16 @@ public class OpenAPIRequestBodyMapper {
             if (mapMime != null) {
                 fields = mapMime.fields();
             }
-            if (fields != null && (!fields.isEmpty() || fields.size() != 0)) {
-                handleMultipleMIMETypes(bodyParameter, fields, payloadNode, schema);
+
+            // Handle multiple mime type when attached with request payload annotation.
+            // ex: <pre> @http:Payload { mediaType:["application/json", "application/xml"] } Pet payload </pre>
+            if (fields != null && !fields.isEmpty()) {
+                List<String> mimeTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE, annotation,
+                        semanticModel);
+                RequestBody requestBody = new RequestBody();
+                for (String mimeType: mimeTypes) {
+                    createRequestBody(bodyParameter, payloadNode, schema, requestBody, mimeType);
+                }
             }  else {
                 //TODO : fill with rest of media types
                 handleSinglePayloadType(payloadNode, schema, bodyParameter, customMediaType);
@@ -231,24 +238,6 @@ public class OpenAPIRequestBodyMapper {
             if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
                 operationAdaptor.getOperation().setRequestBody(requestBody);
             }
-        }
-    }
-
-    /**
-     * Handle multiple mime type when attached with request payload annotation.
-     * ex: <pre> @http:Payload { mediaType:["application/json", "application/xml"] } Pet payload </pre>
-     */
-    private void handleMultipleMIMETypes(RequestBody bodyParameter,
-                                         SeparatedNodeList<MappingFieldNode> fields,
-                                         RequiredParameterNode payloadNode, Map<String, Schema> schema) {
-        List<String> mimeTypes = new ArrayList<>();
-        for (AnnotationNode annotation : payloadNode.annotations()) {
-            mimeTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE, annotation, semanticModel);
-        }
-        RequestBody requestBody = new RequestBody();
-
-        for (String mimeType: mimeTypes) {
-            createRequestBody(bodyParameter, payloadNode, schema, requestBody, mimeType);
         }
     }
 
