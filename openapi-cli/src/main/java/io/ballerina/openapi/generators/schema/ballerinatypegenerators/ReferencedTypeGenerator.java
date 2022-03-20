@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
@@ -50,8 +51,8 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  */
 public class ReferencedTypeGenerator extends TypeGenerator {
 
-    public ReferencedTypeGenerator(Schema schema) {
-        super(schema);
+    public ReferencedTypeGenerator(Schema schema, IdentifierToken typeNameToken) {
+        super(schema, typeNameToken);
     }
 
     /**

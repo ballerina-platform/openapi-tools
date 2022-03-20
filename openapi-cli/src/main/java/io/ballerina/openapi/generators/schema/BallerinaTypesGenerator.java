@@ -130,7 +130,7 @@ public class BallerinaTypesGenerator {
             throws BallerinaOpenApiException {
         IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(getValidName(
                 typeName.trim(), true));
-        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema);
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, typeNameToken);
         List<AnnotationNode> typeAnnotations = new ArrayList<>();
         TypeGeneratorUtils.getRecordDocs(schemaDocs, schema, typeAnnotations);
         return typeGenerator.generateTypeDefinitionNode(typeNameToken,

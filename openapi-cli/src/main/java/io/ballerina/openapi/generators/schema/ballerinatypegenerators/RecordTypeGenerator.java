@@ -19,6 +19,7 @@
 package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -72,8 +73,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
  */
 public class RecordTypeGenerator extends TypeGenerator {
 
-    public RecordTypeGenerator(Schema schema) {
-        super(schema);
+    public RecordTypeGenerator(Schema schema, IdentifierToken typeNameToken) {
+        super(schema, typeNameToken);
     }
 
     /**

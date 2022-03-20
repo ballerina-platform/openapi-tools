@@ -18,6 +18,8 @@
 
 package io.ballerina.openapi.generators.schema;
 
+import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -33,6 +35,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
@@ -52,7 +55,9 @@ public class AnyOfDataTypeTests {
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> anyOf = composedSchema.getAnyOf();
         GeneratorMetaData.createInstance(openAPI, false);
-        String anyOfUnionType = TypeGeneratorUtils.getUnionType(anyOf).toString().trim();
+        IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(getValidName(
+                "AnyOF", true));
+        String anyOfUnionType = TypeGeneratorUtils.getUnionType(anyOf, typeNameToken).toString().trim();
         Assert.assertEquals(anyOfUnionType, "User|Activity");
     }
 

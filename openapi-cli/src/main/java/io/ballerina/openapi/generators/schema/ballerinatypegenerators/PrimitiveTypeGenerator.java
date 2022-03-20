@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
@@ -47,8 +48,8 @@ import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeT
  */
 public class PrimitiveTypeGenerator extends TypeGenerator {
 
-    public PrimitiveTypeGenerator(Schema schema) {
-        super(schema);
+    public PrimitiveTypeGenerator(Schema schema, IdentifierToken typeNameToken) {
+        super(schema, typeNameToken);
     }
 
     /**

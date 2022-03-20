@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
@@ -44,8 +45,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
  */
 public class AnyDataTypeGenerator extends TypeGenerator {
 
-    public AnyDataTypeGenerator(Schema schema) {
-        super(schema);
+    public AnyDataTypeGenerator(Schema schema, IdentifierToken typeNameToken) {
+        super(schema, typeNameToken);
     }
 
     /**

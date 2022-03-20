@@ -38,12 +38,13 @@ import java.nio.file.Paths;
 public class ArrayDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     CodeGenerator codeGenerator = new CodeGenerator();
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
 
     @BeforeTest
     public void setUp() {
-        System.setErr(new PrintStream(outContent));
+        System.setOut(new PrintStream(outContent));
     }
 
     @Test(description = "Generate record with array filed record")
@@ -153,28 +154,8 @@ public class ArrayDataTypeTests {
                 "schema/ballerina/array_with_oneOf_complex.bal", syntaxTree);
     }
 
-    @Test(description = "Array schema has max items count that ballerina doesn't support",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Maximum item count defined in the definition exceeds the.*")
-    public void arrayHasMaxItemsExceedLimit() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/array_exceed_max_item.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-    }
-
-    @Test(description = "Array schema has max items count that ballerina doesn't support, in record field",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Maximum item count defined in the definition exceeds the.*")
-    public void arrayHasMaxItemsExceedLimit02() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/array_exceed_max_item_02.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-    }
-
     @AfterTest
     public void tearDown() {
-        System.setErr(null);
+        System.setOut(originalOut);
     }
 }

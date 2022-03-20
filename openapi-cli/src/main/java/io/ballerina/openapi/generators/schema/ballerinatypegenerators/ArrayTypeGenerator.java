@@ -20,25 +20,25 @@ package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.io.PrintStream;
+
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
 import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNullableType;
 
 /**
@@ -59,9 +59,10 @@ import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNulla
  * @since 2.0.0
  */
 public class ArrayTypeGenerator extends TypeGenerator {
+    private final PrintStream outStream = System.out;
 
-    public ArrayTypeGenerator(Schema schema) {
-        super(schema);
+    public ArrayTypeGenerator(Schema schema, IdentifierToken typeNameToken) {
+        super(schema, typeNameToken);
     }
 
     /**
@@ -72,7 +73,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
-        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(arraySchema.getItems());
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(arraySchema.getItems(), typeName);
         TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
         if (typeGenerator instanceof UnionTypeGenerator) {
             typeDescriptorNode = createParenthesisedTypeDescriptorNode(
@@ -83,14 +84,9 @@ public class ArrayTypeGenerator extends TypeGenerator {
             typeDescriptorNode = (TypeDescriptorNode) node;
         }
 
-        Token arrayLengthToken = null;
         if (arraySchema.getMaxItems() != null) {
-            if (arraySchema.getMaxItems() <= MAX_ARRAY_LENGTH) {
-                arrayLengthToken = createIdentifierToken(String.valueOf(arraySchema.getMaxItems()));
-            } else {
-                throw new BallerinaOpenApiException("Maximum item count defined in the definition exceeds the " +
-                        "maximum ballerina array length.");
-            }
+            outStream.println("WARNING: Maximum item count defined in the array ' " + typeName.text() +
+                    "' property in the definition will not add to the maximum length for ballerina array.");
         }
         NodeList<ArrayDimensionNode> arrayDimensions = NodeFactory.createEmptyNodeList();
         if (typeDescriptorNode.kind() == SyntaxKind.ARRAY_TYPE_DESC) {
@@ -100,7 +96,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         }
 
         ArrayDimensionNode arrayDimension = NodeFactory.createArrayDimensionNode(
-                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), arrayLengthToken,
+                createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                 createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
         arrayDimensions = arrayDimensions.add(arrayDimension);
         ArrayTypeDescriptorNode arrayTypeDescriptorNode = createArrayTypeDescriptorNode(typeDescriptorNode
