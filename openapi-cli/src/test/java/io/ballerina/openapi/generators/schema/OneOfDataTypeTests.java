@@ -18,8 +18,6 @@
 
 package io.ballerina.openapi.generators.schema;
 
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -37,8 +35,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
-
 /**
  * All the tests related to OneOF data binding handling the {@link BallerinaTypesGenerator}
  * util.
@@ -55,9 +51,7 @@ public class OneOfDataTypeTests {
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> oneOf = composedSchema.getOneOf();
         GeneratorMetaData.createInstance(openAPI, false);
-        IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(getValidName(
-                "Error", true));
-        String oneOfUnionType = TypeGeneratorUtils.getUnionType(oneOf, typeNameToken).toString().trim();
+        String oneOfUnionType = TypeGeneratorUtils.getUnionType(oneOf, "Error").toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile");
     }
 
@@ -69,9 +63,7 @@ public class OneOfDataTypeTests {
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> oneOf = composedSchema.getOneOf();
         GeneratorMetaData.createInstance(openAPI, false);
-        IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(getValidName(
-                "Error", true));
-        String oneOfUnionType = TypeGeneratorUtils.getUnionType(oneOf, typeNameToken).toString().trim();
+        String oneOfUnionType = TypeGeneratorUtils.getUnionType(oneOf, "Error").toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
     }
 
@@ -82,9 +74,7 @@ public class OneOfDataTypeTests {
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, true);
-        IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(getValidName(
-                "Error", true));
-        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, typeNameToken);
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error");
         String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile?");
     }

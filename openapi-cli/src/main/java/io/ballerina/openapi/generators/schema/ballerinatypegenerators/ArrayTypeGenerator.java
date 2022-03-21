@@ -20,7 +20,6 @@ package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -39,6 +38,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedT
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
 import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNullableType;
 
 /**
@@ -61,8 +61,8 @@ import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNulla
 public class ArrayTypeGenerator extends TypeGenerator {
     private final PrintStream outStream = System.out;
 
-    public ArrayTypeGenerator(Schema schema, IdentifierToken typeNameToken) {
-        super(schema, typeNameToken);
+    public ArrayTypeGenerator(Schema schema, String typeName) {
+        super(schema, typeName);
     }
 
     /**
@@ -85,8 +85,13 @@ public class ArrayTypeGenerator extends TypeGenerator {
         }
 
         if (arraySchema.getMaxItems() != null) {
-            outStream.println("WARNING: Maximum item count defined in the array ' " + typeName.text() +
-                    "' property in the definition will not add to the maximum length for ballerina array.");
+            if (arraySchema.getMaxItems() <= MAX_ARRAY_LENGTH) {
+                outStream.println("WARNING: Maximum array item count defined for the property ' " + typeName +
+                        "' in the definition will be ignored");
+            } else {
+                throw new BallerinaOpenApiException("Maximum item count defined in the definition exceeds the " +
+                        "maximum ballerina array length.");
+            }
         }
         NodeList<ArrayDimensionNode> arrayDimensions = NodeFactory.createEmptyNodeList();
         if (typeDescriptorNode.kind() == SyntaxKind.ARRAY_TYPE_DESC) {

@@ -1,6 +1,5 @@
 package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
@@ -29,8 +28,8 @@ import java.util.List;
  */
 public class UnionTypeGenerator extends TypeGenerator {
 
-    public UnionTypeGenerator(Schema schema, IdentifierToken typeNameToken) {
-        super(schema, typeNameToken);
+    public UnionTypeGenerator(Schema schema, String typeName) {
+        super(schema, typeName);
     }
 
     @Override

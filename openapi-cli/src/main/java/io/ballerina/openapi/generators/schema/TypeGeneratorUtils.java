@@ -85,28 +85,28 @@ public class TypeGeneratorUtils {
      * Get SchemaType object relevant to the schema given.
      *
      * @param schemaValue Schema object
-     * @param typeNameToken parameter name
+     * @param typeName parameter name
      * @return Relevant SchemaType object
      */
-    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, IdentifierToken typeNameToken) {
+    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName) {
         if (schemaValue.get$ref() != null) {
-            return new ReferencedTypeGenerator(schemaValue, typeNameToken);
+            return new ReferencedTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schemaValue;
             if (composedSchema.getAllOf() != null) {
-                return new AllOfRecordTypeGenerator(schemaValue, typeNameToken);
+                return new AllOfRecordTypeGenerator(schemaValue, typeName);
             } else {
-                return new UnionTypeGenerator(schemaValue, typeNameToken);
+                return new UnionTypeGenerator(schemaValue, typeName);
             }
         } else if ((schemaValue.getType() != null && schemaValue.getType().equals(OBJECT)) ||
                 schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null) {
-            return new RecordTypeGenerator(schemaValue, typeNameToken);
+            return new RecordTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ArraySchema) {
-            return new ArrayTypeGenerator(schemaValue, typeNameToken);
+            return new ArrayTypeGenerator(schemaValue, typeName);
         } else if (schemaValue.getType() != null && primitiveTypeList.contains(schemaValue.getType())) {
-            return new PrimitiveTypeGenerator(schemaValue, typeNameToken);
+            return new PrimitiveTypeGenerator(schemaValue, typeName);
         } else { // when schemaValue.type == null
-            return new AnyDataTypeGenerator(schemaValue, typeNameToken);
+            return new AnyDataTypeGenerator(schemaValue, typeName);
         }
     }
     /**
@@ -149,7 +149,7 @@ public class TypeGeneratorUtils {
             List<Node> schemaDoc = getFieldApiDocs(field.getValue());
             NodeList<Node> schemaDocNodes = createNodeList(schemaDoc);
             IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldNameStr);
-            TypeDescriptorNode fieldTypeName = getTypeGenerator(field.getValue(), fieldName)
+            TypeDescriptorNode fieldTypeName = getTypeGenerator(field.getValue(), fieldNameStr)
                     .generateTypeDescriptorNode();
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
             MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
@@ -232,7 +232,7 @@ public class TypeGeneratorUtils {
      * @return Union type
      * @throws BallerinaOpenApiException when unsupported combination of schemas found
      */
-    public static TypeDescriptorNode getUnionType(List<Schema> schemas, IdentifierToken typeName)
+    public static TypeDescriptorNode getUnionType(List<Schema> schemas, String typeName)
             throws BallerinaOpenApiException {
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema schema: schemas) {

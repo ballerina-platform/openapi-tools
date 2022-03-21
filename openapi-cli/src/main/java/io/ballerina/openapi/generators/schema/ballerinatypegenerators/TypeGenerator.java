@@ -44,8 +44,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  */
 public abstract class TypeGenerator {
     Schema schema;
-    IdentifierToken typeName;
-    public TypeGenerator(Schema schema, IdentifierToken typeName) {
+    String typeName;
+    public TypeGenerator(Schema schema, String typeName) {
         this.schema = schema;
         this.typeName = typeName;
     }

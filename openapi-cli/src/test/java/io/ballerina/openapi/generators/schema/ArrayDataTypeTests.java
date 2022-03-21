@@ -154,6 +154,26 @@ public class ArrayDataTypeTests {
                 "schema/ballerina/array_with_oneOf_complex.bal", syntaxTree);
     }
 
+    @Test(description = "Array schema has max items count that ballerina doesn't support",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Maximum item count defined in the definition exceeds the.*")
+    public void arrayHasMaxItemsExceedLimit() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/array_exceed_max_item.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+    }
+
+    @Test(description = "Array schema has max items count that ballerina doesn't support, in record field",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "Maximum item count defined in the definition exceeds the.*")
+    public void arrayHasMaxItemsExceedLimit02() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/array_exceed_max_item_02.yaml");
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+    }
+
     @AfterTest
     public void tearDown() {
         System.setOut(originalOut);
