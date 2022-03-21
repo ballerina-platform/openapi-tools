@@ -76,8 +76,8 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.gen
  */
 public class BallerinaServiceGenerator {
     private boolean isNullableRequired;
-    private OpenAPI openAPI;
-    private Filter filter;
+    private final OpenAPI openAPI;
+    private final Filter filter;
 
     public BallerinaServiceGenerator(OpenAPI openApi, Filter filter) {
             this.openAPI = openApi;
