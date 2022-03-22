@@ -50,8 +50,8 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  */
 public class ReferencedTypeGenerator extends TypeGenerator {
 
-    public ReferencedTypeGenerator(Schema schema) {
-        super(schema);
+    public ReferencedTypeGenerator(Schema schema, String typeName) {
+        super(schema, typeName);
     }
 
     /**

@@ -69,8 +69,8 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  */
 public class AllOfRecordTypeGenerator extends TypeGenerator {
 
-    public AllOfRecordTypeGenerator(Schema schema) {
-        super(schema);
+    public AllOfRecordTypeGenerator(Schema schema, String typeName) {
+        super(schema, typeName);
     }
 
     /**
@@ -82,7 +82,8 @@ public class AllOfRecordTypeGenerator extends TypeGenerator {
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> allOfSchemas = composedSchema.getAllOf();
         if (allOfSchemas.size() == 1 && allOfSchemas.get(0).get$ref() != null) {
-            ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(allOfSchemas.get(0));
+            ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(allOfSchemas.get(0),
+                    typeName);
             return referencedTypeGenerator.generateTypeDescriptorNode();
         } else {
             List<Node> recordFieldList = generateAllOfRecordFields(allOfSchemas);
