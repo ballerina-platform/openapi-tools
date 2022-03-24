@@ -590,12 +590,13 @@ public class FunctionBodyGenerator {
                 String pathVariable = path.substring(m.start(), m.end());
                 if (pathVariable.startsWith("{") && pathVariable.endsWith("}")) {
                     String d = pathVariable.replace("{", "").replace("}", "");
-                    String replaceVariable = "{" + getValidName(d, false) + "}";
+                    String replaceVariable = "{getEncodedUri(" + getValidName(d, false) + ".toString())}";
                     refinedPath = refinedPath.replace(pathVariable, replaceVariable);
                 }
             }
             path = refinedPath.replaceAll("[{]", "\\${");
         }
+        ballerinaUtilGenerator.setPathParametersFound(true);
         return path;
     }
 

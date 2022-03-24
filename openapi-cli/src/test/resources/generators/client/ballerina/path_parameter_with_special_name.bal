@@ -17,7 +17,7 @@ public isolated client class Client {
     # + versionName - Version Name
     # + return - Ok
     remote isolated function operationId04(int 'version, string versionName) returns string|error {
-        string resourcePath = string `/v1/${'version}/v2/${versionName}`;
+        string resourcePath = string `/v1/${getEncodedUri('version.toString())}/v2/${getEncodedUri(versionName.toString())}`;
         string response = check self.clientEp-> get(resourcePath);
         return response;
     }
@@ -26,7 +26,7 @@ public isolated client class Client {
     # + versionLimit - Version Limit
     # + return - Ok
     remote isolated function operationId05(int versionId, int versionLimit) returns string|error {
-        string resourcePath = string `/v1/${versionId}/v2/${versionLimit}`;
+        string resourcePath = string `/v1/${getEncodedUri(versionId.toString())}/v2/${getEncodedUri(versionLimit.toString())}`;
         string response = check self.clientEp-> get(resourcePath);
         return response;
     }

@@ -18,7 +18,7 @@ public isolated client class Client {
     # + name - test
     # + return - Ok
     remote isolated function pathParameter(int 'version, string name) returns string|error {
-        string resourcePath = string `/v1/${'version}/v2/${name}`;
+        string resourcePath = string `/v1/${getEncodedUri('version.toString())}/v2/${getEncodedUri(name.toString())}`;
         string response = check self.clientEp-> get(resourcePath);
         return response;
     }
