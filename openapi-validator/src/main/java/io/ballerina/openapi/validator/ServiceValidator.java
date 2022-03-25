@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -219,7 +220,7 @@ public class ServiceValidator {
                         // Get the payload type
                         Node typeNode = requestBodyNode.typeName();
                         SyntaxKind kind = typeNode.kind();
-                        String mediaType;
+                        String mediaType = null;
                         // Return mediaType
                         switch (kind) {
                             case STRING_TYPE_DESC:
@@ -239,14 +240,16 @@ public class ServiceValidator {
                                 requestBodyNode.annotations(), context.semanticModel());
                         RequestBody oasRequestBody = oasOperation.getRequestBody();
                         Content content = oasRequestBody.getContent();
-                        if (content != null) {
-                            for (Map.Entry<String, MediaType> media : content.entrySet()) {
-                            }
-                        }
                         // traverse request body  list
                         // first check given media type is there
                         if (mediaTypes.isEmpty()) {
+                            if (content != null) {
+                                for (Map.Entry<String, MediaType> media : content.entrySet()) {
+                                    if (mediaType != null && Objects.equals(media.getKey(), mediaType)) {
 
+                                    }
+                                }
+                            }
                         } else {
 
                         }
