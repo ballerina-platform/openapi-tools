@@ -998,7 +998,10 @@ public class BallerinaAuthConfigGenerator {
                     httpFieldTypeNames.add(AuthConfigTypes.BASIC.getValue());
                     break;
                 case CLIENT_CRED:
-                    // Current swagger parser return empty string , when it has ex: tokenUrl: "", earlier it was null
+                    // Previous version of swagger parser returns null value, when it has an
+                    // empty string as a value (ex: tokenURL: ""). Latest version `2.0.30` version 
+                    // returns empty string as it is. Therefore, we have to check both null check and empty string
+                    // check.
                     if (clientCredGrantTokenUrl != null && !clientCredGrantTokenUrl.isBlank()) {
                         httpFieldTypeNames.add(AuthConfigTypes.CUSTOM_CLIENT_CREDENTIAL.getValue());
                     } else {
