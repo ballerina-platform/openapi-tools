@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.unescapeIdentifier;
 import static io.ballerina.openapi.generators.common.TestUtils.getStringFromGivenBalFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.compareWithGeneratedFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.deleteDirectory;
@@ -197,6 +198,15 @@ public class OpenApiConverterUtilsTest {
             } else {
                 Assert.fail("Yaml was not generated");
             }
+            if (Files.exists(tempDir.resolve("limit_openapi.yaml"))) {
+                String generatedYaml = getStringFromGivenBalFile(tempDir, "limit_openapi.yaml");
+                System.out.println(generatedYaml);
+                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+            } else {
+                Assert.fail("Yaml was not generated");
+            }
         } catch (IOException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
@@ -204,6 +214,14 @@ public class OpenApiConverterUtilsTest {
             deleteDirectory(tempDir);
             System.gc();
         }
+    }
+
+    @Test
+    public void testUnescapeIdentifiers() {
+        Assert.assertEquals(unescapeIdentifier("'limit"), "limit");
+        Assert.assertEquals(unescapeIdentifier("x\\-client"), "x-client");
+        Assert.assertEquals(unescapeIdentifier("/'limit"), "/limit");
+        Assert.assertEquals(unescapeIdentifier("/'limit/x\\-cl"), "/limit/x-cl");
     }
 
     @AfterMethod

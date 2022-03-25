@@ -489,6 +489,6 @@ public class ConverterCommonUtils {
     }
 
     public static String unescapeIdentifier(String parameterName) {
-        return parameterName.replaceAll("\\\\", "");
+        return parameterName.replaceAll("\\\\", "").replaceAll("'", "");
     }
 }

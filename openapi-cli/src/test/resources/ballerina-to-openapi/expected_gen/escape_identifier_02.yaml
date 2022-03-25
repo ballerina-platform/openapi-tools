@@ -1,0 +1,112 @@
+openapi: 3.0.1
+info:
+  title: Limit
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/limit"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /steps/from/date:
+    get:
+      summary: Query parameter
+      operationId: operation_get_/steps/from/date
+      parameters:
+        - name: limit
+          in: query
+          description: QParameter Description
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
+  /steps/{join}:
+    get:
+      operationId: "operation_get_/steps/{join}"
+      parameters:
+        - name: join
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: limit
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
+  /steps:
+    post:
+      operationId: operation_post_/steps
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Offset'
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    Pet:
+      required:
+        - id
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+        id:
+          type: integer
+          format: int64
+    Offset:
+      required:
+        - id
+        - join
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+        id:
+          type: integer
+          format: int64
+        join:
+          $ref: '#/components/schemas/Pet'
