@@ -28,8 +28,8 @@ import java.util.List;
  */
 public class UnionTypeGenerator extends TypeGenerator {
 
-    public UnionTypeGenerator(Schema schema) {
-        super(schema);
+    public UnionTypeGenerator(Schema schema, String typeName) {
+        super(schema, typeName);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class UnionTypeGenerator extends TypeGenerator {
         } else {
             schemas = composedSchema.getAnyOf();
         }
-        TypeDescriptorNode unionTypeDesc = TypeGeneratorUtils.getUnionType(schemas);
+        TypeDescriptorNode unionTypeDesc = TypeGeneratorUtils.getUnionType(schemas, typeName);
         return TypeGeneratorUtils.getNullableType(schema, unionTypeDesc);
     }
 }

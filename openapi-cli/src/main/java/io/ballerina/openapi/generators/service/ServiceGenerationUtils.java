@@ -40,7 +40,6 @@ import io.ballerina.openapi.generators.GeneratorUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
@@ -69,8 +68,12 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_JSON;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_OCTET_STREAM;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_XML;
 import static io.ballerina.openapi.generators.GeneratorConstants.FALSE;
 import static io.ballerina.openapi.generators.GeneratorConstants.SERVICE_CONFIG;
+import static io.ballerina.openapi.generators.GeneratorConstants.TEXT;
 import static io.ballerina.openapi.generators.GeneratorConstants.TREAT_NILABLE_AS_OPTIONAL;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
@@ -150,9 +153,8 @@ public class ServiceGenerationUtils {
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
             Schema contentType = iterator.next();
-            TypeDescriptorNode node = getIdentifierTokenForJsonSchema(contentType);
+            TypeDescriptorNode node = generateNodeForOASSchema(contentType);
             qualifiedNodes.add((SimpleNameReferenceNode) node);
-
         }
         SimpleNameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
         SimpleNameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
@@ -168,55 +170,44 @@ public class ServiceGenerationUtils {
     }
 
     /**
-     * Generate typeDescriptor for application/json type.
+     * Generate typeDescriptor for given schema.
      */
-    public static TypeDescriptorNode getIdentifierTokenForJsonSchema(Schema schema) throws BallerinaOpenApiException {
-        IdentifierToken identifierToken;
-        if (schema != null) {
-            if (schema.get$ref() != null) {
-                identifierToken = createIdentifierToken(getValidName(extractReferenceType(schema.get$ref()), true));
-            } else if (schema.getType() != null) {
-                if (schema instanceof ObjectSchema) {
-                    ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
-                    return returnTypeGenerator.getRecordTypeDescriptorNode(schema);
-                } else if (schema instanceof ArraySchema) {
-                    TypeDescriptorNode member;
-                    if (((ArraySchema) schema).getItems().get$ref() != null) {
-                        member = createBuiltinSimpleNameReferenceNode(null,
-                                createIdentifierToken(getValidName(extractReferenceType(((ArraySchema) schema).
-                                        getItems().get$ref()), true)));
-                    } else if (!(((ArraySchema) schema).getItems() instanceof ArraySchema)) {
-                        member = createBuiltinSimpleNameReferenceNode(null,
-                                createIdentifierToken(GeneratorConstants.JSON));
-                    } else {
-                        member = createBuiltinSimpleNameReferenceNode(null,
-                                createIdentifierToken(convertOpenAPITypeToBallerina(
-                                        ((ArraySchema) schema).getItems().getType())));
-                    }
-                    ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
-                            createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
-                            createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-                    NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
-                    return  createArrayTypeDescriptorNode(member, nodeList);
+    public static TypeDescriptorNode generateNodeForOASSchema(Schema<?> schema) throws BallerinaOpenApiException {
+        IdentifierToken identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
+                AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
+        if (schema == null) {
+            return createSimpleNameReferenceNode(identifierToken);
+        }
+        if (schema.get$ref() != null) {
+            String schemaName = getValidName(extractReferenceType(schema.get$ref()), true);
+            return createSimpleNameReferenceNode(createIdentifierToken(schemaName));
+        } else if (schema.getType() != null) {
+            if (schema instanceof ArraySchema) {
+                TypeDescriptorNode member;
+                if (((ArraySchema) schema).getItems().get$ref() != null) {
+                    member = createBuiltinSimpleNameReferenceNode(null,
+                            createIdentifierToken(getValidName(extractReferenceType(((ArraySchema) schema).
+                                    getItems().get$ref()), true)));
+                } else if (!(((ArraySchema) schema).getItems() instanceof ArraySchema)) {
+                    member = createBuiltinSimpleNameReferenceNode(null,
+                            createIdentifierToken(GeneratorConstants.JSON));
                 } else {
-                    identifierToken =  createIdentifierToken(schema.getType(),
-                            AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
+                    member = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
+                            convertOpenAPITypeToBallerina(((ArraySchema) schema).getItems().getType())));
                 }
-            } else if (schema instanceof ComposedSchema) {
-                if (((ComposedSchema) schema).getOneOf() != null) {
-                    Iterator<Schema> iterator = ((ComposedSchema) schema).getOneOf().iterator();
-                    return getUnionNodeForOneOf(iterator);
-                } else {
-                    identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
-                            AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
-                }
+                ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
+                        createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
+                        createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
+                NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
+                return  createArrayTypeDescriptorNode(member, nodeList);
             } else {
-                identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
+                identifierToken =  createIdentifierToken(schema.getType(),
                         AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
+                return createSimpleNameReferenceNode(identifierToken);
             }
-        } else {
-            identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
-                    AbstractNodeFactory.createEmptyMinutiaeList(), SINGLE_WS_MINUTIAE);
+        } else if (schema instanceof ComposedSchema && (((ComposedSchema) schema).getOneOf() != null)) {
+            Iterator<Schema> iterator = ((ComposedSchema) schema).getOneOf().iterator();
+            return getUnionNodeForOneOf(iterator);
         }
         return createSimpleNameReferenceNode(identifierToken);
     }
@@ -228,21 +219,21 @@ public class ServiceGenerationUtils {
             throws BallerinaOpenApiException {
         String mediaTypeContent = mediaType.getKey().trim();
         if (mediaTypeContent.matches("text/.*")) {
-            mediaTypeContent = "text";
+            mediaTypeContent = TEXT;
         }
         MediaType value = mediaType.getValue();
         Schema<?> schema = value.getSchema();
         IdentifierToken identifierToken;
         switch (mediaTypeContent) {
-            case "application/json":
-                return getIdentifierTokenForJsonSchema(schema);
-            case "application/xml":
+            case APPLICATION_JSON:
+                return generateNodeForOASSchema(schema);
+            case APPLICATION_XML:
                 identifierToken = createIdentifierToken(GeneratorConstants.XML);
                 return createSimpleNameReferenceNode(identifierToken);
-            case "text":
+            case TEXT:
                 identifierToken = createIdentifierToken(GeneratorConstants.STRING);
                 return createSimpleNameReferenceNode(identifierToken);
-            case "application/octet-stream":
+            case APPLICATION_OCTET_STREAM:
                 ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                         createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));

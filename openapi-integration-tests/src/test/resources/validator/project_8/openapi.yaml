@@ -1,0 +1,53 @@
+openapi: 3.0.1
+info:
+  title: Main Openapi Yaml
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "8980"
+paths:
+  /:
+    get:
+      operationId: operation_get
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+    put:
+      operationId: operation_put
+      responses:
+        "202":
+          description: Accepted
+    post:
+      operationId: operation_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        "202":
+          description: Accepted
+    delete:
+      operationId: operation_delete
+      responses:
+        "202":
+          description: Accepted
+components:
+  schemas:
+    Pet:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: string

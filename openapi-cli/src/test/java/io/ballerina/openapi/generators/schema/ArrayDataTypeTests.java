@@ -22,8 +22,9 @@ import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -38,12 +39,14 @@ import java.nio.file.Paths;
 public class ArrayDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     CodeGenerator codeGenerator = new CodeGenerator();
+    private final PrintStream originalStdOut = System.out;
+    private ByteArrayOutputStream consoleContent = new ByteArrayOutputStream();
 
-    @BeforeTest
-    public void setUp() {
-        System.setErr(new PrintStream(outContent));
+    @BeforeMethod
+    public void beforeTest() {
+        // Redirect all System.out to consoleContent.
+        System.setOut(new PrintStream(this.consoleContent));
     }
 
     @Test(description = "Generate record with array filed record")
@@ -119,6 +122,10 @@ public class ArrayDataTypeTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        this.pause(50);
+        String out = "Maximum array item count defined for the property";
+        Assert.assertTrue(this.consoleContent.toString().replaceAll("\\s+", "")
+                .contains(out.replaceAll("\\s+", "")));
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/array_max_item.bal",
                 syntaxTree);
     }
@@ -173,8 +180,20 @@ public class ArrayDataTypeTests {
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
     }
 
-    @AfterTest
-    public void tearDown() {
-        System.setErr(null);
+    @AfterMethod
+    public void afterTest() {
+        // Put back the standard out.
+        System.setOut(this.originalStdOut);
+        // Clear the consoleContent.
+        this.consoleContent = new ByteArrayOutputStream();
+    }
+
+    // Simulate some processing time by pausing.
+    private void pause(long lPauseInMillisSec) {
+        try {
+            Thread.sleep(lPauseInMillisSec);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }
