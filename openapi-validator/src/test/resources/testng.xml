@@ -33,9 +33,12 @@ under the License.
             <package name="org.ballerinalang.openapi.validator.*"/>
         </packages>
         <classes>
-            <class name="io.ballerina.openapi.validator.tests.PreValidationTests"/>
+            <class name="io.ballerina.openapi.validator.tests.HeaderValidationTests"/>
             <class name="io.ballerina.openapi.validator.tests.OpenAPIAnnotationNegativeTests"/>
             <class name="io.ballerina.openapi.validator.tests.OpenApiFilterTests"/>
+            <class name="io.ballerina.openapi.validator.tests.PreValidationTests"/>
+            <class name="io.ballerina.openapi.validator.tests.PathParameterValidationTests"/>
+            <class name="io.ballerina.openapi.validator.tests.QueryParameterValidationTests"/>
 <!--            <class name="io.ballerina.openapi.validator.tests.ResourceToOperationTests"/>-->
 <!--            <class name="io.ballerina.openapi.validator.tests.ServiceValidationTests"/>-->
 <!--            <class name="io.ballerina.openapi.validator.tests.TypeMisMatchTests"/>-->

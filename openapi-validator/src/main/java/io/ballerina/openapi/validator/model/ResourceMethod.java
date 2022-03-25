@@ -35,7 +35,7 @@ public class ResourceMethod {
     private final String path;
     private final Location location;
     private final String method;
-    private final Map<String, ParameterNode> parameters;
+    private final Map<String, Node> parameters;
     private final RequiredParameterNode body;
     private final Map<String, Node> headers;
     private final ReturnTypeDescriptorNode returnNode;
@@ -62,7 +62,7 @@ public class ResourceMethod {
         return method;
     }
 
-    public Map<String, ParameterNode> getParameters() {
+    public Map<String, Node> getParameters() {
         return parameters;
     }
 
@@ -85,7 +85,7 @@ public class ResourceMethod {
         private String path;
         private Location location;
         private String method;
-        private Map<String, ParameterNode> parameters;
+        private Map<String, Node> parameters;
         private RequiredParameterNode body;
         private Map<String, Node> headers;
         private ReturnTypeDescriptorNode returnNode;
@@ -105,7 +105,7 @@ public class ResourceMethod {
             return this;
         }
 
-        public ResourceMethodBuilder parameters(Map<String, ParameterNode> parameters) {
+        public ResourceMethodBuilder parameters(Map<String, Node> parameters) {
             this.parameters = parameters;
             return this;
         }

@@ -18,24 +18,35 @@
 package io.ballerina.openapi.validator;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.openapi.validator.model.Filter;
 import io.ballerina.openapi.validator.model.OpenAPIPathSummary;
@@ -294,10 +305,10 @@ public class ValidatorUtils {
             Map<String, Node> parameterNodeMap = new HashMap<>();
             String path = generatePath(relativeResourcePathNodes, parameterNodeMap);
             if (resourceSummaryList.containsKey(path)) {
-                extractResourceMethodDetails(resourceNode, path, resourceSummaryList.get(path));
+                extractResourceMethodDetails(resourceNode, path, resourceSummaryList.get(path), parameterNodeMap);
             } else {
                 ResourcePathSummary resourcePathSummary = new ResourcePathSummary(path);
-                extractResourceMethodDetails(resourceNode, path, resourcePathSummary);
+                extractResourceMethodDetails(resourceNode, path, resourcePathSummary, parameterNodeMap);
                 resourceSummaryList.put(path, resourcePathSummary);
             }
         }
@@ -314,7 +325,7 @@ public class ValidatorUtils {
             String node = next.toString().trim();
             if (next instanceof ResourcePathParameterNode) {
                 ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) next;
-                String paramName = pathParameterNode.paramName().text().trim();
+                String paramName = unescapeIdentifier(pathParameterNode.paramName().text().trim());
                 node = "{" + paramName + "}";
                 parameterNodeMap.put(paramName, next);
             }
@@ -335,7 +346,7 @@ public class ValidatorUtils {
      * @param resourcePath {@link ResourcePathSummary} that collection of resource method for specific path.
      */
     private static void extractResourceMethodDetails(FunctionDefinitionNode resourceNode, String path,
-                                                     ResourcePathSummary resourcePath) {
+                                                     ResourcePathSummary resourcePath, Map<String, Node> parameterNodes) {
 
         FunctionSignatureNode signatureNode = resourceNode.functionSignature();
         String httpMethod = resourceNode.functionName().text().trim();
@@ -345,8 +356,6 @@ public class ValidatorUtils {
         resourceMethodBuilder.path(path);
         resourceMethodBuilder.method(httpMethod);
         resourceMethodBuilder.location(resourceNode.location());
-
-        Map<String, ParameterNode> parameterNodes = new HashMap<>();
         Map<String, Node> headers = new HashMap<>();
 
         for (ParameterNode param : parameters) {
@@ -414,4 +423,86 @@ public class ValidatorUtils {
         }
     }
 
+    /**
+     * Method for convert ballerina TYPE_DEC type to ballerina type.
+     *
+     * @param type  OpenApi parameter types
+     * @return ballerina type
+     */
+    public static Optional<String> convertBallerinaType(SyntaxKind type) {
+        switch (type) {
+            case INT_TYPE_DESC:
+                return Optional.of(INT);
+            case STRING_TYPE_DESC:
+                return Optional.of(STRING);
+            case BOOLEAN_TYPE_DESC:
+                return Optional.of(BOOLEAN);
+            case ARRAY_TYPE_DESC:
+                return Optional.of(ARRAY_BRACKETS);
+            case RECORD_TYPE_DESC:
+                return Optional.of(RECORD);
+            case DECIMAL_TYPE_DESC:
+                return Optional.of(DECIMAL);
+            case FLOAT_TYPE_DESC:
+                return Optional.of(FLOAT);
+            default:
+                return Optional.empty();
+        }
+    }
+
+    public static String unescapeIdentifier(String parameterName) {
+        return parameterName.replaceAll("\\\\", "");
+    }
+
+    /**
+     * This util functions is used to extract the details of annotation field.
+     *
+     * @param annotationReference   Annotation reference name that need to extract
+     * @param annotationField       Annotation field name that need to extract details.
+     * @param annotations            Annotation nodes
+     * @return List of string
+     */
+
+    public static List<String> extractAnnotationFieldDetails(String annotationReference, String annotationField,
+                                                             NodeList<AnnotationNode> annotations,
+                                                             SemanticModel semanticModel) {
+
+        List<String> fieldValues = new ArrayList<>();
+        Iterator<AnnotationNode> iterator = annotations.stream().iterator();
+        while (iterator.hasNext()) {
+            AnnotationNode annotation = iterator.next();
+            Node annotReference = annotation.annotReference();
+            if (annotReference.toString().trim().equals(annotationReference) && annotation.annotValue().isPresent()) {
+                MappingConstructorExpressionNode listOfAnnotValue = annotation.annotValue().get();
+                for (MappingFieldNode field : listOfAnnotValue.fields()) {
+                    SpecificFieldNode fieldNode = (SpecificFieldNode) field;
+                    if (!((fieldNode).fieldName().toString().trim().equals(annotationField)) &&
+                            fieldNode.valueExpr().isEmpty()) {
+                        continue;
+                    }
+                    ExpressionNode expressionNode = fieldNode.valueExpr().get();
+                    if (expressionNode instanceof ListConstructorExpressionNode) {
+                        SeparatedNodeList mimeList = ((ListConstructorExpressionNode) expressionNode).expressions();
+                        for (Object mime : mimeList) {
+                            if (!(mime instanceof BasicLiteralNode)) {
+                                continue;
+                            }
+                            fieldValues.add(((BasicLiteralNode) mime).literalToken().text().trim().replaceAll("\"", ""));
+                        }
+                    } else if (expressionNode instanceof QualifiedNameReferenceNode && semanticModel != null) {
+                        QualifiedNameReferenceNode moduleRef = (QualifiedNameReferenceNode) expressionNode;
+                        Optional<Symbol> refSymbol = semanticModel.symbol(moduleRef);
+                        if (refSymbol.isPresent() && (refSymbol.get().kind() == SymbolKind.CONSTANT)
+                                && ((ConstantSymbol) refSymbol.get()).resolvedValue().isPresent()) {
+                            String mediaType = ((ConstantSymbol) refSymbol.get()).resolvedValue().get();
+                            fieldValues.add(mediaType.replaceAll("\"", ""));
+                        }
+                    } else {
+                        fieldValues.add(expressionNode.toString().trim().replaceAll("\"", ""));
+                    }
+                }
+            }
+        }
+        return fieldValues;
+    }
 }

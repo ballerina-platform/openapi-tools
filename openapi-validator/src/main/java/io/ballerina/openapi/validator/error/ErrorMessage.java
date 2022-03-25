@@ -24,21 +24,29 @@ public enum ErrorMessage {
     ERROR_003("Given OpenAPI contract file path is an empty string."),
     ERROR_004("OpenAPI annotation won''t support for non http service."),
     ERROR_005(""),
-    ERROR_006(""),
+    ERROR_006("Implementation type does not match with OAS contract type (expected ''{0}'',found ''{1}'') for the" +
+            " parameter ''{2}'' in http method ''{3}'' that associated with the path ''{4}''."),
     ERROR_007(""),
     ERROR_008(""),
-    ERROR_009(""),
+    ERROR_009("''{0}'' parameter for the method ''{1}'' of the resource associated with the path" +
+            " ''{2}'' is not documented in the OpenAPI contract."),
     ERROR_010(""),
-    ERROR_011("Unexpected error occur while reading the contract : %s"),
-    ERROR_012("Couldn't read the OpenAPI contract from the given file: %s"),
+    ERROR_011("Unexpected error occur while reading the contract : {0}"),
+    ERROR_012("Couldn't read the OpenAPI contract from the given file: {0}"),
     ERROR_013("bOTH TAGS AN DE TAGS"),
     ERROR_014("BOTH OPERATION AND E OPERATIONS"),
-    ERROR_015("Could not find Ballerina service resource(s) for HTTP method(s) ''%s'' for the path ''%s'' which is " +
+    ERROR_015("Could not find Ballerina service resource(s) for HTTP method(s) ''{0}'' for the path ''{1}'' which is " +
             "documented in the OpenAPI contract"),
-    ERROR_016("Ballerina service contains  ''%s'' resource/s with ''%s'' that is not documented in the " +
+    ERROR_016("Ballerina service contains  ''{0}'' resource/s with ''{1}'' that is not documented in the " +
             "OpenAPI contract."),
-    ERROR_017("Could not find a Ballerina service resource for the path ''%s'' which is documented in the OpenAPI contract."),
-    ERROR_018("Ballerina service contains resource/s with ''%s'' that is not documented in the OpenAPI contract.");
+    ERROR_017("Could not find a Ballerina service resource for the path ''{0}'' which is documented in the OpenAPI " +
+            "contract."),
+    ERROR_018("Ballerina service contains resource/s with ''{0}'' that is not documented in the OpenAPI contract."),
+    ERROR_019("Implementation type does not match with OAS contract type (expected ''{0}'',found ''{1}'') for the" +
+            " header ''{2}'' in http method ''{3}'' that associated with the path ''{4}''."),
+    ERROR_020("''{0}'' header for the method ''{1}'' of the resource associated with the path" +
+            " ''{2}'' is not documented in the OpenAPI contract.");
+
 
     private final String message;
 

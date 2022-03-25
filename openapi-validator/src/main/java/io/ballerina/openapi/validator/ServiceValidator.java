@@ -19,13 +19,19 @@
 package io.ballerina.openapi.validator;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.openapi.validator.model.Filter;
@@ -35,17 +41,28 @@ import io.ballerina.openapi.validator.model.ResourcePathSummary;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
+import static io.ballerina.openapi.validator.Constants.HTTP_PAYLOAD;
+import static io.ballerina.openapi.validator.ValidatorUtils.convertBallerinaType;
 import static io.ballerina.openapi.validator.ValidatorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.validator.ValidatorUtils.extractAnnotationFieldDetails;
+import static io.ballerina.openapi.validator.ValidatorUtils.getNormalizedPath;
 import static io.ballerina.openapi.validator.ValidatorUtils.summarizeOpenAPI;
 import static io.ballerina.openapi.validator.ValidatorUtils.summarizeResources;
+import static io.ballerina.openapi.validator.ValidatorUtils.unescapeIdentifier;
 import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
 
 /**
@@ -86,10 +103,9 @@ public class ServiceValidator {
                 resourcePathMap);
         // 5. Undocumented resource in service file
         Map<String, ResourcePathSummary> updatedResourcePath = undocumentedResource(openAPIPathSummaries, resourcePathMap);
-        SemanticModel semanticModel = context.semanticModel();
 
         // 6. Ballerina -> OAS validation
-
+        validateBallerinaAgainstToOAS(updatedResourcePath, updatedOASPaths);
                 // parameter , query, path
                 // header
                 // request body
@@ -108,7 +124,7 @@ public class ServiceValidator {
             // Unimplemented path
             if (!resources.containsKey(operationPath.getPath())) {
                 updateContext(context, CompilationError.UNIMPLEMENTED_RESOURCE_PATH, context.node().location(),
-                        operationPath.getPath());
+                        getNormalizedPath(operationPath.getPath()));
                 openAPIPathIterator.remove();
             } else {
                 // Unimplemented function
@@ -118,7 +134,8 @@ public class ServiceValidator {
                 for (Map.Entry<String, Operation> operation : methods.entrySet()) {
                     if (!resourceMethods.containsKey(operation.getKey().trim())) {
                         updateContext(context, CompilationError.UNIMPLEMENTED_RESOURCE_FUNCTION,
-                                context.node().location(), operation.getKey().trim(), operationPath.getPath());
+                                context.node().location(), operation.getKey().trim(),
+                                getNormalizedPath(operationPath.getPath()));
                         openAPIPathIterator.remove();
                     }
                 }
@@ -144,7 +161,8 @@ public class ServiceValidator {
                         Map.Entry<String, ResourceMethod> method = methodsIter.next();
                         if (!operationPath.getAvailableOperations().contains(method.getKey().trim())) {
                             updateContext(context, CompilationError.UNDOCUMENTED_RESOURCE_FUNCTIONS,
-                                    method.getValue().getLocation(), method.getKey(), resourcePath.getKey());
+                                    method.getValue().getLocation(), method.getKey(),
+                                    getNormalizedPath(resourcePath.getKey()));
                             methodsIter.remove();
                         }
                     }
@@ -153,7 +171,7 @@ public class ServiceValidator {
             }
             if (!isPathDocumented) {
                 updateContext(context, CompilationError.UNDOCUMENTED_RESOURCE_PATH, context.node().location(),
-                        resourcePath.getKey());
+                        getNormalizedPath(resourcePath.getKey()));
                 resourcePathIter.remove();
             }
         }
@@ -161,16 +179,20 @@ public class ServiceValidator {
     }
 
     // ballerina -> OAS
-    private void validateBallerinaAgainstToOAS (List<OpenAPIPathSummary> oasPaths, Map<String,
-            ResourcePathSummary> resourcePaths) {
+    /**
+     * This validation happens ballerina service against to openapi specification.
+     *
+     * @param resourcePaths
+     * @param oasPaths
+     */
+    private void validateBallerinaAgainstToOAS ( Map<String, ResourcePathSummary> resourcePaths,
+                                                 List<OpenAPIPathSummary> oasPaths) {
 
         Set<Map.Entry<String, ResourcePathSummary>> paths = resourcePaths.entrySet();
-        Iterator<Map.Entry<String, ResourcePathSummary>> pathIter = paths.iterator();
-        while (pathIter.hasNext()) {
-            Map.Entry<String, ResourcePathSummary> path = pathIter.next();
+        for (Map.Entry<String, ResourcePathSummary> path : paths) {
             Map<String, ResourceMethod> methods = path.getValue().getMethods();
             OpenAPIPathSummary oasPath = null;
-            for (OpenAPIPathSummary openAPIPath: oasPaths) {
+            for (OpenAPIPathSummary openAPIPath : oasPaths) {
                 if (path.getKey().equals(openAPIPath.getPath())) {
                     oasPath = openAPIPath;
                     break;
@@ -181,41 +203,174 @@ public class ServiceValidator {
                 assert oasPath != null;
                 Map<String, Operation> operations = oasPath.getOperations();
                 Operation oasOperation = operations.get(method.getKey());
-                // parameter validation ballerina ->
-                Map<String, ParameterNode> balParameters = method.getValue().getParameters();
+                // Ballerina parameters validation
                 List<Parameter> oasParameters = oasOperation.getParameters();
-                /// 1. parameter type mismatch
-                //  2. undocumented parameter
-                for (Map.Entry<String, ParameterNode> parameter : balParameters.entrySet()) {
-                    boolean isExist = false;
-                    ParameterNode paramNode = parameter.getValue();
-                    String ballerinaType;
-                    if (paramNode instanceof RequiredParameterNode) {
-                        RequiredParameterNode requireParam = (RequiredParameterNode) paramNode;
-                        ballerinaType = requireParam.typeName().toString().trim();
-                    } else {
-                        DefaultableParameterNode defaultParam = (DefaultableParameterNode) paramNode;
-                        ballerinaType = defaultParam.typeName().toString().trim();
-                    }
-                    for (Parameter oasParameter : oasParameters) {
-                        if (!parameter.getKey().equals(oasParameter.getName())) {
-                            continue;
+                validateBallerinaParameters(method, oasParameters);
+                // Ballerina headers validation
+                Map<String, Node> balHeaders = method.getValue().getHeaders();
+                validateBallerinaHeaders(method, oasParameters, balHeaders);
+                // Request body validation
+                Node body = method.getValue().getBody();
+                boolean isBodyExist = false;
+                if (oasOperation.getRequestBody() != null) {
+                    if (body instanceof RequiredParameterNode) {
+                        //Ballerina support type payload string|json|map<json>|xml|byte[]||record {| anydata...; |}[]
+                        RequiredParameterNode requestBodyNode = (RequiredParameterNode) body;
+                        // Get the payload type
+                        Node typeNode = requestBodyNode.typeName();
+                        SyntaxKind kind = typeNode.kind();
+                        String mediaType;
+                        // Return mediaType
+                        switch (kind) {
+                            case STRING_TYPE_DESC:
+                                mediaType = "text/plain";
+                                break;
+                            case MAP_TYPE_DESC:
+                            case RECORD_TYPE_DESC:
+                            case JSON_TYPE_DESC:
+                                mediaType = "application/json";
+                                break;
+                            case XML_TYPE_DESC:
+                                mediaType = "application/xml";
+                                break;
                         }
-                        isExist = true;
-                        if (convertOpenAPITypeToBallerina(oasParameter.getSchema().getType()).isEmpty()) {
-                            // type mismatch
-                            return;
+
+                        List<String> mediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, "mediaType",
+                                requestBodyNode.annotations(), context.semanticModel());
+                        RequestBody oasRequestBody = oasOperation.getRequestBody();
+                        Content content = oasRequestBody.getContent();
+                        if (content != null) {
+                            for (Map.Entry<String, MediaType> media : content.entrySet()) {
+                            }
                         }
-                        String type = convertOpenAPITypeToBallerina(oasParameter.getSchema().getType()).get();
-                        if (!ballerinaType.equals(type)) {
+                        // traverse request body  list
+                        // first check given media type is there
+                        if (mediaTypes.isEmpty()) {
+
+                        } else {
 
                         }
                     }
                 }
+
+                // Return type validation
             }
         }
     }
 
+    /**
+     * This function is used to validate the ballerina resource header against to openapi header.
+     *
+     * @param method
+     * @param oasParameters
+     * @param balHeaders
+     */
+    private void validateBallerinaHeaders(Map.Entry<String, ResourceMethod> method, List<Parameter> oasParameters,
+                           Map<String, Node> balHeaders) {
+
+        for (Map.Entry<String, Node> balHeader: balHeaders.entrySet()) {
+            // Available header types string|int|boolean|string[]|int[]|boolean[]|? headers
+            // Need to remove `\`  while checking header name x\-client\-header
+            Node headerNode = balHeader.getValue();
+            String headerName = unescapeIdentifier(balHeader.getKey());
+            String ballerinaType;
+            NodeList<AnnotationNode> annotations;
+            if (headerNode instanceof RequiredParameterNode) {
+                RequiredParameterNode requireParam = (RequiredParameterNode) headerNode;
+                ballerinaType = requireParam.typeName().toString().trim();
+                annotations = requireParam.annotations();
+            } else {
+                DefaultableParameterNode defaultParam = (DefaultableParameterNode) headerNode;
+                ballerinaType = defaultParam.typeName().toString().trim();
+                annotations = defaultParam.annotations();
+            }
+            if (!annotations.isEmpty()) {
+                List<String> headers = extractAnnotationFieldDetails(HTTP_HEADER, "name", annotations,
+                        context.semanticModel());
+                if (!headers.isEmpty()) {
+                    headerName = headers.get(0);
+                }
+            }
+            boolean isHeaderDocumented = false;
+            if (oasParameters != null) {
+                for (Parameter oasParameter: oasParameters) {
+                    if (!(oasParameter instanceof HeaderParameter)) {
+                        continue;
+                    }
+                    if (headerName.equals(oasParameter.getName())) {
+                        isHeaderDocumented = true;
+                        Optional<String> type =
+                                convertOpenAPITypeToBallerina(oasParameter.getSchema().getType());
+                        if (type.isEmpty() || !ballerinaType.equals(type.get())) {
+                            updateContext(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
+                                    headerNode.location(), ballerinaType, oasParameter.getSchema().getType(),
+                                    headerName, method.getKey(),
+                                    getNormalizedPath(method.getValue().getPath()));
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!isHeaderDocumented) {
+                // undocumented header
+                updateContext(context, CompilationError.UNDOCUMENTED_HEADER, balHeader.getValue().location(),
+                        headerName, method.getKey(), getNormalizedPath(method.getValue().getPath()));
+            }
+        }
+    }
+
+    /**
+     * This function is used to validate the ballerina resource parameter against to openapi parameters.
+     *
+     * @param method
+     * @param oasParameters
+     */
+    private void validateBallerinaParameters(Map.Entry<String, ResourceMethod> method,
+                                             List<Parameter> oasParameters) {
+
+        for (Map.Entry<String, Node> parameter : method.getValue().getParameters().entrySet()) {
+            boolean isExist = false;
+            String parameterName = unescapeIdentifier(parameter.getKey());
+            String ballerinaType;
+
+            if (parameter.getValue() instanceof ParameterNode) {
+                ParameterNode paramNode = (ParameterNode) parameter.getValue();
+                if (paramNode instanceof RequiredParameterNode) {
+                    RequiredParameterNode requireParam = (RequiredParameterNode) paramNode;
+                    ballerinaType = requireParam.typeName().toString().trim();
+                } else {
+                    DefaultableParameterNode defaultParam = (DefaultableParameterNode) paramNode;
+                    ballerinaType = defaultParam.typeName().toString().trim();
+                }
+            } else {
+                ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) parameter.getValue();
+                ballerinaType = convertBallerinaType(pathParameterNode.typeDescriptor().kind()).orElse(null);
+            }
+            if (oasParameters != null) {
+                for (Parameter oasParameter : oasParameters) {
+                    if (!parameterName.equals(oasParameter.getName())) {
+                        continue;
+                    }
+                    isExist = true;
+                    Optional<String> type = convertOpenAPITypeToBallerina(oasParameter.getSchema().getType());
+                    if (type.isEmpty() || !ballerinaType.equals(type.get())) {
+                        updateContext(context, CompilationError.TYPE_MISMATCH_PARAMETER,
+                                parameter.getValue().location(), ballerinaType, oasParameter.getSchema().getType(),
+                                parameterName, method.getKey(), method.getValue().getPath());
+                        break;
+                    }
+                }
+            }
+            if (!isExist) {
+                // undocumented parameter
+                updateContext(context, CompilationError.UNDOCUMENTED_PARAMETER, parameter.getValue().location(),
+                        parameterName, method.getKey(), getNormalizedPath(method.getValue().getPath()));
+            }
+        }
+    }
+
+    // oas -> ballerina
     private void validateBalParameterAgainstOAS(Map<String, ParameterNode> parameters, List<Parameter> oasParameters) {
 
         for (Map.Entry<String, ParameterNode> parameter : parameters.entrySet()) {
@@ -229,7 +384,6 @@ public class ServiceValidator {
                 }
             }
         }
-
     }
 }
 

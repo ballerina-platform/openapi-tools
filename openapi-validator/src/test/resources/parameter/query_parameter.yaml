@@ -1,0 +1,39 @@
+openapi: 3.0.1
+info:
+  title: V1
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/v1"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pets:
+    get:
+      operationId: type_mismatch
+      parameters:
+        - name: offset
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "202":
+          description: Accepted
+  /pets02:
+    get:
+      operationId: undocumented
+      parameters:
+        - name: offset
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "202":
+          description: Accepted
+components: {}

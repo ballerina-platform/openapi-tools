@@ -60,7 +60,13 @@ public enum CompilationError {
     UNIMPLEMENTED_RESOURCE_PATH(ErrorCode.OPENAPI_VALIDATOR_017, ErrorMessage.ERROR_017,
             DiagnosticSeverity.ERROR),
     UNDOCUMENTED_RESOURCE_PATH(ErrorCode.OPENAPI_VALIDATOR_018, ErrorMessage.ERROR_018,
+            DiagnosticSeverity.ERROR),
+    TYPE_MISMATCH_HEADER_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_019, ErrorMessage.ERROR_019,
+            DiagnosticSeverity.ERROR),
+    UNDOCUMENTED_HEADER(ErrorCode.OPENAPI_VALIDATOR_020, ErrorMessage.ERROR_020,
             DiagnosticSeverity.ERROR);
+
+
 
 
     private final String code;

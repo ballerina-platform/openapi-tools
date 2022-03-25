@@ -19,6 +19,8 @@ package io.ballerina.openapi.validator.tests;
 
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Project;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.nio.file.Path;
@@ -27,30 +29,20 @@ import java.nio.file.Paths;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getCompilation;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
-/**
- * This test set for covering the all the negative behaviours of the annotation.
- */
-public class OpenAPIAnnotationNegativeTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/annotation").toAbsolutePath();
-    //1. contract path " "
-    //2. contract path location invaild
-    //3. contract in invalid
-    //4. contract path missing with filters enable
-    //5. annotation is empty
-    //6. annotation is with only embed field
-    @Test(description = "Contract attribute has path empty string")
-    public void annotationWithoutFields() {
-        Path path = RES_DIR.resolve("negative/annotation_without_fields.bal");
+public class PathParameterValidationTests {
+    private static final Path RES_DIR = Paths.get("src/test/resources/parameter")
+            .toAbsolutePath();
+    @Test(description = "Path parameter type mismatch test")
+    public void typeMismatch() {
+        Path path = RES_DIR.resolve("path_parameter.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
-        int i = diagnostic.diagnosticCount();
-    }
-
-    @Test(description = "Contract attribute has path empty string")
-    public void contractPathEmptyString() {
-        Path path = RES_DIR.resolve("negative/contract_path_empty.bal");
-        Project project = getProject(path);
-        DiagnosticResult diagnostic = getCompilation(project);
-        int i = diagnostic.diagnosticCount();
+        Object[] errors =
+                diagnostic.diagnostics().stream().filter(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity())
+                        .toArray();
+        Assert.assertTrue(errors.length == 2);
+        String error = "ERROR [query_parameter.bal:(8:32,8:45)] Implementation type does not match with OAS contract" +
+                " type (expected 'string',found 'integer') for the parameter 'offset' in http method 'get' that associated with the path '/pets'.";
+        Assert.assertEquals(error, errors[0].toString());
     }
 }
