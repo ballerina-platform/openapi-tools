@@ -20,6 +20,7 @@ package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -28,6 +29,8 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -59,7 +62,9 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -144,6 +149,7 @@ public class TypeGeneratorUtils {
         List<Node> recordFieldList = new ArrayList<>();
         for (Map.Entry<String, Schema> field : fields) {
             RecordFieldNode recordFieldNode;
+            RecordFieldWithDefaultValueNode recordFieldWithDefaultValueNode;
             String fieldNameStr = escapeIdentifier(field.getKey().trim());
             // API doc generations
             List<Node> schemaDoc = getFieldApiDocs(field.getValue());
@@ -155,17 +161,53 @@ public class TypeGeneratorUtils {
             MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
             if (required != null) {
                 if (!required.contains(field.getKey().trim())) {
-                    recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
-                            fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
+                    if (field.getValue().getDefault() != null) {
+                        Token defaultValue;
+                        if ((field.getValue().getDefault()).getClass() == String.class) {
+                            defaultValue = AbstractNodeFactory.createIdentifierToken("\"" + 
+                            field.getValue().getDefault().toString() + "\"");
+                        } else {
+                            defaultValue = AbstractNodeFactory.createIdentifierToken
+                            (field.getValue().getDefault().toString());
+                        }
+                        ExpressionNode expressionNode = createRequiredExpressionNode(defaultValue);
+                        IdentifierToken modifiedToken = fieldName.modify(fieldName + "?");
+                        recordFieldWithDefaultValueNode = NodeFactory.createRecordFieldWithDefaultValueNode
+                        (metadataNode, null, fieldTypeName, modifiedToken, createToken(EQUAL_TOKEN), 
+                        expressionNode, createToken(SEMICOLON_TOKEN));
+                        recordFieldList.add(recordFieldWithDefaultValueNode);
+                    } else {
+                        recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
+                                fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), 
+                                createToken(SEMICOLON_TOKEN));
+                        recordFieldList.add(recordFieldNode);
+                    }
                 } else {
-                    recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
-                            fieldTypeName, fieldName, null, createToken(SEMICOLON_TOKEN));
+                    if (field.getValue().getDefault() != null) {
+                        Token defaultValue;
+                        if ((field.getValue().getDefault()).getClass() == String.class) {
+                            defaultValue = AbstractNodeFactory.createIdentifierToken
+                                ("\"" + field.getValue().getDefault().toString() + "\"");
+                        } else {
+                            defaultValue = AbstractNodeFactory.createIdentifierToken
+                                (field.getValue().getDefault().toString());
+                        }
+                        ExpressionNode expressionNode = createRequiredExpressionNode(defaultValue);
+                        recordFieldWithDefaultValueNode = NodeFactory.createRecordFieldWithDefaultValueNode
+                            (metadataNode, null, fieldTypeName, fieldName, createToken(EQUAL_TOKEN), 
+                            expressionNode, createToken(SEMICOLON_TOKEN));
+                        recordFieldList.add(recordFieldWithDefaultValueNode);
+                    } else {
+                        recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
+                                fieldTypeName, fieldName, null, createToken(SEMICOLON_TOKEN));
+                        recordFieldList.add(recordFieldNode);
+                    }
                 }
             } else {
                 recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
                         fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
+                recordFieldList.add(recordFieldNode);
             }
-            recordFieldList.add(recordFieldNode);
         }
         return recordFieldList;
 

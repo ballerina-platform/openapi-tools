@@ -159,6 +159,30 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test Ballerina types generation when default value is provided")
+    public void generateTypesWithDefaultFields() {
+        final String clientName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("petstore_with_default_values.yaml").toString();
+        CodeGenerator generator = new CodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "default_value.bal");
+            generator.generateClient(definitionPath, clientName, resourcePath.toString(), filter, false);
+
+            if (Files.exists(resourcePath.resolve("types.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "types.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+            } else {
+                Assert.fail("Types were not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
     @Test(description = "Test Ballerina types generation when nullable option is given")
     public void generateTypesWithNullableFields() {
         final String clientName = "openapipetstore";
