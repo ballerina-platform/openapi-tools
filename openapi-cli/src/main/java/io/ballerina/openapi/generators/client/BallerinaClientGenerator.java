@@ -262,7 +262,7 @@ public class BallerinaClientGenerator {
         }
         // Generate api doc
         List<Node> documentationLines = new ArrayList<>();
-        if (openAPI.getInfo().getDescription() != null) {
+        if (openAPI.getInfo().getDescription() != null && !openAPI.getInfo().getDescription().isBlank()) {
             documentationLines.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                     openAPI.getInfo().getDescription(), false));
         }
@@ -506,7 +506,7 @@ public class BallerinaClientGenerator {
         if (operation.getValue().getSummary() != null) {
             remoteFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                     operation.getValue().getSummary(), true));
-        } else if (operation.getValue().getDescription() != null) {
+        } else if (operation.getValue().getDescription() != null && !operation.getValue().getDescription().isBlank()) {
             remoteFunctionDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                     operation.getValue().getDescription(), true));
         } else {
