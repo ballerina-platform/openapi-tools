@@ -185,12 +185,12 @@ public class OpenApiConverterUtilsTest {
         Path ballerinaFilePath = RES_DIR.resolve("escape_identifier.bal");
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
-            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
-                    "escape_identifier.yaml");
             OpenApiConverter openApiConverter = new OpenApiConverter();
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                     , false);
             if (Files.exists(tempDir.resolve("v1_abc-hello_openapi.yaml"))) {
+                String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
+                        "escape_identifier.yaml");
                 String generatedYaml = getStringFromGivenBalFile(tempDir, "v1_abc-hello_openapi.yaml");
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
                 expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
@@ -199,8 +199,9 @@ public class OpenApiConverterUtilsTest {
                 Assert.fail("Yaml was not generated");
             }
             if (Files.exists(tempDir.resolve("limit_openapi.yaml"))) {
+                String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
+                        "escape_identifier_02.yaml");
                 String generatedYaml = getStringFromGivenBalFile(tempDir, "limit_openapi.yaml");
-                System.out.println(generatedYaml);
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
                 expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedYaml.contains(expectedYamlContent));

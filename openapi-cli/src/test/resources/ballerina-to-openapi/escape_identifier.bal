@@ -41,6 +41,7 @@ type Pet record {
 };
 
 type Offset record {
+    # pet type
     string 'type;
     int id;
     Pet 'join;
@@ -52,7 +53,9 @@ service /'limit on new http:Listener(9090) {
     resource function get steps/'from/date(string 'limit) returns string|error {
         return "Hello";
     }
-
+    # Header parameter
+    #
+    # + 'limit - HParameter Description
     resource function get steps/[int 'join](@http:Header string 'limit) returns string|error {
         return "Hello";
     }
