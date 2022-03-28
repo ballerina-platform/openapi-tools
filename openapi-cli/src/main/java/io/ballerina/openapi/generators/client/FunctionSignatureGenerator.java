@@ -156,7 +156,7 @@ public class FunctionSignatureGenerator {
         Collection<ApiResponse> values = responses.values();
         Iterator<ApiResponse> iteratorRes = values.iterator();
         ApiResponse next = iteratorRes.next();
-        if (next.getDescription() != null) {
+        if (next.getDescription() != null && !next.getDescription().isBlank()) {
             MarkdownParameterDocumentationLineNode returnDoc = DocCommentsGenerator.createAPIParamDoc("return",
                     next.getDescription());
             remoteFunctionDoc.add(returnDoc);
@@ -180,7 +180,7 @@ public class FunctionSignatureGenerator {
         List<Node> deprecatedParamDocComments = new ArrayList<>();
         if (parameters != null) {
             for (Parameter parameter: parameters) {
-                if (parameter.getDescription() != null) {
+                if (parameter.getDescription() != null && !parameter.getDescription().isBlank()) {
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
                             DocCommentsGenerator.createAPIParamDoc(getValidName(
                                             parameter.getName(), false), parameter.getDescription());
@@ -397,7 +397,7 @@ public class FunctionSignatureGenerator {
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getKey(), false));
         List<AnnotationNode> parameterAnnotationNodeList = new ArrayList<>();
 
-        if (parameter.getValue().getDescription() != null) {
+        if (parameter.getValue().getDescription() != null && !parameter.getValue().getDescription().isBlank()) {
             MarkdownParameterDocumentationLineNode paramAPIDoc = DocCommentsGenerator.createAPIParamDoc(
                     getValidName(parameter.getKey(), false), parameter.getValue().getDescription());
             remoteFunctionDoc.add(paramAPIDoc);
@@ -510,7 +510,7 @@ public class FunctionSignatureGenerator {
                 IdentifierToken paramName = createIdentifierToken(PAYLOAD);
                 RequiredParameterNode payload = createRequiredParameterNode(
                         createNodeList(annotationNodes), typeName, paramName);
-                if (requestBody.getDescription() != null) {
+                if (requestBody.getDescription() != null && !requestBody.getDescription().isBlank()) {
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
                             DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(PAYLOAD),
                                     requestBody.getDescription().split("\n")[0]);
