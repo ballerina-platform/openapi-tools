@@ -63,4 +63,10 @@ service /'limit on new http:Listener(9090) {
     resource function post steps(@http:Payload Offset payload) returns string|error {
         return "Hello";
     }
+    resource function put พิมพ์ชื่อ(string ชื่อ) {
+
+    }
+    resource function get พิมพ์ชื่อ(string ชื่\u{E2D}) {
+
+    }
 }

@@ -71,6 +71,8 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -91,6 +93,7 @@ import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
  * Utilities used in Ballerina  to OpenAPI converter.
  */
 public class ConverterCommonUtils {
+    private static final String GENERATED_METHOD_PREFIX = "$gen$";
 
     /**
      * Retrieves a matching OpenApi {@link Schema} for a provided ballerina type.
@@ -489,6 +492,17 @@ public class ConverterCommonUtils {
     }
 
     public static String unescapeIdentifier(String parameterName) {
+        // NOTE: This is a temporary fix to decode unicode until we come up with a proper api.
+        // This already implemented API from {@link io.ballerina.identifier.Utils} can be access, if it is available
+        // in some which we can access in external class. That API is need to be implemented.
+        try {
+            Class<?> uClass = Class.forName("io.ballerina.identifier.Utils");
+            Method unescapeBallerina = uClass.getDeclaredMethod("unescapeBallerina", java.lang.String.class);
+            parameterName = (String) unescapeBallerina.invoke(null, parameterName);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                InvocationTargetException e) {
+            return parameterName;
+        }
         return parameterName.replaceAll("\\\\", "").replaceAll("'", "");
     }
 }

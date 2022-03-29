@@ -85,6 +85,29 @@ paths:
             text/plain:
               schema:
                 type: string
+  /พิมพ์ชื่อ:
+    get:
+      operationId: operation_get_/พิมพ์ชื่อ
+      parameters:
+        - name: ชื่อ
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+    put:
+      operationId: operation_put_/พิมพ์ชื่อ
+      parameters:
+        - name: ชื่อ
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
 components:
   schemas:
     Pet:

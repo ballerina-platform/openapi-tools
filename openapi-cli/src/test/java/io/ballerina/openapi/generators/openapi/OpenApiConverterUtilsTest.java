@@ -223,6 +223,12 @@ public class OpenApiConverterUtilsTest {
         Assert.assertEquals(unescapeIdentifier("x\\-client"), "x-client");
         Assert.assertEquals(unescapeIdentifier("/'limit"), "/limit");
         Assert.assertEquals(unescapeIdentifier("/'limit/x\\-cl"), "/limit/x-cl");
+        Assert.assertEquals(unescapeIdentifier("'พิมพ์ชื่อ"), "พิมพ์ชื่อ");
+    }
+
+    @Test
+    public void testDecodeIdentifier() {
+        Assert.assertEquals(unescapeIdentifier("ชื่\\u{E2D}"), "ชื่อ");
     }
 
     @AfterMethod

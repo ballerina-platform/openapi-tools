@@ -78,7 +78,7 @@ public class OpenAPIHeaderMapper {
             }
         }
         enableHeaderRequiredOption(headerParameter, node, headerTypeSchema, isOptional);
-        if (!apidocs.isEmpty() && apidocs.containsKey(headerName)) {
+        if (apidocs != null && apidocs.containsKey(headerName)) {
             headerParameter.setDescription(apidocs.get(headerName.trim()));
         }
         completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
@@ -120,7 +120,7 @@ public class OpenAPIHeaderMapper {
         if (headerParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
             headerTypeSchema.setNullable(true);
         }
-        if (!apidocs.isEmpty() && apidocs.containsKey(headerName)) {
+        if (apidocs != null && apidocs.containsKey(headerName)) {
             headerParameter.setDescription(apidocs.get(headerName.trim()));
         }
         completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
