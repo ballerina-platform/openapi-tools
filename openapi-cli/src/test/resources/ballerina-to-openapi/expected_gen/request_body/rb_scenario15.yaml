@@ -15,7 +15,7 @@ paths:
       operationId: operation_post_/pets
       requestBody:
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
               type: object
               additionalProperties:
@@ -28,7 +28,7 @@ paths:
       operationId: operation_post_/pets02
       requestBody:
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
               type: object
               additionalProperties:
@@ -39,6 +39,19 @@ paths:
   /pets03:
     post:
       operationId: operation_post_/pets03
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        "200":
+          description: Ok
+  /pets04:
+    post:
+      operationId: operation_post_/pets04
       requestBody:
         content:
           application/x-www-form-urlencoded:
