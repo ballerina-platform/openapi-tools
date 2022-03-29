@@ -85,27 +85,28 @@ public class TypeGeneratorUtils {
      * Get SchemaType object relevant to the schema given.
      *
      * @param schemaValue Schema object
+     * @param typeName parameter name
      * @return Relevant SchemaType object
      */
-    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue) {
+    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName) {
         if (schemaValue.get$ref() != null) {
-            return new ReferencedTypeGenerator(schemaValue);
+            return new ReferencedTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schemaValue;
             if (composedSchema.getAllOf() != null) {
-                return new AllOfRecordTypeGenerator(schemaValue);
+                return new AllOfRecordTypeGenerator(schemaValue, typeName);
             } else {
-                return new UnionTypeGenerator(schemaValue);
+                return new UnionTypeGenerator(schemaValue, typeName);
             }
         } else if ((schemaValue.getType() != null && schemaValue.getType().equals(OBJECT)) ||
                 schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null) {
-            return new RecordTypeGenerator(schemaValue);
+            return new RecordTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ArraySchema) {
-            return new ArrayTypeGenerator(schemaValue);
+            return new ArrayTypeGenerator(schemaValue, typeName);
         } else if (schemaValue.getType() != null && primitiveTypeList.contains(schemaValue.getType())) {
-            return new PrimitiveTypeGenerator(schemaValue);
+            return new PrimitiveTypeGenerator(schemaValue, typeName);
         } else { // when schemaValue.type == null
-            return new AnyDataTypeGenerator(schemaValue);
+            return new AnyDataTypeGenerator(schemaValue, typeName);
         }
     }
     /**
@@ -148,7 +149,8 @@ public class TypeGeneratorUtils {
             List<Node> schemaDoc = getFieldApiDocs(field.getValue());
             NodeList<Node> schemaDocNodes = createNodeList(schemaDoc);
             IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldNameStr);
-            TypeDescriptorNode fieldTypeName = getTypeGenerator(field.getValue()).generateTypeDescriptorNode();
+            TypeDescriptorNode fieldTypeName = getTypeGenerator(field.getValue(), fieldNameStr)
+                    .generateTypeDescriptorNode();
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
             MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
             if (required != null) {
@@ -226,13 +228,15 @@ public class TypeGeneratorUtils {
      * Creates the UnionType string to generate bal type for a given oneOf or anyOf type schema.
      *
      * @param schemas List of schemas included in the anyOf or oneOf schema
+     * @param typeName This is parameter or variable name that used to populate error message meaningful
      * @return Union type
      * @throws BallerinaOpenApiException when unsupported combination of schemas found
      */
-    public static TypeDescriptorNode getUnionType(List<Schema> schemas) throws BallerinaOpenApiException {
+    public static TypeDescriptorNode getUnionType(List<Schema> schemas, String typeName)
+            throws BallerinaOpenApiException {
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema schema: schemas) {
-            TypeDescriptorNode typeDescriptorNode = getTypeGenerator(schema).generateTypeDescriptorNode();
+            TypeDescriptorNode typeDescriptorNode = getTypeGenerator(schema, typeName).generateTypeDescriptorNode();
             if (typeDescriptorNode instanceof OptionalTypeDescriptorNode &&
                     GeneratorMetaData.getInstance().isNullable()) {
                 Node internalTypeDesc = ((OptionalTypeDescriptorNode) typeDescriptorNode).typeDescriptor();

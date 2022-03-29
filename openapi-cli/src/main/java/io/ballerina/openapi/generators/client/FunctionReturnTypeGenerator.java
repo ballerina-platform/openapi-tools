@@ -152,7 +152,7 @@ public class FunctionReturnTypeGenerator {
                 type = Character.toUpperCase(operationId.charAt(0)) + operationId.substring(1) +
                         "Response";
                 List<Node> responseDocs = new ArrayList<>();
-                if (response.getDescription() != null) {
+                if (response.getDescription() != null && !response.getDescription().isBlank()) {
                     responseDocs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(
                             response.getDescription(), false));
                 }

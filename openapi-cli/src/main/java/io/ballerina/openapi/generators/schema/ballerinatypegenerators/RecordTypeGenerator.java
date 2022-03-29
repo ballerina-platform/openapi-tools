@@ -72,8 +72,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
  */
 public class RecordTypeGenerator extends TypeGenerator {
 
-    public RecordTypeGenerator(Schema schema) {
-        super(schema);
+    public RecordTypeGenerator(Schema schema, String typeName) {
+        super(schema, typeName);
     }
 
     /**
