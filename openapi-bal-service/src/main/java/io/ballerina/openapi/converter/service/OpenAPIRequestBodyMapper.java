@@ -23,9 +23,6 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -33,7 +30,6 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
@@ -46,6 +42,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -53,13 +50,14 @@ import java.util.Optional;
 import javax.ws.rs.core.MediaType;
 
 import static io.ballerina.openapi.converter.Constants.APPLICATION_PREFIX;
+import static io.ballerina.openapi.converter.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.converter.Constants.JSON_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.MEDIA_TYPE;
 import static io.ballerina.openapi.converter.Constants.OCTECT_STREAM_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.TEXT_PREFIX;
 import static io.ballerina.openapi.converter.Constants.XML_POSTFIX;
-import static io.ballerina.openapi.converter.Constants.X_WWW_FORM_URLENCODED_POSTFIX;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.extractAnnotationFieldDetails;
 
 /**
  * OpenAPIRequestBodyMapper provides functionality for converting ballerina payload to OAS request body model.
@@ -123,8 +121,16 @@ public class OpenAPIRequestBodyMapper {
             if (mapMime != null) {
                 fields = mapMime.fields();
             }
-            if (fields != null && (!fields.isEmpty() || fields.size() != 0)) {
-                handleMultipleMIMETypes(bodyParameter, fields, payloadNode, schema);
+
+            // Handle multiple mime type when attached with request payload annotation.
+            // ex: <pre> @http:Payload { mediaType:["application/json", "application/xml"] } Pet payload </pre>
+            if (fields != null && !fields.isEmpty()) {
+                List<String> mimeTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE, annotation,
+                        semanticModel);
+                RequestBody requestBody = new RequestBody();
+                for (String mimeType: mimeTypes) {
+                    createRequestBody(bodyParameter, payloadNode, schema, requestBody, mimeType);
+                }
             }  else {
                 //TODO : fill with rest of media types
                 handleSinglePayloadType(payloadNode, schema, bodyParameter, customMediaType);
@@ -165,8 +171,8 @@ public class OpenAPIRequestBodyMapper {
                 addConsumes(operationAdaptor, bodyParameter, mediaTypeString);
                 break;
             case Constants.MAP_STRING:
-                mediaTypeString = customMediaPrefix == null ? MediaType.APPLICATION_FORM_URLENCODED :
-                        APPLICATION_PREFIX + customMediaPrefix + X_WWW_FORM_URLENCODED_POSTFIX;
+                mediaTypeString = customMediaPrefix == null ? MediaType.APPLICATION_JSON :
+                        APPLICATION_PREFIX + customMediaPrefix + JSON_POSTFIX;
                 Schema objectSchema = new ObjectSchema();
                 objectSchema.additionalProperties(new StringSchema());
                 io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
@@ -231,41 +237,6 @@ public class OpenAPIRequestBodyMapper {
             //  parameter.
             if (!operationAdaptor.getHttpOperation().equalsIgnoreCase("delete")) {
                 operationAdaptor.getOperation().setRequestBody(requestBody);
-            }
-        }
-    }
-
-    /**
-     * Handle multiple mime type when attached with request payload annotation.
-     * ex: <pre> @http:Payload { mediaType:["application/json", "application/xml"] } Pet payload </pre>
-     */
-    private void handleMultipleMIMETypes(RequestBody bodyParameter,
-                                         SeparatedNodeList<MappingFieldNode> fields,
-                                         RequiredParameterNode payloadNode, Map<String, Schema> schema) {
-
-        for (MappingFieldNode fieldNode: fields) {
-            if (!(fieldNode instanceof SpecificFieldNode) ||
-                    !((SpecificFieldNode) fieldNode).fieldName().toString().equals(MEDIA_TYPE) ||
-                    fieldNode.children() == null) {
-                continue;
-            }
-            RequestBody requestBody = new RequestBody();
-            SpecificFieldNode field = (SpecificFieldNode) fieldNode;
-            if (field.valueExpr().isEmpty()) {
-                continue;
-            }
-            ExpressionNode valueNode = field.valueExpr().get();
-            if (valueNode instanceof ListConstructorExpressionNode) {
-                SeparatedNodeList mimeList = ((ListConstructorExpressionNode) valueNode).expressions();
-                for (Object mime : mimeList) {
-                    if (mime instanceof BasicLiteralNode) {
-                        createRequestBody(bodyParameter, payloadNode, schema, requestBody,
-                                ((BasicLiteralNode) mime).literalToken().text());
-                    }
-                }
-            } else {
-                createRequestBody(bodyParameter, payloadNode, schema, requestBody,
-                        valueNode.toString());
             }
         }
     }

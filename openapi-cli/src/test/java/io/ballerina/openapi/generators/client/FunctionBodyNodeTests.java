@@ -76,7 +76,7 @@ public class FunctionBodyNodeTests {
                         "httpHeaders=getMapForHeaders(headerValues);http:Response response =checkself.clientEp->get" +
                         "(resourcePath,httpHeaders); return response;}"},
                 {"diagnostic_files/head_operation.yaml", "/{filesystem}",
-                        "{string resourcePath=string`/${getEncodedUri(filesystem.toString())}`;" +
+                        "{string resourcePath=string`/${getEncodedUri(filesystem)}`;" +
                         "map<anydata>queryParam={\"resource\":'resource,\"timeout\":timeout};" +
                         "resourcePath = resourcePath + check getPathForQueryParam(queryParam);" +
                         "map<any>headerValues={\"x-ms-client-request-id\":xMsClientRequestId," +
@@ -84,7 +84,7 @@ public class FunctionBodyNodeTests {
                         "httpHeaders = getMapForHeaders(headerValues);" +
                         "http:Responseresponse=check self.clientEp-> head(resourcePath, httpHeaders);returnresponse;}"},
                 {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string resourcePath = " +
-                        "string `/pets/${getEncodedUri(petId.toString())}`;" +
+                        "string `/pets/${getEncodedUri(petId)}`;" +
                         "http:Response response = check self.clientEp-> delete(resourcePath);" +
                         "return response;}"},
                 {"diagnostic_files/json_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
@@ -105,7 +105,7 @@ public class FunctionBodyNodeTests {
                         "http:Response response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
                 {"swagger/response_type_order.yaml", "/pet/{petId}", 
-                        "{string resourcePath = string `/pet/${getEncodedUri(petId.toString())}`;" +
+                        "{string resourcePath = string `/pet/${getEncodedUri(petId)}`;" +
                         "Pet response = check self.clientEp->get(resourcePath);" +
                         "return response;}"},
                 {"swagger/text_request_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +

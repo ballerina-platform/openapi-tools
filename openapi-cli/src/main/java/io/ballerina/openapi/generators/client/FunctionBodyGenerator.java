@@ -590,7 +590,7 @@ public class FunctionBodyGenerator {
                 String pathVariable = path.substring(m.start(), m.end());
                 if (pathVariable.startsWith("{") && pathVariable.endsWith("}")) {
                     String d = pathVariable.replace("{", "").replace("}", "");
-                    String replaceVariable = "{getEncodedUri(" + getValidName(d, false) + ".toString())}";
+                    String replaceVariable = "{getEncodedUri(" + getValidName(d, false) + ")}";
                     refinedPath = refinedPath.replace(pathVariable, replaceVariable);
                 }
             }

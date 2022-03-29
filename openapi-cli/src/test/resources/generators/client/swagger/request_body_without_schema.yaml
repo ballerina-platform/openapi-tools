@@ -53,6 +53,6 @@ paths:
           application/json: {}
       responses:
         '200':
-          description: ''
+          description: 'Return json'
           content:
             application/json: {}

@@ -37,13 +37,13 @@ public client class openapiClient {
     //client cant be with multiple value
     // remote function showPetById(string petId) returns Pet|Error {
     //     http:Client showPetByIdEp = self.clientEp;
-    //     Pet|Error response = checkpanic showPetByIdEp->get(string `/pets/${getEncodedUri(petId.toString())}`);
+    //     Pet|Error response = checkpanic showPetByIdEp->get(string `/pets/${getEncodedUri(petId)}`);
     //     return response;
     // }
 
     remote function showPetById(string petId) returns http:Response {
         http:Client showPetByIdEp = self.clientEp;
-        http:Response response = checkpanic showPetByIdEp->get(string `/pets/${getEncodedUri(petId.toString())}`);
+        http:Response response = checkpanic showPetByIdEp->get(string `/pets/${getEncodedUri(petId)}`);
         // if response is http:Response {
             // handle the given payload and return
         // }
@@ -56,7 +56,7 @@ public client class openapiClient {
     // remote function deletePet(int petId) returns boolean {
         // http:Client deletePetEp = self.clientEp;
         //can't use http:Accepted in targetType.
-        // http:Accepted response = check deletePetEp->delete(string `/pets/${getEncodedUri(petId.toString())}`);
+        // http:Accepted response = check deletePetEp->delete(string `/pets/${getEncodedUri(petId)}`);
         // return http:Accepted;
         // return true;
     // }
