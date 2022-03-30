@@ -62,6 +62,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.MEDIA_TYPE_KEYW
 import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEXT;
+import static io.ballerina.openapi.generators.GeneratorConstants.TEXT_WILDCARD_REGEX;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
@@ -115,7 +116,7 @@ public class RequestBodyGenerator {
         if (mediaType.getValue().getSchema().get$ref() != null) {
             String schemaName = extractReferenceType(mediaType.getValue().getSchema().get$ref());
             String mediaTypeContent = mediaType.getKey().trim();
-            if (mediaTypeContent.matches("text/.*")) {
+            if (mediaTypeContent.matches(TEXT_WILDCARD_REGEX)) {
                 mediaTypeContent = TEXT;
             }
             IdentifierToken identifierToken;
@@ -137,8 +138,8 @@ public class RequestBodyGenerator {
                             NodeFactory.createNodeList(dimensionNode));
                     break;
                 case APPLICATION_JSON:
-                    Schema<?> schema = components.getSchemas().get(schemaName);
-                    // This condition is avoid to wrong code generation for union type request body. If given schema
+                    Schema<?> schema = components.getSchemas().get(getValidName(schemaName, true));
+                    // This condition is to avoid wrong code generation for union type request body. If given schema
                     // has oneOf type , then it will not be able to support via ballerina. We need to pick it mime
                     // type instead of schema type.
                     if ((schema instanceof ComposedSchema) && (((ComposedSchema) schema).getOneOf() != null)) {
@@ -174,11 +175,11 @@ public class RequestBodyGenerator {
      */
     private SeparatedNodeList<MappingFieldNode> fillRequestAnnotationValues(List<Node> literals,
                                                                             HashSet<Map.Entry<String,
-                                                                                    MediaType>> equalDataType) {
+                                                                                    MediaType>> equalDataTypes) {
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
         IdentifierToken mediaType = createIdentifierToken(MEDIA_TYPE_KEYWORD);
 
-        Iterator<Map.Entry<String, MediaType>> iter = equalDataType.iterator();
+        Iterator<Map.Entry<String, MediaType>> iter = equalDataTypes.iterator();
         SpecificFieldNode specificFieldNode;
         while (iter.hasNext()) {
             Map.Entry<String, MediaType> next = iter.next();
@@ -188,9 +189,9 @@ public class RequestBodyGenerator {
         }
         literals.remove(literals.size() - 1);
         SeparatedNodeList<Node> expression = NodeFactory.createSeparatedNodeList(literals);
-        if (equalDataType.size() == 1) {
+        if (equalDataTypes.size() == 1) {
             BasicLiteralNode valueExpr = NodeFactory.createBasicLiteralNode(SyntaxKind.STRING_LITERAL,
-                    createIdentifierToken('"' + equalDataType.iterator().next().getKey() + '"'));
+                    createIdentifierToken('"' + equalDataTypes.iterator().next().getKey() + '"'));
             specificFieldNode = NodeFactory.createSpecificFieldNode(null, mediaType,
                     createToken(SyntaxKind.COLON_TOKEN), valueExpr);
         } else {
