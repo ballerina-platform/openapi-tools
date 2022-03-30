@@ -39,9 +39,11 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.unescapeIdentifier;
 
 /**
  * This class for the mapping ballerina headers with OAS header parameter sections.
@@ -49,6 +51,12 @@ import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnot
  * @since 2.0.0
  */
 public class OpenAPIHeaderMapper {
+    private final Map<String, String> apidocs;
+
+    public OpenAPIHeaderMapper(Map<String, String> apidocs) {
+        this.apidocs = apidocs;
+    }
+
     /**
      * Handle header parameters in ballerina data type.
      *
@@ -56,7 +64,7 @@ public class OpenAPIHeaderMapper {
      */
     public List<Parameter> setHeaderParameter(RequiredParameterNode headerParam) {
         List<Parameter> parameters = new ArrayList<>();
-        String headerName = extractHeaderName(headerParam);
+        String headerName = unescapeIdentifier(extractHeaderName(headerParam));
         HeaderParameter headerParameter = new HeaderParameter();
         Node node = headerParam.typeName();
         Schema<?> headerTypeSchema = ConverterCommonUtils.getOpenApiSchema(getHeaderType(headerParam));
@@ -70,6 +78,9 @@ public class OpenAPIHeaderMapper {
             }
         }
         enableHeaderRequiredOption(headerParameter, node, headerTypeSchema, isOptional);
+        if (apidocs != null && apidocs.containsKey(headerName)) {
+            headerParameter.setDescription(apidocs.get(headerName.trim()));
+        }
         completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
                 headerParam.typeName());
         return parameters;
@@ -108,6 +119,9 @@ public class OpenAPIHeaderMapper {
         }
         if (headerParam.typeName().kind() == SyntaxKind.OPTIONAL_TYPE_DESC) {
             headerTypeSchema.setNullable(true);
+        }
+        if (apidocs != null && apidocs.containsKey(headerName)) {
+            headerParameter.setDescription(apidocs.get(headerName.trim()));
         }
         completeHeaderParameter(parameters, headerName, headerParameter, headerTypeSchema, headerParam.annotations(),
                 headerParam.typeName());

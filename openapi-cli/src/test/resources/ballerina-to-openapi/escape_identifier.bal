@@ -35,3 +35,38 @@ service /v1/abc\-hello on new http:Listener(9090) {
 
     }
 }
+type Pet record {
+    string 'type;
+    int id;
+};
+
+type Offset record {
+    # pet type
+    string 'type;
+    int id;
+    Pet 'join;
+};
+service /'limit on new http:Listener(9090) {
+    # Query parameter
+    #
+    # + 'limit - QParameter Description
+    resource function get steps/'from/date(string 'limit) returns string|error {
+        return "Hello";
+    }
+    # Header parameter
+    #
+    # + 'limit - HParameter Description
+    resource function get steps/[int 'join](@http:Header string 'limit) returns string|error {
+        return "Hello";
+    }
+
+    resource function post steps(@http:Payload Offset payload) returns string|error {
+        return "Hello";
+    }
+    resource function put พิมพ์ชื่อ(string ชื่อ) {
+
+    }
+    resource function get พิมพ์ชื่อ(string ชื่\u{E2D}) {
+
+    }
+}
