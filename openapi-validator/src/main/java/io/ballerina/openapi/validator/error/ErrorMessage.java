@@ -45,6 +45,8 @@ public enum ErrorMessage {
     ERROR_019("Implementation type does not match with OAS contract type (expected ''{0}'',found ''{1}'') for the" +
             " header ''{2}'' in http method ''{3}'' that associated with the path ''{4}''."),
     ERROR_020("''{0}'' header for the method ''{1}'' of the resource associated with the path" +
+            " ''{2}'' is not documented in the OpenAPI contract."),
+    ERROR_021("Request body for the method ''{0}'' of the resource associated with the path" +
             " ''{2}'' is not documented in the OpenAPI contract.");
 
 

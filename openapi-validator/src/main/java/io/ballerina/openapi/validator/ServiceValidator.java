@@ -43,6 +43,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -210,11 +211,17 @@ public class ServiceValidator {
                 // Ballerina headers validation
                 Map<String, Node> balHeaders = method.getValue().getHeaders();
                 validateBallerinaHeaders(method, oasParameters, balHeaders);
+
+
+
                 // Request body validation
                 Node body = method.getValue().getBody();
                 boolean isBodyExist = false;
-                if (oasOperation.getRequestBody() != null) {
+                if (oasOperation.getRequestBody() != null && body != null) {
+                    // This flag is to trac the availability of requestBody has documented
+                    isBodyExist = true;
                     if (body instanceof RequiredParameterNode) {
+                        boolean isMediaTypeExist = false;
                         //Ballerina support type payload string|json|map<json>|xml|byte[]||record {| anydata...; |}[]
                         RequiredParameterNode requestBodyNode = (RequiredParameterNode) body;
                         // Get the payload type
@@ -244,19 +251,35 @@ public class ServiceValidator {
                         // first check given media type is there
                         if (mediaTypes.isEmpty()) {
                             if (content != null) {
-                                for (Map.Entry<String, MediaType> media : content.entrySet()) {
-                                    if (mediaType != null && Objects.equals(media.getKey(), mediaType)) {
-
+                                for (Map.Entry<String, MediaType> oasMedia : content.entrySet()) {
+                                    if (mediaType != null && Objects.equals(oasMedia.getKey(), mediaType)) {
+                                        isMediaTypeExist = true;
+                                        boolean isTypeMatch = false;
+                                        // Test the payload type mapping
+                                        if (oasMedia.getValue().getSchema() != null) {
+                                            Schema<?> schema = oasMedia.getValue().getSchema();
+                                            if (schema.get$ref() != null) {
+                                                isTypeMatch = true;
+                                            } else if (convertBallerinaType(kind).equals(convertOpenAPITypeToBallerina(
+                                                        schema.getType()))) {
+                                                isTypeMatch = true;
+                                            }
+                                            if (!isTypeMatch) {
+                                                // payload mismatch error message
+                                            }
+                                        }
                                     }
                                 }
                             }
                         } else {
-
+                            //Todo: multiple mediatype handle
                         }
                     }
                 }
-
-                // Return type validation
+                if (!isBodyExist) {
+                    updateContext(context, CompilationError.UNDOCUMENTED_REQUEST_BODY, body.location(),
+                            method.getKey(), getNormalizedPath(method.getValue().getPath()));
+                }
             }
         }
     }
@@ -272,6 +295,8 @@ public class ServiceValidator {
                            Map<String, Node> balHeaders) {
 
         for (Map.Entry<String, Node> balHeader: balHeaders.entrySet()) {
+            //Todo: Nullable and default value assign scenarios
+
             // Available header types string|int|boolean|string[]|int[]|boolean[]|? headers
             // Need to remove `\`  while checking header name x\-client\-header
             Node headerNode = balHeader.getValue();
@@ -336,7 +361,7 @@ public class ServiceValidator {
             boolean isExist = false;
             String parameterName = unescapeIdentifier(parameter.getKey());
             String ballerinaType;
-
+            //Todo: Nullable and default value assign scenarios
             if (parameter.getValue() instanceof ParameterNode) {
                 ParameterNode paramNode = (ParameterNode) parameter.getValue();
                 if (paramNode instanceof RequiredParameterNode) {

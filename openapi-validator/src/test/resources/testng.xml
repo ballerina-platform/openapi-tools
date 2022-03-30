@@ -39,6 +39,7 @@ under the License.
             <class name="io.ballerina.openapi.validator.tests.PreValidationTests"/>
             <class name="io.ballerina.openapi.validator.tests.PathParameterValidationTests"/>
             <class name="io.ballerina.openapi.validator.tests.QueryParameterValidationTests"/>
+            <class name="io.ballerina.openapi.validator.tests.RequestBodyValidationTests"/>
 <!--            <class name="io.ballerina.openapi.validator.tests.ResourceToOperationTests"/>-->
 <!--            <class name="io.ballerina.openapi.validator.tests.ServiceValidationTests"/>-->
 <!--            <class name="io.ballerina.openapi.validator.tests.TypeMisMatchTests"/>-->

@@ -19,7 +19,6 @@ package io.ballerina.openapi.validator.tests;
 
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Project;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -27,22 +26,25 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getCompilation;
+import static io.ballerina.openapi.validator.tests.ValidatorTest.getDiagnostics;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
-public class PathParameterValidationTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/parameter")
+/**
+ * This test class use for cover the query parameter tests.
+ */
+public class RequestBodyValidationTests {
+    private static final Path RES_DIR = Paths.get("src/test/resources/request-body")
             .toAbsolutePath();
-    @Test(description = "Path parameter type mismatch test")
-    public void typeMismatch() {
-        Path path = RES_DIR.resolve("path_parameter.bal");
+    @Test(description = "Undocumented request body")
+    public void undocumentedRequestBody() {
+        Path path = RES_DIR.resolve("request_body.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
-        Object[] errors =
-                diagnostic.diagnostics().stream().filter(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity())
-                        .toArray();
-        Assert.assertTrue(errors.length == 2);
-        String error = "ERROR [request_body.bal:(8:32,8:45)] Implementation type does not match with OAS contract" +
-                " type (expected 'string',found 'integer') for the parameter 'offset' in http method 'get' that associated with the path '/pets'.";
-        Assert.assertEquals(error, errors[0].toString());
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        // Undocumented query parameter
+        String undocumentedRB = "ERROR [request_body.bal:(8:33,8:59)] Request body for the method 'post' of the" +
+                " resource associated with the path '{2}' is not documented in the OpenAPI contract.";
+        Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
 }
