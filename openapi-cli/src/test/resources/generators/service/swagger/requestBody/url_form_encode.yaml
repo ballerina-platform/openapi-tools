@@ -50,7 +50,10 @@ paths:
       requestBody:
         content:
           application/x-www-form-urlencoded:
-            schema: {}
+            schema:
+              type: object
+              additionalProperties:
+                type: string
       responses:
         200:
           description: Successful
