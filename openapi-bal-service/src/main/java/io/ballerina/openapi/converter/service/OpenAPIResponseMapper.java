@@ -58,7 +58,6 @@ import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -516,8 +515,9 @@ public class OpenAPIResponseMapper {
                 apiResponse = new ApiResponse();
                 apiResponse.description("Any Response");
                 Content content = new Content();
-                content.put(WILD_CARD_CONTENT_KEY, new io.swagger.v3.oas.models.media.MediaType().example(new Example()
-                        .summary(WILD_CARD_SUMMARY)));
+                io.swagger.v3.oas.models.media.MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
+                mediaType.setSchema(new Schema<>().description(WILD_CARD_SUMMARY));
+                content.put(WILD_CARD_CONTENT_KEY, mediaType);
                 apiResponse.setContent(content);
                 apiResponses.put(Constants.DEFAULT, apiResponse);
                 return Optional.of(apiResponses);
