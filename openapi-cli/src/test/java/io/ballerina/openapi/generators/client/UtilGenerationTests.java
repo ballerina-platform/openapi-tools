@@ -45,16 +45,16 @@ public class UtilGenerationTests {
     private static final String GET_SERIALIZED_RECORD_ARRAY = "getSerializedRecordArray";
 
 
-    @Test(description = "Test empty util file generation")
-    public void testEmptyUtilFileGen() throws IOException, BallerinaOpenApiException,
+    @Test(description = "Test default util file generation")
+    public void testDefaultUtilFileGen() throws IOException, BallerinaOpenApiException,
             FormatterException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/no_util.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<String> invalidFunctionNames = Arrays.asList(GET_MAP_FOR_HEADERS);
-        Assert.assertTrue(checkUtil(invalidFunctionNames,
+        String validFunctionName = GET_ENCODED_URI;
+        Assert.assertTrue(checkDefaultUtil(validFunctionName,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
@@ -68,7 +68,7 @@ public class UtilGenerationTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        List<String> invalidFunctionNames = Arrays.asList(GET_MAP_FOR_HEADERS);
+        List<String> invalidFunctionNames = Arrays.asList(CREATE_FORM_URLENCODED_REQUEST_BODY, GET_MAP_FOR_HEADERS);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
@@ -186,6 +186,25 @@ public class UtilGenerationTests {
                 }
             }
             return true;
+        }
+        return false;
+    }
+
+    private boolean checkDefaultUtil(String validFunctionName, SyntaxTree utilSyntaxTree) {
+        ModulePartNode modulePartNode = utilSyntaxTree.rootNode();
+        NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
+        if (members.size() == 1) {
+            for (ModuleMemberDeclarationNode node : members) {
+                if (node.kind().equals(SyntaxKind.FUNCTION_DEFINITION)) {
+                    for (ChildNodeEntry childNodeEntry : node.childEntries()) {
+                        if (childNodeEntry.name().equals("functionName")) {
+                            if (validFunctionName.equals(childNodeEntry.node().get().toString())) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
         }
         return false;
     }

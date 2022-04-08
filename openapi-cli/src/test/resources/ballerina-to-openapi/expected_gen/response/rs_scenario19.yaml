@@ -7,8 +7,8 @@ paths:
           description: Any Response
           content:
             '*/*':
-              example:
-                summary: Any type of entity body
+              schema:
+                description: Any type of entity body
   /pets:
     get:
       operationId: operation_get_/pets

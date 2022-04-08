@@ -180,7 +180,6 @@ public class BallerinaUtilGenerator {
         }
         if (queryParamsFound) {
             functionNameList.addAll(Arrays.asList(
-                    CREATE_FORM_URLENCODED_REQUEST_BODY, GET_FORM_STYLE_REQUEST,
                     GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST,
                     GET_ENCODED_URI, GET_ORIGINAL_KEY, GET_SERIALIZED_ARRAY, GET_PATH_FOR_QUERY_PARAM,
                     GET_SERIALIZED_RECORD_ARRAY

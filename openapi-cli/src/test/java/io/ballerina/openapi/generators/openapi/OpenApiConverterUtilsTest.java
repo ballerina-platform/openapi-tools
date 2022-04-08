@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.unescapeIdentifier;
 import static io.ballerina.openapi.generators.common.TestUtils.getStringFromGivenBalFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.compareWithGeneratedFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.deleteDirectory;
@@ -184,13 +185,23 @@ public class OpenApiConverterUtilsTest {
         Path ballerinaFilePath = RES_DIR.resolve("escape_identifier.bal");
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
-            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
-                    "escape_identifier.yaml");
             OpenApiConverter openApiConverter = new OpenApiConverter();
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                     , false);
             if (Files.exists(tempDir.resolve("v1_abc-hello_openapi.yaml"))) {
+                String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
+                        "escape_identifier.yaml");
                 String generatedYaml = getStringFromGivenBalFile(tempDir, "v1_abc-hello_openapi.yaml");
+                generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+            } else {
+                Assert.fail("Yaml was not generated");
+            }
+            if (Files.exists(tempDir.resolve("limit_openapi.yaml"))) {
+                String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
+                        "escape_identifier_02.yaml");
+                String generatedYaml = getStringFromGivenBalFile(tempDir, "limit_openapi.yaml");
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
                 expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
@@ -204,6 +215,20 @@ public class OpenApiConverterUtilsTest {
             deleteDirectory(tempDir);
             System.gc();
         }
+    }
+
+    @Test
+    public void testUnescapeIdentifiers() {
+        Assert.assertEquals(unescapeIdentifier("'limit"), "limit");
+        Assert.assertEquals(unescapeIdentifier("x\\-client"), "x-client");
+        Assert.assertEquals(unescapeIdentifier("/'limit"), "/limit");
+        Assert.assertEquals(unescapeIdentifier("/'limit/x\\-cl"), "/limit/x-cl");
+        Assert.assertEquals(unescapeIdentifier("'พิมพ์ชื่อ"), "พิมพ์ชื่อ");
+    }
+
+    @Test
+    public void testDecodeIdentifier() {
+        Assert.assertEquals(unescapeIdentifier("ชื่\\u{E2D}"), "ชื่อ");
     }
 
     @AfterMethod

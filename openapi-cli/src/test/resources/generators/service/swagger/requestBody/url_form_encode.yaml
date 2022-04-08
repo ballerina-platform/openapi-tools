@@ -1,0 +1,75 @@
+openapi: 3.0.1
+info:
+  title: testInlineRequestBody
+  version: 1.0.0
+paths:
+  /user:
+    post:
+      summary: Post operation for the path /user
+      operationId: inline
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                userName:
+                  description: User Name
+                  type: string
+                userPhone:
+                  description: User Phone Number
+                  type: string
+              required:
+                - userName
+                - userPhone
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              example: Ok
+  /user02:
+    post:
+      summary: Post operation for the path /user
+      operationId: reference
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              example: Ok
+  /user03:
+    post:
+      summary: Post operation for the path /user
+      operationId: noSchema
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              example: Ok
+components:
+    schemas:
+      User:
+        type: object
+        properties:
+          userName:
+            description: User Name
+            type: string
+          password:
+            description: User Phone Number
+            type: string
+            required:
+              - userName
