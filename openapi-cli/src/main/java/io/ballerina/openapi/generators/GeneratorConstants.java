@@ -161,6 +161,7 @@ public class GeneratorConstants {
     public static final String APPLICATION_PDF = "application/pdf";
     public static final String APPLICATION_XML = "application/xml";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+    public static final String APPLICATION_URL_ENCODE = "application/x-www-form-urlencoded";
     public static final String TEXT = "text";
     public static final String IMAGE_PNG = "image/png";
     public static final String TEXT_PLAIN = "text/plain";
@@ -316,5 +317,7 @@ public class GeneratorConstants {
     public static final String SERVICE_CONFIG = "http:ServiceConfig";
     public static final String FALSE = "false";
     public static final String HEADER_ANNOT = "Header";
+    public static final String MAP_STRING = "map<string>";
+    public static final String TEXT_WILDCARD_REGEX = "text/.*";
 
 }

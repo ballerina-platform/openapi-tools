@@ -7,8 +7,8 @@ paths:
           description: Any Response
           content:
             '*/*':
-              example:
-                summary: Any type of entity body
+              schema:
+                description: Any type of entity body
         "500":
           description: Found unexpected output
           content:

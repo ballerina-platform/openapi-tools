@@ -38,8 +38,8 @@ import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
@@ -102,9 +102,9 @@ public class OpenAPIParameterMapper {
                     String typeName = (referenceNode).modulePrefix().text() + ":" + (referenceNode).identifier().text();
                     if (typeName.equals(HTTP_REQUEST)) {
                         RequestBody requestBody = new RequestBody();
-                        requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY,
-                                new io.swagger.v3.oas.models.media.MediaType().example(
-                                        new Example().summary(WILD_CARD_SUMMARY))));
+                        MediaType mediaType = new MediaType();
+                        mediaType.setSchema(new Schema<>().description(WILD_CARD_SUMMARY));
+                        requestBody.setContent(new Content().addMediaType(WILD_CARD_CONTENT_KEY, mediaType));
                         operationAdaptor.getOperation().setRequestBody(requestBody);
                     }
                 }
@@ -170,7 +170,7 @@ public class OpenAPIParameterMapper {
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper();
+                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(apidocs);
                 parameters.addAll(openAPIHeaderMapper.setHeaderParameter(requiredParameterNode));
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
                     (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
@@ -202,7 +202,7 @@ public class OpenAPIParameterMapper {
         for (AnnotationNode annotation: annotations) {
             if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
                 // Handle headers.
-                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper();
+                OpenAPIHeaderMapper openAPIHeaderMapper = new OpenAPIHeaderMapper(apidocs);
                 parameters = openAPIHeaderMapper.setHeaderParameter(defaultableParameterNode);
             }
         }
