@@ -32,12 +32,12 @@ import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 /**
  * This test class use for cover the query parameter tests.
  */
-public class RequestBodyValidationTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/request-body")
+public class RecordValidationTests {
+    private static final Path RES_DIR = Paths.get("src/test/resources/record")
             .toAbsolutePath();
-    @Test(description = "Undocumented request body")
-    public void undocumentedRequestBody() {
-        Path path = RES_DIR.resolve("request_body.bal");
+    @Test(description = "Type mismatch record field with basic type")
+    public void typeMisMatchField() {
+        Path path = RES_DIR.resolve("type_mismatch_field.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);

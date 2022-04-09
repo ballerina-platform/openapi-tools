@@ -23,7 +23,8 @@ public enum ErrorMessage {
     ERROR_002("Invalid file type. Provide either a .yaml or .json file."),
     ERROR_003("Given OpenAPI contract file path is an empty string."),
     ERROR_004("OpenAPI annotation won''t support for non http service."),
-    ERROR_005(""),
+    ERROR_005("Implementation type does not match with OAS contract type " +
+            "(expected ''{0}'', found ''{1}'') for the field ''{2}'' of type ''{3}''"),
     ERROR_006("Implementation type does not match with OAS contract type (expected ''{0}'',found ''{1}'') for the" +
             " parameter ''{2}'' in http method ''{3}'' that associated with the path ''{4}''."),
     ERROR_007(""),
@@ -47,7 +48,9 @@ public enum ErrorMessage {
     ERROR_020("''{0}'' header for the method ''{1}'' of the resource associated with the path" +
             " ''{2}'' is not documented in the OpenAPI contract."),
     ERROR_021("Request body for the method ''{0}'' of the resource associated with the path" +
-            " ''{2}'' is not documented in the OpenAPI contract.");
+            " ''{2}'' is not documented in the OpenAPI contract."),
+    ERROR_022("Implementation payload type does not match with OAS contract content type (expected ''{0}'',found " +
+            "''{1}'') for the ''{2}'' in http method ''{3}'' that associated with the path ''{4}''.");
 
 
     private final String message;

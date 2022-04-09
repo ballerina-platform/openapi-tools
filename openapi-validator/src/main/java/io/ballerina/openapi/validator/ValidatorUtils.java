@@ -120,8 +120,8 @@ public class ValidatorUtils {
             throws  IOException {
         Path contractPath = Paths.get(definitionURI);
         ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        parseOptions.setResolveFully(true);
+//        parseOptions.setResolve(true);
+//        parseOptions.setResolveFully(true);
 
         if (!Files.exists(contractPath)) {
             updateContext(context, CompilationError.INVALID_CONTRACT_PATH, location);
@@ -395,60 +395,7 @@ public class ValidatorUtils {
         resourcePath.addMethod(httpMethod, resourceMethodBuilder.build());
     }
 
-    /**
-     * Method for convert openApi type to ballerina type.
-     *
-     * @param type  OpenApi parameter types
-     * @return ballerina type
-     */
-    public static Optional<String> convertOpenAPITypeToBallerina(String type) {
-        switch (type) {
-            case Constants.INTEGER:
-                return Optional.of(INT);
-            case STRING:
-                return Optional.of(STRING);
-            case BOOLEAN:
-                return Optional.of(BOOLEAN);
-            case Constants.ARRAY:
-                return Optional.of(ARRAY_BRACKETS);
-            case Constants.OBJECT:
-                return Optional.of(RECORD);
-            case DECIMAL:
-            case NUMBER:
-                return Optional.of(DECIMAL);
-            case FLOAT:
-                return Optional.of(FLOAT);
-            default:
-                return Optional.empty();
-        }
-    }
 
-    /**
-     * Method for convert ballerina TYPE_DEC type to ballerina type.
-     *
-     * @param type  OpenApi parameter types
-     * @return ballerina type
-     */
-    public static Optional<String> convertBallerinaType(SyntaxKind type) {
-        switch (type) {
-            case INT_TYPE_DESC:
-                return Optional.of(INT);
-            case STRING_TYPE_DESC:
-                return Optional.of(STRING);
-            case BOOLEAN_TYPE_DESC:
-                return Optional.of(BOOLEAN);
-            case ARRAY_TYPE_DESC:
-                return Optional.of(ARRAY_BRACKETS);
-            case RECORD_TYPE_DESC:
-                return Optional.of(RECORD);
-            case DECIMAL_TYPE_DESC:
-                return Optional.of(DECIMAL);
-            case FLOAT_TYPE_DESC:
-                return Optional.of(FLOAT);
-            default:
-                return Optional.empty();
-        }
-    }
 
     public static String unescapeIdentifier(String parameterName) {
         return parameterName.replaceAll("\\\\", "");
@@ -504,5 +451,42 @@ public class ValidatorUtils {
             }
         }
         return fieldValues;
+    }
+
+    public static String getMediaType(SyntaxKind kind, String mediaType) {
+        // Return mediaType
+        switch (kind) {
+            case STRING_TYPE_DESC:
+                mediaType = "text/plain";
+                break;
+            case MAP_TYPE_DESC:
+            case SIMPLE_NAME_REFERENCE:
+            case RECORD_TYPE_DESC:
+            case JSON_TYPE_DESC:
+                mediaType = "application/json";
+                break;
+            case XML_TYPE_DESC:
+                mediaType = "application/xml";
+                break;
+        }
+        return mediaType;
+    }
+
+    /**
+     * This method will extract reference type by splitting the reference string.
+     *
+     * @param referenceVariable - Reference String
+     * @return Reference variable name
+     */
+    public static Optional<String> extractReferenceType(String referenceVariable)  {
+        if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
+            String[] refArray = referenceVariable.split("/");
+            return Optional.of(refArray[refArray.length - 1]);
+        } else {
+            // Note : Current implementation will not support external links a references.
+            // TODO: "Invalid reference value : " + referenceVariable + "\nBallerina only supports local reference
+            // values.");
+            return Optional.empty();
+        }
     }
 }

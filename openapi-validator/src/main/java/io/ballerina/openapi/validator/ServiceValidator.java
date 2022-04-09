@@ -18,20 +18,19 @@
 
 package io.ballerina.openapi.validator;
 
-import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.openapi.validator.model.Filter;
@@ -41,8 +40,10 @@ import io.ballerina.openapi.validator.model.ResourcePathSummary;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -58,9 +59,10 @@ import java.util.Set;
 
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
 import static io.ballerina.openapi.validator.Constants.HTTP_PAYLOAD;
-import static io.ballerina.openapi.validator.ValidatorUtils.convertBallerinaType;
-import static io.ballerina.openapi.validator.ValidatorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.validator.TypeValidatorUtils.convertBallerinaType;
+import static io.ballerina.openapi.validator.TypeValidatorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.validator.ValidatorUtils.extractAnnotationFieldDetails;
+import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
 import static io.ballerina.openapi.validator.ValidatorUtils.getNormalizedPath;
 import static io.ballerina.openapi.validator.ValidatorUtils.summarizeOpenAPI;
 import static io.ballerina.openapi.validator.ValidatorUtils.summarizeResources;
@@ -215,74 +217,90 @@ public class ServiceValidator {
 
 
                 // Request body validation
-                Node body = method.getValue().getBody();
-                boolean isBodyExist = false;
-                if (oasOperation.getRequestBody() != null && body != null) {
-                    // This flag is to trac the availability of requestBody has documented
-                    isBodyExist = true;
-                    if (body instanceof RequiredParameterNode) {
-                        boolean isMediaTypeExist = false;
-                        //Ballerina support type payload string|json|map<json>|xml|byte[]||record {| anydata...; |}[]
-                        RequiredParameterNode requestBodyNode = (RequiredParameterNode) body;
-                        // Get the payload type
-                        Node typeNode = requestBodyNode.typeName();
-                        SyntaxKind kind = typeNode.kind();
-                        String mediaType = null;
-                        // Return mediaType
-                        switch (kind) {
-                            case STRING_TYPE_DESC:
-                                mediaType = "text/plain";
-                                break;
-                            case MAP_TYPE_DESC:
-                            case RECORD_TYPE_DESC:
-                            case JSON_TYPE_DESC:
-                                mediaType = "application/json";
-                                break;
-                            case XML_TYPE_DESC:
-                                mediaType = "application/xml";
-                                break;
-                        }
-
-                        List<String> mediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, "mediaType",
-                                requestBodyNode.annotations(), context.semanticModel());
-                        RequestBody oasRequestBody = oasOperation.getRequestBody();
-                        Content content = oasRequestBody.getContent();
-                        // traverse request body  list
-                        // first check given media type is there
-                        if (mediaTypes.isEmpty()) {
-                            if (content != null) {
-                                for (Map.Entry<String, MediaType> oasMedia : content.entrySet()) {
-                                    if (mediaType != null && Objects.equals(oasMedia.getKey(), mediaType)) {
-                                        isMediaTypeExist = true;
-                                        boolean isTypeMatch = false;
-                                        // Test the payload type mapping
-                                        if (oasMedia.getValue().getSchema() != null) {
-                                            Schema<?> schema = oasMedia.getValue().getSchema();
-                                            if (schema.get$ref() != null) {
-                                                isTypeMatch = true;
-                                            } else if (convertBallerinaType(kind).equals(convertOpenAPITypeToBallerina(
-                                                        schema.getType()))) {
-                                                isTypeMatch = true;
-                                            }
-                                            if (!isTypeMatch) {
-                                                // payload mismatch error message
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            //Todo: multiple mediatype handle
-                        }
-                    }
-                }
-                if (!isBodyExist) {
-                    updateContext(context, CompilationError.UNDOCUMENTED_REQUEST_BODY, body.location(),
-                            method.getKey(), getNormalizedPath(method.getValue().getPath()));
-                }
+                validateBallerinaRequestBody(method, oasOperation);
             }
         }
     }
+
+    private void validateBallerinaRequestBody(Map.Entry<String, ResourceMethod> method, Operation oasOperation) {
+
+        Node body = method.getValue().getBody();
+        boolean isBodyExist = false;
+        if (oasOperation.getRequestBody() != null && body != null) {
+            // This flag is to trac the availability of requestBody has documented
+            isBodyExist = true;
+            if (body instanceof RequiredParameterNode) {
+                boolean isMediaTypeExist = false;
+                //Ballerina support type payload string|json|map<json>|xml|byte[]||record {| anydata...; |}[]
+                RequiredParameterNode requestBodyNode = (RequiredParameterNode) body;
+                // Get the payload type
+                Node typeNode = requestBodyNode.typeName();
+                SyntaxKind kind = typeNode.kind();
+                String mediaType = null;
+                mediaType = ValidatorUtils.getMediaType(kind, mediaType);
+
+                List<String> mediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, "mediaType",
+                        requestBodyNode.annotations(), context.semanticModel());
+
+                RequestBody oasRequestBody = oasOperation.getRequestBody();
+                Content content = oasRequestBody.getContent();
+                // Traverse request body  list , when it has multiple types
+                // first check given media type is there
+                if (mediaTypes.isEmpty()) {
+                    if (content != null) {
+                        List<String> oasMediaTypes = new ArrayList<>();
+                        for (Map.Entry<String, MediaType> oasMedia : content.entrySet()) {
+                            oasMediaTypes.add(oasMedia.getKey());
+                            if (mediaType != null && Objects.equals(oasMedia.getKey(), mediaType)) {
+                                isMediaTypeExist = true;
+                                if (oasMedia.getValue().getSchema() == null) {
+                                    return;
+                                }
+                                Schema<?> schema = oasMedia.getValue().getSchema();
+                                if (schema == null || schema.get$ref() == null && !(schema instanceof ObjectSchema)) {
+                                    // type issue
+                                    //TODO: && !(schema instanceof ComposedSchema)) for oneOf, allOf
+                                    return;
+                                }
+                                Optional<String> oasName = extractReferenceType(schema.get$ref());
+                                if (requestBodyNode.paramName().isEmpty() && oasName.isEmpty()) {
+                                    return;
+                                }
+                                Optional<Symbol> symbol = context.semanticModel().symbol(requestBodyNode);
+                                if (symbol.isEmpty()) {
+                                    return;
+                                }
+                                String balRecordName = requestBodyNode.paramName().get().toString();
+                                TypeSymbol typeSymbol = (TypeSymbol) symbol.get();
+                                if (typeSymbol instanceof TypeReferenceTypeSymbol) {
+                                    balRecordName = requestBodyNode.typeName().toString().trim();
+                                }
+                                String oasSchemaName =  oasName.get();
+                                schema = openAPI.getComponents().getSchemas().get(oasSchemaName);
+                                /// validate- Record
+                                TypeValidatorUtils.validateRecordType(schema, typeSymbol, balRecordName,
+                                        context, openAPI);
+                            }
+                        }
+                        if (mediaType != null && !isMediaTypeExist) {
+                            updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
+                                    body.location(), mediaType, oasMediaTypes.toString(),
+                                    requestBodyNode.paramName().get().toString().trim(), method.getKey(),
+                                    getNormalizedPath(method.getValue().getPath()));
+                        }
+                    }
+                } else {
+                    //Todo: multiple media-types handle
+                }
+            }
+        }
+        if (!isBodyExist) {
+            updateContext(context, CompilationError.UNDOCUMENTED_REQUEST_BODY, body.location(),
+                    method.getKey(), getNormalizedPath(method.getValue().getPath()));
+        }
+    }
+
+
 
     /**
      * This function is used to validate the ballerina resource header against to openapi header.

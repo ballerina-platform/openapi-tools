@@ -66,7 +66,9 @@ public enum CompilationError {
     UNDOCUMENTED_HEADER(ErrorCode.OPENAPI_VALIDATOR_020, ErrorMessage.ERROR_020,
             DiagnosticSeverity.ERROR),
     UNDOCUMENTED_REQUEST_BODY(ErrorCode.OPENAPI_VALIDATOR_021, ErrorMessage.ERROR_021,
-                        DiagnosticSeverity.ERROR);
+                        DiagnosticSeverity.ERROR),
+    TYPEMISMATCH_REQUEST_BODY_PAYLOAD(ErrorCode.OPENAPI_VALIDATOR_022, ErrorMessage.ERROR_022,
+            DiagnosticSeverity.ERROR);
 
 
 
