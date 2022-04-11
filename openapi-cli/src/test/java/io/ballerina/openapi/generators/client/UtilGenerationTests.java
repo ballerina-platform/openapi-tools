@@ -9,6 +9,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -46,18 +47,15 @@ public class UtilGenerationTests {
 
 
     @Test(description = "Test default util file generation")
-    public void testDefaultUtilFileGen() throws IOException, BallerinaOpenApiException,
-            FormatterException {
+    public void testDefaultUtilFileGen() throws IOException, BallerinaOpenApiException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/no_util.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        String validFunctionName = GET_ENCODED_URI;
-        Assert.assertTrue(checkDefaultUtil(validFunctionName,
-                ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));
-        List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
-        Assert.assertTrue(diagnostics.isEmpty());
+        SyntaxTree utlisSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("client/ballerina/default_util.bal",
+                utlisSyntaxTree);
     }
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with query parameters")
@@ -186,25 +184,6 @@ public class UtilGenerationTests {
                 }
             }
             return true;
-        }
-        return false;
-    }
-
-    private boolean checkDefaultUtil(String validFunctionName, SyntaxTree utilSyntaxTree) {
-        ModulePartNode modulePartNode = utilSyntaxTree.rootNode();
-        NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
-        if (members.size() == 1) {
-            for (ModuleMemberDeclarationNode node : members) {
-                if (node.kind().equals(SyntaxKind.FUNCTION_DEFINITION)) {
-                    for (ChildNodeEntry childNodeEntry : node.childEntries()) {
-                        if (childNodeEntry.name().equals("functionName")) {
-                            if (validFunctionName.equals(childNodeEntry.node().get().toString())) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
         }
         return false;
     }
