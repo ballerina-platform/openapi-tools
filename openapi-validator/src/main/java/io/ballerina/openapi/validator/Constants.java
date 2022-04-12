@@ -17,6 +17,10 @@
  */
 package io.ballerina.openapi.validator;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Container for Constants used in validator plugin.
  *
@@ -50,6 +54,7 @@ public class Constants {
     public static final String HTTP_HEADER = "http:Header";
     public static final String HTTP_PAYLOAD = "http:Payload";
     public static final String HTTP_REQUEST = "http:Request";
+    public static final String HTTP_RESPONSE = "http:Response";
     public static final String ARRAY = "array";
     public static final String ARRAY_BRACKETS = "[]";
     public static final String STRING = "string";
@@ -61,4 +66,55 @@ public class Constants {
     public static final String NUMBER = "number";
     public static final String INT = "int";
     public static final String FLOAT = "float";
+    public static final String DEFAULT = "default";
+    public static final String WILD_CARD_CONTENT_KEY = "*/*";
+    public static final String WILD_CARD_SUMMARY = "Any type of entity body";
+
+    public static final Map<String, String> HTTP_CODES;
+    static {
+        Map<String, String> aMap = new HashMap<>();
+        aMap.put("Continue", "100");
+        aMap.put("SwitchingProtocols", "101");
+        aMap.put("Ok", "200");
+        aMap.put("Created", "201");
+        aMap.put("Accepted", "202");
+        aMap.put("NonAuthoritativeInformation", "203");
+        aMap.put("NoContent", "204");
+        aMap.put("RestContent", "205");
+        aMap.put("PartialContent", "206");
+        aMap.put("MultipleChoices", "300");
+        aMap.put("MovedPermanently", "301");
+        aMap.put("Found", "302");
+        aMap.put("SeeOther", "303");
+        aMap.put("NotModified", "304");
+        aMap.put("UseProxy", "305");
+        aMap.put("TemporaryRedirect", "308");
+        aMap.put("BadRequest", "400");
+        aMap.put("Unauthorized", "401");
+        aMap.put("PaymentRequired", "402");
+        aMap.put("Forbidden", "403");
+        aMap.put("NotFound", "404");
+        aMap.put("MethodNotAllowed", "405");
+        aMap.put("NotAcceptable", "406");
+        aMap.put("ProxyAuthenticationRequires", "407");
+        aMap.put("RequestTimeOut", "408");
+        aMap.put("Conflict", "409");
+        aMap.put("Gone", "410");
+        aMap.put("LengthRequired", "411");
+        aMap.put("PreconditionFailed", "412");
+        aMap.put("UriTooLong", "413");
+        aMap.put("UnsupportedMediaType", "414");
+        aMap.put("RangeNotSatisfied", "415");
+        aMap.put("ExpectationFailed", "416");
+        aMap.put("UpgradeRequired", "426");
+        aMap.put("RequestHeaderFieldsTooLarge", "431");
+        aMap.put("InternalServerError", "500");
+        aMap.put("NotImplemented", "501");
+        aMap.put("BadGateway", "502");
+        aMap.put("ServiceUnavailable", "503");
+        aMap.put("GatewayTimeOut", "504");
+        aMap.put("HttpVersionNotSupported", "505");
+        HTTP_CODES = Collections.unmodifiableMap(aMap);
+    }
+
 }

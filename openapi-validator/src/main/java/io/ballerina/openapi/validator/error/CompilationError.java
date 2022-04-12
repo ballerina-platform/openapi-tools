@@ -37,9 +37,9 @@ public enum CompilationError {
             DiagnosticSeverity.ERROR),
     TYPE_MISMATCH_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_006, ErrorMessage.ERROR_006,
             DiagnosticSeverity.ERROR),
-    MISSING_BRECORD_FIELD(ErrorCode.OPENAPI_VALIDATOR_007, ErrorMessage.ERROR_007,
+    UNDOCUMENTED_BRECORD_FIELD(ErrorCode.OPENAPI_VALIDATOR_007, ErrorMessage.ERROR_007,
             DiagnosticSeverity.ERROR),
-    MISSING_OAS_PROPERTY(ErrorCode.OPENAPI_VALIDATOR_008, ErrorMessage.ERROR_008,
+    UNIMPLEMENTED_OAS_PROPERTY(ErrorCode.OPENAPI_VALIDATOR_008, ErrorMessage.ERROR_008,
             DiagnosticSeverity.ERROR),
     UNDOCUMENTED_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_009, ErrorMessage.ERROR_009,
             DiagnosticSeverity.ERROR),
@@ -68,7 +68,9 @@ public enum CompilationError {
     UNDOCUMENTED_REQUEST_BODY(ErrorCode.OPENAPI_VALIDATOR_021, ErrorMessage.ERROR_021,
                         DiagnosticSeverity.ERROR),
     TYPEMISMATCH_REQUEST_BODY_PAYLOAD(ErrorCode.OPENAPI_VALIDATOR_022, ErrorMessage.ERROR_022,
-            DiagnosticSeverity.ERROR);
+            DiagnosticSeverity.ERROR),
+    UNDOCUMENTED_RETURN_CODE(ErrorCode.OPENAPI_VALIDATOR_023, ErrorMessage.ERROR_023,
+                              DiagnosticSeverity.ERROR);
 
 
 

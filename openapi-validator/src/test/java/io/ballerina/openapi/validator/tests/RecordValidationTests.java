@@ -33,33 +33,61 @@ import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
  * This test class use for cover the query parameter tests.
  */
 public class RecordValidationTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/record")
-            .toAbsolutePath();
+    private static final Path RES_DIR = Paths.get("src/test/resources/record").toAbsolutePath();
+
     @Test(description = "Type mismatch record field with basic type")
-    public void typeMisMatchField() {
+    public void typeMisMatchField01() {
         Path path = RES_DIR.resolve("type_mismatch_field.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        // Undocumented query parameter
-        String undocumentedRB = "ERROR [request_body.bal:(8:33,8:59)] Request body for the method 'post' of the" +
-                " resource associated with the path '{2}' is not documented in the OpenAPI contract.";
-        Assert.assertEquals(undocumentedRB, errors[0].toString());
+        // Type mismatch field
+        String typeMismatch = "ERROR [type_mismatch_field.bal:(5:12,5:14)] Implementation type does not match with" +
+                " OAS contract type (expected 'string', found 'integer') for the field 'id' of type 'Pet'";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
-    @Test(description = "Type mis match request body payload type")
-    public void typeMisMatchRequestBodyMediaType() {
-        Path path = RES_DIR.resolve("type_mismatch_request_body.bal");
+    @Test(description = "Type mismatch record field with array type")
+    public void typeMisMatchArrayField() {
+        Path path = RES_DIR.resolve("array_type_mismatch_field.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 2);
+        // Type mismatch field
+        String typeMismatch01 = "ERROR [array_type_mismatch_field.bal:(7:14,7:18)] Implementation type does not match" +
+                " with OAS contract type (expected 'string[]', found 'integer[]') for the field 'tags' of type 'Pet'";
+        String typeMismatchNestedArray = "ERROR [array_type_mismatch_field.bal:(8:14,8:24)] Implementation type does " +
+                "not match with OAS contract type (expected 'string[]', found 'string[][]') for the field " +
+                "'categories' of type 'Pet'";
+        Assert.assertEquals(typeMismatch01, errors[0].toString());
+        Assert.assertEquals(typeMismatchNestedArray, errors[1].toString());
+    }
+
+    @Test(description = "Type mismatch record field with array type")
+    public void typeMisMatchRecordField() {
+        Path path = RES_DIR.resolve("type_mismatch_record.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        // Undocumented query parameter
-        String undocumentedRB = "Implementation payload type does not match with OAS contract content type (expected" +
-                " 'application/json',found '[text/plain]') for the 'payload' in http method 'post' that associated " +
-                "with the path '/pets'.";
-        Assert.assertEquals(undocumentedRB, errors[0].toString());
+        // Type mismatch field
+        String typeMismatch01 = "ERROR [type_mismatch_record.bal:(10:9,10:11)] Implementation type does not match " +
+                "with OAS contract type (expected 'int', found 'string') for the field 'id' of type 'Type'";
+        Assert.assertEquals(typeMismatch01, errors[0].toString());
+    }
+
+    @Test(description = "Undocumented record field in record")
+    public void undocumentedRecordField() {
+        Path path = RES_DIR.resolve("undocumented_field.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String undocumentedField = "ERROR [undocumented_field.bal:(7:12,7:17)] The 'type' field in the 'Pet'" +
+                " record is not documented in the OpenAPI contract 'Pet' schema.";
+        Assert.assertEquals(undocumentedField, errors[0].toString());
     }
 
     //TODO: unimplemented requestbody oas->ballerina

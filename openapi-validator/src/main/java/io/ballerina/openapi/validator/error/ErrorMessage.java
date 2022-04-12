@@ -27,7 +27,7 @@ public enum ErrorMessage {
             "(expected ''{0}'', found ''{1}'') for the field ''{2}'' of type ''{3}''"),
     ERROR_006("Implementation type does not match with OAS contract type (expected ''{0}'',found ''{1}'') for the" +
             " parameter ''{2}'' in http method ''{3}'' that associated with the path ''{4}''."),
-    ERROR_007(""),
+    ERROR_007("The ''{0}'' field in the ''{1}'' record is not documented in the OpenAPI contract ''{2}'' schema."),
     ERROR_008(""),
     ERROR_009("''{0}'' parameter for the method ''{1}'' of the resource associated with the path" +
             " ''{2}'' is not documented in the OpenAPI contract."),
@@ -50,7 +50,9 @@ public enum ErrorMessage {
     ERROR_021("Request body for the method ''{0}'' of the resource associated with the path" +
             " ''{2}'' is not documented in the OpenAPI contract."),
     ERROR_022("Implementation payload type does not match with OAS contract content type (expected ''{0}'',found " +
-            "''{1}'') for the ''{2}'' in http method ''{3}'' that associated with the path ''{4}''.");
+            "''{1}'') for the ''{2}'' in http method ''{3}'' that associated with the path ''{4}''."),
+    ERROR_023("Undocumented resource return status code ''{0}'' for the method ''{1}'' of the resource " +
+            "associated with the path ''{2}''.");
 
 
     private final String message;
