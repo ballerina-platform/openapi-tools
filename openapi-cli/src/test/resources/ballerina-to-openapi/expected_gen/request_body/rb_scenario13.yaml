@@ -5,8 +5,8 @@ paths:
       requestBody:
         content:
           '*/*':
-            example:
-              summary: Any type of entity body
+            schema:
+              description: Any type of entity body
       responses:
         "200":
           description: Ok
