@@ -1,9 +1,9 @@
 openapi: 3.0.1
 info:
-  title: '''limit'
+  title: Main Openapi Yaml
   version: 0.1.0
 servers:
-  - url: "{server}:{port}/"
+  - url: "{server}:{port}"
     variables:
       server:
         default: http://localhost
@@ -16,7 +16,6 @@ paths:
       responses:
         "200":
           description: Ok
-          content:
-            application/json:
-              schema: {}
+        "202":
+          description: Accepted
 components: {}

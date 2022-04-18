@@ -61,7 +61,7 @@ public class ReturnTypeValidationTests {
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
     }
 
-    //--->
+    //---> need to fix
     @Test(description = "Status code change in record")
     public void statusCodeWithRecord() {
         Path path = RES_DIR.resolve("single_record_status_code.bal");
@@ -70,9 +70,18 @@ public class ReturnTypeValidationTests {
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
         // Undocumented query parameter
-        String undocumentedReturnCode = "ERROR [single_status_code.bal:(8:31,8:46)] Undocumented resource return " +
-                "status code '200' for the method 'get' of the resource associated with the path '/'.";
+        String undocumentedReturnCode = "ERROR [single_record_status_code.bal:(14:31,14:47)] Undocumented resource" +
+                " return status code '202' for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
+    }
+
+    @Test(description = "Union type with status code only.")
+    public void unionStatusCode() {
+        Path path = RES_DIR.resolve("union_status_code.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 3);
     }
 
 //    @Test(description = "Type mis match media type")
