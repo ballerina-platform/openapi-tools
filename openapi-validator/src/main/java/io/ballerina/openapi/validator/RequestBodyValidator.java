@@ -54,7 +54,7 @@ public class RequestBodyValidator {
                 Node typeNode = requestBodyNode.typeName();
                 SyntaxKind kind = typeNode.kind();
                 String mediaType = null;
-                mediaType = ValidatorUtils.getMediaType(kind, mediaType);
+                mediaType = ValidatorUtils.getMediaType(kind);
 
                 List<String> mediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, "mediaType",
                         requestBodyNode.annotations(), context.semanticModel());

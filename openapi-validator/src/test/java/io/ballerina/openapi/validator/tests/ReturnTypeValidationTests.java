@@ -42,26 +42,24 @@ public class ReturnTypeValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        // Undocumented query parameter
-        String undocumentedReturnCode = "ERROR [single_status_code.bal:(8:31,8:46)] Undocumented resource return " +
+        String undocumentedReturnCode = "ERROR [single_status_code.bal:(8:39,8:46)] Undocumented resource return " +
                 "status code '200' for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
     }
 
-    @Test(description = "Type mis match media type", enabled = false)
+    @Test(description = "Type mis match media type")
     public void typeMistMatchMediaType() {
-        Path path = RES_DIR.resolve("single_record.bal");
+        Path path = RES_DIR.resolve("single_record_payload_type_mismatch.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        // Undocumented query parameter
-        String undocumentedReturnCode = "ERROR [single_status_code.bal:(8:31,8:46)] Undocumented resource return " +
-                "status code '200' for the method 'get' of the resource associated with the path '/'.";
+        String undocumentedReturnCode = "ERROR [single_record_payload_type_mismatch.bal:(14:39,14:47)]" +
+                " Undocumented resource return media type 'text/plain' for the method 'get' of the resource" +
+                " associated with the path '/'.";
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
     }
 
-    //---> need to fix
     @Test(description = "Status code change in record")
     public void statusCodeWithRecord() {
         Path path = RES_DIR.resolve("single_record_status_code.bal");
@@ -69,8 +67,7 @@ public class ReturnTypeValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        // Undocumented query parameter
-        String undocumentedReturnCode = "ERROR [single_record_status_code.bal:(14:31,14:47)] Undocumented resource" +
+        String undocumentedReturnCode = "ERROR [single_record_status_code.bal:(14:39,14:47)] Undocumented resource" +
                 " return status code '202' for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
     }
@@ -82,18 +79,43 @@ public class ReturnTypeValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 3);
+        //TODO check al the status code to one message
     }
 
-//    @Test(description = "Type mis match media type")
-//    public void typeMistMatchMediaType() {
-//        Path path = RES_DIR.resolve("single_record.bal");
-//        Project project = getProject(path);
-//        DiagnosticResult diagnostic = getCompilation(project);
-//        Object[] errors = getDiagnostics(diagnostic);
-//        Assert.assertTrue(errors.length == 1);
-//        // Undocumented query parameter
-//        String undocumentedReturnCode = "ERROR [single_status_code.bal:(8:31,8:46)] Undocumented resource return " +
-//                "status code '200' for the method 'get' of the resource associated with the path '/'.";
-//        Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
-//    }
+
+    @Test(description = "Type mismatch record field in Response record")
+    public void typeMistMatchRecordFiled() {
+        Path path = RES_DIR.resolve("single_record.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String typeMismatch = "ERROR [single_record.bal:(10:9,10:11)] Implementation type does not match " +
+                "with OAS contract type (expected 'int', found 'string') for the field 'id' of type 'Test'";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
+
+    @Test(description = "Union type validation")
+    public void unionReturnType() {
+        Path path = RES_DIR.resolve("union_return_type.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String typeMismatch = "ERROR [union_return_type.bal:(15:9,15:11)] Implementation type does not match with" +
+                " OAS contract type (expected 'int', found 'string') for the field 'id' of type 'Pet'";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
+
+    @Test(description = "Undocumented union type")
+    public void undocumentedUnionType() {
+        Path path = RES_DIR.resolve("undocumented_union_return_type.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String typeMismatch = "ERROR [undocumented_union_return_type.bal:(24:60,24:78)] Undocumented resource " +
+                "return status code '406' for the method 'get' of the resource associated with the path '/'.";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
 }

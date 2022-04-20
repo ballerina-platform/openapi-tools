@@ -70,7 +70,9 @@ public enum CompilationError {
     TYPEMISMATCH_REQUEST_BODY_PAYLOAD(ErrorCode.OPENAPI_VALIDATOR_022, ErrorMessage.ERROR_022,
             DiagnosticSeverity.ERROR),
     UNDOCUMENTED_RETURN_CODE(ErrorCode.OPENAPI_VALIDATOR_023, ErrorMessage.ERROR_023,
-                              DiagnosticSeverity.ERROR);
+                              DiagnosticSeverity.ERROR),
+    UNDOCUMENTED_RETURN_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_024, ErrorMessage.ERROR_024,
+            DiagnosticSeverity.ERROR); //TODO collecte every undocuemnted or typemismatch to one error message
 
 
 

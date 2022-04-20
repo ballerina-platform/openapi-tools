@@ -52,6 +52,8 @@ public enum ErrorMessage {
     ERROR_022("Implementation payload type does not match with OAS contract content type (expected ''{0}'',found " +
             "''{1}'') for the ''{2}'' in http method ''{3}'' that associated with the path ''{4}''."),
     ERROR_023("Undocumented resource return status code ''{0}'' for the method ''{1}'' of the resource " +
+            "associated with the path ''{2}''."),
+    ERROR_024("Undocumented resource return media type ''{0}'' for the method ''{1}'' of the resource " +
             "associated with the path ''{2}''.");
 
 

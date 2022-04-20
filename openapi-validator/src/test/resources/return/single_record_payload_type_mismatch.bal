@@ -3,24 +3,17 @@ import ballerina/http;
 
 type Response record {|
     *http:Ok;
-    Test body;
+    string body;
 |};
 
-type Test record {|
-    int id;
-    string name;
-|};
 @openapi:ServiceInfo {
-    contract:"single_record.yaml"
+    contract:"single_record_payload_type_mismatch.yaml"
 }
 
 service / on new http:Listener(9090) {
     resource function get .() returns Response {
         return {
-            body: {
-                id: 1,
-                name: "test"
-            }
+            body: "Testing"
         };
     }
 }

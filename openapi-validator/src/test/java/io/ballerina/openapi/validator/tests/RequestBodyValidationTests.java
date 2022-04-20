@@ -42,7 +42,6 @@ public class RequestBodyValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        // Undocumented query parameter
         String undocumentedRB = "ERROR [request_body.bal:(8:33,8:59)] Request body for the method 'post' of the" +
                 " resource associated with the path '{2}' is not documented in the OpenAPI contract.";
         Assert.assertEquals(undocumentedRB, errors[0].toString());
@@ -55,7 +54,6 @@ public class RequestBodyValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        // Undocumented query parameter
         String undocumentedRB = "Implementation payload type does not match with OAS contract content type (expected" +
                 " 'application/json',found '[text/plain]') for the 'payload' in http method 'post' that associated " +
                 "with the path '/pets'.";

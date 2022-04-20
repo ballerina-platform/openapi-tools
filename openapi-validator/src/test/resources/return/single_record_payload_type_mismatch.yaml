@@ -18,14 +18,5 @@ paths:
           description: Ok
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Test'
-components:
-  schemas:
-    Test:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
+              schema: {}
+components: {}

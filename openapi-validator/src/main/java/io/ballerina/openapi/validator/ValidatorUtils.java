@@ -453,7 +453,8 @@ public class ValidatorUtils {
         return fieldValues;
     }
 
-    public static String getMediaType(SyntaxKind kind, String mediaType) {
+    public static String getMediaType(SyntaxKind kind) {
+        String mediaType = null;
         // Return mediaType
         switch (kind) {
             case STRING_TYPE_DESC:
@@ -471,7 +472,26 @@ public class ValidatorUtils {
         }
         return mediaType;
     }
-
+    public static String getMediaType(TypeDescKind kind) {
+        String mediaType = null;
+        // Return mediaType
+        switch (kind) {
+            case STRING:
+                mediaType = "text/plain";
+                break;
+            case MAP:
+            case OBJECT:
+            case RECORD:
+            case TYPE_REFERENCE:
+            case JSON:
+                mediaType = "application/json";
+                break;
+            case XML:
+                mediaType = "application/xml";
+                break;
+        }
+        return mediaType;
+    }
     /**
      * This method will extract reference type by splitting the reference string.
      *
