@@ -60,5 +60,31 @@ public class RequestBodyValidationTests {
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
 
+    @Test(description = "Unimplemented request body")
+    public void unimplementedRequestBody() {
+        Path path = RES_DIR.resolve("oas_request_body.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String undocumentedRB = "ERROR [oas_request_body.bal:(8:5,10:6)] Missing OpenAPI contract request " +
+                "body implementation in the counterpart Ballerina service resource (method: 'post', path: '/pets')";
+        Assert.assertEquals(undocumentedRB, errors[0].toString());
+    }
+
+    @Test(description = "Unimplemented request body media type")
+    public void unimplementedMediaType() {
+        Path path = RES_DIR.resolve("mis_mediatype_oas_request_body.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String undocumentedRB = "ERROR [mis_mediatype_oas_request_body.bal:(8:33,8:59)] Missing OpenAPI contract" +
+                " request body media type 'text/plain' in the counterpart Ballerina service resource (method:" +
+                " 'post', path: '/pets')";
+        Assert.assertEquals(undocumentedRB, errors[0].toString());
+    }
+
+
     //TODO: unimplemented requestbody oas->ballerina
 }

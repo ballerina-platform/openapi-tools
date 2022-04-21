@@ -1,0 +1,26 @@
+openapi: 3.0.1
+info:
+  title: V1
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/v1"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pets:
+    post:
+      operationId: undocumented
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "202":
+          description: Accepted
+components: {}

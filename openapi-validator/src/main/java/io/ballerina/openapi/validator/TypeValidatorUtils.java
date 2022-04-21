@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.ballerina.openapi.validator.Constants.ARRAY_BRACKETS;
 import static io.ballerina.openapi.validator.Constants.BOOLEAN;
@@ -167,7 +169,6 @@ public class TypeValidatorUtils {
         return oasType;
     }
 
-    // todo: OpenAPI-to-Ballerina schema
 
     /**
      * Method for convert openApi type to ballerina type.
@@ -225,6 +226,40 @@ public class TypeValidatorUtils {
                 return Optional.of(FLOAT);
             default:
                 return Optional.empty();
+        }
+    }
+
+    // todo: OpenAPI-to-Ballerina schema
+
+    public static void validateObjectSchema(ObjectSchema objectSchema, TypeSymbol typeSymbol,
+                                          SyntaxNodeAnalysisContext context,
+                                          OpenAPI openAPI, String oasName, String balRecord) {
+        if (typeSymbol instanceof RecordTypeSymbol || typeSymbol instanceof TypeReferenceTypeSymbol) {
+            if (typeSymbol instanceof TypeReferenceTypeSymbol) {
+                typeSymbol = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
+            }
+            RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeSymbol;
+            Map<String, Schema> properties = objectSchema.getProperties();
+            Map<String, RecordFieldSymbol> recordFieldSymbolMap = recordTypeSymbol.fieldDescriptors();
+            TypeSymbol finalTypeSymbol = typeSymbol;
+            AtomicInteger numberOfMissingFields = new AtomicInteger();
+            properties.forEach((key, value)-> {
+                AtomicBoolean isPropertyExist = new AtomicBoolean(false);
+                recordFieldSymbolMap.forEach((fieldName, fieldValue) -> {
+                    if (key.equals(fieldName.trim())) {
+                        isPropertyExist.set(true);
+                    }
+                });
+                if (!isPropertyExist.get()) {
+                    // Missing field message;
+                    numberOfMissingFields.addAndGet(1);
+                    updateContext(context, CompilationError.UNIMPLEMENTED_OAS_PROPERTY,
+                            finalTypeSymbol.getLocation().orElse(null), key, balRecord);
+                }
+            });
+            if (numberOfMissingFields.get() == properties.size()) {
+                // TODO: error message for unimplemented record
+            }
         }
     }
 }

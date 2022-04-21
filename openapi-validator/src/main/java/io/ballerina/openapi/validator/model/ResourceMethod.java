@@ -66,7 +66,7 @@ public class ResourceMethod {
         return parameters;
     }
 
-    public Node getBody() {
+    public RequiredParameterNode getBody() {
         return body;
     }
 

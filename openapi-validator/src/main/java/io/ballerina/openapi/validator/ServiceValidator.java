@@ -38,6 +38,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
@@ -345,7 +346,6 @@ public class ServiceValidator {
 
             String oasPath = openAPIPath.getPath();
 
-
             ResourcePathSummary resourcePath = resourcePaths.get(oasPath);
             Map<String, ResourceMethod> methods = resourcePath.getMethods();
 
@@ -355,54 +355,43 @@ public class ServiceValidator {
                 //Parameter validation
                 List<Parameter> oasParameters = value.getParameters();
                 Map<String, Node> resourceParameters = resourceMethod.getParameters();
-                oasParameters.forEach(parameter -> {
-                    if (parameter.getIn().equals("header")) {
-                        // headerValidation
-                        Map<String, Node> resourceHeaders = resourceMethod.getHeaders();
-                        AtomicBoolean isHeaderExist = new AtomicBoolean(false);
-                        resourceHeaders.forEach((header, headerNode) -> {
-                            if (parameter.getName().trim().equals(header)) {
-                                isHeaderExist.set(true);
+                if (oasParameters != null) {
+                    oasParameters.forEach(parameter -> {
+                        if (parameter.getIn().equals("header")) {
+                            // headerValidation
+                            Map<String, Node> resourceHeaders = resourceMethod.getHeaders();
+                            AtomicBoolean isHeaderExist = new AtomicBoolean(false);
+                            resourceHeaders.forEach((header, headerNode) -> {
+                                if (parameter.getName().trim().equals(header)) {
+                                    isHeaderExist.set(true);
+                                }
+                            });
+                            if (!isHeaderExist.get()) {
+                                updateContext(context, CompilationError.UNIMPLEMENTED_HEADER,
+                                        resourceMethod.getLocation() , parameter.getName(), key, oasPath);
                             }
-                        });
-                        if (!isHeaderExist.get()) {
-                            updateContext(context, CompilationError.UNIMPLEMENTED_HEADER,
-                                    resourceMethod.getLocation() , parameter.getName(), key, oasPath);
-                        }
-                    } else {
-                        AtomicBoolean isImplemented = new AtomicBoolean(false);
-                        resourceParameters.forEach((paramName, paramNode) -> {
-                            // avoid headers
-                            if (parameter.getName().equals(paramName)) {
-                                isImplemented.set(true);
+                        } else {
+                            AtomicBoolean isImplemented = new AtomicBoolean(false);
+                            resourceParameters.forEach((paramName, paramNode) -> {
+                                // avoid headers
+                                if (parameter.getName().equals(paramName)) {
+                                    isImplemented.set(true);
+                                }
+                            });
+                            if (!isImplemented.get()) {
+                                // error message
+                                updateContext(context, CompilationError.UNIMPLEMENTED_PARAMETER,
+                                        resourceMethod.getLocation() , parameter.getName(), key, oasPath);
                             }
-                        });
-                        if (!isImplemented.get()) {
-                            // error message
-                            updateContext(context, CompilationError.UNIMPLEMENTED_PARAMETER,
-                                   resourceMethod.getLocation() , parameter.getName(), key, oasPath);
-
                         }
-                    }
-                });
-            });
-        }
-
-
-    }
-    // oas -> ballerina
-    private void validateBalParameterAgainstOAS(Map<String, ParameterNode> parameters, List<Parameter> oasParameters) {
-
-        for (Map.Entry<String, ParameterNode> parameter : parameters.entrySet()) {
-            boolean isBalParameterExist = false;
-            for (Parameter oasParam: oasParameters) {
-                //escape special character
-                if (parameter.getKey().equals(oasParam.getName())) {
-                    isBalParameterExist = true;
-                    ParameterNode value = parameter.getValue();
-
+                    });
                 }
-            }
+                // Request body
+                RequestBody requestBody = value.getRequestBody();
+                RequiredParameterNode body = resourceMethod.getBody();
+                RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI);
+                rbValidator.validateOASRequestBody(body, requestBody, oasPath, key, resourceMethod.getLocation());
+            });
         }
     }
 }

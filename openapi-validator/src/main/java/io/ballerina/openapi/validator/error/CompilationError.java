@@ -74,6 +74,10 @@ public enum CompilationError {
     UNDOCUMENTED_RETURN_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_024, ErrorMessage.ERROR_024,
             DiagnosticSeverity.ERROR),//TODO collecte every undocuemnted or typemismatch to one error message
     UNIMPLEMENTED_HEADER(ErrorCode.OPENAPI_VALIDATOR_025, ErrorMessage.ERROR_025,
+            DiagnosticSeverity.ERROR),
+    UNIMPLEMENTED_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_026, ErrorMessage.ERROR_026,
+            DiagnosticSeverity.ERROR),
+    UNIMPLEMENTED_REQUEST_BODY(ErrorCode.OPENAPI_VALIDATOR_027, ErrorMessage.ERROR_027,
             DiagnosticSeverity.ERROR);
 
 

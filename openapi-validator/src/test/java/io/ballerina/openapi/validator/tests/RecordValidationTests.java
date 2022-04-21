@@ -90,5 +90,15 @@ public class RecordValidationTests {
         Assert.assertEquals(undocumentedField, errors[0].toString());
     }
 
+    @Test(description = "Undocumented object schema field in record")
+    public void unimplementedOASField() {
+        Path path = RES_DIR.resolve("unimplemented_field.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String undocumentedField = "Couldn't find OpenAPI object schema field 'tag' in 'Pet' the Ballerina record.";
+        Assert.assertEquals(undocumentedField, errors[0].toString());
+    }
     //TODO: unimplemented requestbody oas->ballerina
 }

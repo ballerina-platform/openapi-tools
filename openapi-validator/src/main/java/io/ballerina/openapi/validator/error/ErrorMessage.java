@@ -28,13 +28,13 @@ public enum ErrorMessage {
     ERROR_006("Implementation type does not match with OAS contract type (expected ''{0}'',found ''{1}'') for the" +
             " parameter ''{2}'' in http method ''{3}'' that associated with the path ''{4}''."),
     ERROR_007("The ''{0}'' field in the ''{1}'' record is not documented in the OpenAPI contract ''{2}'' schema."),
-    ERROR_008(""),
+    ERROR_008("Couldn''t find OpenAPI object schema field ''{0}'' in ''{1}'' the Ballerina record."),
     ERROR_009("''{0}'' parameter for the method ''{1}'' of the resource associated with the path" +
             " ''{2}'' is not documented in the OpenAPI contract."),
     ERROR_010("Missing OpenAPI contract parameter ''{0}'' in the counterpart Ballerina service resource (method: " +
             "''{1}'', path: ''{2}'')"),
     ERROR_011("Unexpected error occur while reading the contract : {0}"),
-    ERROR_012("Couldn't read the OpenAPI contract from the given file: {0}"),
+    ERROR_012("Couldn''t read the OpenAPI contract from the given file: {0}"),
     ERROR_013("bOTH TAGS AN DE TAGS"),
     ERROR_014("BOTH OPERATION AND E OPERATIONS"),
     ERROR_015("Could not find Ballerina service resource(s) for HTTP method(s) ''{0}'' for the path ''{1}'' which is " +
@@ -57,8 +57,11 @@ public enum ErrorMessage {
     ERROR_024("Undocumented resource return media type ''{0}'' for the method ''{1}'' of the resource " +
             "associated with the path ''{2}''."),
     ERROR_025("Missing OpenAPI contract header ''{0}'' in the counterpart Ballerina service resource" +
-            " (method: ''{1}'', path: ''{2}'')");
-
+            " (method: ''{1}'', path: ''{2}'')"),
+    ERROR_026("Missing OpenAPI contract request body media type ''{0}'' in the counterpart Ballerina service resource" +
+                      " (method: ''{1}'', path: ''{2}'')"),
+    ERROR_027("Missing OpenAPI contract request body implementation in the counterpart Ballerina service resource" +
+                      " (method: ''{0}'', path: ''{1}'')");
 
     private final String message;
 
