@@ -32,7 +32,7 @@ import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 public class HeaderValidationTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/headers").toAbsolutePath();
     @Test(description = "Required Header test")
-    public void queryTest() {
+    public void resourceHeaderValidation() {
         Path path = RES_DIR.resolve("header.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
@@ -48,5 +48,18 @@ public class HeaderValidationTests {
         String undocumentedParameter = "ERROR [header.bal:(10:34,10:78)] 'x-offset' header for the method 'get' " +
                 "of the resource associated with the path '/pets02' is not documented in the OpenAPI contract.";
         Assert.assertEquals(undocumentedParameter, errors[1].toString());
+    }
+
+    @Test(description = "Oas Header test")
+    public void oasHeader() {
+        Path path = RES_DIR.resolve("oas_header.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        // unimplemented header
+        String typeMismatchError = "ERROR [oas_header.bal:(8:5,10:6)] Missing OpenAPI contract header" +
+                " 'x-offset' in the counterpart Ballerina service resource (method: 'get', path: '/pets')";
+        Assert.assertEquals(typeMismatchError, errors[0].toString());
     }
 }

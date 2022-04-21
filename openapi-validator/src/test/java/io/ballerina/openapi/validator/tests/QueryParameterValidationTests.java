@@ -53,4 +53,17 @@ public class QueryParameterValidationTests {
                 "'get' of the resource associated with the path '/pets02' is not documented in the OpenAPI contract.";
         Assert.assertEquals(undocumentedParameter, errors[1].toString());
     }
+
+    // Unimplemented query parameter
+    @Test(description = "This test for unimplemented query parameter in openAPI spec")
+    public void unimplemented(){
+        Path path = RES_DIR.resolve("oas_query_parameter.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String message = "ERROR [oas_query_parameter.bal:(8:5,10:6)] Missing OpenAPI contract parameter 'offset' in " +
+                "the counterpart Ballerina service resource (method: 'get', path: '/pets')";
+        Assert.assertEquals(message, errors[0].toString());
+    }
 }

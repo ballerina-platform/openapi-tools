@@ -31,7 +31,8 @@ public enum ErrorMessage {
     ERROR_008(""),
     ERROR_009("''{0}'' parameter for the method ''{1}'' of the resource associated with the path" +
             " ''{2}'' is not documented in the OpenAPI contract."),
-    ERROR_010(""),
+    ERROR_010("Missing OpenAPI contract parameter ''{0}'' in the counterpart Ballerina service resource (method: " +
+            "''{1}'', path: ''{2}'')"),
     ERROR_011("Unexpected error occur while reading the contract : {0}"),
     ERROR_012("Couldn't read the OpenAPI contract from the given file: {0}"),
     ERROR_013("bOTH TAGS AN DE TAGS"),
@@ -54,7 +55,9 @@ public enum ErrorMessage {
     ERROR_023("Undocumented resource return status code ''{0}'' for the method ''{1}'' of the resource " +
             "associated with the path ''{2}''."),
     ERROR_024("Undocumented resource return media type ''{0}'' for the method ''{1}'' of the resource " +
-            "associated with the path ''{2}''.");
+            "associated with the path ''{2}''."),
+    ERROR_025("Missing OpenAPI contract header ''{0}'' in the counterpart Ballerina service resource" +
+            " (method: ''{1}'', path: ''{2}'')");
 
 
     private final String message;
