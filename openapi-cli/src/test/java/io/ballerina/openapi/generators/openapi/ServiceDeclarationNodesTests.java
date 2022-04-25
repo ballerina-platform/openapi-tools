@@ -49,7 +49,7 @@ public class ServiceDeclarationNodesTests {
     public void multipleServiceWithSameAbsolute() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services.bal");
         executedMethod(ballerinaFilePath, "multiple_service_01.yaml", "hello_openapi.yaml",
-                "hello-");
+                "hello_");
     }
 
     @Test(description = "Multiple services with absolute path as '/'. ")
@@ -57,7 +57,7 @@ public class ServiceDeclarationNodesTests {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services_without_base_path.bal");
         executedMethod(ballerinaFilePath, "multiple_service_02.yaml",
                 "multiple_services_without_base_path_openapi.yaml",
-                "multiple_services_without_base_path-");
+                "multiple_services_without_base_path_");
     }
 
     @Test(description = "Multiple services with no absolute path")
@@ -65,7 +65,7 @@ public class ServiceDeclarationNodesTests {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services_no_base_path.bal");
         executedMethod(ballerinaFilePath, "multiple_service_03.yaml",
                 "multiple_services_no_base_path_openapi.yaml",
-                "multiple_services_no_base_path-");
+                "multiple_services_no_base_path_");
     }
 
     private static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {

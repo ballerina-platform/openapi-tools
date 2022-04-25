@@ -58,6 +58,7 @@ import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
 import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractFileName;
 import static io.ballerina.openapi.converter.utils.CodegenUtils.writeFile;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.containErrors;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getNormalizeFileName;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.isHttpService;
 
 /**
@@ -114,15 +115,14 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
      * @param serviceSymbol symbol for taking the hash code of services
      */
     private String constructFileName(SyntaxTree syntaxTree, Map<Integer, String> services, Symbol serviceSymbol) {
-        String fileName = services.get(serviceSymbol.hashCode());
+        String fileName = getNormalizeFileName(services.get(serviceSymbol.hashCode()));
+        String balFileName = syntaxTree.filePath().split("\\.")[0];
         if (fileName.equals(SLASH)) {
-            return syntaxTree.filePath().split("\\.")[0] + OPENAPI_SUFFIX + YAML_EXTENSION;
-        } else if (fileName.contains(HYPHEN) && fileName.split(HYPHEN)[0].equals(SLASH)) {
-            return syntaxTree.filePath().split("\\.")[0] + UNDERSCORE +
-                     services.get(serviceSymbol.hashCode()).split(HYPHEN)[1] + OPENAPI_SUFFIX + YAML_EXTENSION;
-        } else {
-            return services.get(serviceSymbol.hashCode()) + OPENAPI_SUFFIX + YAML_EXTENSION;
+            return balFileName + OPENAPI_SUFFIX + YAML_EXTENSION;
+        } else if (fileName.contains(HYPHEN) && fileName.split(HYPHEN)[0].equals(SLASH) || fileName.isBlank()) {
+            return balFileName + UNDERSCORE + serviceSymbol.hashCode() + OPENAPI_SUFFIX + YAML_EXTENSION;
         }
+        return fileName + OPENAPI_SUFFIX + YAML_EXTENSION;
     }
 
     private void writeOpenAPIYaml(Path outPath, OASResult oasResult, List<Diagnostic> diagnostics) {
@@ -130,8 +130,9 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
             try {
                 // Create openapi directory if not exists in the path. If exists do not throw an error
                 Files.createDirectories(Paths.get(outPath + OAS_PATH_SEPARATOR + OPENAPI));
+                String serviceName = oasResult.getServiceName();
                 String fileName = resolveContractFileName(outPath.resolve(OPENAPI),
-                        oasResult.getServiceName(), false);
+                        serviceName, false);
                 writeFile(outPath.resolve(OPENAPI + OAS_PATH_SEPARATOR + fileName), oasResult.getYaml().get());
             } catch (IOException e) {
                 DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_108;

@@ -87,6 +87,7 @@ import static io.ballerina.openapi.converter.Constants.HYPHEN;
 import static io.ballerina.openapi.converter.Constants.JSON_EXTENSION;
 import static io.ballerina.openapi.converter.Constants.SLASH;
 import static io.ballerina.openapi.converter.Constants.SPECIAL_CHAR_REGEX;
+import static io.ballerina.openapi.converter.Constants.UNDERSCORE;
 import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
 
 /**
@@ -477,7 +478,27 @@ public class ConverterCommonUtils {
             // Replace rest of the path separators with underscore
             openAPIFileName = serviceName.replaceAll(SLASH, "_");
         }
-        return openAPIFileName + Constants.OPENAPI_SUFFIX + (isJson ? JSON_EXTENSION : YAML_EXTENSION);
+
+        return getNormalizeFileName(openAPIFileName) + Constants.OPENAPI_SUFFIX +
+                (isJson ? JSON_EXTENSION : YAML_EXTENSION);
+    }
+
+    /**
+     * Remove special characters from the given file name.
+     */
+    public static String getNormalizeFileName(String openAPIFileName) {
+
+        String[] splitNames = openAPIFileName.split("[^a-zA-Z0-9]");
+        StringBuilder normalizeFileName = new StringBuilder();
+        for (String name: splitNames) {
+            if (!name.isBlank()) {
+                normalizeFileName.append(name).append(UNDERSCORE);
+            }
+        }
+        if (normalizeFileName.toString().endsWith(UNDERSCORE)) {
+            return normalizeFileName.deleteCharAt(normalizeFileName.length() - 1).toString();
+        }
+        return openAPIFileName;
     }
 
     public static boolean isHttpService(ModuleSymbol moduleSymbol) {

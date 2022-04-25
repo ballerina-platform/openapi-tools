@@ -33,6 +33,7 @@ import java.util.List;
 import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
 import static io.ballerina.openapi.cmd.TestUtil.RESOURCE;
 import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.cmd.TestUtil.executeOpenapiBuild;
 
 /**
  * These tests are for capture the `--export-openapi` flag in distribution.
@@ -56,25 +57,25 @@ public class BuildExtensionTests {
     public void flagWithBuildOption() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
-        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
+        InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_2"), buildArgs);
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("project_2/target/openapi/greeting_openapi.yaml")));
     }
 
-    @Test(description = "Check --export-openapi flag with graphQl service", enabled = false)
+    @Test(description = "Check --export-openapi flag with graphQl service")
     public void withNonHttpServiceWithBuildOption() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
-        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
+        InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_3"), buildArgs);
         Assert.assertTrue(Files.exists(RESOURCE.resolve("project_3/target/openapi/greeting_openapi.yaml")));
     }
 
-    @Test(description = "Check --export-openapi flag with package has service on module", enabled = false)
+    @Test(description = "Check --export-openapi flag with package has service on module")
     public void buildOptionWithSeparateModule() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
-        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
+        InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_4"), buildArgs);
         Assert.assertTrue(Files.exists(RESOURCE.resolve("project_4/target/openapi/greeting_openapi.yaml")));
         Assert.assertTrue(Files.exists(RESOURCE.resolve("project_4/target/openapi/mod_openapi.yaml")));
@@ -88,25 +89,47 @@ public class BuildExtensionTests {
                 TEST_RESOURCE.resolve("project_5/service.bal"), buildArgs);
     }
 
-    @Test(description = "Check --export-openapi flag with grpc service", enabled = false)
+    @Test(description = "Check --export-openapi flag with grpc service")
     public void buildOptionWithGrpcService() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
-        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
+        InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_6"), buildArgs);
+        Assert.assertFalse(Files.exists(RESOURCE.resolve("project_6/target/openapi/")));
     }
 
-    @Test(description = "Check --export-openapi flag with webHub service", enabled = false)
+    @Test(description = "Check --export-openapi flag with webHub service")
     public void buildOptionWithWebHub() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");
-        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
+        InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_7"), buildArgs);
+        Assert.assertFalse(Files.exists(RESOURCE.resolve("project_7/target/openapi/")));
     }
 
+    @Test(description = "Base path with special characters")
+    public void basePathWithSpecialCharacter() throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("--export-openapi");
+        InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
+                TEST_RESOURCE.resolve("project_8"), buildArgs);
+        if (successful.available() == 0) {
+            Assert.assertTrue(Files.exists(RESOURCE.resolve("project_8/target/openapi/" +
+                    "well_known_smart_configuration_openapi.yaml")));
+        }
+    }
+
+    @Test(description = "Base path with unicode characters")
+    public void basePathWithUnicodeCharacter() throws IOException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("--export-openapi");
+        InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
+                TEST_RESOURCE.resolve("project_9"), buildArgs);
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_9/target/openapi/ชื่อ_openapi.yaml")));
+    }
     private void executeCommand(String resourcePath) throws IOException {
         List<String> buildArgs = new LinkedList<>();
-        InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
+        InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve(resourcePath), buildArgs);
     }
 }
