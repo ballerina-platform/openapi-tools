@@ -98,6 +98,8 @@ public class RequestBodyValidator {
                             /// validate- Record
                             TypeValidatorUtils.validateRecordType(schema, typeSymbol, balRecordName,
                                     context, openAPI, oasSchemaName);
+
+                            //TODO: array type validation
                         }
                     }
                     if (mediaType != null && !isMediaTypeExist) {
@@ -162,6 +164,7 @@ public class RequestBodyValidator {
                                 //TODO: oneOf, AllOF handle
                                 return;
                             } else {
+                                //TODO: array schema
                                 return;
                             }
                         }
@@ -172,10 +175,6 @@ public class RequestBodyValidator {
                             mediaTypeEntry.getKey(), method, path);
                 }
             }
-
         }
-
     }
-
-
 }

@@ -24,10 +24,12 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -42,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_TYPE_DESC;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPTIONAL_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.UNION_TYPE_DESC;
@@ -69,18 +73,27 @@ public class ReturnValidator {
         this.path = path;
     }
 
-    public void validateReturnBallerinaToOas(ReturnTypeDescriptorNode returnNode, ApiResponses responses) {
-        SyntaxKind kind = returnNode.type().kind();
+    public void validateReturnBallerinaToOas(TypeDescriptorNode returnNode, ApiResponses responses) {
+        SyntaxKind kind = returnNode.kind();
         if (kind == QUALIFIED_NAME_REFERENCE) {
-            QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) returnNode.type();
+            QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) returnNode;
             validateQualifiedType(qNode, responses);
         } else if (kind == UNION_TYPE_DESC) {
             // A|B|C|D
-            UnionTypeDescriptorNode uNode = (UnionTypeDescriptorNode) returnNode.type();
+            UnionTypeDescriptorNode uNode = (UnionTypeDescriptorNode) returnNode;
             validateUnionType(uNode, responses);
         } else if (kind == SIMPLE_NAME_REFERENCE) {
-            SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) returnNode.type();
+            SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) returnNode;
             validateSimpleNameReference(simpleRefNode, responses);
+        } else if (kind == ERROR_TYPE_DESC) {
+            if (!responses.containsKey("500")) {
+                // error message
+                updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, returnNode.location(), "500",
+                        method, path);
+            }
+        } else if (kind == OPTIONAL_TYPE_DESC) {
+             OptionalTypeDescriptorNode optionalNode = (OptionalTypeDescriptorNode) returnNode;
+            validateReturnBallerinaToOas((TypeDescriptorNode) optionalNode.typeDescriptor(), responses);
         }
         //TODO: array type validation
     }
@@ -194,6 +207,11 @@ public class ReturnValidator {
             } else if (reNode.kind() == SIMPLE_NAME_REFERENCE) {
                 SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) reNode;
                 validateSimpleNameReference(simpleRefNode, responses);
+            } else if (reNode.kind() == ERROR_TYPE_DESC) {
+                if (!responses.containsKey("500")) {
+                    updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, uNode.location(), "500",
+                            method, path);
+                }
             }
         }
     }

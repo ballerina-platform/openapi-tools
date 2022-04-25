@@ -118,4 +118,40 @@ public class ReturnTypeValidationTests {
                 "return status code '406' for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
+
+    @Test(description = "Without return type")
+    public void withoutReturnType() {
+        Path path = RES_DIR.resolve("without_return.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String typeMismatch = "ERROR [without_return.bal:(8:5,9:6)] Undocumented resource return status code '202' " +
+                "for the method 'get' of the resource associated with the path '/'.";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
+
+    @Test(description = "Error return type")
+    public void errorReturnType() {
+        Path path = RES_DIR.resolve("error_return.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String typeMismatch = "ERROR [error_return.bal:(8:31,8:44)] Undocumented resource return status code '500'" +
+                " for the method 'get' of the resource associated with the path '/'.";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
+
+    @Test(description = "Error return type")
+    public void errorReturnTypeWithNil() {
+        Path path = RES_DIR.resolve("nil_error_return.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String typeMismatch = "ERROR [nil_error_return.bal:(8:39,8:44)] Undocumented resource return status code" +
+                " '500' for the method 'get' of the resource associated with the path '/'.";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
 }

@@ -28,6 +28,7 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.openapi.validator.model.Filter;
 import io.ballerina.openapi.validator.model.OpenAPIPathSummary;
@@ -214,8 +215,15 @@ public class ServiceValidator {
                         getNormalizedPath(method.getValue().getPath()));
                 ApiResponses responses = oasOperation.getResponses();
                 ReturnTypeDescriptorNode returnNode = method.getValue().getReturnNode();
-                returnValidator.validateReturnBallerinaToOas(returnNode, responses);
-
+                // If return type doesn't provide in service , then it maps to status code 202.
+                if (returnNode == null) {
+                    if (!responses.containsKey("202")) {
+                        updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
+                                method.getValue().getLocation(), "202", method.getKey(), path.getKey());
+                    }
+                } else {
+                    returnValidator.validateReturnBallerinaToOas((TypeDescriptorNode) returnNode.type(), responses);
+                }
             }
         }
     }
@@ -388,9 +396,11 @@ public class ServiceValidator {
                 }
                 // Request body
                 RequestBody requestBody = value.getRequestBody();
-                RequiredParameterNode body = resourceMethod.getBody();
-                RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI);
-                rbValidator.validateOASRequestBody(body, requestBody, oasPath, key, resourceMethod.getLocation());
+                if (requestBody != null) {
+                    RequiredParameterNode body = resourceMethod.getBody();
+                    RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI);
+                    rbValidator.validateOASRequestBody(body, requestBody, oasPath, key, resourceMethod.getLocation());
+                }
             });
         }
     }
