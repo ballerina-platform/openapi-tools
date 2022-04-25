@@ -16,9 +16,9 @@
 
 package io.ballerina.openapi.extension.context;
 
-import io.ballerina.projects.PackageId;
+import io.ballerina.projects.DocumentId;
+import io.ballerina.projects.ModuleId;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,21 +28,21 @@ import java.util.List;
  * {@code OpenApiDocContext} contains details related to open-api doc generation.
  */
 public class OpenApiDocContext {
-    private final PackageId packageId;
-    private final Path sourcePath;
+    private final ModuleId moduleId;
+    private final DocumentId documentId;
     private final List<OpenApiDefinition> definitions = new ArrayList<>();
 
-    public OpenApiDocContext(PackageId packageId, Path sourcePath) {
-        this.packageId = packageId;
-        this.sourcePath = sourcePath;
+    public OpenApiDocContext(ModuleId moduleId, DocumentId documentId) {
+        this.moduleId = moduleId;
+        this.documentId = documentId;
     }
 
-    public PackageId getPackageId() {
-        return packageId;
+    ModuleId getModuleId() {
+        return moduleId;
     }
 
-    public Path getSourcePath() {
-        return sourcePath;
+    DocumentId getDocumentId() {
+        return documentId;
     }
 
     public List<OpenApiDefinition> getOpenApiDetails() {
@@ -57,18 +57,18 @@ public class OpenApiDocContext {
      * {@code OpenApiDefinition} contains details related to generated open-api definition.
      */
     public static class OpenApiDefinition {
-        private final String fileName;
+        private final int serviceId;
         private final String definition;
         private final boolean embed;
 
-        public OpenApiDefinition(String fileName, String definition, boolean embed) {
-            this.fileName = fileName;
+        public OpenApiDefinition(int serviceId, String definition, boolean embed) {
+            this.serviceId = serviceId;
             this.definition = definition;
             this.embed = embed;
         }
 
-        public String getFileName() {
-            return fileName;
+        public int getServiceId() {
+            return serviceId;
         }
 
         public String getDefinition() {

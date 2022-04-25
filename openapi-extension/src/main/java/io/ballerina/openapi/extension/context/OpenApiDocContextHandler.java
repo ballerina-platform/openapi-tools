@@ -16,9 +16,9 @@
 
 package io.ballerina.openapi.extension.context;
 
-import io.ballerina.projects.PackageId;
+import io.ballerina.projects.DocumentId;
+import io.ballerina.projects.ModuleId;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -53,12 +53,13 @@ public final class OpenApiDocContextHandler {
 
     /**
      * Update the shared context for open-api doc generation.
-     * @param packageId of the current project
-     * @param srcRoot of the current project
+     * @param moduleId of the current module
+     * @param documentId of the current file
      * @param definition to be added to the context
      */
-    public void updateContext(PackageId packageId, Path srcRoot, OpenApiDocContext.OpenApiDefinition definition) {
-        Optional<OpenApiDocContext> contextOpt = retrieveContext(packageId, srcRoot);
+    public void updateContext(ModuleId moduleId, DocumentId documentId,
+                              OpenApiDocContext.OpenApiDefinition definition) {
+        Optional<OpenApiDocContext> contextOpt = retrieveContext(moduleId, documentId);
         if (contextOpt.isPresent()) {
             OpenApiDocContext context = contextOpt.get();
             synchronized (context) {
@@ -66,19 +67,19 @@ public final class OpenApiDocContextHandler {
             }
             return;
         }
-        OpenApiDocContext context = new OpenApiDocContext(packageId, srcRoot);
+        OpenApiDocContext context = new OpenApiDocContext(moduleId, documentId);
         context.updateOpenApiDetails(definition);
         addContext(context);
     }
 
-    public Optional<OpenApiDocContext> retrieveContext(PackageId packageId, Path srcRoot) {
+    public Optional<OpenApiDocContext> retrieveContext(ModuleId moduleId, DocumentId documentId) {
         return this.contexts.stream()
-                .filter(ctx -> equals(ctx, packageId, srcRoot))
+                .filter(ctx -> equals(ctx, moduleId, documentId))
                 .findFirst();
     }
 
-    private boolean equals(OpenApiDocContext context, PackageId packageId, Path srcRoot) {
-        int hashCodeForCurrentContext = Objects.hash(context.getPackageId(), context.getSourcePath());
-        return hashCodeForCurrentContext == Objects.hash(packageId, srcRoot);
+    private boolean equals(OpenApiDocContext context, ModuleId moduleId, DocumentId documentId) {
+        int hashCodeForCurrentContext = Objects.hash(context.getModuleId(), context.getDocumentId());
+        return hashCodeForCurrentContext == Objects.hash(moduleId, documentId);
     }
 }
