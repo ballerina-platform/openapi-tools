@@ -165,6 +165,8 @@ public class BallerinaAuthConfigGenerator {
     private boolean apiKey;
     private boolean httpOROAuth;
     private String clientCredGrantTokenUrl;
+    private String passwordGrantTokenUrl;
+    private String refreshTokenUrl;
     private final Set<String> authTypes = new LinkedHashSet<>();
 
     public BallerinaAuthConfigGenerator(boolean isAPIKey, boolean isHttpOROAuth) {
@@ -238,6 +240,16 @@ public class BallerinaAuthConfigGenerator {
             // Add custom `OAuth2ClientCredentialsGrantConfig` record with default tokenUrl if `tokenUrl` is available
             if (clientCredGrantTokenUrl != null) {
                 nodes.add(getOAuth2ClientCredsGrantConfigRecord());
+            }
+
+            // Add custom `OAuth2PasswordGrantConfig` record with default tokenUrl if `tokenUrl` is available
+            if (passwordGrantTokenUrl != null) {
+                nodes.add(getOAuth2PasswordGrantConfigRecord());
+            }
+
+            // Add custom `OAuth2RefreshTokenGrantConfig` record with default refreshUrl if `refreshUrl` is available
+            if (refreshTokenUrl != null) {
+                nodes.add(getOAuth2RefreshTokenGrantConfigRecord());
             }
         }
     }
@@ -373,6 +385,124 @@ public class BallerinaAuthConfigGenerator {
         IdentifierToken fieldNameTokenUrl = createIdentifierToken("tokenUrl");
         ExpressionNode defaultValue = createRequiredExpressionNode(createIdentifierToken("\"" +
                 clientCredGrantTokenUrl + "\""));
+        RecordFieldWithDefaultValueNode fieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, stringType, fieldNameTokenUrl, equalToken, defaultValue,
+                semicolonToken);
+        recordFieldNodes.add(fieldNode);
+        return recordFieldNodes;
+    }
+
+    /**
+     * Create `OAuth2PasswordGrantConfig` record with default tokenUrl.
+     *
+     * <pre>
+     *      # OAuth2 Password Grant Configs
+     *      public type OAuth2PasswordGrantConfig record {|
+     *          *http:OAuth2PasswordGrantConfig;
+     *          # Token URL
+     *          string tokenUrl = "https://zoom.us/oauth/token";
+     *      |};
+     * </pre>
+     *
+     * @return {@link TypeDefinitionNode}   Custom `OAuth2PasswordGrantConfig` record with default tokenUrl
+     */
+    public TypeDefinitionNode getOAuth2PasswordGrantConfigRecord() {
+        Token typeName = AbstractNodeFactory.createIdentifierToken(AuthConfigTypes.CUSTOM_PASSWORD.getValue());
+        NodeList<Node> recordFieldList = createNodeList(getPasswordGrantConfigFields());
+        MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Password Grant Configs");
+        RecordTypeDescriptorNode recordTypeDescriptorNode =
+                NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                        createToken(OPEN_BRACE_PIPE_TOKEN), recordFieldList, null,
+                        createToken(CLOSE_BRACE_PIPE_TOKEN));
+        return NodeFactory.createTypeDefinitionNode(configRecordMetadataNode,
+                createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName,
+                recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    /**
+     * Generates fields of `OAuth2PasswordGrantConfig` record with default tokenUrl.
+     *
+     * <pre>
+     *      *http:OAuth2PasswordGrantConfig;
+     *      # Token URL
+     *      string tokenUrl = "https://zoom.us/oauth/token";
+     * </pre>
+     *
+     * @return {@link List<Node>}
+     */
+    private List<Node> getPasswordGrantConfigFields() {
+        List<Node> recordFieldNodes = new ArrayList<>();
+        Token semicolonToken = createToken(SEMICOLON_TOKEN);
+        Token equalToken = createToken(EQUAL_TOKEN);
+
+        recordFieldNodes.add(createIncludedRecordParameterNode(createEmptyNodeList(),
+                createIdentifierToken(ASTERISK_TOKEN.stringValue()),
+                createIdentifierToken("http:OAuth2PasswordGrantConfig;"), null));
+
+        MetadataNode metadataNode = getMetadataNode("Token URL");
+        TypeDescriptorNode stringType = createSimpleNameReferenceNode(createToken(STRING_KEYWORD));
+        IdentifierToken fieldNameTokenUrl = createIdentifierToken("tokenUrl");
+        ExpressionNode defaultValue = createRequiredExpressionNode(createIdentifierToken("\"" +
+                passwordGrantTokenUrl + "\""));
+        RecordFieldWithDefaultValueNode fieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
+                metadataNode, null, stringType, fieldNameTokenUrl, equalToken, defaultValue,
+                semicolonToken);
+        recordFieldNodes.add(fieldNode);
+        return recordFieldNodes;
+    }
+
+    /**
+     * Create `OAuth2RefreshTokenGrantConfig` record with default refreshUrl.
+     *
+     * <pre>
+     *      # OAuth2 Refresh Token Grant Configs
+     *      public type OAuth2RefreshTokenGrantConfig record {|
+     *          *http:OAuth2RefreshTokenGrantConfig;
+     *          # Refresh URL
+     *          string refreshUrl = "https://zoom.us/oauth/token";
+     *      |};
+     * </pre>
+     *
+     * @return {@link TypeDefinitionNode}   Custom `OAuth2RefreshTokenGrantConfig` record with default refreshUrl
+     */
+    public TypeDefinitionNode getOAuth2RefreshTokenGrantConfigRecord() {
+        Token typeName = AbstractNodeFactory.createIdentifierToken(AuthConfigTypes.CUSTOM_REFRESH_TOKEN.getValue());
+        NodeList<Node> recordFieldList = createNodeList(getRefreshTokenGrantConfigFields());
+        MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Refresh Token Grant Configs");
+        RecordTypeDescriptorNode recordTypeDescriptorNode =
+                NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                        createToken(OPEN_BRACE_PIPE_TOKEN), recordFieldList, null,
+                        createToken(CLOSE_BRACE_PIPE_TOKEN));
+        return NodeFactory.createTypeDefinitionNode(configRecordMetadataNode,
+                createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD), typeName,
+                recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+    }
+
+    /**
+     * Generates fields of `OAuth2RefreshTokenGrantConfig` record with default refreshUrl.
+     *
+     * <pre>
+     *      *http:OAuth2RefreshTokenGrantConfig;
+     *      # Refresh URL
+     *      string refreshUrl = "https://zoom.us/oauth/token";
+     * </pre>
+     *
+     * @return {@link List<Node>}
+     */
+    private List<Node> getRefreshTokenGrantConfigFields() {
+        List<Node> recordFieldNodes = new ArrayList<>();
+        Token semicolonToken = createToken(SEMICOLON_TOKEN);
+        Token equalToken = createToken(EQUAL_TOKEN);
+
+        recordFieldNodes.add(createIncludedRecordParameterNode(createEmptyNodeList(),
+                createIdentifierToken(ASTERISK_TOKEN.stringValue()),
+                createIdentifierToken("http:OAuth2RefreshTokenGrantConfig;"), null));
+
+        MetadataNode metadataNode = getMetadataNode("Refresh URL");
+        TypeDescriptorNode stringType = createSimpleNameReferenceNode(createToken(STRING_KEYWORD));
+        IdentifierToken fieldNameTokenUrl = createIdentifierToken("refreshUrl");
+        ExpressionNode defaultValue = createRequiredExpressionNode(createIdentifierToken("\"" +
+                refreshTokenUrl + "\""));
         RecordFieldWithDefaultValueNode fieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
                 metadataNode, null, stringType, fieldNameTokenUrl, equalToken, defaultValue,
                 semicolonToken);
@@ -929,9 +1059,15 @@ public class BallerinaAuthConfigGenerator {
                             authTypes.add(CLIENT_CRED);
                         }
                         if (schemaValue.getFlows().getPassword() != null) {
+                            if (schemaValue.getFlows().getPassword().getTokenUrl() != null) {
+                                passwordGrantTokenUrl = schemaValue.getFlows().getPassword().getTokenUrl();
+                            }
                             authTypes.add(PASSWORD);
                         }
                         if (schemaValue.getFlows().getAuthorizationCode() != null) {
+                            if (schemaValue.getFlows().getAuthorizationCode().getTokenUrl() != null) {
+                                refreshTokenUrl = schemaValue.getFlows().getAuthorizationCode().getTokenUrl();
+                            }
                             authTypes.addAll(Arrays.asList(BEARER, REFRESH_TOKEN));
                         }
                         if (schemaValue.getFlows().getImplicit() != null) {
@@ -1009,10 +1145,18 @@ public class BallerinaAuthConfigGenerator {
                     }
                     break;
                 case PASSWORD:
-                    httpFieldTypeNames.add(AuthConfigTypes.PASSWORD.getValue());
+                    if (passwordGrantTokenUrl != null && !passwordGrantTokenUrl.isBlank()) {
+                        httpFieldTypeNames.add(AuthConfigTypes.CUSTOM_PASSWORD.getValue());
+                    } else {
+                        httpFieldTypeNames.add(AuthConfigTypes.PASSWORD.getValue());
+                    }
                     break;
                 case REFRESH_TOKEN:
-                    httpFieldTypeNames.add(AuthConfigTypes.REFRESH_TOKEN.getValue());
+                    if (refreshTokenUrl != null && !refreshTokenUrl.isBlank()) {
+                        httpFieldTypeNames.add(AuthConfigTypes.CUSTOM_REFRESH_TOKEN.getValue());
+                    } else {
+                        httpFieldTypeNames.add(AuthConfigTypes.REFRESH_TOKEN.getValue());
+                    }
                     break;
                 default:
                     break;
