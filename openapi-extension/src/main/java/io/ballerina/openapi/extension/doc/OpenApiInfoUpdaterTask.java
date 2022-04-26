@@ -177,7 +177,7 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
     }
 
     private AnnotationNode getSchemaStringAnnotation(String openApiDefinition) {
-        String configIdentifierString = Constants.OPEN_API_PACKAGE + SyntaxKind.COLON_TOKEN.stringValue() +
+        String configIdentifierString = Constants.PACKAGE_NAME + SyntaxKind.COLON_TOKEN.stringValue() +
                 Constants.SERVICE_INFO_ANNOTATION_IDENTIFIER;
         IdentifierToken identifierToken = NodeFactory.createIdentifierToken(configIdentifierString);
         Token atToken = NodeFactory.createToken(SyntaxKind.AT_TOKEN);
@@ -205,7 +205,7 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
 
     private boolean isOpenApiInfoAnnotations(AnnotationNode annotationNode) {
         QualifiedNameReferenceNode referenceNode = ((QualifiedNameReferenceNode) annotationNode.annotReference());
-        if (!Constants.OPEN_API_PACKAGE.equals(referenceNode.modulePrefix().text())) {
+        if (!Constants.PACKAGE_NAME.equals(referenceNode.modulePrefix().text())) {
             return false;
         }
         return Constants.SERVICE_INFO_ANNOTATION_IDENTIFIER.equals(referenceNode.identifier().text());

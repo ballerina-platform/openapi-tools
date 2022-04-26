@@ -138,8 +138,10 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         }
         MetadataNode metaData = metadata.get();
         NodeList<AnnotationNode> annotations = metaData.annotations();
+        String serviceInfoAnnotation = String.format("%s:%s",
+                Constants.PACKAGE_NAME, Constants.SERVICE_INFO_ANNOTATION_IDENTIFIER);
         return annotations.stream()
-                .filter(ann -> Constants.SERVICE_INFO_ANNOTATION.equals(ann.annotReference().toString().trim()))
+                .filter(ann -> serviceInfoAnnotation.equals(ann.annotReference().toString().trim()))
                 .findFirst();
     }
 

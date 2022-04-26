@@ -22,20 +22,12 @@ package io.ballerina.openapi.extension;
 public interface Constants {
     // package details related constants
     String PACKAGE_ORG = "ballerina";
-    String PACKAGE_NAME = "http";
-
-    // resource directory structure related constants
-    String TARGET_DIR_NAME = "target";
-    String BIN_DIR_NAME = "bin";
-    String RESOURCES_DIR_NAME = "resources";
-    String RESOURCE_DIR_NAME = "resource";
+    String PACKAGE_NAME = "openapi";
+    String HTTP_PACKAGE_NAME = "http";
 
     // open-api module related constants
-    String SERVICE_INFO_ANNOTATION = "openapi:ServiceInfo";
+    String SERVICE_INFO_ANNOTATION_IDENTIFIER = "ServiceInfo";
     String CONTRACT = "contract";
     String EMBED = "embed";
-
-    String SERVICE_INFO_ANNOTATION_IDENTIFIER = "ServiceInfo";
-    String OPEN_API_PACKAGE = "openapi";
     String OPEN_API_DEFINITION_FIELD = "openApiDefinition";
 }
