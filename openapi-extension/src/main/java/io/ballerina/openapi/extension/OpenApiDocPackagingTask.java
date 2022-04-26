@@ -59,9 +59,9 @@ public class OpenApiDocPackagingTask implements CompilerLifecycleTask<CompilerLi
         }
 
         // if the shared open-api doc context is not found, do not proceed
-        Package currentPackage = compilationContext.currentPackage();
+//        Package currentPackage = compilationContext.currentPackage();
         Optional<OpenApiDocContext> openApiDocContextOpt = getContextHandler()
-                .retrieveContext(currentPackage.packageId(), currentPackage.project().sourceRoot());
+                .retrieveContext(null, null);
         if (openApiDocContextOpt.isEmpty()) {
             return;
         }

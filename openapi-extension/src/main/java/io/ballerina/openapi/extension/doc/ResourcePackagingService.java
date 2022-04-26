@@ -82,7 +82,7 @@ public class ResourcePackagingService {
             }
 
             try (InputStream inputStream = new ByteArrayInputStream(definition.getDefinition().getBytes())) {
-                Path targetFile = resourcesDirectory.resolve(definition.getFileName());
+                Path targetFile = resourcesDirectory.resolve(String.format("%d.json", definition.getServiceId()));
                 outStream.putNextEntry(new ZipEntry(targetFile.toString()));
                 CodegenUtils.copyContent(inputStream, outStream);
                 outStream.closeEntry();

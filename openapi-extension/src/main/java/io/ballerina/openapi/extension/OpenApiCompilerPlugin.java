@@ -26,6 +26,6 @@ public class OpenApiCompilerPlugin extends CompilerPlugin {
     @Override
     public void init(CompilerPluginContext context) {
         context.addCodeAnalyzer(new OpenApiCodeAnalyzer());
-        context.addCompilerLifecycleListener(new OpenApiLifecycleListener());
+        context.addCodeModifier(new OpenApiCodeModifier());
     }
 }

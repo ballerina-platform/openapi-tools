@@ -34,4 +34,8 @@ public interface Constants {
     String SERVICE_INFO_ANNOTATION = "openapi:ServiceInfo";
     String CONTRACT = "contract";
     String EMBED = "embed";
+
+    String SERVICE_INFO_ANNOTATION_IDENTIFIER = "ServiceInfo";
+    String OPEN_API_PACKAGE = "openapi";
+    String OPEN_API_DEFINITION_FIELD = "openApiDefinition";
 }
