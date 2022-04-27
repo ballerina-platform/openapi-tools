@@ -85,6 +85,8 @@ public class RequestBodyValidationTests {
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
 
+    //TODO: union support in request
+    //TODO: Array type mapping
 
-    //TODO: unimplemented requestbody oas->ballerina
+
 }

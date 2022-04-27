@@ -70,6 +70,7 @@ public class ServiceValidator {
     private SyntaxNodeAnalysisContext context;
     private OpenAPI openAPI;
     private Filter filter;
+    private ReturnValidator returnValidator;
 
     public void initialize(SyntaxNodeAnalysisContext context, OpenAPI openAPI, Filter filter) {
         this.context = context;
@@ -211,12 +212,13 @@ public class ServiceValidator {
                     requestBodyValidator.validateBallerinaRequestBody(method, oasOperation);
                 }
                 // Return Type validation
-                ReturnValidator returnValidator = new ReturnValidator(context, openAPI, method.getKey(),
+                returnValidator = new ReturnValidator(context, openAPI, method.getKey(),
                         getNormalizedPath(method.getValue().getPath()));
                 ApiResponses responses = oasOperation.getResponses();
                 ReturnTypeDescriptorNode returnNode = method.getValue().getReturnNode();
                 // If return type doesn't provide in service , then it maps to status code 202.
                 if (returnNode == null) {
+                    returnValidator.addBalStatusCodes("202", null);
                     if (!responses.containsKey("202")) {
                         updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
                                 method.getValue().getLocation(), "202", method.getKey(), path.getKey());
@@ -401,6 +403,10 @@ public class ServiceValidator {
                     RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI);
                     rbValidator.validateOASRequestBody(body, requestBody, oasPath, key, resourceMethod.getLocation());
                 }
+
+                // Response validator
+                returnValidator.validateReturnOASToBallerina(value.getResponses(),
+                        (TypeDescriptorNode) resourceMethod.getReturnNode().type());
             });
         }
     }

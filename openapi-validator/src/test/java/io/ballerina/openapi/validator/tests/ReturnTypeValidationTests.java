@@ -41,10 +41,15 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertTrue(errors.length == 2);
         String undocumentedReturnCode = "ERROR [single_status_code.bal:(8:39,8:46)] Undocumented resource return " +
                 "status code '200' for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
+
+        //Unimplemented return type.
+        String unimplementedReturnCode = "ERROR [single_status_code.bal:(8:39,8:46)] Could not find the implementation" +
+                " for return code '202' in the counterpart Ballerina service resource (method: 'get', path: '/')";
+        Assert.assertEquals(unimplementedReturnCode, errors[1].toString());
     }
 
     @Test(description = "Type mis match media type")
@@ -53,11 +58,18 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertTrue(errors.length == 2);
         String undocumentedReturnCode = "ERROR [single_record_payload_type_mismatch.bal:(14:39,14:47)]" +
                 " Undocumented resource return media type 'text/plain' for the method 'get' of the resource" +
                 " associated with the path '/'.";
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
+
+
+        String unimplementedReturnCode = "ERROR [single_record_payload_type_mismatch.bal:(14:39,14:47)]" +
+                "ERROR [single_record_payload_type_mismatch.bal:(14:39,14:47)] Could not find the implementation " +
+                "for return media type 'application/json' in the counterpart Ballerina service resource (method:" +
+                " 'get', path: '/')";
+        Assert.assertEquals(unimplementedReturnCode, errors[1].toString());
     }
 
     @Test(description = "Status code change in record")
@@ -154,4 +166,37 @@ public class ReturnTypeValidationTests {
                 " '500' for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
+
+    @Test(description = "Unimplemented MediaType")
+    public void unimplementedMediaType() {
+        Path path = RES_DIR.resolve("unimplemented_media_type.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String typeMismatch = "ERROR [unimplemented_media_type.bal:(15:39,15:58)] Could not find the implementation" +
+                " for return media type 'application/xml' in the counterpart Ballerina service " +
+                "resource (method: 'get', path: '/')";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
+
+
+//    @Test(description = "Unimplemented code in OAS to ballerina")
+//    public void singleCodeOas() {
+//        Path path = RES_DIR.resolve("single.bal");
+//        Project project = getProject(path);
+//        DiagnosticResult diagnostic = getCompilation(project);
+//        Object[] errors = getDiagnostics(diagnostic);
+//        Assert.assertTrue(errors.length == 1);
+//        String typeMismatch = "ERROR [nil_error_return.bal:(8:39,8:44)] Undocumented resource return status code" +
+//                " '500' for the method 'get' of the resource associated with the path '/'.";
+//        Assert.assertEquals(typeMismatch, errors[0].toString());
+//    }
+
+
+    @Test(description = "Module level record", enabled = false)
+    public void handleModuleLevelQualifierRecord() {
+        // TODO: res:ResRecord
+    }
+
 }

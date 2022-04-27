@@ -100,5 +100,12 @@ public class RecordValidationTests {
         String undocumentedField = "Couldn't find OpenAPI object schema field 'tag' in 'Pet' the Ballerina record.";
         Assert.assertEquals(undocumentedField, errors[0].toString());
     }
-    //TODO: unimplemented requestbody oas->ballerina
+
+    @Test(description = "Module level record", enabled = false)
+    public void handleModuleLevelQualifierRecord() {
+        // TODO: res:ResRecord
+    }
+
+    //TODO: unimplemented record in ballerina
+    //TODO: undocumented object schema in ballerina
 }

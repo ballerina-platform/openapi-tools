@@ -61,7 +61,11 @@ public enum ErrorMessage {
     ERROR_026("Missing OpenAPI contract request body media type ''{0}'' in the counterpart Ballerina service resource" +
                       " (method: ''{1}'', path: ''{2}'')"),
     ERROR_027("Missing OpenAPI contract request body implementation in the counterpart Ballerina service resource" +
-                      " (method: ''{0}'', path: ''{1}'')");
+                      " (method: ''{0}'', path: ''{1}'')"),
+    ERROR_028("Could not find the implementation for return code ''{0}'' in the counterpart Ballerina service " +
+            "resource (method: ''{1}'', path: ''{2}'')"),
+    ERROR_029("Could not find the implementation for return media type ''{0}'' in the counterpart Ballerina service " +
+            "resource (method: ''{1}'', path: ''{2}'')");
 
     private final String message;
 

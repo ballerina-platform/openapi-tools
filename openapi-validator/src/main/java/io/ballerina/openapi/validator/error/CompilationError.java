@@ -78,6 +78,10 @@ public enum CompilationError {
     UNIMPLEMENTED_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_026, ErrorMessage.ERROR_026,
             DiagnosticSeverity.ERROR),
     UNIMPLEMENTED_REQUEST_BODY(ErrorCode.OPENAPI_VALIDATOR_027, ErrorMessage.ERROR_027,
+            DiagnosticSeverity.ERROR),
+    UNIMPLEMENTED_STATUS_CODE(ErrorCode.OPENAPI_VALIDATOR_028, ErrorMessage.ERROR_028,
+                               DiagnosticSeverity.ERROR),
+    UNIMPLEMENTED_RESPONSE_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_029, ErrorMessage.ERROR_029,
             DiagnosticSeverity.ERROR);
 
 

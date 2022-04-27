@@ -26,7 +26,6 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -36,10 +35,13 @@ import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,12 +61,13 @@ import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
  * This class for validate the return and response types.
  */
 public class ReturnValidator {
-    private SyntaxNodeAnalysisContext context;
-    private OpenAPI openAPI;
-    private String method;
-    private String path;
+    private final SyntaxNodeAnalysisContext context;
+    private final OpenAPI openAPI;
+    private final String method;
+    private final String path;
 
-    private List<String> balStatusCodes = new ArrayList<>();
+    private final Map<String, Node> balStatusCodes = new HashMap<>();
+    private final List<String> balMediaTypes = new ArrayList<>();
 
     public ReturnValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, String method, String path) {
         this.context = context;
@@ -73,11 +76,19 @@ public class ReturnValidator {
         this.path = path;
     }
 
+    public void addBalStatusCodes (String statusCode, Node node) {
+        balStatusCodes.put(statusCode, node);
+    }
+
+
     public void validateReturnBallerinaToOas(TypeDescriptorNode returnNode, ApiResponses responses) {
+        //TODO: handle
         SyntaxKind kind = returnNode.kind();
         if (kind == QUALIFIED_NAME_REFERENCE) {
             QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) returnNode;
             validateQualifiedType(qNode, responses);
+            //TODO: handle module level qualified name ex: `res:ResponseRecord`
+
         } else if (kind == UNION_TYPE_DESC) {
             // A|B|C|D
             UnionTypeDescriptorNode uNode = (UnionTypeDescriptorNode) returnNode;
@@ -120,7 +131,7 @@ public class ReturnValidator {
                             if (code.isEmpty()) {
                                 return;
                             }
-                            balStatusCodes.add(code.get());
+                            balStatusCodes.put(code.get(), simpleRefNode);
                             if (!responses.containsKey(code.get())) {
                                 updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
                                         simpleRefNode.location(), code.get(), method, path);
@@ -131,6 +142,7 @@ public class ReturnValidator {
                                 TypeSymbol bodyFieldType = fields.get("body").typeDescriptor();
                                 TypeDescKind bodyKind = bodyFieldType.typeKind();
                                 String mediaType = getMediaType(bodyKind);
+                                balMediaTypes.add(mediaType);
                                 Content content = apiResponse.getContent();
                                 if (content != null) {
                                     MediaType oasMtype = content.get(mediaType);
@@ -172,6 +184,8 @@ public class ReturnValidator {
                         ApiResponse apiResponse = responses.get("200");
                         Content content = apiResponse.getContent();
                         MediaType oasMtype = content.get("application/json");
+                        balStatusCodes.put("200", simpleRefNode);
+                        balMediaTypes.add("application/json");
 
                         if (oasMtype.getSchema() != null && oasMtype.getSchema().get$ref() != null) {
                             Optional<String> schemaName = extractReferenceType(oasMtype.getSchema().get$ref());
@@ -208,6 +222,7 @@ public class ReturnValidator {
                 SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) reNode;
                 validateSimpleNameReference(simpleRefNode, responses);
             } else if (reNode.kind() == ERROR_TYPE_DESC) {
+                balStatusCodes.put("500", null);
                 if (!responses.containsKey("500")) {
                     updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, uNode.location(), "500",
                             method, path);
@@ -222,7 +237,7 @@ public class ReturnValidator {
         Optional<String> statusCode = generateApiResponseCode(qNode.identifier().toString().trim());
         if (statusCode.isPresent()) {
             String balCode = statusCode.get();
-            balStatusCodes.add(balCode);
+            balStatusCodes.put(balCode, qNode);
             if (!responses.containsKey(balCode)) {
                 // Undocumented status code
                 updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, qNode.location(), balCode,
@@ -241,5 +256,103 @@ public class ReturnValidator {
         } else {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Validate oas -> ballerina
+     * @param responses
+     * @param returnNode
+     */
+    public void validateReturnOASToBallerina(ApiResponses responses, TypeDescriptorNode returnNode) {
+        // code is exist
+        responses.forEach((key, value) -> {
+            if (!balStatusCodes.containsKey(key)) {
+                // Unimplemented status code in swagger operation and get location via bal return node.
+                updateContext(context, CompilationError.UNIMPLEMENTED_STATUS_CODE, returnNode.location(), key,
+                        method, path);
+                return;
+            }
+            Content content = value.getContent();
+            if (content == null) {
+                return;
+            }
+            content.forEach((mediaType, schema) -> {
+                if (balMediaTypes.contains(mediaType)) {
+                    Node node = balStatusCodes.get(key);
+                    if (node == null) {
+                        // This can be null when the return type is not in service, and return type is error.
+                        return;
+                    }
+                    if (schema.getSchema() == null) {
+                        return;
+                    }
+                    ObjectSchema objectSchema = null;
+                    String oasSchema = "Anonymous ObjectSchema";
+                    if (schema.getSchema().get$ref() != null) {
+                        //object schema
+                        Optional<String> schemaName = extractReferenceType(schema.getSchema().get$ref());
+                        if (schemaName.isEmpty()) {
+                            return;
+                        }
+                        oasSchema = schemaName.get();
+                        Schema<?> vschema = openAPI.getComponents().getSchemas().get(schemaName.get());
+                        if (vschema instanceof ObjectSchema) {
+                            objectSchema = (ObjectSchema) vschema;
+                        }
+                    }
+                    if (schema.getSchema() instanceof ObjectSchema) {
+                        objectSchema = (ObjectSchema) schema.getSchema();
+                    }
+                    SyntaxKind kind = node.kind();
+                    if (kind == QUALIFIED_NAME_REFERENCE) {
+                        //TODO: handle module level qualified name ex: `res:ResponseRecord`
+                    } else if (kind == SIMPLE_NAME_REFERENCE) {
+                        SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) node;
+                        Optional<Symbol> symbol = context.semanticModel().symbol(simpleRefNode);
+                        //Access the status code and media type via record
+                        if (symbol.isEmpty()) {
+                            return;
+                        }
+                        if (symbol.get() instanceof TypeReferenceTypeSymbol) {
+                            TypeReferenceTypeSymbol refType = (TypeReferenceTypeSymbol) symbol.get();
+                            TypeSymbol type = refType.typeDescriptor();
+                            if (type instanceof RecordTypeSymbol) {
+                                RecordTypeSymbol typeSymbol = (RecordTypeSymbol) type;
+                                List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
+                                boolean isHttp = false;
+                                if (!typeInclusions.isEmpty()) {
+                                    for (TypeSymbol typeInSymbol : typeInclusions) {
+                                        if (HTTP.equals(
+                                                typeInSymbol.getModule().orElseThrow().getName().orElseThrow())) {
+                                            isHttp = true;
+                                            Map<String, RecordFieldSymbol> fields = typeSymbol.fieldDescriptors();
+                                            TypeSymbol bodyFieldType = fields.get("body").typeDescriptor();
+                                            //TODO inline record both ballerina and schema
+                                            //TODO array type
+                                            TypeValidatorUtils.validateObjectSchema(objectSchema, bodyFieldType,
+                                                    context, openAPI, oasSchema,
+                                                    ((TypeReferenceTypeSymbol) bodyFieldType).definition().getName().
+                                                            orElse("Anonymous Record"));
+                                        }
+                                    }
+                                    if (!isHttp) {
+                                        TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol,
+                                                context, openAPI, oasSchema,
+                                                ((TypeReferenceTypeSymbol) typeSymbol).definition().getName().
+                                                        orElse("Anonymous Record"));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Unimplemented meida type code in swagger operation and get location via bal return node.
+                        updateContext(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
+                                returnNode.location(), mediaType, method, path);
+                    //TODO: array type handle
+                }
+            });
+        });
+        //TODO: array type validation
     }
 }
