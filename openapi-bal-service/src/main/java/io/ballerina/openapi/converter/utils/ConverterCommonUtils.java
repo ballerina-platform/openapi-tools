@@ -77,9 +77,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.converter.Constants.BALLERINA;
 import static io.ballerina.openapi.converter.Constants.HTTP;
@@ -479,24 +481,20 @@ public class ConverterCommonUtils {
             openAPIFileName = serviceName.replaceAll(SLASH, "_");
         }
 
-        return getNormalizeFileName(openAPIFileName) + Constants.OPENAPI_SUFFIX +
+        return getNormalizedFileName(openAPIFileName) + Constants.OPENAPI_SUFFIX +
                 (isJson ? JSON_EXTENSION : YAML_EXTENSION);
     }
 
     /**
      * Remove special characters from the given file name.
      */
-    public static String getNormalizeFileName(String openAPIFileName) {
+    public static String getNormalizedFileName(String openAPIFileName) {
 
         String[] splitNames = openAPIFileName.split("[^a-zA-Z0-9]");
-        StringBuilder normalizeFileName = new StringBuilder();
-        for (String name: splitNames) {
-            if (!name.isBlank()) {
-                normalizeFileName.append(name).append(UNDERSCORE);
-            }
-        }
-        if (normalizeFileName.toString().endsWith(UNDERSCORE)) {
-            return normalizeFileName.deleteCharAt(normalizeFileName.length() - 1).toString();
+        if (splitNames.length > 0) {
+            return Arrays.stream(splitNames)
+                    .filter(namePart -> !namePart.isBlank())
+                    .collect(Collectors.joining(UNDERSCORE));
         }
         return openAPIFileName;
     }

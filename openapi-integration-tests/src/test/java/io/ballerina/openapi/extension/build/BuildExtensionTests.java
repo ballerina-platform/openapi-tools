@@ -59,6 +59,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_2"), buildArgs);
+        this.pause(50);
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("project_2/target/openapi/greeting_openapi.yaml")));
     }
 
@@ -68,6 +69,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_3"), buildArgs);
+        this.pause(50);
         Assert.assertTrue(Files.exists(RESOURCE.resolve("project_3/target/openapi/greeting_openapi.yaml")));
     }
 
@@ -77,6 +79,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_4"), buildArgs);
+        this.pause(50);
         Assert.assertTrue(Files.exists(RESOURCE.resolve("project_4/target/openapi/greeting_openapi.yaml")));
         Assert.assertTrue(Files.exists(RESOURCE.resolve("project_4/target/openapi/mod_openapi.yaml")));
     }
@@ -113,6 +116,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_8"), buildArgs);
+        this.pause(50);
         if (successful.available() == 0) {
             Assert.assertTrue(Files.exists(RESOURCE.resolve("project_8/target/openapi/" +
                     "well_known_smart_configuration_openapi.yaml")));
@@ -125,11 +129,20 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_9"), buildArgs);
+        this.pause(50);
         Assert.assertTrue(Files.exists(RESOURCE.resolve("project_9/target/openapi/ชื่อ_openapi.yaml")));
     }
     private void executeCommand(String resourcePath) throws IOException {
         List<String> buildArgs = new LinkedList<>();
         InputStream successful = executeOpenapiBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve(resourcePath), buildArgs);
+    }
+    // Simulate some processing time by pausing.
+    private void pause(long lPauseInMillisSec) {
+        try {
+            Thread.sleep(lPauseInMillisSec);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }

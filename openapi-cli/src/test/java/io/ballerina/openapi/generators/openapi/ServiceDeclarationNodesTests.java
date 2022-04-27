@@ -48,14 +48,14 @@ public class ServiceDeclarationNodesTests {
     @Test(description = "Multiple services with same absolute path")
     public void multipleServiceWithSameAbsolute() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services.bal");
-        executedMethod(ballerinaFilePath, "multiple_service_01.yaml", "hello_openapi.yaml",
+        executeMethod(ballerinaFilePath, "multiple_service_01.yaml", "hello_openapi.yaml",
                 "hello_");
     }
 
     @Test(description = "Multiple services with absolute path as '/'. ")
     public void multipleServiceWithOutAbsolute() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services_without_base_path.bal");
-        executedMethod(ballerinaFilePath, "multiple_service_02.yaml",
+        executeMethod(ballerinaFilePath, "multiple_service_02.yaml",
                 "multiple_services_without_base_path_openapi.yaml",
                 "multiple_services_without_base_path_");
     }
@@ -63,7 +63,7 @@ public class ServiceDeclarationNodesTests {
     @Test(description = "Multiple services with no absolute path")
     public void multipleServiceNoBasePath() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("multiple_services_no_base_path.bal");
-        executedMethod(ballerinaFilePath, "multiple_service_03.yaml",
+        executeMethod(ballerinaFilePath, "multiple_service_03.yaml",
                 "multiple_services_no_base_path_openapi.yaml",
                 "multiple_services_no_base_path_");
     }
@@ -81,8 +81,8 @@ public class ServiceDeclarationNodesTests {
         return fileNames.length > 0 ? fileNames[0] : null;
     }
 
-    private void executedMethod(Path ballerinaFilePath, String yamlFile, String generatedYamlFile,
-                                 String secondGeneratedFile) throws IOException {
+    private void executeMethod(Path ballerinaFilePath, String yamlFile, String generatedYamlFile,
+                               String secondGeneratedFile) throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("openapi"),

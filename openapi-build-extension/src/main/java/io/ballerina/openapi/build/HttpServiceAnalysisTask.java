@@ -58,7 +58,7 @@ import static io.ballerina.openapi.converter.Constants.YAML_EXTENSION;
 import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractFileName;
 import static io.ballerina.openapi.converter.utils.CodegenUtils.writeFile;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.containErrors;
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getNormalizeFileName;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getNormalizedFileName;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.isHttpService;
 
 /**
@@ -115,7 +115,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
      * @param serviceSymbol symbol for taking the hash code of services
      */
     private String constructFileName(SyntaxTree syntaxTree, Map<Integer, String> services, Symbol serviceSymbol) {
-        String fileName = getNormalizeFileName(services.get(serviceSymbol.hashCode()));
+        String fileName = getNormalizedFileName(services.get(serviceSymbol.hashCode()));
         String balFileName = syntaxTree.filePath().split("\\.")[0];
         if (fileName.equals(SLASH)) {
             return balFileName + OPENAPI_SUFFIX + YAML_EXTENSION;
