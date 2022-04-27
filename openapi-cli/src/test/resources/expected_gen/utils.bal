@@ -131,7 +131,7 @@ isolated function getSerializedArray(string arrayName, anydata[] anyArray, strin
 # + style - Defines how multiple values are delimited
 # + explode - Specifies whether arrays and objects should generate separate parameters
 # + return - Serialized record as a string
-isolated function getSerializedRecordArray(string parent, record {}[] value, string style = FORM, boolean explode = true) returns string{
+isolated function getSerializedRecordArray(string parent, record {}[] value, string style = FORM, boolean explode = true) returns string {
     string[] serializedArray = [];
     if style == DEEPOBJECT {
         int arayIndex = 0;
@@ -155,12 +155,12 @@ isolated function getSerializedRecordArray(string parent, record {}[] value, str
 #
 # + value - Value to be encoded
 # + return - Encoded string
-isolated function getEncodedUri(string value) returns string {
-    string|error encoded = url:encode(value, "UTF8");
+isolated function getEncodedUri(anydata value) returns string {
+    string|error encoded = url:encode(value.toString(), "UTF8");
     if (encoded is string) {
         return encoded;
     } else {
-        return value;
+        return value.toString();
     }
 }
 
@@ -199,4 +199,3 @@ isolated function getPathForQueryParam(map<anydata> queryParam, map<Encoding> en
     string restOfPath = string:'join("", ...param);
     return restOfPath;
 }
-

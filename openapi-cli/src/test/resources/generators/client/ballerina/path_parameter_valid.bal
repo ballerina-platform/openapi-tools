@@ -35,28 +35,28 @@ public isolated client class Client {
     # + id - id value
     # + return - Ok
     remote isolated function operationId03(int id) returns string|error {
-        string resourcePath = string `/v1/${id}`;
+        string resourcePath = string `/v1/${getEncodedUri(id)}`;
         string response = check self.clientEp-> get(resourcePath);
         return response;
     }
     #
     # + return - Ok
     remote isolated function operationId04(int 'version, string name) returns string|error {
-        string resourcePath = string `/v1/${'version}/v2/${name}`;
+        string resourcePath = string `/v1/${getEncodedUri('version)}/v2/${getEncodedUri(name)}`;
         string response = check self.clientEp-> get(resourcePath);
         return response;
     }
     #
     # + return - Ok
     remote isolated function operationId05(int 'version, int 'limit) returns string|error {
-        string resourcePath = string `/v1/${'version}/v2/${'limit}`;
+        string resourcePath = string `/v1/${getEncodedUri('version)}/v2/${getEncodedUri('limit)}`;
         string response = check self.clientEp-> get(resourcePath);
         return response;
     }
     #
     # + return - Ok
     remote isolated function operationId06(int age, string name) returns string|error {
-        string resourcePath = string `/v1/${age}/v2/${name}`;
+        string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
         string response = check self.clientEp-> get(resourcePath);
         return response;
     }
