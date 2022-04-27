@@ -163,8 +163,13 @@ public class TypeGeneratorUtils {
                     if (field.getValue().getDefault() != null) {
                         Token defaultValue;
                         if ((field.getValue().getType()).equals(STRING)) {
-                            defaultValue = AbstractNodeFactory.createIdentifierToken("\"" +
-                                    field.getValue().getDefault().toString() + "\"");
+                            if (field.getValue().getDefault().toString().equals("\"")) {
+                                defaultValue = AbstractNodeFactory.createIdentifierToken("\"" + "\\" +
+                                        field.getValue().getDefault().toString() + "\"");
+                            } else {
+                                defaultValue = AbstractNodeFactory.createIdentifierToken("\"" +
+                                        field.getValue().getDefault().toString() + "\"");
+                            }
                         } else {
                             defaultValue = AbstractNodeFactory.createIdentifierToken
                                     (field.getValue().getDefault().toString());
