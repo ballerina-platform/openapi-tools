@@ -76,6 +76,19 @@ public class TestUtil {
     }
 
     /**
+     * Ballerina build command.
+     */
+    public static boolean executeBuild(String distributionName, Path sourceDirectory,
+                                              List<String> args) throws IOException, InterruptedException {
+        args.add(0, "build");
+        Process process = getProcessBuilderResults(distributionName, sourceDirectory, args);
+        int exitCode = process.waitFor();
+        logOutput(process.getInputStream());
+        logOutput(process.getErrorStream());
+        return exitCode == 0;
+    }
+
+    /**
      * Execute ballerina openapi command.
      *
      * @param distributionName The name of the distribution.
