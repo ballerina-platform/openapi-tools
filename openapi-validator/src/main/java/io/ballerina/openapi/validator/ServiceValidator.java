@@ -56,6 +56,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static io.ballerina.openapi.validator.Constants.ARRAY;
 import static io.ballerina.openapi.validator.Constants.DOUBLE;
 import static io.ballerina.openapi.validator.Constants.FLOAT;
+import static io.ballerina.openapi.validator.Constants.HEADER_NAME;
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
 import static io.ballerina.openapi.validator.Constants.NUMBER;
 import static io.ballerina.openapi.validator.TypeValidatorUtils.convertBallerinaType;
@@ -268,7 +269,7 @@ public class ServiceValidator {
                 annotations = defaultParam.annotations();
             }
             if (!annotations.isEmpty()) {
-                List<String> headers = extractAnnotationFieldDetails(HTTP_HEADER, "name", annotations,
+                List<String> headers = extractAnnotationFieldDetails(HTTP_HEADER, HEADER_NAME, annotations,
                         context.semanticModel());
                 if (!headers.isEmpty()) {
                     headerName = headers.get(0);
@@ -282,11 +283,30 @@ public class ServiceValidator {
                     }
                     if (headerName.equals(oasParameter.getName())) {
                         isHeaderDocumented = true;
-                        Optional<String> type =
-                                convertOpenAPITypeToBallerina(oasParameter.getSchema().getType());
+                        String headerType = oasParameter.getSchema().getType();
+                        headerType = getNumberFormatType(oasParameter, headerType);
+                        //Array type
+                        if (oasParameter.getSchema() instanceof ArraySchema) {
+                            ArraySchema arraySchema = (ArraySchema) oasParameter.getSchema();
+                            String items = arraySchema.getItems().getType();
+                            Optional<String> arrayItemType = convertOpenAPITypeToBallerina(items);
+
+                            //Array mapping
+                            if (arrayItemType.isEmpty() || !ballerinaType.equals(arrayItemType.get() + "[]")) {
+                                // This special concatenation is used to check the array header parameters
+                                updateContext(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
+                                        headerNode.location(), ballerinaType, items + "[]",
+                                        headerName, method.getKey(),
+                                        getNormalizedPath(method.getValue().getPath()));
+                                break;
+                            }
+
+                        }
+
+                        Optional<String> type = convertOpenAPITypeToBallerina(headerType);
                         if (type.isEmpty() || !ballerinaType.equals(type.get())) {
                             updateContext(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
-                                    headerNode.location(), ballerinaType, oasParameter.getSchema().getType(),
+                                    headerNode.location(), ballerinaType, headerType,
                                     headerName, method.getKey(),
                                     getNormalizedPath(method.getValue().getPath()));
                             break;
@@ -301,6 +321,17 @@ public class ServiceValidator {
                         headerName, method.getKey(), getNormalizedPath(method.getValue().getPath()));
             }
         }
+    }
+
+    private String getNumberFormatType(Parameter oasParameter, String headerType) {
+        if (headerType.equals(NUMBER)) {
+            headerType = DOUBLE;
+            if (oasParameter.getSchema().getFormat() != null &&
+                    oasParameter.getSchema().getFormat().equals(FLOAT)) {
+                headerType = FLOAT;
+            }
+        }
+        return headerType;
     }
 
     /**
@@ -337,13 +368,7 @@ public class ServiceValidator {
                     }
                     isExist = true;
                     String oasType = oasParameter.getSchema().getType();
-                    if (oasType.equals(NUMBER)) {
-                        oasType = DOUBLE;
-                        if (oasParameter.getSchema().getFormat() != null &&
-                                oasParameter.getSchema().getFormat().equals(FLOAT)) {
-                            oasType = FLOAT;
-                        }
-                    }
+                    oasType = getNumberFormatType(oasParameter, oasType);
 
                     if (oasType.equals(ARRAY)) {
                         ArraySchema schema = (ArraySchema) oasParameter.getSchema();

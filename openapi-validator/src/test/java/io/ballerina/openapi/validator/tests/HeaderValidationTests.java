@@ -62,4 +62,17 @@ public class HeaderValidationTests {
                 " 'x-offset' in the counterpart Ballerina service resource (method: 'get', path: '/pets')";
         Assert.assertEquals(typeMismatchError, errors[0].toString());
     }
+
+    @Test(description = "Header has array types")
+    public void headerArrays() {
+        Path path = RES_DIR.resolve("array_header.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        // unimplemented header
+        String typeMismatchError = "ERROR [oas_header.bal:(8:5,10:6)] Missing OpenAPI contract header" +
+                " 'x-offset' in the counterpart Ballerina service resource (method: 'get', path: '/pets')";
+        Assert.assertEquals(typeMismatchError, errors[0].toString());
+    }
 }

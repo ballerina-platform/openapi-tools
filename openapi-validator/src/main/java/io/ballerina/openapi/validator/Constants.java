@@ -68,6 +68,7 @@ public class Constants {
     public static final String FLOAT = "float";
     public static final String DEFAULT = "default";
     public static final String DOUBLE = "double";
+    public static final String HEADER_NAME = "name";
     public static final String WILD_CARD_CONTENT_KEY = "*/*";
     public static final String WILD_CARD_SUMMARY = "Any type of entity body";
 
