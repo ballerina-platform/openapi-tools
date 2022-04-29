@@ -37,6 +37,8 @@ import io.ballerina.openapi.validator.model.ResourcePathSummary;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -46,11 +48,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.ballerina.openapi.validator.Constants.ARRAY;
+import static io.ballerina.openapi.validator.Constants.DOUBLE;
+import static io.ballerina.openapi.validator.Constants.FLOAT;
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
+import static io.ballerina.openapi.validator.Constants.NUMBER;
 import static io.ballerina.openapi.validator.TypeValidatorUtils.convertBallerinaType;
 import static io.ballerina.openapi.validator.TypeValidatorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.validator.ValidatorUtils.extractAnnotationFieldDetails;
@@ -329,10 +336,34 @@ public class ServiceValidator {
                         continue;
                     }
                     isExist = true;
-                    Optional<String> type = convertOpenAPITypeToBallerina(oasParameter.getSchema().getType());
-                    if (type.isEmpty() || !ballerinaType.equals(type.get())) {
+                    String oasType = oasParameter.getSchema().getType();
+                    if (oasType.equals(NUMBER)) {
+                        oasType = DOUBLE;
+                        if (oasParameter.getSchema().getFormat() != null &&
+                                oasParameter.getSchema().getFormat().equals(FLOAT)) {
+                            oasType = FLOAT;
+                        }
+                    }
+
+                    if (oasType.equals(ARRAY)) {
+                        ArraySchema schema = (ArraySchema) oasParameter.getSchema();
+                        oasType = schema.getItems().getType();
+                    }
+                    Optional<String> type = convertOpenAPITypeToBallerina(oasType);
+
+                    //TODO: map<json> type matching
+                    //Array mapping
+                    if (type.isEmpty() || !ballerinaType.equals(type.get() + "[]")) {
+                        // This special concatenation is used to check the array query parameters
                         updateContext(context, CompilationError.TYPE_MISMATCH_PARAMETER,
-                                parameter.getValue().location(), ballerinaType, oasParameter.getSchema().getType(),
+                                parameter.getValue().location(), ballerinaType, oasType + "[]",
+                                parameterName, method.getKey(), method.getValue().getPath());
+                        break;
+                    }
+                    if (!Objects.equals(ballerinaType, type.get())) {
+                        // This special concatenation is used to check the array query parameters
+                        updateContext(context, CompilationError.TYPE_MISMATCH_PARAMETER,
+                                parameter.getValue().location(), ballerinaType, oasType,
                                 parameterName, method.getKey(), method.getValue().getPath());
                         break;
                     }

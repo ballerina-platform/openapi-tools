@@ -65,4 +65,40 @@ public class QueryParameterValidationTests {
                 "the counterpart Ballerina service resource (method: 'get', path: '/pets')";
         Assert.assertEquals(message, errors[0].toString());
     }
+
+    @Test(description = "Query parameter with float, decimal type")
+    public void floatDecimalType() {
+        Path path = RES_DIR.resolve("decimal_query_parameter.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String message = "ERROR [decimal_query_parameter.bal:(8:32,8:44)] Implementation type does not match with" +
+                " OAS contract type (expected 'float',found 'double') for the parameter 'offset' in" +
+                " http method 'get' that associated with the path '/pets'.";
+        Assert.assertEquals(message, errors[0].toString());
+    }
+
+    @Test(description = "Query parameter with int array type")
+    public void queryArrayType() {
+        Path path = RES_DIR.resolve("array_query_parameter.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String message = "ERROR [array_query_parameter.bal:(8:32,8:44)] Implementation type does not match" +
+                " with OAS contract type (expected 'int[]',found 'string[]') for the parameter 'offset' in http" +
+                " method 'get' that associated with the path '/pets'.";
+        Assert.assertEquals(message, errors[0].toString());
+    }
+
+    @Test(description = "Map<json> type validation in ballerina" , enabled = false)
+    public void mapJsonType() {
+        //TODO
+    }
+
+    @Test(description = "Nullable type validation in ballerina" , enabled = false)
+    public void nullable() {
+        //TODO
+    }
 }

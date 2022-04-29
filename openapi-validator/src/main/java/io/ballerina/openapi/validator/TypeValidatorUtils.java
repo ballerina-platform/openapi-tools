@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static io.ballerina.openapi.validator.Constants.ARRAY_BRACKETS;
 import static io.ballerina.openapi.validator.Constants.BOOLEAN;
 import static io.ballerina.openapi.validator.Constants.DECIMAL;
+import static io.ballerina.openapi.validator.Constants.DOUBLE;
 import static io.ballerina.openapi.validator.Constants.FLOAT;
 import static io.ballerina.openapi.validator.Constants.INT;
 import static io.ballerina.openapi.validator.Constants.NUMBER;
@@ -84,7 +85,16 @@ public class TypeValidatorUtils {
                     if (field.getKey().trim().equals(property.getKey().trim())) {
                         isFieldExist = true;
                         String fieldType = field.getValue().typeDescriptor().signature();
-                        Optional<String> oasType = convertOpenAPITypeToBallerina(property.getValue().getType());
+
+                        String oas = property.getValue().getType();
+                        if (oas.equals(NUMBER)) {
+                            oas = DOUBLE;
+                            if (property.getValue().getFormat() != null &&
+                                    property.getValue().getFormat().equals(FLOAT)) {
+                                oas = FLOAT;
+                            }
+                        }
+                        Optional<String> oasType = convertOpenAPITypeToBallerina(oas);
                         if (property.getValue() instanceof ArraySchema) {
                             validateArrayTypeMismatch(balRecord, context, field, property);
                         } else if (property.getValue().get$ref() != null) {
@@ -98,7 +108,7 @@ public class TypeValidatorUtils {
                             // type mismatch field
                             updateContext(context, CompilationError.TYPE_MISMATCH_FIELD,
                                     field.getValue().getLocation().orElse(null), fieldType,
-                                    property.getValue().getType(), field.getKey(), balRecord);
+                                    oas, field.getKey(), balRecord);
                         }
                         break;
                     }
@@ -191,7 +201,7 @@ public class TypeValidatorUtils {
                 return Optional.of(ARRAY_BRACKETS);
             case Constants.OBJECT:
                 return Optional.of(RECORD);
-            case DECIMAL:
+            case DOUBLE:
             case NUMBER:
                 return Optional.of(DECIMAL);
             case FLOAT:
