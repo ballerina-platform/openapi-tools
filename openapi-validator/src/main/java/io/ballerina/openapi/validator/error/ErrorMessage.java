@@ -51,7 +51,7 @@ public enum ErrorMessage {
     ERROR_021("Request body for the method ''{0}'' of the resource associated with the path" +
             " ''{2}'' is not documented in the OpenAPI contract."),
     ERROR_022("Implementation payload type does not match with OAS contract content type (expected ''{0}'',found " +
-            "''{1}'') for the ''{2}'' in http method ''{3}'' that associated with the path ''{4}''."),
+            "''{1}'') for the http method ''{2}'' that associated with the path ''{3}''."),
     ERROR_023("Undocumented resource return status code ''{0}'' for the method ''{1}'' of the resource " +
             "associated with the path ''{2}''."),
     ERROR_024("Undocumented resource return media type ''{0}'' for the method ''{1}'' of the resource " +

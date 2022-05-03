@@ -100,7 +100,7 @@ public class ServiceValidator {
             }
         }
         // 3. Summaries the resource functions
-        Map<String, ResourcePathSummary> resourcePathMap = summarizeResources(resourceFunctions);
+        Map<String, ResourcePathSummary> resourcePathMap = summarizeResources(resourceFunctions, context);
 
         // 4. Unimplemented resource in service file
         List<OpenAPIPathSummary> updatedOASPaths = unimplementedResourceFunction(openAPIPathSummaries,
@@ -221,7 +221,7 @@ public class ServiceValidator {
                 }
                 // Return Type validation
                 returnValidator = new ReturnValidator(context, openAPI, method.getKey(),
-                        getNormalizedPath(method.getValue().getPath()));
+                        getNormalizedPath(method.getValue().getPath()), method.getValue().getLocation());
                 ApiResponses responses = oasOperation.getResponses();
                 ReturnTypeDescriptorNode returnNode = method.getValue().getReturnNode();
                 // If return type doesn't provide in service , then it maps to status code 202.
@@ -461,8 +461,7 @@ public class ServiceValidator {
                 }
 
                 // Response validator
-                returnValidator.validateReturnOASToBallerina(value.getResponses(),
-                        (TypeDescriptorNode) resourceMethod.getReturnNode().type());
+                returnValidator.validateReturnOASToBallerina(value.getResponses());
             });
         }
     }

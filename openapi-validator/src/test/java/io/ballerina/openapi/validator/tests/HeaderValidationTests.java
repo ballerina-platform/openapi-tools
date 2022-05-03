@@ -69,10 +69,20 @@ public class HeaderValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertTrue(errors.length == 2);
         // unimplemented header
-        String typeMismatchError = "ERROR [oas_header.bal:(8:5,10:6)] Missing OpenAPI contract header" +
-                " 'x-offset' in the counterpart Ballerina service resource (method: 'get', path: '/pets')";
+        String typeMismatchError = "ERROR [array_header.bal:(8:32,8:63)] Implementation type does not match with " +
+                "OAS contract type (expected 'string[]',found 'integer[]') for the header 'x-offset' in http" +
+                " method 'get' that associated with the path '/pets'.";
+        String typeMismatch02 = "ERROR [array_header.bal:(10:34,10:78)] Implementation type does not match with OAS " +
+                "contract type (expected 'string',found 'integer[]') for the header 'x-offset' in http method 'get'" +
+                " that associated with the path '/pets02'.";
         Assert.assertEquals(typeMismatchError, errors[0].toString());
+        Assert.assertEquals(typeMismatch02, errors[1].toString());
+    }
+
+    @Test(description = "Header with record", enabled = false)
+    public void recordHeader() {
+        //TODO
     }
 }

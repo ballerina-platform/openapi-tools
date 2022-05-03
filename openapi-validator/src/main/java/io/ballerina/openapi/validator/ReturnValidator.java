@@ -32,6 +32,7 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -69,11 +70,14 @@ public class ReturnValidator {
     private final Map<String, Node> balStatusCodes = new HashMap<>();
     private final List<String> balMediaTypes = new ArrayList<>();
 
-    public ReturnValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, String method, String path) {
+    private final Location location;
+
+    public ReturnValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, String method, String path, Location location) {
         this.context = context;
         this.openAPI = openAPI;
         this.method = method;
         this.path = path;
+        this.location = location;
     }
 
     public void addBalStatusCodes (String statusCode, Node node) {
@@ -263,12 +267,12 @@ public class ReturnValidator {
      * @param responses
      * @param returnNode
      */
-    public void validateReturnOASToBallerina(ApiResponses responses, TypeDescriptorNode returnNode) {
+    public void validateReturnOASToBallerina(ApiResponses responses) {
         // code is exist
         responses.forEach((key, value) -> {
             if (!balStatusCodes.containsKey(key)) {
                 // Unimplemented status code in swagger operation and get location via bal return node.
-                updateContext(context, CompilationError.UNIMPLEMENTED_STATUS_CODE, returnNode.location(), key,
+                updateContext(context, CompilationError.UNIMPLEMENTED_STATUS_CODE, location, key,
                         method, path);
                 return;
             }
@@ -348,7 +352,8 @@ public class ReturnValidator {
                 } else {
                     // Unimplemented meida type code in swagger operation and get location via bal return node.
                         updateContext(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
-                                returnNode.location(), mediaType, method, path);
+                                location, mediaType, method, path);
+                        return;
                     //TODO: array type handle
                 }
             });

@@ -30,7 +30,7 @@ import static io.ballerina.openapi.validator.tests.ValidatorTest.getDiagnostics;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
 /**
- * This test class use for cover the query parameter tests.
+ * This test class use for cover the Request body in resources functions.
  */
 public class RequestBodyValidationTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/request-body")
@@ -54,9 +54,9 @@ public class RequestBodyValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        String undocumentedRB = "Implementation payload type does not match with OAS contract content type (expected" +
-                " 'application/json',found '[text/plain]') for the 'payload' in http method 'post' that associated " +
-                "with the path '/pets'.";
+        String undocumentedRB = "ERROR [type_mismatch_request_body.bal:(8:32,8:58)] Implementation payload type does" +
+                " not match with OAS contract content type (expected 'application/json',found '[text/plain]') for" +
+                " the http method 'post' that associated with the path '/pet'.";
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
 
@@ -80,13 +80,36 @@ public class RequestBodyValidationTests {
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
         String undocumentedRB = "ERROR [mis_mediatype_oas_request_body.bal:(8:33,8:59)] Missing OpenAPI contract" +
-                " request body media type 'text/plain' in the counterpart Ballerina service resource (method:" +
-                " 'post', path: '/pets')";
+                " request body media type '[text/plain]' in the counterpart Ballerina service resource" +
+                " (method: 'post', path: '/pets')";
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
 
     //TODO: union support in request
     //TODO: Array type mapping
+    @Test(description = "Request body array type validation")
+    public void arrayTypeValidation() {
+        Path path = RES_DIR.resolve("array_request_body.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String undocumentedRB = "ERROR [array_request_body.bal:(5:9,5:11)] Implementation type does" +
+                " not match with OAS contract type (expected 'int', found 'string') for the field 'id' of type 'Pet'";
+        Assert.assertEquals(undocumentedRB, errors[0].toString());
+    }
 
+    @Test(description = "Unimplemented request body array type validation")
+    public void arrayTypeMisMatchValidation() {
+        Path path = RES_DIR.resolve("array_request_body_02.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String undocumentedRB = "ERROR [array_request_body_02.bal:(14:33,14:58)] Implementation payload" +
+                " type does not match with OAS contract content type (expected 'Pet ',found 'Pet[]') " +
+                "for the http method 'post' that associated with the path '/pets'.";
+        Assert.assertEquals(undocumentedRB, errors[0].toString());
+    }
 
 }

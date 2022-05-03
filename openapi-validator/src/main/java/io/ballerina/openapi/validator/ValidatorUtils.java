@@ -81,7 +81,9 @@ import static io.ballerina.openapi.validator.Constants.BOOLEAN;
 import static io.ballerina.openapi.validator.Constants.DECIMAL;
 import static io.ballerina.openapi.validator.Constants.FLOAT;
 import static io.ballerina.openapi.validator.Constants.FULL_STOP;
+import static io.ballerina.openapi.validator.Constants.HEADER_NAME;
 import static io.ballerina.openapi.validator.Constants.HTTP;
+import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
 import static io.ballerina.openapi.validator.Constants.INT;
 import static io.ballerina.openapi.validator.Constants.JSON;
 import static io.ballerina.openapi.validator.Constants.NUMBER;
@@ -297,7 +299,8 @@ public class ValidatorUtils {
      * @param functions         documented functions
      * @return List of ResourcePathSummary
      */
-    public static Map<String, ResourcePathSummary> summarizeResources(List<FunctionDefinitionNode> functions) {
+    public static Map<String, ResourcePathSummary> summarizeResources(List<FunctionDefinitionNode> functions,
+                                                                      SyntaxNodeAnalysisContext context) {
         // Iterate resources available in a service and extract details to be validated.
         Map<String, ResourcePathSummary> resourceSummaryList = new HashMap<>();
         for (FunctionDefinitionNode resourceNode: functions) {
@@ -305,10 +308,10 @@ public class ValidatorUtils {
             Map<String, Node> parameterNodeMap = new HashMap<>();
             String path = generatePath(relativeResourcePathNodes, parameterNodeMap);
             if (resourceSummaryList.containsKey(path)) {
-                extractResourceMethodDetails(resourceNode, path, resourceSummaryList.get(path), parameterNodeMap);
+                extractResourceMethodDetails(resourceNode, path, resourceSummaryList.get(path), parameterNodeMap, context);
             } else {
                 ResourcePathSummary resourcePathSummary = new ResourcePathSummary(path);
-                extractResourceMethodDetails(resourceNode, path, resourcePathSummary, parameterNodeMap);
+                extractResourceMethodDetails(resourceNode, path, resourcePathSummary, parameterNodeMap, context);
                 resourceSummaryList.put(path, resourcePathSummary);
             }
         }
@@ -346,7 +349,9 @@ public class ValidatorUtils {
      * @param resourcePath {@link ResourcePathSummary} that collection of resource method for specific path.
      */
     private static void extractResourceMethodDetails(FunctionDefinitionNode resourceNode, String path,
-                                                     ResourcePathSummary resourcePath, Map<String, Node> parameterNodes) {
+                                                     ResourcePathSummary resourcePath,
+                                                     Map<String, Node> parameterNodes,
+                                                     SyntaxNodeAnalysisContext context) {
 
         FunctionSignatureNode signatureNode = resourceNode.functionSignature();
         String httpMethod = resourceNode.functionName().text().trim();
@@ -366,7 +371,13 @@ public class ValidatorUtils {
                 // Set payloads and headers
                 for (AnnotationNode annotation : annotations) {
                     if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
-                        headers.put(requiredParamNode.paramName().orElseThrow().text(), requiredParamNode);
+                        List<String> annotationHeaders = extractAnnotationFieldDetails(HTTP_HEADER, HEADER_NAME,
+                                annotations, context.semanticModel());
+                        String headerName = unescapeIdentifier(requiredParamNode.paramName().orElseThrow().text());
+                        if (!annotationHeaders.isEmpty()) {
+                            headerName = annotationHeaders.get(0);
+                        }
+                        headers.put(headerName, requiredParamNode);
                     } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
                         resourceMethodBuilder.body(requiredParamNode);
                     }
@@ -463,6 +474,13 @@ public class ValidatorUtils {
             case MAP_TYPE_DESC:
             case SIMPLE_NAME_REFERENCE:
             case RECORD_TYPE_DESC:
+            case INT_TYPE_DESC:
+            case BOOLEAN_TYPE_DESC:
+            case ARRAY_TYPE_DESC:
+            case TABLE_TYPE_DESC:
+            case DECIMAL_TYPE_DESC:
+            case BYTE_TYPE_DESC:
+            case FLOAT_KEYWORD:
             case JSON_TYPE_DESC:
                 mediaType = "application/json";
                 break;
