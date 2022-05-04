@@ -25,7 +25,6 @@ import io.ballerina.projects.plugins.CompilerPluginContext;
 public class OpenApiCompilerPlugin extends CompilerPlugin {
     @Override
     public void init(CompilerPluginContext context) {
-        context.addCodeAnalyzer(new OpenApiCodeAnalyzer());
         context.addCodeModifier(new OpenApiCodeModifier());
     }
 }
