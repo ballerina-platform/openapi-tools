@@ -38,7 +38,7 @@ public isolated client class Client {
     # + petId - The id of the pet to retrieve
     # + return - Expected response to a valid request
     remote isolated function showPetById(string petId) returns Pets|error {
-        string resourcePath = string `/pets/${petId}`;
+        string resourcePath = string `/pets/${getEncodedUri(petId)}`;
         Pets response = check self.clientEp-> get(resourcePath);
         return response;
     }
@@ -47,7 +47,7 @@ public isolated client class Client {
     # + dogId - The id of the pet to retrieve
     # + return - Expected response to a valid request
     remote isolated function getDogs(string dogId) returns Dog|error {
-        string resourcePath = string `/pets/dogs/${dogId}`;
+        string resourcePath = string `/pets/dogs/${getEncodedUri(dogId)}`;
         Dog response = check self.clientEp-> get(resourcePath);
         return response;
     }

@@ -20,12 +20,12 @@ public isolated client class Client {
         return response;
     }
     remote isolated function getPetId(string petId) returns http:Response | error {
-        string resourcePath = string `/pets/${petId}`;
+        string resourcePath = string `/pets/${getEncodedUri(petId)}`;
         http:Response  response = check self.clientEp->get(resourcePath);
         return response;
     }
     remote isolated function  ImageByimageId(int petId, string imageId) returns http:Response | error {
-        string resourcePath = string `/pets/${petId}/Image/${imageId}`;
+        string resourcePath = string `/pets/${getEncodedUri(petId)}/Image/${getEncodedUri(imageId)}`;
         http:Response  response = check self.clientEp->get(resourcePath);
         return response;
     }
