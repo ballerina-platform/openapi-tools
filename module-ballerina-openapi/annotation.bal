@@ -24,7 +24,6 @@
 # + embed - Enable auto-inject of OpenAPI documentation to current service
 # + title - Title for generated OpenAPI contract
 # + version - Version for generated OpenAPI contract
-# + openApiDefinition - The generated OpenAPI definition for the HTTP service. This is auto-generated at compile-time.
 public type ServiceInformation record {|
     string contract = "";
     string[]? tags = [];
@@ -35,7 +34,6 @@ public type ServiceInformation record {|
     boolean embed = true;
     string title?;
     string 'version?;
-    readonly byte[] openApiDefinition = [];
 |};
 
 # Annotation for additional OpenAPI information of a Ballerina service.

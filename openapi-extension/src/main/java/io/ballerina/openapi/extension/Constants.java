@@ -26,6 +26,7 @@ public interface Constants {
     String HTTP_PACKAGE_NAME = "http";
 
     // open-api module related constants
+    String SERVICE_CONFIG_ANNOTATION_IDENTIFIER = "ServiceConfig";
     String SERVICE_INFO_ANNOTATION_IDENTIFIER = "ServiceInfo";
     String CONTRACT = "contract";
     String EMBED = "embed";
