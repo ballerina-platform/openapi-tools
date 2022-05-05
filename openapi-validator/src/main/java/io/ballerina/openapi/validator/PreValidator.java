@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package io.ballerina.openapi.validator;
 
 import io.ballerina.compiler.api.SemanticModel;
@@ -48,6 +65,9 @@ import static io.ballerina.openapi.validator.error.CompilationError.EMPTY_CONTRA
 import static io.ballerina.openapi.validator.error.CompilationError.NON_HTTP_SERVICE;
 import static io.ballerina.openapi.validator.error.CompilationError.UNEXPECTED_EXCEPTIONS;
 
+/**
+ * This PreValidator class contain validation for given service is valid http service and summaries all the resources.
+ */
 public class PreValidator {
     private SyntaxNodeAnalysisContext context;
     private OpenAPI openAPI;
@@ -63,6 +83,7 @@ public class PreValidator {
 
     public void initialize(SyntaxNodeAnalysisContext context) {
         this.context = context;
+        this.openAPI = null;
     }
 
     public void preValidation() {
@@ -127,32 +148,39 @@ public class PreValidator {
                     }
                     Node fieldName = specificField.fieldName();
                     String attributeName = ((Token) fieldName).text();
-                    switch (attributeName) {
-                        case ATTRIBUTE_CONTRACT_PATH:
-                            Path openAPIPath = Paths.get(expression.toString().replaceAll("\"",
-                                    "").trim());
-                            this.openAPI = getOpenAPIContract(ballerinaFilePath, location, openAPIPath);
-                            if (openAPI != null) {
-                                validatorEnable = true;
-                            }
-                            break;
-                        case ATTRIBUTE_FAIL_ON_ERRORS:
-                            filterBuilder.kind(DiagnosticSeverity.WARNING);
-                            break;
-                        case Constants.ATTRIBUTE_TAGS:
-                            filterBuilder.tag(values);
-                            break;
-                        case ATTRIBUTE_OPERATIONS:
-                            filterBuilder.operation(values);
-                            break;
-                        case ATTRIBUTE_EXCLUDE_TAGS:
-                            filterBuilder.excludeTag(values);
-                            break;
-                        case ATTRIBUTE_EXCLUDE_OPERATIONS:
-                            filterBuilder.excludeOperation(values);
-                            break;
-                        default:
-                            break;
+                    if (attributeName.equals(ATTRIBUTE_CONTRACT_PATH) || attributeName.equals(ATTRIBUTE_FAIL_ON_ERRORS)
+                            || !values.isEmpty()) {
+                        switch (attributeName) {
+                            case ATTRIBUTE_CONTRACT_PATH:
+                                Path openAPIPath = Paths.get(expression.toString().replaceAll("\"",
+                                        "").trim());
+                                this.openAPI = getOpenAPIContract(ballerinaFilePath, location, openAPIPath);
+                                if (openAPI != null) {
+                                    validatorEnable = true;
+                                }
+                                break;
+                            case ATTRIBUTE_FAIL_ON_ERRORS:
+                                if (expression.toString().contains("true")) {
+                                    filterBuilder.kind(DiagnosticSeverity.ERROR);
+                                } else {
+                                    filterBuilder.kind(DiagnosticSeverity.WARNING);
+                                }
+                                break;
+                            case Constants.ATTRIBUTE_TAGS:
+                                filterBuilder.tag(values);
+                                break;
+                            case ATTRIBUTE_OPERATIONS:
+                                filterBuilder.operation(values);
+                                break;
+                            case ATTRIBUTE_EXCLUDE_TAGS:
+                                filterBuilder.excludeTag(values);
+                                break;
+                            case ATTRIBUTE_EXCLUDE_OPERATIONS:
+                                filterBuilder.excludeOperation(values);
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
                 this.filter = filterBuilder.build();
@@ -165,11 +193,12 @@ public class PreValidator {
     }
 
     private SeparatedNodeList<MappingFieldNode> extractAnnotationAttributeList(ServiceDeclarationNode serviceNode,
-                                                                               Location location, AnnotationNode annotation) {
+                                                                               Location location,
+                                                                               AnnotationNode annotation) {
         // Test given service is http service, if not this will return WARNING and execute the ballerina
         // file.
         if (!isHttpService(serviceNode, context.semanticModel())) {
-            updateContext(context, NON_HTTP_SERVICE, location);
+            updateContext(context, NON_HTTP_SERVICE, location, DiagnosticSeverity.WARNING);
             return null;
         }
         Optional<MappingConstructorExpressionNode> mappingNode = annotation.annotValue();
@@ -197,7 +226,7 @@ public class PreValidator {
         Path relativePath = null;
         try {
             if (openAPIPath.toString().isBlank()) {
-                updateContext(context, EMPTY_CONTRACT_PATH, location);
+                updateContext(context, EMPTY_CONTRACT_PATH, location, DiagnosticSeverity.WARNING);
             } else if (Paths.get(openAPIPath.toString()).isAbsolute()) {
                 relativePath = Paths.get(openAPIPath.toString());
             } else {
@@ -210,7 +239,7 @@ public class PreValidator {
                 return parseOpenAPIFile(context, relativePath.toString(), location);
             }
         } catch (IOException e) {
-            updateContext(context, UNEXPECTED_EXCEPTIONS, location, e.getMessage());
+            updateContext(context, UNEXPECTED_EXCEPTIONS, location, DiagnosticSeverity.ERROR, e.getMessage());
         }
         return null;
     }
@@ -221,7 +250,7 @@ public class PreValidator {
         List<String> values = new ArrayList<>();
         while (iterator.hasNext()) {
             Node item = iterator.next();
-            if (item.kind() == SyntaxKind.STRING_LITERAL) {
+            if (item.kind() == SyntaxKind.STRING_LITERAL && !item.toString().isBlank()) {
                 Token stringItem = ((BasicLiteralNode) item).literalToken();
                 String text = stringItem.text();
                 // Here we need to do some preprocessing by removing '"' from the given values.

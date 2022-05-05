@@ -106,10 +106,9 @@ public class RequestBodyValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        String undocumentedRB = "ERROR [array_request_body_02.bal:(14:33,14:58)] Implementation payload" +
-                " type does not match with OAS contract content type (expected 'Pet ',found 'Pet[]') " +
-                "for the http method 'post' that associated with the path '/pets'.";
+        String undocumentedRB = "ERROR [array_request_body_02.bal:(14:33,14:58)] Implementation payload type" +
+                " does not match with OAS contract content type (expected 'Pet',found 'Pet[]') for the http method " +
+                "'post' that associated with the path '/pets'.";
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
-
 }

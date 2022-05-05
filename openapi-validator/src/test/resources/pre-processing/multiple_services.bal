@@ -9,7 +9,7 @@ type User record {
 listener http:Listener ep = new(9090);
 
 @openapi:ServiceInfo {
-    contract: "openapi.yaml",
+    contract: "multiple_services.yaml",
     tags: [],
     operations: [],
     failOnErrors: false

@@ -136,7 +136,8 @@
 //        Assert.assertEquals(((TypeMismatch) (validationError).get(0)).getBallerinaType(), Constants.Type.STRING);
 //    }
 //
-//    @Test(description = "Invalid test for RequestPayload parameter: when request payload parameters has missing field.")
+//    @Test(description = "Invalid test for RequestPayload parameter: when request payload parameters has
+//    missing field.")
 //    public void testMissingFieldMatchRequestPayloadParam() throws OpenApiValidatorException, IOException {
 //        Path contractPath = RES_DIR.resolve("swagger/invalid/petstore_payload_missfield.yaml");
 //        api = ValidatorUtils.parseOpenAPIFile(contractPath.toString());
@@ -152,6 +153,8 @@
 //        Assert.assertEquals(((MissingFieldInJsonSchema) (validationError).get(0)).getType(), Constants.Type.INT);
 //        Assert.assertTrue(validationError.get(1) instanceof MissingFieldInBallerinaType);
 //        Assert.assertEquals(validationError.get(1).getFieldName(), "userName");
-//        Assert.assertEquals(((MissingFieldInBallerinaType) (validationError).get(1)).getType(), Constants.Type.STRING);
+//
+//        Assert.assertEquals(((MissingFieldInBallerinaType) (validationError).get(1)).getType(),
+//        Constants.Type.STRING);
 //    }
 //}

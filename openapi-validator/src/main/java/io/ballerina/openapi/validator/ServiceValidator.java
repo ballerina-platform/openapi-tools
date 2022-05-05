@@ -45,6 +45,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -57,11 +58,13 @@ import static io.ballerina.openapi.validator.Constants.ARRAY;
 import static io.ballerina.openapi.validator.Constants.DOUBLE;
 import static io.ballerina.openapi.validator.Constants.FLOAT;
 import static io.ballerina.openapi.validator.Constants.HEADER_NAME;
+import static io.ballerina.openapi.validator.Constants.HTTP_202;
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
 import static io.ballerina.openapi.validator.Constants.NUMBER;
 import static io.ballerina.openapi.validator.TypeValidatorUtils.convertBallerinaType;
 import static io.ballerina.openapi.validator.TypeValidatorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.validator.ValidatorUtils.extractAnnotationFieldDetails;
+import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
 import static io.ballerina.openapi.validator.ValidatorUtils.getNormalizedPath;
 import static io.ballerina.openapi.validator.ValidatorUtils.summarizeOpenAPI;
 import static io.ballerina.openapi.validator.ValidatorUtils.summarizeResources;
@@ -78,7 +81,8 @@ public class ServiceValidator {
     private SyntaxNodeAnalysisContext context;
     private OpenAPI openAPI;
     private Filter filter;
-    private ReturnValidator returnValidator;
+    private final Map<String, Node> balStatusCodes = new HashMap<>();
+    private final List<String> balReturnMediaTypes = new ArrayList<>();
 
     public void initialize(SyntaxNodeAnalysisContext context, OpenAPI openAPI, Filter filter) {
         this.context = context;
@@ -106,7 +110,8 @@ public class ServiceValidator {
         List<OpenAPIPathSummary> updatedOASPaths = unimplementedResourceFunction(openAPIPathSummaries,
                 resourcePathMap);
         // 5. Undocumented resource in service file
-        Map<String, ResourcePathSummary> updatedResourcePath = undocumentedResource(openAPIPathSummaries, resourcePathMap);
+        Map<String, ResourcePathSummary> updatedResourcePath = undocumentedResource(openAPIPathSummaries,
+                resourcePathMap);
 
         // 6. Ballerina -> OAS validation
         validateBallerinaAgainstToOAS(updatedResourcePath, updatedOASPaths);
@@ -123,13 +128,19 @@ public class ServiceValidator {
     // OAS-> ballerina
     private List<OpenAPIPathSummary> unimplementedResourceFunction(List<OpenAPIPathSummary> operations, Map<String,
             ResourcePathSummary> resources) {
+
+        boolean filterEnable = filter.getOperation() != null || filter.getTag() != null ||
+                filter.getExcludeTag() != null || filter.getExcludeOperation() != null;
         Iterator<OpenAPIPathSummary> openAPIPathIterator = operations.iterator();
         while (openAPIPathIterator.hasNext()) {
             OpenAPIPathSummary operationPath = openAPIPathIterator.next();
             // Unimplemented path
             if (!resources.containsKey(operationPath.getPath())) {
-                updateContext(context, CompilationError.UNIMPLEMENTED_RESOURCE_PATH, context.node().location(),
-                        getNormalizedPath(operationPath.getPath()));
+                if (!filterEnable) {
+                    updateContext(context, CompilationError.UNIMPLEMENTED_RESOURCE_PATH, context.node().location(),
+                            filter.getKind(),
+                            getNormalizedPath(operationPath.getPath()));
+                }
                 openAPIPathIterator.remove();
             } else {
                 // Unimplemented function
@@ -138,10 +149,12 @@ public class ServiceValidator {
                 Map<String, Operation> methods = operationPath.getOperations();
                 for (Map.Entry<String, Operation> operation : methods.entrySet()) {
                     if (!resourceMethods.containsKey(operation.getKey().trim())) {
-                        updateContext(context, CompilationError.UNIMPLEMENTED_RESOURCE_FUNCTION,
-                                context.node().location(), operation.getKey().trim(),
-                                getNormalizedPath(operationPath.getPath()));
-                        openAPIPathIterator.remove();
+                        if (!filterEnable) {
+                            updateContext(context, CompilationError.UNIMPLEMENTED_RESOURCE_FUNCTION,
+                                    context.node().location(), filter.getKind(), operation.getKey().trim(),
+                                    getNormalizedPath(operationPath.getPath()));
+                        }
+                        methods.remove(operation.getKey());
                     }
                 }
             }
@@ -153,6 +166,9 @@ public class ServiceValidator {
 
     private Map<String, ResourcePathSummary> undocumentedResource(List<OpenAPIPathSummary> operations, Map<String,
             ResourcePathSummary> resourcePathMap) {
+        boolean filterEnable = filter.getOperation() != null || filter.getTag() != null ||
+                filter.getExcludeTag() != null || filter.getExcludeOperation() != null;
+
         Iterator<Map.Entry<String, ResourcePathSummary>> resourcePathIter = resourcePathMap.entrySet().iterator();
         while (resourcePathIter.hasNext()) {
             Map.Entry<String, ResourcePathSummary> resourcePath = resourcePathIter.next();
@@ -165,9 +181,11 @@ public class ServiceValidator {
                     while (methodsIter.hasNext()) {
                         Map.Entry<String, ResourceMethod> method = methodsIter.next();
                         if (!operationPath.getAvailableOperations().contains(method.getKey().trim())) {
-                            updateContext(context, CompilationError.UNDOCUMENTED_RESOURCE_FUNCTIONS,
-                                    method.getValue().getLocation(), method.getKey(),
-                                    getNormalizedPath(resourcePath.getKey()));
+                            if (!filterEnable) {
+                                updateContext(context, CompilationError.UNDOCUMENTED_RESOURCE_FUNCTIONS,
+                                        method.getValue().getLocation(), filter.getKind(), method.getKey(),
+                                        getNormalizedPath(resourcePath.getKey()));
+                            }
                             methodsIter.remove();
                         }
                     }
@@ -175,20 +193,20 @@ public class ServiceValidator {
                 }
             }
             if (!isPathDocumented) {
-                updateContext(context, CompilationError.UNDOCUMENTED_RESOURCE_PATH, context.node().location(),
-                        getNormalizedPath(resourcePath.getKey()));
+                if (!filterEnable) {
+                    updateContext(context, CompilationError.UNDOCUMENTED_RESOURCE_PATH, context.node().location(),
+                            filter.getKind(),
+                            getNormalizedPath(resourcePath.getKey()));
+                }
                 resourcePathIter.remove();
             }
         }
         return resourcePathMap;
     }
 
-    // ballerina -> OAS
     /**
      * This validation happens ballerina service against to openapi specification.
      *
-     * @param resourcePaths
-     * @param oasPaths
      */
     private void validateBallerinaAgainstToOAS(Map<String, ResourcePathSummary> resourcePaths,
                                                  List<OpenAPIPathSummary> oasPaths) {
@@ -216,24 +234,29 @@ public class ServiceValidator {
                 validateBallerinaHeaders(method, oasParameters, balHeaders);
                 // Request body validation
                 if (method.getValue().getBody() != null) {
-                    RequestBodyValidator requestBodyValidator = new RequestBodyValidator(context, openAPI);
+                    RequestBodyValidator requestBodyValidator = new RequestBodyValidator(context, openAPI,
+                            filter.getKind());
                     requestBodyValidator.validateBallerinaRequestBody(method, oasOperation);
                 }
                 // Return Type validation
-                returnValidator = new ReturnValidator(context, openAPI, method.getKey(),
-                        getNormalizedPath(method.getValue().getPath()), method.getValue().getLocation());
+                ReturnValidator returnValidator = new ReturnValidator(context, openAPI, method.getKey(),
+                        getNormalizedPath(method.getValue().getPath()), method.getValue().getLocation(),
+                        filter.getKind());
                 ApiResponses responses = oasOperation.getResponses();
                 ReturnTypeDescriptorNode returnNode = method.getValue().getReturnNode();
                 // If return type doesn't provide in service , then it maps to status code 202.
                 if (returnNode == null) {
-                    returnValidator.addBalStatusCodes("202", null);
-                    if (!responses.containsKey("202")) {
+                    returnValidator.addBalStatusCodes(HTTP_202, null);
+                    if (!responses.containsKey(HTTP_202)) {
                         updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
-                                method.getValue().getLocation(), "202", method.getKey(), path.getKey());
+                                method.getValue().getLocation(), filter.getKind(), HTTP_202, method.getKey(),
+                                path.getKey());
                     }
                 } else {
                     returnValidator.validateReturnBallerinaToOas((TypeDescriptorNode) returnNode.type(), responses);
                 }
+                balStatusCodes.putAll(returnValidator.getBalStatusCodes());
+                balReturnMediaTypes.addAll(returnValidator.getBalMediaTypes());
             }
         }
     }
@@ -243,13 +266,9 @@ public class ServiceValidator {
     /**
      * This function is used to validate the ballerina resource header against to openapi header.
      *
-     * @param method
-     * @param oasParameters
-     * @param balHeaders
      */
     private void validateBallerinaHeaders(Map.Entry<String, ResourceMethod> method, List<Parameter> oasParameters,
                            Map<String, Node> balHeaders) {
-
         for (Map.Entry<String, Node> balHeader: balHeaders.entrySet()) {
             //Todo: Nullable and default value assign scenarios
 
@@ -283,11 +302,12 @@ public class ServiceValidator {
                     }
                     if (headerName.equals(oasParameter.getName())) {
                         isHeaderDocumented = true;
-                        String headerType = oasParameter.getSchema().getType();
+                        Schema schema = oasParameter.getSchema();
+                        String headerType = schema.getType();
                         headerType = getNumberFormatType(oasParameter, headerType);
                         //Array type
-                        if (oasParameter.getSchema() instanceof ArraySchema) {
-                            ArraySchema arraySchema = (ArraySchema) oasParameter.getSchema();
+                        if (schema instanceof ArraySchema) {
+                            ArraySchema arraySchema = (ArraySchema) schema;
                             String items = arraySchema.getItems().getType();
                             Optional<String> arrayItemType = convertOpenAPITypeToBallerina(items);
 
@@ -295,7 +315,7 @@ public class ServiceValidator {
                             if (arrayItemType.isEmpty() || !ballerinaType.equals(arrayItemType.get() + "[]")) {
                                 // This special concatenation is used to check the array header parameters
                                 updateContext(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
-                                        headerNode.location(), ballerinaType, items + "[]",
+                                        headerNode.location(), filter.getKind(), ballerinaType, items + "[]",
                                         headerName, method.getKey(),
                                         getNormalizedPath(method.getValue().getPath()));
                                 break;
@@ -306,7 +326,7 @@ public class ServiceValidator {
                         Optional<String> type = convertOpenAPITypeToBallerina(headerType);
                         if (type.isEmpty() || !ballerinaType.equals(type.get())) {
                             updateContext(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
-                                    headerNode.location(), ballerinaType, headerType,
+                                    headerNode.location(), filter.getKind(), ballerinaType, headerType,
                                     headerName, method.getKey(),
                                     getNormalizedPath(method.getValue().getPath()));
                             break;
@@ -318,6 +338,7 @@ public class ServiceValidator {
             if (!isHeaderDocumented) {
                 // undocumented header
                 updateContext(context, CompilationError.UNDOCUMENTED_HEADER, balHeader.getValue().location(),
+                        filter.getKind(),
                         headerName, method.getKey(), getNormalizedPath(method.getValue().getPath()));
             }
         }
@@ -337,8 +358,6 @@ public class ServiceValidator {
     /**
      * This function is used to validate the ballerina resource parameter against to openapi parameters.
      *
-     * @param method
-     * @param oasParameters
      */
     private void validateBallerinaParameters(Map.Entry<String, ResourceMethod> method,
                                              List<Parameter> oasParameters) {
@@ -352,10 +371,10 @@ public class ServiceValidator {
                 ParameterNode paramNode = (ParameterNode) parameter.getValue();
                 if (paramNode instanceof RequiredParameterNode) {
                     RequiredParameterNode requireParam = (RequiredParameterNode) paramNode;
-                    ballerinaType = requireParam.typeName().toString().trim();
+                    ballerinaType = requireParam.typeName().toString().trim().replaceAll("\\?", "");
                 } else {
                     DefaultableParameterNode defaultParam = (DefaultableParameterNode) paramNode;
-                    ballerinaType = defaultParam.typeName().toString().trim();
+                    ballerinaType = defaultParam.typeName().toString().trim().replaceAll("\\?", "");
                 }
             } else {
                 ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) parameter.getValue();
@@ -363,32 +382,54 @@ public class ServiceValidator {
             }
             if (oasParameters != null) {
                 for (Parameter oasParameter : oasParameters) {
-                    if (!parameterName.equals(oasParameter.getName())) {
+                    String oasParameterName = oasParameter.getName();
+                    Schema schema = oasParameter.getSchema();
+                    if (oasParameter.get$ref() != null) {
+                        Optional<String> name = extractReferenceType(oasParameter.get$ref());
+                        if (name.isEmpty()) {
+                            return;
+                        }
+                        oasParameterName = name.get();
+                        schema = openAPI.getComponents().getParameters().get(oasParameterName).getSchema();
+                        if (openAPI.getComponents().getParameters().get(oasParameterName).getName() != null) {
+                            oasParameterName = openAPI.getComponents().getParameters().get(oasParameterName).getName();
+                        }
+                    }
+                    //There are situation path parameter name change with its schema name, therefore we need to avoid
+                    // name checking in path parameter
+                    //ex:
+                    // paths:
+                    //  /applications/{obsId}/metrics:
+                    //    get:
+                    //      operationId: getMetrics
+                    //      parameters:
+                    //        - $ref: "#/components/parameters/obsIdPathParam"
+                    if (!parameterName.equals(oasParameterName)) {
                         continue;
                     }
                     isExist = true;
-                    String oasType = oasParameter.getSchema().getType();
+                    String oasType = schema.getType();
                     oasType = getNumberFormatType(oasParameter, oasType);
-
-                    if (oasType.equals(ARRAY)) {
-                        ArraySchema schema = (ArraySchema) oasParameter.getSchema();
-                        oasType = schema.getItems().getType();
+                    if (oasType.equals(ARRAY) && schema instanceof ArraySchema) {
+                        ArraySchema arraySchema = (ArraySchema) schema;
+                        oasType = arraySchema.getItems().getType();
                     }
                     Optional<String> type = convertOpenAPITypeToBallerina(oasType);
 
                     //TODO: map<json> type matching
+                    //TODO: Handle optional
                     //Array mapping
-                    if (type.isEmpty() || !ballerinaType.equals(type.get() + "[]")) {
+                    if (type.isEmpty() || ballerinaType.contains("[]") && !ballerinaType.equals(type.get() + "[]")) {
                         // This special concatenation is used to check the array query parameters
                         updateContext(context, CompilationError.TYPE_MISMATCH_PARAMETER,
-                                parameter.getValue().location(), ballerinaType, oasType + "[]",
+                                parameter.getValue().location(), filter.getKind(), ballerinaType, oasType + "[]",
                                 parameterName, method.getKey(), method.getValue().getPath());
                         break;
                     }
                     if (!Objects.equals(ballerinaType, type.get())) {
                         // This special concatenation is used to check the array query parameters
                         updateContext(context, CompilationError.TYPE_MISMATCH_PARAMETER,
-                                parameter.getValue().location(), ballerinaType, oasType,
+                                parameter.getValue().location(), filter.getKind(), ballerinaType, oasType,
                                 parameterName, method.getKey(), method.getValue().getPath());
                         break;
                     }
@@ -397,7 +438,8 @@ public class ServiceValidator {
             if (!isExist) {
                 // undocumented parameter
                 updateContext(context, CompilationError.UNDOCUMENTED_PARAMETER, parameter.getValue().location(),
-                        parameterName, method.getKey(), getNormalizedPath(method.getValue().getPath()));
+                        filter.getKind(), parameterName, method.getKey(),
+                        getNormalizedPath(method.getValue().getPath()));
             }
         }
     }
@@ -423,31 +465,43 @@ public class ServiceValidator {
                 Map<String, Node> resourceParameters = resourceMethod.getParameters();
                 if (oasParameters != null) {
                     oasParameters.forEach(parameter -> {
-                        if (parameter.getIn().equals("header")) {
+                        if (parameter.get$ref() != null) {
+                            Optional<String> parameterName = extractReferenceType(parameter.get$ref());
+                            if (parameterName.isEmpty()) {
+                                return;
+                            }
+                            parameter = openAPI.getComponents().getParameters().get(parameterName.get());
+                        }
+                        if (parameter instanceof HeaderParameter ||
+                                parameter.getIn() != null && parameter.getIn().equals("header")) {
                             // headerValidation
                             Map<String, Node> resourceHeaders = resourceMethod.getHeaders();
                             AtomicBoolean isHeaderExist = new AtomicBoolean(false);
+                            Parameter finalParameter = parameter;
                             resourceHeaders.forEach((header, headerNode) -> {
-                                if (parameter.getName().trim().equals(header)) {
+                                if (finalParameter.getName().trim().equals(header)) {
                                     isHeaderExist.set(true);
                                 }
                             });
                             if (!isHeaderExist.get()) {
                                 updateContext(context, CompilationError.UNIMPLEMENTED_HEADER,
-                                        resourceMethod.getLocation() , parameter.getName(), key, oasPath);
+                                        resourceMethod.getLocation(), filter.getKind(), parameter.getName(), key,
+                                        oasPath);
                             }
                         } else {
                             AtomicBoolean isImplemented = new AtomicBoolean(false);
+                            Parameter finalParameter1 = parameter;
                             resourceParameters.forEach((paramName, paramNode) -> {
                                 // avoid headers
-                                if (parameter.getName().equals(paramName)) {
+                                if (finalParameter1.getName().equals(paramName)) {
                                     isImplemented.set(true);
                                 }
                             });
                             if (!isImplemented.get()) {
                                 // error message
                                 updateContext(context, CompilationError.UNIMPLEMENTED_PARAMETER,
-                                        resourceMethod.getLocation() , parameter.getName(), key, oasPath);
+                                        resourceMethod.getLocation(), filter.getKind(), parameter.getName(), key,
+                                        oasPath);
                             }
                         }
                     });
@@ -456,14 +510,17 @@ public class ServiceValidator {
                 RequestBody requestBody = value.getRequestBody();
                 if (requestBody != null) {
                     RequiredParameterNode body = resourceMethod.getBody();
-                    RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI);
+                    RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI, filter.getKind());
                     rbValidator.validateOASRequestBody(body, requestBody, oasPath, key, resourceMethod.getLocation());
                 }
 
                 // Response validator
+                ReturnValidator returnValidator = new ReturnValidator(context, openAPI, key, oasPath,
+                        resourceMethod.getLocation(), filter.getKind());
+                returnValidator.addAllBalStatusCodes(balStatusCodes);
+                returnValidator.addAllBalMediaTypes(balReturnMediaTypes);
                 returnValidator.validateReturnOASToBallerina(value.getResponses());
             });
         }
     }
 }
-

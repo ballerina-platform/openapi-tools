@@ -18,7 +18,6 @@
 package io.ballerina.openapi.validator.model;
 
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.tools.diagnostics.Location;
@@ -79,7 +78,7 @@ public class ResourceMethod {
     }
 
     /**
-     * This is the builder class for the {@link ResourceMethod}
+     * This is the builder class for the {@link ResourceMethod}.
      */
     public static  class ResourceMethodBuilder {
         private String path;

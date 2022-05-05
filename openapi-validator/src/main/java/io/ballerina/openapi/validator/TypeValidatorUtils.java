@@ -24,13 +24,13 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,20 +56,15 @@ import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
 public class TypeValidatorUtils {
 
     /**
-     * Validate ballerina record against schema
-     * @param schema
-     * @param typeSymbol
-     * @param balRecord
-     * @param context
-     * @param openAPI
-     * @param oasName
+     * Validate ballerina record against schema.
+     *
      */
     public static void validateRecordType(Schema<?> schema, TypeSymbol typeSymbol, String balRecord,
                                           SyntaxNodeAnalysisContext context,
-                                          OpenAPI openAPI, String oasName) {
+                                          OpenAPI openAPI, String oasName, DiagnosticSeverity severity) {
 
         if (typeSymbol instanceof RecordTypeSymbol || typeSymbol instanceof TypeReferenceTypeSymbol) {
-            List<String> recordFields = new ArrayList<>();
+//            List<String> recordFields = new ArrayList<>();
             Map<String, Schema> properties = schema.getProperties();
             if (schema instanceof ObjectSchema) {
                 properties = schema.getProperties();
@@ -86,28 +81,30 @@ public class TypeValidatorUtils {
                         isFieldExist = true;
                         String fieldType = field.getValue().typeDescriptor().signature();
 
-                        String oas = property.getValue().getType();
-                        if (oas.equals(NUMBER)) {
+                        Schema schemaValue = property.getValue();
+                        String oas = schemaValue.getType();
+                        if (oas != null && oas.equals(NUMBER)) {
                             oas = DOUBLE;
-                            if (property.getValue().getFormat() != null &&
-                                    property.getValue().getFormat().equals(FLOAT)) {
+                            if (schemaValue.getFormat() != null &&
+                                    schemaValue.getFormat().equals(FLOAT)) {
                                 oas = FLOAT;
                             }
                         }
                         Optional<String> oasType = convertOpenAPITypeToBallerina(oas);
-                        if (property.getValue() instanceof ArraySchema) {
-                            validateArrayTypeMismatch(balRecord, context, field, property);
-                        } else if (property.getValue().get$ref() != null) {
+                        if (schemaValue instanceof ArraySchema) {
+                            ArraySchema arraySchema = (ArraySchema) schemaValue;
+                            validateArrayTypeMismatch(balRecord, context, field, arraySchema, severity);
+                        } else if (schemaValue.get$ref() != null) {
                             Schema componentSchema = openAPI.getComponents().getSchemas()
-                                    .get(extractReferenceType(property.getValue().get$ref()).orElse(null));
+                                    .get(extractReferenceType(schemaValue.get$ref()).orElse(null));
                             validateRecordType(componentSchema, field.getValue().typeDescriptor(), fieldType, context
-                                    , openAPI, extractReferenceType(property.getValue().get$ref()).orElse(null));
-                        } else if (property.getValue() instanceof ObjectSchema) {
+                                    , openAPI, extractReferenceType(schemaValue.get$ref()).orElse(null), severity);
+                        } else if (schemaValue instanceof ObjectSchema) {
                             // Todo: inline record validation ex: record {|int id; string name;|}
                         } else if (oasType.isEmpty() || !fieldType.equals(oasType.get())) {
                             // type mismatch field
                             updateContext(context, CompilationError.TYPE_MISMATCH_FIELD,
-                                    field.getValue().getLocation().orElse(null), fieldType,
+                                    field.getValue().getLocation().orElse(null), severity, fieldType,
                                     oas, field.getKey(), balRecord);
                         }
                         break;
@@ -116,13 +113,14 @@ public class TypeValidatorUtils {
                 if (!isFieldExist) {
                     // Undocumented field.
                     updateContext(context, CompilationError.UNDOCUMENTED_BRECORD_FIELD,
-                            field.getValue().getLocation().orElse(null), field.getKey(), balRecord, oasName);
-                    recordFields.add(field.getKey());
+                            field.getValue().getLocation().orElse(null), severity,
+                            field.getKey(), balRecord, oasName);
+//                    recordFields.add(field.getKey());
                 }
             }
-            if (recordFields.size() == fieldSymbolList.size()) {
-                //TODO : undocumented records
-            }
+//            if (recordFields.size() == fieldSymbolList.size()) {
+//                //TODO : undocumented records
+//            }
         }
     }
 
@@ -131,18 +129,16 @@ public class TypeValidatorUtils {
      * @param balRecord
      * @param context
      * @param field
-     * @param property
+     * @param arraySchema
      * @return
      */
     private static Optional<String> validateArrayTypeMismatch(String balRecord, SyntaxNodeAnalysisContext context,
-                                              Map.Entry<String, RecordFieldSymbol> field,
-                                              Map.Entry<String, Schema> property) {
+                                              Map.Entry<String, RecordFieldSymbol> field, ArraySchema arraySchema,
+                                                              DiagnosticSeverity severity) {
 
         Optional<String> oasType;
         String messageOasType;
         String balFieldType = field.getValue().typeDescriptor().signature();
-
-        ArraySchema arraySchema = (ArraySchema) property.getValue();
         Schema<?> arraySchemaItems = arraySchema.getItems();
         ArraySchema traverseNestedArraySchema;
         String array = "[]";
@@ -171,11 +167,12 @@ public class TypeValidatorUtils {
             }
         }
 
-        oasType = Optional.of(convertOpenAPITypeToBallerina(oasArrayItems).orElse(oasArrayItems) + arrayBuilder.toString());
+        oasType = Optional.of(convertOpenAPITypeToBallerina(oasArrayItems).orElse(oasArrayItems)
+                + arrayBuilder.toString());
         messageOasType = oasArrayItems + arrayBuilder.toString();
         // type mismatch error
         updateContext(context, CompilationError.TYPE_MISMATCH_FIELD, field.getValue().getLocation().orElse(null),
-                balFieldType, messageOasType, field.getKey(), balRecord);
+                severity, balFieldType, messageOasType, field.getKey(), balRecord);
         return oasType;
     }
 
@@ -242,8 +239,10 @@ public class TypeValidatorUtils {
     // todo: OpenAPI-to-Ballerina schema
 
     public static void validateObjectSchema(ObjectSchema objectSchema, TypeSymbol typeSymbol,
-                                          SyntaxNodeAnalysisContext context,
-                                          OpenAPI openAPI, String oasName, String balRecord) {
+                                          SyntaxNodeAnalysisContext context, String balRecord,
+                                            DiagnosticSeverity severity) {
+
+        Location location = typeSymbol.getLocation().get();
         if (typeSymbol instanceof RecordTypeSymbol || typeSymbol instanceof TypeReferenceTypeSymbol) {
             if (typeSymbol instanceof TypeReferenceTypeSymbol) {
                 typeSymbol = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
@@ -251,7 +250,6 @@ public class TypeValidatorUtils {
             RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeSymbol;
             Map<String, Schema> properties = objectSchema.getProperties();
             Map<String, RecordFieldSymbol> recordFieldSymbolMap = recordTypeSymbol.fieldDescriptors();
-            TypeSymbol finalTypeSymbol = typeSymbol;
             AtomicInteger numberOfMissingFields = new AtomicInteger();
             properties.forEach((key, value)-> {
                 AtomicBoolean isPropertyExist = new AtomicBoolean(false);
@@ -264,12 +262,12 @@ public class TypeValidatorUtils {
                     // Missing field message;
                     numberOfMissingFields.addAndGet(1);
                     updateContext(context, CompilationError.UNIMPLEMENTED_OAS_PROPERTY,
-                            finalTypeSymbol.getLocation().orElse(null), key, balRecord);
+                            location, severity, key, balRecord);
                 }
             });
-            if (numberOfMissingFields.get() == properties.size()) {
-                // TODO: error message for unimplemented record
-            }
+//            if (numberOfMissingFields.get() == properties.size()) {
+//                // TODO: error message for unimplemented record
+//            }
         }
     }
 }

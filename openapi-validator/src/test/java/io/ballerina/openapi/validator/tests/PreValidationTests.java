@@ -19,15 +19,21 @@ package io.ballerina.openapi.validator.tests;
 
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Project;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getCompilation;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
+/**
+ * This test suit enable all the tests for checking the valida service for validate.
+ */
 public class PreValidationTests {
     //1. compilation issue tests error -done,
     //2. compilation issue tests warning -done,
@@ -69,6 +75,17 @@ public class PreValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         int i = diagnostic.diagnosticCount();
         Assert.assertEquals(i, 4);
+        Object[] errors =
+                diagnostic.diagnostics().stream().filter(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity())
+                        .toArray();
+        Collection<Diagnostic> diagnostics = diagnostic.diagnostics();
+        String unimplementedPath = "ERROR [unimplemented_resources.bal:(4:1,10:2)] Could not find a Ballerina " +
+                "service resource for the path '/pet02' which is documented in the OpenAPI contract.";
+        String unimplementedMethod = "ERROR [unimplemented_resources.bal:(4:1,10:2)] Could not find Ballerina " +
+                "service resource(s) for HTTP method(s) 'get' for the path '/pet' which is documented in the " +
+                "OpenAPI contract";
+//        Assert.assertTrue(errors[0].equals(unimplementedPath));
+//        Assert.assertTrue(errors[1].equals((unimplementedMethod)));
     }
 
     @Test(description = "Given ballerina file has compilation issue as warning")
@@ -80,4 +97,12 @@ public class PreValidationTests {
         Assert.assertEquals(i, 6);
     }
 
+    @Test(description = "OpenAPI annotation with failOnErrors turn off")
+    public void validatorTurnOff() {
+        Path path = RES_DIR.resolve("multiple_services.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        int i = diagnostic.diagnosticCount();
+        Assert.assertEquals(i, 4);
+    }
 }

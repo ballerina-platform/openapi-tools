@@ -55,7 +55,7 @@ public class QueryParameterValidationTests {
     }
 
     @Test(description = "This test for unimplemented query parameter in openAPI spec")
-    public void unimplemented(){
+    public void unimplemented() {
         Path path = RES_DIR.resolve("oas_query_parameter.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);

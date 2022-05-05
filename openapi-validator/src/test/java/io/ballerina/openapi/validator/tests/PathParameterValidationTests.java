@@ -29,6 +29,9 @@ import java.nio.file.Paths;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getCompilation;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
+/**
+ * Validate tests for path parameters.
+ */
 public class PathParameterValidationTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/parameter")
             .toAbsolutePath();
@@ -41,8 +44,9 @@ public class PathParameterValidationTests {
                 diagnostic.diagnostics().stream().filter(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity())
                         .toArray();
         Assert.assertTrue(errors.length == 2);
-        String error = "ERROR [request_body.bal:(8:32,8:45)] Implementation type does not match with OAS contract" +
-                " type (expected 'string',found 'integer') for the parameter 'offset' in http method 'get' that associated with the path '/pets'.";
+        String error = "ERROR [path_parameter.bal:(13:54,13:69)] Implementation type does not match with OAS " +
+                "contract type (expected 'int',found 'string') for the parameter 'owner-id' in http method 'get'" +
+                " that associated with the path '/pets/{petId}/owner/{owner-id}'.";
         Assert.assertEquals(error, errors[0].toString());
     }
 }

@@ -37,7 +37,6 @@ import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
@@ -56,6 +55,7 @@ import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -75,21 +75,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.ballerina.openapi.validator.Constants.ARRAY_BRACKETS;
 import static io.ballerina.openapi.validator.Constants.BALLERINA;
-import static io.ballerina.openapi.validator.Constants.BOOLEAN;
-import static io.ballerina.openapi.validator.Constants.DECIMAL;
-import static io.ballerina.openapi.validator.Constants.FLOAT;
 import static io.ballerina.openapi.validator.Constants.FULL_STOP;
 import static io.ballerina.openapi.validator.Constants.HEADER_NAME;
 import static io.ballerina.openapi.validator.Constants.HTTP;
+import static io.ballerina.openapi.validator.Constants.HTTP_CALLER;
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
-import static io.ballerina.openapi.validator.Constants.INT;
+import static io.ballerina.openapi.validator.Constants.HTTP_REQUEST;
 import static io.ballerina.openapi.validator.Constants.JSON;
-import static io.ballerina.openapi.validator.Constants.NUMBER;
-import static io.ballerina.openapi.validator.Constants.RECORD;
 import static io.ballerina.openapi.validator.Constants.SLASH;
-import static io.ballerina.openapi.validator.Constants.STRING;
 import static io.ballerina.openapi.validator.Constants.YAML;
 import static io.ballerina.openapi.validator.Constants.YML;
 
@@ -107,8 +101,7 @@ public class ValidatorUtils {
      * @return string with refactored path
      */
     public static String getNormalizedPath(String path) {
-        return path.replaceAll("\\{", "\'{").replaceAll("\\}", "\\}'")
-                .replaceAll("''", "\\'''");
+        return path;
     }
 
     /**
@@ -126,17 +119,18 @@ public class ValidatorUtils {
 //        parseOptions.setResolveFully(true);
 
         if (!Files.exists(contractPath)) {
-            updateContext(context, CompilationError.INVALID_CONTRACT_PATH, location);
+            updateContext(context, CompilationError.INVALID_CONTRACT_PATH, location, DiagnosticSeverity.ERROR);
         }
         if (!(definitionURI.endsWith(YAML) || definitionURI.endsWith(JSON) || definitionURI.endsWith(YML))) {
-            updateContext(context, CompilationError.INVALID_CONTRACT_FORMAT, location);
+            updateContext(context, CompilationError.INVALID_CONTRACT_FORMAT, location, DiagnosticSeverity.ERROR);
         }
         String openAPIFileContent = Files.readString(Paths.get(definitionURI));
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null,
                 parseOptions);
         OpenAPI api = parseResult.getOpenAPI();
         if (api == null) {
-            updateContext(context, CompilationError.PARSER_EXCEPTION, location, definitionURI);
+            updateContext(context, CompilationError.PARSER_EXCEPTION, location, DiagnosticSeverity.ERROR,
+                    definitionURI);
         }
         return api;
     }
@@ -182,19 +176,19 @@ public class ValidatorUtils {
         }
     }
 
-    public static void updateContext(SyntaxNodeAnalysisContext context, CompilationError error, Location location) {
+    public static void updateContext(SyntaxNodeAnalysisContext context, CompilationError error, Location location,
+                                     DiagnosticSeverity severity) {
 
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(),
-                error.getDescription(), error.getSeverity());
+                error.getDescription(), severity);
         Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
                 , location);
         context.reportDiagnostic(diagnostic);
     }
 
     public static void updateContext(SyntaxNodeAnalysisContext context, CompilationError error,
-                                     Location location, Object... args) {
-        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error.getDescription(),
-                error.getSeverity());
+                                     Location location, DiagnosticSeverity severity, Object... args) {
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error.getDescription(), severity);
         Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location, args);
         context.reportDiagnostic(diagnostic);
     }
@@ -214,13 +208,14 @@ public class ValidatorUtils {
 
         // 1. When the both tag and e.tags enable compiler gives compilation error.
         if (tagEnabled && excludeTagsEnabled) {
-            updateContext(context, CompilationError.BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES, context.node().location());
+            updateContext(context, CompilationError.BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES, context.node().location(),
+                    DiagnosticSeverity.ERROR);
             return false;
         }
         // 2. When the both operation and e. operations enable compiler gives compilation error.
         if (operationEnabled && excludeOperationEnable) {
             updateContext(context, CompilationError.BOTH_OPERATIONS_AND_EXCLUDE_OPERATIONS_ENABLES,
-                    context.node().location());
+                    context.node().location(), DiagnosticSeverity.ERROR);
             return false;
         }
         // This is the annotation has not any filters to filter the operations.
@@ -231,12 +226,16 @@ public class ValidatorUtils {
             if ((operationEnabled && operationId != null) && (filter.getOperation().contains(operationId))) {
                 // 3. tag + operation = union
                 return true;
-            } else if ((excludeOperationEnable && operationId != null) && (filter.getOperation().contains(operationId))) {
+            } else if ((excludeOperationEnable && operationId != null) &&
+                    (filter.getOperation().contains(operationId))) {
                 // 4. tag + e.operation = all tags remove e.operations
                 return false;
-            } else if (tags != null && !Collections.disjoint(tags, filter.getTag())){
+            } else if (tags != null && !Collections.disjoint(tags, filter.getTag())) {
                 return true;
             }
+        }
+        if (excludeTagsEnabled) {
+            return tags == null || Collections.disjoint(tags, filter.getExcludeTag());
         }
         // Here scenarios operationId + e.tags won't consider bcz if some user give the operation for filter ,
         // operation filter takes the first priority of filtering process.
@@ -281,7 +280,9 @@ public class ValidatorUtils {
                     addOpenAPISummary(openAPISummary, Constants.TRACE, value.getTrace(), filter, context);
                 }
             }
-            openAPISummaries.add(openAPISummary);
+            if (openAPISummary.getOperations().size() > 0) {
+                openAPISummaries.add(openAPISummary);
+            }
         });
         return openAPISummaries;
     }
@@ -308,7 +309,8 @@ public class ValidatorUtils {
             Map<String, Node> parameterNodeMap = new HashMap<>();
             String path = generatePath(relativeResourcePathNodes, parameterNodeMap);
             if (resourceSummaryList.containsKey(path)) {
-                extractResourceMethodDetails(resourceNode, path, resourceSummaryList.get(path), parameterNodeMap, context);
+                extractResourceMethodDetails(resourceNode, path, resourceSummaryList.get(path), parameterNodeMap,
+                        context);
             } else {
                 ResourcePathSummary resourcePathSummary = new ResourcePathSummary(path);
                 extractResourceMethodDetails(resourceNode, path, resourcePathSummary, parameterNodeMap, context);
@@ -368,35 +370,41 @@ public class ValidatorUtils {
             if (param instanceof RequiredParameterNode) {
                 RequiredParameterNode requiredParamNode = (RequiredParameterNode) param;
                 NodeList<AnnotationNode> annotations = requiredParamNode.annotations();
-                // Set payloads and headers
-                for (AnnotationNode annotation : annotations) {
-                    if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
-                        List<String> annotationHeaders = extractAnnotationFieldDetails(HTTP_HEADER, HEADER_NAME,
-                                annotations, context.semanticModel());
-                        String headerName = unescapeIdentifier(requiredParamNode.paramName().orElseThrow().text());
-                        if (!annotationHeaders.isEmpty()) {
-                            headerName = annotationHeaders.get(0);
+                if (!requiredParamNode.typeName().toString().trim().equals(HTTP_CALLER) &&
+                        !requiredParamNode.typeName().toString().trim().equals(HTTP_REQUEST)) {
+                    // Set payloads and headers
+                    for (AnnotationNode annotation : annotations) {
+                        if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
+                            List<String> annotationHeaders = extractAnnotationFieldDetails(HTTP_HEADER, HEADER_NAME,
+                                    annotations, context.semanticModel());
+                            String headerName = unescapeIdentifier(requiredParamNode.paramName().orElseThrow().text());
+                            if (!annotationHeaders.isEmpty()) {
+                                headerName = annotationHeaders.get(0);
+                            }
+                            headers.put(headerName, requiredParamNode);
+                        } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
+                            resourceMethodBuilder.body(requiredParamNode);
                         }
-                        headers.put(headerName, requiredParamNode);
-                    } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
-                        resourceMethodBuilder.body(requiredParamNode);
                     }
-                }
-                if (annotations.isEmpty()) {
-                    parameterNodes.put(requiredParamNode.paramName().orElseThrow().text(), requiredParamNode);
+                    if (annotations.isEmpty()) {
+                        parameterNodes.put(requiredParamNode.paramName().orElseThrow().text(), requiredParamNode);
+                    }
                 }
 
             } else if (param instanceof DefaultableParameterNode) {
                 DefaultableParameterNode defaultParam = (DefaultableParameterNode) param;
                 NodeList<AnnotationNode> annotations = defaultParam.annotations();
-                // Set payloads and headers
-                for (AnnotationNode annotation : annotations) {
-                    if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
-                        headers.put(defaultParam.paramName().orElseThrow().text(), defaultParam);
+                if (!defaultParam.typeName().toString().equals(HTTP_CALLER) &&
+                        !defaultParam.typeName().toString().equals(HTTP_REQUEST)) {
+                    // Set payloads and headers
+                    for (AnnotationNode annotation : annotations) {
+                        if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_HEADER)) {
+                            headers.put(defaultParam.paramName().orElseThrow().text(), defaultParam);
+                        }
                     }
-                }
-                if (annotations.isEmpty()) {
-                    parameterNodes.put(defaultParam.paramName().orElseThrow().text(), defaultParam);
+                    if (annotations.isEmpty()) {
+                        parameterNodes.put(defaultParam.paramName().orElseThrow().text(), defaultParam);
+                    }
                 }
             }
         }
@@ -445,7 +453,8 @@ public class ValidatorUtils {
                             if (!(mime instanceof BasicLiteralNode)) {
                                 continue;
                             }
-                            fieldValues.add(((BasicLiteralNode) mime).literalToken().text().trim().replaceAll("\"", ""));
+                            fieldValues.add(((BasicLiteralNode) mime).literalToken().text().trim().
+                                    replaceAll("\"", ""));
                         }
                     } else if (expressionNode instanceof QualifiedNameReferenceNode && semanticModel != null) {
                         QualifiedNameReferenceNode moduleRef = (QualifiedNameReferenceNode) expressionNode;
@@ -465,11 +474,14 @@ public class ValidatorUtils {
     }
 
     public static String getMediaType(SyntaxKind kind) {
-        String mediaType = null;
+        String mediaType;
         // Return mediaType
         switch (kind) {
             case STRING_TYPE_DESC:
                 mediaType = "text/plain";
+                break;
+            case XML_TYPE_DESC:
+                mediaType = "application/xml";
                 break;
             case MAP_TYPE_DESC:
             case SIMPLE_NAME_REFERENCE:
@@ -482,30 +494,29 @@ public class ValidatorUtils {
             case BYTE_TYPE_DESC:
             case FLOAT_KEYWORD:
             case JSON_TYPE_DESC:
+            default:
                 mediaType = "application/json";
-                break;
-            case XML_TYPE_DESC:
-                mediaType = "application/xml";
                 break;
         }
         return mediaType;
     }
     public static String getMediaType(TypeDescKind kind) {
-        String mediaType = null;
+        String mediaType;
         // Return mediaType
         switch (kind) {
             case STRING:
                 mediaType = "text/plain";
+                break;
+            case XML:
+                mediaType = "application/xml";
                 break;
             case MAP:
             case OBJECT:
             case RECORD:
             case TYPE_REFERENCE:
             case JSON:
+            default:
                 mediaType = "application/json";
-                break;
-            case XML:
-                mediaType = "application/xml";
                 break;
         }
         return mediaType;

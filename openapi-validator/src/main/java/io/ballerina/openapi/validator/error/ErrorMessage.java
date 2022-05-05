@@ -18,6 +18,9 @@
 
 package io.ballerina.openapi.validator.error;
 
+/**
+ * This enum class stores the all error messages.
+ */
 public enum ErrorMessage {
     ERROR_001("OpenAPI contract doesn't exist in the given location: %s"),
     ERROR_002("Invalid file type. Provide either a .yaml or .json file."),

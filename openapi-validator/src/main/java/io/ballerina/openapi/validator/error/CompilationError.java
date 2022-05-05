@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.validator.error;
 
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 /**
  * This {@code DiagnosticMessages} enum class for containing the error message related to openapi validator plugin.
@@ -25,76 +24,45 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
  * @since 2.0.0
  */
 public enum CompilationError {
-    INVALID_CONTRACT_PATH(ErrorCode.OPENAPI_VALIDATOR_001, ErrorMessage.ERROR_001,
-            DiagnosticSeverity.ERROR),
-    INVALID_CONTRACT_FORMAT(ErrorCode.OPENAPI_VALIDATOR_002, ErrorMessage.ERROR_002,
-            DiagnosticSeverity.ERROR),
-    EMPTY_CONTRACT_PATH(ErrorCode.OPENAPI_VALIDATOR_003, ErrorMessage.ERROR_003,
-            DiagnosticSeverity.WARNING),
-    NON_HTTP_SERVICE(ErrorCode.OPENAPI_VALIDATOR_004, ErrorMessage.ERROR_004,
-            DiagnosticSeverity.WARNING),
-    TYPE_MISMATCH_FIELD(ErrorCode.OPENAPI_VALIDATOR_005, ErrorMessage.ERROR_005,
-            DiagnosticSeverity.ERROR),
-    TYPE_MISMATCH_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_006, ErrorMessage.ERROR_006,
-            DiagnosticSeverity.ERROR),
-    UNDOCUMENTED_BRECORD_FIELD(ErrorCode.OPENAPI_VALIDATOR_007, ErrorMessage.ERROR_007,
-            DiagnosticSeverity.ERROR),
-    UNIMPLEMENTED_OAS_PROPERTY(ErrorCode.OPENAPI_VALIDATOR_008, ErrorMessage.ERROR_008,
-            DiagnosticSeverity.ERROR),
-    UNDOCUMENTED_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_009, ErrorMessage.ERROR_009,
-            DiagnosticSeverity.ERROR),
-    UNIMPLEMENTED_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_010, ErrorMessage.ERROR_010,
-            DiagnosticSeverity.ERROR),
-    UNEXPECTED_EXCEPTIONS(ErrorCode.OPENAPI_VALIDATOR_011, ErrorMessage.ERROR_011,
-            DiagnosticSeverity.ERROR),
-    PARSER_EXCEPTION(ErrorCode.OPENAPI_VALIDATOR_012, ErrorMessage.ERROR_012,
-            DiagnosticSeverity.ERROR),
-    BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES(ErrorCode.OPENAPI_VALIDATOR_013, ErrorMessage.ERROR_013,
-            DiagnosticSeverity.ERROR),
-    BOTH_OPERATIONS_AND_EXCLUDE_OPERATIONS_ENABLES(ErrorCode.OPENAPI_VALIDATOR_014, ErrorMessage.ERROR_014,
-            DiagnosticSeverity.ERROR),
-    UNIMPLEMENTED_RESOURCE_FUNCTION(ErrorCode.OPENAPI_VALIDATOR_015, ErrorMessage.ERROR_015,
-            DiagnosticSeverity.ERROR),
-    UNDOCUMENTED_RESOURCE_FUNCTIONS(ErrorCode.OPENAPI_VALIDATOR_016, ErrorMessage.ERROR_016,
-            DiagnosticSeverity.ERROR),
-    UNIMPLEMENTED_RESOURCE_PATH(ErrorCode.OPENAPI_VALIDATOR_017, ErrorMessage.ERROR_017,
-            DiagnosticSeverity.ERROR),
-    UNDOCUMENTED_RESOURCE_PATH(ErrorCode.OPENAPI_VALIDATOR_018, ErrorMessage.ERROR_018,
-            DiagnosticSeverity.ERROR),
-    TYPE_MISMATCH_HEADER_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_019, ErrorMessage.ERROR_019,
-            DiagnosticSeverity.ERROR),
-    UNDOCUMENTED_HEADER(ErrorCode.OPENAPI_VALIDATOR_020, ErrorMessage.ERROR_020,
-            DiagnosticSeverity.ERROR),
-    UNDOCUMENTED_REQUEST_BODY(ErrorCode.OPENAPI_VALIDATOR_021, ErrorMessage.ERROR_021,
-                        DiagnosticSeverity.ERROR),
-    TYPEMISMATCH_REQUEST_BODY_PAYLOAD(ErrorCode.OPENAPI_VALIDATOR_022, ErrorMessage.ERROR_022,
-            DiagnosticSeverity.ERROR),
-    UNDOCUMENTED_RETURN_CODE(ErrorCode.OPENAPI_VALIDATOR_023, ErrorMessage.ERROR_023,
-                              DiagnosticSeverity.ERROR),
-    UNDOCUMENTED_RETURN_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_024, ErrorMessage.ERROR_024,
-            DiagnosticSeverity.ERROR),//TODO collecte every undocuemnted or typemismatch to one error message
-    UNIMPLEMENTED_HEADER(ErrorCode.OPENAPI_VALIDATOR_025, ErrorMessage.ERROR_025,
-            DiagnosticSeverity.ERROR),
-    UNIMPLEMENTED_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_026, ErrorMessage.ERROR_026,
-            DiagnosticSeverity.ERROR),
-    UNIMPLEMENTED_REQUEST_BODY(ErrorCode.OPENAPI_VALIDATOR_027, ErrorMessage.ERROR_027,
-            DiagnosticSeverity.ERROR),
-    UNIMPLEMENTED_STATUS_CODE(ErrorCode.OPENAPI_VALIDATOR_028, ErrorMessage.ERROR_028,
-                               DiagnosticSeverity.ERROR),
-    UNIMPLEMENTED_RESPONSE_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_029, ErrorMessage.ERROR_029,
-            DiagnosticSeverity.ERROR);
+    INVALID_CONTRACT_PATH(ErrorCode.OPENAPI_VALIDATOR_001, ErrorMessage.ERROR_001),
+    INVALID_CONTRACT_FORMAT(ErrorCode.OPENAPI_VALIDATOR_002, ErrorMessage.ERROR_002),
+    EMPTY_CONTRACT_PATH(ErrorCode.OPENAPI_VALIDATOR_003, ErrorMessage.ERROR_003), //DiagnosticSeverity.WARNING
+    NON_HTTP_SERVICE(ErrorCode.OPENAPI_VALIDATOR_004, ErrorMessage.ERROR_004), //DiagnosticSeverity.WARNING
+    TYPE_MISMATCH_FIELD(ErrorCode.OPENAPI_VALIDATOR_005, ErrorMessage.ERROR_005),
+    TYPE_MISMATCH_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_006, ErrorMessage.ERROR_006),
+    UNDOCUMENTED_BRECORD_FIELD(ErrorCode.OPENAPI_VALIDATOR_007, ErrorMessage.ERROR_007),
+    UNIMPLEMENTED_OAS_PROPERTY(ErrorCode.OPENAPI_VALIDATOR_008, ErrorMessage.ERROR_008),
+    UNDOCUMENTED_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_009, ErrorMessage.ERROR_009),
+    UNIMPLEMENTED_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_010, ErrorMessage.ERROR_010),
+    UNEXPECTED_EXCEPTIONS(ErrorCode.OPENAPI_VALIDATOR_011, ErrorMessage.ERROR_011),
+    PARSER_EXCEPTION(ErrorCode.OPENAPI_VALIDATOR_012, ErrorMessage.ERROR_012),
+    BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES(ErrorCode.OPENAPI_VALIDATOR_013, ErrorMessage.ERROR_013),
+    BOTH_OPERATIONS_AND_EXCLUDE_OPERATIONS_ENABLES(ErrorCode.OPENAPI_VALIDATOR_014, ErrorMessage.ERROR_014),
+    UNIMPLEMENTED_RESOURCE_FUNCTION(ErrorCode.OPENAPI_VALIDATOR_015, ErrorMessage.ERROR_015),
+    UNDOCUMENTED_RESOURCE_FUNCTIONS(ErrorCode.OPENAPI_VALIDATOR_016, ErrorMessage.ERROR_016),
+    UNIMPLEMENTED_RESOURCE_PATH(ErrorCode.OPENAPI_VALIDATOR_017, ErrorMessage.ERROR_017),
+    UNDOCUMENTED_RESOURCE_PATH(ErrorCode.OPENAPI_VALIDATOR_018, ErrorMessage.ERROR_018),
+    TYPE_MISMATCH_HEADER_PARAMETER(ErrorCode.OPENAPI_VALIDATOR_019, ErrorMessage.ERROR_019),
+    UNDOCUMENTED_HEADER(ErrorCode.OPENAPI_VALIDATOR_020, ErrorMessage.ERROR_020),
+    UNDOCUMENTED_REQUEST_BODY(ErrorCode.OPENAPI_VALIDATOR_021, ErrorMessage.ERROR_021),
+    TYPEMISMATCH_REQUEST_BODY_PAYLOAD(ErrorCode.OPENAPI_VALIDATOR_022, ErrorMessage.ERROR_022),
+    UNDOCUMENTED_RETURN_CODE(ErrorCode.OPENAPI_VALIDATOR_023, ErrorMessage.ERROR_023),
+    UNDOCUMENTED_RETURN_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_024, ErrorMessage.ERROR_024),
+    //TODO collecte every undocuemnted or typemismatch to one error message
+    UNIMPLEMENTED_HEADER(ErrorCode.OPENAPI_VALIDATOR_025, ErrorMessage.ERROR_025),
+    UNIMPLEMENTED_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_026, ErrorMessage.ERROR_026),
+    UNIMPLEMENTED_REQUEST_BODY(ErrorCode.OPENAPI_VALIDATOR_027, ErrorMessage.ERROR_027),
+    UNIMPLEMENTED_STATUS_CODE(ErrorCode.OPENAPI_VALIDATOR_028, ErrorMessage.ERROR_028),
+    UNIMPLEMENTED_RESPONSE_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_029, ErrorMessage.ERROR_029);
 
 
 
     private final String code;
     private final String description;
-    private final DiagnosticSeverity severity;
-
-    CompilationError(ErrorCode code, ErrorMessage description, DiagnosticSeverity severity) {
+    CompilationError(ErrorCode code, ErrorMessage description) {
 
         this.code = code.name();
         this.description = description.getMessage();
-        this.severity = severity;
     }
 
     public String getCode() {
@@ -105,8 +73,8 @@ public enum CompilationError {
         return description;
     }
 
-    public DiagnosticSeverity getSeverity() {
-        return severity;
-    }
+//    public DiagnosticSeverity getSeverity() {
+//        return severity;
+//    }
 }
 

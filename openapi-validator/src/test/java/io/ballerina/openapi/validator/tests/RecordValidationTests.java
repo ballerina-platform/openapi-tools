@@ -65,7 +65,7 @@ public class RecordValidationTests {
         Assert.assertEquals(typeMismatchNestedArray, errors[1].toString());
     }
 
-    @Test(description = "Type mismatch record field with array type")
+    @Test(description = "Type mismatch record field")
     public void typeMisMatchRecordField() {
         Path path = RES_DIR.resolve("type_mismatch_record.bal");
         Project project = getProject(path);
@@ -97,7 +97,8 @@ public class RecordValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        String undocumentedField = "Couldn't find OpenAPI object schema field 'tag' in 'Pet' the Ballerina record.";
+        String undocumentedField = "ERROR [unimplemented_field.bal:(4:6,4:9)] Couldn't find OpenAPI " +
+                "object schema field 'tag' in 'Pet' the Ballerina record.";
         Assert.assertEquals(undocumentedField, errors[0].toString());
     }
 

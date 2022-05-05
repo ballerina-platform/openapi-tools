@@ -28,6 +28,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.openapi.validator.model.ResourceMethod;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -60,11 +61,13 @@ public class RequestBodyValidator {
 
     private SyntaxNodeAnalysisContext context;
     private OpenAPI openAPI;
+    private DiagnosticSeverity severity;
 
-    public RequestBodyValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI) {
+    public RequestBodyValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity) {
 
         this.context = context;
         this.openAPI = openAPI;
+        this.severity = severity;
     }
 
     /**
@@ -99,7 +102,7 @@ public class RequestBodyValidator {
                     List<String> oasMediaTypes = new ArrayList<>();
                     for (Map.Entry<String, MediaType> oasMedia : content.entrySet()) {
                         oasMediaTypes.add(oasMedia.getKey());
-                        if (mediaType != null && Objects.equals(oasMedia.getKey(), mediaType)) {
+                        if (Objects.equals(oasMedia.getKey(), mediaType)) {
                             isMediaTypeExist = true;
                             if (oasMedia.getValue().getSchema() == null) {
                                 return;
@@ -122,27 +125,27 @@ public class RequestBodyValidator {
                             if (symbol.isEmpty()) {
                                 return;
                             }
-                            String balRecordName = requestBodyNode.typeName().toString();
+                            String balRecordName = requestBodyNode.typeName().toString().trim();
                             TypeSymbol typeSymbol = ((ParameterSymbol) symbol.get()).typeDescriptor();
                             if (typeSymbol instanceof TypeReferenceTypeSymbol) {
                                 if (schema instanceof ArraySchema) {
                                     ArraySchema arraySchema = (ArraySchema) schema;
                                     updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                            requestBodyNode.location(), balRecordName,
+                                            requestBodyNode.location(), severity, balRecordName,
                                             extractReferenceType(arraySchema.getItems().get$ref()).get() + "[]",
                                             method.getKey(),
                                             getNormalizedPath(method.getValue().getPath()));
-                                } else if (schema instanceof ObjectSchema) {
-                                    /// validate- Record
-                                    if (balRecordName.equals(oasName.get())) {
-                                        String oasSchemaName = oasName.get();
-                                        schema = openAPI.getComponents().getSchemas().get(oasSchemaName);
+                                } else if (schema instanceof ObjectSchema || schema.get$ref() != null) {
+                                    // validate- Record
+                                    String oasSchema = oasName.get();
+                                    if (balRecordName.equals(oasSchema)) {
+                                        schema = openAPI.getComponents().getSchemas().get(oasSchema);
                                         TypeValidatorUtils.validateRecordType(schema, typeSymbol, balRecordName,
-                                                context, openAPI, oasSchemaName);
+                                                context, openAPI, oasSchema, severity);
                                     } else {
                                         updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                                requestBodyNode.location(), mediaType, balRecordName,
-                                                oasName.get(),
+                                                requestBodyNode.location(), severity, mediaType, balRecordName,
+                                                oasSchema,
                                                 method.getKey(),
                                                 getNormalizedPath(method.getValue().getPath()));
                                     }
@@ -157,7 +160,8 @@ public class RequestBodyValidator {
 
                                     if (!(schema instanceof ArraySchema)) {
                                         updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                                requestBodyNode.location(), mediaType, oasMediaTypes.toString(),
+                                                requestBodyNode.location(), severity, mediaType,
+                                                oasMediaTypes.toString(),
                                                 requestBodyNode.paramName().get().toString().trim(), method.getKey(),
                                                 getNormalizedPath(method.getValue().getPath()));
                                         return;
@@ -170,7 +174,7 @@ public class RequestBodyValidator {
                                             /// validate- Record
                                             TypeValidatorUtils.validateRecordType(schema,
                                                     arrayType.memberTypeDescriptor(),
-                                                    balRecordName, context, openAPI, oasSchemaName);
+                                                    balRecordName, context, openAPI, oasSchemaName, severity);
                                         } else {
                                             //TODO inline object schema
                                         }
@@ -188,9 +192,9 @@ public class RequestBodyValidator {
                             }
                         }
                     }
-                    if (mediaType != null && !isMediaTypeExist) {
+                    if (!isMediaTypeExist) {
                         updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                requestBodyNode.location(), mediaType,
+                                requestBodyNode.location(), severity, mediaType,
                                 oasMediaTypes.toString(), method.getKey(),
                                 getNormalizedPath(method.getValue().getPath()));
                     }
@@ -201,7 +205,7 @@ public class RequestBodyValidator {
         }
         //TODO: http:Request type
         if (!isBodyExist) {
-            updateContext(context, CompilationError.UNDOCUMENTED_REQUEST_BODY, requestBodyNode.location(),
+            updateContext(context, CompilationError.UNDOCUMENTED_REQUEST_BODY, requestBodyNode.location(), severity,
                     method.getKey(),
                     getNormalizedPath(method.getValue().getPath()));
         }
@@ -214,7 +218,7 @@ public class RequestBodyValidator {
                                        String method, Location location) {
         Content content = oasBody.getContent();
         if (body == null) {
-            updateContext(context, CompilationError.UNIMPLEMENTED_REQUEST_BODY, location, method, path);
+            updateContext(context, CompilationError.UNIMPLEMENTED_REQUEST_BODY, location, severity, method, path);
             return;
         }
         if (content != null) {
@@ -249,7 +253,7 @@ public class RequestBodyValidator {
                             if (payloadSchema instanceof ObjectSchema) {
                                 //Get balllerina typeSymbol
                                 TypeValidatorUtils.validateObjectSchema((ObjectSchema) payloadSchema, typeSymbol,
-                                        context, openAPI, schemaName.get(), balRecordName);
+                                        context, balRecordName, severity);
                             } else if (payloadSchema instanceof ComposedSchema) {
                                 //TODO: oneOf, AllOF handle
                                 return;
@@ -261,13 +265,14 @@ public class RequestBodyValidator {
                                     schema = openAPI.getComponents().getSchemas().get(oasSchemaName);
                                     if (typeSymbol instanceof ArrayTypeSymbol) {
                                         ArrayTypeSymbol arrayType = (ArrayTypeSymbol) typeSymbol;
-                                        if (arrayType.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol) {
+                                        if (arrayType.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol
+                                                && schema instanceof ObjectSchema) {
                                             balRecordName = body.typeName().toString().trim()
                                                     .replaceAll("\\[", "")
                                                     .replaceAll("\\]", "");
                                             TypeValidatorUtils.validateObjectSchema((ObjectSchema) schema,
                                                     arrayType.memberTypeDescriptor(),
-                                                    context, openAPI, schemaName.get(), balRecordName);
+                                                    context, balRecordName, severity);
                                         }
                                     }
                                 }
@@ -282,7 +287,7 @@ public class RequestBodyValidator {
                 }
             }
             if (content.entrySet().size() != 1) {
-                updateContext(context, CompilationError.UNIMPLEMENTED_MEDIA_TYPE, body.location(),
+                updateContext(context, CompilationError.UNIMPLEMENTED_MEDIA_TYPE, body.location(), severity,
                         missingPayload.toString(), method, path);
             }
         }

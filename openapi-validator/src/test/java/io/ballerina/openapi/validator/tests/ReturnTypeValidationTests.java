@@ -47,8 +47,9 @@ public class ReturnTypeValidationTests {
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
 
         //Unimplemented return type.
-        String unimplementedReturnCode = "ERROR [single_status_code.bal:(8:39,8:46)] Could not find the implementation" +
-                " for return code '202' in the counterpart Ballerina service resource (method: 'get', path: '/')";
+        String unimplementedReturnCode = "ERROR [single_status_code.bal:(8:5,10:6)] Could not find " +
+                "the implementation for return code '202' in the counterpart Ballerina service" +
+                " resource (method: 'get', path: '/')";
         Assert.assertEquals(unimplementedReturnCode, errors[1].toString());
     }
 
@@ -65,10 +66,9 @@ public class ReturnTypeValidationTests {
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
 
 
-        String unimplementedReturnCode = "ERROR [single_record_payload_type_mismatch.bal:(14:39,14:47)]" +
-                "ERROR [single_record_payload_type_mismatch.bal:(14:39,14:47)] Could not find the implementation " +
-                "for return media type 'application/json' in the counterpart Ballerina service resource (method:" +
-                " 'get', path: '/')";
+        String unimplementedReturnCode = "ERROR [single_record_payload_type_mismatch.bal:(14:5,18:6)] Could not " +
+                "find the implementation for return media type 'application/json' in the counterpart Ballerina " +
+                "service resource (method: 'get', path: '/')";
         Assert.assertEquals(unimplementedReturnCode, errors[1].toString());
     }
 
@@ -78,7 +78,7 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertTrue(errors.length == 2);
         String undocumentedReturnCode = "ERROR [single_record_status_code.bal:(14:39,14:47)] Undocumented resource" +
                 " return status code '202' for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
@@ -90,7 +90,7 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 3);
+        Assert.assertTrue(errors.length == 4);
         //TODO check al the status code to one message
     }
 
@@ -125,7 +125,7 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertTrue(errors.length == 2);
         String typeMismatch = "ERROR [undocumented_union_return_type.bal:(24:60,24:78)] Undocumented resource " +
                 "return status code '406' for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
@@ -137,7 +137,7 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertTrue(errors.length == 2);
         String typeMismatch = "ERROR [without_return.bal:(8:5,9:6)] Undocumented resource return status code '202' " +
                 "for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
@@ -149,9 +149,9 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
-        String typeMismatch = "ERROR [error_return.bal:(8:31,8:44)] Undocumented resource return status code '500'" +
-                " for the method 'get' of the resource associated with the path '/'.";
+        Assert.assertTrue(errors.length == 2);
+        String typeMismatch = "ERROR [error_return.bal:(8:39,8:44)] Undocumented resource return status code" +
+                " '500' for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
@@ -161,7 +161,7 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertTrue(errors.length == 2);
         String typeMismatch = "ERROR [nil_error_return.bal:(8:39,8:44)] Undocumented resource return status code" +
                 " '500' for the method 'get' of the resource associated with the path '/'.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
@@ -174,9 +174,9 @@ public class ReturnTypeValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        String typeMismatch = "ERROR [unimplemented_media_type.bal:(15:39,15:58)] Could not find the implementation" +
-                " for return media type 'application/xml' in the counterpart Ballerina service " +
-                "resource (method: 'get', path: '/')";
+        String typeMismatch = "ERROR [unimplemented_media_type.bal:(15:5,23:6)] Could not find the " +
+                "implementation for return media type 'application/xml' in the counterpart Ballerina service" +
+                " resource (method: 'get', path: '/')";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 

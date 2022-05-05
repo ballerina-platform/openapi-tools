@@ -29,6 +29,10 @@ import static io.ballerina.openapi.validator.tests.ValidatorTest.getCompilation;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getDiagnostics;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
+/**
+ * HeaderValidatorTests contains the validation for header scenarios.
+ *
+ */
 public class HeaderValidationTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/headers").toAbsolutePath();
     @Test(description = "Required Header test")

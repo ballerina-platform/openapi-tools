@@ -62,14 +62,14 @@ public class Filter {
     }
 
     /**
-     * This is the builder class for the {@link Filter}
+     * This is the builder class for the {@link Filter}.
      */
     public static class FilterBuilder {
         private List<String> tag;
         private List<String> excludeTag;
         private List<String> operation;
         private List<String> excludeOperation;
-        private DiagnosticSeverity kind;
+        private DiagnosticSeverity kind = DiagnosticSeverity.ERROR;
 
         public FilterBuilder tag(List<String> tag) {
             this.tag = tag;

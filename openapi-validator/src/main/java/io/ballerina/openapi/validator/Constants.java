@@ -55,6 +55,7 @@ public class Constants {
     public static final String HTTP_PAYLOAD = "http:Payload";
     public static final String HTTP_REQUEST = "http:Request";
     public static final String HTTP_RESPONSE = "http:Response";
+    public static final String HTTP_CALLER = "http:Caller";
     public static final String ARRAY = "array";
     public static final String ARRAY_BRACKETS = "[]";
     public static final String STRING = "string";
@@ -119,5 +120,8 @@ public class Constants {
         aMap.put("HttpVersionNotSupported", "505");
         HTTP_CODES = Collections.unmodifiableMap(aMap);
     }
+    public static final String HTTP_200 = "200";
+    public static final String HTTP_500 = "500";
+    public static final String HTTP_202 = "202";
 
 }
