@@ -23,12 +23,14 @@ public interface Constants {
     // package details related constants
     String PACKAGE_ORG = "ballerina";
     String PACKAGE_NAME = "openapi";
-    String HTTP_PACKAGE_NAME = "http";
 
     // open-api module related constants
-    String SERVICE_CONFIG_ANNOTATION_IDENTIFIER = "ServiceConfig";
     String SERVICE_INFO_ANNOTATION_IDENTIFIER = "ServiceInfo";
     String CONTRACT = "contract";
     String EMBED = "embed";
+
+    // http module related constants
+    String HTTP_PACKAGE_NAME = "http";
+    String SERVICE_CONFIG_ANNOTATION_IDENTIFIER = "ServiceConfig";
     String OPEN_API_DEFINITION_FIELD = "openApiDefinition";
 }

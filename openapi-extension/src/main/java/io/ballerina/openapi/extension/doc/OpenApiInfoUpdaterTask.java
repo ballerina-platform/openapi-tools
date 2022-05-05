@@ -141,7 +141,7 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
         NodeList<AnnotationNode> updatedAnnotations = NodeFactory.createNodeList();
         boolean openApiAnnotationUpdated = false;
         for (AnnotationNode annotation: currentAnnotations) {
-            if (isOpenApiInfoAnnotations(annotation)) {
+            if (isHttpServiceConfigAnnotation(annotation)) {
                 openApiAnnotationUpdated = true;
                 SeparatedNodeList<MappingFieldNode> updatedFields = getUpdatedFields(annotation, openApiDefinition);
                 MappingConstructorExpressionNode annotationValue =
@@ -153,7 +153,7 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
             updatedAnnotations = updatedAnnotations.add(annotation);
         }
         if (!openApiAnnotationUpdated) {
-            AnnotationNode openApiAnnotation = getSchemaStringAnnotation(openApiDefinition);
+            AnnotationNode openApiAnnotation = getHttpServiceConfigAnnotation(openApiDefinition);
             updatedAnnotations = updatedAnnotations.add(openApiAnnotation);
         }
         return updatedAnnotations;
@@ -176,7 +176,7 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
         return NodeFactory.createSeparatedNodeList(fields);
     }
 
-    private AnnotationNode getSchemaStringAnnotation(String openApiDefinition) {
+    private AnnotationNode getHttpServiceConfigAnnotation(String openApiDefinition) {
         String configIdentifierString = Constants.HTTP_PACKAGE_NAME + SyntaxKind.COLON_TOKEN.stringValue() +
                 Constants.SERVICE_CONFIG_ANNOTATION_IDENTIFIER;
         IdentifierToken identifierToken = NodeFactory.createIdentifierToken(configIdentifierString);
@@ -203,7 +203,10 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
         return NodeFactory.createSpecificFieldNode(null, fieldName, colonToken, expressionNode);
     }
 
-    private boolean isOpenApiInfoAnnotations(AnnotationNode annotationNode) {
+    private boolean isHttpServiceConfigAnnotation(AnnotationNode annotationNode) {
+        if (!(annotationNode.annotReference() instanceof QualifiedNameReferenceNode)) {
+            return false;
+        }
         QualifiedNameReferenceNode referenceNode = ((QualifiedNameReferenceNode) annotationNode.annotReference());
         if (!Constants.HTTP_PACKAGE_NAME.equals(referenceNode.modulePrefix().text())) {
             return false;
