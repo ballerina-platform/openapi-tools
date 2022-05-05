@@ -9,6 +9,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -45,18 +46,16 @@ public class UtilGenerationTests {
     private static final String GET_SERIALIZED_RECORD_ARRAY = "getSerializedRecordArray";
 
 
-    @Test(description = "Test empty util file generation")
-    public void testEmptyUtilFileGen() throws IOException, BallerinaOpenApiException,
-            FormatterException {
+    @Test(description = "Test default util file generation")
+    public void testDefaultUtilFileGen() throws IOException, BallerinaOpenApiException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/no_util.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
-        SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
-        List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
-        Assert.assertTrue(diagnostics.isEmpty());
-        Assert.assertTrue(utilSyntaxTree.toString().isEmpty());
+        SyntaxTree utlisSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("client/ballerina/default_util.bal",
+                utlisSyntaxTree);
     }
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with query parameters")
@@ -83,7 +82,7 @@ public class UtilGenerationTests {
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<String> invalidFunctionNames = Arrays.asList(CREATE_FORM_URLENCODED_REQUEST_BODY,
-                GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST, GET_SERIALIZED_ARRAY, GET_ENCODED_URI,
+                GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST, GET_SERIALIZED_ARRAY,
                 GET_ORIGINAL_KEY, GET_PATH_FOR_QUERY_PARAM, GET_SERIALIZED_RECORD_ARRAY);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()));

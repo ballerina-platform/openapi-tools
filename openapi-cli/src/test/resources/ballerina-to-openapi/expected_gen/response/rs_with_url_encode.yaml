@@ -22,4 +22,41 @@ paths:
                 type: object
                 additionalProperties:
                   type: string
+  /foo:
+    get:
+      operationId: operation_get_/foo
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+  /bar:
+    get:
+      operationId: operation_get_/bar
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+  /barint:
+    get:
+      operationId: operation_get_/barint
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int64
 components: {}

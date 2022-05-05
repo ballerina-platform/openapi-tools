@@ -49,6 +49,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.NUMERIC_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPTIONAL_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getAnnotationNodesFromServiceNode;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.unescapeIdentifier;
 
 /**
  * This class processes mapping query parameters in between Ballerina and OAS.
@@ -68,7 +69,7 @@ public class OpenAPIQueryParameterMapper {
      * Handle function query parameters for required parameters.
      */
     public Parameter createQueryParameter(RequiredParameterNode queryParam) {
-        String queryParamName = queryParam.paramName().get().text();
+        String queryParamName = unescapeIdentifier(queryParam.paramName().get().text());
         boolean isQuery = !queryParam.paramName().get().text().equals(Constants.PATH)
                 && queryParam.annotations().isEmpty();
         if (queryParam.typeName() instanceof BuiltinSimpleNameReferenceNode && isQuery) {

@@ -23,7 +23,7 @@ public isolated client class Client {
         return response;
     }
     remote isolated function showPetById(string petId) returns Pets|error {
-        string resourcePath = string `/pets/${petId}`;
+        string resourcePath = string `/pets/${getEncodedUri(petId)}`;
         Pets response = check self.clientEp->get(resourcePath);
         return response;
     }

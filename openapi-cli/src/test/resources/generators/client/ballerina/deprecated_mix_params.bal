@@ -27,7 +27,7 @@ public isolated client class Client {
     # + offset -
     # + return - Success
     remote isolated function getCommentsOnTrack(int trackId, int 'limit = 50, @deprecated int offset = 0, boolean? linkedPartitioning = ()) returns InlineResponse200|error {
-        string resourcePath = string `/tracks/${trackId}/comments`;
+        string resourcePath = string `/tracks/${getEncodedUri(trackId)}/comments`;
         map<anydata> queryParam = {"limit": 'limit, "offset": offset, "linked_partitioning": linkedPartitioning};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         InlineResponse200 response = check self.clientEp->get(resourcePath);
