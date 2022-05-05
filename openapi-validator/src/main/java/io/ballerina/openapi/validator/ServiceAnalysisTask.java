@@ -65,13 +65,12 @@ public class ServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisConte
             return;
         }
         // This is the annotation has not any filters to filter the operations.
-        if (!tagEnabled && !operationEnabled && !excludeOperationEnable && !excludeTagsEnabled) {
+        if (tagEnabled && operationEnabled && excludeOperationEnable && excludeTagsEnabled) {
             updateContext(syntaxContext, CompilationError.FOUR_ANNOTATION_FIELDS,
                     syntaxContext.node().location(), DiagnosticSeverity.ERROR);
             return;
         }
         this.serviceValidator.initialize(syntaxContext, this.preValidator.getOpenAPI(), filter);
         this.serviceValidator.validate();
-
     }
 }

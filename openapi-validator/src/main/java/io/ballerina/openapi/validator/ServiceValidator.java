@@ -58,7 +58,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static io.ballerina.openapi.validator.Constants.ARRAY;
 import static io.ballerina.openapi.validator.Constants.DOUBLE;
 import static io.ballerina.openapi.validator.Constants.FLOAT;
-import static io.ballerina.openapi.validator.Constants.GET;
 import static io.ballerina.openapi.validator.Constants.HEADER_NAME;
 import static io.ballerina.openapi.validator.Constants.HTTP_202;
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
@@ -173,7 +172,7 @@ public class ServiceValidator {
     }
 
     /**
-     * Checking whether there is undocumented resource function with align to openapi spec
+     * Checking whether there is undocumented resource function with align to openapi spec.
      * Ballerina -> OAS
      */
     private Map<String, ResourcePathSummary> undocumentedResource(List<OpenAPIPathSummary> operations, Map<String,
