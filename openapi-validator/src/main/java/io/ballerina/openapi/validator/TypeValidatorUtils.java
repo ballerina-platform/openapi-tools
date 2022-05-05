@@ -64,7 +64,7 @@ public class TypeValidatorUtils {
                                           OpenAPI openAPI, String oasName, DiagnosticSeverity severity) {
 
         if (typeSymbol instanceof RecordTypeSymbol || typeSymbol instanceof TypeReferenceTypeSymbol) {
-//            List<String> recordFields = new ArrayList<>();
+//            List<String> recordFields = new ArrayList<>(); //Comment due to enable later implementation.
             Map<String, Schema> properties = schema.getProperties();
             if (schema instanceof ObjectSchema) {
                 properties = schema.getProperties();
@@ -126,11 +126,7 @@ public class TypeValidatorUtils {
 
     /**
      * This function is used to validate type for array fields.
-     * @param balRecord
-     * @param context
-     * @param field
-     * @param arraySchema
-     * @return
+     *
      */
     private static Optional<String> validateArrayTypeMismatch(String balRecord, SyntaxNodeAnalysisContext context,
                                               Map.Entry<String, RecordFieldSymbol> field, ArraySchema arraySchema,

@@ -58,6 +58,7 @@ import static io.ballerina.openapi.validator.Constants.ATTRIBUTE_FAIL_ON_ERRORS;
 import static io.ballerina.openapi.validator.Constants.ATTRIBUTE_OPERATIONS;
 import static io.ballerina.openapi.validator.Constants.EMBED;
 import static io.ballerina.openapi.validator.Constants.OPENAPI_ANNOTATION;
+import static io.ballerina.openapi.validator.Constants.TRUE;
 import static io.ballerina.openapi.validator.ValidatorUtils.isHttpService;
 import static io.ballerina.openapi.validator.ValidatorUtils.parseOpenAPIFile;
 import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
@@ -67,6 +68,8 @@ import static io.ballerina.openapi.validator.error.CompilationError.UNEXPECTED_E
 
 /**
  * This PreValidator class contain validation for given service is valid http service and summaries all the resources.
+ *
+ * @since 2201.1.0
  */
 public class PreValidator {
     private SyntaxNodeAnalysisContext context;
@@ -86,6 +89,11 @@ public class PreValidator {
         this.openAPI = null;
     }
 
+    /**
+     * During the Pre validation , it is checking whether the given service is http service, that service has openapi
+     * annotation @openapi:ServiceInfo and that annotation includes valid openapi contract path.
+     *
+     */
     public void preValidation() {
         // 1. Checking receive service node has compilation issue
         SemanticModel semanticModel = context.semanticModel();
@@ -107,8 +115,8 @@ public class PreValidator {
         if (metadata.isEmpty()) {
             return;
         }
-        // 1. Check openapi annotation is available -- done
-        // 2. Check contract path is available and exist -- done
+        // 1. Check openapi annotation is available
+        // 2. Check contract path is available and exist
         MetadataNode serviceMetadata = metadata.orElseThrow();
         NodeList<AnnotationNode> annotations = serviceMetadata.annotations();
         if (annotations.isEmpty()) {
@@ -160,7 +168,7 @@ public class PreValidator {
                                 }
                                 break;
                             case ATTRIBUTE_FAIL_ON_ERRORS:
-                                if (expression.toString().contains("true")) {
+                                if (expression.toString().contains(TRUE)) {
                                     filterBuilder.kind(DiagnosticSeverity.ERROR);
                                 } else {
                                     filterBuilder.kind(DiagnosticSeverity.WARNING);
@@ -192,6 +200,9 @@ public class PreValidator {
 
     }
 
+    /**
+     * This function is to extract the annotation attribute details.
+     */
     private SeparatedNodeList<MappingFieldNode> extractAnnotationAttributeList(ServiceDeclarationNode serviceNode,
                                                                                Location location,
                                                                                AnnotationNode annotation) {
@@ -222,6 +233,9 @@ public class PreValidator {
         return path.orElse(null);
     }
 
+    /**
+     * OpenAPI contract path resolution.
+     */
     private OpenAPI getOpenAPIContract(Path ballerinaFilePath, Location location, Path openAPIPath) {
         Path relativePath = null;
         try {

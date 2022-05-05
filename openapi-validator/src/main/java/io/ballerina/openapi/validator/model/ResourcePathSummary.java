@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Summarized details of a Ballerina resource to be validated against OpenAPI document.
  *
- * @since 2201.0.3
+ * @since 2201.1.0
  */
 public class ResourcePathSummary {
     private final String path;

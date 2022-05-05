@@ -34,6 +34,7 @@ import io.ballerina.openapi.validator.model.Filter;
 import io.ballerina.openapi.validator.model.OpenAPIPathSummary;
 import io.ballerina.openapi.validator.model.ResourceMethod;
 import io.ballerina.openapi.validator.model.ResourcePathSummary;
+import io.ballerina.openapi.validator.model.ReturnSummary;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -57,10 +58,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static io.ballerina.openapi.validator.Constants.ARRAY;
 import static io.ballerina.openapi.validator.Constants.DOUBLE;
 import static io.ballerina.openapi.validator.Constants.FLOAT;
+import static io.ballerina.openapi.validator.Constants.GET;
 import static io.ballerina.openapi.validator.Constants.HEADER_NAME;
 import static io.ballerina.openapi.validator.Constants.HTTP_202;
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
 import static io.ballerina.openapi.validator.Constants.NUMBER;
+import static io.ballerina.openapi.validator.Constants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.validator.TypeValidatorUtils.convertBallerinaType;
 import static io.ballerina.openapi.validator.TypeValidatorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.validator.ValidatorUtils.extractAnnotationFieldDetails;
@@ -75,13 +78,13 @@ import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
  * This model used to filter and validate all the operations according to the given filter and filter the service
  * resource in the resource file.
  *
- * @since 2201.0.1
+ * @since 2201.1.0
  */
 public class ServiceValidator {
     private SyntaxNodeAnalysisContext context;
     private OpenAPI openAPI;
     private Filter filter;
-    private final Map<String, Node> balStatusCodes = new HashMap<>();
+    private final Map<String, Map<String, ReturnSummary>> balReturnSummary = new HashMap<>();
     private final List<String> balReturnMediaTypes = new ArrayList<>();
 
     public void initialize(SyntaxNodeAnalysisContext context, OpenAPI openAPI, Filter filter) {
@@ -90,6 +93,10 @@ public class ServiceValidator {
         this.filter = filter;
     }
 
+    /**
+     * Validate the given service. All the diagnostics may update with the @SyntaxNodeAnalysisContext context
+     * dynamically.
+     */
     public void validate() {
         ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) this.context.node();
 
@@ -125,7 +132,10 @@ public class ServiceValidator {
 
     }
 
-    // OAS-> ballerina
+    /**
+     * Validate all the resource with operations to check whether there is any missing implementation for operations.
+     * OAS-> ballerina
+     */
     private List<OpenAPIPathSummary> unimplementedResourceFunction(List<OpenAPIPathSummary> operations, Map<String,
             ResourcePathSummary> resources) {
 
@@ -162,8 +172,10 @@ public class ServiceValidator {
         return operations;
     }
 
-    // ballerina -> OAS
-
+    /**
+     * Checking whether there is undocumented resource function with align to openapi spec
+     * Ballerina -> OAS
+     */
     private Map<String, ResourcePathSummary> undocumentedResource(List<OpenAPIPathSummary> operations, Map<String,
             ResourcePathSummary> resourcePathMap) {
         boolean filterEnable = filter.getOperation() != null || filter.getTag() != null ||
@@ -180,7 +192,7 @@ public class ServiceValidator {
                     Iterator<Map.Entry<String, ResourceMethod>> methodsIter = methods.iterator();
                     while (methodsIter.hasNext()) {
                         Map.Entry<String, ResourceMethod> method = methodsIter.next();
-                        if (!operationPath.getAvailableOperations().contains(method.getKey().trim())) {
+                        if (!operationPath.getOperations().containsKey(method.getKey().trim())) {
                             if (!filterEnable) {
                                 updateContext(context, CompilationError.UNDOCUMENTED_RESOURCE_FUNCTIONS,
                                         method.getValue().getLocation(), filter.getKind(), method.getKey(),
@@ -221,6 +233,7 @@ public class ServiceValidator {
                     break;
                 }
             }
+            Map<String, ReturnSummary> balMethodReturnSummary = new HashMap<>();
 
             for (Map.Entry<String, ResourceMethod> method : methods.entrySet()) {
                 assert oasPath != null;
@@ -255,9 +268,14 @@ public class ServiceValidator {
                 } else {
                     returnValidator.validateReturnBallerinaToOas((TypeDescriptorNode) returnNode.type(), responses);
                 }
-                balStatusCodes.putAll(returnValidator.getBalStatusCodes());
-                balReturnMediaTypes.addAll(returnValidator.getBalMediaTypes());
+                ReturnSummary returnSummary = new ReturnSummary(returnValidator.getBalStatusCodes(),
+                        returnValidator.getBalMediaTypes());
+                balMethodReturnSummary.put(method.getKey(), returnSummary);
+//                balStatusCodes.putAll(returnValidator.getBalStatusCodes());
+//                balReturnMediaTypes.clear();
+//                balReturnMediaTypes.addAll(returnValidator.getBalMediaTypes());
             }
+            balReturnSummary.put(path.getKey(), balMethodReturnSummary);
         }
     }
 
@@ -312,11 +330,12 @@ public class ServiceValidator {
                             Optional<String> arrayItemType = convertOpenAPITypeToBallerina(items);
 
                             //Array mapping
-                            if (arrayItemType.isEmpty() || !ballerinaType.equals(arrayItemType.get() + "[]")) {
+                            if (arrayItemType.isEmpty() || !ballerinaType.equals(arrayItemType.get() +
+                                    SQUARE_BRACKETS)) {
                                 // This special concatenation is used to check the array header parameters
                                 updateContext(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
-                                        headerNode.location(), filter.getKind(), ballerinaType, items + "[]",
-                                        headerName, method.getKey(),
+                                        headerNode.location(), filter.getKind(), ballerinaType, items +
+                                                SQUARE_BRACKETS, headerName, method.getKey(),
                                         getNormalizedPath(method.getValue().getPath()));
                                 break;
                             }
@@ -458,6 +477,7 @@ public class ServiceValidator {
             Map<String, ResourceMethod> methods = resourcePath.getMethods();
 
             Map<String, Operation> operations = openAPIPath.getOperations();
+            Map<String, ReturnSummary> returnSummaryMap = balReturnSummary.get(oasPath);
             operations.forEach((key, value) -> {
                 ResourceMethod resourceMethod = methods.get(key);
                 //Parameter validation
@@ -517,8 +537,8 @@ public class ServiceValidator {
                 // Response validator
                 ReturnValidator returnValidator = new ReturnValidator(context, openAPI, key, oasPath,
                         resourceMethod.getLocation(), filter.getKind());
-                returnValidator.addAllBalStatusCodes(balStatusCodes);
-                returnValidator.addAllBalMediaTypes(balReturnMediaTypes);
+                returnValidator.addAllBalStatusCodes(returnSummaryMap.get(key).getBalStatusCodes());
+                returnValidator.addAllBalMediaTypes(returnSummaryMap.get(key).getBalMediaTypes());
                 returnValidator.validateReturnOASToBallerina(value.getResponses());
             });
         }

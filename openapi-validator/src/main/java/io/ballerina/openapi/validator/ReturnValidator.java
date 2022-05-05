@@ -53,6 +53,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.UNION_TYPE_DESC;
+import static io.ballerina.openapi.validator.Constants.APPLICATION_JSON;
+import static io.ballerina.openapi.validator.Constants.BODY;
 import static io.ballerina.openapi.validator.Constants.HTTP;
 import static io.ballerina.openapi.validator.Constants.HTTP_200;
 import static io.ballerina.openapi.validator.Constants.HTTP_500;
@@ -63,6 +65,8 @@ import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
 
 /**
  * This class for validate the return and response types.
+ *
+ * @since 2201.1.0
  */
 public class ReturnValidator {
     private final SyntaxNodeAnalysisContext context;
@@ -105,10 +109,13 @@ public class ReturnValidator {
     public List<String> getBalMediaTypes() {
         return this.balMediaTypes;
     }
+
     /**
+     * This util function for validate the ballerina return against to openapi response. Here we string ballerina
+     * status code and , Mediatypes that user has used for the ballerina return.
      *
-     * @param returnNode
-     * @param responses
+     * @param returnNode Ballerina Return Node from function signature.
+     * @param responses OAS operation response.
      */
     public void validateReturnBallerinaToOas(TypeDescriptorNode returnNode, ApiResponses responses) {
         SyntaxKind kind = returnNode.kind();
@@ -126,7 +133,6 @@ public class ReturnValidator {
         } else if (kind == ERROR_TYPE_DESC) {
             balStatusCodes.put(HTTP_500, null);
             if (!responses.containsKey(HTTP_500)) {
-                // error message
                 updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, returnNode.location(), severity,
                         HTTP_500,
                         method, path);
@@ -136,7 +142,6 @@ public class ReturnValidator {
             validateReturnBallerinaToOas((TypeDescriptorNode) optionalNode.typeDescriptor(), responses);
         } else if (returnNode instanceof BuiltinSimpleNameReferenceNode) {
             if (!responses.containsKey(HTTP_200)) {
-                // error message
                 updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
                         returnNode.location(), severity, HTTP_200, method, path);
             } else {
@@ -146,7 +151,6 @@ public class ReturnValidator {
                 Content content = apiResponse.getContent();
                 balMediaTypes.add(mediaType);
                 if (content == null || !content.containsKey(mediaType)) {
-                    // Error message
                     updateContext(context, CompilationError.UNDOCUMENTED_RETURN_MEDIA_TYPE,
                             returnNode.location(), severity, mediaType, method, path);
                 }
@@ -155,6 +159,11 @@ public class ReturnValidator {
         //TODO: array type validation
     }
 
+    /**
+     * Validate Ballerina record against to openapi response.
+     * ex: resource function  get pet() returns Pet {}
+     *
+     */
     private void validateSimpleNameReference(SimpleNameReferenceNode simpleRefNode, ApiResponses responses) {
         Optional<Symbol> symbol = context.semanticModel().symbol(simpleRefNode);
         //Access the status code and media type via record
@@ -185,7 +194,7 @@ public class ReturnValidator {
                                 // handle media types
                                 ApiResponse apiResponse = responses.get(code.get());
                                 Map<String, RecordFieldSymbol> fields = typeSymbol.fieldDescriptors();
-                                TypeSymbol bodyFieldType = fields.get("body").typeDescriptor();
+                                TypeSymbol bodyFieldType = fields.get(BODY).typeDescriptor();
                                 TypeDescKind bodyKind = bodyFieldType.typeKind();
                                 String mediaType = getMediaType(bodyKind);
                                 balMediaTypes.add(mediaType);
@@ -193,7 +202,7 @@ public class ReturnValidator {
                                 if (content != null) {
                                     MediaType oasMtype = content.get(mediaType);
                                     if (!content.containsKey(mediaType)) {
-                                        // not media type
+                                        // not media type equal
                                         updateContext(context, CompilationError.UNDOCUMENTED_RETURN_MEDIA_TYPE,
                                                 simpleRefNode.location(), severity, mediaType, method, path);
                                         return;
@@ -225,13 +234,12 @@ public class ReturnValidator {
                         updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, simpleRefNode.location(),
                                 severity, HTTP_200, method, path);
                     } else {
-                        // record validation - done
-                        // Array validation
+                        // record validation
                         ApiResponse apiResponse = responses.get(HTTP_200);
                         Content content = apiResponse.getContent();
-                        MediaType oasMtype = content.get("application/json");
+                        MediaType oasMtype = content.get(APPLICATION_JSON);
                         balStatusCodes.put(HTTP_200, simpleRefNode);
-                        balMediaTypes.add("application/json");
+                        balMediaTypes.add(APPLICATION_JSON);
 
                         if (oasMtype.getSchema() != null && oasMtype.getSchema().get$ref() != null) {
                             Optional<String> schemaName = extractReferenceType(oasMtype.getSchema().get$ref());
@@ -249,6 +257,10 @@ public class ReturnValidator {
         }
     }
 
+    /**
+     * Validate union type return.
+     * ex: Http:Ok | Pet | Http:Accepted
+     */
     private void validateUnionType(UnionTypeDescriptorNode uNode, ApiResponses responses) {
         List<Node> unionNodes = new ArrayList<>();
         while (uNode != null) {
@@ -278,6 +290,10 @@ public class ReturnValidator {
         }
     }
 
+    /**
+     * Validate qualifier return type ex: Http:Ok.
+     *
+     */
     private void validateQualifiedType(QualifiedNameReferenceNode qNode, ApiResponses responses) {
         qNode.identifier();
         // get the status code
@@ -306,7 +322,8 @@ public class ReturnValidator {
     }
 
     /**
-     * Validate OAS response against to ballerina return type.
+     * Validate OAS response against to ballerina return type. Here mainly we pick the ballerina status code Map ,
+     * and media type earlier we stored under the ballerina to openapi return validation.
      *
      * @param responses api Responses.
      */
@@ -333,14 +350,12 @@ public class ReturnValidator {
                         return;
                     }
                     ObjectSchema objectSchema = null;
-                    String oasSchema = "Anonymous ObjectSchema";
                     if (schema.getSchema().get$ref() != null) {
                         //object schema
                         Optional<String> schemaName = extractReferenceType(schema.getSchema().get$ref());
                         if (schemaName.isEmpty()) {
                             return;
                         }
-                        oasSchema = schemaName.get();
                         Schema<?> vschema = openAPI.getComponents().getSchemas().get(schemaName.get());
                         if (vschema instanceof ObjectSchema) {
                             objectSchema = (ObjectSchema) vschema;
@@ -372,13 +387,15 @@ public class ReturnValidator {
                                                 typeInSymbol.getModule().orElseThrow().getName().orElseThrow())) {
                                             isHttp = true;
                                             Map<String, RecordFieldSymbol> fields = typeSymbol.fieldDescriptors();
-                                            TypeSymbol bodyFieldType = fields.get("body").typeDescriptor();
+                                            TypeSymbol bodyFieldType = fields.get(BODY).typeDescriptor();
                                             //TODO inline record both ballerina and schema
                                             //TODO array type
-                                            TypeValidatorUtils.validateObjectSchema(objectSchema, bodyFieldType,
-                                                    context, ((TypeReferenceTypeSymbol) bodyFieldType)
-                                                            .definition().getName().orElse("Anonymous Record"),
-                                                    severity);
+                                            if (bodyFieldType instanceof  TypeReferenceTypeSymbol) {
+                                                TypeValidatorUtils.validateObjectSchema(objectSchema, bodyFieldType,
+                                                        context, ((TypeReferenceTypeSymbol) bodyFieldType)
+                                                                .definition().getName().orElse("Anonymous Record"),
+                                                        severity);
+                                            }
                                         }
                                     }
                                     if (!isHttp) {

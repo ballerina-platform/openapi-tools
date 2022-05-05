@@ -42,9 +42,7 @@ under the License.
             <class name="io.ballerina.openapi.validator.tests.RequestBodyValidationTests"/>
             <class name="io.ballerina.openapi.validator.tests.RecordValidationTests"/>
             <class name="io.ballerina.openapi.validator.tests.ReturnTypeValidationTests"/>
-<!--            <class name="io.ballerina.openapi.validator.tests.ResourceToOperationTests"/>-->
-<!--            <class name="io.ballerina.openapi.validator.tests.ServiceValidationTests"/>-->
-<!--            <class name="io.ballerina.openapi.validator.tests.TypeMisMatchTests"/>-->
+            <class name="io.ballerina.openapi.validator.tests.FilterTests"/>
         </classes>
     </test>
 </suite>

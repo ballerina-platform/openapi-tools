@@ -124,4 +124,9 @@ public class Constants {
     public static final String HTTP_500 = "500";
     public static final String HTTP_202 = "202";
 
+    public static final String TRUE = "true";
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String BODY = "body";
+    public static final String SQUARE_BRACKETS = "[]";
+
 }

@@ -17,14 +17,19 @@
  */
 package io.ballerina.openapi.validator;
 
+import io.ballerina.openapi.validator.error.CompilationError;
+import io.ballerina.openapi.validator.model.Filter;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+
+import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
 
 /**
  * This model used to filter and validate all the operations according to the given filter and filter the service
  * resource in the resource file.
  *
- * @since 2.0.0
+ * @since 2201.1.0
  */
 public class ServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
     private final ServiceValidator serviceValidator;
@@ -42,9 +47,31 @@ public class ServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisConte
         if (this.preValidator.getOpenAPI() == null) {
             return;
         }
-        this.serviceValidator.initialize(syntaxContext, this.preValidator.getOpenAPI(), this.preValidator.getFilter());
+        Filter filter = this.preValidator.getFilter();
+        boolean tagEnabled = filter.getTag() != null;
+        boolean operationEnabled = filter.getOperation() != null;
+        boolean excludeTagsEnabled = filter.getExcludeTag() != null;
+        boolean excludeOperationEnable = filter.getExcludeOperation() != null;
+        // 1. When the both tag and e.tags enable compiler gives compilation error.
+        if (tagEnabled && excludeTagsEnabled) {
+            updateContext(syntaxContext, CompilationError.BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES,
+                    syntaxContext.node().location(), DiagnosticSeverity.ERROR);
+            return;
+        }
+        // 2. When the both operation and e. operations enable compiler gives compilation error.
+        if (operationEnabled && excludeOperationEnable) {
+            updateContext(syntaxContext, CompilationError.BOTH_OPERATIONS_AND_EXCLUDE_OPERATIONS_ENABLES,
+                    syntaxContext.node().location(), DiagnosticSeverity.ERROR);
+            return;
+        }
+        // This is the annotation has not any filters to filter the operations.
+        if (!tagEnabled && !operationEnabled && !excludeOperationEnable && !excludeTagsEnabled) {
+            updateContext(syntaxContext, CompilationError.FOUR_ANNOTATION_FIELDS,
+                    syntaxContext.node().location(), DiagnosticSeverity.ERROR);
+            return;
+        }
+        this.serviceValidator.initialize(syntaxContext, this.preValidator.getOpenAPI(), filter);
         this.serviceValidator.validate();
 
     }
-    //Extract details from openapi annotation.
 }

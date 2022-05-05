@@ -20,6 +20,8 @@ package io.ballerina.openapi.validator.error;
 
 /**
  * Container for ErrorCode Constants used in validator plugin.
+ *
+ * @since 2201.1.0
  */
 public enum ErrorCode {
     OPENAPI_VALIDATOR_001,
@@ -50,5 +52,7 @@ public enum ErrorCode {
     OPENAPI_VALIDATOR_026,
     OPENAPI_VALIDATOR_027,
     OPENAPI_VALIDATOR_028,
-    OPENAPI_VALIDATOR_029
+    OPENAPI_VALIDATOR_029,
+    OPENAPI_VALIDATOR_030
+
 }

@@ -21,7 +21,7 @@ package io.ballerina.openapi.validator.error;
 /**
  * This {@code DiagnosticMessages} enum class for containing the error message related to openapi validator plugin.
  *
- * @since 2.0.0
+ * @since 2201.1.0
  */
 public enum CompilationError {
     INVALID_CONTRACT_PATH(ErrorCode.OPENAPI_VALIDATOR_001, ErrorMessage.ERROR_001),
@@ -53,7 +53,8 @@ public enum CompilationError {
     UNIMPLEMENTED_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_026, ErrorMessage.ERROR_026),
     UNIMPLEMENTED_REQUEST_BODY(ErrorCode.OPENAPI_VALIDATOR_027, ErrorMessage.ERROR_027),
     UNIMPLEMENTED_STATUS_CODE(ErrorCode.OPENAPI_VALIDATOR_028, ErrorMessage.ERROR_028),
-    UNIMPLEMENTED_RESPONSE_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_029, ErrorMessage.ERROR_029);
+    UNIMPLEMENTED_RESPONSE_MEDIA_TYPE(ErrorCode.OPENAPI_VALIDATOR_029, ErrorMessage.ERROR_029),
+    FOUR_ANNOTATION_FIELDS(ErrorCode.OPENAPI_VALIDATOR_030, ErrorMessage.ERROR_030);
 
 
 

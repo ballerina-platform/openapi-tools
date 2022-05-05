@@ -115,8 +115,6 @@ public class ValidatorUtils {
             throws  IOException {
         Path contractPath = Paths.get(definitionURI);
         ParseOptions parseOptions = new ParseOptions();
-//        parseOptions.setResolve(true);
-//        parseOptions.setResolveFully(true);
 
         if (!Files.exists(contractPath)) {
             updateContext(context, CompilationError.INVALID_CONTRACT_PATH, location, DiagnosticSeverity.ERROR);
@@ -206,40 +204,39 @@ public class ValidatorUtils {
         boolean excludeTagsEnabled = filter.getExcludeTag() != null;
         boolean excludeOperationEnable = filter.getExcludeOperation() != null;
 
-        // 1. When the both tag and e.tags enable compiler gives compilation error.
-        if (tagEnabled && excludeTagsEnabled) {
-            updateContext(context, CompilationError.BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES, context.node().location(),
-                    DiagnosticSeverity.ERROR);
-            return false;
+        if (excludeTagsEnabled && excludeOperationEnable) {
+            return tags == null || Collections.disjoint(tags, filter.getExcludeTag())  &&
+                    operationId != null && !filter.getExcludeOperation().contains(operationId);
         }
-        // 2. When the both operation and e. operations enable compiler gives compilation error.
-        if (operationEnabled && excludeOperationEnable) {
-            updateContext(context, CompilationError.BOTH_OPERATIONS_AND_EXCLUDE_OPERATIONS_ENABLES,
-                    context.node().location(), DiagnosticSeverity.ERROR);
-            return false;
+
+        if (tagEnabled && operationEnabled) {
+            return operationId != null && filter.getOperation().contains(operationId)  ||
+                    tags != null && !Collections.disjoint(tags, filter.getTag());
         }
-        // This is the annotation has not any filters to filter the operations.
-        if (!tagEnabled && !operationEnabled && !excludeOperationEnable && !excludeTagsEnabled) {
-            return true;
-        }
-        if (tagEnabled) {
-            if ((operationEnabled && operationId != null) && (filter.getOperation().contains(operationId))) {
-                // 3. tag + operation = union
-                return true;
-            } else if ((excludeOperationEnable && operationId != null) &&
-                    (filter.getOperation().contains(operationId))) {
-                // 4. tag + e.operation = all tags remove e.operations
-                return false;
-            } else if (tags != null && !Collections.disjoint(tags, filter.getTag())) {
-                return true;
+
+        if (operationEnabled) {
+            if (excludeTagsEnabled) {
+                return tags == null || Collections.disjoint(tags, filter.getExcludeTag());
             }
+            return operationId != null && filter.getOperation().contains(operationId);
         }
-        if (excludeTagsEnabled) {
-            return tags == null || Collections.disjoint(tags, filter.getExcludeTag());
+
+        if (tagEnabled) {
+            if (tags != null && !Collections.disjoint(tags, filter.getTag())) {
+                if (excludeOperationEnable) {
+                    return operationId != null && !filter.getExcludeOperation().contains(operationId);
+                }
+            }
+            return tags != null && !Collections.disjoint(tags, filter.getTag());
         }
-        // Here scenarios operationId + e.tags won't consider bcz if some user give the operation for filter ,
+
+        if (excludeOperationEnable) {
+            return operationId != null && !filter.getExcludeOperation().contains(operationId);
+        }
+
+        return tags == null || Collections.disjoint(tags, filter.getExcludeTag());
+        // if some user give the operations for filter ,
         // operation filter takes the first priority of filtering process.
-        return (operationEnabled && operationId != null) && filter.getOperation().contains(operationId);
     }
 
     /**

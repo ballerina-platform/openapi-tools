@@ -20,6 +20,8 @@ package io.ballerina.openapi.validator.error;
 
 /**
  * This enum class stores the all error messages.
+ *
+ * @since 2201.1.0
  */
 public enum ErrorMessage {
     ERROR_001("OpenAPI contract doesn't exist in the given location: %s"),
@@ -38,8 +40,10 @@ public enum ErrorMessage {
             "''{1}'', path: ''{2}'')"),
     ERROR_011("Unexpected error occur while reading the contract : {0}"),
     ERROR_012("Couldn''t read the OpenAPI contract from the given file: {0}"),
-    ERROR_013("bOTH TAGS AN DE TAGS"),
-    ERROR_014("BOTH OPERATION AND E OPERATIONS"),
+    ERROR_013("OpenAPI service validator does not support for tags and excludeTags together. Please select one from " +
+            "tags and excludeTags"),
+    ERROR_014("OpenAPI service validator does not support for operations and excludeOperations together. Please " +
+            "select one from operation and excludeOperations"),
     ERROR_015("Could not find Ballerina service resource(s) for HTTP method(s) ''{0}'' for the path ''{1}'' which is " +
             "documented in the OpenAPI contract"),
     ERROR_016("Ballerina service contains  ''{0}'' resource/s with ''{1}'' that is not documented in the " +
@@ -68,7 +72,8 @@ public enum ErrorMessage {
     ERROR_028("Could not find the implementation for return code ''{0}'' in the counterpart Ballerina service " +
             "resource (method: ''{1}'', path: ''{2}'')"),
     ERROR_029("Could not find the implementation for return media type ''{0}'' in the counterpart Ballerina service " +
-            "resource (method: ''{1}'', path: ''{2}'')");
+            "resource (method: ''{1}'', path: ''{2}'')"),
+    ERROR_030("OpenAPI service validator can not be proceed with all four attributes, Please select few from them.");
 
     private final String message;
 

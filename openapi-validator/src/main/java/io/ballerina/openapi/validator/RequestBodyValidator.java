@@ -56,6 +56,8 @@ import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
 
 /**
  * This RequestBodyValidator class includes all the code related to resource request body validate.
+ *
+ * @since 2201.1.0
  */
 public class RequestBodyValidator {
 

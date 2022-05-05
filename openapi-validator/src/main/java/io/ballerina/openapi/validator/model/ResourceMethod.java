@@ -28,7 +28,7 @@ import java.util.Map;
  * This is for containing the resource functions details. This includes all path, parameters, headers, return types,
  * request body details.
  *
- * @since 2201.0.3
+ * @since 2201.1.0
  */
 public class ResourceMethod {
     private final String path;

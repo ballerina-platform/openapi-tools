@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * Summary of the OpenAPI documentation for a API path.
  *
- * @since 2.0.0
+ * @since 2201.1.0
  */
 public class OpenAPIPathSummary {
     private String path;
