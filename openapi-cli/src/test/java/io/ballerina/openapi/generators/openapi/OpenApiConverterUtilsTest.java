@@ -188,10 +188,10 @@ public class OpenApiConverterUtilsTest {
             OpenApiConverter openApiConverter = new OpenApiConverter();
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                     , false);
-            if (Files.exists(tempDir.resolve("v1_abc-hello_openapi.yaml"))) {
+            if (Files.exists(tempDir.resolve("v1_abc_hello_openapi.yaml"))) {
                 String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"),
                         "escape_identifier.yaml");
-                String generatedYaml = getStringFromGivenBalFile(tempDir, "v1_abc-hello_openapi.yaml");
+                String generatedYaml = getStringFromGivenBalFile(tempDir, "v1_abc_hello_openapi.yaml");
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
                 expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
                 Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
