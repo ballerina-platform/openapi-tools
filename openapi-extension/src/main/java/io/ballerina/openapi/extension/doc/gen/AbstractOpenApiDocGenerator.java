@@ -74,7 +74,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 boolean embed = retrieveValueForAnnotationFields(
                         serviceInfoAnnotation, Constants.EMBED)
                         .map(Boolean::parseBoolean)
-                        .orElse(true);
+                        .orElse(false);
 
                 // use the available open-api doc and update the context
                 OpenApiContractResolver.ResolverResponse resolverResponse = this.contractResolver
@@ -104,7 +104,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 String openApiDefinition = generateOpenApiDoc(
                         config.getSemanticModel(), config.getSyntaxTree(), serviceNode, targetFile);
                 if (null != openApiDefinition && !openApiDefinition.isBlank()) {
-                    updateOpenApiContext(context, serviceId, openApiDefinition, true);
+                    updateOpenApiContext(context, serviceId, openApiDefinition, false);
                 } else {
                     OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
                     updateCompilerContext(context, location, errorCode);
