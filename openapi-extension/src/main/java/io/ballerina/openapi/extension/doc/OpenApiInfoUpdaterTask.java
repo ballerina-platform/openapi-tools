@@ -131,6 +131,12 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
                 serviceDecModifier.withMetadata(updatedMetadataNode);
                 ServiceDeclarationNode updatedServiceDecNode = serviceDecModifier.apply();
                 updatedMembers.add(updatedServiceDecNode);
+            } else {
+                NodeList<AnnotationNode> annotationNodes = NodeFactory.createNodeList(
+                        getHttpServiceConfigAnnotation(openApiDef.getDefinition()));
+                MetadataNode newMetaData = NodeFactory.createMetadataNode(null, annotationNodes);
+                ServiceDeclarationNode updatedServiceNode = serviceNode.modify().withMetadata(newMetaData).apply();
+                updatedMembers.add(updatedServiceNode);
             }
         }
         return AbstractNodeFactory.createNodeList(updatedMembers);
