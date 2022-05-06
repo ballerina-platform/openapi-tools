@@ -117,27 +117,25 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
                 updatedMembers.add(memberNode);
                 continue;
             }
-            Optional<MetadataNode> metadata = serviceNode.metadata();
-            if (metadata.isPresent()) {
-                MetadataNode metadataNode = metadata.get();
-                MetadataNode.MetadataNodeModifier modifier = metadataNode.modify();
-                NodeList<AnnotationNode> updatedAnnotations = updateAnnotations(
-                        metadataNode.annotations(), openApiDef.getDefinition());
-                modifier.withAnnotations(updatedAnnotations);
-                MetadataNode updatedMetadataNode = modifier.apply();
-                ServiceDeclarationNode.ServiceDeclarationNodeModifier serviceDecModifier = serviceNode.modify();
-                serviceDecModifier.withMetadata(updatedMetadataNode);
-                ServiceDeclarationNode updatedServiceDecNode = serviceDecModifier.apply();
-                updatedMembers.add(updatedServiceDecNode);
-            } else {
-                NodeList<AnnotationNode> annotationNodes = NodeFactory.createNodeList(
-                        getHttpServiceConfigAnnotation(openApiDef.getDefinition()));
-                MetadataNode newMetaData = NodeFactory.createMetadataNode(null, annotationNodes);
-                ServiceDeclarationNode updatedServiceNode = serviceNode.modify().withMetadata(newMetaData).apply();
-                updatedMembers.add(updatedServiceNode);
-            }
+            MetadataNode metadataNode = getMetadataNode(serviceNode);
+            MetadataNode.MetadataNodeModifier modifier = metadataNode.modify();
+            NodeList<AnnotationNode> updatedAnnotations = updateAnnotations(
+                    metadataNode.annotations(), openApiDef.getDefinition());
+            modifier.withAnnotations(updatedAnnotations);
+            MetadataNode updatedMetadataNode = modifier.apply();
+            ServiceDeclarationNode.ServiceDeclarationNodeModifier serviceDecModifier = serviceNode.modify();
+            serviceDecModifier.withMetadata(updatedMetadataNode);
+            ServiceDeclarationNode updatedServiceDecNode = serviceDecModifier.apply();
+            updatedMembers.add(updatedServiceDecNode);
         }
         return AbstractNodeFactory.createNodeList(updatedMembers);
+    }
+
+    private MetadataNode getMetadataNode(ServiceDeclarationNode serviceNode) {
+        return serviceNode.metadata().orElseGet(() -> {
+            NodeList<AnnotationNode> annotations = NodeFactory.createNodeList();
+            return NodeFactory.createMetadataNode(null, annotations);
+        });
     }
 
     private NodeList<AnnotationNode> updateAnnotations(NodeList<AnnotationNode> currentAnnotations,
