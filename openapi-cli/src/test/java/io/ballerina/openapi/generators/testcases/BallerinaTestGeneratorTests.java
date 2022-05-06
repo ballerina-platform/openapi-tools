@@ -113,12 +113,12 @@ public class BallerinaTestGeneratorTests {
         return new Object[]{
                 "basic_auth.yaml",
                 "bearer_auth.yaml",
-                "oauth2_authrization_code.yaml",
+                "oauth2_authorization_code.yaml",
                 "oauth2_implicit.yaml",
                 "query_api_key.yaml",
                 "no_auth.yaml",
                 "combination_of_apikey_and_http_oauth.yaml",
-                "outh_passwordflow.yaml"
+                "oauth2_password.yaml"
         };
     }
 }

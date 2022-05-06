@@ -337,7 +337,7 @@ public class BallerinaAuthConfigGenerator {
      * Create `OAuth2ClientCredentialsGrantConfig` record with default tokenUrl.
      *
      * <pre>
-     *      # OAuth2 Client Credintials Grant Configs
+     *      # OAuth2 Client Credentials Grant Configs
      *      public type OAuth2ClientCredentialsGrantConfig record {|
      *          *http:OAuth2ClientCredentialsGrantConfig;
      *          # Token URL
@@ -350,7 +350,7 @@ public class BallerinaAuthConfigGenerator {
     public TypeDefinitionNode getOAuth2ClientCredsGrantConfigRecord() {
         Token typeName = AbstractNodeFactory.createIdentifierToken(AuthConfigTypes.CUSTOM_CLIENT_CREDENTIAL.getValue());
         NodeList<Node> recordFieldList = createNodeList(getClientCredsGrantConfigFields());
-        MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Client Credintials Grant Configs");
+        MetadataNode configRecordMetadataNode = getMetadataNode("OAuth2 Client Credentials Grant Configs");
         RecordTypeDescriptorNode recordTypeDescriptorNode =
                 NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                         createToken(OPEN_BRACE_PIPE_TOKEN), recordFieldList, null,
@@ -377,7 +377,7 @@ public class BallerinaAuthConfigGenerator {
         Token equalToken = createToken(EQUAL_TOKEN);
 
         recordFieldNodes.add(createIncludedRecordParameterNode(createEmptyNodeList(),
-                createIdentifierToken(ASTERISK_TOKEN.stringValue()),
+                createToken(ASTERISK_TOKEN),
                 createIdentifierToken("http:OAuth2ClientCredentialsGrantConfig;"), null));
 
         MetadataNode metadataNode = getMetadataNode("Token URL");
@@ -436,7 +436,7 @@ public class BallerinaAuthConfigGenerator {
         Token equalToken = createToken(EQUAL_TOKEN);
 
         recordFieldNodes.add(createIncludedRecordParameterNode(createEmptyNodeList(),
-                createIdentifierToken(ASTERISK_TOKEN.stringValue()),
+                createToken(ASTERISK_TOKEN),
                 createIdentifierToken("http:OAuth2PasswordGrantConfig;"), null));
 
         MetadataNode metadataNode = getMetadataNode("Token URL");
@@ -495,7 +495,7 @@ public class BallerinaAuthConfigGenerator {
         Token equalToken = createToken(EQUAL_TOKEN);
 
         recordFieldNodes.add(createIncludedRecordParameterNode(createEmptyNodeList(),
-                createIdentifierToken(ASTERISK_TOKEN.stringValue()),
+                createToken(ASTERISK_TOKEN),
                 createIdentifierToken("http:OAuth2RefreshTokenGrantConfig;"), null));
 
         MetadataNode metadataNode = getMetadataNode("Refresh URL");

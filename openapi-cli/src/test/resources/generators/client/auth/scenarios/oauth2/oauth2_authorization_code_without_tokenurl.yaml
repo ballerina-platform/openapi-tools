@@ -63,7 +63,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/MessagewithErrorCode'
       security:
-        - oAuth2Password: []
+        - oAuth2AuthCode: []
 components:
   schemas:
     attributes:
@@ -108,11 +108,12 @@ components:
   requestBodies: {}
   headers: {}
   securitySchemes:
-    oAuth2Password:
+    oAuth2AuthCode:
       type: oauth2
-      description: Authentication based on OAuth 2.0.
+      description: For more information, see https://api.slack.com/docs/oauth
       flows:
-        password:
+        authorizationCode:
+          authorizationUrl: https://login.salesforce.com/services/oauth2/autherize
           tokenUrl: ""
           scopes: {}
           
