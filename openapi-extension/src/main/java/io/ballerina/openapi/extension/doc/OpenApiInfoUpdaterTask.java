@@ -61,6 +61,8 @@ import static io.ballerina.openapi.extension.context.OpenApiDocContextHandler.ge
 /**
  * {@code OpenApiInfoUpdaterTask} modifies the source by including generated open-api spec for http-service
  * declarations.
+ *
+ * @since 1.1.0
  */
 public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContext> {
     @Override

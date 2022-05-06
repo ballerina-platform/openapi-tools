@@ -23,6 +23,8 @@ import io.ballerina.projects.plugins.CodeModifierContext;
 
 /**
  * {@code OpenApiCodeModifier} handles required code-modification related to open-api doc generation for http-services.
+ *
+ * @since 1.1.0
  */
 public class OpenApiCodeModifier extends CodeModifier {
     @Override
