@@ -102,6 +102,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.URL;
 public class BallerinaUtilGenerator {
 
     private boolean headersFound = false;
+    private boolean pathParametersFound = false;
     private boolean queryParamsFound = false;
     private boolean requestBodyEncodingFound = false;
     private boolean requestBodyMultipartFormDatafound = false;
@@ -134,6 +135,15 @@ public class BallerinaUtilGenerator {
      */
     public void setHeadersFound(boolean flag) {
         this.headersFound = flag;
+    }
+
+    /**
+     * Set `pathParametersFound` flag to `true` when at least one path parameter found.
+     *
+     * @param flag     Function will be called only in the occasions where flag needs to be set to `true`
+     */
+    public void setPathParametersFound(boolean flag) {
+        this.pathParametersFound = flag;
     }
 
     /**
@@ -177,6 +187,9 @@ public class BallerinaUtilGenerator {
         }
         if (headersFound) {
             functionNameList.add(GET_MAP_FOR_HEADERS);
+        }
+        if (pathParametersFound) {
+            functionNameList.add(GET_ENCODED_URI);
         }
         if (requestBodyMultipartFormDatafound) {
             functionNameList.add(CREATE_MULTIPART_BODY_PARTS);

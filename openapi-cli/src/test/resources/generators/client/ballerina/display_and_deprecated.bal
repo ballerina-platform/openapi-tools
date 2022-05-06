@@ -49,7 +49,7 @@ public isolated client class Client {
     # # Deprecated
     @deprecated
     remote isolated function showPetById(string petId, @display {label: "Result limit"} @deprecated string 'limit) returns Pets|error {
-        string resourcePath = string `/pets/${petId}`;
+        string resourcePath = string `/pets/${getEncodedUri(petId)}`;
         map<anydata> queryParam = {"limit": 'limit};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         Pets response = check self.clientEp-> get(resourcePath);

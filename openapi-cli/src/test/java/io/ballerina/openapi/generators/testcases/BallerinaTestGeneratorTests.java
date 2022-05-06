@@ -117,7 +117,8 @@ public class BallerinaTestGeneratorTests {
                 "oauth2_implicit.yaml",
                 "query_api_key.yaml",
                 "no_auth.yaml",
-                "combination_of_apikey_and_http_oauth.yaml"
+                "combination_of_apikey_and_http_oauth.yaml",
+                "outh_passwordflow.yaml"
         };
     }
 }

@@ -19,4 +19,5 @@ module ballerina.openapi.build {
     requires io.ballerina.parser;
     requires io.ballerina.openapi.converter;
     requires io.ballerina.tools.api;
+    requires org.apache.commons.io;
 }
