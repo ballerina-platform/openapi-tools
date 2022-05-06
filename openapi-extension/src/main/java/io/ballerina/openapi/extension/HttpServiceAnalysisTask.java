@@ -101,7 +101,7 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
 
     private boolean isHttp(ModuleSymbol moduleSymbol) {
         Optional<String> moduleNameOpt = moduleSymbol.getName();
-        return moduleNameOpt.isPresent() && Constants.PACKAGE_NAME.equals(moduleNameOpt.get())
+        return moduleNameOpt.isPresent() && Constants.HTTP_PACKAGE_NAME.equals(moduleNameOpt.get())
                 && Constants.PACKAGE_ORG.equals(moduleSymbol.id().orgName());
     }
 }
