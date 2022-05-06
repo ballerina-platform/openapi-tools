@@ -20,6 +20,7 @@ import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.ModuleId;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -72,10 +73,14 @@ public final class OpenApiDocContextHandler {
         addContext(context);
     }
 
-    public Optional<OpenApiDocContext> retrieveContext(ModuleId moduleId, DocumentId documentId) {
+    private Optional<OpenApiDocContext> retrieveContext(ModuleId moduleId, DocumentId documentId) {
         return this.contexts.stream()
                 .filter(ctx -> equals(ctx, moduleId, documentId))
                 .findFirst();
+    }
+
+    public List<OpenApiDocContext> retrieveAvailableContexts() {
+        return Collections.unmodifiableList(contexts);
     }
 
     private boolean equals(OpenApiDocContext context, ModuleId moduleId, DocumentId documentId) {

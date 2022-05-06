@@ -32,16 +32,16 @@ public class OpenApiDocContext {
     private final DocumentId documentId;
     private final List<OpenApiDefinition> definitions = new ArrayList<>();
 
-    public OpenApiDocContext(ModuleId moduleId, DocumentId documentId) {
+    OpenApiDocContext(ModuleId moduleId, DocumentId documentId) {
         this.moduleId = moduleId;
         this.documentId = documentId;
     }
 
-    ModuleId getModuleId() {
+    public ModuleId getModuleId() {
         return moduleId;
     }
 
-    DocumentId getDocumentId() {
+    public DocumentId getDocumentId() {
         return documentId;
     }
 

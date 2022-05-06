@@ -47,6 +47,7 @@ import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.plugins.ModifierTask;
 import io.ballerina.projects.plugins.SourceModifierContext;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.ballerina.tools.text.TextDocument;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -72,29 +73,22 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
             return;
         }
 
-        for (ModuleId modId : context.currentPackage().moduleIds()) {
-            Module currentModule = context.currentPackage().module(modId);
-            SemanticModel semanticModel = context.compilation().getSemanticModel(modId);
-            for (DocumentId docId : currentModule.documentIds()) {
-                Optional<OpenApiDocContext> servicePathContextOpt = getContextHandler().retrieveContext(modId, docId);
-                // if the shared service-path generation context not found, do not proceed
-                if (servicePathContextOpt.isEmpty()) {
-                    continue;
-                }
-                List<OpenApiDocContext.OpenApiDefinition> servicePathDetails = servicePathContextOpt.get()
-                        .getOpenApiDetails();
-                if (servicePathDetails.isEmpty()) {
-                    continue;
-                }
-
-                Document currentDoc = currentModule.document(docId);
-                ModulePartNode rootNode = currentDoc.syntaxTree().rootNode();
-                NodeList<ModuleMemberDeclarationNode> newMembers = updateMemberNodes(
-                        rootNode.members(), servicePathDetails, semanticModel);
-                ModulePartNode newModulePart =
-                        rootNode.modify(rootNode.imports(), newMembers, rootNode.eofToken());
-                SyntaxTree updatedSyntaxTree = currentDoc.syntaxTree().modifyWith(newModulePart);
-                context.modifySourceFile(updatedSyntaxTree.textDocument(), docId);
+        for (OpenApiDocContext openApiContext: getContextHandler().retrieveAvailableContexts()) {
+            ModuleId moduleId = openApiContext.getModuleId();
+            Module currentModule = context.currentPackage().module(moduleId);
+            DocumentId documentId = openApiContext.getDocumentId();
+            Document currentDoc = currentModule.document(documentId);
+            SemanticModel semanticModel = context.compilation().getSemanticModel(moduleId);
+            ModulePartNode rootNode = currentDoc.syntaxTree().rootNode();
+            NodeList<ModuleMemberDeclarationNode> newMembers = updateMemberNodes(
+                    rootNode.members(), openApiContext.getOpenApiDetails(), semanticModel);
+            ModulePartNode newModulePart = rootNode.modify(rootNode.imports(), newMembers, rootNode.eofToken());
+            SyntaxTree updatedSyntaxTree = currentDoc.syntaxTree().modifyWith(newModulePart);
+            TextDocument textDocument = updatedSyntaxTree.textDocument();
+            if (currentModule.documentIds().contains(documentId)) {
+                context.modifySourceFile(textDocument, documentId);
+            } else {
+                context.modifyTestSourceFile(textDocument, documentId);
             }
         }
     }
@@ -119,6 +113,10 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
                 continue;
             }
             OpenApiDocContext.OpenApiDefinition openApiDef = openApiDefOpt.get();
+            if (!openApiDef.isAutoEmbedToService()) {
+                updatedMembers.add(memberNode);
+                continue;
+            }
             Optional<MetadataNode> metadata = serviceNode.metadata();
             if (metadata.isPresent()) {
                 MetadataNode metadataNode = metadata.get();
