@@ -56,6 +56,16 @@ public class RecordDefaultValueTests {
                         "default_optional_string_schema.bal", syntaxTree);
     }
 
+    @Test(description = "Test for default optional String fields with value double quote in records")
+    public void testDefaultWithDoubleQuote() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+                "/default_optional_schema_with_doublequote.yaml"), true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/" +
+                "default_optional_schema_with_doublequote.bal", syntaxTree);
+    }
+
     @Test(description = "Test for default value for array record")
     public void testDefaultArray() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
