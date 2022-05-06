@@ -1,0 +1,63 @@
+openapi: 3.0.1
+info:
+  title: Main Openapi Yaml
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "8990"
+paths:
+  /pet:
+    put:
+      operationId: operation_put_/pet
+      responses:
+        "202":
+          description: Accepted
+    post:
+      operationId: operation_post_/pet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        "202":
+          description: Accepted
+  /pet02:
+    post:
+      operationId: operation_post_/pet02
+      responses:
+        "202":
+          description: Accepted
+components:
+  schemas:
+    Type:
+      required:
+        - id
+        - type
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        type:
+          type: string
+    Pet:
+      required:
+        - id
+        - tags
+        - type
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        tags:
+          type: array
+          items:
+            type: string
+        type:
+          $ref: '#/components/schemas/Type'

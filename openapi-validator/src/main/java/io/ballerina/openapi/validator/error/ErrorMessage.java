@@ -24,7 +24,7 @@ package io.ballerina.openapi.validator.error;
  * @since 2201.1.0
  */
 public enum ErrorMessage {
-    ERROR_001("OpenAPI contract doesn't exist in the given location: %s"),
+    ERROR_001("OpenAPI contract does not exist in the given location: '{0}'"),
     ERROR_002("Invalid file type. Provide either a .yaml or .json file."),
     ERROR_003("Given OpenAPI contract file path is an empty string."),
     ERROR_004("OpenAPI annotation won''t support for non http service."),
@@ -39,7 +39,7 @@ public enum ErrorMessage {
     ERROR_010("Missing OpenAPI contract parameter ''{0}'' in the counterpart Ballerina service resource (method: " +
             "''{1}'', path: ''{2}'')"),
     ERROR_011("Unexpected error occur while reading the contract : {0}"),
-    ERROR_012("Couldn''t read the OpenAPI contract from the given file: {0}"),
+    ERROR_012("Invalid contract file {0}"),
     ERROR_013("OpenAPI service validator does not support for tags and excludeTags together. Please select one from " +
             "tags and excludeTags"),
     ERROR_014("OpenAPI service validator does not support for operations and excludeOperations together. Please " +
@@ -56,7 +56,7 @@ public enum ErrorMessage {
     ERROR_020("''{0}'' header for the method ''{1}'' of the resource associated with the path" +
             " ''{2}'' is not documented in the OpenAPI contract."),
     ERROR_021("Request body for the method ''{0}'' of the resource associated with the path" +
-            " ''{2}'' is not documented in the OpenAPI contract."),
+            " ''{1}'' is not documented in the OpenAPI contract."),
     ERROR_022("Implementation payload type does not match with OAS contract content type (expected ''{0}'',found " +
             "''{1}'') for the http method ''{2}'' that associated with the path ''{3}''."),
     ERROR_023("Undocumented resource return status code ''{0}'' for the method ''{1}'' of the resource " +

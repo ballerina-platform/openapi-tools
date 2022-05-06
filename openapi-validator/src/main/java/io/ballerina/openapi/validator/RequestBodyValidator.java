@@ -255,7 +255,7 @@ public class RequestBodyValidator {
                             if (payloadSchema instanceof ObjectSchema) {
                                 //Get balllerina typeSymbol
                                 TypeValidatorUtils.validateObjectSchema((ObjectSchema) payloadSchema, typeSymbol,
-                                        context, balRecordName, severity);
+                                        context, balRecordName, location, severity);
                             } else if (payloadSchema instanceof ComposedSchema) {
                                 //TODO: oneOf, AllOF handle
                                 return;
@@ -274,7 +274,7 @@ public class RequestBodyValidator {
                                                     .replaceAll("\\]", "");
                                             TypeValidatorUtils.validateObjectSchema((ObjectSchema) schema,
                                                     arrayType.memberTypeDescriptor(),
-                                                    context, balRecordName, severity);
+                                                    context, balRecordName, location, severity);
                                         }
                                     }
                                 }

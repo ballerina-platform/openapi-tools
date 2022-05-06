@@ -286,6 +286,21 @@ public class ReturnValidator {
                     updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, uNode.location(), severity,
                             HTTP_500, method, path);
                 }
+            }  else if (reNode instanceof BuiltinSimpleNameReferenceNode) {
+                if (!responses.containsKey(HTTP_200)) {
+                    updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
+                            reNode.location(), severity, HTTP_200, method, path);
+                } else {
+                    balStatusCodes.put(HTTP_200, (BuiltinSimpleNameReferenceNode) reNode);
+                    String mediaType = getMediaType(reNode.kind());
+                    ApiResponse apiResponse = responses.get(HTTP_200);
+                    Content content = apiResponse.getContent();
+                    balMediaTypes.add(mediaType);
+                    if (content == null || !content.containsKey(mediaType)) {
+                        updateContext(context, CompilationError.UNDOCUMENTED_RETURN_MEDIA_TYPE,
+                                reNode.location(), severity, mediaType, method, path);
+                    }
+                }
             }
         }
     }
@@ -394,16 +409,21 @@ public class ReturnValidator {
                                                 TypeValidatorUtils.validateObjectSchema(objectSchema, bodyFieldType,
                                                         context, ((TypeReferenceTypeSymbol) bodyFieldType)
                                                                 .definition().getName().orElse("Anonymous Record"),
-                                                        severity);
+                                                        location, severity);
                                             }
                                         }
                                     }
                                     if (!isHttp) {
                                         TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol,
                                                 context, ((TypeReferenceTypeSymbol) typeSymbol).definition().getName().
-                                                        orElse("Anonymous Record"), severity);
+                                                        orElse("Anonymous Record"), location, severity);
                                     }
+                                } else {
+                                    TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol,
+                                            context, refType.definition().getName().
+                                                    orElse("Anonymous Record"), location, severity);
                                 }
+
                             }
                         }
                     }

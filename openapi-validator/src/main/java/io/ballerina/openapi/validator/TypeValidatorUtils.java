@@ -44,6 +44,7 @@ import static io.ballerina.openapi.validator.Constants.FLOAT;
 import static io.ballerina.openapi.validator.Constants.INT;
 import static io.ballerina.openapi.validator.Constants.NUMBER;
 import static io.ballerina.openapi.validator.Constants.RECORD;
+import static io.ballerina.openapi.validator.Constants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.validator.Constants.STRING;
 import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
 import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
@@ -80,6 +81,11 @@ public class TypeValidatorUtils {
                     if (field.getKey().trim().equals(property.getKey().trim())) {
                         isFieldExist = true;
                         String fieldType = field.getValue().typeDescriptor().signature();
+                        if (field.getValue().typeDescriptor() instanceof TypeReferenceTypeSymbol) {
+                            TypeReferenceTypeSymbol typeRef =
+                                    (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
+                            fieldType = typeRef.definition().getName().get();
+                        }
 
                         Schema schemaValue = property.getValue();
                         String oas = schemaValue.getType();
@@ -137,7 +143,7 @@ public class TypeValidatorUtils {
         String balFieldType = field.getValue().typeDescriptor().signature();
         Schema<?> arraySchemaItems = arraySchema.getItems();
         ArraySchema traverseNestedArraySchema;
-        String array = "[]";
+        String array = SQUARE_BRACKETS;
         StringBuilder arrayBuilder = new StringBuilder();
         arrayBuilder.append(array);
         String oasArrayItems = arraySchema.getItems().getType();
@@ -166,9 +172,11 @@ public class TypeValidatorUtils {
         oasType = Optional.of(convertOpenAPITypeToBallerina(oasArrayItems).orElse(oasArrayItems)
                 + arrayBuilder.toString());
         messageOasType = oasArrayItems + arrayBuilder.toString();
-        // type mismatch error
-        updateContext(context, CompilationError.TYPE_MISMATCH_FIELD, field.getValue().getLocation().orElse(null),
-                severity, balFieldType, messageOasType, field.getKey(), balRecord);
+        if (!balFieldType.equals(oasType.get())) {
+            // type mismatch error
+            updateContext(context, CompilationError.TYPE_MISMATCH_FIELD, field.getValue().getLocation().orElse(null),
+                    severity, balFieldType, messageOasType, field.getKey(), balRecord);
+        }
         return oasType;
     }
 
@@ -232,17 +240,24 @@ public class TypeValidatorUtils {
         }
     }
 
-    // todo: OpenAPI-to-Ballerina schema
-
+    /**
+     * This util is to validate OpenAPI Object Schema against to Ballerina record.
+     */
     public static void validateObjectSchema(ObjectSchema objectSchema, TypeSymbol typeSymbol,
-                                          SyntaxNodeAnalysisContext context, String balRecord,
+                                          SyntaxNodeAnalysisContext context, String balRecord, Location parentLocation,
                                             DiagnosticSeverity severity) {
-
-        Location location = typeSymbol.getLocation().get();
+        //when union type typeSymbol didn't give location currently
+        Location location;
+        if (typeSymbol.getLocation().isEmpty()) {
+            location = parentLocation;
+        } else {
+            location = typeSymbol.getLocation().get();
+        }
         if (typeSymbol instanceof RecordTypeSymbol || typeSymbol instanceof TypeReferenceTypeSymbol) {
             if (typeSymbol instanceof TypeReferenceTypeSymbol) {
                 typeSymbol = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
             }
+
             RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeSymbol;
             Map<String, Schema> properties = objectSchema.getProperties();
             Map<String, RecordFieldSymbol> recordFieldSymbolMap = recordTypeSymbol.fieldDescriptors();

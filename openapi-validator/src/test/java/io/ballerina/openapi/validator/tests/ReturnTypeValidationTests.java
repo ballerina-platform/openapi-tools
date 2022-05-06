@@ -181,18 +181,29 @@ public class ReturnTypeValidationTests {
     }
 
 
-//    @Test(description = "Unimplemented code in OAS to ballerina")
-//    public void singleCodeOas() {
-//        Path path = RES_DIR.resolve("single.bal");
-//        Project project = getProject(path);
-//        DiagnosticResult diagnostic = getCompilation(project);
-//        Object[] errors = getDiagnostics(diagnostic);
-//        Assert.assertTrue(errors.length == 1);
-//        String typeMismatch = "ERROR [nil_error_return.bal:(8:39,8:44)] Undocumented resource return status code" +
-//                " '500' for the method 'get' of the resource associated with the path '/'.";
-//        Assert.assertEquals(typeMismatch, errors[0].toString());
-//    }
+    @Test(description = "Unimplemented code in OAS to ballerina")
+    public void singleCodeOas() {
+        Path path = RES_DIR.resolve("unimplemented_status_code.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 1);
+        String typeMismatch = "ERROR [unimplemented_status_code.bal:(10:5,12:6)] Could not find the implementation" +
+                " for return code '404' in the counterpart Ballerina service resource (method: 'get', path: '/')";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
 
+    @Test(description = "Unimplemented code in OAS to ballerina")
+    public void record() {
+        Path path = RES_DIR.resolve("record.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertTrue(errors.length == 5);
+        String typeMismatch = "ERROR [unimplemented_status_code.bal:(10:5,12:6)] Could not find the implementation" +
+                " for return code '404' in the counterpart Ballerina service resource (method: 'get', path: '/')";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
 
     @Test(description = "Module level record", enabled = false)
     public void handleModuleLevelQualifierRecord() {

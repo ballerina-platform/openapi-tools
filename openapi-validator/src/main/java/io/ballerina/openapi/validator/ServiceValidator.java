@@ -270,9 +270,6 @@ public class ServiceValidator {
                 ReturnSummary returnSummary = new ReturnSummary(returnValidator.getBalStatusCodes(),
                         returnValidator.getBalMediaTypes());
                 balMethodReturnSummary.put(method.getKey(), returnSummary);
-//                balStatusCodes.putAll(returnValidator.getBalStatusCodes());
-//                balReturnMediaTypes.clear();
-//                balReturnMediaTypes.addAll(returnValidator.getBalMediaTypes());
             }
             balReturnSummary.put(path.getKey(), balMethodReturnSummary);
         }
@@ -437,10 +434,12 @@ public class ServiceValidator {
                     //TODO: map<json> type matching
                     //TODO: Handle optional
                     //Array mapping
-                    if (type.isEmpty() || ballerinaType.contains("[]") && !ballerinaType.equals(type.get() + "[]")) {
+                    if (type.isEmpty() || ballerinaType.contains(SQUARE_BRACKETS) &&
+                            !ballerinaType.equals(type.get() + SQUARE_BRACKETS)) {
                         // This special concatenation is used to check the array query parameters
                         updateContext(context, CompilationError.TYPE_MISMATCH_PARAMETER,
-                                parameter.getValue().location(), filter.getKind(), ballerinaType, oasType + "[]",
+                                parameter.getValue().location(), filter.getKind(), ballerinaType, oasType +
+                                        SQUARE_BRACKETS,
                                 parameterName, method.getKey(), method.getValue().getPath());
                         break;
                     }

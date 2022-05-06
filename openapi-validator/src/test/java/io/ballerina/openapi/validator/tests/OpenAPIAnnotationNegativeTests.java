@@ -19,6 +19,8 @@ package io.ballerina.openapi.validator.tests;
 
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Project;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.nio.file.Path;
@@ -32,18 +34,15 @@ import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
  */
 public class OpenAPIAnnotationNegativeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/annotation").toAbsolutePath();
-    //1. contract path " "
-    //2. contract path location invaild
-    //3. contract in invalid
-    //4. contract path missing with filters enable
-    //5. annotation is empty
-    //6. annotation is with only embed field
-    @Test(description = "Contract attribute has path empty string")
+    @Test(description = "Contract has annotation without attributes")
     public void annotationWithoutFields() {
         Path path = RES_DIR.resolve("negative/annotation_without_fields.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         int i = diagnostic.diagnosticCount();
+        Object[] errors = diagnostic.diagnostics().stream().filter(d ->
+                DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
+        Assert.assertEquals(errors.length, 0);
     }
 
     @Test(description = "Contract attribute has path empty string")
@@ -52,5 +51,52 @@ public class OpenAPIAnnotationNegativeTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         int i = diagnostic.diagnosticCount();
+        Object[] errors = diagnostic.diagnostics().stream().filter(d ->
+                DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
+        Assert.assertEquals(errors.length, 0);
+    }
+
+    @Test(description = "contract: when it has invalid format instead of .json and .yaml format contract")
+    public void invalidFormat() {
+        Path path = RES_DIR.resolve("negative/contract_format_invalid.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = diagnostic.diagnostics().stream().filter(d ->
+                        DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
+        Assert.assertEquals(errors.length, 1);
+        Assert.assertTrue(errors[0].toString().contains("ERROR [contract_format_invalid.bal:(4:1,11:2)] " +
+                "Invalid file type. Provide either a .yaml or .json file."));
+    }
+
+    @Test(description = "contract path location invaild")
+    public void invalidLocation() {
+        Path path = RES_DIR.resolve("negative/contract_path_invalid.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = diagnostic.diagnostics().stream().filter(d ->
+                DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
+        Assert.assertEquals(errors.length, 1);
+        Assert.assertTrue(errors[0].toString().contains("ERROR [contract_path_invalid.bal:(4:1,11:2)] OpenAPI " +
+                "contract does not exist in the given location:"));
+    }
+
+    @Test(description = "contract path missing with filters enable")
+    public void missingContractPath() {
+        Path path = RES_DIR.resolve("negative/missing_contract_path.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = diagnostic.diagnostics().stream().filter(d ->
+                DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
+        Assert.assertEquals(errors.length, 0);
+    }
+
+    @Test(description = "annotation is with only embed field")
+    public void withEmbedField() {
+        Path path = RES_DIR.resolve("negative/with_embed_field.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = diagnostic.diagnostics().stream().filter(d ->
+                DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
+        Assert.assertEquals(errors.length, 0);
     }
 }

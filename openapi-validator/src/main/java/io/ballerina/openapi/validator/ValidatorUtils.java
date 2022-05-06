@@ -117,12 +117,17 @@ public class ValidatorUtils {
         ParseOptions parseOptions = new ParseOptions();
 
         if (!Files.exists(contractPath)) {
-            updateContext(context, CompilationError.INVALID_CONTRACT_PATH, location, DiagnosticSeverity.ERROR);
+            updateContext(context, CompilationError.INVALID_CONTRACT_PATH, location, DiagnosticSeverity.ERROR,
+                    contractPath);
+            return null;
         }
+
         if (!(definitionURI.endsWith(YAML) || definitionURI.endsWith(JSON) || definitionURI.endsWith(YML))) {
             updateContext(context, CompilationError.INVALID_CONTRACT_FORMAT, location, DiagnosticSeverity.ERROR);
+            return null;
         }
-        String openAPIFileContent = Files.readString(Paths.get(definitionURI));
+
+        String openAPIFileContent = Files.readString(contractPath);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null,
                 parseOptions);
         OpenAPI api = parseResult.getOpenAPI();

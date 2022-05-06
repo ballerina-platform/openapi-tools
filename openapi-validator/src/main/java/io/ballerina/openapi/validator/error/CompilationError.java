@@ -74,8 +74,5 @@ public enum CompilationError {
         return description;
     }
 
-//    public DiagnosticSeverity getSeverity() {
-//        return severity;
-//    }
 }
 

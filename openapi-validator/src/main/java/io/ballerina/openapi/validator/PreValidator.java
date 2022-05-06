@@ -43,7 +43,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -249,7 +248,7 @@ public class PreValidator {
                 File openapiContract = new File(parentFolder, openAPIPath.toString());
                 relativePath = Paths.get(openapiContract.getCanonicalPath());
             }
-            if (relativePath != null && Files.exists(relativePath)) {
+            if (relativePath != null) {
                 return parseOpenAPIFile(context, relativePath.toString(), location);
             }
         } catch (IOException e) {
