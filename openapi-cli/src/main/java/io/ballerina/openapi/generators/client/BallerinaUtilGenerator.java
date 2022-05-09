@@ -389,15 +389,15 @@ public class BallerinaUtilGenerator {
     }
 
     /**
-     * Gets the path of the utils.bal template at the time of execution.
+     * Gets the path of the utils_openapi.bal template at the time of execution.
      *
-     * @return  Path to utils.bal file in the temporary directory created
-     * @throws  IOException     When failed to get the templates/utils.bal file from resources
+     * @return  Path to utils_openapi.bal file in the temporary directory created
+     * @throws  IOException     When failed to get the templates/utils_openapi.bal file from resources
      */
     private Path getResourceFilePath() throws IOException {
         Path path = null;
         ClassLoader classLoader = getClass().getClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream("templates/utils.bal");
+        InputStream inputStream = classLoader.getResourceAsStream("templates/utils_openapi.bal");
         if (inputStream != null) {
             String clientSyntaxTreeString = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
             Path tmpDir = Files.createTempDirectory(".util-tmp" + System.nanoTime());
