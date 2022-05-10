@@ -31,7 +31,7 @@ public type ServiceInformation record {|
     string[]? excludeTags = [];
     string[]? excludeOperations = [];
     boolean failOnErrors = true;
-    boolean embed = true;
+    boolean embed = false;
     string title?;
     string 'version?;
 |};
