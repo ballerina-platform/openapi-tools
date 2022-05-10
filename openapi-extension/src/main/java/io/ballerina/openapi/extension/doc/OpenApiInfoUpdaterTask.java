@@ -50,11 +50,8 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.text.TextDocument;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.extension.context.OpenApiDocContextHandler.getContextHandler;
 
@@ -172,11 +169,20 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
         MappingConstructorExpressionNode annotationValue = annotationValueOpt.get();
         SeparatedNodeList<MappingFieldNode> existingFields = annotationValue.fields();
         Token separator = NodeFactory.createToken(SyntaxKind.COMMA_TOKEN);
+        boolean openApiDefAvailable = false;
         for (MappingFieldNode field : existingFields) {
+            if (field instanceof SpecificFieldNode) {
+                String fieldName = ((SpecificFieldNode) field).fieldName().toString();
+                openApiDefAvailable = Constants.OPEN_API_DEFINITION_FIELD.equals(fieldName);
+            }
             fields.add(field);
             fields.add(separator);
         }
-        fields.add(createOpenApiDefinitionField(servicePath));
+        if (openApiDefAvailable) {
+            fields.remove(fields.size() - 1);
+        } else {
+            fields.add(createOpenApiDefinitionField(servicePath));
+        }
         return NodeFactory.createSeparatedNodeList(fields);
     }
 
