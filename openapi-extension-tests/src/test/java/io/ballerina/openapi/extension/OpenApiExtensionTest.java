@@ -123,6 +123,13 @@ public class OpenApiExtensionTest {
         Assert.assertTrue(noOpenApiWarningAvailable(compilation));
     }
 
+    @Test
+    public void testGeneratedDocEmbedWithUserProvidedOpenApiDoc() {
+        Package currentPackage = loadPackage("sample_11", false);
+        PackageCompilation compilation = currentPackage.getCompilation();
+        Assert.assertTrue(noOpenApiWarningAvailable(compilation));
+    }
+
     private Package loadPackage(String path, boolean isSingleFile) {
         Path projectDirPath = RESOURCE_DIRECTORY.resolve(path);
         if (isSingleFile) {
