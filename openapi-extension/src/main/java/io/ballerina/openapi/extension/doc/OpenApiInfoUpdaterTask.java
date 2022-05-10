@@ -50,8 +50,11 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.text.TextDocument;
 
 import java.nio.charset.Charset;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 import static io.ballerina.openapi.extension.context.OpenApiDocContextHandler.getContextHandler;
 
