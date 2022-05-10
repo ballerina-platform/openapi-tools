@@ -172,11 +172,22 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
         MappingConstructorExpressionNode annotationValue = annotationValueOpt.get();
         SeparatedNodeList<MappingFieldNode> existingFields = annotationValue.fields();
         Token separator = NodeFactory.createToken(SyntaxKind.COMMA_TOKEN);
+        boolean openApiDefAvailable = false;
         for (MappingFieldNode field : existingFields) {
+            if (field instanceof SpecificFieldNode) {
+                String fieldName = ((SpecificFieldNode) field).fieldName().toString();
+                openApiDefAvailable = Constants.OPEN_API_DEFINITION_FIELD.equals(fieldName);
+            }
             fields.add(field);
             fields.add(separator);
         }
-        fields.add(createOpenApiDefinitionField(servicePath));
+        if (openApiDefAvailable) {
+            if (fields.size() != 0) {
+                fields.remove(fields.size() - 1);
+            }
+        } else {
+            fields.add(createOpenApiDefinitionField(servicePath));
+        }
         return NodeFactory.createSeparatedNodeList(fields);
     }
 
