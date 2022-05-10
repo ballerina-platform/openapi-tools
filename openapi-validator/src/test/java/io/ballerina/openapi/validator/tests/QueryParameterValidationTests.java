@@ -43,14 +43,15 @@ public class QueryParameterValidationTests {
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 2);
         // Type mismatch
-        String typeMismatchError = "ERROR [query_parameter.bal:(8:32,8:45)] Implementation type does not match with " +
-                "OAS contract type (expected 'string',found 'integer') for the parameter 'offset' in http method " +
-                "'get' that associated with the path '/pets'.";
+        String typeMismatchError = "ERROR [query_parameter.bal:(8:32,8:45)] implementation type does not match with" +
+                " openapi contract type (expected 'integer',found 'string') for the parameter 'offset' in http" +
+                " method 'get' that associated with the path '/pets'.";
         Assert.assertEquals(typeMismatchError, errors[0].toString());
 
         // Undocumented query parameter
-        String undocumentedParameter = "ERROR [query_parameter.bal:(10:46,10:59)] 'limits' parameter for the method " +
-                "'get' of the resource associated with the path '/pets02' is not documented in the OpenAPI contract.";
+        String undocumentedParameter = "ERROR [query_parameter.bal:(10:46,10:59)] undefined parameter" +
+                " 'limits' for the method get of the resource associated with the path 'get' is not" +
+                " documented in the openapi contract.";
         Assert.assertEquals(undocumentedParameter, errors[1].toString());
     }
 
@@ -61,8 +62,8 @@ public class QueryParameterValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        String message = "ERROR [oas_query_parameter.bal:(8:5,10:6)] Missing OpenAPI contract parameter 'offset' in " +
-                "the counterpart Ballerina service resource (method: 'get', path: '/pets')";
+        String message = "ERROR [oas_query_parameter.bal:(8:5,10:6)] missing openapi contract parameter " +
+                "'offset' in the counterpart ballerina service resource (method: 'get', path: '/pets')";
         Assert.assertEquals(message, errors[0].toString());
     }
 
@@ -73,9 +74,9 @@ public class QueryParameterValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        String message = "ERROR [decimal_query_parameter.bal:(8:32,8:44)] Implementation type does not match with" +
-                " OAS contract type (expected 'float',found 'double') for the parameter 'offset' in" +
-                " http method 'get' that associated with the path '/pets'.";
+        String message = "ERROR [decimal_query_parameter.bal:(8:32,8:44)] implementation type does not match with" +
+                " openapi contract type (expected 'double',found 'float') for the parameter 'offset' in http " +
+                "method 'get' that associated with the path '/pets'.";
         Assert.assertEquals(message, errors[0].toString());
     }
 
@@ -86,9 +87,9 @@ public class QueryParameterValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertTrue(errors.length == 1);
-        String message = "ERROR [array_query_parameter.bal:(8:32,8:44)] Implementation type does not match" +
-                " with OAS contract type (expected 'int[]',found 'string[]') for the parameter 'offset' in http" +
-                " method 'get' that associated with the path '/pets'.";
+        String message = "ERROR [array_query_parameter.bal:(8:32,8:44)] implementation type does not match with " +
+                "openapi contract type (expected 'string[]',found 'int[]') for the parameter 'offset' in http " +
+                "method 'get' that associated with the path '/pets'.";
         Assert.assertEquals(message, errors[0].toString());
     }
 

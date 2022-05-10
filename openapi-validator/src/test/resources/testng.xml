@@ -43,6 +43,7 @@ under the License.
             <class name="io.ballerina.openapi.validator.tests.RecordValidationTests"/>
             <class name="io.ballerina.openapi.validator.tests.ReturnTypeValidationTests"/>
             <class name="io.ballerina.openapi.validator.tests.FilterTests"/>
+            <class name="io.ballerina.openapi.validator.tests.OpenApiFilterNegativeTests"/>
         </classes>
     </test>
 </suite>

@@ -1,34 +1,25 @@
 import ballerina/http;
 import ballerina/openapi;
 
-
-type Pet record {
-    int id;
-    string name; // extra feild
-    string[] tags;
-    Type 'type;
-};
-
-type Type record {
-    string id;
-    string 'type;
-
-};
-
 @openapi:ServiceInfo {
-    contract: "record.yaml"
+    contract: "record.yaml",
+    tags: [ ],
+    operations:[],
+    failOnErrors: true
 }
-service on new http:Listener(8990) {
-    // record type mismatch
-    resource function post pet (@http:Payload Pet payload) {
-    }
+@http:ServiceConfig { mediaTypeSubtypePrefix: "vnd.snowpeak.reservation"}
 
-    //oas->ballerina mis rb
-    resource function put pet (@http:Payload Pet payload) {
+service /data/'2\.5 on new http:Listener(9091) {
+    resource function get weather(string? id, string? lat, string? lon, string? zip, string? units, string? lang, string? mode) returns string {
+        return "hello";
     }
-
-    //ballerina->oas mis rb
-    resource function post pet02 () {
+    resource function get onecall(string lon, string? exclude, string? units, string? lang) returns string {
+        return "hello";
     }
-
 }
+
+service /mVersion on new http:Listener(9090) {
+     resource function get versions() returns string {
+         return "Hello, World!";
+     }
+ }

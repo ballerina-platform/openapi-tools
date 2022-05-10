@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * Container for Constants used in validator plugin.
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 public class Constants {
     public static final String ATTRIBUTE_CONTRACT_PATH = "contract";

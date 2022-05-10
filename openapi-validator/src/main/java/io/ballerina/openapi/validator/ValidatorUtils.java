@@ -238,10 +238,12 @@ public class ValidatorUtils {
         if (excludeOperationEnable) {
             return operationId != null && !filter.getExcludeOperation().contains(operationId);
         }
-
-        return tags == null || Collections.disjoint(tags, filter.getExcludeTag());
+        if (excludeTagsEnabled) {
+            return tags == null || filter.getExcludeTag() != null && Collections.disjoint(tags, filter.getExcludeTag());
+        }
         // if some user give the operations for filter ,
         // operation filter takes the first priority of filtering process.
+        return true;
     }
 
     /**

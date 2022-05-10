@@ -68,7 +68,7 @@ import static io.ballerina.openapi.validator.error.CompilationError.UNEXPECTED_E
 /**
  * This PreValidator class contain validation for given service is valid http service and summaries all the resources.
  *
- * @since 2201.1.0
+ * @since 1.1.0
  */
 public class PreValidator {
     private SyntaxNodeAnalysisContext context;

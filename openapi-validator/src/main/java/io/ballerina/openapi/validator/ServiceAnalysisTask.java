@@ -29,7 +29,7 @@ import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
  * This model used to filter and validate all the operations according to the given filter and filter the service
  * resource in the resource file.
  *
- * @since 2201.1.0
+ * @since 1.1.0
  */
 public class ServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
     private final ServiceValidator serviceValidator;

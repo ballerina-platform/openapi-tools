@@ -29,9 +29,9 @@ import java.util.Map;
  */
 public class ReturnSummary {
     private final Map<String, Node> balStatusCodes;
-    private final List<String> balMediaTypes;
+    private final Map<String, List<String>> balMediaTypes;
 
-    public ReturnSummary(Map<String, Node> balStatusCodes, List<String> balMediaTypes) {
+    public ReturnSummary(Map<String, Node> balStatusCodes, Map<String, List<String>> balMediaTypes) {
 
         this.balStatusCodes = balStatusCodes;
         this.balMediaTypes = balMediaTypes;
@@ -42,7 +42,7 @@ public class ReturnSummary {
         return balStatusCodes;
     }
 
-    public List<String> getBalMediaTypes() {
+    public Map<String, List<String>> getBalMediaTypes() {
 
         return balMediaTypes;
     }

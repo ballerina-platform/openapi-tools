@@ -20,7 +20,7 @@ package io.ballerina.openapi.validator;
 /**
  * OpenAPI Validator plugin exception.
  *
- * @since 2201.1.0
+ * @since 1.1.0
  */
 public class OpenApiValidatorException extends Exception {
     OpenApiValidatorException(String message, Throwable e) {

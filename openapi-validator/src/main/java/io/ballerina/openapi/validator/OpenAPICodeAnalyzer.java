@@ -7,7 +7,7 @@ import io.ballerina.projects.plugins.CodeAnalyzer;
 /**
  * This class for generate openAPI code analyzer.
  *
- * @since 2201.1.0
+ * @since 1.1.0
  */
 public  class OpenAPICodeAnalyzer extends CodeAnalyzer {
     @Override

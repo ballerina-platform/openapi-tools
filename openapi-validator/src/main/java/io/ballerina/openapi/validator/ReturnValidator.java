@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERENCE;
@@ -57,6 +58,7 @@ import static io.ballerina.openapi.validator.Constants.APPLICATION_JSON;
 import static io.ballerina.openapi.validator.Constants.BODY;
 import static io.ballerina.openapi.validator.Constants.HTTP;
 import static io.ballerina.openapi.validator.Constants.HTTP_200;
+import static io.ballerina.openapi.validator.Constants.HTTP_202;
 import static io.ballerina.openapi.validator.Constants.HTTP_500;
 import static io.ballerina.openapi.validator.Constants.HTTP_CODES;
 import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
@@ -66,7 +68,7 @@ import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
 /**
  * This class for validate the return and response types.
  *
- * @since 2201.1.0
+ * @since 1.1.0
  */
 public class ReturnValidator {
     private final SyntaxNodeAnalysisContext context;
@@ -75,7 +77,7 @@ public class ReturnValidator {
     private final String path;
 
     private final Map<String, Node> balStatusCodes = new HashMap<>();
-    private final List<String> balMediaTypes = new ArrayList<>();
+    private final Map<String, List<String>> balMediaTypes = new HashMap<>();
 
     private final Location location;
     private final DiagnosticSeverity severity;
@@ -90,10 +92,6 @@ public class ReturnValidator {
         this.severity = severity;
     }
 
-    public void addBalStatusCodes (String statusCode, Node node) {
-        balStatusCodes.put(statusCode, node);
-    }
-
     public void addAllBalStatusCodes (Map<String, Node> statusCodes) {
         balStatusCodes.putAll(statusCodes);
     }
@@ -102,11 +100,11 @@ public class ReturnValidator {
         return this.balStatusCodes;
     }
 
-    public void addAllBalMediaTypes(List<String> balMediaType) {
-        balMediaTypes.addAll(balMediaType);
+    public void addAllBalMediaTypes(Map<String, List<String>> balMediaType) {
+        balMediaTypes.putAll(balMediaType);
     }
 
-    public List<String> getBalMediaTypes() {
+    public Map<String, List<String>> getBalMediaTypes() {
         return this.balMediaTypes;
     }
 
@@ -117,44 +115,69 @@ public class ReturnValidator {
      * @param returnNode Ballerina Return Node from function signature.
      * @param responses OAS operation response.
      */
-    public void validateReturnBallerinaToOas(TypeDescriptorNode returnNode, ApiResponses responses) {
-        SyntaxKind kind = returnNode.kind();
-        if (returnNode instanceof QualifiedNameReferenceNode) {
-            QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) returnNode;
-            validateQualifiedType(qNode, responses);
-            //TODO: handle module level qualified name ex: `res:ResponseRecord`
-        } else if (returnNode instanceof UnionTypeDescriptorNode) {
-            // A|B|C|D
-            UnionTypeDescriptorNode uNode = (UnionTypeDescriptorNode) returnNode;
-            validateUnionType(uNode, responses);
-        } else if (returnNode instanceof SimpleNameReferenceNode) {
-            SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) returnNode;
-            validateSimpleNameReference(simpleRefNode, responses);
-        } else if (kind == ERROR_TYPE_DESC) {
-            balStatusCodes.put(HTTP_500, null);
-            if (!responses.containsKey(HTTP_500)) {
-                updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, returnNode.location(), severity,
-                        HTTP_500,
-                        method, path);
-            }
-        } else if (returnNode instanceof OptionalTypeDescriptorNode) {
-            OptionalTypeDescriptorNode optionalNode = (OptionalTypeDescriptorNode) returnNode;
-            validateReturnBallerinaToOas((TypeDescriptorNode) optionalNode.typeDescriptor(), responses);
-        } else if (returnNode instanceof BuiltinSimpleNameReferenceNode) {
-            if (!responses.containsKey(HTTP_200)) {
-                updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
-                        returnNode.location(), severity, HTTP_200, method, path);
-            } else {
-                balStatusCodes.put(HTTP_200, (BuiltinSimpleNameReferenceNode) returnNode);
-                String mediaType = getMediaType(kind);
-                ApiResponse apiResponse = responses.get(HTTP_200);
-                Content content = apiResponse.getContent();
-                balMediaTypes.add(mediaType);
-                if (content == null || !content.containsKey(mediaType)) {
-                    updateContext(context, CompilationError.UNDOCUMENTED_RETURN_MEDIA_TYPE,
-                            returnNode.location(), severity, mediaType, method, path);
+    public void validateReturnBallerinaToOas(Optional<TypeDescriptorNode> returnNode, ApiResponses responses) {
+        boolean isOptional = false;
+        if (returnNode.isEmpty()) {
+            balStatusCodes.put(HTTP_202, null);
+        } else {
+            TypeDescriptorNode balReturnNode = returnNode.get();
+            SyntaxKind kind = returnNode.get().kind();
+            if (balReturnNode instanceof QualifiedNameReferenceNode) {
+                QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) balReturnNode;
+                validateQualifiedType(qNode, responses);
+                //TODO: handle module level qualified name ex: `res:ResponseRecord`
+            } else if (balReturnNode instanceof UnionTypeDescriptorNode) {
+                // A|B|C|D
+                UnionTypeDescriptorNode uNode = (UnionTypeDescriptorNode) balReturnNode;
+                validateUnionType(uNode, responses);
+            } else if (balReturnNode instanceof SimpleNameReferenceNode) {
+                SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) balReturnNode;
+                validateSimpleNameReference(simpleRefNode, responses);
+            } else if (kind == ERROR_TYPE_DESC) {
+                balStatusCodes.put(HTTP_500, null);
+            } else if (balReturnNode instanceof OptionalTypeDescriptorNode) {
+                isOptional = true;
+                OptionalTypeDescriptorNode optionalNode = (OptionalTypeDescriptorNode) balReturnNode;
+                validateReturnBallerinaToOas(Optional.of((TypeDescriptorNode) optionalNode.typeDescriptor()),
+                        responses);
+            } else if (balReturnNode instanceof BuiltinSimpleNameReferenceNode) {
+                balStatusCodes.put(HTTP_200, (BuiltinSimpleNameReferenceNode) balReturnNode);
+                if (responses.containsKey(HTTP_200)) {
+                    String mediaType = getMediaType(kind);
+                    fillMediaTypes(HTTP_200, mediaType);
                 }
             }
+        }
+
+        if (!isOptional) {
+            //Undefined status code
+            Set<String> ballerinaCodes = balStatusCodes.keySet();
+            Set<String> oasKeys = responses.keySet();
+            List<String> undefineCode = new ArrayList<>(ballerinaCodes);
+            undefineCode.removeAll(oasKeys);
+            if (undefineCode.size() > 0) {
+                updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, location,
+                        severity, undefineCode.toString(), method, path);
+            }
+
+            //Undefined mediaTypes
+            balMediaTypes.forEach((key, value)-> {
+                if (responses.containsKey(key)) {
+                    ApiResponse apiResponse = responses.get(key);
+                    if (apiResponse.getContent() != null) {
+                        Set<String> oasMediaTypes = apiResponse.getContent().keySet();
+                        List<String> undefinedMediaTypes = new ArrayList<>(value);
+                        undefinedMediaTypes.removeAll(oasMediaTypes);
+                        if (undefinedMediaTypes.size() > 0) {
+                            updateContext(context, CompilationError.UNDOCUMENTED_RETURN_MEDIA_TYPE,
+                                    location, severity, undefinedMediaTypes.toString(), key, method, path);
+                        }
+                    } else {
+                        updateContext(context, CompilationError.UNDOCUMENTED_RETURN_MEDIA_TYPE,
+                                location, severity, value.toString(), key, method, path);
+                    }
+                }
+            });
         }
         //TODO: array type validation
     }
@@ -187,24 +210,19 @@ public class ReturnValidator {
                                 return;
                             }
                             balStatusCodes.put(code.get(), simpleRefNode);
-                            if (!responses.containsKey(code.get())) {
-                                updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
-                                        simpleRefNode.location(), severity, code.get(), method, path);
-                            } else {
+                            if (responses.containsKey(code.get())) {
                                 // handle media types
                                 ApiResponse apiResponse = responses.get(code.get());
                                 Map<String, RecordFieldSymbol> fields = typeSymbol.fieldDescriptors();
                                 TypeSymbol bodyFieldType = fields.get(BODY).typeDescriptor();
                                 TypeDescKind bodyKind = bodyFieldType.typeKind();
                                 String mediaType = getMediaType(bodyKind);
-                                balMediaTypes.add(mediaType);
+                                fillMediaTypes(code.get(), mediaType);
                                 Content content = apiResponse.getContent();
                                 if (content != null) {
                                     MediaType oasMtype = content.get(mediaType);
                                     if (!content.containsKey(mediaType)) {
                                         // not media type equal
-                                        updateContext(context, CompilationError.UNDOCUMENTED_RETURN_MEDIA_TYPE,
-                                                simpleRefNode.location(), severity, mediaType, method, path);
                                         return;
                                     }
                                     if (oasMtype.getSchema() != null && oasMtype.getSchema().get$ref() != null &&
@@ -230,19 +248,15 @@ public class ReturnValidator {
                 }
                 if (!isHttp) {
                     // validate normal Record status code 200 and application json
-                    if (!responses.containsKey(HTTP_200)) {
-                        updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, simpleRefNode.location(),
-                                severity, HTTP_200, method, path);
-                    } else {
+                    if (responses.containsKey(HTTP_200)) {
                         // record validation
                         ApiResponse apiResponse = responses.get(HTTP_200);
                         Content content = apiResponse.getContent();
-                        MediaType oasMtype = content.get(APPLICATION_JSON);
+                        MediaType oasMType = content.get(APPLICATION_JSON);
                         balStatusCodes.put(HTTP_200, simpleRefNode);
-                        balMediaTypes.add(APPLICATION_JSON);
-
-                        if (oasMtype.getSchema() != null && oasMtype.getSchema().get$ref() != null) {
-                            Optional<String> schemaName = extractReferenceType(oasMtype.getSchema().get$ref());
+                        fillMediaTypes(HTTP_200, APPLICATION_JSON);
+                        if (oasMType.getSchema() != null && oasMType.getSchema().get$ref() != null) {
+                            Optional<String> schemaName = extractReferenceType(oasMType.getSchema().get$ref());
                             if (schemaName.isEmpty()) {
                                 return;
                             }
@@ -281,28 +295,25 @@ public class ReturnValidator {
                 validateSimpleNameReference(simpleRefNode, responses);
             } else if (reNode.kind() == ERROR_TYPE_DESC) {
                 balStatusCodes.put(HTTP_500, null);
-                if (!responses.containsKey(HTTP_500)) {
-                    assert false;
-                    updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, uNode.location(), severity,
-                            HTTP_500, method, path);
-                }
             }  else if (reNode instanceof BuiltinSimpleNameReferenceNode) {
-                if (!responses.containsKey(HTTP_200)) {
-                    updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
-                            reNode.location(), severity, HTTP_200, method, path);
-                } else {
-                    balStatusCodes.put(HTTP_200, (BuiltinSimpleNameReferenceNode) reNode);
+                balStatusCodes.put(HTTP_200, (BuiltinSimpleNameReferenceNode) reNode);
+                if (responses.containsKey(HTTP_200)) {
                     String mediaType = getMediaType(reNode.kind());
-                    ApiResponse apiResponse = responses.get(HTTP_200);
-                    Content content = apiResponse.getContent();
-                    balMediaTypes.add(mediaType);
-                    if (content == null || !content.containsKey(mediaType)) {
-                        updateContext(context, CompilationError.UNDOCUMENTED_RETURN_MEDIA_TYPE,
-                                reNode.location(), severity, mediaType, method, path);
-                    }
+                    fillMediaTypes(HTTP_200, mediaType);
                 }
             }
         }
+    }
+
+    private void fillMediaTypes(String http200, String mediaType) {
+        List<String> mediaTypes;
+        if (balMediaTypes.containsKey(http200)) {
+            mediaTypes = balMediaTypes.get(http200);
+        } else {
+            mediaTypes = new ArrayList<>();
+        }
+        mediaTypes.add(mediaType);
+        balMediaTypes.put(http200, mediaTypes);
     }
 
     /**
@@ -316,11 +327,6 @@ public class ReturnValidator {
         if (statusCode.isPresent()) {
             String balCode = statusCode.get();
             balStatusCodes.put(balCode, qNode);
-            if (!responses.containsKey(balCode)) {
-                // Undocumented status code
-                updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, qNode.location(), severity, balCode,
-                        method, path);
-            }
         }
     }
 
@@ -343,19 +349,45 @@ public class ReturnValidator {
      * @param responses api Responses.
      */
     public void validateReturnOASToBallerina(ApiResponses responses) {
+
+
+        Set<String> ballerinaCodes = balStatusCodes.keySet();
+        Set<String> oasKeys = responses.keySet();
+        List<String> missingCode = new ArrayList<>(oasKeys);
+        missingCode.removeAll(ballerinaCodes);
+        if (missingCode.size() > 0) {
+            // Unimplemented status codes in swagger operation and get location via bal return node.
+            updateContext(context, CompilationError.UNIMPLEMENTED_STATUS_CODE, location, severity,
+                    missingCode.toString(),
+                    method, path);
+        }
+
         responses.forEach((key, value) -> {
             if (!balStatusCodes.containsKey(key)) {
-                // Unimplemented status code in swagger operation and get location via bal return node.
-                updateContext(context, CompilationError.UNIMPLEMENTED_STATUS_CODE, location, severity, key, method,
-                        path);
                 return;
             }
             Content content = value.getContent();
             if (content == null) {
                 return;
             }
+            // Unimplemented media type code in swagger operation and get location via bal return node.
+            Set<String> oasMediaTypes = content.keySet();
+            List<String> ballerinaMediaTypes = balMediaTypes.get(key);
+
+            List<String> missingMediaTypes = new ArrayList<>(oasMediaTypes);
+            //TODO: error msg with status code
+            if (ballerinaMediaTypes == null) {
+                updateContext(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
+                        location, severity, oasMediaTypes.toString(), key, method, path);
+                return;
+            }
+            missingMediaTypes.removeAll(ballerinaMediaTypes);
+            if (missingMediaTypes.size() > 0) {
+                updateContext(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
+                        location, severity, missingMediaTypes.toString(), key, method, path);
+            }
             content.forEach((mediaType, schema) -> {
-                if (balMediaTypes.contains(mediaType)) {
+                if (ballerinaMediaTypes.contains(mediaType)) {
                     Node node = balStatusCodes.get(key);
                     if (node == null) {
                         // This can be null when the return type is not in service, and return type is error.
@@ -427,11 +459,6 @@ public class ReturnValidator {
                             }
                         }
                     }
-                } else {
-                    // Unimplemented media type code in swagger operation and get location via bal return node.
-                        updateContext(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
-                                location, severity, mediaType, method, path);
-                    //TODO: array type handle
                 }
             });
         });

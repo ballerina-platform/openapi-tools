@@ -110,8 +110,8 @@ public class TypeValidatorUtils {
                         } else if (oasType.isEmpty() || !fieldType.equals(oasType.get())) {
                             // type mismatch field
                             updateContext(context, CompilationError.TYPE_MISMATCH_FIELD,
-                                    field.getValue().getLocation().orElse(null), severity, fieldType,
-                                    oas, field.getKey(), balRecord);
+                                    field.getValue().getLocation().orElse(null), severity, oas, fieldType,
+                                    field.getKey(), balRecord);
                         }
                         break;
                     }
@@ -175,7 +175,7 @@ public class TypeValidatorUtils {
         if (!balFieldType.equals(oasType.get())) {
             // type mismatch error
             updateContext(context, CompilationError.TYPE_MISMATCH_FIELD, field.getValue().getLocation().orElse(null),
-                    severity, balFieldType, messageOasType, field.getKey(), balRecord);
+                    severity, messageOasType, balFieldType, field.getKey(), balRecord);
         }
         return oasType;
     }

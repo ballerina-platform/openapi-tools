@@ -59,7 +59,6 @@ import static io.ballerina.openapi.validator.Constants.ARRAY;
 import static io.ballerina.openapi.validator.Constants.DOUBLE;
 import static io.ballerina.openapi.validator.Constants.FLOAT;
 import static io.ballerina.openapi.validator.Constants.HEADER_NAME;
-import static io.ballerina.openapi.validator.Constants.HTTP_202;
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
 import static io.ballerina.openapi.validator.Constants.NUMBER;
 import static io.ballerina.openapi.validator.Constants.SQUARE_BRACKETS;
@@ -77,7 +76,7 @@ import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
  * This model used to filter and validate all the operations according to the given filter and filter the service
  * resource in the resource file.
  *
- * @since 2201.1.0
+ * @since 1.1.0
  */
 public class ServiceValidator {
     private SyntaxNodeAnalysisContext context;
@@ -258,14 +257,16 @@ public class ServiceValidator {
                 ReturnTypeDescriptorNode returnNode = method.getValue().getReturnNode();
                 // If return type doesn't provide in service , then it maps to status code 202.
                 if (returnNode == null) {
-                    returnValidator.addBalStatusCodes(HTTP_202, null);
-                    if (!responses.containsKey(HTTP_202)) {
-                        updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
-                                method.getValue().getLocation(), filter.getKind(), HTTP_202, method.getKey(),
-                                path.getKey());
-                    }
+                    returnValidator.validateReturnBallerinaToOas(Optional.empty(), responses);
+//                    returnValidator.addBalStatusCodes(HTTP_202, null);
+//                    if (!responses.containsKey(HTTP_202)) {
+//                        updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
+//                                method.getValue().getLocation(), filter.getKind(), HTTP_202, method.getKey(),
+//                                path.getKey());
+//                    }
                 } else {
-                    returnValidator.validateReturnBallerinaToOas((TypeDescriptorNode) returnNode.type(), responses);
+                    returnValidator.validateReturnBallerinaToOas(
+                            Optional.ofNullable((TypeDescriptorNode) returnNode.type()), responses);
                 }
                 ReturnSummary returnSummary = new ReturnSummary(returnValidator.getBalStatusCodes(),
                         returnValidator.getBalMediaTypes());
@@ -330,19 +331,26 @@ public class ServiceValidator {
                                     SQUARE_BRACKETS)) {
                                 // This special concatenation is used to check the array header parameters
                                 updateContext(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
-                                        headerNode.location(), filter.getKind(), ballerinaType, items +
-                                                SQUARE_BRACKETS, headerName, method.getKey(),
+                                        headerNode.location(),
+                                        filter.getKind(),
+                                        items + SQUARE_BRACKETS,
+                                        ballerinaType,
+                                        headerName,
+                                        method.getKey(),
                                         getNormalizedPath(method.getValue().getPath()));
                                 break;
                             }
-
                         }
 
                         Optional<String> type = convertOpenAPITypeToBallerina(headerType);
                         if (type.isEmpty() || !ballerinaType.equals(type.get())) {
                             updateContext(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
-                                    headerNode.location(), filter.getKind(), ballerinaType, headerType,
-                                    headerName, method.getKey(),
+                                    headerNode.location(),
+                                    filter.getKind(),
+                                    headerType,
+                                    ballerinaType,
+                                    headerName,
+                                    method.getKey(),
                                     getNormalizedPath(method.getValue().getPath()));
                             break;
                         }
@@ -438,15 +446,15 @@ public class ServiceValidator {
                             !ballerinaType.equals(type.get() + SQUARE_BRACKETS)) {
                         // This special concatenation is used to check the array query parameters
                         updateContext(context, CompilationError.TYPE_MISMATCH_PARAMETER,
-                                parameter.getValue().location(), filter.getKind(), ballerinaType, oasType +
-                                        SQUARE_BRACKETS,
+                                parameter.getValue().location(), filter.getKind(),  oasType +
+                                        SQUARE_BRACKETS, ballerinaType,
                                 parameterName, method.getKey(), method.getValue().getPath());
                         break;
                     }
                     if (!Objects.equals(ballerinaType, type.get())) {
                         // This special concatenation is used to check the array query parameters
                         updateContext(context, CompilationError.TYPE_MISMATCH_PARAMETER,
-                                parameter.getValue().location(), filter.getKind(), ballerinaType, oasType,
+                                parameter.getValue().location(), filter.getKind(), oasType, ballerinaType,
                                 parameterName, method.getKey(), method.getValue().getPath());
                         break;
                     }

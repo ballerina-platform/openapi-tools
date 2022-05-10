@@ -41,6 +41,7 @@ public class PreValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         int i = diagnostic.diagnosticCount();
+        Assert.assertEquals(i, 1);
     }
 
     @Test(description = "Given ballerina file has compilation issue")
@@ -72,11 +73,10 @@ public class PreValidationTests {
                 diagnostic.diagnostics().stream().filter(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity())
                         .toArray();
         //Expected error messages
-        String unimplementedPath = "ERROR [unimplemented_resources.bal:(4:1,10:2)] Could not find a Ballerina " +
-                "service resource for the path '/pet02' which is documented in the OpenAPI contract.";
-        String unimplementedMethod = "ERROR [unimplemented_resources.bal:(4:1,10:2)] Could not find Ballerina " +
-                "service resource(s) for HTTP method(s) 'get' for the path '/pet' which is documented in the " +
-                "OpenAPI contract";
+        String unimplementedPath = "ERROR [unimplemented_resources.bal:(4:1,10:2)] missing ballerina service" +
+                " resource(s) for HTTP method(s) 'get' for the path '/pet' which is documented in the openAPI contract";
+        String unimplementedMethod = "ERROR [unimplemented_resources.bal:(4:1,10:2)] missing ballerina service" +
+                " resource for the path '/pet02' which is documented in the openAPI contract.";
         Assert.assertEquals(errors.length, 2);
     }
 

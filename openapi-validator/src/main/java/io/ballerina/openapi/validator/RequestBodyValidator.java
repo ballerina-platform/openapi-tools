@@ -57,7 +57,7 @@ import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
 /**
  * This RequestBodyValidator class includes all the code related to resource request body validate.
  *
- * @since 2201.1.0
+ * @since 1.1.0
  */
 public class RequestBodyValidator {
 
@@ -133,9 +133,10 @@ public class RequestBodyValidator {
                                 if (schema instanceof ArraySchema) {
                                     ArraySchema arraySchema = (ArraySchema) schema;
                                     updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                            requestBodyNode.location(), severity, balRecordName,
+                                            requestBodyNode.location(), severity,
+                                            mediaType,
                                             extractReferenceType(arraySchema.getItems().get$ref()).get() + "[]",
-                                            method.getKey(),
+                                            balRecordName, method.getKey(),
                                             getNormalizedPath(method.getValue().getPath()));
                                 } else if (schema instanceof ObjectSchema || schema.get$ref() != null) {
                                     // validate- Record
@@ -146,8 +147,11 @@ public class RequestBodyValidator {
                                                 context, openAPI, oasSchema, severity);
                                     } else {
                                         updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                                requestBodyNode.location(), severity, mediaType, balRecordName,
+                                                requestBodyNode.location(),
+                                                severity,
+                                                mediaType,
                                                 oasSchema,
+                                                balRecordName,
                                                 method.getKey(),
                                                 getNormalizedPath(method.getValue().getPath()));
                                     }
@@ -162,7 +166,9 @@ public class RequestBodyValidator {
 
                                     if (!(schema instanceof ArraySchema)) {
                                         updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                                requestBodyNode.location(), severity, mediaType,
+                                                requestBodyNode.location(),
+                                                severity,
+                                                mediaType,
                                                 oasMediaTypes.toString(),
                                                 requestBodyNode.paramName().get().toString().trim(), method.getKey(),
                                                 getNormalizedPath(method.getValue().getPath()));
@@ -195,9 +201,11 @@ public class RequestBodyValidator {
                         }
                     }
                     if (!isMediaTypeExist) {
-                        updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                requestBodyNode.location(), severity, mediaType,
-                                oasMediaTypes.toString(), method.getKey(),
+                        updateContext(context, CompilationError.UNDOCUMENTED_REQUEST_MEDIA_TYPE,
+                                requestBodyNode.location(),
+                                severity,
+                                mediaType,
+                                method.getKey(),
                                 getNormalizedPath(method.getValue().getPath()));
                     }
                 }
@@ -289,7 +297,7 @@ public class RequestBodyValidator {
                 }
             }
             if (content.entrySet().size() != 1) {
-                updateContext(context, CompilationError.UNIMPLEMENTED_MEDIA_TYPE, body.location(), severity,
+                updateContext(context, CompilationError.UNIMPLEMENTED_REQUEST_MEDIA_TYPE, body.location(), severity,
                         missingPayload.toString(), method, path);
             }
         }

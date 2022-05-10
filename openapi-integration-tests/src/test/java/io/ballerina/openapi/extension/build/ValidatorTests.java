@@ -54,8 +54,8 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_1");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(13:5,15:6)] Missing OpenAPI contract parameter 'q' in the counterpart" +
-                " Ballerina service resource (method: 'get', path: '/weather')";
+        String msg = " ERROR [service.bal:(13:5,15:6)] missing openapi contract parameter 'q' in the counterpart" +
+                " ballerina service resource (method: 'get', path: '/weather')\n";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -75,9 +75,9 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_2");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = "Implementation type does not match with OAS contract type (expected 'int',found 'string') for" +
-                " the parameter 'obsId' in http method 'get' that associated with the path" +
-                " '/applications/{obsId}/metrics'.";
+        String msg = "ERROR [service.bal:(11:49,11:60)] implementation type does not match with openapi contract " +
+                "type (expected 'string',found 'int') for the parameter 'obsId' in http method 'get' that" +
+                " associated with the path '/applications/{obsId}/metrics'.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -97,8 +97,8 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_4");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(7:1,23:2)] Could not find a Ballerina service resource for the path " +
-                "'/applications/'{obsId}'/metrics/'{startTime}'' which is documented in the OpenAPI contract.";
+        String msg = "ERROR [service.bal:(7:1,23:2)] missing ballerina service resource for the path" +
+                " '/applications/'{obsId}'/metrics/'{startTime}'' which is documented in the openapi contract.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -118,14 +118,9 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_5");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(11:72,11:90)] Implementation type does not match with OAS contract type" +
-                " (expected 'string',found 'integer') for the parameter 'startTime' in http method 'get' that " +
-                "associated with the path '/applications/{obsId}/metrics/{startTime}'.\n" +
-                "    ERROR [service.bal:(15:5,22:6)] Undocumented resource return status code '202' for the method" +
-                " 'get' of the resource associated with the path '/healthz'.\n" +
-                "    ERROR [service.bal:(11:5,13:6)] Missing OpenAPI contract parameter 'endTime' in the" +
-                " counterpart Ballerina service resource (method: 'get', path:" +
-                " '/applications/{obsId}/metrics/{startTime}')\n";
+        String msg = "  ERROR [service.bal:(11:72,11:90)] implementation type does not match with openapi contract" +
+                " type (expected 'integer',found 'string') for the parameter 'startTime' in http method 'get' that" +
+                " associated with the path '/applications/{obsId}/metrics/{startTime}'.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -145,11 +140,12 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_6");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(10:115,10:124)] Implementation type does not match with OAS contract" +
-                " type (expected 'int',found 'string') for the parameter 'mode' in http method 'get' that associated" +
-                " with the path '/weather'.\n" +
-                "    ERROR [service.bal:(10:134,10:140)] Undocumented resource return media type 'text/plain' " +
-                "for the method 'get' of the resource associated with the path '/weather'.\n";
+        String msg = " ERROR [service.bal:(10:115,10:124)] implementation type does not match with openapi " +
+                "contract type (expected 'string',found 'int') for the parameter 'mode' in http method 'get' that " +
+                "associated with the path '/weather'.\n" +
+                "    ERROR [service.bal:(10:5,12:6)] undefined resource return mediaType/s '[text/plain]' " +
+                "for return status code '200' in the counterpart ballerina service resource (method: 'get', path: " +
+                "'/weather')";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -213,9 +209,9 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_8");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(12:30,12:36)] Implementation type does not match with OAS contract" +
-                " type (expected 'int',found 'string') for the parameter 'id' in http method 'get' that associated " +
-                "with the path '/'.";
+        String msg = "ERROR [service.bal:(12:30,12:36)] implementation type does not match with openapi contract " +
+                "type (expected 'string',found 'int') for the parameter 'id' in http method 'get' that" +
+                " associated with the path '/'.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
