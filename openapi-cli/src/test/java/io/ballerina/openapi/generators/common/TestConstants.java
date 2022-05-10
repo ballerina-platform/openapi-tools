@@ -65,6 +65,11 @@ public class TestConstants {
             "public type ClientConfig record {|\n" +
             "   # Configurations related to client authentication\n" +
             "   http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig auth;\n" + commonClientConfigurationFields;
+    public static final String OAUTH2_CUSTOM_AUTHORIZATION_CODE_CONFIG_REC = "" +
+            clientConfigRecordDoc +
+            "public type ClientConfig record {|\n" +
+            "   # Configurations related to client authentication\n" +
+            "   http:BearerTokenConfig|OAuth2RefreshTokenGrantConfig auth;\n" + commonClientConfigurationFields;
     public static final String OAUTH2_IMPLICIT_CONFIG_REC = "" +
             clientConfigRecordDoc +
             "public type ClientConfig record {|\n" +
@@ -75,6 +80,11 @@ public class TestConstants {
             "public type ClientConfig record {|\n" +
             "   # Configurations related to client authentication\n" +
             "   http:OAuth2PasswordGrantConfig auth;\n" + commonClientConfigurationFields;
+    public static final String OAUTH2_CUSTOM_PASSWORD_CONFIG_REC = "" +
+            clientConfigRecordDoc +
+            "public type ClientConfig record {|\n" +
+            "   # Configurations related to client authentication\n" +
+            "   OAuth2PasswordGrantConfig auth;\n" + commonClientConfigurationFields;
     public static final String OAUTH2_CLIENT_CRED_CONFIG_REC = "" +
             clientConfigRecordDoc +
             "public type ClientConfig record {|\n" +
@@ -89,7 +99,7 @@ public class TestConstants {
             clientConfigRecordDoc +
             "public type ClientConfig record {|\n" +
             "  # Configurations related to client authentication\n" +
-            "  http:OAuth2PasswordGrantConfig|http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig auth;\n"
+            " OAuth2PasswordGrantConfig|http:BearerTokenConfig|OAuth2RefreshTokenGrantConfig auth;\n"
             + commonClientConfigurationFields;
     public static final String API_KEY_CONFIG_VAR = "final readonly & ApiKeysConfig apiKeyConfig;";
     public static final String API_KEY_CONFIG_NILLABLE_VAR = "final readonly & ApiKeysConfig? apiKeyConfig;";

@@ -90,11 +90,13 @@ public class OAuth2Tests {
     @DataProvider(name = "oAuth2IOProvider")
     public Object[][] dataProvider() {
         return new Object[][]{
-                {"oauth2_authrization_code.yaml", TestConstants.OAUTH2_AUTHORIZATION_CODE_CONFIG_REC},
+                {"oauth2_authorization_code.yaml", TestConstants.OAUTH2_CUSTOM_AUTHORIZATION_CODE_CONFIG_REC},
+                {"oauth2_authorization_code_without_tokenurl.yaml", TestConstants.OAUTH2_AUTHORIZATION_CODE_CONFIG_REC},
                 {"oauth2_client_credential.yaml", TestConstants.OAUTH2_CUSTOM_CLIENT_CRED_CONFIG_REC},
                 {"oauth2_client_credential_without_tokenurl.yaml", TestConstants.OAUTH2_CLIENT_CRED_CONFIG_REC},
                 {"oauth2_implicit.yaml", TestConstants.OAUTH2_IMPLICIT_CONFIG_REC},
-                {"oauth2_password.yaml", TestConstants.OAUTH2_PASSWORD_CONFIG_REC},
+                {"oauth2_password.yaml", TestConstants.OAUTH2_CUSTOM_PASSWORD_CONFIG_REC},
+                {"oauth2_password_without_tokenurl.yaml", TestConstants.OAUTH2_PASSWORD_CONFIG_REC},
                 {"oauth2_multipleflows.yaml", TestConstants.OAUTH2_MULTI_FLOWS_CONFIG_REC}
         };
     }
