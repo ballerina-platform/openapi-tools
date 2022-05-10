@@ -182,7 +182,9 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
             fields.add(separator);
         }
         if (openApiDefAvailable) {
-            fields.remove(fields.size() - 1);
+            if (fields.size() != 0) {
+                fields.remove(fields.size() - 1);
+            }
         } else {
             fields.add(createOpenApiDefinitionField(servicePath));
         }
