@@ -57,10 +57,10 @@ final json openApiDocumentation = {
 };
 
 @openapi:ServiceInfo {
-	embed: true
+  embed: true
 }
 @http:ServiceConfig {
-    openApiDefinition: openApiDocumentation.toBalString().toBytes()
+  openApiDefinition: openApiDocumentation.toBalString().toBytes()
 }
 service /hello on new http:Listener(9090) {
 	resource function get world() returns string {
