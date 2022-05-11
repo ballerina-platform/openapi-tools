@@ -208,7 +208,7 @@ public class ConverterCommonUtils {
         //For the flatten enable we need to remove first Part of valid name check
         // this - > !operationID.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
         if (!operationID.matches("\\b[0-9]*\\b")) {
-            String[] split = operationID.split(Constants.ESCAPE_PATTERN);
+            String[] split = operationID.split(Constants.SPECIAL_CHAR_REGEX);
             StringBuilder validName = new StringBuilder();
             for (String part: split) {
                 if (!part.isBlank()) {

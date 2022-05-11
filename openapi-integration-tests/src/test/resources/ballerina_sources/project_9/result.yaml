@@ -12,7 +12,7 @@ servers:
 paths:
   /title:
     get:
-      operationId: operation_get_/title
+      operationId: getTitle
       responses:
         "200":
           description: Ok
