@@ -334,7 +334,6 @@ public class ReturnValidator {
      * Get related http status code.
      */
     private Optional<String> generateApiResponseCode(String identifier) {
-
         if (HTTP_CODES.containsKey(identifier)) {
             return Optional.of(HTTP_CODES.get(identifier));
         } else {
@@ -349,8 +348,6 @@ public class ReturnValidator {
      * @param responses api Responses.
      */
     public void validateReturnOASToBallerina(ApiResponses responses) {
-
-
         Set<String> ballerinaCodes = balStatusCodes.keySet();
         Set<String> oasKeys = responses.keySet();
         List<String> missingCode = new ArrayList<>(oasKeys);
@@ -373,9 +370,8 @@ public class ReturnValidator {
             // Unimplemented media type code in swagger operation and get location via bal return node.
             Set<String> oasMediaTypes = content.keySet();
             List<String> ballerinaMediaTypes = balMediaTypes.get(key);
-
             List<String> missingMediaTypes = new ArrayList<>(oasMediaTypes);
-            //TODO: error msg with status code
+
             if (ballerinaMediaTypes == null) {
                 updateContext(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
                         location, severity, oasMediaTypes.toString(), key, method, path);
@@ -403,9 +399,9 @@ public class ReturnValidator {
                         if (schemaName.isEmpty()) {
                             return;
                         }
-                        Schema<?> vschema = openAPI.getComponents().getSchemas().get(schemaName.get());
-                        if (vschema instanceof ObjectSchema) {
-                            objectSchema = (ObjectSchema) vschema;
+                        Schema<?> vSchema = openAPI.getComponents().getSchemas().get(schemaName.get());
+                        if (vSchema instanceof ObjectSchema) {
+                            objectSchema = (ObjectSchema) vSchema;
                         }
                     }
                     if (schema.getSchema() instanceof ObjectSchema) {

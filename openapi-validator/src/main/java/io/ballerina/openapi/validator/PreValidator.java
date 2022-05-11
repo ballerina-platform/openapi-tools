@@ -66,7 +66,8 @@ import static io.ballerina.openapi.validator.error.CompilationError.NON_HTTP_SER
 import static io.ballerina.openapi.validator.error.CompilationError.UNEXPECTED_EXCEPTIONS;
 
 /**
- * This PreValidator class contain validation for given service is valid http service and summaries all the resources.
+ * This PreValidator class contains validation for given service if it is a http service and summaries all the
+ * resources.
  *
  * @since 1.1.0
  */

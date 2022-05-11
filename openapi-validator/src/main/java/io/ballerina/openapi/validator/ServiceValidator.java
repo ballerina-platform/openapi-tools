@@ -258,12 +258,6 @@ public class ServiceValidator {
                 // If return type doesn't provide in service , then it maps to status code 202.
                 if (returnNode == null) {
                     returnValidator.validateReturnBallerinaToOas(Optional.empty(), responses);
-//                    returnValidator.addBalStatusCodes(HTTP_202, null);
-//                    if (!responses.containsKey(HTTP_202)) {
-//                        updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE,
-//                                method.getValue().getLocation(), filter.getKind(), HTTP_202, method.getKey(),
-//                                path.getKey());
-//                    }
                 } else {
                     returnValidator.validateReturnBallerinaToOas(
                             Optional.ofNullable((TypeDescriptorNode) returnNode.type()), responses);
@@ -285,7 +279,7 @@ public class ServiceValidator {
     private void validateBallerinaHeaders(Map.Entry<String, ResourceMethod> method, List<Parameter> oasParameters,
                            Map<String, Node> balHeaders) {
         for (Map.Entry<String, Node> balHeader: balHeaders.entrySet()) {
-            //Todo: Nullable and default value assign scenarios
+            //TODO: Nullable and default value assign scenarios
 
             // Available header types string|int|boolean|string[]|int[]|boolean[]|? headers
             // Need to remove `\`  while checking header name x\-client\-header
@@ -469,6 +463,9 @@ public class ServiceValidator {
         }
     }
 
+    /**
+     * Validate openapi operation against to given ballerina resource.
+     */
     private void validateOASAgainstToBallerina(List<OpenAPIPathSummary> oasPaths,
                                                Map<String, ResourcePathSummary> resourcePaths) {
         // Parameter validation

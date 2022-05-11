@@ -52,7 +52,7 @@ import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
 /**
  * This util class is used to validate data types with given schema.
  *
- * @since 2201.1.0
+ * @since 1.1.0
  */
 public class TypeValidatorUtils {
 
@@ -132,12 +132,10 @@ public class TypeValidatorUtils {
 
     /**
      * This function is used to validate type for array fields.
-     *
      */
-    private static Optional<String> validateArrayTypeMismatch(String balRecord, SyntaxNodeAnalysisContext context,
-                                              Map.Entry<String, RecordFieldSymbol> field, ArraySchema arraySchema,
-                                                              DiagnosticSeverity severity) {
-
+    private static void validateArrayTypeMismatch(String balRecord, SyntaxNodeAnalysisContext context,
+                                                  Map.Entry<String, RecordFieldSymbol> field, ArraySchema arraySchema,
+                                                  DiagnosticSeverity severity) {
         Optional<String> oasType;
         String messageOasType;
         String balFieldType = field.getValue().typeDescriptor().signature();
@@ -177,7 +175,6 @@ public class TypeValidatorUtils {
             updateContext(context, CompilationError.TYPE_MISMATCH_FIELD, field.getValue().getLocation().orElse(null),
                     severity, messageOasType, balFieldType, field.getKey(), balRecord);
         }
-        return oasType;
     }
 
 
@@ -219,7 +216,6 @@ public class TypeValidatorUtils {
      * @return ballerina type
      */
     public static Optional<String> convertBallerinaType(SyntaxKind type) {
-
         switch (type) {
             case INT_TYPE_DESC:
                 return Optional.of(INT);
