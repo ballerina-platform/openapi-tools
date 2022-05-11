@@ -38,7 +38,6 @@ import io.ballerina.tools.diagnostics.Diagnostic;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -50,8 +49,6 @@ import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnosti
  * {@code AbstractOpenApiDocGenerator} contains the basic utilities required for OpenAPI doc generation.
  */
 public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator {
-    private static final String OPEN_API_DOC_NAME_FORMAT = "%d.json";
-
     private final OpenApiContractResolver contractResolver;
 
     public AbstractOpenApiDocGenerator() {
@@ -61,8 +58,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
     @Override
     public void generate(OpenApiDocConfig config, SyntaxNodeAnalysisContext context, NodeLocation location) {
         try {
-            String openApiDocName = String.format(OPEN_API_DOC_NAME_FORMAT, config.getServiceSymbol().hashCode());
-
+            int serviceId = config.getServiceSymbol().hashCode();
             Package currentPackage = config.getCurrentPackage();
             Path srcRoot = currentPackage.project().sourceRoot();
 
@@ -71,13 +67,14 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
 
             ServiceDeclarationNode serviceNode = config.getServiceNode();
             Optional<AnnotationNode> serviceInfoAnnotationOpt = getServiceInfoAnnotation(serviceNode);
+            String targetFile = String.format("%d.json", serviceId);
             if (serviceInfoAnnotationOpt.isPresent()) {
                 AnnotationNode serviceInfoAnnotation = serviceInfoAnnotationOpt.get();
 
                 boolean embed = retrieveValueForAnnotationFields(
                         serviceInfoAnnotation, Constants.EMBED)
                         .map(Boolean::parseBoolean)
-                        .orElse(true);
+                        .orElse(false);
 
                 // use the available open-api doc and update the context
                 OpenApiContractResolver.ResolverResponse resolverResponse = this.contractResolver
@@ -90,14 +87,13 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                         return;
                     }
                     String openApiDefinition = Files.readString(resolverResponse.getContractPath().get());
-                    updateOpenApiContext(currentPackage, srcRoot, openApiDocName, openApiDefinition, embed);
+                    updateOpenApiContext(context, serviceId, openApiDefinition, embed);
                 } else {
                     // generate open-api doc and update the context if the `contract` configuration is not available
                     String openApiDefinition = generateOpenApiDoc(
-                            config.getSemanticModel(), config.getSyntaxTree(), serviceNode, openApiDocName);
+                            config.getSemanticModel(), config.getSyntaxTree(), serviceNode, targetFile);
                     if (null != openApiDefinition && !openApiDefinition.isBlank()) {
-                        updateOpenApiContext(
-                                currentPackage, srcRoot, openApiDocName, openApiDefinition, embed);
+                        updateOpenApiContext(context, serviceId, openApiDefinition, embed);
                     } else {
                         OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
                         updateCompilerContext(context, location, errorCode);
@@ -106,10 +102,9 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             } else {
                 // generate open-api doc and update the context
                 String openApiDefinition = generateOpenApiDoc(
-                        config.getSemanticModel(), config.getSyntaxTree(), serviceNode, openApiDocName);
+                        config.getSemanticModel(), config.getSyntaxTree(), serviceNode, targetFile);
                 if (null != openApiDefinition && !openApiDefinition.isBlank()) {
-                    updateOpenApiContext(
-                            currentPackage, srcRoot, openApiDocName, openApiDefinition, true);
+                    updateOpenApiContext(context, serviceId, openApiDefinition, false);
                 } else {
                     OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
                     updateCompilerContext(context, location, errorCode);
@@ -123,11 +118,11 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         }
     }
 
-    private void updateOpenApiContext(Package currentPackage, Path srcRoot, String openApiDocName,
-                                      String openApiDefinition, boolean embed) {
+    private void updateOpenApiContext(SyntaxNodeAnalysisContext context, int serviceId, String openApiDefinition,
+                                      boolean embed) {
         OpenApiDocContext.OpenApiDefinition openApiDef = new OpenApiDocContext
-                .OpenApiDefinition(openApiDocName, openApiDefinition, embed);
-        getContextHandler().updateContext(currentPackage.packageId(), srcRoot, openApiDef);
+                .OpenApiDefinition(serviceId, openApiDefinition, embed);
+        getContextHandler().updateContext(context.moduleId(), context.documentId(), openApiDef);
     }
 
     private void updateCompilerContext(SyntaxNodeAnalysisContext context, NodeLocation location,
@@ -143,8 +138,10 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         }
         MetadataNode metaData = metadata.get();
         NodeList<AnnotationNode> annotations = metaData.annotations();
+        String serviceInfoAnnotation = String.format("%s:%s",
+                Constants.PACKAGE_NAME, Constants.SERVICE_INFO_ANNOTATION_IDENTIFIER);
         return annotations.stream()
-                .filter(ann -> Constants.SERVICE_INFO_ANNOTATION.equals(ann.annotReference().toString().trim()))
+                .filter(ann -> serviceInfoAnnotation.equals(ann.annotReference().toString().trim()))
                 .findFirst();
     }
 
@@ -179,17 +176,5 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
 
     protected Path retrieveProjectRoot(Path projectRoot) {
         return projectRoot;
-    }
-
-    // current design for resources directory structure is as follows :
-    //  <executable.jar>
-    //      - [resources]
-    //          - [ballerina]
-    //              - [http]
-    protected Path retrieveResourcePath(Path projectRoot) {
-        return projectRoot
-                .resolve(Constants.TARGET_DIR_NAME)
-                .resolve(Paths.get(Constants.BIN_DIR_NAME, Constants.RESOURCES_DIR_NAME))
-                .resolve(Constants.PACKAGE_ORG).resolve(Constants.PACKAGE_NAME);
     }
 }

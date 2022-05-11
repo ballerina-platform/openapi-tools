@@ -58,7 +58,9 @@ public class GeneratorConstants {
         CLIENT_CREDENTIAL("http:OAuth2ClientCredentialsGrantConfig"),
         CUSTOM_CLIENT_CREDENTIAL("OAuth2ClientCredentialsGrantConfig"),
         REFRESH_TOKEN("http:OAuth2RefreshTokenGrantConfig"),
-        PASSWORD("http:OAuth2PasswordGrantConfig");
+        CUSTOM_REFRESH_TOKEN("OAuth2RefreshTokenGrantConfig"),
+        PASSWORD("http:OAuth2PasswordGrantConfig"),
+        CUSTOM_PASSWORD("OAuth2PasswordGrantConfig");
 
         private final String authType;
 
