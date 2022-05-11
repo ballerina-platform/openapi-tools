@@ -24,8 +24,8 @@ import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.Schema;
 
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createIdentifierToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.*;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.*;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
@@ -61,7 +61,9 @@ public class ReferencedTypeGenerator extends TypeGenerator {
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         String typeName = getValidName(extractReferenceType(schema.get$ref()), true);
         Schema<?> refSchema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName);
-        TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(createIdentifierToken(typeName));
+        //TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(createIdentifierToken(typeName));
+        TypeDescriptorNode typeDescriptorNode = createOptionalTypeDescriptorNode(createIdentifierToken(typeName), createToken(QUESTION_MARK_TOKEN));
+
         if (refSchema == null) {
             throw new BallerinaOpenApiException(String.format("Undefined $ref: '%s' in openAPI contract.",
                     schema.get$ref()));

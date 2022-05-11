@@ -1,0 +1,118 @@
+openapi: 3.0.0
+servers:
+  - description: Asana API endpoint.
+    url: https://app.asana.com/api/1.0
+info:
+  x-ballerina-display:
+    label: Asana
+    iconPath: "icon.png"
+  contact:
+    name: Asana Support
+    url: https://asana.com/support
+  description: >-
+    This is a generated connector for [Asana API v1.0](https://developers.asana.com/docs) OpenAPI specification.
+
+    This API enables you to help teams organize, track and manage their work.
+
+    For additional help getting started with the API, visit [Asana API](https://developers.asana.com).
+  x-ballerina-init-description: >
+    The connector initialization requires setting the API credentials.
+
+    Create an [Asana API Account](https://asana.com/create-account) and obtain tokens following [this guide](https://developers.asana.com/docs/authentication).
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  termsOfService: https://asana.com/terms
+  title: Asana
+  version: "1.0"
+  x-logo:
+    url: https://d1gwm4cf8hecp4.cloudfront.net/images/favicons/apple-touch-icon-57x57.png
+  x-origin:
+    - format: openapi
+      url: https://raw.githubusercontent.com/Asana/developer-docs/master/defs/asana_oas.yaml
+      version: "3.0"
+  x-providerName: asana.com
+  x-public-description: This is the interface for interacting with the [Asana Platform](https://developers.asana.com). Our API reference is generated from our [OpenAPI spec] (https://raw.githubusercontent.com/Asana/developer-docs/master/defs/asana_oas.yaml).
+security:
+  - personalAccessToken: []
+  - oauth2: []
+paths:
+  "/jobs":
+    get:
+      description: Returns the full record for a job.
+      operationId: getJob
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: "#/components/schemas/TaskResponse"
+                type: object
+          description: Successfully retrieved Job.
+      summary: Get a job by id
+      tags:
+        - Jobs
+components:
+  schemas:
+    TaskResponse:
+      properties:
+        assignee:
+          description: Users assigned to the task.
+          $ref: "#/components/schemas/UserCompact"
+          nullable: true
+    UserCompact:
+      properties:
+        abc:
+          description: Users assigned to the task.
+          type: string
+    BatchResponse:
+      description: A response object returned from a batch request.
+      properties:
+        body:
+          description: The JSON body that the invoked endpoint returned.
+          example:
+            data:
+              completed: false
+              gid: "1967"
+              name: Hello, world!
+              notes: How are you today?
+          type: object
+          nullable: true
+        status_code:
+          description: The HTTP status code that the invoked endpoint returned.
+          example: 200
+          type: integer
+          nullable: true
+      type: object
+    JobCompact:
+      allOf:
+        - $ref: "#/components/schemas/UserCompact"
+        - description: A *job* is an object representing a process that handles asynchronous work.
+          properties:
+            resource_subtype:
+              description: The subtype of this resource. Different subtypes retain many of the same fields and behavior, but may render differently in Asana or represent resources with different semantic meaning.
+              example: duplicate_task
+              readOnly: true
+              type: string
+  securitySchemes:
+    oauth2:
+      description: |-
+        We require that applications designed to access the Asana API on behalf of multiple users implement OAuth 2.0.
+        Asana supports the Authorization Code Grant flow.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://app.asana.com/-/oauth_authorize
+          refreshUrl: https://app.asana.com/-/oauth_token
+          scopes:
+            default: Provides access to all endpoints documented in our API reference. If no scopes are requested, this scope is assumed by default.
+            email: Provides access to the user’s email through the OpenID Connect user info endpoint.
+            openid: Provides access to OpenID Connect ID tokens and the OpenID Connect user info endpoint.
+            profile: Provides access to the user’s name and profile photo through the OpenID Connect user info endpoint.
+          tokenUrl: https://app.asana.com/-/oauth_token
+      type: oauth2
+    personalAccessToken:
+      description: A personal access token allows access to the api for the user who created it. This should be kept a secret and be treated like a password.
+      scheme: bearer
+      type: http
