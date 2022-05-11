@@ -2,18 +2,18 @@
 paths:
   /:
     get:
-      operationId: operation_get
+      operationId: get
       responses:
         "202":
           description: Accepted
     post:
-      operationId: operation_post
+      operationId: post
       responses:
         "202":
           description: Accepted
   /v1/{id}:
     get:
-      operationId: "operation_get_/v1/{id}"
+      operationId: getV1Id
       parameters:
         - name: id
           in: path

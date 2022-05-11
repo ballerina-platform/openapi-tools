@@ -231,4 +231,6 @@ public class Constants {
     public static final String YML_EXTENSION = ".yml";
     public static final String PLUS = "+";
     public static final String UNDERSCORE = "_";
+    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
+
 }

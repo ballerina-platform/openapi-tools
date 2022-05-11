@@ -1,7 +1,7 @@
 paths:
   /pet:
     get:
-      operationId: operation_get_/pet
+      operationId: getPet
       responses:
         default:
           description: Any Response
@@ -17,7 +17,7 @@ paths:
                 type: string
   /pets:
     get:
-      operationId: operation_get_/pets
+      operationId: getPets
       responses:
         "200":
           description: Ok

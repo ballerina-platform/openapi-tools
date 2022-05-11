@@ -12,7 +12,7 @@ servers:
 paths:
   /accepted:
     get:
-      operationId: operation_get_/accepted
+      operationId: getAccepted
       responses:
         "202":
           description: Accepted
@@ -24,7 +24,7 @@ paths:
                   type: string
   /foo:
     get:
-      operationId: operation_get_/foo
+      operationId: getFoo
       responses:
         "200":
           description: Ok
@@ -36,7 +36,7 @@ paths:
                   type: string
   /bar:
     get:
-      operationId: operation_get_/bar
+      operationId: getBar
       responses:
         "200":
           description: Ok
@@ -48,7 +48,7 @@ paths:
                   type: string
   /barint:
     get:
-      operationId: operation_get_/barint
+      operationId: getBarint
       responses:
         "200":
           description: Ok

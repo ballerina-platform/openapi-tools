@@ -49,6 +49,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.ballerina.openapi.converter.Constants.DEFAULT;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.getOperationId;
 
 /**
  * This class will do resource mapping from ballerina to openApi.
@@ -251,16 +252,6 @@ public class OpenAPIResourceMapper {
             }
         }
         return apiDocs;
-    }
-
-    /**
-     * get UUID generated with the given post fix.
-     *
-     * @param postFix string post fix to attach to ID
-     * @return {@link String} generated UUID
-     */
-    private String getOperationId(String postFix) {
-        return "operation_" + postFix;
     }
 
     /**

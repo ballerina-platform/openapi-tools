@@ -12,7 +12,7 @@ servers:
 paths:
   /:
     get:
-      operationId: operation_get
+      operationId: get
       responses:
         "200":
           description: Ok

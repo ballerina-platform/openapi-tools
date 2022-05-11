@@ -13,7 +13,7 @@ paths:
   /reservation:
     post:
       summary: Represents Snowpeak reservation resource
-      operationId: operation_post_/reservation
+      operationId: postReservation
       requestBody:
         description: Reservation representation
         content:
@@ -47,7 +47,7 @@ paths:
   /payment/{id}:
     post:
       summary: Represents Snowpeak payment resource
-      operationId: "operation_post_/payment/{id}"
+      operationId: postPaymentId
       parameters:
         - name: id
           in: path

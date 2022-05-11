@@ -12,7 +12,7 @@ servers:
 paths:
   /hello:
     get:
-      operationId: operation_get_/hello
+      operationId: getHello
       responses:
         "406":
           description: NotAcceptable

@@ -12,7 +12,7 @@ servers:
 paths:
   /pets:
     get:
-      operationId: operation_get_/pets
+      operationId: getPets
       responses:
         "200":
           description: Ok
@@ -21,7 +21,7 @@ paths:
               schema:
                 type: object
     post:
-      operationId: operation_post_/pets
+      operationId: postPets
       requestBody:
         content:
           application/vnd.wso2.sales+json:
@@ -36,7 +36,7 @@ paths:
                 type: string
   /pet:
     get:
-      operationId: operation_get_/pet
+      operationId: getPet
       responses:
         "200":
           description: Ok
@@ -46,7 +46,7 @@ paths:
                 type: object
   /hi:
     post:
-      operationId: operation_post_/hi
+      operationId: postHi
       responses:
         "200":
           description: Ok

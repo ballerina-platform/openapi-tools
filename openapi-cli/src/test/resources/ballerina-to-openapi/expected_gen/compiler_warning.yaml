@@ -12,7 +12,7 @@ servers:
 paths:
   /lb:
     get:
-      operationId: operation_get_/lb
+      operationId: getLb
       responses:
         "200":
           description: Ok

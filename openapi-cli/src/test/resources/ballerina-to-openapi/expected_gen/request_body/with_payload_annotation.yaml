@@ -1,7 +1,7 @@
 paths:
   /reservation:
     post:
-      operationId: operation_post_/reservation
+      operationId: postReservation
       requestBody:
         content:
           application/json:
