@@ -41,7 +41,7 @@ public class QueryParameterValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
+        Assert.assertEquals(errors.length, 2);
         // Type mismatch
         String typeMismatchError = "ERROR [query_parameter.bal:(8:32,8:45)] implementation type does not match with" +
                 " openapi contract type (expected 'integer',found 'string') for the parameter 'offset' in http" +

@@ -64,14 +64,14 @@ import static io.ballerina.openapi.validator.Constants.HTTP_500;
 import static io.ballerina.openapi.validator.Constants.HTTP_CODES;
 import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
 import static io.ballerina.openapi.validator.ValidatorUtils.getMediaType;
-import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
+import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
 
 /**
  * This class for validate the return and response types.
  *
  * @since 1.1.0
  */
-public class ReturnValidator {
+public class ReturnTypeValidator {
     private final SyntaxNodeAnalysisContext context;
     private final OpenAPI openAPI;
     private final String method;
@@ -83,8 +83,8 @@ public class ReturnValidator {
     private final Location location;
     private final DiagnosticSeverity severity;
 
-    public ReturnValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, String method, String path,
-                           Location location, DiagnosticSeverity severity) {
+    public ReturnTypeValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, String method, String path,
+                               Location location, DiagnosticSeverity severity) {
         this.context = context;
         this.openAPI = openAPI;
         this.method = method;
@@ -111,7 +111,7 @@ public class ReturnValidator {
 
     /**
      * This util function for validate the ballerina return against to openapi response. Here we string ballerina
-     * status code and , Mediatypes that user has used for the ballerina return.
+     * status code and , Media types that user has used for the ballerina return.
      *
      * @param returnNode Ballerina Return Node from function signature.
      * @param responses OAS operation response.
@@ -157,7 +157,7 @@ public class ReturnValidator {
             List<String> undefineCode = new ArrayList<>(ballerinaCodes);
             undefineCode.removeAll(oasKeys);
             if (undefineCode.size() > 0) {
-                updateContext(context, CompilationError.UNDOCUMENTED_RETURN_CODE, location,
+                reportDiagnostic(context, CompilationError.UNDEFINED_RETURN_CODE, location,
                         severity, undefineCode.toString(), method, path);
             }
 
@@ -170,11 +170,11 @@ public class ReturnValidator {
                         List<String> undefinedMediaTypes = new ArrayList<>(value);
                         undefinedMediaTypes.removeAll(oasMediaTypes);
                         if (undefinedMediaTypes.size() > 0) {
-                            updateContext(context, CompilationError.UNDOCUMENTED_RETURN_MEDIA_TYPE,
+                            reportDiagnostic(context, CompilationError.UNDEFINED_RETURN_MEDIA_TYPE,
                                     location, severity, undefinedMediaTypes.toString(), key, method, path);
                         }
                     } else {
-                        updateContext(context, CompilationError.UNDOCUMENTED_RETURN_MEDIA_TYPE,
+                        reportDiagnostic(context, CompilationError.UNDEFINED_RETURN_MEDIA_TYPE,
                                 location, severity, value.toString(), key, method, path);
                     }
                 }
@@ -355,7 +355,7 @@ public class ReturnValidator {
         missingCode.removeAll(ballerinaCodes);
         if (missingCode.size() > 0) {
             // Unimplemented status codes in swagger operation and get location via bal return node.
-            updateContext(context, CompilationError.UNIMPLEMENTED_STATUS_CODE, location, severity,
+            reportDiagnostic(context, CompilationError.UNIMPLEMENTED_STATUS_CODE, location, severity,
                     missingCode.toString(),
                     method, path);
         }
@@ -374,13 +374,13 @@ public class ReturnValidator {
             List<String> missingMediaTypes = new ArrayList<>(oasMediaTypes);
 
             if (ballerinaMediaTypes == null) {
-                updateContext(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
+                reportDiagnostic(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
                         location, severity, oasMediaTypes.toString(), key, method, path);
                 return;
             }
             missingMediaTypes.removeAll(ballerinaMediaTypes);
             if (missingMediaTypes.size() > 0) {
-                updateContext(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
+                reportDiagnostic(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
                         location, severity, missingMediaTypes.toString(), key, method, path);
             }
             content.forEach((mediaType, schema) -> {

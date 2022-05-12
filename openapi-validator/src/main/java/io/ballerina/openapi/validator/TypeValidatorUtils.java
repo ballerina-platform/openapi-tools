@@ -47,7 +47,7 @@ import static io.ballerina.openapi.validator.Constants.RECORD;
 import static io.ballerina.openapi.validator.Constants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.validator.Constants.STRING;
 import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
-import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
+import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
 
 /**
  * This util class is used to validate data types with given schema.
@@ -109,7 +109,7 @@ public class TypeValidatorUtils {
                             // Todo: inline record validation ex: record {|int id; string name;|}
                         } else if (oasType.isEmpty() || !fieldType.equals(oasType.get())) {
                             // type mismatch field
-                            updateContext(context, CompilationError.TYPE_MISMATCH_FIELD,
+                            reportDiagnostic(context, CompilationError.TYPE_MISMATCH_FIELD,
                                     field.getValue().getLocation().orElse(null), severity, oas, fieldType,
                                     field.getKey(), balRecord);
                         }
@@ -118,7 +118,7 @@ public class TypeValidatorUtils {
                 }
                 if (!isFieldExist) {
                     // Undocumented field.
-                    updateContext(context, CompilationError.UNDOCUMENTED_BRECORD_FIELD,
+                    reportDiagnostic(context, CompilationError.UNDEFINED_BRECORD_FIELD,
                             field.getValue().getLocation().orElse(null), severity,
                             field.getKey(), balRecord, oasName);
 //                    recordFields.add(field.getKey());
@@ -172,7 +172,7 @@ public class TypeValidatorUtils {
         messageOasType = oasArrayItems + arrayBuilder.toString();
         if (!balFieldType.equals(oasType.get())) {
             // type mismatch error
-            updateContext(context, CompilationError.TYPE_MISMATCH_FIELD, field.getValue().getLocation().orElse(null),
+            reportDiagnostic(context, CompilationError.TYPE_MISMATCH_FIELD, field.getValue().getLocation().orElse(null),
                     severity, messageOasType, balFieldType, field.getKey(), balRecord);
         }
     }
@@ -268,7 +268,7 @@ public class TypeValidatorUtils {
                 if (!isPropertyExist.get()) {
                     // Missing field message;
                     numberOfMissingFields.addAndGet(1);
-                    updateContext(context, CompilationError.UNIMPLEMENTED_OAS_PROPERTY,
+                    reportDiagnostic(context, CompilationError.UNIMPLEMENTED_OAS_PROPERTY,
                             location, severity, key, balRecord);
                 }
             });

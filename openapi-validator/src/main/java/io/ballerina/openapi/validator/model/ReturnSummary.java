@@ -25,10 +25,11 @@ import java.util.Map;
 /**
  * This model is created to store the multiple ballerina status code and media type for specific ballerina resource.
  *
- * @since 2201.1.0
+ * @since 1.1.0
  */
 public class ReturnSummary {
     private final Map<String, Node> balStatusCodes;
+    //This balMediaTypes contains <status_code, list of mediaTypes>
     private final Map<String, List<String>> balMediaTypes;
 
     public ReturnSummary(Map<String, Node> balStatusCodes, Map<String, List<String>> balMediaTypes) {

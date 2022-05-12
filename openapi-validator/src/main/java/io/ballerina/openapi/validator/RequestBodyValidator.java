@@ -53,7 +53,7 @@ import static io.ballerina.openapi.validator.ValidatorUtils.extractAnnotationFie
 import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
 import static io.ballerina.openapi.validator.ValidatorUtils.getMediaType;
 import static io.ballerina.openapi.validator.ValidatorUtils.getNormalizedPath;
-import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
+import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
 
 /**
  * This RequestBodyValidator class includes all the code related to resource request body validate.
@@ -120,7 +120,7 @@ public class RequestBodyValidator {
                             if (schema.get$ref() != null) {
                                 oasName = extractReferenceType(schema.get$ref());
                             }
-                            if (requestBodyNode.paramName().isEmpty() && oasName.isEmpty()) {
+                            if (requestBodyNode.paramName().isEmpty() || oasName.isEmpty()) {
                                 return;
                             }
                             Optional<Symbol> symbol = context.semanticModel().symbol(requestBodyNode);
@@ -130,75 +130,13 @@ public class RequestBodyValidator {
                             String balRecordName = requestBodyNode.typeName().toString().trim();
                             TypeSymbol typeSymbol = ((ParameterSymbol) symbol.get()).typeDescriptor();
                             if (typeSymbol instanceof TypeReferenceTypeSymbol) {
-                                if (schema instanceof ArraySchema) {
-                                    ArraySchema arraySchema = (ArraySchema) schema;
-                                    updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                            requestBodyNode.location(), severity,
-                                            mediaType,
-                                            extractReferenceType(arraySchema.getItems().get$ref()).get() +
-                                                    SQUARE_BRACKETS,
-                                            balRecordName, method.getKey(),
-                                            getNormalizedPath(method.getValue().getPath()));
-                                } else if (schema instanceof ObjectSchema || schema.get$ref() != null) {
-                                    // validate- Record
-                                    String oasSchema = oasName.get();
-                                    if (balRecordName.equals(oasSchema)) {
-                                        schema = openAPI.getComponents().getSchemas().get(oasSchema);
-                                        TypeValidatorUtils.validateRecordType(schema,
-                                                typeSymbol,
-                                                balRecordName,
-                                                context,
-                                                openAPI,
-                                                oasSchema,
-                                                severity);
-                                    } else {
-                                        updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                                requestBodyNode.location(),
-                                                severity,
-                                                mediaType,
-                                                oasSchema,
-                                                balRecordName,
-                                                method.getKey(),
-                                                getNormalizedPath(method.getValue().getPath()));
-                                    }
-                                }
+                                validateRecordTypePayload(method, requestBodyNode, mediaType, schema, oasName.get(),
+                                        balRecordName, typeSymbol);
                                 //TODO: inline record
                             } else if (typeSymbol instanceof ArrayTypeSymbol) {
                                 ArrayTypeSymbol arrayType = (ArrayTypeSymbol) typeSymbol;
-                                if (arrayType.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol) {
-                                    balRecordName = requestBodyNode.typeName().toString()
-                                            .trim().replaceAll("\\[", "")
-                                            .replaceAll("\\]", "");
-
-                                    if (!(schema instanceof ArraySchema)) {
-                                        updateContext(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                                                requestBodyNode.location(),
-                                                severity,
-                                                mediaType,
-                                                oasMediaTypes.toString(),
-                                                requestBodyNode.paramName().get().toString().trim(), method.getKey(),
-                                                getNormalizedPath(method.getValue().getPath()));
-                                        return;
-                                    } else {
-                                        ArraySchema arraySchema = (ArraySchema) schema;
-                                        if (arraySchema.getItems().get$ref() != null) {
-                                            String oasSchemaName =
-                                                    extractReferenceType(arraySchema.getItems().get$ref()).get();
-                                            schema = openAPI.getComponents().getSchemas().get(oasSchemaName);
-                                            // validate record
-                                            TypeValidatorUtils.validateRecordType(schema,
-                                                    arrayType.memberTypeDescriptor(),
-                                                    balRecordName, context, openAPI, oasSchemaName, severity);
-                                        } else {
-                                            //TODO inline object schema
-                                        }
-                                    }
-                                } else {
-                                    // TODO validate schema int[], boolean[] if any real world scenario. most of the
-                                    //  case come with object schema
-                                    return;
-                                }
-
+                                validateArrayTypePayload(method, requestBodyNode, mediaType, oasMediaTypes, schema,
+                                        arrayType);
                             } else {
                                 // TODO validate schema, int, boolean, map if any real world scenario. most of the case
                                 //  come with schema
@@ -207,7 +145,7 @@ public class RequestBodyValidator {
                         }
                     }
                     if (!isMediaTypeExist) {
-                        updateContext(context, CompilationError.UNDOCUMENTED_REQUEST_MEDIA_TYPE,
+                        reportDiagnostic(context, CompilationError.UNDEFINED_REQUEST_MEDIA_TYPE,
                                 requestBodyNode.location(),
                                 severity,
                                 mediaType,
@@ -222,9 +160,78 @@ public class RequestBodyValidator {
         //TODO: http:Request type
         if (!isBodyExist) {
             assert requestBodyNode != null;
-            updateContext(context, CompilationError.UNDOCUMENTED_REQUEST_BODY, requestBodyNode.location(), severity,
+            reportDiagnostic(context, CompilationError.UNDEFINED_REQUEST_BODY, requestBodyNode.location(), severity,
                     method.getKey(),
                     getNormalizedPath(method.getValue().getPath()));
+        }
+    }
+
+    /**
+     * This method is to validate array type request payload.
+     */
+    private void validateArrayTypePayload(Map.Entry<String, ResourceMethod> method,
+                                          RequiredParameterNode requestBodyNode,
+                              String mediaType, List<String> oasMediaTypes, Schema<?> schema,
+                              ArrayTypeSymbol arrayType) {
+
+        String balRecordName;
+        if (arrayType.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol) {
+            balRecordName = requestBodyNode.typeName().toString().trim().replaceAll("\\[", "")
+                    .replaceAll("\\]", "");
+
+            if (!(schema instanceof ArraySchema)) {
+                reportDiagnostic(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD, requestBodyNode.location(),
+                        severity, mediaType, oasMediaTypes.toString(),
+                        requestBodyNode.paramName().get().toString().trim(), method.getKey(),
+                        getNormalizedPath(method.getValue().getPath()));
+                return;
+            } else {
+                ArraySchema arraySchema = (ArraySchema) schema;
+                if (arraySchema.getItems().get$ref() != null) {
+                    String oasSchemaName = extractReferenceType(arraySchema.getItems().get$ref()).get();
+                    schema = openAPI.getComponents().getSchemas().get(oasSchemaName);
+                    // validate array record
+                    TypeValidatorUtils.validateRecordType(schema, arrayType.memberTypeDescriptor(),
+                            balRecordName, context, openAPI, oasSchemaName, severity);
+                } else {
+                    //TODO inline object schema
+                    return;
+                }
+            }
+        } else {
+            // TODO validate schema int[], boolean[] if any real world scenario. most of the
+            //  case come with object schema
+            return;
+        }
+    }
+
+    /**
+     * This method is to validate record type request payload.
+     */
+    private void validateRecordTypePayload(Map.Entry<String, ResourceMethod> method,
+                                           RequiredParameterNode requestBodyNode,
+                           String mediaType, Schema<?> schema, String oasName, String balRecordName,
+                           TypeSymbol typeSymbol) {
+
+        if (schema instanceof ArraySchema) {
+            ArraySchema arraySchema = (ArraySchema) schema;
+            reportDiagnostic(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
+                    requestBodyNode.location(), severity, mediaType, extractReferenceType(arraySchema.getItems()
+                            .get$ref()) + SQUARE_BRACKETS, balRecordName, method.getKey(),
+                    getNormalizedPath(method.getValue().getPath()));
+            
+        } else if (schema instanceof ObjectSchema || schema.get$ref() != null) {
+            // validate- Record
+            if (balRecordName.equals(oasName)) {
+                schema = openAPI.getComponents().getSchemas().get(oasName);
+                TypeValidatorUtils.validateRecordType(schema, typeSymbol, balRecordName,
+                        context, openAPI, oasName, severity);
+            } else {
+                reportDiagnostic(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
+                        requestBodyNode.location(), severity, mediaType, oasName,
+                        balRecordName, method.getKey(),
+                        getNormalizedPath(method.getValue().getPath()));
+            }
         }
     }
 
@@ -235,7 +242,7 @@ public class RequestBodyValidator {
                                        String method, Location location) {
         Content content = oasBody.getContent();
         if (body == null) {
-            updateContext(context, CompilationError.UNIMPLEMENTED_REQUEST_BODY, location, severity, method, path);
+            reportDiagnostic(context, CompilationError.UNIMPLEMENTED_REQUEST_BODY, location, severity, method, path);
             return;
         }
         if (content != null) {
@@ -304,7 +311,7 @@ public class RequestBodyValidator {
                 }
             }
             if (content.entrySet().size() != 1) {
-                updateContext(context, CompilationError.UNIMPLEMENTED_REQUEST_MEDIA_TYPE, body.location(), severity,
+                reportDiagnostic(context, CompilationError.UNIMPLEMENTED_REQUEST_MEDIA_TYPE, body.location(), severity,
                         missingPayload.toString(), method, path);
             }
         }

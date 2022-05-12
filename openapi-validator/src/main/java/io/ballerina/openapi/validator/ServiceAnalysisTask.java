@@ -23,7 +23,7 @@ import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
-import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
+import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
 
 /**
  * This model used to filter and validate all the operations according to the given filter and filter the service
@@ -40,10 +40,11 @@ public class ServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisConte
         this.serviceValidator = new ServiceValidator();
     }
 
+    //create common interface for validators as validate.  openAPI, contex are common.
     @Override
     public void perform(SyntaxNodeAnalysisContext syntaxContext) {
         this.preValidator.initialize(syntaxContext);
-        this.preValidator.preValidation();
+        this.preValidator.validate();
         if (this.preValidator.getOpenAPI() == null) {
             return;
         }
@@ -52,24 +53,28 @@ public class ServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisConte
         boolean operationEnabled = filter.getOperation() != null;
         boolean excludeTagsEnabled = filter.getExcludeTag() != null;
         boolean excludeOperationEnable = filter.getExcludeOperation() != null;
-        // 1. When the both tag and e.tags enable compiler gives compilation error.
-        if (tagEnabled && excludeTagsEnabled) {
-            updateContext(syntaxContext, CompilationError.BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES,
-                    syntaxContext.node().location(), DiagnosticSeverity.ERROR);
-            return;
-        }
-        // 2. When the both operation and e. operations enable compiler gives compilation error.
-        if (operationEnabled && excludeOperationEnable) {
-            updateContext(syntaxContext, CompilationError.BOTH_OPERATIONS_AND_EXCLUDE_OPERATIONS_ENABLES,
-                    syntaxContext.node().location(), DiagnosticSeverity.ERROR);
-            return;
-        }
+
         // This is the annotation has not any filters to filter the operations.
         if (tagEnabled && operationEnabled && excludeOperationEnable && excludeTagsEnabled) {
-            updateContext(syntaxContext, CompilationError.FOUR_ANNOTATION_FIELDS,
+            reportDiagnostic(syntaxContext, CompilationError.FOUR_ANNOTATION_FIELDS,
                     syntaxContext.node().location(), DiagnosticSeverity.ERROR);
             return;
         }
+
+        // 1. When the both tag and e.tags enable compiler gives compilation error.
+        if (tagEnabled && excludeTagsEnabled) {
+            reportDiagnostic(syntaxContext, CompilationError.BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES,
+                    syntaxContext.node().location(), DiagnosticSeverity.ERROR);
+            return;
+        }
+
+        // 2. When the both operation and e. operations enable compiler gives compilation error.
+        if (operationEnabled && excludeOperationEnable) {
+            reportDiagnostic(syntaxContext, CompilationError.BOTH_OPERATIONS_AND_EXCLUDE_OPERATIONS_ENABLES,
+                    syntaxContext.node().location(), DiagnosticSeverity.ERROR);
+            return;
+        }
+
         this.serviceValidator.initialize(syntaxContext, this.preValidator.getOpenAPI(), filter);
         this.serviceValidator.validate();
     }
