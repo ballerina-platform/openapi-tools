@@ -59,6 +59,7 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -76,6 +77,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.openapi.validator.Constants.BALLERINA;
+import static io.ballerina.openapi.validator.Constants.DOUBLE;
+import static io.ballerina.openapi.validator.Constants.FLOAT;
 import static io.ballerina.openapi.validator.Constants.FULL_STOP;
 import static io.ballerina.openapi.validator.Constants.HEADER_NAME;
 import static io.ballerina.openapi.validator.Constants.HTTP;
@@ -83,6 +86,7 @@ import static io.ballerina.openapi.validator.Constants.HTTP_CALLER;
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
 import static io.ballerina.openapi.validator.Constants.HTTP_REQUEST;
 import static io.ballerina.openapi.validator.Constants.JSON;
+import static io.ballerina.openapi.validator.Constants.NUMBER;
 import static io.ballerina.openapi.validator.Constants.SLASH;
 import static io.ballerina.openapi.validator.Constants.YAML;
 import static io.ballerina.openapi.validator.Constants.YML;
@@ -90,7 +94,7 @@ import static io.ballerina.openapi.validator.Constants.YML;
 /**
  * This util class contain the common util functions that use in validator process.
  *
- * @since 2.0.0
+ * @since 1.1.0
  */
 public class ValidatorUtils {
 
@@ -117,13 +121,13 @@ public class ValidatorUtils {
         ParseOptions parseOptions = new ParseOptions();
 
         if (!Files.exists(contractPath)) {
-            updateContext(context, CompilationError.INVALID_CONTRACT_PATH, location, DiagnosticSeverity.ERROR,
+            reportDiagnostic(context, CompilationError.INVALID_CONTRACT_PATH, location, DiagnosticSeverity.ERROR,
                     contractPath);
             return null;
         }
 
         if (!(definitionURI.endsWith(YAML) || definitionURI.endsWith(JSON) || definitionURI.endsWith(YML))) {
-            updateContext(context, CompilationError.INVALID_CONTRACT_FORMAT, location, DiagnosticSeverity.ERROR);
+            reportDiagnostic(context, CompilationError.INVALID_CONTRACT_FORMAT, location, DiagnosticSeverity.ERROR);
             return null;
         }
 
@@ -132,7 +136,7 @@ public class ValidatorUtils {
                 parseOptions);
         OpenAPI api = parseResult.getOpenAPI();
         if (api == null) {
-            updateContext(context, CompilationError.PARSER_EXCEPTION, location, DiagnosticSeverity.ERROR,
+            reportDiagnostic(context, CompilationError.PARSER_EXCEPTION, location, DiagnosticSeverity.ERROR,
                     definitionURI);
         }
         return api;
@@ -178,19 +182,8 @@ public class ValidatorUtils {
             return false;
         }
     }
-
-    public static void updateContext(SyntaxNodeAnalysisContext context, CompilationError error, Location location,
-                                     DiagnosticSeverity severity) {
-
-        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(),
-                error.getDescription(), severity);
-        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo
-                , location);
-        context.reportDiagnostic(diagnostic);
-    }
-
-    public static void updateContext(SyntaxNodeAnalysisContext context, CompilationError error,
-                                     Location location, DiagnosticSeverity severity, Object... args) {
+    public static void reportDiagnostic(SyntaxNodeAnalysisContext context, CompilationError error,
+                                        Location location, DiagnosticSeverity severity, Object... args) {
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error.getDescription(), severity);
         Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location, args);
         context.reportDiagnostic(diagnostic);
@@ -541,5 +534,16 @@ public class ValidatorUtils {
             // values.");
             return Optional.empty();
         }
+    }
+
+    public static String getNumberFormatType(Parameter oasParameter, String headerType) {
+        if (headerType.equals(NUMBER)) {
+            headerType = DOUBLE;
+            if (oasParameter.getSchema().getFormat() != null &&
+                    oasParameter.getSchema().getFormat().equals(FLOAT)) {
+                headerType = FLOAT;
+            }
+        }
+        return headerType;
     }
 }

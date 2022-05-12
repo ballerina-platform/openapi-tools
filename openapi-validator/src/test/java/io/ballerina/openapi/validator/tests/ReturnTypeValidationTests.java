@@ -58,7 +58,7 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
+        Assert.assertEquals(errors.length, 2);
         String undocumentedReturnCode = "ERROR [single_record_payload_type_mismatch.bal:(14:5,18:6)] undefined " +
                 "resource return mediaType/s '[text/plain]' for return status code '200' in the counterpart ballerina" +
                 " service resource (method: 'get', path: '/')";
@@ -70,13 +70,14 @@ public class ReturnTypeValidationTests {
         Assert.assertEquals(unimplementedReturnCode, errors[1].toString());
     }
 
+    //clear description
     @Test(description = "Status code change in record")
     public void statusCodeWithRecord() {
         Path path = RES_DIR.resolve("single_record_status_code.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
+        Assert.assertEquals(errors.length, 2);
         String undocumentedReturnCode = "ERROR [single_record_status_code.bal:(14:5,18:6)] undefined status" +
                 " code/s '[202]' for return type in the counterpart ballerina service resource" +
                 " (method: 'get', path: '/')";
@@ -89,7 +90,7 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
+        Assert.assertEquals(errors.length, 2);
         String allMessage = "ERROR [union_status_code.bal:(8:5,10:6)] undefined status code/s '[400, 401, 404]'" +
                 " for return type in the counterpart ballerina service resource (method: 'get', path: '/')";
         Assert.assertEquals(allMessage, errors[0].toString());
