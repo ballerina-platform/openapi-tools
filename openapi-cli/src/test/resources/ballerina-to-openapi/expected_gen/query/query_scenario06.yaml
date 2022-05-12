@@ -1,7 +1,7 @@
 paths:
   /pets:
     get:
-      operationId: operation_get_/pets
+      operationId: getPets
       parameters:
         - name: pet
           in: query
@@ -13,7 +13,7 @@ paths:
           description: Ok
   /ping:
     get:
-      operationId: operation_get_/ping
+      operationId: getPing
       parameters:
         - name: offset
           in: query
@@ -26,7 +26,7 @@ paths:
           description: Ok
   /ping02:
     get:
-      operationId: operation_get_/ping02
+      operationId: getPing02
       parameters:
         - name: offset
           in: query
@@ -39,7 +39,7 @@ paths:
           description: Ok
   /ping03:
     get:
-      operationId: operation_get_/ping03
+      operationId: getPing03
       parameters:
         - name: offset
           in: query
@@ -51,7 +51,7 @@ paths:
           description: Ok
   /ping04:
     get:
-      operationId: operation_get_/ping04
+      operationId: getPing04
       parameters:
         - name: offset
           in: query
@@ -64,7 +64,7 @@ paths:
           description: Ok
   /ping05:
     get:
-      operationId: operation_get_/ping05
+      operationId: getPing05
       parameters:
         - name: offset
           in: query
@@ -80,7 +80,7 @@ paths:
           description: Ok
   /ping06:
     get:
-      operationId: operation_get_/ping06
+      operationId: getPing06
       parameters:
         - name: offset
           in: query
@@ -93,7 +93,7 @@ paths:
           description: Ok
   /ping07:
     get:
-      operationId: operation_get_/ping07
+      operationId: getPing07
       parameters:
         - name: offset
           in: query
@@ -110,7 +110,7 @@ paths:
   /ping08:
     get:
       summary: Mock resource function
-      operationId: operation_get_/ping08
+      operationId: getPing08
       parameters:
         - name: offset
           in: query

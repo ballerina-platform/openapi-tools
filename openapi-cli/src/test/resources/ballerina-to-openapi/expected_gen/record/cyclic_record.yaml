@@ -12,7 +12,7 @@ servers:
 paths:
   /pet:
     post:
-      operationId: operation_post_/pet
+      operationId: postPet
       responses:
         "200":
           description: Ok
@@ -24,7 +24,7 @@ paths:
           description: Accepted
   /pet02:
     post:
-      operationId: operation_post_/pet02
+      operationId: postPet02
       responses:
         "200":
           description: Ok
@@ -36,7 +36,7 @@ paths:
           description: Accepted
   /pet03:
     post:
-      operationId: operation_post_/pet03
+      operationId: postPet03
       responses:
         "200":
           description: Ok
@@ -48,7 +48,7 @@ paths:
           description: Accepted
   /pet04:
     post:
-      operationId: operation_post_/pet04
+      operationId: postPet04
       responses:
         "200":
           description: Ok
@@ -60,7 +60,7 @@ paths:
           description: Accepted
   /pet05:
     post:
-      operationId: operation_post_/pet05
+      operationId: postPet05
       responses:
         "200":
           description: Ok
@@ -72,7 +72,7 @@ paths:
           description: Accepted
   /pet06:
     post:
-      operationId: operation_post_/pet06
+      operationId: postPet06
       responses:
         "200":
           description: Ok
@@ -84,7 +84,7 @@ paths:
           description: Accepted
   /pet07:
     post:
-      operationId: operation_post_/pet07
+      operationId: postPet07
       responses:
         "200":
           description: Ok

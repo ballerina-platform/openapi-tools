@@ -12,7 +12,7 @@ servers:
 paths:
   /cachingBackEnd:
     get:
-      operationId: operation_get_/cachingBackEnd
+      operationId: getCachingbackend
       responses:
         "200":
           description: Ok

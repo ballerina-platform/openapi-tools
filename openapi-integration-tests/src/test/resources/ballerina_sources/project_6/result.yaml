@@ -12,7 +12,7 @@ servers:
 paths:
   /greeting:
     get:
-      operationId: operation_get_/greeting
+      operationId: getGreeting
       responses:
         "200":
           description: Ok

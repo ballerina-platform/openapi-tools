@@ -12,7 +12,7 @@ servers:
 paths:
   /pet01:
     get:
-      operationId: operation_get_/pet01
+      operationId: getPet01
       responses:
         "200":
           description: Ok
@@ -22,7 +22,7 @@ paths:
                 $ref: '#/components/schemas/User'
   /pet02:
     get:
-      operationId: operation_get_/pet02
+      operationId: getPet02
       responses:
         "200":
           description: Ok
@@ -32,7 +32,7 @@ paths:
                 type: object
   /pet03:
     get:
-      operationId: operation_get_/pet03
+      operationId: getPet03
       responses:
         "200":
           description: Ok
