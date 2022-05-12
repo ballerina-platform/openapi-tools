@@ -111,7 +111,6 @@ public class PreValidator {
         Location location = serviceNode.location();
 
         // 2. Preprocessing - return OpenAPI and filter
-
         if (metadata.isEmpty()) {
             return;
         }
@@ -125,6 +124,7 @@ public class PreValidator {
         for (AnnotationNode annotation : annotations) {
             Node node = annotation.annotReference();
             if (node.toString().trim().equals(OPENAPI_ANNOTATION)) {
+                // Check the annotated service is http.
                 SeparatedNodeList<MappingFieldNode> fields =
                         extractAnnotationAttributeList(serviceNode, location, annotation);
                 if (fields == null) {

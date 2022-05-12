@@ -54,6 +54,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUALIFIED_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SIMPLE_NAME_REFERENCE;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.UNION_TYPE_DESC;
+import static io.ballerina.openapi.validator.Constants.ANONYMOUS_RECORD;
 import static io.ballerina.openapi.validator.Constants.APPLICATION_JSON;
 import static io.ballerina.openapi.validator.Constants.BODY;
 import static io.ballerina.openapi.validator.Constants.HTTP;
@@ -436,7 +437,7 @@ public class ReturnValidator {
                                             if (bodyFieldType instanceof  TypeReferenceTypeSymbol) {
                                                 TypeValidatorUtils.validateObjectSchema(objectSchema, bodyFieldType,
                                                         context, ((TypeReferenceTypeSymbol) bodyFieldType)
-                                                                .definition().getName().orElse("Anonymous Record"),
+                                                                .definition().getName().orElse(ANONYMOUS_RECORD),
                                                         location, severity);
                                             }
                                         }
@@ -444,12 +445,12 @@ public class ReturnValidator {
                                     if (!isHttp) {
                                         TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol,
                                                 context, ((TypeReferenceTypeSymbol) typeSymbol).definition().getName().
-                                                        orElse("Anonymous Record"), location, severity);
+                                                        orElse(ANONYMOUS_RECORD), location, severity);
                                     }
                                 } else {
                                     TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol,
                                             context, refType.definition().getName().
-                                                    orElse("Anonymous Record"), location, severity);
+                                                    orElse(ANONYMOUS_RECORD), location, severity);
                                 }
 
                             }

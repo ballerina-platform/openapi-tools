@@ -111,10 +111,10 @@ public class ServiceValidator {
         // 3. Summaries the resource functions
         Map<String, ResourcePathSummary> resourcePathMap = summarizeResources(resourceFunctions, context);
 
-        // 4. Unimplemented resource in service file
+        // 4. Unimplemented resource in service file (extra resource in openapi spec)
         List<OpenAPIPathSummary> updatedOASPaths = unimplementedResourceFunction(openAPIPathSummaries,
                 resourcePathMap);
-        // 5. Undocumented resource in service file
+        // 5. Undocumented resource in service file (extra resource in ballerina service)
         Map<String, ResourcePathSummary> updatedResourcePath = undocumentedResource(openAPIPathSummaries,
                 resourcePathMap);
 
@@ -127,7 +127,6 @@ public class ServiceValidator {
 
         // 7. OpenAPI -> Ballerina
         validateOASAgainstToBallerina(updatedOASPaths, updatedResourcePath);
-
     }
 
     /**
@@ -269,8 +268,6 @@ public class ServiceValidator {
             balReturnSummary.put(path.getKey(), balMethodReturnSummary);
         }
     }
-
-
 
     /**
      * This function is used to validate the ballerina resource header against to openapi header.
