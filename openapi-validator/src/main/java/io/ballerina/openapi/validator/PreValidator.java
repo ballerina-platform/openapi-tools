@@ -60,7 +60,7 @@ import static io.ballerina.openapi.validator.Constants.OPENAPI_ANNOTATION;
 import static io.ballerina.openapi.validator.Constants.TRUE;
 import static io.ballerina.openapi.validator.ValidatorUtils.isHttpService;
 import static io.ballerina.openapi.validator.ValidatorUtils.parseOpenAPIFile;
-import static io.ballerina.openapi.validator.ValidatorUtils.updateContext;
+import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
 import static io.ballerina.openapi.validator.error.CompilationError.EMPTY_CONTRACT_PATH;
 import static io.ballerina.openapi.validator.error.CompilationError.NON_HTTP_SERVICE;
 import static io.ballerina.openapi.validator.error.CompilationError.UNEXPECTED_EXCEPTIONS;
@@ -94,7 +94,7 @@ public class PreValidator {
      * annotation @openapi:ServiceInfo and that annotation includes valid openapi contract path.
      *
      */
-    public void preValidation() {
+    public void validate() {
         // 1. Checking receive service node has compilation issue
         SemanticModel semanticModel = context.semanticModel();
         List<Diagnostic> diagnostics = semanticModel.diagnostics();
@@ -110,7 +110,14 @@ public class PreValidator {
         boolean validatorEnable = false;
         Location location = serviceNode.location();
 
-        // 2. Preprocessing - return OpenAPI and filter
+        // 2.Test given service is http service, if not this will return WARNING and execute the ballerina
+        // file.
+        if (!isHttpService(serviceNode, context.semanticModel())) {
+            reportDiagnostic(context, NON_HTTP_SERVICE, location, DiagnosticSeverity.WARNING);
+            return;
+        }
+
+        // 3. Preprocessing - return OpenAPI and filter
         if (metadata.isEmpty()) {
             return;
         }
@@ -125,8 +132,7 @@ public class PreValidator {
             Node node = annotation.annotReference();
             if (node.toString().trim().equals(OPENAPI_ANNOTATION)) {
                 // Check the annotated service is http.
-                SeparatedNodeList<MappingFieldNode> fields =
-                        extractAnnotationAttributeList(serviceNode, location, annotation);
+                SeparatedNodeList<MappingFieldNode> fields = extractAnnotationAttributeList(annotation);
                 if (fields == null) {
                     return;
                 }
@@ -203,15 +209,7 @@ public class PreValidator {
     /**
      * This function is to extract the annotation attribute details.
      */
-    private SeparatedNodeList<MappingFieldNode> extractAnnotationAttributeList(ServiceDeclarationNode serviceNode,
-                                                                               Location location,
-                                                                               AnnotationNode annotation) {
-        // Test given service is http service, if not this will return WARNING and execute the ballerina
-        // file.
-        if (!isHttpService(serviceNode, context.semanticModel())) {
-            updateContext(context, NON_HTTP_SERVICE, location, DiagnosticSeverity.WARNING);
-            return null;
-        }
+    private SeparatedNodeList<MappingFieldNode> extractAnnotationAttributeList(AnnotationNode annotation) {
         Optional<MappingConstructorExpressionNode> mappingNode = annotation.annotValue();
         if (mappingNode.isEmpty()) {
             return null;
@@ -240,7 +238,7 @@ public class PreValidator {
         Path relativePath = null;
         try {
             if (openAPIPath.toString().isBlank()) {
-                updateContext(context, EMPTY_CONTRACT_PATH, location, DiagnosticSeverity.WARNING);
+                reportDiagnostic(context, EMPTY_CONTRACT_PATH, location, DiagnosticSeverity.WARNING);
             } else if (Paths.get(openAPIPath.toString()).isAbsolute()) {
                 relativePath = Paths.get(openAPIPath.toString());
             } else {
@@ -253,7 +251,7 @@ public class PreValidator {
                 return parseOpenAPIFile(context, relativePath.toString(), location);
             }
         } catch (IOException e) {
-            updateContext(context, UNEXPECTED_EXCEPTIONS, location, DiagnosticSeverity.ERROR, e.getMessage());
+            reportDiagnostic(context, UNEXPECTED_EXCEPTIONS, location, DiagnosticSeverity.ERROR, e.getMessage());
         }
         return null;
     }

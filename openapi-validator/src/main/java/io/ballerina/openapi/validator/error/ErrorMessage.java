@@ -46,7 +46,7 @@ public enum ErrorMessage {
             " at the same time."),
     ERROR_015("missing Ballerina service resource method ''{0}'' with path ''{1}'' which is documented in the OpenAPI" +
             " contract."),
-    ERROR_016("undefined resource/s ''{0}'' with path ''{1}'' in the OpenAPI contract."),
+    ERROR_016("undefined resource(s) ''{0}'' with path ''{1}'' in the OpenAPI contract."),
     ERROR_017("missing Ballerina service resource for the path ''{0}'' which is documented in the OpenAPI contract."),
     ERROR_018("undefined resource path ''{0}'' in the OpenAPI contract."),
     ERROR_019("implementation type does not match with OpenAPI contract type (expected ''{0}'',found ''{1}'') for the" +
@@ -57,9 +57,9 @@ public enum ErrorMessage {
             " in the OpenAPI contract."),
     ERROR_022("implementation payload type does not match with OpenAPI contract content type ''{0}'' (expected " +
             "''{1}'',found ''{2}'') for the HTTP method ''{3}'' that associated with the path ''{4}''."),
-    ERROR_023("undefined status code/s ''{0}'' for return type in the counterpart Ballerina service resource" +
+    ERROR_023("undefined status code(s) ''{0}'' for return type in the counterpart Ballerina service resource" +
             " (method: ''{1}'', path: ''{2}'')"),
-    ERROR_024("undefined resource return mediaType/s ''{0}'' for return status code ''{1}'' in the counterpart" +
+    ERROR_024("undefined resource return mediaType(s) ''{0}'' for return status code ''{1}'' in the counterpart" +
             " Ballerina service resource (method: ''{2}'', path: ''{3}'')"),
     ERROR_025("missing OpenAPI contract header ''{0}'' in the counterpart Ballerina service resource" +
             " (method: ''{1}'', path: ''{2}'')"),
@@ -67,13 +67,13 @@ public enum ErrorMessage {
                       " (method: ''{1}'', path: ''{2}'')"),
     ERROR_027("missing OpenAPI contract request body implementation in the counterpart Ballerina service resource" +
                       " (method: ''{0}'', path: ''{1}'')"),
-    ERROR_028("missing implementation for return code/s ''{0}'' in the counterpart Ballerina service " +
+    ERROR_028("missing implementation for return code(s) ''{0}'' in the counterpart Ballerina service " +
             "resource (method: ''{1}'', path: ''{2}'')"),
-    ERROR_029("missing implementation for return mediaType/s ''{0}'' for return code ''{1}'' in the HTTP method " +
+    ERROR_029("missing implementation for return mediaType(s) ''{0}'' for return code ''{1}'' in the HTTP method " +
             "''{2}'' that associated with the path ''{3}''."),
     ERROR_030("OpenAPI service validator can not be proceed with all four attributes (tags, operations, " +
             "excludeTags, excludeOperations) at the same time, Please select a valid combination from them."),
-    ERROR_031("undefined mediaType/s ''{0}'' for the request body in the counterpart Ballerina service resource " +
+    ERROR_031("undefined mediaType(s) ''{0}'' for the request body in the counterpart Ballerina service resource " +
             "(method: ''{1}'', path: ''{2}'').");
 
     private final String message;
