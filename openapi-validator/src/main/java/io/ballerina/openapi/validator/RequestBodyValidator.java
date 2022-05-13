@@ -26,11 +26,11 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.validator.error.CompilationError;
+import io.ballerina.openapi.validator.model.MetaData;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -59,42 +59,60 @@ import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
  *
  * @since 1.1.0
  */
-public class RequestBodyValidator extends Validator {
+public class RequestBodyValidator implements Validator {
+    private final SyntaxNodeAnalysisContext context;
+    private final OpenAPI openAPI;
     private final String path;
     private final String method;
     private Location location;
+    private final DiagnosticSeverity severity;
+    private final RequestBody oasRequestBody;
+    private final RequiredParameterNode body;
 
-    public RequestBodyValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity,
-                                String path, String method) {
-        super(context, openAPI, severity);
-        this.path = path;
-        this.method = method;
+    public RequestBodyValidator(MetaData metaData, RequestBody oasRequestBody, RequiredParameterNode body) {
+        this.openAPI = metaData.getOpenAPI();
+        this.context = metaData.getContext();
+        this.method = metaData.getMethod();
+        this.path = metaData.getPath();
+        this.severity = metaData.getSeverity();
+        this.location = metaData.getLocation();
+        this.body = body;
+        this.oasRequestBody = oasRequestBody;
+    }
+
+    @Override
+    public void validate() {
+        //Validate ballerina resource request body
+        if (body != null) {
+            validateBallerinaRequestBody();
+        }
+        //Validate OAS request body
+        if (oasRequestBody != null) {
+            validateOASRequestBody();
+        }
     }
 
     /**
      * Validate resource payload against to OAS operation request body.
      *
-     * @param requestBodyNode       Validate ballerina request body details
-     * @param oasOperation OAS operation
      */
-    public void validateBallerinaRequestBody(RequiredParameterNode requestBodyNode, Operation oasOperation) {
+    private void validateBallerinaRequestBody() {
 
         boolean isBodyExist = false;
-        if (oasOperation.getRequestBody() != null && requestBodyNode != null) {
+        if (oasRequestBody != null && body != null) {
             // This flag is to trac the availability of requestBody has documented
             isBodyExist = true;
             boolean isMediaTypeExist = false;
-            location = requestBodyNode.location();
+            location = body.location();
             //Ballerina support type payload string|json|map<json>|xml|byte[]||record {| anydata...; |}[]
             // Get the payload type
-            Node typeNode = requestBodyNode.typeName();
+            Node typeNode = body.typeName();
             SyntaxKind kind = typeNode.kind();
             String mediaType = ValidatorUtils.getMediaType(kind);
 
             List<String> mediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE,
-                    requestBodyNode.annotations(), context.semanticModel());
+                    body.annotations(), context.semanticModel());
 
-            RequestBody oasRequestBody = oasOperation.getRequestBody();
             Content content = oasRequestBody.getContent();
             // Traverse request body  list , when it has multiple types
             // first check given media type is there,if not return diagnostic.if it is there check the payload type.
@@ -118,14 +136,14 @@ public class RequestBodyValidator extends Validator {
                             if (schema.get$ref() != null) {
                                 oasName = extractReferenceType(schema.get$ref());
                             }
-                            if (requestBodyNode.paramName().isEmpty() && oasName.isEmpty()) {
+                            if (body.paramName().isEmpty() && oasName.isEmpty()) {
                                 return;
                             }
-                            Optional<Symbol> symbol = context.semanticModel().symbol(requestBodyNode);
+                            Optional<Symbol> symbol = context.semanticModel().symbol(body);
                             if (symbol.isEmpty()) {
                                 return;
                             }
-                            String balRecordName = requestBodyNode.typeName().toString().trim();
+                            String balRecordName = body.typeName().toString().trim();
                             TypeSymbol typeSymbol = ((ParameterSymbol) symbol.get()).typeDescriptor();
                             if (typeSymbol instanceof TypeReferenceTypeSymbol) {
                                 validateRecordTypePayload(mediaType, schema,
@@ -133,7 +151,7 @@ public class RequestBodyValidator extends Validator {
                                 //TODO: inline record
                             } else if (typeSymbol instanceof ArrayTypeSymbol) {
                                 ArrayTypeSymbol arrayType = (ArrayTypeSymbol) typeSymbol;
-                                validateArrayTypePayload(requestBodyNode, mediaType, oasMediaTypes, schema,
+                                validateArrayTypePayload(body, mediaType, oasMediaTypes, schema,
                                         arrayType);
                                 return;
                             } else {
@@ -145,7 +163,7 @@ public class RequestBodyValidator extends Validator {
                     }
                     if (!isMediaTypeExist) {
                         reportDiagnostic(context, CompilationError.UNDEFINED_REQUEST_MEDIA_TYPE,
-                                requestBodyNode.location(), severity, mediaType, method, getNormalizedPath(path));
+                                body.location(), severity, mediaType, method, getNormalizedPath(path));
                     }
                 }
             } else {
@@ -154,8 +172,7 @@ public class RequestBodyValidator extends Validator {
         }
         //TODO: http:Request type
         if (!isBodyExist) {
-            assert requestBodyNode != null;
-            reportDiagnostic(context, CompilationError.UNDEFINED_REQUEST_BODY, requestBodyNode.location(),
+            reportDiagnostic(context, CompilationError.UNDEFINED_REQUEST_BODY, body.location(),
                     severity, method, getNormalizedPath(path));
         }
     }
@@ -229,9 +246,8 @@ public class RequestBodyValidator extends Validator {
     /**
      * Validate OpenAPI request body against to ballerina payload.
      */
-    public void validateOASRequestBody(RequiredParameterNode body, RequestBody oasBody, String path,
-                                       String method, Location location) {
-        Content content = oasBody.getContent();
+    private void validateOASRequestBody() {
+        Content content = oasRequestBody.getContent();
         if (body == null) {
             reportDiagnostic(context, CompilationError.MISSING_REQUEST_BODY, location, severity, method, path);
             return;
@@ -307,4 +323,5 @@ public class RequestBodyValidator extends Validator {
             }
         }
     }
+
 }

@@ -18,3 +18,8 @@ service /v1 on ep {
      resource function post pets(@http:Payload User  payload) returns error? {
      }
  }
+
+service /v2 on ep {
+     resource function post pets(@http:Payload User  payload) returns error? {
+     }
+ }

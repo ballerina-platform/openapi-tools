@@ -46,9 +46,9 @@ public enum ErrorMessage {
             " at the same time."),
     ERROR_015("missing Ballerina service resource method ''{0}'' with path ''{1}'' which is documented in the OpenAPI" +
             " contract."),
-    ERROR_016("undefined resource(s) ''{0}'' with path ''{1}'' in the OpenAPI contract."),
+    ERROR_016("undefined resource(s) ''{0}'' with path ''{1}'' in the Ballerina service."),
     ERROR_017("missing Ballerina service resource for the path ''{0}'' which is documented in the OpenAPI contract."),
-    ERROR_018("undefined resource path ''{0}'' in the OpenAPI contract."),
+    ERROR_018("undefined resource path ''{0}'' in the Ballerina service."),
     ERROR_019("implementation type does not match with OpenAPI contract type (expected ''{0}'',found ''{1}'') for the" +
             " header ''{2}'' in HTTP method ''{3}'' that associated with the path ''{4}''."),
     ERROR_020("undefined header ''{0}'' for the method 'get' of the resource associated with the path ''{1}'' is not " +

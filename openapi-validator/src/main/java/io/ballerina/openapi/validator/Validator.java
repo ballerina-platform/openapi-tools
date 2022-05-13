@@ -17,34 +17,12 @@
  */
 package io.ballerina.openapi.validator;
 
-import io.ballerina.openapi.validator.model.Filter;
-import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-import io.swagger.v3.oas.models.OpenAPI;
-
 /**
- * Abstract class for the validator.
- * 
+ * Abstract interface for the validator.
+ *
  * @since 1.1.0
  */
-public abstract class Validator {
-    SyntaxNodeAnalysisContext context;
-    OpenAPI openAPI;
-    DiagnosticSeverity severity = DiagnosticSeverity.ERROR;
-    public Validator(){}
+public interface Validator {
 
-    public Validator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity) {
-        this.context = context;
-        this.openAPI = openAPI;
-        this.severity = severity;
-    }
-
-    public OpenAPI getOpenAPI() {
-        return openAPI;
-    }
-
-
-    public void validate() {};
-
-    public void initialize(SyntaxNodeAnalysisContext context, OpenAPI openAPI, Filter filter) {};
+    void validate();
 }

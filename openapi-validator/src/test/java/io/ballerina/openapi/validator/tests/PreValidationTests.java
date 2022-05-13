@@ -55,13 +55,13 @@ public class PreValidationTests {
 
     @Test(description = "Given ballerina file has compilation issue as warning")
     public void compilationWarnings() {
-        Path path = RES_DIR.resolve("compilation_error.bal");
+        Path path = RES_DIR.resolve("compilation_warning.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         int i = diagnostic.diagnosticCount();
         Object[] errors = diagnostic.diagnostics().stream().filter(d ->
                 DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
-        Assert.assertEquals(errors.length, 2);
+        Assert.assertEquals(errors.length, 0);
     }
 
     @Test(description = "Given ballerina file has compilation issue as warning")
@@ -80,7 +80,7 @@ public class PreValidationTests {
         Assert.assertEquals(errors.length, 2);
     }
 
-    @Test(description = "Given ballerina file has compilation issue as warning")
+    @Test(description = "Given ballerina file has extra resources")
     public void undocumentedPathAndOperations() {
         Path path = RES_DIR.resolve("undocumented_resources.bal");
         Project project = getProject(path);
@@ -89,12 +89,13 @@ public class PreValidationTests {
         Assert.assertEquals(i, 6);
     }
 
-    @Test(description = "OpenAPI annotation with failOnErrors turn off")
+    @Test(description = "OpenAPI annotation with failOnErrors turn off with multiple resources")
     public void validatorTurnOff() {
         Path path = RES_DIR.resolve("multiple_services.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
-        int i = diagnostic.diagnosticCount();
-        Assert.assertEquals(i, 4);
+        Object[] errors = diagnostic.diagnostics().stream().filter(d ->
+                        DiagnosticSeverity.WARNING == d.diagnosticInfo().severity()).toArray();
+        Assert.assertEquals(errors.length, 3);
     }
 }

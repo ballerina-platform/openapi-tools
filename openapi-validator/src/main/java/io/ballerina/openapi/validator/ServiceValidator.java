@@ -21,34 +21,26 @@ package io.ballerina.openapi.validator;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.openapi.validator.model.Filter;
+import io.ballerina.openapi.validator.model.MetaData;
 import io.ballerina.openapi.validator.model.OpenAPIPathSummary;
 import io.ballerina.openapi.validator.model.ResourceMethod;
 import io.ballerina.openapi.validator.model.ResourcePathSummary;
-import io.ballerina.openapi.validator.model.ReturnSummary;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
 import static io.ballerina.openapi.validator.ValidatorUtils.getNormalizedPath;
 import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
 import static io.ballerina.openapi.validator.ValidatorUtils.summarizeOpenAPI;
@@ -60,19 +52,19 @@ import static io.ballerina.openapi.validator.ValidatorUtils.summarizeResources;
  *
  * @since 1.1.0
  */
-public class ServiceValidator extends Validator {
-    private final Map<String, Map<String, ReturnSummary>> balReturnSummary = new HashMap<>();
+public class ServiceValidator implements Validator {
     private Filter filter;
+    private SyntaxNodeAnalysisContext context;
+    private OpenAPI openAPI;
 
-    @Override
     public void initialize(SyntaxNodeAnalysisContext context, OpenAPI openAPI, Filter filter) {
         this.context = context;
         this.openAPI = openAPI;
         this.filter = filter;
     }
 
-    public Filter getFilter() {
-        return filter;
+    public OpenAPI getOpenAPI() {
+        return openAPI;
     }
 
     /**
@@ -103,15 +95,9 @@ public class ServiceValidator extends Validator {
         Map<String, ResourcePathSummary> updatedResourcePath = validateUndefinedBalResources(openAPIPathSummaries,
                 resourcePathMap);
 
-        // 6. Ballerina -> OAS validation
-        validateBalServiceAgainstOAS(updatedResourcePath, updatedOASPaths);
-                // parameter , query, path - done
-                // header - done
-                // request body - done partial
-                // return type - done partial
+        // 6. Resource validation
+        validateBalServiceWithOAS(updatedResourcePath, updatedOASPaths);
 
-        // 7. OpenAPI -> Ballerina
-        validateOASAgainstBalService(updatedOASPaths, updatedResourcePath);
     }
 
     /**
@@ -202,8 +188,8 @@ public class ServiceValidator extends Validator {
      * This validation happens ballerina service against to openapi specification.
      *
      */
-    private void validateBalServiceAgainstOAS(Map<String, ResourcePathSummary> resourcePaths,
-                                              List<OpenAPIPathSummary> oasPaths) {
+    private void validateBalServiceWithOAS(Map<String, ResourcePathSummary> resourcePaths,
+                                           List<OpenAPIPathSummary> oasPaths) {
 
         Set<Map.Entry<String, ResourcePathSummary>> paths = resourcePaths.entrySet();
         for (Map.Entry<String, ResourcePathSummary> path : paths) {
@@ -215,131 +201,36 @@ public class ServiceValidator extends Validator {
                     break;
                 }
             }
-            Map<String, ReturnSummary> balMethodReturnSummary = new HashMap<>();
 
             for (Map.Entry<String, ResourceMethod> method : methods.entrySet()) {
                 assert oasPath != null;
+                MetaData metaData = new MetaData(context, openAPI, path.getKey(), method.getKey(), filter.getKind(),
+                        method.getValue().getLocation());
                 Map<String, Operation> operations = oasPath.getOperations();
                 Operation oasOperation = operations.get(method.getKey());
-                // Ballerina parameters validation
+                // Parameters validation
                 List<Parameter> oasParameters = oasOperation.getParameters();
-                ParameterValidator parameterValidator = new ParameterValidator(context, openAPI, filter.getKind(),
-                        method.getValue().getPath(), method.getKey());
-                parameterValidator.validateBallerinaParameters(method.getValue().getParameters(), oasParameters);
-                // Ballerina headers validation
+                ParameterValidator parameterValidator = new ParameterValidator(metaData,
+                        method.getValue().getParameters(), oasParameters);
+                parameterValidator.validate();
+
+                // Headers validation
                 Map<String, Node> balHeaders = method.getValue().getHeaders();
-                HeaderValidator headerValidator = new HeaderValidator(context, openAPI, filter.getKind(),
-                        method.getValue().getPath(), method.getKey());
-                headerValidator.validateBallerinaHeaders(oasParameters, balHeaders);
+                HeaderValidator headerValidator = new HeaderValidator(metaData, balHeaders, oasParameters);
+                headerValidator.validate();
+
                 // Request body validation
-                if (method.getValue().getBody() != null) {
-                    RequestBodyValidator requestBodyValidator = new RequestBodyValidator(context, openAPI,
-                            filter.getKind(), method.getValue().getPath(), method.getKey());
-                    requestBodyValidator.validateBallerinaRequestBody(method.getValue().getBody(), oasOperation);
-                }
+                RequestBodyValidator requestBodyValidator = new RequestBodyValidator(metaData,
+                        oasOperation.getRequestBody(), method.getValue().getBody());
+                requestBodyValidator.validate();
+
                 // Return Type validation
-                ReturnTypeValidator returnTypeValidator = new ReturnTypeValidator(context, openAPI, method.getKey(),
-                        getNormalizedPath(method.getValue().getPath()), method.getValue().getLocation(),
-                        filter.getKind());
-                ApiResponses responses = oasOperation.getResponses();
                 ReturnTypeDescriptorNode returnNode = method.getValue().getReturnNode();
-                // If return type doesn't provide in service , then it maps to status code 202.
-                if (returnNode == null) {
-                    returnTypeValidator.validateBallerinaReturnType(Optional.empty(), responses);
-                } else {
-                    returnTypeValidator.validateBallerinaReturnType(
-                            Optional.ofNullable((TypeDescriptorNode) returnNode.type()), responses);
-                }
-                ReturnSummary returnSummary = new ReturnSummary(returnTypeValidator.getBalStatusCodes(),
-                        returnTypeValidator.getBalMediaTypes());
-                balMethodReturnSummary.put(method.getKey(), returnSummary);
+                ApiResponses responses = oasOperation.getResponses();
+
+                ReturnTypeValidator returnTypeValidator = new ReturnTypeValidator(metaData, returnNode, responses);
+                returnTypeValidator.validate();
             }
-            balReturnSummary.put(path.getKey(), balMethodReturnSummary);
-        }
-    }
-
-    /**
-     * Validate openapi operation against to given ballerina resource.
-     */
-    private void validateOASAgainstBalService(List<OpenAPIPathSummary> oasPaths,
-                                              Map<String, ResourcePathSummary> resourcePaths) {
-        // Parameter validation
-        // Headers validation
-        // RequestBody validation
-        // Return validation
-        for (OpenAPIPathSummary openAPIPath: oasPaths) {
-
-            String oasPath = openAPIPath.getPath();
-
-            ResourcePathSummary resourcePath = resourcePaths.get(oasPath);
-            Map<String, ResourceMethod> methods = resourcePath.getMethods();
-
-            Map<String, Operation> operations = openAPIPath.getOperations();
-            Map<String, ReturnSummary> returnSummaryMap = balReturnSummary.get(oasPath);
-            operations.forEach((key, value) -> {
-                ResourceMethod resourceMethod = methods.get(key);
-                //Parameter validation
-                List<Parameter> oasParameters = value.getParameters();
-                Map<String, Node> resourceParameters = resourceMethod.getParameters();
-                if (oasParameters != null) {
-                    oasParameters.forEach(parameter -> {
-                        if (parameter.get$ref() != null) {
-                            Optional<String> parameterName = extractReferenceType(parameter.get$ref());
-                            if (parameterName.isEmpty()) {
-                                return;
-                            }
-                            parameter = openAPI.getComponents().getParameters().get(parameterName.get());
-                        }
-                        if (parameter instanceof HeaderParameter ||
-                                parameter.getIn() != null && parameter.getIn().equals("header")) {
-                            // headerValidation
-                            Map<String, Node> resourceHeaders = resourceMethod.getHeaders();
-                            AtomicBoolean isHeaderExist = new AtomicBoolean(false);
-                            Parameter finalParameter = parameter;
-                            resourceHeaders.forEach((header, headerNode) -> {
-                                if (finalParameter.getName().trim().equals(header)) {
-                                    isHeaderExist.set(true);
-                                }
-                            });
-                            if (!isHeaderExist.get()) {
-                                reportDiagnostic(context, CompilationError.MISSING_HEADER,
-                                        resourceMethod.getLocation(), filter.getKind(), parameter.getName(), key,
-                                        oasPath);
-                            }
-                        } else {
-                            AtomicBoolean isImplemented = new AtomicBoolean(false);
-                            Parameter finalParameter1 = parameter;
-                            resourceParameters.forEach((paramName, paramNode) -> {
-                                // avoid headers
-                                if (finalParameter1.getName().equals(paramName)) {
-                                    isImplemented.set(true);
-                                }
-                            });
-                            if (!isImplemented.get()) {
-                                // error message
-                                reportDiagnostic(context, CompilationError.MISSING_PARAMETER,
-                                        resourceMethod.getLocation(), filter.getKind(), parameter.getName(), key,
-                                        oasPath);
-                            }
-                        }
-                    });
-                }
-                // Request body
-                RequestBody requestBody = value.getRequestBody();
-                if (requestBody != null) {
-                    RequiredParameterNode body = resourceMethod.getBody();
-                    RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI, filter.getKind(),
-                            oasPath, key);
-                    rbValidator.validateOASRequestBody(body, requestBody, oasPath, key, resourceMethod.getLocation());
-                }
-
-                // Response validator
-                ReturnTypeValidator returnTypeValidator = new ReturnTypeValidator(context, openAPI, key, oasPath,
-                        resourceMethod.getLocation(), filter.getKind());
-                returnTypeValidator.addAllBalStatusCodes(returnSummaryMap.get(key).getBalStatusCodes());
-                returnTypeValidator.addAllBalMediaTypes(returnSummaryMap.get(key).getBalMediaTypes());
-                returnTypeValidator.validateOASReturnType(value.getResponses());
-            });
         }
     }
 }

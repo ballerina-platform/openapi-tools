@@ -23,8 +23,10 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.openapi.validator.error.CompilationError;
+import io.ballerina.openapi.validator.model.MetaData;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -34,12 +36,14 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.ballerina.openapi.validator.Constants.HEADER_NAME;
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
 import static io.ballerina.openapi.validator.Constants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.validator.TypeValidatorUtils.convertOpenAPITypeToBallerina;
 import static io.ballerina.openapi.validator.ValidatorUtils.extractAnnotationFieldDetails;
+import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
 import static io.ballerina.openapi.validator.ValidatorUtils.getNormalizedPath;
 import static io.ballerina.openapi.validator.ValidatorUtils.getNumberFormatType;
 import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
@@ -50,22 +54,70 @@ import static io.ballerina.openapi.validator.ValidatorUtils.unescapeIdentifier;
  *
  * @since 1.1.0
  */
-public class HeaderValidator extends Validator {
+public class HeaderValidator implements Validator {
     private final String path;
     private final String method;
+    private final SyntaxNodeAnalysisContext context;
+    private final OpenAPI openAPI;
+    private final DiagnosticSeverity severity;
+    private final Map<String, Node> balHeaders;
+    private final List<Parameter> oasParameters;
 
-    public HeaderValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity,
-                           String path, String method) {
-        super(context, openAPI, severity);
-        this.path = path;
-        this.method = method;
+    // This default location is map to relevant resource function
+    private final Location location;
+
+
+    public HeaderValidator(MetaData metaData, Map<String, Node> balHeaders, List<Parameter> oasParameters) {
+        this.openAPI = metaData.getOpenAPI();
+        this.context = metaData.getContext();
+        this.method = metaData.getMethod();
+        this.path = metaData.getPath();
+        this.severity = metaData.getSeverity();
+        this.location = metaData.getLocation();
+        this.balHeaders = balHeaders;
+        this.oasParameters = oasParameters;
+    }
+
+    @Override
+    public void validate() {
+        //Ballerina to openAPI header validation.
+        validateBallerinaHeaders(oasParameters, balHeaders);
+        //OAS->Ballerina header validation
+        if (oasParameters == null) {
+            return;
+        }
+        oasParameters.forEach(parameter -> {
+            if (parameter.get$ref() != null) {
+                Optional<String> parameterName = extractReferenceType(parameter.get$ref());
+                if (parameterName.isEmpty()) {
+                    return;
+                }
+                parameter = openAPI.getComponents().getParameters().get(parameterName.get());
+            }
+            if (parameter instanceof HeaderParameter || parameter.getIn() != null &&
+                    parameter.getIn().equals("header")) {
+                AtomicBoolean isHeaderExist = new AtomicBoolean(false);
+                Parameter finalParameter = parameter;
+                balHeaders.forEach((header, headerNode) -> {
+                    if (finalParameter.getName().trim().equals(header)) {
+                        isHeaderExist.set(true);
+                    }
+                });
+                if (!isHeaderExist.get()) {
+                    reportDiagnostic(context, CompilationError.MISSING_HEADER,
+                            location, severity, parameter.getName(), method,
+                            path);
+                }
+            }
+        });
+
     }
 
     /**
      * This function is used to validate the ballerina resource header against to openapi header.
      *
      */
-    public void validateBallerinaHeaders(List<Parameter> oasParameters, Map<String, Node> balHeaders) {
+    private void validateBallerinaHeaders(List<Parameter> oasParameters, Map<String, Node> balHeaders) {
         for (Map.Entry<String, Node> balHeader: balHeaders.entrySet()) {
             //TODO: Nullable and default value assign scenarios
 

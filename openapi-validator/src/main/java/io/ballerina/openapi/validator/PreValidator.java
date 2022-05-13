@@ -71,16 +71,20 @@ import static io.ballerina.openapi.validator.error.CompilationError.UNEXPECTED_E
  *
  * @since 1.1.0
  */
-public class PreValidator extends Validator {
+public class PreValidator implements Validator {
     private Filter filter;
-    @Override
-    public void initialize(SyntaxNodeAnalysisContext context, OpenAPI openAPI, Filter filter) {
+    private SyntaxNodeAnalysisContext context;
+    private OpenAPI openAPI;
+    public void initialize(SyntaxNodeAnalysisContext context) {
         this.context = context;
-        this.openAPI = openAPI;
-        this.filter = filter;
+        this.openAPI = null;
     }
     public Filter getFilter() {
         return filter;
+    }
+
+    public OpenAPI getOpenAPI() {
+        return openAPI;
     }
 
     /**

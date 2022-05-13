@@ -27,11 +27,13 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.validator.error.CompilationError;
+import io.ballerina.openapi.validator.model.MetaData;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
@@ -71,7 +73,7 @@ import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
  *
  * @since 1.1.0
  */
-public class ReturnTypeValidator extends Validator {
+public class ReturnTypeValidator implements Validator {
     private final String method;
     private final String path;
 
@@ -79,29 +81,37 @@ public class ReturnTypeValidator extends Validator {
     private final Map<String, List<String>> balMediaTypes = new HashMap<>();
 
     private final Location location;
+    private final OpenAPI openAPI;
 
-    public ReturnTypeValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, String method, String path,
-                               Location location, DiagnosticSeverity severity) {
-        super(context, openAPI, severity);
-        this.method = method;
-        this.path = path;
-        this.location = location;
+    private final DiagnosticSeverity severity;
+
+    private final ReturnTypeDescriptorNode returnNode;
+
+    ApiResponses responses;
+    SyntaxNodeAnalysisContext context;
+
+    public ReturnTypeValidator(MetaData metaData, ReturnTypeDescriptorNode returnNode, ApiResponses responses) {
+        this.openAPI = metaData.getOpenAPI();
+        this.context = metaData.getContext();
+        this.method = metaData.getMethod();
+        this.path = metaData.getPath();
+        this.severity = metaData.getSeverity();
+        this.location = metaData.getLocation();
+        this.returnNode = returnNode;
+        this.responses = responses;
     }
 
-    public void addAllBalStatusCodes(Map<String, Node> statusCodes) {
-        balStatusCodes.putAll(statusCodes);
-    }
-
-    public Map<String, Node> getBalStatusCodes() {
-        return this.balStatusCodes;
-    }
-
-    public void addAllBalMediaTypes(Map<String, List<String>> balMediaType) {
-        balMediaTypes.putAll(balMediaType);
-    }
-
-    public Map<String, List<String>> getBalMediaTypes() {
-        return this.balMediaTypes;
+    @Override
+    public void validate() {
+        // Validate ballerina -> OAS return type
+        // If return type doesn't provide in service , then it maps to status code 202.
+        if (returnNode == null) {
+            validateBallerinaReturnType(Optional.empty(), responses);
+        } else {
+            validateBallerinaReturnType(Optional.ofNullable((TypeDescriptorNode) returnNode.type()), responses);
+        }
+        // Validate OAS -> ballerina
+        validateOASReturnType(responses);
     }
 
     /**
@@ -111,7 +121,7 @@ public class ReturnTypeValidator extends Validator {
      * @param returnNode Ballerina Return Node from function signature.
      * @param responses  OAS operation response.
      */
-    public void validateBallerinaReturnType(Optional<TypeDescriptorNode> returnNode, ApiResponses responses) {
+    private void validateBallerinaReturnType(Optional<TypeDescriptorNode> returnNode, ApiResponses responses) {
         boolean isOptional = false;
         if (returnNode.isEmpty()) {
             balStatusCodes.put(HTTP_202, null);
@@ -137,7 +147,7 @@ public class ReturnTypeValidator extends Validator {
                 validateBallerinaReturnType(Optional.of((TypeDescriptorNode) optionalNode.typeDescriptor()),
                         responses);
             } else if (balReturnNode instanceof BuiltinSimpleNameReferenceNode) {
-                balStatusCodes.put(HTTP_200, (BuiltinSimpleNameReferenceNode) balReturnNode);
+                balStatusCodes.put(HTTP_200, balReturnNode);
                 if (responses.containsKey(HTTP_200)) {
                     String mediaType = getMediaType(kind);
                     fillMediaTypes(HTTP_200, mediaType);
@@ -291,7 +301,7 @@ public class ReturnTypeValidator extends Validator {
             } else if (reNode.kind() == ERROR_TYPE_DESC) {
                 balStatusCodes.put(HTTP_500, null);
             } else if (reNode instanceof BuiltinSimpleNameReferenceNode) {
-                balStatusCodes.put(HTTP_200, (BuiltinSimpleNameReferenceNode) reNode);
+                balStatusCodes.put(HTTP_200, reNode);
                 if (responses.containsKey(HTTP_200)) {
                     String mediaType = getMediaType(reNode.kind());
                     fillMediaTypes(HTTP_200, mediaType);
@@ -341,7 +351,7 @@ public class ReturnTypeValidator extends Validator {
      *
      * @param responses api Responses.
      */
-    public void validateOASReturnType(ApiResponses responses) {
+    private void validateOASReturnType(ApiResponses responses) {
         Set<String> ballerinaCodes = balStatusCodes.keySet();
         Set<String> oasKeys = responses.keySet();
         List<String> missingCode = new ArrayList<>(oasKeys);
@@ -458,4 +468,5 @@ public class ReturnTypeValidator extends Validator {
             }
         }
     }
+
 }
