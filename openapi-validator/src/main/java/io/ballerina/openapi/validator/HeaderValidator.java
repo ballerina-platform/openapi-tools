@@ -23,7 +23,6 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.openapi.validator.error.CompilationError;
-import io.ballerina.openapi.validator.model.ResourceMethod;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -52,17 +51,21 @@ import static io.ballerina.openapi.validator.ValidatorUtils.unescapeIdentifier;
  * @since 1.1.0
  */
 public class HeaderValidator extends Validator {
+    private final String path;
+    private final String method;
 
-    public HeaderValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity) {
+    public HeaderValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity,
+                           String path, String method) {
         super(context, openAPI, severity);
+        this.path = path;
+        this.method = method;
     }
 
     /**
      * This function is used to validate the ballerina resource header against to openapi header.
      *
      */
-    public void validateBallerinaHeaders(Map.Entry<String, ResourceMethod> method, List<Parameter> oasParameters,
-                                          Map<String, Node> balHeaders) {
+    public void validateBallerinaHeaders(List<Parameter> oasParameters, Map<String, Node> balHeaders) {
         for (Map.Entry<String, Node> balHeader: balHeaders.entrySet()) {
             //TODO: Nullable and default value assign scenarios
 
@@ -108,8 +111,7 @@ public class HeaderValidator extends Validator {
                                 // This special concatenation is used to check the array header parameters
                                 reportDiagnostic(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
                                         headerNode.location(), severity, items + SQUARE_BRACKETS,
-                                        ballerinaType, headerName, method.getKey(),
-                                        getNormalizedPath(method.getValue().getPath()));
+                                        ballerinaType, headerName, method, getNormalizedPath(path));
                                 break;
                             }
                         }
@@ -118,7 +120,7 @@ public class HeaderValidator extends Validator {
                         if (type.isEmpty() || !ballerinaType.equals(type.get())) {
                             reportDiagnostic(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
                                     headerNode.location(), severity, headerType, ballerinaType, headerName,
-                                    method.getKey(), getNormalizedPath(method.getValue().getPath()));
+                                    method, getNormalizedPath(path));
                             break;
                         }
                     }
@@ -128,7 +130,7 @@ public class HeaderValidator extends Validator {
             if (!isHeaderDocumented) {
                 // undefined header
                 reportDiagnostic(context, CompilationError.UNDEFINED_HEADER, balHeader.getValue().location(),
-                        severity, headerName, method.getKey(), getNormalizedPath(method.getValue().getPath()));
+                        severity, headerName, method, getNormalizedPath(path));
             }
         }
     }

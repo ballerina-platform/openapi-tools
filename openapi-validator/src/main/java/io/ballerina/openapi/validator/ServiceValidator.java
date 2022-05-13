@@ -223,17 +223,19 @@ public class ServiceValidator extends Validator {
                 Operation oasOperation = operations.get(method.getKey());
                 // Ballerina parameters validation
                 List<Parameter> oasParameters = oasOperation.getParameters();
-                ParameterValidator parameterValidator = new ParameterValidator(context, openAPI, filter.getKind());
-                parameterValidator.validateBallerinaParameters(method, oasParameters);
+                ParameterValidator parameterValidator = new ParameterValidator(context, openAPI, filter.getKind(),
+                        method.getValue().getPath(), method.getKey());
+                parameterValidator.validateBallerinaParameters(method.getValue().getParameters(), oasParameters);
                 // Ballerina headers validation
                 Map<String, Node> balHeaders = method.getValue().getHeaders();
-                HeaderValidator headerValidator = new HeaderValidator(context, openAPI, filter.getKind());
-                headerValidator.validateBallerinaHeaders(method, oasParameters, balHeaders);
+                HeaderValidator headerValidator = new HeaderValidator(context, openAPI, filter.getKind(),
+                        method.getValue().getPath(), method.getKey());
+                headerValidator.validateBallerinaHeaders(oasParameters, balHeaders);
                 // Request body validation
                 if (method.getValue().getBody() != null) {
                     RequestBodyValidator requestBodyValidator = new RequestBodyValidator(context, openAPI,
-                            filter.getKind());
-                    requestBodyValidator.validateBallerinaRequestBody(method, oasOperation);
+                            filter.getKind(), method.getValue().getPath(), method.getKey());
+                    requestBodyValidator.validateBallerinaRequestBody(method.getValue().getBody(), oasOperation);
                 }
                 // Return Type validation
                 ReturnTypeValidator returnTypeValidator = new ReturnTypeValidator(context, openAPI, method.getKey(),
@@ -326,7 +328,8 @@ public class ServiceValidator extends Validator {
                 RequestBody requestBody = value.getRequestBody();
                 if (requestBody != null) {
                     RequiredParameterNode body = resourceMethod.getBody();
-                    RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI, filter.getKind());
+                    RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI, filter.getKind(),
+                            oasPath, key);
                     rbValidator.validateOASRequestBody(body, requestBody, oasPath, key, resourceMethod.getLocation());
                 }
 

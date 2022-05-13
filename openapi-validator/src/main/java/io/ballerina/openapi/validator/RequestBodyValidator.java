@@ -26,7 +26,6 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.validator.error.CompilationError;
-import io.ballerina.openapi.validator.model.ResourceMethod;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
@@ -61,25 +60,25 @@ import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
  * @since 1.1.0
  */
 public class RequestBodyValidator extends Validator {
-    private String path;
-    private String httpMethod;
+    private final String path;
+    private final String method;
     private Location location;
 
-    public RequestBodyValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity) {
+    public RequestBodyValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity,
+                                String path, String method) {
         super(context, openAPI, severity);
+        this.path = path;
+        this.method = method;
     }
 
     /**
      * Validate resource payload against to OAS operation request body.
      *
-     * @param method       Validate ballerina method details
+     * @param requestBodyNode       Validate ballerina request body details
      * @param oasOperation OAS operation
      */
-    public void validateBallerinaRequestBody(Map.Entry<String, ResourceMethod> method, Operation oasOperation) {
+    public void validateBallerinaRequestBody(RequiredParameterNode requestBodyNode, Operation oasOperation) {
 
-        RequiredParameterNode requestBodyNode = method.getValue().getBody();
-        this.path = method.getValue().getPath();
-        this.httpMethod = method.getKey();
         boolean isBodyExist = false;
         if (oasOperation.getRequestBody() != null && requestBodyNode != null) {
             // This flag is to trac the availability of requestBody has documented
@@ -146,8 +145,7 @@ public class RequestBodyValidator extends Validator {
                     }
                     if (!isMediaTypeExist) {
                         reportDiagnostic(context, CompilationError.UNDEFINED_REQUEST_MEDIA_TYPE,
-                                requestBodyNode.location(), severity, mediaType, method.getKey(),
-                                getNormalizedPath(method.getValue().getPath()));
+                                requestBodyNode.location(), severity, mediaType, method, getNormalizedPath(path));
                     }
                 }
             } else {
@@ -158,7 +156,7 @@ public class RequestBodyValidator extends Validator {
         if (!isBodyExist) {
             assert requestBodyNode != null;
             reportDiagnostic(context, CompilationError.UNDEFINED_REQUEST_BODY, requestBodyNode.location(),
-                    severity, method.getKey(), getNormalizedPath(method.getValue().getPath()));
+                    severity, method, getNormalizedPath(path));
         }
     }
 
@@ -178,8 +176,7 @@ public class RequestBodyValidator extends Validator {
                 reportDiagnostic(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
                         requestBodyNode.location(),
                         severity, mediaType, oasMediaTypes.toString(),
-                        requestBodyNode.paramName().get().toString().trim(), httpMethod,
-                        getNormalizedPath(path));
+                        requestBodyNode.paramName().get().toString().trim(), method, getNormalizedPath(path));
             } else {
                 ArraySchema arraySchema = (ArraySchema) schema;
                 if (arraySchema.getItems().get$ref() != null) {
@@ -212,7 +209,7 @@ public class RequestBodyValidator extends Validator {
                 item = itemType.get() + SQUARE_BRACKETS;
             }
             reportDiagnostic(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                    location, severity, mediaType, item, balRecordName, httpMethod,
+                    location, severity, mediaType, item, balRecordName, method,
                     getNormalizedPath(path));
             
         } else if (schema instanceof ObjectSchema || schema.get$ref() != null) {
@@ -224,7 +221,7 @@ public class RequestBodyValidator extends Validator {
             } else {
                 reportDiagnostic(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
                         location, severity, mediaType, oasName,
-                        balRecordName, httpMethod, getNormalizedPath(path));
+                        balRecordName, method, getNormalizedPath(path));
             }
         }
     }

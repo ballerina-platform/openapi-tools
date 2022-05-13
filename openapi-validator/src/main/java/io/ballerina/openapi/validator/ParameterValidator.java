@@ -23,7 +23,6 @@ import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.openapi.validator.error.CompilationError;
-import io.ballerina.openapi.validator.model.ResourceMethod;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -52,18 +51,22 @@ import static io.ballerina.openapi.validator.ValidatorUtils.unescapeIdentifier;
  * @since 1.1.0
  */
 public class ParameterValidator extends Validator {
-
-    public ParameterValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity) {
+    private final String path;
+    private final String method;
+    public ParameterValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity,
+                              String path, String method) {
         super(context, openAPI, severity);
+        this.method = method;
+        this.path = path;
     }
 
     /**
      * This function is used to validate the ballerina resource parameter against to openapi parameters.
      *
      */
-    public void validateBallerinaParameters(Map.Entry<String, ResourceMethod> method,
-                                             List<Parameter> oasParameters) {
-        for (Map.Entry<String, Node> parameter : method.getValue().getParameters().entrySet()) {
+    public void validateBallerinaParameters(Map<String, Node> parameters, List<Parameter> oasParameters) {
+
+        for (Map.Entry<String, Node> parameter : parameters.entrySet()) {
             boolean isExist = false;
             String parameterName = unescapeIdentifier(parameter.getKey());
             String ballerinaType;
@@ -125,14 +128,14 @@ public class ParameterValidator extends Validator {
                         reportDiagnostic(context, CompilationError.TYPE_MISMATCH_PARAMETER,
                                 parameter.getValue().location(), severity,  oasType +
                                         SQUARE_BRACKETS, ballerinaType,
-                                parameterName, method.getKey(), method.getValue().getPath());
+                                parameterName, method, path);
                         break;
                     }
                     if (!Objects.equals(ballerinaType, type.get())) {
                         // This special concatenation is used to check the array query parameters
                         reportDiagnostic(context, CompilationError.TYPE_MISMATCH_PARAMETER,
                                 parameter.getValue().location(), severity, oasType, ballerinaType,
-                                parameterName, method.getKey(), method.getValue().getPath());
+                                parameterName, method, path);
                         break;
                     }
                 }
@@ -140,8 +143,8 @@ public class ParameterValidator extends Validator {
             if (!isExist) {
                 // undocumented parameter
                 reportDiagnostic(context, CompilationError.UNDEFINED_PARAMETER, parameter.getValue().location(),
-                        severity, parameterName, method.getKey(),
-                        getNormalizedPath(method.getValue().getPath()));
+                        severity, parameterName, method,
+                        getNormalizedPath(path));
             }
         }
     }
