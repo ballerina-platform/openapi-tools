@@ -41,9 +41,9 @@ public class RequestBodyValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         String undocumentedRB = "ERROR [request_body.bal:(8:33,8:59)] undefined request body for the method 'post' " +
-                "of the resource associated with the path '/pets' in the openapi contract.";
+                "of the resource associated with the path '/pets' in the OpenAPI contract.";
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
 
@@ -53,9 +53,9 @@ public class RequestBodyValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
-        String undocumentedRB = "ERROR [type_mismatch_request_body.bal:(8:32,8:58)] undefined mediaType/s " +
-                "'application/json' for the request body in the counterpart ballerina service resource" +
+        Assert.assertEquals(errors.length, 1);
+        String undocumentedRB = "ERROR [type_mismatch_request_body.bal:(8:32,8:58)] undefined mediaType(s) " +
+                "'application/json' for the request body in the counterpart Ballerina service resource" +
                 " (method: 'post', path: '/pet').";
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
@@ -66,9 +66,9 @@ public class RequestBodyValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
-        String undocumentedRB = "ERROR [oas_request_body.bal:(8:5,10:6)] missing openapi contract request body" +
-                " implementation in the counterpart ballerina service resource (method: 'post', path: '/pets')";
+        Assert.assertEquals(errors.length, 1);
+        String undocumentedRB = "ERROR [oas_request_body.bal:(8:5,10:6)] missing OpenAPI contract request body" +
+                " implementation in the counterpart Ballerina service resource (method: 'post', path: '/pets').";
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
 
@@ -78,10 +78,10 @@ public class RequestBodyValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
-        String undocumentedRB = "ERROR [mis_mediatype_oas_request_body.bal:(8:33,8:59)] missing openapi contract" +
-                " request body media type '[text/plain]' in the counterpart ballerina service resource" +
-                " (method: 'post', path: '/pets')";
+        Assert.assertEquals(errors.length, 1);
+        String undocumentedRB = "ERROR [mis_mediatype_oas_request_body.bal:(8:33,8:59)] missing OpenAPI contract" +
+                " request body media type '[text/plain]' in the counterpart Ballerina service resource" +
+                " (method: 'post', path: '/pets').";
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
 
@@ -93,9 +93,9 @@ public class RequestBodyValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         String undocumentedRB = "ERROR [array_request_body.bal:(5:9,5:11)] implementation type does not match" +
-                " with openapi contract type (expected 'string', found 'int') for the field 'id' of type 'Pet'";
+                " with OpenAPI contract type (expected 'string', found 'int') for the field 'id' of type 'Pet'.";
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
 
@@ -105,10 +105,10 @@ public class RequestBodyValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         String undocumentedRB = "ERROR [array_request_body_02.bal:(14:33,14:58)] implementation payload type does" +
-                " not match with openapi contract content type 'application/json' (expected 'Pet[]',found 'Pet') for" +
-                " the http method 'post' that associated with the path '/pets'.";
+                " not match with OpenAPI contract content type 'application/json' (expected 'Pet[]',found 'Pet') for" +
+                " the HTTP method 'post' that associated with the path '/pets'.";
         Assert.assertEquals(undocumentedRB, errors[0].toString());
     }
 }

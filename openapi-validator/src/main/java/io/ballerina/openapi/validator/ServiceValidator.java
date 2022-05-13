@@ -50,9 +50,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
 import static io.ballerina.openapi.validator.ValidatorUtils.getNormalizedPath;
+import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
 import static io.ballerina.openapi.validator.ValidatorUtils.summarizeOpenAPI;
 import static io.ballerina.openapi.validator.ValidatorUtils.summarizeResources;
-import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
 
 /**
  * This model used to filter and validate all the operations according to the given filter and filter the service
@@ -60,22 +60,26 @@ import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
  *
  * @since 1.1.0
  */
-public class ServiceValidator {
-    private SyntaxNodeAnalysisContext context;
-    private OpenAPI openAPI;
-    private Filter filter;
+public class ServiceValidator extends Validator {
     private final Map<String, Map<String, ReturnSummary>> balReturnSummary = new HashMap<>();
+    private Filter filter;
 
+    @Override
     public void initialize(SyntaxNodeAnalysisContext context, OpenAPI openAPI, Filter filter) {
         this.context = context;
         this.openAPI = openAPI;
         this.filter = filter;
     }
 
+    public Filter getFilter() {
+        return filter;
+    }
+
     /**
      * Validate the given service. All the diagnostics may update with the @SyntaxNodeAnalysisContext context
      * dynamically.
      */
+    @Override
     public void validate() {
         ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) context.node();
 
@@ -124,7 +128,7 @@ public class ServiceValidator {
             // Extra path openapi
             if (!resources.containsKey(operationPath.getPath())) {
                 if (!filterEnable) {
-                    reportDiagnostic(context, CompilationError.UNIMPLEMENTED_RESOURCE_PATH, context.node().location(),
+                    reportDiagnostic(context, CompilationError.MISSING_RESOURCE_PATH, context.node().location(),
                             filter.getKind(),
                             getNormalizedPath(operationPath.getPath()));
                 }
@@ -137,7 +141,7 @@ public class ServiceValidator {
                 for (Map.Entry<String, Operation> operation : methods.entrySet()) {
                     if (!resourceMethods.containsKey(operation.getKey().trim())) {
                         if (!filterEnable) {
-                            reportDiagnostic(context, CompilationError.UNIMPLEMENTED_RESOURCE_FUNCTION,
+                            reportDiagnostic(context, CompilationError.MISSING_RESOURCE_FUNCTION,
                                     context.node().location(), filter.getKind(), operation.getKey().trim(),
                                     getNormalizedPath(operationPath.getPath()));
                         }
@@ -219,17 +223,19 @@ public class ServiceValidator {
                 Operation oasOperation = operations.get(method.getKey());
                 // Ballerina parameters validation
                 List<Parameter> oasParameters = oasOperation.getParameters();
-                ParameterValidator parameterValidator = new ParameterValidator(context, openAPI, filter);
-                parameterValidator.validateBallerinaParameters(method, oasParameters);
+                ParameterValidator parameterValidator = new ParameterValidator(context, openAPI, filter.getKind(),
+                        method.getValue().getPath(), method.getKey());
+                parameterValidator.validateBallerinaParameters(method.getValue().getParameters(), oasParameters);
                 // Ballerina headers validation
                 Map<String, Node> balHeaders = method.getValue().getHeaders();
-                HeaderValidator headerValidator = new HeaderValidator(context, filter);
-                headerValidator.validateBallerinaHeaders(method, oasParameters, balHeaders);
+                HeaderValidator headerValidator = new HeaderValidator(context, openAPI, filter.getKind(),
+                        method.getValue().getPath(), method.getKey());
+                headerValidator.validateBallerinaHeaders(oasParameters, balHeaders);
                 // Request body validation
                 if (method.getValue().getBody() != null) {
                     RequestBodyValidator requestBodyValidator = new RequestBodyValidator(context, openAPI,
-                            filter.getKind());
-                    requestBodyValidator.validateBallerinaRequestBody(method, oasOperation);
+                            filter.getKind(), method.getValue().getPath(), method.getKey());
+                    requestBodyValidator.validateBallerinaRequestBody(method.getValue().getBody(), oasOperation);
                 }
                 // Return Type validation
                 ReturnTypeValidator returnTypeValidator = new ReturnTypeValidator(context, openAPI, method.getKey(),
@@ -239,9 +245,9 @@ public class ServiceValidator {
                 ReturnTypeDescriptorNode returnNode = method.getValue().getReturnNode();
                 // If return type doesn't provide in service , then it maps to status code 202.
                 if (returnNode == null) {
-                    returnTypeValidator.validateReturnBallerinaToOas(Optional.empty(), responses);
+                    returnTypeValidator.validateBallerinaReturnType(Optional.empty(), responses);
                 } else {
-                    returnTypeValidator.validateReturnBallerinaToOas(
+                    returnTypeValidator.validateBallerinaReturnType(
                             Optional.ofNullable((TypeDescriptorNode) returnNode.type()), responses);
                 }
                 ReturnSummary returnSummary = new ReturnSummary(returnTypeValidator.getBalStatusCodes(),
@@ -296,7 +302,7 @@ public class ServiceValidator {
                                 }
                             });
                             if (!isHeaderExist.get()) {
-                                reportDiagnostic(context, CompilationError.UNIMPLEMENTED_HEADER,
+                                reportDiagnostic(context, CompilationError.MISSING_HEADER,
                                         resourceMethod.getLocation(), filter.getKind(), parameter.getName(), key,
                                         oasPath);
                             }
@@ -311,7 +317,7 @@ public class ServiceValidator {
                             });
                             if (!isImplemented.get()) {
                                 // error message
-                                reportDiagnostic(context, CompilationError.UNIMPLEMENTED_PARAMETER,
+                                reportDiagnostic(context, CompilationError.MISSING_PARAMETER,
                                         resourceMethod.getLocation(), filter.getKind(), parameter.getName(), key,
                                         oasPath);
                             }
@@ -322,7 +328,8 @@ public class ServiceValidator {
                 RequestBody requestBody = value.getRequestBody();
                 if (requestBody != null) {
                     RequiredParameterNode body = resourceMethod.getBody();
-                    RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI, filter.getKind());
+                    RequestBodyValidator rbValidator = new RequestBodyValidator(context, openAPI, filter.getKind(),
+                            oasPath, key);
                     rbValidator.validateOASRequestBody(body, requestBody, oasPath, key, resourceMethod.getLocation());
                 }
 
@@ -331,7 +338,7 @@ public class ServiceValidator {
                         resourceMethod.getLocation(), filter.getKind());
                 returnTypeValidator.addAllBalStatusCodes(returnSummaryMap.get(key).getBalStatusCodes());
                 returnTypeValidator.addAllBalMediaTypes(returnSummaryMap.get(key).getBalMediaTypes());
-                returnTypeValidator.validateReturnOASToBallerina(value.getResponses());
+                returnTypeValidator.validateOASReturnType(value.getResponses());
             });
         }
     }

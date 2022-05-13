@@ -64,8 +64,8 @@ public class OpenAPIAnnotationNegativeTests {
         Object[] errors = diagnostic.diagnostics().stream().filter(d ->
                         DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
         Assert.assertEquals(errors.length, 1);
-        Assert.assertTrue(errors[0].toString().contains("ERROR [contract_format_invalid.bal:(4:1,11:2)] invalid " +
-                "file type. Provide either a .yaml or .json file."));
+        Assert.assertTrue(errors[0].toString().contains("ERROR [contract_format_invalid.bal:(4:1,11:2)] unsupported" +
+                " contract file type. Provide either a .yaml or .json file."));
     }
 
     @Test(description = "contract path location invaild")
@@ -76,7 +76,7 @@ public class OpenAPIAnnotationNegativeTests {
         Object[] errors = diagnostic.diagnostics().stream().filter(d ->
                 DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
         Assert.assertEquals(errors.length, 1);
-        Assert.assertTrue(errors[0].toString().contains("ERROR [contract_path_invalid.bal:(4:1,11:2)] openapi" +
+        Assert.assertTrue(errors[0].toString().contains("ERROR [contract_path_invalid.bal:(4:1,11:2)] OpenAPI" +
                 " contract does not exist in the given location:"));
     }
 

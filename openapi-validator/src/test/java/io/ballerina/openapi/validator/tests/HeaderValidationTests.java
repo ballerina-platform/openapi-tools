@@ -41,17 +41,17 @@ public class HeaderValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
+        Assert.assertEquals(errors.length, 2);
         // Type mismatch
         String typeMismatchError = "ERROR [header.bal:(8:32,8:61)] implementation type does not match with " +
-                "openapi contract type (expected 'integer',found 'string') for the header 'x-offset' in http" +
+                "OpenAPI contract type (expected 'integer',found 'string') for the header 'x-offset' in HTTP" +
                 " method 'get' that associated with the path '/pets'.";
         Assert.assertEquals(typeMismatchError, errors[0].toString());
 
         // Undocumented header
         String undocumentedParameter = "ERROR [header.bal:(10:34,10:78)] undefined header 'x-offset' for" +
                 " the method get of the resource associated with the path 'get' is not documented" +
-                " in the openapi contract.";
+                " in the OpenAPI contract.";
         Assert.assertEquals(undocumentedParameter, errors[1].toString());
     }
 
@@ -61,10 +61,10 @@ public class HeaderValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         // unimplemented header
-        String typeMismatchError = "ERROR [oas_header.bal:(8:5,10:6)] missing openapi contract header 'x-offset'" +
-                " in the counterpart ballerina service resource (method: 'get', path: '/pets')";
+        String typeMismatchError = "ERROR [oas_header.bal:(8:5,10:6)] missing OpenAPI contract header 'x-offset'" +
+                " in the counterpart Ballerina service resource (method: 'get', path: '/pets').";
         Assert.assertEquals(typeMismatchError, errors[0].toString());
     }
 
@@ -74,13 +74,13 @@ public class HeaderValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
+        Assert.assertEquals(errors.length, 2);
         // unimplemented header
         String typeMismatchError = "ERROR [array_header.bal:(8:32,8:63)] implementation type does not match with " +
-                "openapi contract type (expected 'integer[]',found 'string[]') for the header 'x-offset' in http" +
+                "OpenAPI contract type (expected 'integer[]',found 'string[]') for the header 'x-offset' in HTTP" +
                 " method 'get' that associated with the path '/pets'.";
         String typeMismatch02 = "ERROR [array_header.bal:(10:34,10:78)] implementation type does not match with " +
-                "openapi contract type (expected 'integer[]',found 'string') for the header 'x-offset' in http" +
+                "OpenAPI contract type (expected 'integer[]',found 'string') for the header 'x-offset' in HTTP" +
                 " method 'get' that associated with the path '/pets02'.";
         Assert.assertEquals(typeMismatchError, errors[0].toString());
         Assert.assertEquals(typeMismatch02, errors[1].toString());

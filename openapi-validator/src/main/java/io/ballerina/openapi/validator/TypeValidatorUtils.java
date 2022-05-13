@@ -47,6 +47,7 @@ import static io.ballerina.openapi.validator.Constants.RECORD;
 import static io.ballerina.openapi.validator.Constants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.validator.Constants.STRING;
 import static io.ballerina.openapi.validator.ValidatorUtils.extractReferenceType;
+import static io.ballerina.openapi.validator.ValidatorUtils.getNumberFormatType;
 import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
 
 /**
@@ -65,7 +66,6 @@ public class TypeValidatorUtils {
                                           OpenAPI openAPI, String oasName, DiagnosticSeverity severity) {
 
         if (typeSymbol instanceof RecordTypeSymbol || typeSymbol instanceof TypeReferenceTypeSymbol) {
-//            List<String> recordFields = new ArrayList<>(); //Comment due to enable later implementation.
             Map<String, Schema> properties = schema.getProperties();
             if (schema instanceof ObjectSchema) {
                 properties = schema.getProperties();
@@ -87,26 +87,20 @@ public class TypeValidatorUtils {
                             fieldType = typeRef.definition().getName().get();
                         }
 
-                        Schema schemaValue = property.getValue();
-                        String oas = schemaValue.getType();
-                        if (oas != null && oas.equals(NUMBER)) {
-                            oas = DOUBLE;
-                            if (schemaValue.getFormat() != null &&
-                                    schemaValue.getFormat().equals(FLOAT)) {
-                                oas = FLOAT;
-                            }
-                        }
+                        Schema<?> schemaValue = property.getValue();
+                        String oas = getNumberFormatType(schemaValue);
                         Optional<String> oasType = convertOpenAPITypeToBallerina(oas);
                         if (schemaValue instanceof ArraySchema) {
                             ArraySchema arraySchema = (ArraySchema) schemaValue;
                             validateArrayTypeMismatch(balRecord, context, field, arraySchema, severity);
                         } else if (schemaValue.get$ref() != null) {
-                            Schema componentSchema = openAPI.getComponents().getSchemas()
+                            Schema<?> componentSchema = openAPI.getComponents().getSchemas()
                                     .get(extractReferenceType(schemaValue.get$ref()).orElse(null));
                             validateRecordType(componentSchema, field.getValue().typeDescriptor(), fieldType, context
                                     , openAPI, extractReferenceType(schemaValue.get$ref()).orElse(null), severity);
                         } else if (schemaValue instanceof ObjectSchema) {
                             // Todo: inline record validation ex: record {|int id; string name;|}
+                            return;
                         } else if (oasType.isEmpty() || !fieldType.equals(oasType.get())) {
                             // type mismatch field
                             reportDiagnostic(context, CompilationError.TYPE_MISMATCH_FIELD,
@@ -117,16 +111,12 @@ public class TypeValidatorUtils {
                     }
                 }
                 if (!isFieldExist) {
-                    // Undocumented field.
+                    // Undefine record field.
                     reportDiagnostic(context, CompilationError.UNDEFINED_BRECORD_FIELD,
-                            field.getValue().getLocation().orElse(null), severity,
-                            field.getKey(), balRecord, oasName);
-//                    recordFields.add(field.getKey());
+                            field.getValue().getLocation().orElse(null), severity, field.getKey(), balRecord,
+                            oasName);
                 }
             }
-//            if (recordFields.size() == fieldSymbolList.size()) {
-//                //TODO : undocumented records
-//            }
         }
     }
 
@@ -172,8 +162,9 @@ public class TypeValidatorUtils {
         messageOasType = oasArrayItems + arrayBuilder.toString();
         if (!balFieldType.equals(oasType.get())) {
             // type mismatch error
-            reportDiagnostic(context, CompilationError.TYPE_MISMATCH_FIELD, field.getValue().getLocation().orElse(null),
-                    severity, messageOasType, balFieldType, field.getKey(), balRecord);
+            reportDiagnostic(context, CompilationError.TYPE_MISMATCH_FIELD,
+                    field.getValue().getLocation().orElse(null), severity, messageOasType, balFieldType,
+                    field.getKey(), balRecord);
         }
     }
 
@@ -268,13 +259,10 @@ public class TypeValidatorUtils {
                 if (!isPropertyExist.get()) {
                     // Missing field message;
                     numberOfMissingFields.addAndGet(1);
-                    reportDiagnostic(context, CompilationError.UNIMPLEMENTED_OAS_PROPERTY,
+                    reportDiagnostic(context, CompilationError.MISSING_OAS_PROPERTY,
                             location, severity, key, balRecord);
                 }
             });
-//            if (numberOfMissingFields.get() == properties.size()) {
-//                // TODO: error message for unimplemented record
-//            }
         }
     }
 }
