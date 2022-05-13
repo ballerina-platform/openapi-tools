@@ -73,9 +73,9 @@ public class PreValidationTests {
                 diagnostic.diagnostics().stream().filter(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity())
                         .toArray();
         //Expected error messages
-        String unimplementedPath = "ERROR [unimplemented_resources.bal:(4:1,10:2)] missing ballerina service" +
+        String unimplementedPath = "ERROR [unimplemented_resources.bal:(4:1,10:2)] missing Ballerina service" +
                 " resource(s) for HTTP method(s) 'get' for the path '/pet' which is documented in the openAPI contract";
-        String unimplementedMethod = "ERROR [unimplemented_resources.bal:(4:1,10:2)] missing ballerina service" +
+        String unimplementedMethod = "ERROR [unimplemented_resources.bal:(4:1,10:2)] missing Ballerina service" +
                 " resource for the path '/pet02' which is documented in the openAPI contract.";
         Assert.assertEquals(errors.length, 2);
     }

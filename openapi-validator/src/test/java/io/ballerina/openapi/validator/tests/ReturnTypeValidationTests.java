@@ -41,14 +41,14 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
-        String undocumentedReturnCode = "ERROR [single_status_code.bal:(8:5,10:6)] undefined status code/s '[200]'" +
-                " for return type in the counterpart ballerina service resource (method: 'get', path: '/')";
+        Assert.assertEquals(errors.length, 2);
+        String undocumentedReturnCode = "ERROR [single_status_code.bal:(8:5,10:6)] undefined status code(s) '[200]'" +
+                " for return type in the counterpart Ballerina service resource (method: 'get', path: '/').";
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
 
         //Unimplemented return type.
         String unimplementedReturnCode = "ERROR [single_status_code.bal:(8:5,10:6)] missing implementation for" +
-                " return code/s '[202]' in the counterpart ballerina service resource (method: 'get', path: '/')";
+                " return code(s) '[202]' in the counterpart Ballerina service resource (method: 'get', path: '/').";
         Assert.assertEquals(unimplementedReturnCode, errors[1].toString());
     }
 
@@ -60,18 +60,17 @@ public class ReturnTypeValidationTests {
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertEquals(errors.length, 2);
         String undocumentedReturnCode = "ERROR [single_record_payload_type_mismatch.bal:(14:5,18:6)] undefined " +
-                "resource return mediaType/s '[text/plain]' for return status code '200' in the counterpart ballerina" +
-                " service resource (method: 'get', path: '/')";
+                "resource return mediaType(s) '[text/plain]' for return status code '200' in the counterpart " +
+                "Ballerina service resource (method: 'get', path: '/').";
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
 
         String unimplementedReturnCode = "ERROR [single_record_payload_type_mismatch.bal:(14:5,18:6)] missing" +
-                " implementation for return mediaType/s '[application/json]' for return code '200' in the" +
-                " http method 'get' that associated with the path '/'.";
+                " implementation for return mediaType(s) '[application/json]' for return code '200' in the" +
+                " HTTP method 'get' that associated with the path '/'.";
         Assert.assertEquals(unimplementedReturnCode, errors[1].toString());
     }
 
-    //clear description
-    @Test(description = "Status code change in record")
+    @Test(description = "Return type has record including status code field.")
     public void statusCodeWithRecord() {
         Path path = RES_DIR.resolve("single_record_status_code.bal");
         Project project = getProject(path);
@@ -79,8 +78,8 @@ public class ReturnTypeValidationTests {
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertEquals(errors.length, 2);
         String undocumentedReturnCode = "ERROR [single_record_status_code.bal:(14:5,18:6)] undefined status" +
-                " code/s '[202]' for return type in the counterpart ballerina service resource" +
-                " (method: 'get', path: '/')";
+                " code(s) '[202]' for return type in the counterpart Ballerina service resource" +
+                " (method: 'get', path: '/').";
         Assert.assertEquals(undocumentedReturnCode, errors[0].toString());
     }
 
@@ -91,8 +90,8 @@ public class ReturnTypeValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
         Assert.assertEquals(errors.length, 2);
-        String allMessage = "ERROR [union_status_code.bal:(8:5,10:6)] undefined status code/s '[400, 401, 404]'" +
-                " for return type in the counterpart ballerina service resource (method: 'get', path: '/')";
+        String allMessage = "ERROR [union_status_code.bal:(8:5,10:6)] undefined status code(s) '[400, 401, 404]'" +
+                " for return type in the counterpart Ballerina service resource (method: 'get', path: '/').";
         Assert.assertEquals(allMessage, errors[0].toString());
     }
 
@@ -103,9 +102,9 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         String typeMismatch = "ERROR [single_record.bal:(10:9,10:11)] implementation type does not match with " +
-                "openapi contract type (expected 'string', found 'int') for the field 'id' of type 'Test'";
+                "OpenAPI contract type (expected 'string', found 'int') for the field 'id' of type 'Test'.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
@@ -115,9 +114,9 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         String typeMismatch = "ERROR [union_return_type.bal:(15:9,15:11)] implementation type does not " +
-                "match with openapi contract type (expected 'string', found 'int') for the field 'id' of type 'Pet'";
+                "match with OpenAPI contract type (expected 'string', found 'int') for the field 'id' of type 'Pet'.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
@@ -127,9 +126,9 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
-        String typeMismatch = "ERROR [undocumented_union_return_type.bal:(24:5,26:6)] undefined status code/s" +
-                " '[406]' for return type in the counterpart ballerina service resource (method: 'get', path: '/')";
+        Assert.assertEquals(errors.length, 2);
+        String typeMismatch = "ERROR [undocumented_union_return_type.bal:(24:5,26:6)] undefined status code(s)" +
+                " '[406]' for return type in the counterpart Ballerina service resource (method: 'get', path: '/').";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
@@ -139,9 +138,9 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
-        String typeMismatch = "ERROR [without_return.bal:(8:5,9:6)] undefined status code/s '[202]' for" +
-                " return type in the counterpart ballerina service resource (method: 'get', path: '/')";
+        Assert.assertEquals(errors.length, 2);
+        String typeMismatch = "ERROR [without_return.bal:(8:5,9:6)] undefined status code(s) '[202]' for" +
+                " return type in the counterpart Ballerina service resource (method: 'get', path: '/').";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
@@ -151,9 +150,9 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
-        String typeMismatch = "ERROR [error_return.bal:(8:5,10:6)] undefined status code/s '[500]' " +
-                "for return type in the counterpart ballerina service resource (method: 'get', path: '/')";
+        Assert.assertEquals(errors.length, 2);
+        String typeMismatch = "ERROR [error_return.bal:(8:5,10:6)] undefined status code(s) '[500]' " +
+                "for return type in the counterpart Ballerina service resource (method: 'get', path: '/').";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
@@ -163,9 +162,9 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
-        String typeMismatch = "ERROR [nil_error_return.bal:(8:5,9:6)] undefined status code/s '[500]' for " +
-                "return type in the counterpart ballerina service resource (method: 'get', path: '/')";
+        Assert.assertEquals(errors.length, 2);
+        String typeMismatch = "ERROR [nil_error_return.bal:(8:5,9:6)] undefined status code(s) '[500]' for " +
+                "return type in the counterpart Ballerina service resource (method: 'get', path: '/').";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
@@ -175,23 +174,23 @@ public class ReturnTypeValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         String typeMismatch = "ERROR [unimplemented_media_type.bal:(15:5,23:6)] missing implementation for return" +
-                " mediaType/s '[application/xml]' for return code '200' in the http method 'get' that associated" +
+                " mediaType(s) '[application/xml]' for return code '200' in the HTTP method 'get' that associated" +
                 " with the path '/'.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
 
-    @Test(description = "Unimplemented code in OAS to ballerina")
+    @Test(description = "Unimplemented code in OAS to Ballerina")
     public void singleCodeOas() {
         Path path = RES_DIR.resolve("unimplemented_status_code.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         String typeMismatch = "ERROR [unimplemented_status_code.bal:(10:5,12:6)] missing implementation for return" +
-                " code/s '[404]' in the counterpart ballerina service resource (method: 'get', path: '/')";
+                " code(s) '[404]' in the counterpart Ballerina service resource (method: 'get', path: '/').";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 

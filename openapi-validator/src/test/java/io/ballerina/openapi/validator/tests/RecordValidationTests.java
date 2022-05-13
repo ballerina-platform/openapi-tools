@@ -41,10 +41,10 @@ public class RecordValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         // Type mismatch field
         String typeMismatch = "ERROR [type_mismatch_field.bal:(5:12,5:14)] implementation type does not match " +
-                "with openapi contract type (expected 'integer', found 'string') for the field 'id' of type 'Pet'";
+                "with OpenAPI contract type (expected 'integer', found 'string') for the field 'id' of type 'Pet'.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
@@ -54,14 +54,14 @@ public class RecordValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 2);
+        Assert.assertEquals(errors.length, 2);
         // Type mismatch field
         String typeMismatch01 = "ERROR [array_type_mismatch_field.bal:(7:14,7:18)] implementation type does" +
-                " not match with openapi contract type (expected 'integer[]', found 'string[]') for the field " +
-                "'tags' of type 'Pet'";
+                " not match with OpenAPI contract type (expected 'integer[]', found 'string[]') for the field " +
+                "'tags' of type 'Pet'.";
         String typeMismatchNestedArray = "ERROR [array_type_mismatch_field.bal:(8:14,8:24)] implementation type " +
-                "does not match with openapi contract type (expected 'string[][]', found 'string[]') for the field" +
-                " 'categories' of type 'Pet'";
+                "does not match with OpenAPI contract type (expected 'string[][]', found 'string[]') for the field" +
+                " 'categories' of type 'Pet'.";
         Assert.assertEquals(typeMismatch01, errors[0].toString());
         Assert.assertEquals(typeMismatchNestedArray, errors[1].toString());
     }
@@ -72,10 +72,10 @@ public class RecordValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         // Type mismatch field
         String typeMismatch01 = "ERROR [type_mismatch_record.bal:(10:9,10:11)] implementation type does not " +
-                "match with openapi contract type (expected 'string', found 'int') for the field 'id' of type 'Type'";
+                "match with OpenAPI contract type (expected 'string', found 'int') for the field 'id' of type 'Type'.";
         Assert.assertEquals(typeMismatch01, errors[0].toString());
     }
 
@@ -85,9 +85,9 @@ public class RecordValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
+        Assert.assertEquals(errors.length, 1);
         String undocumentedField = "ERROR [undocumented_field.bal:(7:12,7:17)] the 'type' field in the 'Pet' " +
-                "record is not documented in the openapi contract 'Pet' schema.";
+                "record is not documented in the OpenAPI contract 'Pet' schema.";
         Assert.assertEquals(undocumentedField, errors[0].toString());
     }
 
@@ -97,9 +97,9 @@ public class RecordValidationTests {
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = getDiagnostics(diagnostic);
-        Assert.assertTrue(errors.length == 1);
-        String undocumentedField = "ERROR [unimplemented_field.bal:(4:6,4:9)] could not find openapi object schema " +
-                "field 'tag' in 'Pet' the ballerina record.";
+        Assert.assertEquals(errors.length, 1);
+        String undocumentedField = "ERROR [unimplemented_field.bal:(4:6,4:9)] could not find OpenAPI object schema " +
+                "field 'tag' in 'Pet' the Ballerina record.";
         Assert.assertEquals(undocumentedField, errors[0].toString());
     }
 

@@ -128,6 +128,6 @@ public class Constants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String BODY = "body";
     public static final String SQUARE_BRACKETS = "[]";
-    public static final String ANONYMOUS_RECORD ="Anonymous Record";
+    public static final String ANONYMOUS_RECORD = "Anonymous Record";
 
 }

@@ -43,7 +43,7 @@ public class ServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisConte
     //create common interface for validators as validate.  openAPI, contex are common.
     @Override
     public void perform(SyntaxNodeAnalysisContext syntaxContext) {
-        this.preValidator.initialize(syntaxContext);
+        this.preValidator.initialize(syntaxContext, null, null);
         this.preValidator.validate();
         if (this.preValidator.getOpenAPI() == null) {
             return;

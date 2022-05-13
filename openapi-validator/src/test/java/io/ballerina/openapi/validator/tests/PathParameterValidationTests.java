@@ -44,8 +44,8 @@ public class PathParameterValidationTests {
                 diagnostic.diagnostics().stream().filter(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity())
                         .toArray();
         Assert.assertTrue(errors.length == 2);
-        String error = "ERROR [path_parameter.bal:(13:54,13:69)] implementation type does not match with openapi" +
-                " contract type (expected 'string',found 'int') for the parameter 'owner-id' in http method 'get' " +
+        String error = "ERROR [path_parameter.bal:(13:54,13:69)] implementation type does not match with OpenAPI" +
+                " contract type (expected 'string',found 'int') for the parameter 'owner-id' in HTTP method 'get' " +
                 "that associated with the path '/pets/{petId}/owner/{owner-id}'.";
         Assert.assertEquals(error, errors[0].toString());
     }

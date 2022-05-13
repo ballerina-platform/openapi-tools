@@ -71,9 +71,7 @@ import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
  *
  * @since 1.1.0
  */
-public class ReturnTypeValidator {
-    private final SyntaxNodeAnalysisContext context;
-    private final OpenAPI openAPI;
+public class ReturnTypeValidator extends Validator {
     private final String method;
     private final String path;
 
@@ -81,19 +79,16 @@ public class ReturnTypeValidator {
     private final Map<String, List<String>> balMediaTypes = new HashMap<>();
 
     private final Location location;
-    private final DiagnosticSeverity severity;
 
     public ReturnTypeValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, String method, String path,
                                Location location, DiagnosticSeverity severity) {
-        this.context = context;
-        this.openAPI = openAPI;
+        super(context, openAPI, severity);
         this.method = method;
         this.path = path;
         this.location = location;
-        this.severity = severity;
     }
 
-    public void addAllBalStatusCodes (Map<String, Node> statusCodes) {
+    public void addAllBalStatusCodes(Map<String, Node> statusCodes) {
         balStatusCodes.putAll(statusCodes);
     }
 
@@ -114,9 +109,9 @@ public class ReturnTypeValidator {
      * status code and , Media types that user has used for the ballerina return.
      *
      * @param returnNode Ballerina Return Node from function signature.
-     * @param responses OAS operation response.
+     * @param responses  OAS operation response.
      */
-    public void validateReturnBallerinaToOas(Optional<TypeDescriptorNode> returnNode, ApiResponses responses) {
+    public void validateBallerinaReturnType(Optional<TypeDescriptorNode> returnNode, ApiResponses responses) {
         boolean isOptional = false;
         if (returnNode.isEmpty()) {
             balStatusCodes.put(HTTP_202, null);
@@ -125,7 +120,7 @@ public class ReturnTypeValidator {
             SyntaxKind kind = returnNode.get().kind();
             if (balReturnNode instanceof QualifiedNameReferenceNode) {
                 QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) balReturnNode;
-                validateQualifiedType(qNode, responses);
+                validateQualifiedType(qNode);
                 //TODO: handle module level qualified name ex: `res:ResponseRecord`
             } else if (balReturnNode instanceof UnionTypeDescriptorNode) {
                 // A|B|C|D
@@ -139,7 +134,7 @@ public class ReturnTypeValidator {
             } else if (balReturnNode instanceof OptionalTypeDescriptorNode) {
                 isOptional = true;
                 OptionalTypeDescriptorNode optionalNode = (OptionalTypeDescriptorNode) balReturnNode;
-                validateReturnBallerinaToOas(Optional.of((TypeDescriptorNode) optionalNode.typeDescriptor()),
+                validateBallerinaReturnType(Optional.of((TypeDescriptorNode) optionalNode.typeDescriptor()),
                         responses);
             } else if (balReturnNode instanceof BuiltinSimpleNameReferenceNode) {
                 balStatusCodes.put(HTTP_200, (BuiltinSimpleNameReferenceNode) balReturnNode);
@@ -157,12 +152,12 @@ public class ReturnTypeValidator {
             List<String> undefineCode = new ArrayList<>(ballerinaCodes);
             undefineCode.removeAll(oasKeys);
             if (undefineCode.size() > 0) {
-                reportDiagnostic(context, CompilationError.UNDEFINED_RETURN_CODE, location,
-                        severity, undefineCode.toString(), method, path);
+                reportDiagnostic(context, CompilationError.UNDEFINED_RETURN_CODE, location, severity,
+                        undefineCode.toString(), method, path);
             }
 
             //Undefined mediaTypes
-            balMediaTypes.forEach((key, value)-> {
+            balMediaTypes.forEach((key, value) -> {
                 if (responses.containsKey(key)) {
                     ApiResponse apiResponse = responses.get(key);
                     if (apiResponse.getContent() != null) {
@@ -186,7 +181,6 @@ public class ReturnTypeValidator {
     /**
      * Validate Ballerina record against to openapi response.
      * ex: resource function  get pet() returns Pet {}
-     *
      */
     private void validateSimpleNameReference(SimpleNameReferenceNode simpleRefNode, ApiResponses responses) {
         Optional<Symbol> symbol = context.semanticModel().symbol(simpleRefNode);
@@ -290,13 +284,13 @@ public class ReturnTypeValidator {
         for (Node reNode : unionNodes) {
             if (reNode.kind() == QUALIFIED_NAME_REFERENCE) {
                 QualifiedNameReferenceNode traversRNode = (QualifiedNameReferenceNode) reNode;
-                validateQualifiedType(traversRNode, responses);
+                validateQualifiedType(traversRNode);
             } else if (reNode.kind() == SIMPLE_NAME_REFERENCE) {
                 SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) reNode;
                 validateSimpleNameReference(simpleRefNode, responses);
             } else if (reNode.kind() == ERROR_TYPE_DESC) {
                 balStatusCodes.put(HTTP_500, null);
-            }  else if (reNode instanceof BuiltinSimpleNameReferenceNode) {
+            } else if (reNode instanceof BuiltinSimpleNameReferenceNode) {
                 balStatusCodes.put(HTTP_200, (BuiltinSimpleNameReferenceNode) reNode);
                 if (responses.containsKey(HTTP_200)) {
                     String mediaType = getMediaType(reNode.kind());
@@ -306,23 +300,21 @@ public class ReturnTypeValidator {
         }
     }
 
-    private void fillMediaTypes(String http200, String mediaType) {
+    private void fillMediaTypes(String code, String mediaType) {
         List<String> mediaTypes;
-        if (balMediaTypes.containsKey(http200)) {
-            mediaTypes = balMediaTypes.get(http200);
+        if (balMediaTypes.containsKey(code)) {
+            mediaTypes = balMediaTypes.get(code);
         } else {
             mediaTypes = new ArrayList<>();
         }
         mediaTypes.add(mediaType);
-        balMediaTypes.put(http200, mediaTypes);
+        balMediaTypes.put(code, mediaTypes);
     }
 
     /**
      * Validate qualifier return type ex: Http:Ok.
-     *
      */
-    private void validateQualifiedType(QualifiedNameReferenceNode qNode, ApiResponses responses) {
-        qNode.identifier();
+    private void validateQualifiedType(QualifiedNameReferenceNode qNode) {
         // get the status code
         Optional<String> statusCode = generateApiResponseCode(qNode.identifier().toString().trim());
         if (statusCode.isPresent()) {
@@ -335,6 +327,7 @@ public class ReturnTypeValidator {
      * Get related http status code.
      */
     private Optional<String> generateApiResponseCode(String identifier) {
+
         if (HTTP_CODES.containsKey(identifier)) {
             return Optional.of(HTTP_CODES.get(identifier));
         } else {
@@ -348,14 +341,14 @@ public class ReturnTypeValidator {
      *
      * @param responses api Responses.
      */
-    public void validateReturnOASToBallerina(ApiResponses responses) {
+    public void validateOASReturnType(ApiResponses responses) {
         Set<String> ballerinaCodes = balStatusCodes.keySet();
         Set<String> oasKeys = responses.keySet();
         List<String> missingCode = new ArrayList<>(oasKeys);
         missingCode.removeAll(ballerinaCodes);
         if (missingCode.size() > 0) {
             // Unimplemented status codes in swagger operation and get location via bal return node.
-            reportDiagnostic(context, CompilationError.UNIMPLEMENTED_STATUS_CODE, location, severity,
+            reportDiagnostic(context, CompilationError.MISSING_STATUS_CODE, location, severity,
                     missingCode.toString(),
                     method, path);
         }
@@ -374,13 +367,13 @@ public class ReturnTypeValidator {
             List<String> missingMediaTypes = new ArrayList<>(oasMediaTypes);
 
             if (ballerinaMediaTypes == null) {
-                reportDiagnostic(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
+                reportDiagnostic(context, CompilationError.MISSING_RESPONSE_MEDIA_TYPE,
                         location, severity, oasMediaTypes.toString(), key, method, path);
                 return;
             }
             missingMediaTypes.removeAll(ballerinaMediaTypes);
             if (missingMediaTypes.size() > 0) {
-                reportDiagnostic(context, CompilationError.UNIMPLEMENTED_RESPONSE_MEDIA_TYPE,
+                reportDiagnostic(context, CompilationError.MISSING_RESPONSE_MEDIA_TYPE,
                         location, severity, missingMediaTypes.toString(), key, method, path);
             }
             content.forEach((mediaType, schema) -> {
@@ -413,52 +406,56 @@ public class ReturnTypeValidator {
                         //TODO: handle module level qualified name ex: `res:ResponseRecord`
                     } else if (kind == SIMPLE_NAME_REFERENCE) {
                         SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) node;
-                        Optional<Symbol> symbol = context.semanticModel().symbol(simpleRefNode);
-                        //Access the status code and media type via record
-                        if (symbol.isEmpty()) {
-                            return;
-                        }
-                        if (symbol.get() instanceof TypeReferenceTypeSymbol) {
-                            TypeReferenceTypeSymbol refType = (TypeReferenceTypeSymbol) symbol.get();
-                            TypeSymbol type = refType.typeDescriptor();
-                            if (type instanceof RecordTypeSymbol) {
-                                RecordTypeSymbol typeSymbol = (RecordTypeSymbol) type;
-                                List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
-                                boolean isHttp = false;
-                                if (!typeInclusions.isEmpty()) {
-                                    for (TypeSymbol typeInSymbol : typeInclusions) {
-                                        if (HTTP.equals(
-                                                typeInSymbol.getModule().orElseThrow().getName().orElseThrow())) {
-                                            isHttp = true;
-                                            Map<String, RecordFieldSymbol> fields = typeSymbol.fieldDescriptors();
-                                            TypeSymbol bodyFieldType = fields.get(BODY).typeDescriptor();
-                                            //TODO inline record both ballerina and schema
-                                            //TODO array type
-                                            if (bodyFieldType instanceof  TypeReferenceTypeSymbol) {
-                                                TypeValidatorUtils.validateObjectSchema(objectSchema, bodyFieldType,
-                                                        context, ((TypeReferenceTypeSymbol) bodyFieldType)
-                                                                .definition().getName().orElse(ANONYMOUS_RECORD),
-                                                        location, severity);
-                                            }
-                                        }
-                                    }
-                                    if (!isHttp) {
-                                        TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol,
-                                                context, ((TypeReferenceTypeSymbol) typeSymbol).definition().getName().
-                                                        orElse(ANONYMOUS_RECORD), location, severity);
-                                    }
-                                } else {
-                                    TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol,
-                                            context, refType.definition().getName().
-                                                    orElse(ANONYMOUS_RECORD), location, severity);
-                                }
-
-                            }
-                        }
+                        validateObjectSchema(objectSchema, simpleRefNode);
                     }
                 }
             });
         });
         //TODO: array type validation
+    }
+
+    /**
+     * Validate object schema with record.
+     */
+    private void validateObjectSchema(ObjectSchema objectSchema, SimpleNameReferenceNode simpleRefNode) {
+        Optional<Symbol> symbol = context.semanticModel().symbol(simpleRefNode);
+        //Access the status code and media type via record
+        if (symbol.isEmpty()) {
+            return;
+        }
+        if (symbol.get() instanceof TypeReferenceTypeSymbol) {
+            TypeReferenceTypeSymbol refType = (TypeReferenceTypeSymbol) symbol.get();
+            TypeSymbol type = refType.typeDescriptor();
+            if (type instanceof RecordTypeSymbol) {
+                RecordTypeSymbol typeSymbol = (RecordTypeSymbol) type;
+                List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
+                boolean isHttp = false;
+                if (!typeInclusions.isEmpty()) {
+                    for (TypeSymbol typeInSymbol : typeInclusions) {
+                        if (HTTP.equals(
+                                typeInSymbol.getModule().orElseThrow().getName().orElseThrow())) {
+                            isHttp = true;
+                            Map<String, RecordFieldSymbol> fields = typeSymbol.fieldDescriptors();
+                            TypeSymbol bodyFieldType = fields.get(BODY).typeDescriptor();
+                            //TODO inline record both ballerina and schema
+                            //TODO array type
+                            if (bodyFieldType instanceof TypeReferenceTypeSymbol) {
+                                TypeValidatorUtils.validateObjectSchema(objectSchema, bodyFieldType, context,
+                                        ((TypeReferenceTypeSymbol) bodyFieldType).definition().getName()
+                                                .orElse(ANONYMOUS_RECORD), location, severity);
+                            }
+                        }
+                    }
+                    if (!isHttp) {
+                        TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol, context,
+                                ((TypeReferenceTypeSymbol) typeSymbol).definition().getName().orElse(ANONYMOUS_RECORD),
+                                location, severity);
+                    }
+                } else {
+                    TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol, context,
+                            refType.definition().getName().orElse(ANONYMOUS_RECORD), location, severity);
+                }
+            }
+        }
     }
 }

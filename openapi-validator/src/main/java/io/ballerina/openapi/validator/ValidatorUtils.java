@@ -59,7 +59,7 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -536,14 +536,14 @@ public class ValidatorUtils {
         }
     }
 
-    public static String getNumberFormatType(Parameter oasParameter, String headerType) {
-        if (headerType.equals(NUMBER)) {
-            headerType = DOUBLE;
-            if (oasParameter.getSchema().getFormat() != null &&
-                    oasParameter.getSchema().getFormat().equals(FLOAT)) {
-                headerType = FLOAT;
+    public static String getNumberFormatType(Schema<?> schema) {
+        String type = schema.getType();
+        if (type != null && type.equals(NUMBER)) {
+            type = DOUBLE;
+            if (schema.getFormat() != null && schema.getFormat().equals(FLOAT)) {
+                type = FLOAT;
             }
         }
-        return headerType;
+        return type;
     }
 }

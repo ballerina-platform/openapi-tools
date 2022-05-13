@@ -71,22 +71,16 @@ import static io.ballerina.openapi.validator.error.CompilationError.UNEXPECTED_E
  *
  * @since 1.1.0
  */
-public class PreValidator {
-    private SyntaxNodeAnalysisContext context;
-    private OpenAPI openAPI;
+public class PreValidator extends Validator {
     private Filter filter;
-
-    public OpenAPI getOpenAPI() {
-        return openAPI;
+    @Override
+    public void initialize(SyntaxNodeAnalysisContext context, OpenAPI openAPI, Filter filter) {
+        this.context = context;
+        this.openAPI = openAPI;
+        this.filter = filter;
     }
-
     public Filter getFilter() {
         return filter;
-    }
-
-    public void initialize(SyntaxNodeAnalysisContext context) {
-        this.context = context;
-        this.openAPI = null;
     }
 
     /**
@@ -94,6 +88,7 @@ public class PreValidator {
      * annotation @openapi:ServiceInfo and that annotation includes valid openapi contract path.
      *
      */
+    @Override
     public void validate() {
         // 1. Checking receive service node has compilation issue
         SemanticModel semanticModel = context.semanticModel();

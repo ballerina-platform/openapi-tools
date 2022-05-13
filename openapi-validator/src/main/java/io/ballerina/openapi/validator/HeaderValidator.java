@@ -23,9 +23,10 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.openapi.validator.error.CompilationError;
-import io.ballerina.openapi.validator.model.Filter;
 import io.ballerina.openapi.validator.model.ResourceMethod;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
@@ -42,21 +43,18 @@ import static io.ballerina.openapi.validator.TypeValidatorUtils.convertOpenAPITy
 import static io.ballerina.openapi.validator.ValidatorUtils.extractAnnotationFieldDetails;
 import static io.ballerina.openapi.validator.ValidatorUtils.getNormalizedPath;
 import static io.ballerina.openapi.validator.ValidatorUtils.getNumberFormatType;
-import static io.ballerina.openapi.validator.ValidatorUtils.unescapeIdentifier;
 import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
+import static io.ballerina.openapi.validator.ValidatorUtils.unescapeIdentifier;
 
 /**
  * This contains the header validation.
  *
  * @since 1.1.0
  */
-public class HeaderValidator  extends Validator {
-    private final SyntaxNodeAnalysisContext context;
-    private final Filter filter;
+public class HeaderValidator extends Validator {
 
-    public HeaderValidator(SyntaxNodeAnalysisContext context, Filter filter) {
-        this.context = context;
-        this.filter = filter;
+    public HeaderValidator(SyntaxNodeAnalysisContext context, OpenAPI openAPI, DiagnosticSeverity severity) {
+        super(context, openAPI, severity);
     }
 
     /**
@@ -99,20 +97,17 @@ public class HeaderValidator  extends Validator {
                     if (headerName.equals(oasParameter.getName())) {
                         isHeaderDocumented = true;
                         Schema<?> schema = oasParameter.getSchema();
-                        String headerType = schema.getType();
-                        headerType = getNumberFormatType(oasParameter, headerType);
-                        //Array type
+                        String headerType = getNumberFormatType(schema);
                         if (schema instanceof ArraySchema) {
                             ArraySchema arraySchema = (ArraySchema) schema;
                             String items = arraySchema.getItems().getType();
                             Optional<String> arrayItemType = convertOpenAPITypeToBallerina(items);
-
                             //Array mapping
                             if (arrayItemType.isEmpty() || !ballerinaType.equals(arrayItemType.get() +
                                     SQUARE_BRACKETS)) {
                                 // This special concatenation is used to check the array header parameters
                                 reportDiagnostic(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
-                                        headerNode.location(), filter.getKind(), items + SQUARE_BRACKETS,
+                                        headerNode.location(), severity, items + SQUARE_BRACKETS,
                                         ballerinaType, headerName, method.getKey(),
                                         getNormalizedPath(method.getValue().getPath()));
                                 break;
@@ -122,7 +117,7 @@ public class HeaderValidator  extends Validator {
                         Optional<String> type = convertOpenAPITypeToBallerina(headerType);
                         if (type.isEmpty() || !ballerinaType.equals(type.get())) {
                             reportDiagnostic(context, CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
-                                    headerNode.location(), filter.getKind(), headerType, ballerinaType, headerName,
+                                    headerNode.location(), severity, headerType, ballerinaType, headerName,
                                     method.getKey(), getNormalizedPath(method.getValue().getPath()));
                             break;
                         }
@@ -131,9 +126,9 @@ public class HeaderValidator  extends Validator {
             }
 
             if (!isHeaderDocumented) {
-                // undocumented header
+                // undefined header
                 reportDiagnostic(context, CompilationError.UNDEFINED_HEADER, balHeader.getValue().location(),
-                        filter.getKind(), headerName, method.getKey(), getNormalizedPath(method.getValue().getPath()));
+                        severity, headerName, method.getKey(), getNormalizedPath(method.getValue().getPath()));
             }
         }
     }
