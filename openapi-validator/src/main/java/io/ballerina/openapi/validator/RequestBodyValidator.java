@@ -27,10 +27,6 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.openapi.validator.model.MetaData;
-import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-import io.ballerina.tools.diagnostics.Location;
-import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -59,23 +55,13 @@ import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
  *
  * @since 1.1.0
  */
-public class RequestBodyValidator implements Validator {
-    private final SyntaxNodeAnalysisContext context;
-    private final OpenAPI openAPI;
-    private final String path;
-    private final String method;
-    private Location location;
-    private final DiagnosticSeverity severity;
+public class RequestBodyValidator extends AbstractMetaData implements SectionValidator, Validator {
     private final RequestBody oasRequestBody;
     private final RequiredParameterNode body;
 
     public RequestBodyValidator(MetaData metaData, RequestBody oasRequestBody, RequiredParameterNode body) {
-        this.openAPI = metaData.getOpenAPI();
-        this.context = metaData.getContext();
-        this.method = metaData.getMethod();
-        this.path = metaData.getPath();
-        this.severity = metaData.getSeverity();
-        this.location = metaData.getLocation();
+        super(metaData.getContext(), metaData.getOpenAPI(), metaData.getPath(), metaData.getMethod(),
+                metaData.getSeverity(), metaData.getLocation());
         this.body = body;
         this.oasRequestBody = oasRequestBody;
     }
@@ -84,11 +70,11 @@ public class RequestBodyValidator implements Validator {
     public void validate() {
         //Validate ballerina resource request body
         if (body != null) {
-            validateBallerinaRequestBody();
+            validateBallerina();
         }
         //Validate OAS request body
         if (oasRequestBody != null) {
-            validateOASRequestBody();
+            validateOpenAPI();
         }
     }
 
@@ -96,7 +82,8 @@ public class RequestBodyValidator implements Validator {
      * Validate resource payload against to OAS operation request body.
      *
      */
-    private void validateBallerinaRequestBody() {
+    @Override
+    public void validateBallerina() {
 
         boolean isBodyExist = false;
         if (oasRequestBody != null && body != null) {
@@ -246,7 +233,8 @@ public class RequestBodyValidator implements Validator {
     /**
      * Validate OpenAPI request body against to ballerina payload.
      */
-    private void validateOASRequestBody() {
+    @Override
+    public void validateOpenAPI() {
         Content content = oasRequestBody.getContent();
         if (body == null) {
             reportDiagnostic(context, CompilationError.MISSING_REQUEST_BODY, location, severity, method, path);

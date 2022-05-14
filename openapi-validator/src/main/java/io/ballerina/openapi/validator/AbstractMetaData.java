@@ -15,46 +15,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.validator.model;
+package io.ballerina.openapi.validator;
 
-import io.ballerina.openapi.validator.AbstractMetaData;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 
 /**
- * Purpose of this class is to store all the metadata details that required to validation and generate diagnostic.
+ * Abstract class for store common attribute.
  *
  * @since 1.1.0
  */
-public class MetaData extends AbstractMetaData {
-    public MetaData(SyntaxNodeAnalysisContext context, OpenAPI openAPI, String path, String method,
-                    DiagnosticSeverity severity, Location location) {
-        super(context, openAPI, path, method, severity, location);
-    }
+public abstract class AbstractMetaData {
+    protected final SyntaxNodeAnalysisContext context;
+    protected final OpenAPI openAPI;
+    protected final String path;
+    protected final String method;
+    protected final DiagnosticSeverity severity;
+    // This default location is map to relevant resource function
+    protected Location location;
 
-    public SyntaxNodeAnalysisContext getContext() {
-        return context;
-    }
-
-    public OpenAPI getOpenAPI() {
-        return openAPI;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public DiagnosticSeverity getSeverity() {
-        return severity;
-    }
-
-    public Location getLocation() {
-        return location;
+    public AbstractMetaData(SyntaxNodeAnalysisContext context, OpenAPI openAPI, String path, String method,
+                            DiagnosticSeverity severity, Location location) {
+        this.context = context;
+        this.openAPI = openAPI;
+        this.path = path;
+        this.method = method;
+        this.severity = severity;
+        this.location = location;
     }
 }

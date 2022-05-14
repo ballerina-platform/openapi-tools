@@ -24,10 +24,6 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.openapi.validator.model.MetaData;
-import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-import io.ballerina.tools.diagnostics.Location;
-import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
@@ -54,25 +50,15 @@ import static io.ballerina.openapi.validator.ValidatorUtils.unescapeIdentifier;
  *
  * @since 1.1.0
  */
-public class ParameterValidator implements Validator {
-    private final String path;
-    private final String method;
-    private final SyntaxNodeAnalysisContext context;
-    private final OpenAPI openAPI;
-    private final DiagnosticSeverity severity;
+public class ParameterValidator extends AbstractMetaData implements SectionValidator, Validator {
     private final Map<String, Node> parameters;
     private final List<Parameter> oasParameters;
     // This default location is map to relevant resource function
-    private final Location location;
 
 
     public ParameterValidator(MetaData metaData, Map<String, Node> parameters, List<Parameter> oasParameters) {
-        this.openAPI = metaData.getOpenAPI();
-        this.context = metaData.getContext();
-        this.method = metaData.getMethod();
-        this.path = metaData.getPath();
-        this.severity = metaData.getSeverity();
-        this.location = metaData.getLocation();
+        super(metaData.getContext(), metaData.getOpenAPI(), metaData.getPath(), metaData.getMethod(),
+                metaData.getSeverity(), metaData.getLocation());
         this.parameters = parameters;
         this.oasParameters = oasParameters;
     }
@@ -80,18 +66,19 @@ public class ParameterValidator implements Validator {
     @Override
     public void validate() {
         //Ballerina to OAS parameter validation , here we validate query, path parameters.
-        validateBallerinaParameters();
+        validateBallerina();
 
         //OAS->Ballerina parameter validate
         if (oasParameters != null) {
-            validateOASParameters();
+            validateOpenAPI();
         }
     }
 
     /**
      * Validate OAS parameter against ballerina parameters.
      */
-    private void validateOASParameters() {
+    @Override
+    public void validateOpenAPI() {
 
         oasParameters.forEach(parameter -> {
             if (parameter.get$ref() != null) {
@@ -125,8 +112,8 @@ public class ParameterValidator implements Validator {
      * This function is used to validate the ballerina resource parameter against to openapi parameters.
      *
      */
-    private void validateBallerinaParameters() {
-
+    @Override
+    public void validateBallerina() {
         for (Map.Entry<String, Node> parameter : parameters.entrySet()) {
             boolean isExist = false;
             String parameterName = unescapeIdentifier(parameter.getKey());
@@ -209,4 +196,5 @@ public class ParameterValidator implements Validator {
             }
         }
     }
+
 }

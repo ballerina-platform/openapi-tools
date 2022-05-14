@@ -34,10 +34,6 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.validator.error.CompilationError;
 import io.ballerina.openapi.validator.model.MetaData;
-import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-import io.ballerina.tools.diagnostics.Location;
-import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -73,30 +69,17 @@ import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
  *
  * @since 1.1.0
  */
-public class ReturnTypeValidator implements Validator {
-    private final String method;
-    private final String path;
-
+public class ReturnTypeValidator extends AbstractMetaData implements SectionValidator, Validator {
     private final Map<String, Node> balStatusCodes = new HashMap<>();
     private final Map<String, List<String>> balMediaTypes = new HashMap<>();
-
-    private final Location location;
-    private final OpenAPI openAPI;
-
-    private final DiagnosticSeverity severity;
-
     private final ReturnTypeDescriptorNode returnNode;
-
-    ApiResponses responses;
-    SyntaxNodeAnalysisContext context;
+    private Optional<TypeDescriptorNode> returnNodeType = Optional.empty();
+    private final ApiResponses responses;
 
     public ReturnTypeValidator(MetaData metaData, ReturnTypeDescriptorNode returnNode, ApiResponses responses) {
-        this.openAPI = metaData.getOpenAPI();
-        this.context = metaData.getContext();
-        this.method = metaData.getMethod();
-        this.path = metaData.getPath();
-        this.severity = metaData.getSeverity();
-        this.location = metaData.getLocation();
+        super(metaData.getContext(), metaData.getOpenAPI(), metaData.getPath(), metaData.getMethod(),
+                metaData.getSeverity(), metaData.getLocation());
+
         this.returnNode = returnNode;
         this.responses = responses;
     }
@@ -106,28 +89,29 @@ public class ReturnTypeValidator implements Validator {
         // Validate ballerina -> OAS return type
         // If return type doesn't provide in service , then it maps to status code 202.
         if (returnNode == null) {
-            validateBallerinaReturnType(Optional.empty(), responses);
+            returnNodeType = Optional.empty();
+            validateBallerina();
         } else {
-            validateBallerinaReturnType(Optional.ofNullable((TypeDescriptorNode) returnNode.type()), responses);
+            returnNodeType = Optional.ofNullable((TypeDescriptorNode) returnNode.type());
+            validateBallerina();
         }
         // Validate OAS -> ballerina
-        validateOASReturnType(responses);
+        validateOpenAPI();
     }
 
     /**
      * This util function for validate the ballerina return against to openapi response. Here we string ballerina
      * status code and , Media types that user has used for the ballerina return.
      *
-     * @param returnNode Ballerina Return Node from function signature.
-     * @param responses  OAS operation response.
      */
-    private void validateBallerinaReturnType(Optional<TypeDescriptorNode> returnNode, ApiResponses responses) {
+    @Override
+    public void validateBallerina() {
         boolean isOptional = false;
-        if (returnNode.isEmpty()) {
+        if (returnNodeType.isEmpty()) {
             balStatusCodes.put(HTTP_202, null);
         } else {
-            TypeDescriptorNode balReturnNode = returnNode.get();
-            SyntaxKind kind = returnNode.get().kind();
+            TypeDescriptorNode balReturnNode = returnNodeType.get();
+            SyntaxKind kind = returnNodeType.get().kind();
             if (balReturnNode instanceof QualifiedNameReferenceNode) {
                 QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) balReturnNode;
                 validateQualifiedType(qNode);
@@ -144,8 +128,8 @@ public class ReturnTypeValidator implements Validator {
             } else if (balReturnNode instanceof OptionalTypeDescriptorNode) {
                 isOptional = true;
                 OptionalTypeDescriptorNode optionalNode = (OptionalTypeDescriptorNode) balReturnNode;
-                validateBallerinaReturnType(Optional.of((TypeDescriptorNode) optionalNode.typeDescriptor()),
-                        responses);
+                returnNodeType = Optional.of((TypeDescriptorNode) optionalNode.typeDescriptor());
+                validateBallerina();
             } else if (balReturnNode instanceof BuiltinSimpleNameReferenceNode) {
                 balStatusCodes.put(HTTP_200, balReturnNode);
                 if (responses.containsKey(HTTP_200)) {
@@ -349,9 +333,9 @@ public class ReturnTypeValidator implements Validator {
      * Validate OAS response against to ballerina return type. Here mainly we pick the ballerina status code Map ,
      * and media type earlier we stored under the ballerina to openapi return validation.
      *
-     * @param responses api Responses.
      */
-    private void validateOASReturnType(ApiResponses responses) {
+    @Override
+    public void validateOpenAPI() {
         Set<String> ballerinaCodes = balStatusCodes.keySet();
         Set<String> oasKeys = responses.keySet();
         List<String> missingCode = new ArrayList<>(oasKeys);
