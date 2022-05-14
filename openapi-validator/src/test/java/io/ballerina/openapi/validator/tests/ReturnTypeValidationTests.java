@@ -194,6 +194,30 @@ public class ReturnTypeValidationTests {
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
 
+    @Test(description = "Union return type with error")
+    public void unionWithError() {
+        Path path = RES_DIR.resolve("union_with_error_type.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertEquals(errors.length, 3);
+        String typeMismatch = "ERROR [union_with_error_type.bal:(8:5,10:6)] undefined status code(s) " +
+                "'[400, 500, 401]' for return type in the counterpart Ballerina service resource " +
+                "(method: 'get', path: '/').";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
+
+    @Test(description = "Return has record type which has extra field in relevant in OAS object schema")
+    public void recordType() {
+        Path path = RES_DIR.resolve("record.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertEquals(errors.length, 1);
+        String typeMismatch = "ERROR [record.bal:(13:5,17:6)] could not find OpenAPI object schema field 'type' in" +
+                " 'Pet' the Ballerina record.";
+        Assert.assertEquals(typeMismatch, errors[0].toString());
+    }
     @Test(description = "Module level record", enabled = false)
     public void handleModuleLevelQualifierRecord() {
         // TODO: res:ResRecord

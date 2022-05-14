@@ -140,12 +140,11 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_6");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(10:115,10:124)] implementation type does not match with OpenAPI " +
-                "contract type (expected 'string',found 'int') for the parameter 'mode' in HTTP method 'get' that " +
-                "associated with the path '/weather'.\n" +
-                "    ERROR [service.bal:(10:5,12:6)] undefined resource return mediaType(s) '[text/plain]' " +
-                "for return status code '200' in the counterpart Ballerina service resource (method: 'get', path: " +
-                "'/weather').";
+        String msg = "ERROR [service.bal:(10:115,10:124)] implementation type does not match with OpenAPI contract" +
+                " type (expected 'string',found 'int') for the parameter 'mode' in HTTP method 'get' that associated" +
+                " with the path '/weather'.\n" +
+                "ERROR [service.bal:(10:5,12:6)] missing OpenAPI contract parameter 'q' in the counterpart Ballerina" +
+                " service resource (method: 'get', path: '/weather').\n";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -183,13 +182,13 @@ public class ValidatorTests {
     }
 
     @Test(description = "Negative test to assert validator warnings on type mismatch errors between OAS schema and " +
-            "Ballerina records.", enabled = false)
+            "Ballerina records.")
     public void typeMisMatchingInRecord() throws IOException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_3");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = "WARNING [multiple_services.bal:(5:10,5:18)] Implementation type does not match with OAS" +
-                " contract type (expected 'int', found 'string') for the field 'userName' of type 'User'";
+        String msg = "WARNING [service.bal:(5:10,5:18)] implementation type does not match with OpenAPI contract" +
+                " type (expected 'string', found 'int') for the field 'userName' of type 'User'.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));

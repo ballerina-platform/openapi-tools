@@ -246,62 +246,45 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
                 SyntaxKind kind = body.typeName().kind();
                 String mediaType = getMediaType(kind);
                 if (mediaTypeEntry.getKey().equals(mediaType)) {
-                    // manage the payload type
                     MediaType value = mediaTypeEntry.getValue();
                     Schema<?> schema = value.getSchema();
+
+                    String balPayloadType = body.paramName().get().toString();
+                    Optional<Symbol> symbol = context.semanticModel().symbol(body);
+                    if (symbol.isEmpty()) {
+                        return;
+                    }
+                    TypeSymbol typeSymbol = ((ParameterSymbol) symbol.get()).typeDescriptor();
                     if (schema != null && schema.get$ref() != null) {
                         String ref = schema.get$ref();
                         Optional<String> schemaName = extractReferenceType(ref);
                         if (schemaName.isEmpty()) {
                             return;
                         }
+
                         Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
                         // This condition add due to bug in the swagger parser
                         // issue:https://github.com/swagger-api/swagger-parser/issues/1643
                         if (schemas.containsKey(schemaName.get())) {
                             Schema<?> payloadSchema = schemas.get(schemaName.get());
-                            String balRecordName = body.paramName().get().toString();
-                            Optional<Symbol> symbol = context.semanticModel().symbol(body);
-                            if (symbol.isEmpty()) {
-                                return;
-                            }
-                            TypeSymbol typeSymbol = ((ParameterSymbol) symbol.get()).typeDescriptor();
                             if (typeSymbol instanceof TypeReferenceTypeSymbol) {
-                                balRecordName = body.typeName().toString().trim();
+                                balPayloadType = body.typeName().toString().trim();
                             }
                             if (payloadSchema instanceof ObjectSchema) {
-                                //Get ballerina typeSymbol
                                 TypeValidatorUtils.validateObjectSchema((ObjectSchema) payloadSchema, typeSymbol,
-                                        context, balRecordName, location, severity);
-                            } else if (payloadSchema instanceof ComposedSchema) {
-                                //TODO: oneOf, allOF handle
-                                return;
-                            } else if (schema instanceof ArraySchema) {
-                                ArraySchema arraySchema = (ArraySchema) schema;
-                                if (arraySchema.getItems().get$ref() != null) {
-                                    String oasSchemaName =
-                                            extractReferenceType(arraySchema.getItems().get$ref()).get();
-                                    schema = openAPI.getComponents().getSchemas().get(oasSchemaName);
-                                    if (typeSymbol instanceof ArrayTypeSymbol) {
-                                        ArrayTypeSymbol arrayType = (ArrayTypeSymbol) typeSymbol;
-                                        if (arrayType.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol
-                                                && schema instanceof ObjectSchema) {
-                                            balRecordName = body.typeName().toString().trim()
-                                                    .replaceAll("\\[", "")
-                                                    .replaceAll("\\]", "");
-                                            TypeValidatorUtils.validateObjectSchema((ObjectSchema) schema,
-                                                    arrayType.memberTypeDescriptor(),
-                                                    context, balRecordName, location, severity);
-                                        }
-                                    }
-                                }
-                                //TODO inline object schema array
-                                return;
+                                        context, balPayloadType, location, severity);
                             }
                         }
+                    } else if (schema instanceof ComposedSchema) {
+                        //TODO: oneOf, allOf schema concept
+                        return;
+                    } else if (schema instanceof ArraySchema) {
+                        ArraySchema arraySchema = (ArraySchema) schema;
+                        validateArraySchema(typeSymbol, arraySchema);
+                        return;
                     }
                 } else {
-                    //unimplemented request body media type
+                    //extra request body media type in OAS
                     missingPayload.add(mediaTypeEntry.getKey());
                 }
             }
@@ -312,4 +295,28 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
         }
     }
 
+    /**
+     * Validate array type request body schema.
+     */
+    private void validateArraySchema(TypeSymbol typeSymbol, ArraySchema arraySchema) {
+        Schema<?> schema;
+        if (arraySchema.getItems().get$ref() != null) {
+            String oasSchemaName = extractReferenceType(arraySchema.getItems().get$ref()).get();
+            schema = openAPI.getComponents().getSchemas().get(oasSchemaName);
+            if (typeSymbol instanceof ArrayTypeSymbol) {
+                ArrayTypeSymbol arrayType = (ArrayTypeSymbol) typeSymbol;
+                if (arrayType.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol
+                        && schema instanceof ObjectSchema) {
+                    String balPayloadType = body.typeName().toString().trim()
+                            .replaceAll("\\[", "")
+                            .replaceAll("]", "");
+                    TypeValidatorUtils.validateObjectSchema((ObjectSchema) schema,
+                            arrayType.memberTypeDescriptor(),
+                            context, balPayloadType, location, severity);
+                }
+            }
+            // else given ballerina typeSymbol is not array type it will cover at the ballerina type
+            // validation under the type mismatch.
+        }
+    }
 }
