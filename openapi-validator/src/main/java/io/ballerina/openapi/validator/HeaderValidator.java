@@ -32,7 +32,6 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.ballerina.openapi.validator.Constants.HEADER_NAME;
 import static io.ballerina.openapi.validator.Constants.HTTP_HEADER;
@@ -75,7 +74,6 @@ public class HeaderValidator extends AbstractMetaData implements SectionValidato
 
     /**
      * This function is used to validate the ballerina resource header against to openapi header.
-     *
      */
     @Override
     public void validateBallerina() {
@@ -163,14 +161,13 @@ public class HeaderValidator extends AbstractMetaData implements SectionValidato
             }
             if (parameter instanceof HeaderParameter || parameter.getIn() != null &&
                     parameter.getIn().equals("header")) {
-                AtomicBoolean isHeaderExist = new AtomicBoolean(false);
-                Parameter finalParameter = parameter;
-                balHeaders.forEach((header, headerNode) -> {
-                    if (finalParameter.getName().trim().equals(header)) {
-                        isHeaderExist.set(true);
+                boolean isHeaderExist = false;
+                for (Map.Entry<String, Node> header: balHeaders.entrySet()) {
+                    if (parameter.getName().equals(header.getKey())) {
+                        isHeaderExist = true;
                     }
-                });
-                if (!isHeaderExist.get()) {
+                }
+                if (!isHeaderExist) {
                     reportDiagnostic(context, CompilationError.MISSING_HEADER,
                             location, severity, parameter.getName(), method,
                             path);

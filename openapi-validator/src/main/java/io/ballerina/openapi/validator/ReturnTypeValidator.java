@@ -332,7 +332,6 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
     /**
      * Validate OAS response against to ballerina return type. Here mainly we pick the ballerina status code Map ,
      * and media type earlier we stored under the ballerina to openapi return validation.
-     *
      */
     @Override
     public void validateOpenAPI() {
@@ -452,5 +451,4 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
             }
         }
     }
-
 }

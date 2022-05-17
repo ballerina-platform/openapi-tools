@@ -80,7 +80,6 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
 
     /**
      * Validate resource payload against to OAS operation request body.
-     *
      */
     @Override
     public void validateBallerina() {

@@ -59,7 +59,6 @@ public class TypeValidatorUtils {
 
     /**
      * Validate ballerina record against schema.
-     *
      */
     public static void validateRecordType(Schema<?> schema, TypeSymbol typeSymbol, String balRecord,
                                           SyntaxNodeAnalysisContext context,

@@ -186,7 +186,6 @@ public class ServiceValidator implements Validator {
 
     /**
      * This validation happens ballerina service against to openapi specification.
-     *
      */
     private void validateBalServiceWithOAS(Map<String, ResourcePathSummary> resourcePaths,
                                            List<OpenAPIPathSummary> oasPaths) {

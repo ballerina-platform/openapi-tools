@@ -66,7 +66,7 @@ import static io.ballerina.openapi.validator.error.CompilationError.NON_HTTP_SER
 import static io.ballerina.openapi.validator.error.CompilationError.UNEXPECTED_EXCEPTIONS;
 
 /**
- * This PreValidator class contains validation for given service if it is a http service and summaries all the
+ * This PreValidator class contains validation for given service if it is an HTTP service, and summarise all the
  * resources.
  *
  * @since 1.1.0
@@ -75,10 +75,12 @@ public class PreValidator implements Validator {
     private Filter filter;
     private SyntaxNodeAnalysisContext context;
     private OpenAPI openAPI;
+
     public void initialize(SyntaxNodeAnalysisContext context) {
         this.context = context;
         this.openAPI = null;
     }
+    
     public Filter getFilter() {
         return filter;
     }

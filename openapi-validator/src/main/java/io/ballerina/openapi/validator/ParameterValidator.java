@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
+
 
 import static io.ballerina.openapi.validator.Constants.ARRAY;
 import static io.ballerina.openapi.validator.Constants.SQUARE_BRACKETS;
@@ -90,16 +90,13 @@ public class ParameterValidator extends AbstractMetaData implements SectionValid
             }
             if (!(parameter instanceof HeaderParameter) ||
                     parameter.getIn() != null && !parameter.getIn().equals("header")) {
-                // headerValidation
-                AtomicBoolean isImplemented = new AtomicBoolean(false);
-                Parameter finalParameter1 = parameter;
-                parameters.forEach((paramName, paramNode) -> {
-                    // avoid headers
-                    if (finalParameter1.getName().equals(paramName)) {
-                        isImplemented.set(true);
+                boolean isImplemented = false;
+                for (Map.Entry<String, Node> param: parameters.entrySet()) {
+                    if (parameter.getName().equals(param.getKey())) {
+                        isImplemented = true;
                     }
-                });
-                if (!isImplemented.get()) {
+                }
+                if (!isImplemented) {
                     // error message
                     reportDiagnostic(context, CompilationError.MISSING_PARAMETER,
                             location, severity, parameter.getName(), method, path);
@@ -110,7 +107,6 @@ public class ParameterValidator extends AbstractMetaData implements SectionValid
 
     /**
      * This function is used to validate the ballerina resource parameter against to openapi parameters.
-     *
      */
     @Override
     public void validateBallerina() {
@@ -147,8 +143,8 @@ public class ParameterValidator extends AbstractMetaData implements SectionValid
                             oasParameterName = openAPI.getComponents().getParameters().get(oasParameterName).getName();
                         }
                     }
-                    //There are situation path parameter name change with its schema name, therefore we need to avoid
-                    // name checking in path parameter
+                    //There can be situations where path parameter name change with its schema name, therefore
+                    // we need to avoid name checking in path parameter
                     //ex:
                     // paths:
                     //  /applications/{obsId}/metrics:
