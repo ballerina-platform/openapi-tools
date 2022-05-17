@@ -52,21 +52,21 @@ public class ServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisConte
         boolean excludeTagsEnabled = filter.getExcludeTag() != null;
         boolean excludeOperationEnable = filter.getExcludeOperation() != null;
 
-        // This is the annotation has not any filters to filter the operations.
+        // 1. This is the annotation has not any filters to filter the operations.
         if (tagEnabled && operationEnabled && excludeOperationEnable && excludeTagsEnabled) {
             reportDiagnostic(syntaxContext, CompilationError.FOUR_ANNOTATION_FIELDS,
                     syntaxContext.node().location(), DiagnosticSeverity.ERROR);
             return;
         }
 
-        // 1. When the both tag and e.tags enable compiler gives compilation error.
+        // 2. When the both tag and e.tags enable compiler gives compilation error.
         if (tagEnabled && excludeTagsEnabled) {
             reportDiagnostic(syntaxContext, CompilationError.BOTH_TAGS_AND_EXCLUDE_TAGS_ENABLES,
                     syntaxContext.node().location(), DiagnosticSeverity.ERROR);
             return;
         }
 
-        // 2. When the both operation and e. operations enable compiler gives compilation error.
+        // 3. When the both operation and e. operations enable compiler gives compilation error.
         if (operationEnabled && excludeOperationEnable) {
             reportDiagnostic(syntaxContext, CompilationError.BOTH_OPERATIONS_AND_EXCLUDE_OPERATIONS_ENABLES,
                     syntaxContext.node().location(), DiagnosticSeverity.ERROR);

@@ -15,46 +15,60 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.validator.model;
+package io.ballerina.openapi.validator;
 
-import io.ballerina.openapi.validator.AbstractMetaData;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 
 /**
- * Purpose of this class is to store all the metadata details that required to validation and generate diagnostic.
+ * Abstract class for store common validator attribute.
  *
  * @since 1.1.0
  */
-public class MetaData extends AbstractMetaData {
-    public MetaData(SyntaxNodeAnalysisContext context, OpenAPI openAPI, String path, String method,
-                    DiagnosticSeverity severity, Location location) {
-        super(context, openAPI, path, method, severity, location);
+class ValidatorContext {
+    private final SyntaxNodeAnalysisContext context;
+    private final OpenAPI openAPI;
+    private final String path;
+    private final String method;
+    private final DiagnosticSeverity severity;
+    // This default location is map to relevant resource function
+    private final Location location;
+
+    public ValidatorContext(SyntaxNodeAnalysisContext context,
+                            OpenAPI openAPI,
+                            String path, String method,
+                            DiagnosticSeverity severity, Location location) {
+        this.context = context;
+        this.openAPI = openAPI;
+        this.path = path;
+        this.method = method;
+        this.severity = severity;
+        this.location = location;
     }
 
-    public SyntaxNodeAnalysisContext getContext() {
+    public SyntaxNodeAnalysisContext context() {
         return context;
     }
 
-    public OpenAPI getOpenAPI() {
+    public OpenAPI openAPI() {
         return openAPI;
     }
 
-    public String getPath() {
+    public String path() {
         return path;
     }
 
-    public String getMethod() {
+    public String method() {
         return method;
     }
 
-    public DiagnosticSeverity getSeverity() {
+    public DiagnosticSeverity severity() {
         return severity;
     }
 
-    public Location getLocation() {
+    public Location location() {
         return location;
     }
 }

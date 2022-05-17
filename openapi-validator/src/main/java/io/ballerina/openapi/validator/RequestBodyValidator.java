@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.validator;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -26,7 +27,8 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.validator.error.CompilationError;
-import io.ballerina.openapi.validator.model.MetaData;
+import io.ballerina.tools.diagnostics.Location;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -55,55 +57,48 @@ import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
  *
  * @since 1.1.0
  */
-public class RequestBodyValidator extends AbstractMetaData implements SectionValidator, Validator {
+public class RequestBodyValidator extends NodeValidator {
     private final RequestBody oasRequestBody;
     private final RequiredParameterNode body;
+    private Location location;
 
-    public RequestBodyValidator(MetaData metaData, RequestBody oasRequestBody, RequiredParameterNode body) {
-        super(metaData.getContext(), metaData.getOpenAPI(), metaData.getPath(), metaData.getMethod(),
-                metaData.getSeverity(), metaData.getLocation());
+    public RequestBodyValidator(ValidatorContext validatorContext, RequestBody oasRequestBody,
+                                RequiredParameterNode body) {
+        super(validatorContext);
         this.body = body;
         this.oasRequestBody = oasRequestBody;
-    }
-
-    @Override
-    public void validate() {
-        //Validate ballerina resource request body
-        if (body != null) {
-            validateBallerina();
-        }
-        //Validate OAS request body
-        if (oasRequestBody != null) {
-            validateOpenAPI();
-        }
     }
 
     /**
      * Validate resource payload against to OAS operation request body.
      */
     @Override
-    public void validateBallerina() {
-
-        boolean isBodyExist = false;
+    public void validateBallerinaToOpenAPI() {
+        if (body != null && oasRequestBody == null) {
+            reportDiagnostic(validatorContext.context(), CompilationError.UNDEFINED_REQUEST_BODY, body.location(),
+                    validatorContext.severity(), validatorContext.method(), getNormalizedPath(validatorContext.path()));
+            return;
+        }
+        location = validatorContext.location();
         if (oasRequestBody != null && body != null) {
             // This flag is to trac the availability of requestBody has documented
-            isBodyExist = true;
             boolean isMediaTypeExist = false;
             location = body.location();
             //Ballerina support type payload string|json|map<json>|xml|byte[]||record {| anydata...; |}[]
             // Get the payload type
-            Node typeNode = body.typeName();
-            SyntaxKind kind = typeNode.kind();
-            String mediaType = ValidatorUtils.getMediaType(kind);
 
+            SemanticModel semanticModel = validatorContext.context().semanticModel();
             List<String> mediaTypes = extractAnnotationFieldDetails(HTTP_PAYLOAD, MEDIA_TYPE,
-                    body.annotations(), context.semanticModel());
+                    body.annotations(), semanticModel);
 
             Content content = oasRequestBody.getContent();
             // Traverse request body  list , when it has multiple types
             // first check given media type is there,if not return diagnostic.if it is there check the payload type.
             if (mediaTypes.isEmpty()) {
                 if (content != null) {
+                    Node typeNode = body.typeName();
+                    SyntaxKind kind = typeNode.kind();
+                    String mediaType = ValidatorUtils.getMediaType(kind);
                     List<String> oasMediaTypes = new ArrayList<>();
                     for (Map.Entry<String, MediaType> oasMedia : content.entrySet()) {
                         oasMediaTypes.add(oasMedia.getKey());
@@ -125,7 +120,7 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
                             if (body.paramName().isEmpty() && oasName.isEmpty()) {
                                 return;
                             }
-                            Optional<Symbol> symbol = context.semanticModel().symbol(body);
+                            Optional<Symbol> symbol = semanticModel.symbol(body);
                             if (symbol.isEmpty()) {
                                 return;
                             }
@@ -148,8 +143,9 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
                         }
                     }
                     if (!isMediaTypeExist) {
-                        reportDiagnostic(context, CompilationError.UNDEFINED_REQUEST_MEDIA_TYPE,
-                                body.location(), severity, mediaType, method, getNormalizedPath(path));
+                        reportDiagnostic(validatorContext.context(), CompilationError.UNDEFINED_REQUEST_MEDIA_TYPE,
+                                body.location(), validatorContext.severity(), mediaType, validatorContext.method(),
+                                getNormalizedPath(validatorContext.path()));
                     }
                 }
             } else {
@@ -157,10 +153,6 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
             }
         }
         //TODO: http:Request type
-        if (!isBodyExist) {
-            reportDiagnostic(context, CompilationError.UNDEFINED_REQUEST_BODY, body.location(),
-                    severity, method, getNormalizedPath(path));
-        }
     }
 
     /**
@@ -176,18 +168,20 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
                     .replaceAll("\\]", "");
 
             if (!(schema instanceof ArraySchema)) {
-                reportDiagnostic(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
+                reportDiagnostic(validatorContext.context(), CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
                         requestBodyNode.location(),
-                        severity, mediaType, oasMediaTypes.toString(),
-                        requestBodyNode.paramName().get().toString().trim(), method, getNormalizedPath(path));
+                        validatorContext.severity(), mediaType, oasMediaTypes.toString(),
+                        requestBodyNode.paramName().get().toString().trim(), validatorContext.method(),
+                        getNormalizedPath(validatorContext.path()));
             } else {
                 ArraySchema arraySchema = (ArraySchema) schema;
                 if (arraySchema.getItems().get$ref() != null) {
                     String oasSchemaName = extractReferenceType(arraySchema.getItems().get$ref()).get();
-                    schema = openAPI.getComponents().getSchemas().get(oasSchemaName);
+                    schema = validatorContext.openAPI().getComponents().getSchemas().get(oasSchemaName);
                     // validate array record
                     TypeValidatorUtils.validateRecordType(schema, arrayType.memberTypeDescriptor(),
-                            balRecordName, context, openAPI, oasSchemaName, severity);
+                            balRecordName, validatorContext.context(), validatorContext.openAPI(), oasSchemaName,
+                            validatorContext.severity());
                 } else {
                     //TODO inline object schema
                 }
@@ -211,20 +205,21 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
             if (itemType.isPresent()) {
                 item = itemType.get() + SQUARE_BRACKETS;
             }
-            reportDiagnostic(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                    location, severity, mediaType, item, balRecordName, method,
-                    getNormalizedPath(path));
+            reportDiagnostic(validatorContext.context(), CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
+                    location, validatorContext.severity(), mediaType, item, balRecordName,
+                    validatorContext.method(), getNormalizedPath(validatorContext.path()));
             
         } else if (schema instanceof ObjectSchema || schema.get$ref() != null) {
             // validate- Record
             if (balRecordName.equals(oasName)) {
+                OpenAPI openAPI = validatorContext.openAPI();
                 schema = openAPI.getComponents().getSchemas().get(oasName);
                 TypeValidatorUtils.validateRecordType(schema, typeSymbol, balRecordName,
-                        context, openAPI, oasName, severity);
+                        validatorContext.context(), openAPI, oasName, validatorContext.severity());
             } else {
-                reportDiagnostic(context, CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
-                        location, severity, mediaType, oasName,
-                        balRecordName, method, getNormalizedPath(path));
+                reportDiagnostic(validatorContext.context(), CompilationError.TYPEMISMATCH_REQUEST_BODY_PAYLOAD,
+                        location, validatorContext.severity(), mediaType, oasName,
+                        balRecordName, validatorContext.method(), getNormalizedPath(validatorContext.path()));
             }
         }
     }
@@ -233,10 +228,15 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
      * Validate OpenAPI request body against to ballerina payload.
      */
     @Override
-    public void validateOpenAPI() {
+    public void validateOpenAPIToBallerina() {
+        if (oasRequestBody == null) {
+            return;
+        }
         Content content = oasRequestBody.getContent();
         if (body == null) {
-            reportDiagnostic(context, CompilationError.MISSING_REQUEST_BODY, location, severity, method, path);
+            reportDiagnostic(validatorContext.context(), CompilationError.MISSING_REQUEST_BODY,
+                    location, validatorContext.severity(),
+                    validatorContext.method(), validatorContext.path());
             return;
         }
         if (content != null) {
@@ -249,7 +249,7 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
                     Schema<?> schema = value.getSchema();
 
                     String balPayloadType = body.paramName().get().toString();
-                    Optional<Symbol> symbol = context.semanticModel().symbol(body);
+                    Optional<Symbol> symbol = validatorContext.context().semanticModel().symbol(body);
                     if (symbol.isEmpty()) {
                         return;
                     }
@@ -261,7 +261,7 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
                             return;
                         }
 
-                        Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+                        Map<String, Schema> schemas = validatorContext.openAPI().getComponents().getSchemas();
                         // This condition add due to bug in the swagger parser
                         // issue:https://github.com/swagger-api/swagger-parser/issues/1643
                         if (schemas.containsKey(schemaName.get())) {
@@ -271,7 +271,8 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
                             }
                             if (payloadSchema instanceof ObjectSchema) {
                                 TypeValidatorUtils.validateObjectSchema((ObjectSchema) payloadSchema, typeSymbol,
-                                        context, balPayloadType, location, severity);
+                                        validatorContext.context(), balPayloadType, location,
+                                        validatorContext.severity());
                             }
                         }
                     } else if (schema instanceof ComposedSchema) {
@@ -288,8 +289,9 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
                 }
             }
             if (content.entrySet().size() != 1) {
-                reportDiagnostic(context, CompilationError.MISSING_REQUEST_MEDIA_TYPE, body.location(), severity,
-                        missingPayload.toString(), method, path);
+                reportDiagnostic(validatorContext.context(), CompilationError.MISSING_REQUEST_MEDIA_TYPE,
+                        body.location(), validatorContext.severity(),
+                        missingPayload.toString(), validatorContext.method(), validatorContext.path());
             }
         }
     }
@@ -301,7 +303,7 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
         Schema<?> schema;
         if (arraySchema.getItems().get$ref() != null) {
             String oasSchemaName = extractReferenceType(arraySchema.getItems().get$ref()).get();
-            schema = openAPI.getComponents().getSchemas().get(oasSchemaName);
+            schema = validatorContext.openAPI().getComponents().getSchemas().get(oasSchemaName);
             if (typeSymbol instanceof ArrayTypeSymbol) {
                 ArrayTypeSymbol arrayType = (ArrayTypeSymbol) typeSymbol;
                 if (arrayType.memberTypeDescriptor() instanceof TypeReferenceTypeSymbol
@@ -311,7 +313,8 @@ public class RequestBodyValidator extends AbstractMetaData implements SectionVal
                             .replaceAll("]", "");
                     TypeValidatorUtils.validateObjectSchema((ObjectSchema) schema,
                             arrayType.memberTypeDescriptor(),
-                            context, balPayloadType, location, severity);
+                            validatorContext.context(), balPayloadType, location,
+                            validatorContext.severity());
                 }
             }
             // else given ballerina typeSymbol is not array type it will cover at the ballerina type

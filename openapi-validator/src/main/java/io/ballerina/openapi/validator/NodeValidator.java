@@ -24,8 +24,18 @@ package io.ballerina.openapi.validator;
  *
  * @since 1.1.0
  */
-public interface SectionValidator {
+public abstract class NodeValidator implements Validator {
+    ValidatorContext validatorContext;
 
-    void validateBallerina();
-    void validateOpenAPI();
+    public NodeValidator(ValidatorContext validatorContext) {
+        this.validatorContext = validatorContext;
+    }
+
+    @Override
+    public void validate() {
+        validateBallerinaToOpenAPI();
+        validateOpenAPIToBallerina();
+    }
+    abstract void validateBallerinaToOpenAPI();
+    abstract void validateOpenAPIToBallerina();
 }

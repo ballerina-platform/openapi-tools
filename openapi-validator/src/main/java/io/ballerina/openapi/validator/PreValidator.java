@@ -106,17 +106,16 @@ public class PreValidator implements Validator {
         }
 
         ServiceDeclarationNode serviceNode = (ServiceDeclarationNode) this.context.node();
-        Path ballerinaFilePath = getBallerinaFilePath();
-        Optional<MetadataNode> metadata = serviceNode.metadata();
-        boolean validatorEnable = false;
         Location location = serviceNode.location();
-
         // 2.Test given service is http service, if not this will return WARNING and execute the ballerina
         // file.
         if (!isHttpService(serviceNode, context.semanticModel())) {
             reportDiagnostic(context, NON_HTTP_SERVICE, location, DiagnosticSeverity.WARNING);
             return;
         }
+
+        Optional<MetadataNode> metadata = serviceNode.metadata();
+        boolean validatorEnable = false;
 
         // 3. Preprocessing - return OpenAPI and filter
         if (metadata.isEmpty()) {
@@ -169,6 +168,7 @@ public class PreValidator implements Validator {
                             case ATTRIBUTE_CONTRACT_PATH:
                                 Path openAPIPath = Paths.get(expression.toString().replaceAll("\"",
                                         "").trim());
+                                Path ballerinaFilePath = getBallerinaFilePath();
                                 this.openAPI = getOpenAPIContract(ballerinaFilePath, location, openAPIPath);
                                 if (openAPI != null) {
                                     validatorEnable = true;

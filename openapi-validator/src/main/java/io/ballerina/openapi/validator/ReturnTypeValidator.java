@@ -27,13 +27,11 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.validator.error.CompilationError;
-import io.ballerina.openapi.validator.model.MetaData;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -69,69 +67,50 @@ import static io.ballerina.openapi.validator.ValidatorUtils.reportDiagnostic;
  *
  * @since 1.1.0
  */
-public class ReturnTypeValidator extends AbstractMetaData implements SectionValidator, Validator {
+public class ReturnTypeValidator extends NodeValidator {
     private final Map<String, Node> balStatusCodes = new HashMap<>();
     private final Map<String, List<String>> balMediaTypes = new HashMap<>();
-    private final ReturnTypeDescriptorNode returnNode;
-    private Optional<TypeDescriptorNode> returnNodeType = Optional.empty();
+    private TypeDescriptorNode returnNode;
     private final ApiResponses responses;
 
-    public ReturnTypeValidator(MetaData metaData, ReturnTypeDescriptorNode returnNode, ApiResponses responses) {
-        super(metaData.getContext(), metaData.getOpenAPI(), metaData.getPath(), metaData.getMethod(),
-                metaData.getSeverity(), metaData.getLocation());
-
+    public ReturnTypeValidator(ValidatorContext validatorContext, TypeDescriptorNode returnNode,
+                               ApiResponses responses) {
+        super(validatorContext);
         this.returnNode = returnNode;
         this.responses = responses;
-    }
-
-    @Override
-    public void validate() {
-        // Validate ballerina -> OAS return type
-        // If return type doesn't provide in service , then it maps to status code 202.
-        if (returnNode == null) {
-            returnNodeType = Optional.empty();
-            validateBallerina();
-        } else {
-            returnNodeType = Optional.ofNullable((TypeDescriptorNode) returnNode.type());
-            validateBallerina();
-        }
-        // Validate OAS -> ballerina
-        validateOpenAPI();
     }
 
     /**
      * This util function for validate the ballerina return against to openapi response. Here we string ballerina
      * status code and , Media types that user has used for the ballerina return.
-     *
      */
     @Override
-    public void validateBallerina() {
+    public void validateBallerinaToOpenAPI() {
         boolean isOptional = false;
-        if (returnNodeType.isEmpty()) {
+        if (returnNode == null) {
             balStatusCodes.put(HTTP_202, null);
         } else {
-            TypeDescriptorNode balReturnNode = returnNodeType.get();
-            SyntaxKind kind = returnNodeType.get().kind();
-            if (balReturnNode instanceof QualifiedNameReferenceNode) {
-                QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) balReturnNode;
+            SyntaxKind kind = returnNode.kind();
+            if (returnNode instanceof QualifiedNameReferenceNode) {
+                QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) returnNode;
                 validateQualifiedType(qNode);
                 //TODO: handle module level qualified name ex: `res:ResponseRecord`
-            } else if (balReturnNode instanceof UnionTypeDescriptorNode) {
+            } else if (returnNode instanceof UnionTypeDescriptorNode) {
                 // A|B|C|D
-                UnionTypeDescriptorNode uNode = (UnionTypeDescriptorNode) balReturnNode;
+                UnionTypeDescriptorNode uNode = (UnionTypeDescriptorNode) returnNode;
                 validateUnionType(uNode, responses);
-            } else if (balReturnNode instanceof SimpleNameReferenceNode) {
-                SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) balReturnNode;
+            } else if (returnNode instanceof SimpleNameReferenceNode) {
+                SimpleNameReferenceNode simpleRefNode = (SimpleNameReferenceNode) returnNode;
                 validateSimpleNameReference(simpleRefNode, responses);
             } else if (kind == ERROR_TYPE_DESC) {
                 balStatusCodes.put(HTTP_500, null);
-            } else if (balReturnNode instanceof OptionalTypeDescriptorNode) {
+            } else if (returnNode instanceof OptionalTypeDescriptorNode) {
                 isOptional = true;
-                OptionalTypeDescriptorNode optionalNode = (OptionalTypeDescriptorNode) balReturnNode;
-                returnNodeType = Optional.of((TypeDescriptorNode) optionalNode.typeDescriptor());
-                validateBallerina();
-            } else if (balReturnNode instanceof BuiltinSimpleNameReferenceNode) {
-                balStatusCodes.put(HTTP_200, balReturnNode);
+                OptionalTypeDescriptorNode optionalNode = (OptionalTypeDescriptorNode) returnNode;
+                returnNode = (TypeDescriptorNode) optionalNode.typeDescriptor();
+                validateBallerinaToOpenAPI();
+            } else if (returnNode instanceof BuiltinSimpleNameReferenceNode) {
+                balStatusCodes.put(HTTP_200, returnNode);
                 if (responses.containsKey(HTTP_200)) {
                     String mediaType = getMediaType(kind);
                     fillMediaTypes(HTTP_200, mediaType);
@@ -146,8 +125,9 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
             List<String> undefineCode = new ArrayList<>(ballerinaCodes);
             undefineCode.removeAll(oasKeys);
             if (undefineCode.size() > 0) {
-                reportDiagnostic(context, CompilationError.UNDEFINED_RETURN_CODE, location, severity,
-                        undefineCode.toString(), method, path);
+                reportDiagnostic(validatorContext.context(), CompilationError.UNDEFINED_RETURN_CODE,
+                        validatorContext.location(), validatorContext.severity(),
+                        undefineCode.toString(), validatorContext.method(), validatorContext.path());
             }
 
             //Undefined mediaTypes
@@ -159,12 +139,15 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
                         List<String> undefinedMediaTypes = new ArrayList<>(value);
                         undefinedMediaTypes.removeAll(oasMediaTypes);
                         if (undefinedMediaTypes.size() > 0) {
-                            reportDiagnostic(context, CompilationError.UNDEFINED_RETURN_MEDIA_TYPE,
-                                    location, severity, undefinedMediaTypes.toString(), key, method, path);
+                            reportDiagnostic(validatorContext.context(), CompilationError.UNDEFINED_RETURN_MEDIA_TYPE,
+                                    validatorContext.location(), validatorContext.severity(),
+                                    undefinedMediaTypes.toString(),
+                                    key, validatorContext.method(), validatorContext.path());
                         }
                     } else {
-                        reportDiagnostic(context, CompilationError.UNDEFINED_RETURN_MEDIA_TYPE,
-                                location, severity, value.toString(), key, method, path);
+                        reportDiagnostic(validatorContext.context(), CompilationError.UNDEFINED_RETURN_MEDIA_TYPE,
+                                validatorContext.location(), validatorContext.severity(), value.toString(), key,
+                                validatorContext.method(), validatorContext.path());
                     }
                 }
             });
@@ -177,7 +160,7 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
      * ex: resource function  get pet() returns Pet {}
      */
     private void validateSimpleNameReference(SimpleNameReferenceNode simpleRefNode, ApiResponses responses) {
-        Optional<Symbol> symbol = context.semanticModel().symbol(simpleRefNode);
+        Optional<Symbol> symbol = validatorContext.context().semanticModel().symbol(simpleRefNode);
         //Access the status code and media type via record
         if (symbol.isEmpty()) {
             return;
@@ -225,10 +208,11 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
                                             return;
                                         }
                                         TypeValidatorUtils.validateRecordType(
-                                                openAPI.getComponents().getSchemas().get(schemaName.get()),
-                                                bodyFieldType,
+                                                validatorContext.openAPI().getComponents().getSchemas().get(
+                                                        schemaName.get()), bodyFieldType,
                                                 ((TypeReferenceTypeSymbol) bodyFieldType).definition().getName().get(),
-                                                context, openAPI, schemaName.get(), severity);
+                                                validatorContext.context(), validatorContext.openAPI(),
+                                                schemaName.get(), validatorContext.severity());
                                     }
                                 }
                             }
@@ -250,9 +234,10 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
                                 return;
                             }
                             TypeValidatorUtils.validateRecordType(
-                                    openAPI.getComponents().getSchemas().get(schemaName.get()),
+                                    validatorContext.openAPI().getComponents().getSchemas().get(schemaName.get()),
                                     typeSymbol, refType.definition().getName().orElse(null),
-                                    context, openAPI, schemaName.orElse(null), severity);
+                                    validatorContext.context(), validatorContext.openAPI(),
+                                    schemaName.orElse(null), validatorContext.severity());
                         }
                     }
                 }
@@ -334,16 +319,16 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
      * and media type earlier we stored under the ballerina to openapi return validation.
      */
     @Override
-    public void validateOpenAPI() {
+    public void validateOpenAPIToBallerina() {
         Set<String> ballerinaCodes = balStatusCodes.keySet();
         Set<String> oasKeys = responses.keySet();
         List<String> missingCode = new ArrayList<>(oasKeys);
         missingCode.removeAll(ballerinaCodes);
         if (missingCode.size() > 0) {
             // Unimplemented status codes in swagger operation and get location via bal return node.
-            reportDiagnostic(context, CompilationError.MISSING_STATUS_CODE, location, severity,
-                    missingCode.toString(),
-                    method, path);
+            reportDiagnostic(validatorContext.context(), CompilationError.MISSING_STATUS_CODE,
+                    validatorContext.location(), validatorContext.severity(),
+                    missingCode.toString(), validatorContext.method(), validatorContext.path());
         }
 
         responses.forEach((key, value) -> {
@@ -360,14 +345,16 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
             List<String> missingMediaTypes = new ArrayList<>(oasMediaTypes);
 
             if (ballerinaMediaTypes == null) {
-                reportDiagnostic(context, CompilationError.MISSING_RESPONSE_MEDIA_TYPE,
-                        location, severity, oasMediaTypes.toString(), key, method, path);
+                reportDiagnostic(validatorContext.context(), CompilationError.MISSING_RESPONSE_MEDIA_TYPE,
+                        validatorContext.location(), validatorContext.severity(), oasMediaTypes.toString(), key,
+                        validatorContext.method(), validatorContext.path());
                 return;
             }
             missingMediaTypes.removeAll(ballerinaMediaTypes);
             if (missingMediaTypes.size() > 0) {
-                reportDiagnostic(context, CompilationError.MISSING_RESPONSE_MEDIA_TYPE,
-                        location, severity, missingMediaTypes.toString(), key, method, path);
+                reportDiagnostic(validatorContext.context(), CompilationError.MISSING_RESPONSE_MEDIA_TYPE,
+                        validatorContext.location(), validatorContext.severity(), missingMediaTypes.toString(), key,
+                        validatorContext.method(), validatorContext.path());
             }
             content.forEach((mediaType, schema) -> {
                 if (ballerinaMediaTypes.contains(mediaType)) {
@@ -386,7 +373,8 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
                         if (schemaName.isEmpty()) {
                             return;
                         }
-                        Schema<?> vSchema = openAPI.getComponents().getSchemas().get(schemaName.get());
+                        Schema<?> vSchema = validatorContext.openAPI().getComponents().getSchemas()
+                                .get(schemaName.get());
                         if (vSchema instanceof ObjectSchema) {
                             objectSchema = (ObjectSchema) vSchema;
                         }
@@ -411,7 +399,7 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
      * Validate object schema with record.
      */
     private void validateObjectSchema(ObjectSchema objectSchema, SimpleNameReferenceNode simpleRefNode) {
-        Optional<Symbol> symbol = context.semanticModel().symbol(simpleRefNode);
+        Optional<Symbol> symbol = validatorContext.context().semanticModel().symbol(simpleRefNode);
         //Access the status code and media type via record
         if (symbol.isEmpty()) {
             return;
@@ -433,20 +421,23 @@ public class ReturnTypeValidator extends AbstractMetaData implements SectionVali
                             //TODO inline record both ballerina and schema
                             //TODO array type
                             if (bodyFieldType instanceof TypeReferenceTypeSymbol) {
-                                TypeValidatorUtils.validateObjectSchema(objectSchema, bodyFieldType, context,
+                                TypeValidatorUtils.validateObjectSchema(objectSchema, bodyFieldType,
+                                        validatorContext.context(),
                                         ((TypeReferenceTypeSymbol) bodyFieldType).definition().getName()
-                                                .orElse(ANONYMOUS_RECORD), location, severity);
+                                                .orElse(ANONYMOUS_RECORD), validatorContext.location(),
+                                        validatorContext.severity());
                             }
                         }
                     }
                     if (!isHttp) {
-                        TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol, context,
+                        TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol, validatorContext.context(),
                                 ((TypeReferenceTypeSymbol) typeSymbol).definition().getName().orElse(ANONYMOUS_RECORD),
-                                location, severity);
+                                validatorContext.location(), validatorContext.severity());
                     }
                 } else {
-                    TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol, context,
-                            refType.definition().getName().orElse(ANONYMOUS_RECORD), location, severity);
+                    TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol, validatorContext.context(),
+                            refType.definition().getName().orElse(ANONYMOUS_RECORD), validatorContext.location(),
+                            validatorContext.severity());
                 }
             }
         }
