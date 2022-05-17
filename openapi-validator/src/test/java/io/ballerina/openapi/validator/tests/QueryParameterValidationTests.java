@@ -93,6 +93,17 @@ public class QueryParameterValidationTests {
         Assert.assertEquals(message, errors[0].toString());
     }
 
+    @Test(description = "Query parameter with reference")
+    public void parameterWithReference() {
+        Path path = RES_DIR.resolve("parameter_with_reference.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertEquals(errors.length, 2);
+        String message = "ERROR [parameter_with_reference.bal:(8:5,10:6)] missing OpenAPI contract header 'q' in" +
+                " the counterpart Ballerina service resource (method: 'get', path: '/weather').";
+        Assert.assertEquals(message, errors[0].toString());
+    }
     @Test(description = "Map<json> type validation in ballerina" , enabled = false)
     public void mapJsonType() {
         //TODO

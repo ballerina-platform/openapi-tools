@@ -86,6 +86,18 @@ public class HeaderValidationTests {
         Assert.assertEquals(typeMismatch02, errors[1].toString());
     }
 
+    @Test(description = "Header parameter with reference")
+    public void headerWithReference() {
+        Path path = RES_DIR.resolve("header_with_reference.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertEquals(errors.length, 2);
+        String message = "ERROR [header_with_reference.bal:(8:5,10:6)] missing OpenAPI contract parameter 'x-client'" +
+                " in the counterpart Ballerina service resource (method: 'get', path: '/weather').";
+        Assert.assertEquals(message, errors[0].toString());
+    }
+
     @Test(description = "Header with record", enabled = false)
     public void recordHeader() {
         //TODO
