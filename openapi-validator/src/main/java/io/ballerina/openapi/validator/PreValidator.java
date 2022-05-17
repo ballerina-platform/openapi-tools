@@ -176,22 +176,22 @@ public class PreValidator implements Validator {
                                 break;
                             case ATTRIBUTE_FAIL_ON_ERRORS:
                                 if (expression.toString().contains(TRUE)) {
-                                    filterBuilder.kind(DiagnosticSeverity.ERROR);
+                                    filterBuilder.withKind(DiagnosticSeverity.ERROR);
                                 } else {
-                                    filterBuilder.kind(DiagnosticSeverity.WARNING);
+                                    filterBuilder.withKind(DiagnosticSeverity.WARNING);
                                 }
                                 break;
                             case Constants.ATTRIBUTE_TAGS:
-                                filterBuilder.tag(values);
+                                filterBuilder.withTag(values);
                                 break;
                             case ATTRIBUTE_OPERATIONS:
-                                filterBuilder.operation(values);
+                                filterBuilder.withOperation(values);
                                 break;
                             case ATTRIBUTE_EXCLUDE_TAGS:
-                                filterBuilder.excludeTag(values);
+                                filterBuilder.withExcludeTag(values);
                                 break;
                             case ATTRIBUTE_EXCLUDE_OPERATIONS:
-                                filterBuilder.excludeOperation(values);
+                                filterBuilder.withExcludeOperation(values);
                                 break;
                             default:
                                 break;

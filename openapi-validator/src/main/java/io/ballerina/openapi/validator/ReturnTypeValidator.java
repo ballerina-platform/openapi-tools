@@ -125,9 +125,9 @@ public class ReturnTypeValidator extends NodeValidator {
             List<String> undefineCode = new ArrayList<>(ballerinaCodes);
             undefineCode.removeAll(oasKeys);
             if (undefineCode.size() > 0) {
-                reportDiagnostic(validatorContext.context(), CompilationError.UNDEFINED_RETURN_CODE,
-                        validatorContext.location(), validatorContext.severity(),
-                        undefineCode.toString(), validatorContext.method(), validatorContext.path());
+                reportDiagnostic(validatorContext.getContext(), CompilationError.UNDEFINED_RETURN_CODE,
+                        validatorContext.getLocation(), validatorContext.getSeverity(),
+                        undefineCode.toString(), validatorContext.getMethod(), validatorContext.getPath());
             }
 
             //Undefined mediaTypes
@@ -139,15 +139,13 @@ public class ReturnTypeValidator extends NodeValidator {
                         List<String> undefinedMediaTypes = new ArrayList<>(value);
                         undefinedMediaTypes.removeAll(oasMediaTypes);
                         if (undefinedMediaTypes.size() > 0) {
-                            reportDiagnostic(validatorContext.context(), CompilationError.UNDEFINED_RETURN_MEDIA_TYPE,
-                                    validatorContext.location(), validatorContext.severity(),
-                                    undefinedMediaTypes.toString(),
-                                    key, validatorContext.method(), validatorContext.path());
+                            reportDiagnostic(validatorContext, CompilationError.UNDEFINED_RETURN_MEDIA_TYPE,
+                                    undefinedMediaTypes.toString(), key, validatorContext.getMethod(),
+                                    validatorContext.getPath());
                         }
                     } else {
-                        reportDiagnostic(validatorContext.context(), CompilationError.UNDEFINED_RETURN_MEDIA_TYPE,
-                                validatorContext.location(), validatorContext.severity(), value.toString(), key,
-                                validatorContext.method(), validatorContext.path());
+                        reportDiagnostic(validatorContext, CompilationError.UNDEFINED_RETURN_MEDIA_TYPE,
+                                value.toString(), key, validatorContext.getMethod(), validatorContext.getPath());
                     }
                 }
             });
@@ -160,7 +158,7 @@ public class ReturnTypeValidator extends NodeValidator {
      * ex: resource function  get pet() returns Pet {}
      */
     private void validateSimpleNameReference(SimpleNameReferenceNode simpleRefNode, ApiResponses responses) {
-        Optional<Symbol> symbol = validatorContext.context().semanticModel().symbol(simpleRefNode);
+        Optional<Symbol> symbol = validatorContext.getContext().semanticModel().symbol(simpleRefNode);
         //Access the status code and media type via record
         if (symbol.isEmpty()) {
             return;
@@ -172,6 +170,7 @@ public class ReturnTypeValidator extends NodeValidator {
                 RecordTypeSymbol typeSymbol = (RecordTypeSymbol) type;
                 List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
                 boolean isHttp = false;
+                Map<String, Schema> oasSchemas = validatorContext.getOpenAPI().getComponents().getSchemas();
                 if (!typeInclusions.isEmpty()) {
                     for (TypeSymbol typeInSymbol : typeInclusions) {
                         if (HTTP.equals(typeInSymbol.getModule().orElseThrow().getName().orElseThrow())) {
@@ -208,11 +207,11 @@ public class ReturnTypeValidator extends NodeValidator {
                                             return;
                                         }
                                         TypeValidatorUtils.validateRecordType(
-                                                validatorContext.openAPI().getComponents().getSchemas().get(
+                                                oasSchemas.get(
                                                         schemaName.get()), bodyFieldType,
                                                 ((TypeReferenceTypeSymbol) bodyFieldType).definition().getName().get(),
-                                                validatorContext.context(), validatorContext.openAPI(),
-                                                schemaName.get(), validatorContext.severity());
+                                                validatorContext.getContext(), validatorContext.getOpenAPI(),
+                                                schemaName.get(), validatorContext.getSeverity());
                                     }
                                 }
                             }
@@ -234,10 +233,10 @@ public class ReturnTypeValidator extends NodeValidator {
                                 return;
                             }
                             TypeValidatorUtils.validateRecordType(
-                                    validatorContext.openAPI().getComponents().getSchemas().get(schemaName.get()),
+                                    oasSchemas.get(schemaName.get()),
                                     typeSymbol, refType.definition().getName().orElse(null),
-                                    validatorContext.context(), validatorContext.openAPI(),
-                                    schemaName.orElse(null), validatorContext.severity());
+                                    validatorContext.getContext(), validatorContext.getOpenAPI(),
+                                    schemaName.orElse(null), validatorContext.getSeverity());
                         }
                     }
                 }
@@ -326,9 +325,8 @@ public class ReturnTypeValidator extends NodeValidator {
         missingCode.removeAll(ballerinaCodes);
         if (missingCode.size() > 0) {
             // Unimplemented status codes in swagger operation and get location via bal return node.
-            reportDiagnostic(validatorContext.context(), CompilationError.MISSING_STATUS_CODE,
-                    validatorContext.location(), validatorContext.severity(),
-                    missingCode.toString(), validatorContext.method(), validatorContext.path());
+            reportDiagnostic(validatorContext, CompilationError.MISSING_STATUS_CODE,
+                    missingCode.toString(), validatorContext.getMethod(), validatorContext.getPath());
         }
 
         responses.forEach((key, value) -> {
@@ -345,16 +343,14 @@ public class ReturnTypeValidator extends NodeValidator {
             List<String> missingMediaTypes = new ArrayList<>(oasMediaTypes);
 
             if (ballerinaMediaTypes == null) {
-                reportDiagnostic(validatorContext.context(), CompilationError.MISSING_RESPONSE_MEDIA_TYPE,
-                        validatorContext.location(), validatorContext.severity(), oasMediaTypes.toString(), key,
-                        validatorContext.method(), validatorContext.path());
+                reportDiagnostic(validatorContext, CompilationError.MISSING_RESPONSE_MEDIA_TYPE,
+                        oasMediaTypes.toString(), key, validatorContext.getMethod(), validatorContext.getPath());
                 return;
             }
             missingMediaTypes.removeAll(ballerinaMediaTypes);
             if (missingMediaTypes.size() > 0) {
-                reportDiagnostic(validatorContext.context(), CompilationError.MISSING_RESPONSE_MEDIA_TYPE,
-                        validatorContext.location(), validatorContext.severity(), missingMediaTypes.toString(), key,
-                        validatorContext.method(), validatorContext.path());
+                reportDiagnostic(validatorContext, CompilationError.MISSING_RESPONSE_MEDIA_TYPE,
+                        missingMediaTypes.toString(), key, validatorContext.getMethod(), validatorContext.getPath());
             }
             content.forEach((mediaType, schema) -> {
                 if (ballerinaMediaTypes.contains(mediaType)) {
@@ -373,10 +369,10 @@ public class ReturnTypeValidator extends NodeValidator {
                         if (schemaName.isEmpty()) {
                             return;
                         }
-                        Schema<?> vSchema = validatorContext.openAPI().getComponents().getSchemas()
+                        Schema<?> valueSchema = validatorContext.getOpenAPI().getComponents().getSchemas()
                                 .get(schemaName.get());
-                        if (vSchema instanceof ObjectSchema) {
-                            objectSchema = (ObjectSchema) vSchema;
+                        if (valueSchema instanceof ObjectSchema) {
+                            objectSchema = (ObjectSchema) valueSchema;
                         }
                     }
                     if (schema.getSchema() instanceof ObjectSchema) {
@@ -399,7 +395,7 @@ public class ReturnTypeValidator extends NodeValidator {
      * Validate object schema with record.
      */
     private void validateObjectSchema(ObjectSchema objectSchema, SimpleNameReferenceNode simpleRefNode) {
-        Optional<Symbol> symbol = validatorContext.context().semanticModel().symbol(simpleRefNode);
+        Optional<Symbol> symbol = validatorContext.getContext().semanticModel().symbol(simpleRefNode);
         //Access the status code and media type via record
         if (symbol.isEmpty()) {
             return;
@@ -422,22 +418,22 @@ public class ReturnTypeValidator extends NodeValidator {
                             //TODO array type
                             if (bodyFieldType instanceof TypeReferenceTypeSymbol) {
                                 TypeValidatorUtils.validateObjectSchema(objectSchema, bodyFieldType,
-                                        validatorContext.context(),
+                                        validatorContext.getContext(),
                                         ((TypeReferenceTypeSymbol) bodyFieldType).definition().getName()
-                                                .orElse(ANONYMOUS_RECORD), validatorContext.location(),
-                                        validatorContext.severity());
+                                                .orElse(ANONYMOUS_RECORD), validatorContext.getLocation(),
+                                        validatorContext.getSeverity());
                             }
                         }
                     }
                     if (!isHttp) {
-                        TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol, validatorContext.context(),
+                        TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol, validatorContext.getContext(),
                                 ((TypeReferenceTypeSymbol) typeSymbol).definition().getName().orElse(ANONYMOUS_RECORD),
-                                validatorContext.location(), validatorContext.severity());
+                                validatorContext.getLocation(), validatorContext.getSeverity());
                     }
                 } else {
-                    TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol, validatorContext.context(),
-                            refType.definition().getName().orElse(ANONYMOUS_RECORD), validatorContext.location(),
-                            validatorContext.severity());
+                    TypeValidatorUtils.validateObjectSchema(objectSchema, typeSymbol, validatorContext.getContext(),
+                            refType.definition().getName().orElse(ANONYMOUS_RECORD), validatorContext.getLocation(),
+                            validatorContext.getSeverity());
                 }
             }
         }

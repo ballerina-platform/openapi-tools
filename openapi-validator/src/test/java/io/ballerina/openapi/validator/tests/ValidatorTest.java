@@ -72,9 +72,9 @@ public class ValidatorTest {
 
     @NotNull
     public static Object[] getDiagnostics(DiagnosticResult diagnostic) {
-        Object[] errors =
-                diagnostic.diagnostics().stream().filter(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity())
-                        .toArray();
-        return errors;
+        return diagnostic.diagnostics()
+                .stream()
+                .filter(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity())
+                .toArray();
     }
 }

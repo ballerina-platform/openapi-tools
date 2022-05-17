@@ -17,9 +17,7 @@
  */
 package io.ballerina.openapi.validator.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,12 +27,10 @@ import java.util.Map;
  */
 public class ResourcePathSummary {
     private final String path;
-    private final List<String> availableMethods;
     private final Map<String, ResourceMethod> methods;
 
     public ResourcePathSummary(String path) {
         this.methods = new HashMap<>();
-        this.availableMethods = new ArrayList<>();
         this.path = path;
     }
 
@@ -48,9 +44,5 @@ public class ResourcePathSummary {
 
     public void addMethod(String method, ResourceMethod resourceMethod) {
         this.methods.put(method, resourceMethod);
-    }
-
-    public void addAvailableMethod(String method) {
-        this.availableMethods.add(method);
     }
 }

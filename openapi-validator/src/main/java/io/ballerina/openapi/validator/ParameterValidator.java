@@ -68,32 +68,32 @@ public class ParameterValidator extends NodeValidator {
      */
     @Override
     public void validateOpenAPIToBallerina() {
-        if (oasParameters != null) {
-            oasParameters.forEach(parameter -> {
-                if (parameter.get$ref() != null) {
-                    Optional<String> parameterName = extractReferenceType(parameter.get$ref());
-                    if (parameterName.isEmpty()) {
-                        return;
-                    }
-                    parameter = validatorContext.openAPI().getComponents().getParameters().get(parameterName.get());
-                }
-                if (!(parameter instanceof HeaderParameter) ||
-                        parameter.getIn() != null && !parameter.getIn().equals("header")) {
-                    boolean isImplemented = false;
-                    for (Map.Entry<String, Node> param: parameters.entrySet()) {
-                        if (parameter.getName().equals(param.getKey())) {
-                            isImplemented = true;
-                        }
-                    }
-                    if (!isImplemented) {
-                        // error message
-                        reportDiagnostic(validatorContext.context(), CompilationError.MISSING_PARAMETER,
-                                validatorContext.location(), validatorContext.severity(), parameter.getName(),
-                                validatorContext.method(), validatorContext.path());
-                    }
-                }
-            });
+        if (oasParameters == null) {
+            return;
         }
+        oasParameters.forEach(parameter -> {
+            if (parameter.get$ref() != null) {
+                Optional<String> parameterName = extractReferenceType(parameter.get$ref());
+                if (parameterName.isEmpty()) {
+                    return;
+                }
+                parameter = validatorContext.getOpenAPI().getComponents().getParameters().get(parameterName.get());
+            }
+            if (!(parameter instanceof HeaderParameter) ||
+                    parameter.getIn() != null && !parameter.getIn().equals("header")) {
+                boolean isImplemented = false;
+                for (Map.Entry<String, Node> param: parameters.entrySet()) {
+                    if (parameter.getName().equals(param.getKey())) {
+                        isImplemented = true;
+                    }
+                }
+                if (!isImplemented) {
+                    // error message
+                    reportDiagnostic(validatorContext, CompilationError.MISSING_PARAMETER, parameter.getName(),
+                            validatorContext.getMethod(), validatorContext.getPath());
+                }
+            }
+        });
     }
 
     /**
@@ -129,7 +129,7 @@ public class ParameterValidator extends NodeValidator {
                             return;
                         }
                         oasParameterName = name.get();
-                        Components components = validatorContext.openAPI().getComponents();
+                        Components components = validatorContext.getOpenAPI().getComponents();
                         schema = components.getParameters().get(oasParameterName).getSchema();
                         if (components.getParameters().get(oasParameterName).getName() != null) {
                             oasParameterName = components.getParameters().get(oasParameterName).getName();
@@ -158,10 +158,10 @@ public class ParameterValidator extends NodeValidator {
                     //TODO: map<json> type matching
                     //TODO: Handle optional
                     //Array mapping
-                    SyntaxNodeAnalysisContext context = validatorContext.context();
-                    DiagnosticSeverity severity = validatorContext.severity();
-                    String method = validatorContext.method();
-                    String path = validatorContext.path();
+                    SyntaxNodeAnalysisContext context = validatorContext.getContext();
+                    DiagnosticSeverity severity = validatorContext.getSeverity();
+                    String method = validatorContext.getMethod();
+                    String path = validatorContext.getPath();
                     if (type.isEmpty() || Objects.requireNonNull(ballerinaType).contains(SQUARE_BRACKETS) &&
                             !ballerinaType.equals(type.get() + SQUARE_BRACKETS)) {
                         // This special concatenation is used to check the array query parameters
@@ -183,11 +183,10 @@ public class ParameterValidator extends NodeValidator {
 
             if (!isExist) {
                 // undocumented parameter
-                reportDiagnostic(validatorContext.context(), CompilationError.UNDEFINED_PARAMETER,
-                        parameter.getValue().location(), validatorContext.severity(), parameterName,
-                        validatorContext.method(), getNormalizedPath(validatorContext.path()));
+                reportDiagnostic(validatorContext.getContext(), CompilationError.UNDEFINED_PARAMETER,
+                        parameter.getValue().location(), validatorContext.getSeverity(), parameterName,
+                        validatorContext.getMethod(), getNormalizedPath(validatorContext.getPath()));
             }
         }
     }
-
 }

@@ -182,6 +182,7 @@ public class ValidatorUtils {
             return false;
         }
     }
+    
     public static void reportDiagnostic(SyntaxNodeAnalysisContext context, CompilationError error,
                                         Location location, DiagnosticSeverity severity, Object... args) {
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error.getDescription(), severity);
@@ -189,6 +190,10 @@ public class ValidatorUtils {
         context.reportDiagnostic(diagnostic);
     }
 
+    public static void reportDiagnostic(ValidatorContext validatorContext, CompilationError error, Object... args) {
+        reportDiagnostic(validatorContext.getContext(), error, validatorContext.getLocation(),
+                validatorContext.getSeverity(), args);
+    }
     /**
      * This util function uses to filter and summaries the operations in OpenAPI.
      *
@@ -357,9 +362,9 @@ public class ValidatorUtils {
         SeparatedNodeList<ParameterNode> parameters = signatureNode.parameters();
         // Create resource builder
         ResourceMethod.ResourceMethodBuilder resourceMethodBuilder = new ResourceMethod.ResourceMethodBuilder();
-        resourceMethodBuilder.path(path);
-        resourceMethodBuilder.method(httpMethod);
-        resourceMethodBuilder.location(resourceNode.location());
+        resourceMethodBuilder.withPath(path);
+        resourceMethodBuilder.withMethod(httpMethod);
+        resourceMethodBuilder.withLocation(resourceNode.location());
         Map<String, Node> headers = new HashMap<>();
 
         for (ParameterNode param : parameters) {
@@ -380,7 +385,7 @@ public class ValidatorUtils {
                             }
                             headers.put(headerName, requiredParamNode);
                         } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
-                            resourceMethodBuilder.body(requiredParamNode);
+                            resourceMethodBuilder.withBody(requiredParamNode);
                         }
                     }
                     if (annotations.isEmpty()) {
@@ -405,9 +410,9 @@ public class ValidatorUtils {
                 }
             }
         }
-        resourceMethodBuilder.headers(headers);
-        resourceMethodBuilder.parameters(parameterNodes);
-        resourceMethodBuilder.returnNode(signatureNode.returnTypeDesc().orElse(null));
+        resourceMethodBuilder.withHeaders(headers);
+        resourceMethodBuilder.withParameters(parameterNodes);
+        resourceMethodBuilder.withReturnNode(signatureNode.returnTypeDesc().orElse(null));
         resourcePath.addMethod(httpMethod, resourceMethodBuilder.build());
     }
 

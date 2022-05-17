@@ -28,7 +28,7 @@ import io.swagger.v3.oas.models.OpenAPI;
  * @since 1.1.0
  */
 class ValidatorContext {
-    private final SyntaxNodeAnalysisContext context;
+    private final SyntaxNodeAnalysisContext compilerPluginContext;
     private final OpenAPI openAPI;
     private final String path;
     private final String method;
@@ -36,11 +36,11 @@ class ValidatorContext {
     // This default location is map to relevant resource function
     private final Location location;
 
-    public ValidatorContext(SyntaxNodeAnalysisContext context,
+    public ValidatorContext(SyntaxNodeAnalysisContext compilerPluginContext,
                             OpenAPI openAPI,
                             String path, String method,
                             DiagnosticSeverity severity, Location location) {
-        this.context = context;
+        this.compilerPluginContext = compilerPluginContext;
         this.openAPI = openAPI;
         this.path = path;
         this.method = method;
@@ -48,27 +48,27 @@ class ValidatorContext {
         this.location = location;
     }
 
-    public SyntaxNodeAnalysisContext context() {
-        return context;
+    public SyntaxNodeAnalysisContext getContext() {
+        return compilerPluginContext;
     }
 
-    public OpenAPI openAPI() {
+    public OpenAPI getOpenAPI() {
         return openAPI;
     }
 
-    public String path() {
+    public String getPath() {
         return path;
     }
 
-    public String method() {
+    public String getMethod() {
         return method;
     }
 
-    public DiagnosticSeverity severity() {
+    public DiagnosticSeverity getSeverity() {
         return severity;
     }
 
-    public Location location() {
+    public Location getLocation() {
         return location;
     }
 }

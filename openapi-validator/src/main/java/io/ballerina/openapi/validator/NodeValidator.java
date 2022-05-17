@@ -36,6 +36,19 @@ public abstract class NodeValidator implements Validator {
         validateBallerinaToOpenAPI();
         validateOpenAPIToBallerina();
     }
+
+    /**
+     * This abstract method is to implement the validation ballerina service against OpenAPI spec. Here we can use
+     * validate several sections in the resource function. The sections can be parameters, headers, requestBody
+     * details, return type details. We need to implement this method according to the section we are going to
+     * validate.
+     */
     abstract void validateBallerinaToOpenAPI();
+
+    /**
+     * This abstract method is to implement the validation process OpenAPI spec against ballerina service. We need to
+     * implement this method according to the section we are going to validate. The sections can be parameters, headers,
+     * requestBody details, return type details.
+     */
     abstract void validateOpenAPIToBallerina();
 }

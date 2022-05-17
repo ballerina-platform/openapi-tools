@@ -89,37 +89,37 @@ public class ResourceMethod {
         private Map<String, Node> headers;
         private ReturnTypeDescriptorNode returnNode;
 
-        public ResourceMethodBuilder path(String path) {
+        public ResourceMethodBuilder withPath(String path) {
             this.path = path;
             return this;
         }
 
-        public ResourceMethodBuilder location(Location resourcePosition) {
+        public ResourceMethodBuilder withLocation(Location resourcePosition) {
             this.location = resourcePosition;
             return this;
         }
 
-        public ResourceMethodBuilder method(String method) {
+        public ResourceMethodBuilder withMethod(String method) {
             this.method = method;
             return this;
         }
 
-        public ResourceMethodBuilder parameters(Map<String, Node> parameters) {
+        public ResourceMethodBuilder withParameters(Map<String, Node> parameters) {
             this.parameters = parameters;
             return this;
         }
 
-        public ResourceMethodBuilder body(RequiredParameterNode body) {
+        public ResourceMethodBuilder withBody(RequiredParameterNode body) {
             this.body = body;
             return this;
         }
 
-        public ResourceMethodBuilder headers(Map<String, Node> headers) {
+        public ResourceMethodBuilder withHeaders(Map<String, Node> headers) {
             this.headers = headers;
             return this;
         }
 
-        public ResourceMethodBuilder returnNode(ReturnTypeDescriptorNode returnNode) {
+        public ResourceMethodBuilder withReturnNode(ReturnTypeDescriptorNode returnNode) {
             this.returnNode = returnNode;
             return this;
         }

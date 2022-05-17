@@ -84,7 +84,7 @@ public class HeaderValidator extends NodeValidator {
             }
             if (!annotations.isEmpty()) {
                 List<String> headers = extractAnnotationFieldDetails(HTTP_HEADER, HEADER_NAME, annotations,
-                        validatorContext.context().semanticModel());
+                        validatorContext.getContext().semanticModel());
                 if (!headers.isEmpty()) {
                     headerName = headers.get(0);
                 }
@@ -107,23 +107,23 @@ public class HeaderValidator extends NodeValidator {
                             if (arrayItemType.isEmpty() || !ballerinaType.equals(arrayItemType.get() +
                                     SQUARE_BRACKETS)) {
                                 // This special concatenation is used to check the array header parameters
-                                reportDiagnostic(validatorContext.context(),
+                                reportDiagnostic(validatorContext.getContext(),
                                         CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
-                                        headerNode.location(), validatorContext.severity(),
+                                        headerNode.location(), validatorContext.getSeverity(),
                                         items + SQUARE_BRACKETS,
-                                        ballerinaType, headerName, validatorContext.method(),
-                                        getNormalizedPath(validatorContext.path()));
+                                        ballerinaType, headerName, validatorContext.getMethod(),
+                                        getNormalizedPath(validatorContext.getPath()));
                                 break;
                             }
                         }
 
                         Optional<String> type = convertOpenAPITypeToBallerina(headerType);
                         if (type.isEmpty() || !ballerinaType.equals(type.get())) {
-                            reportDiagnostic(validatorContext.context(),
+                            reportDiagnostic(validatorContext.getContext(),
                                     CompilationError.TYPE_MISMATCH_HEADER_PARAMETER,
-                                    headerNode.location(), validatorContext.severity(), headerType,
-                                    ballerinaType, headerName, validatorContext.method(),
-                                    getNormalizedPath(validatorContext.path()));
+                                    headerNode.location(), validatorContext.getSeverity(), headerType,
+                                    ballerinaType, headerName, validatorContext.getMethod(),
+                                    getNormalizedPath(validatorContext.getPath()));
                             break;
                         }
                     }
@@ -132,9 +132,9 @@ public class HeaderValidator extends NodeValidator {
 
             if (!isHeaderDocumented) {
                 // undefined header
-                reportDiagnostic(validatorContext.context(), CompilationError.UNDEFINED_HEADER,
-                        balHeader.getValue().location(), validatorContext.severity(), headerName,
-                        validatorContext.method(), getNormalizedPath(validatorContext.path()));
+                reportDiagnostic(validatorContext.getContext(), CompilationError.UNDEFINED_HEADER,
+                        balHeader.getValue().location(), validatorContext.getSeverity(), headerName,
+                        validatorContext.getMethod(), getNormalizedPath(validatorContext.getPath()));
             }
         }
     }
@@ -153,7 +153,7 @@ public class HeaderValidator extends NodeValidator {
                 if (parameterName.isEmpty()) {
                     return;
                 }
-                parameter = validatorContext.openAPI().getComponents().getParameters().get(parameterName.get());
+                parameter = validatorContext.getOpenAPI().getComponents().getParameters().get(parameterName.get());
             }
             if (parameter instanceof HeaderParameter || parameter.getIn() != null &&
                     parameter.getIn().equals("header")) {
@@ -164,9 +164,8 @@ public class HeaderValidator extends NodeValidator {
                     }
                 }
                 if (!isHeaderExist) {
-                    reportDiagnostic(validatorContext.context(), CompilationError.MISSING_HEADER,
-                            validatorContext.location(), validatorContext.severity(), parameter.getName(),
-                            validatorContext.method(), validatorContext.path());
+                    reportDiagnostic(validatorContext, CompilationError.MISSING_HEADER, parameter.getName(),
+                            validatorContext.getMethod(), validatorContext.getPath());
                 }
             }
         });
