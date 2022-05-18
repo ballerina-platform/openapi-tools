@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -67,7 +66,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
-import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_JSON;
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_OCTET_STREAM;
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_URL_ENCODE;
@@ -78,6 +76,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TEXT;
 import static io.ballerina.openapi.generators.GeneratorConstants.TREAT_NILABLE_AS_OPTIONAL;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
@@ -87,41 +86,6 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  * @since 2.0.0
  */
 public class ServiceGenerationUtils {
-    /**
-     * This method will escape special characters used in method names and identifiers.
-     *
-     * @param identifier - identifier or method name
-     * @return - escaped string
-     */
-    public static String escapeIdentifier(String identifier) {
-        if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b")
-                || BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
-            // TODO: Remove this `if`. Refer - https://github.com/ballerina-platform/ballerina-lang/issues/23045
-            if (identifier.equals("error")) {
-                identifier = "_error";
-            } else {
-                identifier = identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
-                if (identifier.endsWith("?")) {
-                    if (identifier.charAt(identifier.length() - 2) == '\\') {
-                        StringBuilder stringBuilder = new StringBuilder(identifier);
-                        stringBuilder.deleteCharAt(identifier.length() - 2);
-                        identifier = stringBuilder.toString();
-                    }
-                    if (BAL_KEYWORDS.stream().anyMatch(Optional.ofNullable(identifier)
-                            .filter(balKeyWord -> balKeyWord.length() != 0)
-                            .map(balKeyWord -> balKeyWord.substring(0, balKeyWord.length() - 1))
-                            .orElse(identifier)::equals)) {
-                        identifier = "'" + identifier;
-                    } else {
-                        return identifier;
-                    }
-                } else {
-                    identifier = "'" + identifier;
-                }
-            }
-        }
-        return identifier;
-    }
 
     /**
      * This method will extract reference type by splitting the reference string.
