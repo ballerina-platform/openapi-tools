@@ -50,7 +50,7 @@ public class QueryParameterValidationTests {
 
         // Undocumented query parameter
         String undocumentedParameter = "ERROR [query_parameter.bal:(10:46,10:59)] undefined parameter" +
-                " 'limits' for the method get of the resource associated with the path 'get' is not" +
+                " 'limits' for the method 'get' of the resource associated with the path '/pets02' is not" +
                 " documented in the OpenAPI contract.";
         Assert.assertEquals(undocumentedParameter, errors[1].toString());
     }

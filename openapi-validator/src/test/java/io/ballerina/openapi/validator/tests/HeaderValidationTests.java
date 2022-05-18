@@ -50,7 +50,7 @@ public class HeaderValidationTests {
 
         // Undocumented header
         String undocumentedParameter = "ERROR [header.bal:(10:34,10:78)] undefined header 'x-offset' for" +
-                " the method get of the resource associated with the path 'get' is not documented" +
+                " the method 'get' of the resource associated with the path '/pets02' is not documented" +
                 " in the OpenAPI contract.";
         Assert.assertEquals(undocumentedParameter, errors[1].toString());
     }
