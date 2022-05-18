@@ -194,6 +194,7 @@ public class ValidatorUtils {
         reportDiagnostic(validatorContext.getContext(), error, validatorContext.getLocation(),
                 validatorContext.getSeverity(), args);
     }
+
     /**
      * This util function uses to filter and summaries the operations in OpenAPI.
      *
@@ -356,7 +357,6 @@ public class ValidatorUtils {
                                                      ResourcePathSummary resourcePath,
                                                      Map<String, Node> parameterNodes,
                                                      SyntaxNodeAnalysisContext context) {
-
         FunctionSignatureNode signatureNode = resourceNode.functionSignature();
         String httpMethod = resourceNode.functionName().text().trim();
         SeparatedNodeList<ParameterNode> parameters = signatureNode.parameters();
@@ -416,8 +416,6 @@ public class ValidatorUtils {
         resourcePath.addMethod(httpMethod, resourceMethodBuilder.build());
     }
 
-
-
     public static String unescapeIdentifier(String parameterName) {
         return parameterName.replaceAll("\\\\", "");
     }
@@ -434,7 +432,6 @@ public class ValidatorUtils {
     public static List<String> extractAnnotationFieldDetails(String annotationReference, String annotationField,
                                                              NodeList<AnnotationNode> annotations,
                                                              SemanticModel semanticModel) {
-
         List<String> fieldValues = new ArrayList<>();
         Iterator<AnnotationNode> iterator = annotations.stream().iterator();
         while (iterator.hasNext()) {
@@ -502,6 +499,7 @@ public class ValidatorUtils {
         }
         return mediaType;
     }
+
     public static String getMediaType(TypeDescKind kind) {
         String mediaType;
         // Return mediaType
@@ -523,6 +521,7 @@ public class ValidatorUtils {
         }
         return mediaType;
     }
+
     /**
      * This method will extract reference type by splitting the reference string.
      *
