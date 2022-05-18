@@ -127,9 +127,7 @@ public class Constants {
         }
     }
 
-    /**
-     * Http response status code.
-     */
+
     public static final Map<String, String> HTTP_CODES;
     static {
         Map<String, String> aMap = new HashMap<>();
@@ -209,4 +207,5 @@ public class Constants {
     public static final String YML_EXTENSION = ".yml";
     public static final String PLUS = "+";
     public static final String UNDERSCORE = "_";
+
 }

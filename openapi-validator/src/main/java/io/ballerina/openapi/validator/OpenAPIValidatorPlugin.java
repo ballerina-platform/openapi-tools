@@ -22,6 +22,8 @@ import io.ballerina.projects.plugins.CompilerPluginContext;
 
 /**
  * Compiler plugin for ballerina OpenAPI/service validator.
+ *
+ * @since 1.1.0
  */
 public class OpenAPIValidatorPlugin extends CompilerPlugin {
     @Override
