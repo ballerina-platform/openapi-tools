@@ -66,9 +66,9 @@ import static io.ballerina.openapi.generators.GeneratorConstants.FUNCTION;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
+import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.generateServiceConfigAnnotation;
 
 /**
