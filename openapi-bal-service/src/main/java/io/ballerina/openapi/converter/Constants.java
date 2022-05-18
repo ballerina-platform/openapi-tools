@@ -18,10 +18,8 @@
 
 package io.ballerina.openapi.converter;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -140,18 +138,6 @@ public class Constants {
     /**
      * Http response status code.
      */
-    public static final List<String> STATUS_CODE_RESPONSE = Collections.unmodifiableList(
-            Arrays.asList(
-            "Continue", "SwitchingProtocols", "Ok", "Created", "Accepted", "NonAuthoritativeInformation", "NoContent",
-    "ResetContent", "PartialContent", "MultipleChoices", "MovedPermanently", "Found", "SeeOther", "NotModified",
-                    "UseProxy", "TemporaryRedirect", "PermanentRedirect", "BadRequest", "Unauthorized",
-                    "PaymentRequired", "Forbidden", "NotFound", "MethodNotAllowed", "NotAcceptable",
-                    "ProxyAuthenticationRequired", "RequestTimeout", "Conflict", "Gone", "LengthRequired",
-                    "PreconditionFailed", "PayloadTooLarge", "UriTooLong", "UnsupportedMediaType",
-                    "RangeNotSatisfiable", "ExpectationFailed", "UpgradeRequired", "RequestHeaderFieldsTooLarge",
-                    "InternalServerError", "NotImplemented", "BadGateway", "ServiceUnavailable", "GatewayTimeout",
-                    "HttpVersionNotSupported"));
-
     public static final Map<String, String> HTTP_CODES;
     static {
         Map<String, String> aMap = new HashMap<>();

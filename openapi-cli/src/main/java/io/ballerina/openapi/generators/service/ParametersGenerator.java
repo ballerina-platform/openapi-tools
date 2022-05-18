@@ -71,11 +71,11 @@ import static io.ballerina.openapi.generators.GeneratorConstants.QUERY;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_103;
 import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_104;
 import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_105;
 import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_106;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
 
 /**
@@ -235,7 +235,6 @@ public class ParametersGenerator {
     private DefaultableParameterNode getDefaultableHeaderNode(Schema<?> schema, TypeDescriptorNode headerTypeName,
                                                                  IdentifierToken parameterName,
                                                                  NodeList<AnnotationNode> headerAnnotations) {
-
         if (!schema.getType().equals(ARRAY)) {
             return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
                     createToken(SyntaxKind.EQUAL_TOKEN),

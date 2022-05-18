@@ -37,6 +37,7 @@ import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxInfo;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
@@ -64,7 +65,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -90,7 +90,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
-import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
 import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_PDF;
 import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
@@ -113,7 +112,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
 public class GeneratorUtils {
 
     public static final MinutiaeList SINGLE_WS_MINUTIAE = getSingleWSMinutiae();
-    public static final MinutiaeList SINGLE_EMPTY_MINUTIAE = getEmptyMinutiae();
+    public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
@@ -228,35 +227,11 @@ public class GeneratorUtils {
      * @return - escaped string
      */
     public static String escapeIdentifier(String identifier) {
-
         if (identifier.matches("\\b[0-9]*\\b")) {
             return "'" + identifier;
-        } else if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b")
-                || BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
-
-            // TODO: Remove this `if`. Refer - https://github.com/ballerina-platform/ballerina-lang/issues/23045
-            if (identifier.equals("error")) {
-                identifier = "_error";
-            } else {
-                identifier = identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
-                if (identifier.endsWith("?")) {
-                    if (identifier.charAt(identifier.length() - 2) == '\\') {
-                        StringBuilder stringBuilder = new StringBuilder(identifier);
-                        stringBuilder.deleteCharAt(identifier.length() - 2);
-                        identifier = stringBuilder.toString();
-                    }
-                    if (BAL_KEYWORDS.stream().anyMatch(Optional.ofNullable(identifier)
-                            .filter(sStr -> sStr.length() != 0)
-                            .map(sStr -> sStr.substring(0, sStr.length() - 1))
-                            .orElse(identifier)::equals)) {
-                        identifier = "'" + identifier;
-                    } else {
-                        return identifier;
-                    }
-                } else {
-                    identifier = "'" + identifier;
-                }
-            }
+        } else if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") || BAL_KEYWORDS.contains(identifier)) {
+            identifier = identifier.replaceAll(GeneratorConstants.ESCAPE_PATTERN, "\\\\$1");
+            return "'" + identifier;
         }
         return identifier;
     }
@@ -570,12 +545,6 @@ public class GeneratorUtils {
         Minutiae endOfLineMinutiae = AbstractNodeFactory.createEndOfLineMinutiae(LINE_SEPARATOR);
         MinutiaeList leading = AbstractNodeFactory.createMinutiaeList(endOfLineMinutiae);
         return leading;
-    }
-
-    private static MinutiaeList getEmptyMinutiae() {
-        Minutiae whitespace = AbstractNodeFactory.createWhitespaceMinutiae("");
-        MinutiaeList trailing = AbstractNodeFactory.createMinutiaeList(whitespace);
-        return trailing;
     }
 
     /**

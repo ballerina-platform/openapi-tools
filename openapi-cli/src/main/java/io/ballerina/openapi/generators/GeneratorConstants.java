@@ -18,10 +18,8 @@
 
 package io.ballerina.openapi.generators;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -94,21 +92,6 @@ public class GeneratorConstants {
     public static final String OAS_PATH_SEPARATOR = "/";
     public static final String USER_DIR = "user.dir";
     public static final String UNTITLED_SERVICE = "UntitledAPI";
-    public static final List<String> RESERVED_KEYWORDS = Collections.unmodifiableList(
-            Arrays.asList("abort", "aborted", "abstract", "all", "annotation",
-                    "any", "anydata", "boolean", "break", "byte", "catch", "channel", "check", "checkpanic", "client",
-                    "committed", "const", "continue", "decimal", "else", "error", "external", "fail", "final",
-                    "finally", "float", "flush", "fork", "function", "future", "handle", "if", "import", "in", "int",
-                    "is", "join", "json", "listener", "lock", "match", "new", "object", "OBJECT_INIT", "onretry",
-                    "parameter", "panic", "private", "public", "record", "remote", "resource", "retries", "retry",
-                    "return", "returns", "service", "source", "start", "stream", "string", "table", "transaction",
-                    "try", "type", "typedesc", "typeof", "trap", "throw", "wait", "while", "with", "worker", "var",
-                    "version", "xml", "xmlns", "BOOLEAN_LITERAL", "NULL_LITERAL", "ascending", "descending", "foreach",
-                    "map", "group", "from", "default", "field", "limit", "as", "on", "isolated", "readonly",
-                    "distinct", "where", "select", "do", "transactional", "commit", "enum", "base16", "base64",
-                    "rollback", "configurable",  "class", "module", "never", "outer", "order", "null", "key", "let",
-                    "by", "equals"));
-
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
@@ -232,49 +215,49 @@ public class GeneratorConstants {
      */
     public static final Map<String, String> HTTP_CODES_DES;
     static {
-        Map<String, String> aMap = new HashMap<>();
-        aMap.put("100", "Continue");
-        aMap.put("101", "SwitchingProtocols");
-        aMap.put("200", "Ok");
-        aMap.put("201", "Created");
-        aMap.put("202", "Accepted");
-        aMap.put("203", "NonAuthoritativeInformation");
-        aMap.put("204", "NoContent");
-        aMap.put("205", "RestContent");
-        aMap.put("206", "PartialContent");
-        aMap.put("300", "MultipleChoices");
-        aMap.put("301", "MovedPermanently");
-        aMap.put("302", "Found");
-        aMap.put("303", "SeeOther");
-        aMap.put("304", "NotModified");
-        aMap.put("305", "UseProxy");
-        aMap.put("308", "TemporaryRedirect");
-        aMap.put("400", "BadRequest");
-        aMap.put("401", "Unauthorized");
-        aMap.put("402", "PaymentRequired");
-        aMap.put("403", "Forbidden");
-        aMap.put("404", "NotFound");
-        aMap.put("405", "MethodNotAllowed");
-        aMap.put("406", "NotAccepted");
-        aMap.put("407", "ProxyAuthenticationRequires");
-        aMap.put("408", "RequestTimeOut");
-        aMap.put("409", "Conflict");
-        aMap.put("410", "Gone");
-        aMap.put("411", "LengthRequired");
-        aMap.put("412", "PreconditionFailed");
-        aMap.put("413", "UriTooLong");
-        aMap.put("414", "UnsupportedMediaType");
-        aMap.put("415", "RangeNotSatisfied");
-        aMap.put("416", "ExpectationFailed");
-        aMap.put("426", "UpgradeRequired");
-        aMap.put("431", "RequestHeaderFieldsTooLarge");
-        aMap.put("500", "InternalServerError");
-        aMap.put("501", "NotImplemented");
-        aMap.put("502", "BadGateway");
-        aMap.put("503", "ServiceUnavailable");
-        aMap.put("504", "GatewayTimeOut");
-        aMap.put("505", "HttpVersionNotSupported");
-        HTTP_CODES_DES = Collections.unmodifiableMap(aMap);
+        Map<String, String> httpCodeMap = new HashMap<>();
+        httpCodeMap.put("100", "Continue");
+        httpCodeMap.put("101", "SwitchingProtocols");
+        httpCodeMap.put("200", "Ok");
+        httpCodeMap.put("201", "Created");
+        httpCodeMap.put("202", "Accepted");
+        httpCodeMap.put("203", "NonAuthoritativeInformation");
+        httpCodeMap.put("204", "NoContent");
+        httpCodeMap.put("205", "RestContent");
+        httpCodeMap.put("206", "PartialContent");
+        httpCodeMap.put("300", "MultipleChoices");
+        httpCodeMap.put("301", "MovedPermanently");
+        httpCodeMap.put("302", "Found");
+        httpCodeMap.put("303", "SeeOther");
+        httpCodeMap.put("304", "NotModified");
+        httpCodeMap.put("305", "UseProxy");
+        httpCodeMap.put("308", "TemporaryRedirect");
+        httpCodeMap.put("400", "BadRequest");
+        httpCodeMap.put("401", "Unauthorized");
+        httpCodeMap.put("402", "PaymentRequired");
+        httpCodeMap.put("403", "Forbidden");
+        httpCodeMap.put("404", "NotFound");
+        httpCodeMap.put("405", "MethodNotAllowed");
+        httpCodeMap.put("406", "NotAccepted");
+        httpCodeMap.put("407", "ProxyAuthenticationRequires");
+        httpCodeMap.put("408", "RequestTimeOut");
+        httpCodeMap.put("409", "Conflict");
+        httpCodeMap.put("410", "Gone");
+        httpCodeMap.put("411", "LengthRequired");
+        httpCodeMap.put("412", "PreconditionFailed");
+        httpCodeMap.put("413", "UriTooLong");
+        httpCodeMap.put("414", "UnsupportedMediaType");
+        httpCodeMap.put("415", "RangeNotSatisfied");
+        httpCodeMap.put("416", "ExpectationFailed");
+        httpCodeMap.put("426", "UpgradeRequired");
+        httpCodeMap.put("431", "RequestHeaderFieldsTooLarge");
+        httpCodeMap.put("500", "InternalServerError");
+        httpCodeMap.put("501", "NotImplemented");
+        httpCodeMap.put("502", "BadGateway");
+        httpCodeMap.put("503", "ServiceUnavailable");
+        httpCodeMap.put("504", "GatewayTimeOut");
+        httpCodeMap.put("505", "HttpVersionNotSupported");
+        HTTP_CODES_DES = Collections.unmodifiableMap(httpCodeMap);
     }
     public static final String HTTP_200 = "200";
     public static final String INTEGER = "integer";
