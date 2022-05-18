@@ -12,7 +12,7 @@ servers:
 paths:
   /:
     get:
-      operationId: operation_get
+      operationId: get
       parameters:
         - name: tag
           in: query
@@ -24,13 +24,13 @@ paths:
         "202":
           description: Accepted
     post:
-      operationId: operation_post
+      operationId: post
       responses:
         "202":
           description: Accepted
   /v1/{id}/v2/{name}:
     get:
-      operationId: "operation_get_/v1/{id}/v2/{name}"
+      operationId: getV1IdV2Name
       parameters:
         - name: id
           in: path

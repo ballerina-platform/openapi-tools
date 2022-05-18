@@ -12,7 +12,7 @@ servers:
 paths:
   /pets:
     get:
-      operationId: operation_get_/pets
+      operationId: getPets
       parameters:
         - name: tags
           in: query

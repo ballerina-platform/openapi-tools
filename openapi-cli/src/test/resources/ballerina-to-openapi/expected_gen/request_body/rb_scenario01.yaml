@@ -1,7 +1,7 @@
 paths:
   /v1:
     post:
-      operationId: operation_post_/v1
+      operationId: postV1
       requestBody:
         content:
           application/json:

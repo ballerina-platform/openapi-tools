@@ -1,7 +1,7 @@
 paths:
   /status:
     get:
-      operationId: operation_get_/status
+      operationId: getStatus
       responses:
         "200":
           description: Ok

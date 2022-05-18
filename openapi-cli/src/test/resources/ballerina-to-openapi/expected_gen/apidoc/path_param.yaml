@@ -13,7 +13,7 @@ paths:
   /locations/{id}/rooms:
     get:
       summary: Reperesents Snowpeak room collection resource
-      operationId: "operation_get_/locations/{id}/rooms"
+      operationId: getLocationsIdRooms
       parameters:
         - name: id
           in: path

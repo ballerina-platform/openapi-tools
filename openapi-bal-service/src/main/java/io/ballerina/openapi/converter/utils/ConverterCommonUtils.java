@@ -201,28 +201,30 @@ public class ConverterCommonUtils {
     /**
      * Generate operationId by removing special characters.
      *
-     * @param identifier input function name, record name or operation Id
+     * @param operationID input function name, record name or operation Id
      * @return string with new generated name
      */
-    public static String getValidName(String identifier) {
+    public static String getOperationId(String operationID) {
         //For the flatten enable we need to remove first Part of valid name check
-        // this - > !identifier.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
-        if (!identifier.matches("\\b[0-9]*\\b")) {
-            String[] split = identifier.split(SPECIAL_CHAR_REGEX);
-            StringBuilder validName = new StringBuilder();
-            for (String part : split) {
-                if (!part.isBlank()) {
-                    if (split.length > 1) {
-                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-                                part.substring(1).toLowerCase(Locale.ENGLISH);
-                    }
-                    validName.append(part);
-                }
-            }
-            identifier = validName.toString();
+        // this - > !operationID.matches("\\b[a-zA-Z][a-zA-Z0-9]*\\b") &&
+        if (operationID.matches("\\b[0-9]*\\b")) {
+            return operationID;
         }
-        return identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1);
+        String[] split = operationID.split(Constants.SPECIAL_CHAR_REGEX);
+        StringBuilder validName = new StringBuilder();
+        for (String part: split) {
+            if (!part.isBlank()) {
+                if (split.length > 1) {
+                    part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+                            part.substring(1).toLowerCase(Locale.ENGLISH);
+                }
+                validName.append(part);
+            }
+        }
+        operationID = validName.toString();
+        return operationID.substring(0, 1).toLowerCase(Locale.ENGLISH) + operationID.substring(1);
     }
+
 
     /**
      * This util function uses to take the field value from annotation field.

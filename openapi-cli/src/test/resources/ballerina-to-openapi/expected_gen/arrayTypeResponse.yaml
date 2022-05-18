@@ -13,7 +13,7 @@ paths:
   /:
     get:
       summary: List all products
-      operationId: operation_get
+      operationId: get
       responses:
         "200":
           description: Ok

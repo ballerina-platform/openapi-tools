@@ -12,7 +12,7 @@ servers:
 paths:
   /ping:
     get:
-      operationId: operation_get_/ping
+      operationId: getPing
       parameters:
         - name: headerValue
           in: header
@@ -25,7 +25,7 @@ paths:
           description: Ok
   /ping02:
     get:
-      operationId: operation_get_/ping02
+      operationId: getPing02
       parameters:
         - name: headerValue
           in: header
@@ -39,7 +39,7 @@ paths:
           description: Ok
   /ping03:
     get:
-      operationId: operation_get_/ping03
+      operationId: getPing03
       parameters:
         - name: headerValue
           in: header

@@ -12,7 +12,7 @@ servers:
 paths:
   /pet01:
     get:
-      operationId: operation_get_/pet01
+      operationId: getPet01
       responses:
         "200":
           description: Ok

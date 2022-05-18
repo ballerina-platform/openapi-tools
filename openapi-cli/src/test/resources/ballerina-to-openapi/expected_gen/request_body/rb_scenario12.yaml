@@ -1,7 +1,7 @@
 paths:
   /pets:
     put:
-      operationId: operation_put_/pets
+      operationId: putPets
       requestBody:
         content:
           application/vnd.snowpeak.reservation+json:
@@ -11,7 +11,7 @@ paths:
         "200":
           description: Ok
     post:
-      operationId: operation_post_/pets
+      operationId: postPets
       requestBody:
         content:
           application/vnd.snowpeak.reservation+json:

@@ -27,7 +27,6 @@ import java.util.Map;
  */
 public class Constants {
     public static final String ATTR_HOST = "host";
-    public static final String ATTR_DEF_HOST = "localhost";
     public static final String INT = "int";
     public static final String INTEGER = "integer";
     public static final String NUMBER = "number";
@@ -35,21 +34,14 @@ public class Constants {
     public static final String BOOLEAN = "boolean";
     public static final String DECIMAL = "decimal";
     public static final String ARRAY = "array";
-    public static final String RECORD = "record";
-    public static final String OBJECT = "object";
     public static final String FLOAT = "float";
     public static final String DOUBLE = "double";
     public static final String TYPE_REFERENCE = "type_reference";
     public static final String PATH = "path";
-    public static final String QUERY = "query";
     public static final String BODY = "body";
-    public static final String HEADER = "header";
-    public static final String COOKIE = "cookie";
-    public static final String FORM = "form";
     public static final String HTTP_PAYLOAD = "http:Payload";
     public static final String HTTP = "http";
     public static final String BALLERINA = "ballerina";
-    public static final String PAYLOAD = "payload";
     public static final String TYPEREFERENCE = "typeReference";
     public static final String HTTP_HEADER = "http:Header";
     public static final String BYTE_ARRAY = "byte[]";
