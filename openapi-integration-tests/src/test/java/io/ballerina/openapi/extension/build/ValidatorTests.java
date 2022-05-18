@@ -54,8 +54,8 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_1");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(4:1,19:2)] Missing OpenAPI contract parameter 'q' in the counterpart" +
-                " Ballerina service resource (method: 'get', path: '/weather')";
+        String msg = " ERROR [service.bal:(13:5,15:6)] missing OpenAPI contract parameter 'q' in the counterpart" +
+                " Ballerina service resource (method: 'get', path: '/weather').\n";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -75,9 +75,9 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_2");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(11:49,11:60)] Type mismatch with parameter 'obsId' for the method 'get' " +
-                "of the path '/applications/{obsId}/metrics'.In OpenAPI contract its type is 'string' " +
-                "and resources type is 'int'.";
+        String msg = "ERROR [service.bal:(11:49,11:60)] implementation type does not match with OpenAPI contract " +
+                "type (expected 'string',found 'int') for the parameter 'obsId' in HTTP method 'get' that" +
+                " associated with the path '/applications/{obsId}/metrics'.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -97,8 +97,8 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_4");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = " ERROR [service.bal:(7:1,23:2)] Could not find a Ballerina service resource for the path " +
-                "'/applications/'{obsId}'/metrics/'{startTime}'' which is documented in the OpenAPI contract.";
+        String msg = "ERROR [service.bal:(7:1,23:2)] missing Ballerina service resource for the path" +
+                " '/applications/'{obsId}'/metrics/'{startTime}'' which is documented in the OpenAPI contract.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -118,11 +118,9 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_5");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = "ERROR [service.bal:(11:72,11:90)] Type mismatch with parameter 'startTime' for the method" +
-                " 'get' of the path '/applications/{obsId}/metrics/{startTime}'.In OpenAPI contract its type is" +
-                " 'integer' and resources type is 'string'. \n" +
-                "    ERROR [service.bal:(7:1,23:2)] Missing OpenAPI contract parameter 'endTime' in the counterpart" +
-                " Ballerina service resource (method: 'get', path: '/applications/{obsId}/metrics/{startTime}')";
+        String msg = "  ERROR [service.bal:(11:72,11:90)] implementation type does not match with OpenAPI contract" +
+                " type (expected 'integer',found 'string') for the parameter 'startTime' in HTTP method 'get' that" +
+                " associated with the path '/applications/{obsId}/metrics/{startTime}'.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -142,11 +140,11 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_6");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = "ERROR [service.bal:(10:115,10:124)] Type mismatch with parameter 'mode' for " +
-                "the method 'get' of the path '/weather'.In OpenAPI contract its type is 'string' and" +
-                " resources type is 'int'. \n" +
-                "    ERROR [service.bal:(4:1,16:2)] Missing OpenAPI contract parameter 'q' in the" +
-                " counterpart Ballerina service resource (method: 'get', path: '/weather')";
+        String msg = "ERROR [service.bal:(10:115,10:124)] implementation type does not match with OpenAPI contract" +
+                " type (expected 'string',found 'int') for the parameter 'mode' in HTTP method 'get' that associated" +
+                " with the path '/weather'.\n" +
+                "ERROR [service.bal:(10:5,12:6)] missing OpenAPI contract parameter 'q' in the counterpart Ballerina" +
+                " service resource (method: 'get', path: '/weather').\n";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -189,8 +187,8 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_3");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = "WARNING [service.bal:(5:10,5:18)] Implementation type does not match with OAS contract type" +
-                " (expected 'int', found 'string') for the field 'userName' of type 'User'";
+        String msg = "WARNING [service.bal:(5:10,5:18)] implementation type does not match with OpenAPI contract" +
+                " type (expected 'string', found 'int') for the field 'userName' of type 'User'.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));
@@ -210,8 +208,9 @@ public class ValidatorTests {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("project_8");
         InputStream successful = TestUtil.executeOpenapiBuild(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        String msg = "ERROR [service.bal:(12:30,12:36)] Type mismatch with parameter 'id' for the" +
-                " method 'get' of the path '/'.In OpenAPI contract its type is 'string' and resources type is 'int'.";
+        String msg = "ERROR [service.bal:(12:30,12:36)] implementation type does not match with OpenAPI contract " +
+                "type (expected 'string',found 'int') for the parameter 'id' in HTTP method 'get' that" +
+                " associated with the path '/'.";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(successful))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining(System.lineSeparator()));

@@ -1,0 +1,55 @@
+openapi: 3.0.1
+info:
+  title: V1
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/v1"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pet/{petId}:
+    get:
+      operationId: "operation_get_/pet/{petId}"
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "202":
+          description: Accepted
+  /{pet-id}:
+    get:
+      operationId: "operation_get_/{pet-id}"
+      parameters:
+        - name: pet-id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "202":
+          description: Accepted
+  /pets/{petId}/owner/{owner-id}:
+    get:
+      operationId: "operation_get_/pets/{petId}/owner/{owner-id}"
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: boolean
+        - name: owner-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+components: {}

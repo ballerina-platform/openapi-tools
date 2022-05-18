@@ -6,10 +6,12 @@ import io.ballerina.projects.plugins.CodeAnalyzer;
 
 /**
  * This class for generate openAPI code analyzer.
+ *
+ * @since 1.1.0
  */
 public  class OpenAPICodeAnalyzer extends CodeAnalyzer {
     @Override
     public void init(CodeAnalysisContext codeAnalysisContext) {
-        codeAnalysisContext.addSyntaxNodeAnalysisTask(new ServiceValidator(), SyntaxKind.SERVICE_DECLARATION);
+        codeAnalysisContext.addSyntaxNodeAnalysisTask(new ServiceAnalysisTask(), SyntaxKind.SERVICE_DECLARATION);
     }
 }

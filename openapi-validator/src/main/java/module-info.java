@@ -23,5 +23,6 @@ module io.ballerina.openapi.validator {
     requires swagger.parser.core;
     exports io.ballerina.openapi.validator;
     exports io.ballerina.openapi.validator.error;
+    exports io.ballerina.openapi.validator.model;
 }
 

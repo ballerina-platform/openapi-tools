@@ -15,9 +15,6 @@
  *
  */
 
-//apply from: "$rootDir/gradle/javaProjectWithExtBalo.gradle"
-//apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
-
 apply from: "$rootDir/gradle/javaProject.gradle"
 
 apply plugin: 'com.github.johnrengelman.shadow'
@@ -53,6 +50,7 @@ dependencies {
 }
 
 def bDistribution = file("$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
+
 task jBallerinaPack {
     doLast {
         configurations.balTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
@@ -63,6 +61,15 @@ task jBallerinaPack {
         }
     }
     outputs.dir bDistribution
+}
+
+task copyOpenAPI() {
+    doLast {
+        copy {
+            from file("${project.buildDir}/libs")
+            into("${bDistribution}/bre/lib/")
+        }
+    }
 }
 
 task unpackStdLibs() {
@@ -79,6 +86,7 @@ task unpackStdLibs() {
 
 task copyStdlibs(type: Copy) {
     dependsOn(unpackStdLibs)
+    dependsOn(copyOpenAPI)
     def ballerinaDist = "$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
     into ballerinaDist
 
@@ -133,29 +141,6 @@ test {
         suites 'src/test/resources/testng.xml'
     }
 }
-
-//publishing {
-//    publications {
-//        mavenJava(MavenPublication) {
-//            groupId project.group
-//            artifactId "openapi-validator"
-//            version = project.version
-//            artifact jar
-//        }
-//    }
-//
-//    repositories {
-//        maven {
-//            name = "GitHubPackages"
-//            url = uri("https://github.com/ballerina-platform/ballerina-openapi")
-//            credentials {
-//                username = System.getenv("packageUser")
-//                password = System.getenv("packagePAT")
-//            }
-//        }
-//    }
-//}
-
 
 compileJava {
     doFirst {

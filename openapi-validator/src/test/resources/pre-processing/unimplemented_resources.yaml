@@ -1,0 +1,35 @@
+openapi: 3.0.1
+info:
+  title: V4
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/v4"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pet:
+    get:
+      operationId: operation_get
+      responses:
+        "202":
+          description: Accepted
+    post:
+      operationId: operation_post
+      responses:
+        "202":
+          description: Accepted
+  /pet02:
+    get:
+      operationId: op
+      responses:
+        "202":
+          description: Accepted
+    post:
+      operationId: op2
+      responses:
+        "202":
+          description: Accepted
+components: {}
