@@ -211,6 +211,16 @@ public class ResponseTests {
                 "response/rs_with_service_and_payload_annotation.yaml");
     }
 
+    @Test(description = "When the response has all the status codes")
+    public void testForAllReturnType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/response_code.bal");
+        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/response_code.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
