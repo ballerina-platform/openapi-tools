@@ -92,7 +92,7 @@ public class Constants {
         httpCodes.put("SeeOther", "303");
         httpCodes.put("NotModified", "304");
         httpCodes.put("UseProxy", "305");
-        httpCodes.put( "TemporaryRedirect", "307");
+        httpCodes.put("TemporaryRedirect", "307");
         httpCodes.put("PermanentRedirect", "308");
         httpCodes.put("BadRequest", "400");
         httpCodes.put("Unauthorized", "401");

@@ -218,6 +218,16 @@ public class ReturnTypeValidationTests {
                 " 'Pet' the Ballerina record.";
         Assert.assertEquals(typeMismatch, errors[0].toString());
     }
+
+    @Test(description = "Test for all return codes validation")
+    public void allReturnCodes() {
+        Path path = RES_DIR.resolve("response_code.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertEquals(errors.length, 0);
+    }
+
     @Test(description = "Module level record", enabled = false)
     public void handleModuleLevelQualifierRecord() {
         // TODO: res:ResRecord

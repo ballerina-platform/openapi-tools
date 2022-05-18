@@ -146,7 +146,7 @@ public class Constants {
         httpCodeMap.put("SeeOther", "303");
         httpCodeMap.put("NotModified", "304");
         httpCodeMap.put("UseProxy", "305");
-        httpCodeMap.put( "TemporaryRedirect", "307");
+        httpCodeMap.put("TemporaryRedirect", "307");
         httpCodeMap.put("PermanentRedirect", "308");
         httpCodeMap.put("BadRequest", "400");
         httpCodeMap.put("Unauthorized", "401");

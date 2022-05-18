@@ -245,10 +245,7 @@ public class ReturnTypeTests {
                 "response/different_status_code.bal", syntaxTree);
     }
 
-    @Test(description = "Response has unsupported http status code",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "HTTP status code '429' is not supported in Ballerina."
-    )
+    @Test(description = "Response has unsupported http status code")
     public void testForNotSupportedStatusCode() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/real_apis/box.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

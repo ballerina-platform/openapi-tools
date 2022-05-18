@@ -232,7 +232,7 @@ public class GeneratorConstants {
         httpCodeMap.put("304", "NotModified");
         httpCodeMap.put("305", "UseProxy");
         httpCodeMap.put("307", "TemporaryRedirect");
-        httpCodeMap.put("308","PermanentRedirect");
+        httpCodeMap.put("308", "PermanentRedirect");
         httpCodeMap.put("400", "BadRequest");
         httpCodeMap.put("401", "Unauthorized");
         httpCodeMap.put("402", "PaymentRequired");

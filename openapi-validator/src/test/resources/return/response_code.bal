@@ -1,4 +1,9 @@
+import ballerina/openapi;
 import ballerina/http;
+
+@openapi:ServiceInfo {
+    contract:"response_code.yaml"
+}
 
 service /payloadV on new http:Listener(9090) {
     resource function post pet() returns http:Continue|http:SwitchingProtocols|http:Ok|http:Created|http:Accepted|http:NonAuthoritativeInformation|http:NoContent|
