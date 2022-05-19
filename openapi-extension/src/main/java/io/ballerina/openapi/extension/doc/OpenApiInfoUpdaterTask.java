@@ -176,7 +176,7 @@ public class OpenApiInfoUpdaterTask implements ModifierTask<SourceModifierContex
         for (MappingFieldNode field : existingFields) {
             if (field instanceof SpecificFieldNode) {
                 String fieldName = ((SpecificFieldNode) field).fieldName().toString();
-                openApiDefAvailable = Constants.OPEN_API_DEFINITION_FIELD.equals(fieldName);
+                openApiDefAvailable = Constants.OPEN_API_DEFINITION_FIELD.equals(fieldName.trim());
             }
             fields.add(field);
             fields.add(separator);
