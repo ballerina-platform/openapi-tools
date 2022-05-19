@@ -127,6 +127,7 @@ public class OpenApiExtensionTest {
     public void testGeneratedDocEmbedWithUserProvidedOpenApiDoc() {
         Package currentPackage = loadPackage("sample_11", false);
         PackageCompilation compilation = currentPackage.getCompilation();
+        Assert.assertEquals(compilation.diagnosticResult().errorCount(), 0);
         Assert.assertTrue(noOpenApiWarningAvailable(compilation));
     }
 
