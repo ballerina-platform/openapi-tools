@@ -34,8 +34,8 @@ public enum ErrorMessage {
             " parameter ''{2}'' in HTTP method ''{3}'' that associated with the path ''{4}''."),
     ERROR_007("the ''{0}'' field in the ''{1}'' record is not documented in the OpenAPI contract ''{2}'' schema."),
     ERROR_008("could not find OpenAPI object schema field ''{0}'' in ''{1}'' the Ballerina record."),
-    ERROR_009("undefined parameter ''{0}'' for the method 'get' of the resource associated with the path ''{1}'' is " +
-            "not documented in the OpenAPI contract."),
+    ERROR_009("undefined parameter ''{0}'' for the method ''{1}'' of the resource associated with the path " +
+            "''{2}'' is not documented in the OpenAPI contract."),
     ERROR_010("missing OpenAPI contract parameter ''{0}'' in the counterpart Ballerina service resource (method: " +
             "''{1}'', path: ''{2}'')."),
     ERROR_011("unexpected error occurred while reading the contract : {0}"),
@@ -51,8 +51,8 @@ public enum ErrorMessage {
     ERROR_018("undefined resource path ''{0}'' in the Ballerina service."),
     ERROR_019("implementation type does not match with OpenAPI contract type (expected ''{0}'',found ''{1}'') for the" +
             " header ''{2}'' in HTTP method ''{3}'' that associated with the path ''{4}''."),
-    ERROR_020("undefined header ''{0}'' for the method 'get' of the resource associated with the path ''{1}'' is not " +
-            "documented in the OpenAPI contract."),
+    ERROR_020("undefined header ''{0}'' for the method ''{1}'' of the resource associated with the path ''{2}'' is " +
+            "not documented in the OpenAPI contract."),
     ERROR_021("undefined request body for the method ''{0}'' of the resource associated with the path ''{1}''" +
             " in the OpenAPI contract."),
     ERROR_022("implementation payload type does not match with OpenAPI contract content type ''{0}'' (expected " +
