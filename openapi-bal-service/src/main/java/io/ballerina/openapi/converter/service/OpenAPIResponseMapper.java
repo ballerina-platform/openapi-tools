@@ -95,6 +95,7 @@ import static io.ballerina.openapi.converter.Constants.HTML_POSTFIX;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.converter.Constants.HTTP_200;
 import static io.ballerina.openapi.converter.Constants.HTTP_200_DESCRIPTION;
+import static io.ballerina.openapi.converter.Constants.HTTP_204;
 import static io.ballerina.openapi.converter.Constants.HTTP_CODES;
 import static io.ballerina.openapi.converter.Constants.HTTP_PAYLOAD;
 import static io.ballerina.openapi.converter.Constants.HTTP_RESPONSE;
@@ -892,6 +893,16 @@ public class OpenAPIResponseMapper {
                 RecordFieldSymbol header = fieldsOfRecord.get(RESPONSE_HEADERS);
                 extractResponseHeaders(headers, header);
                 apiResponse = setCacheHeader(headers, apiResponse, code.get());
+
+                // Only `NoContent` type out of 44 http supported status codes doesn't have body for return
+                // payload, therefore we need to leave it with only description instead of mapping in content type to
+                // OAS.
+                if (code.get().equals(HTTP_204)) {
+                    apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
+                    apiResponses.put(code.get(), apiResponse);
+                    return Optional.of(apiResponses);
+                }
+
                 // Handle the content of the response
                 RecordFieldSymbol body = fieldsOfRecord.get(BODY);
                 if (body.typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
