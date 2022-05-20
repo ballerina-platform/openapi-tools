@@ -222,7 +222,7 @@ public class ResponseTests {
     }
 
     @Test(description = "When the response has float return type")
-    public void returnHasFloat() throws IOException {
+    public void testResponseWithFloatReturnType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/float.bal");
         OpenApiConverter openApiConverterUtils = new OpenApiConverter();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
@@ -232,7 +232,7 @@ public class ResponseTests {
     }
 
     @Test(description = "When the response has decimal return type")
-    public void returnHasDecimal() throws IOException {
+    public void testResponseWithDecimalReturnType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/decimal.bal");
         OpenApiConverter openApiConverterUtils = new OpenApiConverter();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
