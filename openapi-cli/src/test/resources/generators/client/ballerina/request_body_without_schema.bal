@@ -16,6 +16,7 @@ public isolated client class Client {
     #
     # + 'limit - How many items to return at one time (max 100)
     # + payload - Pet
+    # + return -  Return json
     remote isolated function listPets(json payload, int? 'limit = ()) returns json|error {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {"limit": 'limit};

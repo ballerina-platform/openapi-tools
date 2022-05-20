@@ -70,6 +70,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.cmd.OpenApiMesseges.BAL_KEYWORDS;
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_JSON;
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_OCTET_STREAM;
+import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_URL_ENCODE;
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_XML;
 import static io.ballerina.openapi.generators.GeneratorConstants.FALSE;
 import static io.ballerina.openapi.generators.GeneratorConstants.SERVICE_CONFIG;
@@ -229,6 +230,9 @@ public class ServiceGenerationUtils {
                 return generateNodeForOASSchema(schema);
             case APPLICATION_XML:
                 identifierToken = createIdentifierToken(GeneratorConstants.XML);
+                return createSimpleNameReferenceNode(identifierToken);
+            case APPLICATION_URL_ENCODE:
+                identifierToken = createIdentifierToken(GeneratorConstants.MAP_STRING);
                 return createSimpleNameReferenceNode(identifierToken);
             case TEXT:
                 identifierToken = createIdentifierToken(GeneratorConstants.STRING);

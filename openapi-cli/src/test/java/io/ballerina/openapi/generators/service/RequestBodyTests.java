@@ -19,6 +19,7 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
@@ -41,10 +42,12 @@ public class RequestBodyTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
     SyntaxTree syntaxTree;
+    public static final CodeGenerator CODE_GENERATOR = new CodeGenerator();
+
 
 
     @Test(description = "Scenario 01 - Request Body has single content type(application/json)")
-    public void generateJsonPayload() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateJsonPayload() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario01_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -54,7 +57,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Scenario 01.02 - Request Body has single content type(application/octet-stream)")
-    public void generateOtherPayload() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateOtherPayload() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario01_02_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -64,7 +67,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Scenario 02 - Request Body has multiple content types with Same dataBind schema type.\n")
-    public void generateRBsameDataBindingPayload() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateRBsameDataBindingPayload() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario02_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -106,10 +109,20 @@ public class RequestBodyTests {
     @Test(description = "RequestBody has oneOf scenarios")
     public void oneOfScenarios() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/oneOf_request_body.yaml");
+        BallerinaServiceGenerator ballerinaServiceGenerator =
+                new BallerinaServiceGenerator(CODE_GENERATOR.normalizeOpenAPI(definitionPath, false), filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "requestBody/oneof_requestBody.bal", syntaxTree);
+    }
+
+    @Test(description = "RequestBody has url encode media type  scenarios")
+    public void uRLEncode() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/requestBody/url_form_encode.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-                "requestBody/oneof_requestBody.bal", syntaxTree);
+                "requestBody/url_encode.bal", syntaxTree);
     }
 }

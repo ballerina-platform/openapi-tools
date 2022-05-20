@@ -47,8 +47,8 @@ import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeT
  */
 public class PrimitiveTypeGenerator extends TypeGenerator {
 
-    public PrimitiveTypeGenerator(Schema schema) {
-        super(schema);
+    public PrimitiveTypeGenerator(Schema schema, String typeName) {
+        super(schema, typeName);
     }
 
     /**

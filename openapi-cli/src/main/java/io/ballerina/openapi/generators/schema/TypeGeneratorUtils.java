@@ -20,6 +20,7 @@ package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
@@ -28,6 +29,8 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -59,7 +62,9 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -85,29 +90,31 @@ public class TypeGeneratorUtils {
      * Get SchemaType object relevant to the schema given.
      *
      * @param schemaValue Schema object
+     * @param typeName parameter name
      * @return Relevant SchemaType object
      */
-    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue) {
+    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName) {
         if (schemaValue.get$ref() != null) {
-            return new ReferencedTypeGenerator(schemaValue);
+            return new ReferencedTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ComposedSchema) {
             ComposedSchema composedSchema = (ComposedSchema) schemaValue;
             if (composedSchema.getAllOf() != null) {
-                return new AllOfRecordTypeGenerator(schemaValue);
+                return new AllOfRecordTypeGenerator(schemaValue, typeName);
             } else {
-                return new UnionTypeGenerator(schemaValue);
+                return new UnionTypeGenerator(schemaValue, typeName);
             }
         } else if ((schemaValue.getType() != null && schemaValue.getType().equals(OBJECT)) ||
                 schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null) {
-            return new RecordTypeGenerator(schemaValue);
+            return new RecordTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ArraySchema) {
-            return new ArrayTypeGenerator(schemaValue);
+            return new ArrayTypeGenerator(schemaValue, typeName);
         } else if (schemaValue.getType() != null && primitiveTypeList.contains(schemaValue.getType())) {
-            return new PrimitiveTypeGenerator(schemaValue);
+            return new PrimitiveTypeGenerator(schemaValue, typeName);
         } else { // when schemaValue.type == null
-            return new AnyDataTypeGenerator(schemaValue);
+            return new AnyDataTypeGenerator(schemaValue, typeName);
         }
     }
+
     /**
      * Generate proper type name considering the nullable configurations.
      * Scenario 1 : schema.getNullable() != null && schema.getNullable() == true && nullable == true -> string?
@@ -118,7 +125,7 @@ public class TypeGeneratorUtils {
      * Scenario 6 : schema.getNullable() == null && nullable == false -> string
      *
      * @param schema Schema of the property
-     * @param originalTypeDesc   Type name
+     * @param originalTypeDesc Type name
      * @return Final type of the field
      */
     public static TypeDescriptorNode getNullableType(Schema schema, TypeDescriptorNode originalTypeDesc) {
@@ -142,28 +149,47 @@ public class TypeGeneratorUtils {
         // TODO: Handle allOf , oneOf, anyOf
         List<Node> recordFieldList = new ArrayList<>();
         for (Map.Entry<String, Schema> field : fields) {
-            RecordFieldNode recordFieldNode;
             String fieldNameStr = escapeIdentifier(field.getKey().trim());
             // API doc generations
             List<Node> schemaDoc = getFieldApiDocs(field.getValue());
             NodeList<Node> schemaDocNodes = createNodeList(schemaDoc);
             IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldNameStr);
-            TypeDescriptorNode fieldTypeName = getTypeGenerator(field.getValue()).generateTypeDescriptorNode();
+            TypeDescriptorNode fieldTypeName = getTypeGenerator(field.getValue(), fieldNameStr)
+                    .generateTypeDescriptorNode();
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
             MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
             if (required != null) {
                 if (!required.contains(field.getKey().trim())) {
-                    recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
-                            fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
+                    if (field.getValue().getDefault() != null) {
+                        Token defaultValue;
+                        if ((field.getValue().getType()).equals(STRING)) {
+                            defaultValue = AbstractNodeFactory.createIdentifierToken("\"" +
+                                    field.getValue().getDefault().toString() + "\"");
+                        } else {
+                            defaultValue = AbstractNodeFactory.createIdentifierToken
+                                    (field.getValue().getDefault().toString());
+                        }
+                        ExpressionNode expressionNode = createRequiredExpressionNode(defaultValue);
+                        RecordFieldWithDefaultValueNode defaultNode = NodeFactory.createRecordFieldWithDefaultValueNode
+                                (metadataNode, null, fieldTypeName, fieldName, createToken(EQUAL_TOKEN),
+                                        expressionNode, createToken(SEMICOLON_TOKEN));
+                        recordFieldList.add(defaultNode);
+                    } else {
+                        RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
+                                fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN),
+                                createToken(SEMICOLON_TOKEN));
+                        recordFieldList.add(recordFieldNode);
+                    }
                 } else {
-                    recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
+                    RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
                             fieldTypeName, fieldName, null, createToken(SEMICOLON_TOKEN));
+                    recordFieldList.add(recordFieldNode);
                 }
             } else {
-                recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
+                RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
                         fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
+                recordFieldList.add(recordFieldNode);
             }
-            recordFieldList.add(recordFieldNode);
         }
         return recordFieldList;
 
@@ -172,7 +198,7 @@ public class TypeGeneratorUtils {
     /**
      * Creates API documentation for record fields.
      *
-     * @param field   Schema of the field to generate
+     * @param field Schema of the field to generate
      * @return Documentation node list
      */
     public static List<Node> getFieldApiDocs(Schema<?> field) {
@@ -225,14 +251,16 @@ public class TypeGeneratorUtils {
     /**
      * Creates the UnionType string to generate bal type for a given oneOf or anyOf type schema.
      *
-     * @param schemas List of schemas included in the anyOf or oneOf schema
+     * @param schemas  List of schemas included in the anyOf or oneOf schema
+     * @param typeName This is parameter or variable name that used to populate error message meaningful
      * @return Union type
      * @throws BallerinaOpenApiException when unsupported combination of schemas found
      */
-    public static TypeDescriptorNode getUnionType(List<Schema> schemas) throws BallerinaOpenApiException {
+    public static TypeDescriptorNode getUnionType(List<Schema> schemas, String typeName)
+            throws BallerinaOpenApiException {
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
-        for (Schema schema: schemas) {
-            TypeDescriptorNode typeDescriptorNode = getTypeGenerator(schema).generateTypeDescriptorNode();
+        for (Schema schema : schemas) {
+            TypeDescriptorNode typeDescriptorNode = getTypeGenerator(schema, typeName).generateTypeDescriptorNode();
             if (typeDescriptorNode instanceof OptionalTypeDescriptorNode &&
                     GeneratorMetaData.getInstance().isNullable()) {
                 Node internalTypeDesc = ((OptionalTypeDescriptorNode) typeDescriptorNode).typeDescriptor();

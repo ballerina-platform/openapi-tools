@@ -44,8 +44,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
  */
 public class AnyDataTypeGenerator extends TypeGenerator {
 
-    public AnyDataTypeGenerator(Schema schema) {
-        super(schema);
+    public AnyDataTypeGenerator(Schema schema, String typeName) {
+        super(schema, typeName);
     }
 
     /**

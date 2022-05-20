@@ -1,9 +1,9 @@
 public type Address record {
     int streetNo?;
-    string[2] mainStreet?;
+    string[] mainStreet?;
     string country?;
 };
 
-public type UserAddress int[7];
+public type UserAddress int[];
 
 public type Pet string[];
