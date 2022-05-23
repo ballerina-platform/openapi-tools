@@ -897,7 +897,7 @@ public class OpenAPIResponseMapper {
                 apiResponse = setCacheHeader(headers, apiResponse, code.get());
 
                 // since `NoContent` status code doesn't have body for return
-                // payload, therefore we need to leave it with only description instead of mapping in content type to
+                // payload, we need to leave it with only description instead of mapping in content type to
                 // OAS.
                 if (code.get().equals(HTTP_204)) {
                     apiResponse.description(typeInSymbol.getName().orElseThrow().trim());
