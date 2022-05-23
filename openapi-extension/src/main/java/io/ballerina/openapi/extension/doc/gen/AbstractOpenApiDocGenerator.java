@@ -82,8 +82,6 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 if (resolverResponse.isContractAvailable()) {
                     // could not find the open-api contract file, hence will not proceed
                     if (resolverResponse.getContractPath().isEmpty()) {
-                        OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_101;
-                        updateCompilerContext(context, location, errorCode);
                         return;
                     }
                     String openApiDefinition = Files.readString(resolverResponse.getContractPath().get());
