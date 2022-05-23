@@ -1,0 +1,36 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /fareCalculator:
+    get:
+      operationId: getFarecalculator
+      parameters:
+        - name: flightNo
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: noOfPassengers
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: number
+                format: float
+components: {}
