@@ -94,19 +94,20 @@ public class OpenApiExtensionTest {
         Assert.assertTrue(noOpenApiWarningAvailable(compilation));
     }
 
-//    @Test
-    public void testInvalidOpenApiContractForBalProject() {
+    @Test
+    public void testEmptyOpenApiContractForBalProject() {
         Package currentPackage = loadPackage("sample_8", false);
         PackageCompilation compilation = currentPackage.getCompilation();
         List<Diagnostic> openApiDiagnostics = compilation.diagnosticResult().diagnostics().stream()
                 .filter(d ->
                         Objects.nonNull(d.diagnosticInfo().code())
-                                && d.diagnosticInfo().code().startsWith("OPENAPI_10")).collect(Collectors.toList());
+                                && d.diagnosticInfo().severity().equals(DiagnosticSeverity.WARNING))
+                .collect(Collectors.toList());
         Assert.assertEquals(openApiDiagnostics.size(), 1);
         Diagnostic diagnostic = openApiDiagnostics.get(0);
         DiagnosticInfo info = diagnostic.diagnosticInfo();
-        Assert.assertEquals(info.code(), "OPENAPI_101");
-        Assert.assertEquals(info.messageFormat(), "could not find the provided contract file");
+        Assert.assertEquals(info.code(), "OPENAPI_VALIDATOR_003");
+        Assert.assertEquals(info.messageFormat(), "given OpenAPI contract file path is an empty string.");
     }
 
     @Test
@@ -129,6 +130,22 @@ public class OpenApiExtensionTest {
         PackageCompilation compilation = currentPackage.getCompilation();
         Assert.assertEquals(compilation.diagnosticResult().errorCount(), 0);
         Assert.assertTrue(noOpenApiWarningAvailable(compilation));
+    }
+
+    @Test
+    public void testInvalidOpenApiContractForBalProject() {
+        Package currentPackage = loadPackage("sample_12", false);
+        PackageCompilation compilation = currentPackage.getCompilation();
+        List<Diagnostic> openApiDiagnostics = compilation.diagnosticResult().diagnostics().stream()
+                .filter(d ->
+                        Objects.nonNull(d.diagnosticInfo().code())
+                                && d.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR))
+                .collect(Collectors.toList());
+        Assert.assertEquals(openApiDiagnostics.size(), 1);
+        Diagnostic diagnostic = openApiDiagnostics.get(0);
+        DiagnosticInfo info = diagnostic.diagnosticInfo();
+        Assert.assertEquals(info.code(), "OPENAPI_VALIDATOR_001");
+        Assert.assertTrue(info.messageFormat().contains("OpenAPI contract does not exist in the given location"));
     }
 
     private Package loadPackage(String path, boolean isSingleFile) {
