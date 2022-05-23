@@ -221,6 +221,16 @@ public class ResponseTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/response_code.yaml");
     }
 
+    @Test(description = "When the response has return record without no body field")
+    public void testForNoContentReturnCode() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("response/without_body_field.bal");
+        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
+                , false);
+        Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "response/no_body_field.yaml");
+    }
+
     @Test(description = "When the response has float return type")
     public void testResponseWithFloatReturnType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/float.bal");
