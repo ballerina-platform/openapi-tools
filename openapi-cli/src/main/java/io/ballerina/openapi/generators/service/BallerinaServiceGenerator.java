@@ -40,6 +40,7 @@ import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorUtils;
@@ -52,6 +53,7 @@ import io.swagger.v3.oas.models.Paths;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -78,6 +80,16 @@ public class BallerinaServiceGenerator {
     private boolean isNullableRequired;
     private final OpenAPI openAPI;
     private final Filter filter;
+    private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
+    public List<TypeDefinitionNode> getTypeInclusionRecords() {
+        List<TypeDefinitionNode> typeRecords = new ArrayList<>();
+        if (this.typeInclusionRecords.size() > 0) {
+            this.typeInclusionRecords.forEach((key, value) -> {
+                typeRecords.add(value);
+            });
+        }
+        return typeRecords;
+    }
 
     public BallerinaServiceGenerator(OpenAPI openApi, Filter filter) {
             this.openAPI = openApi;
@@ -216,6 +228,7 @@ public class BallerinaServiceGenerator {
         ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
                 createEmptyNodeList());
+        typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());
 
         FunctionSignatureNode functionSignatureNode = NodeFactory.createFunctionSignatureNode(
                 createToken(SyntaxKind.OPEN_PAREN_TOKEN), parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN),
