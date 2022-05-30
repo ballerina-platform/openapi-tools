@@ -105,8 +105,8 @@ public class BallerinaServiceGenerator {
         return instance;
     }
 
-    public void initialize(OpenAPI openApi, Filter filter) {
-            this.openAPI = openApi;
+    public void initialize(OpenAPI openAPI, Filter filter) {
+            this.openAPI = openAPI;
             this.filter = filter;
             this.isNullableRequired = false;
     }

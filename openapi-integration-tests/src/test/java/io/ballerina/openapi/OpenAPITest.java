@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * OpenAPI command cmd common class to handle temp dirs and outputs.
+ * This class to handle temp dirs and outputs.
  */
 public abstract class OpenAPITest {
     protected Path tmpDir;
@@ -86,7 +86,6 @@ public abstract class OpenAPITest {
         expectedServiceLines.close();
         return expectedServiceContent.trim().replaceAll("\\s+", "").replaceAll(System.lineSeparator(), "");
     }
-
 
     public void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String balfile) throws IOException {
         String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve(
