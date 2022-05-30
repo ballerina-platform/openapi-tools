@@ -44,7 +44,8 @@ public class HeaderParameterTests {
     public void requiredHeader() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_01.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_01.bal", syntaxTree);
     }
@@ -55,7 +56,8 @@ public class HeaderParameterTests {
     public void requiredHeaderWithNoHeaderType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_02.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header.bal", syntaxTree);
     }
@@ -67,7 +69,8 @@ public class HeaderParameterTests {
     public void headerWithNoSupportType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_03.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header.bal", syntaxTree);
     }
@@ -79,7 +82,8 @@ public class HeaderParameterTests {
     public void headerNoItemType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_04.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header.bal", syntaxTree);
     }
@@ -91,7 +95,8 @@ public class HeaderParameterTests {
     public void headerNoSupportArrayItemType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_05.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header.bal", syntaxTree);
     }
@@ -100,7 +105,8 @@ public class HeaderParameterTests {
     public void optionalHeaders() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_06.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_06.bal", syntaxTree);
     }
@@ -109,7 +115,8 @@ public class HeaderParameterTests {
     public void optionalHeadersWithArray() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_07.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_07.bal", syntaxTree);
     }
@@ -118,7 +125,8 @@ public class HeaderParameterTests {
     public void optionalHeadersWithArrayDefaultValue() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_08.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_08.bal", syntaxTree);
     }
@@ -127,7 +135,8 @@ public class HeaderParameterTests {
     public void optionalHeadersWithDefaultValue() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_09.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_09.bal", syntaxTree);
     }
@@ -136,7 +145,8 @@ public class HeaderParameterTests {
     public void requiredNullableTrue() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_10.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_10.bal", syntaxTree);
     }
@@ -145,7 +155,8 @@ public class HeaderParameterTests {
     public void optionalHeaderWithNullableTrue() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_11.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_11.bal", syntaxTree);
     }
@@ -154,7 +165,8 @@ public class HeaderParameterTests {
     public void paramterOrder() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/headers/header_12.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_12.bal", syntaxTree);
     }

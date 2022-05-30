@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.generators.service;
 
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
@@ -61,6 +60,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
@@ -105,7 +105,8 @@ public class ReturnTypeGenerator {
             } else {
                 while (responseIter.hasNext()) {
                     Map.Entry<String, ApiResponse> response = responseIter.next();
-                    if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
+                    if (response.getValue().getContent() == null &&
+                            response.getValue().get$ref() == null || response.getValue().getContent().size() == 0) {
                         String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
                         // Scenario 01: Response has single response without content type
                         TypeDescriptorNode statues;
@@ -175,7 +176,7 @@ public class ReturnTypeGenerator {
             if (mediaTypeEntry.getValue().getSchema() != null) {
                 Schema schema = mediaTypeEntry.getValue().getSchema();
                 if (schema.get$ref() != null) {
-                    dataType = extractReferenceType(schema.get$ref().trim());
+                    dataType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
                     type = createBuiltinSimpleNameReferenceNode(null,
                             createIdentifierToken(dataType));
                 } else if (schema instanceof ComposedSchema) {
@@ -265,10 +266,8 @@ public class ReturnTypeGenerator {
      * Create recordType TypeDescriptor.
      */
     private SimpleNameReferenceNode createReturnTypeInclusionRecord(String code, TypeDescriptorNode type) {
-
-        String recordName = getValidName(code + "_" + type, true);
-        Token recordKeyWord = createIdentifierToken("record", AbstractNodeFactory.createEmptyMinutiaeList(),
-                SINGLE_WS_MINUTIAE);
+        String recordName = code + getValidName(type.toString(), true);
+        Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
         List<Node> recordFields = new ArrayList<>();
@@ -278,7 +277,6 @@ public class ReturnTypeGenerator {
         TypeReferenceNode typeReferenceNode = NodeFactory.createTypeReferenceNode(asteriskToken, typeNameField,
                 createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(typeReferenceNode);
-        // Record field name
         IdentifierToken fieldName = createIdentifierToken("body", SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null, type,
                 fieldName, null, createToken(SyntaxKind.SEMICOLON_TOKEN));

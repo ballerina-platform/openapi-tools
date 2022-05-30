@@ -47,7 +47,8 @@ public class HeaderTests {
     public void generateHeaderParameter() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/service/swagger/headers/multiHeaderParam.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
-        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstanceDoubleLocking();
+        ballerinaServiceGenerator.initialize(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("headers/header_parameters.bal",
                 syntaxTree);

@@ -27,10 +27,15 @@ import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.GeneratorConstants;
+import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.schema.ballerinatypegenerators.TypeGenerator;
 import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.ballerina.tools.text.TextDocument;
@@ -44,6 +49,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
+import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
 
@@ -88,6 +95,34 @@ public class BallerinaTypesGenerator {
      * Generate syntaxTree for component schema.
      */
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
+        //Create imports
+        NodeList<ImportDeclarationNode> imports = AbstractNodeFactory.createEmptyNodeList();
+        if (!typeDefinitionNodeList.isEmpty()) {
+            for (TypeDefinitionNode node: typeDefinitionNodeList) {
+                if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
+                    continue;
+                }
+                RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) node.typeDescriptor();
+                for (Node field : record.fields()) {
+                    if (!(field instanceof TypeReferenceNode)) {
+                        continue;
+                    }
+                    TypeReferenceNode recordField = (TypeReferenceNode) field;
+                    if (!(recordField.typeName() instanceof QualifiedNameReferenceNode)) {
+                        continue;
+                    }
+                    QualifiedNameReferenceNode typeInclusion = (QualifiedNameReferenceNode) recordField.typeName();
+                    if (typeInclusion.modulePrefix().text().equals(HTTP)) {
+                        ImportDeclarationNode importForHttp =
+                                GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
+                                        , GeneratorConstants.HTTP);
+                        imports = createNodeList(importForHttp);
+                        break;
+                    }
+                }
+            }
+       }
+
         OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
         if (openAPI.getComponents() != null) {
             // Create typeDefinitionNode
@@ -104,8 +139,6 @@ public class BallerinaTypesGenerator {
                 }
             }
         }
-        //Create imports
-        NodeList<ImportDeclarationNode> imports = AbstractNodeFactory.createEmptyNodeList();
         // Create module member declaration
         NodeList<ModuleMemberDeclarationNode> moduleMembers = AbstractNodeFactory.createNodeList(
                 typeDefinitionNodeList.toArray(new TypeDefinitionNode[typeDefinitionNodeList.size()]));

@@ -78,8 +78,11 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.gen
  */
 public class BallerinaServiceGenerator {
     private boolean isNullableRequired;
-    private final OpenAPI openAPI;
-    private final Filter filter;
+    private OpenAPI openAPI;
+    private Filter filter;
+
+    // initialize the instance as null.
+    private static BallerinaServiceGenerator instance = null;
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
     public List<TypeDefinitionNode> getTypeInclusionRecords() {
         List<TypeDefinitionNode> typeRecords = new ArrayList<>();
@@ -91,7 +94,18 @@ public class BallerinaServiceGenerator {
         return typeRecords;
     }
 
-    public BallerinaServiceGenerator(OpenAPI openApi, Filter filter) {
+    BallerinaServiceGenerator() {}
+
+    // Check if the instance is null, within a synchronized block. If so, create the object
+    public static BallerinaServiceGenerator getInstanceDoubleLocking() {
+        synchronized (BallerinaServiceGenerator.class) {
+            if (instance == null) {
+                instance = new BallerinaServiceGenerator();
+            }
+        }
+        return instance;
+    }
+    public void initialize(OpenAPI openApi, Filter filter) {
             this.openAPI = openApi;
             this.filter = filter;
             this.isNullableRequired = false;
