@@ -63,6 +63,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
+import static io.ballerina.openapi.generators.GeneratorConstants.BODY;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
@@ -200,8 +201,6 @@ public class ReturnTypeGenerator {
         while (responseIter.hasNext()) {
             Map.Entry<String, ApiResponse> response = responseIter.next();
             String responseCode = response.getKey().trim();
-            //Generate response record
-
             String code = GeneratorConstants.HTTP_CODES_DES.get(responseCode);
 
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
@@ -274,22 +273,38 @@ public class ReturnTypeGenerator {
         // Type reference node
         Token asteriskToken = createIdentifierToken("*");
         QualifiedNameReferenceNode typeNameField = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
-        TypeReferenceNode typeReferenceNode = NodeFactory.createTypeReferenceNode(asteriskToken, typeNameField,
+        TypeReferenceNode typeReferenceNode = NodeFactory.createTypeReferenceNode(
+                asteriskToken,
+                typeNameField,
                 createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(typeReferenceNode);
-        IdentifierToken fieldName = createIdentifierToken("body", SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
-        RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null, type,
-                fieldName, null, createToken(SyntaxKind.SEMICOLON_TOKEN));
+
+        IdentifierToken fieldName = createIdentifierToken(BODY, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+        RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(
+                null, null,
+                type,
+                fieldName, null,
+                createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(recordFieldNode);
+
         NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordFields);
         Token bodyEndDelimiter = createIdentifierToken("|}");
-        RecordTypeDescriptorNode recordTypeDescriptorNode =
-                NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter, fieldsList,
-                        null, bodyEndDelimiter);
-        TypeDefinitionNode typeDefinitionNode =
-                createTypeDefinitionNode(null, createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD),
-                        createIdentifierToken(recordName), recordTypeDescriptorNode, createToken(SEMICOLON_TOKEN));
+
+        RecordTypeDescriptorNode recordTypeDescriptorNode = NodeFactory.createRecordTypeDescriptorNode(
+                recordKeyWord,
+                bodyStartDelimiter,
+                fieldsList, null,
+                bodyEndDelimiter);
+
+        TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
+                createToken(PUBLIC_KEYWORD),
+                createToken(TYPE_KEYWORD),
+                createIdentifierToken(recordName),
+                recordTypeDescriptorNode,
+                createToken(SEMICOLON_TOKEN));
+
         typeInclusionRecords.put(recordName, typeDefinitionNode);
+
         return createSimpleNameReferenceNode(createIdentifierToken(recordName));
     }
 }

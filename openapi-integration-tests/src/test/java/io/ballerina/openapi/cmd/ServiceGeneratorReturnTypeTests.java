@@ -58,7 +58,7 @@ public class ServiceGeneratorReturnTypeTests extends OpenAPITest {
                 // type is null
                 {"content_schema_has_one_of_type.yaml", "content_schema_has_one_of_type.bal"}, // content type has
                 // one of type schemas
-                {"multiple_mediatype_for_one_response_code.yaml", "multiple_mediatype_for_one_response_code.bal"}, //
+                {"multiple_media_types_for_one_response_code.yaml", "multiple_mediatype_for_one_response_code.bal"}, //
                 // one response code has multiple media types (content types)
                 {"response_has_inline_record.yaml", "response_has_inline_record.bal"}, // Response has inline object
                 // schema for content schema.

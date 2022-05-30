@@ -95,33 +95,11 @@ public class BallerinaTypesGenerator {
      * Generate syntaxTree for component schema.
      */
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
-        //Create imports
+        //Create imports for the http module, when record has http type inclusions.
         NodeList<ImportDeclarationNode> imports = AbstractNodeFactory.createEmptyNodeList();
         if (!typeDefinitionNodeList.isEmpty()) {
-            for (TypeDefinitionNode node: typeDefinitionNodeList) {
-                if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
-                    continue;
-                }
-                RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) node.typeDescriptor();
-                for (Node field : record.fields()) {
-                    if (!(field instanceof TypeReferenceNode)) {
-                        continue;
-                    }
-                    TypeReferenceNode recordField = (TypeReferenceNode) field;
-                    if (!(recordField.typeName() instanceof QualifiedNameReferenceNode)) {
-                        continue;
-                    }
-                    QualifiedNameReferenceNode typeInclusion = (QualifiedNameReferenceNode) recordField.typeName();
-                    if (typeInclusion.modulePrefix().text().equals(HTTP)) {
-                        ImportDeclarationNode importForHttp =
-                                GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
-                                        , GeneratorConstants.HTTP);
-                        imports = createNodeList(importForHttp);
-                        break;
-                    }
-                }
-            }
-       }
+            imports = getImportNodeForHttpModule(imports);
+        }
 
         OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
         if (openAPI.getComponents() != null) {
@@ -149,6 +127,31 @@ public class BallerinaTypesGenerator {
         TextDocument textDocument = TextDocuments.from("");
         SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
         return syntaxTree.modifyWith(modulePartNode);
+    }
+
+    private NodeList<ImportDeclarationNode> getImportNodeForHttpModule(NodeList<ImportDeclarationNode> imports) {
+        for (TypeDefinitionNode node: typeDefinitionNodeList) {
+            if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
+                continue;
+            }
+            RecordTypeDescriptorNode record = (RecordTypeDescriptorNode) node.typeDescriptor();
+            for (Node field : record.fields()) {
+                if (!(field instanceof TypeReferenceNode) ||
+                        !(((TypeReferenceNode) field).typeName() instanceof QualifiedNameReferenceNode)) {
+                    continue;
+                }
+                TypeReferenceNode recordField = (TypeReferenceNode) field;
+                QualifiedNameReferenceNode typeInclusion = (QualifiedNameReferenceNode) recordField.typeName();
+                if (typeInclusion.modulePrefix().text().equals(HTTP)) {
+                    ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
+                            GeneratorConstants.BALLERINA,
+                            GeneratorConstants.HTTP);
+                    imports = createNodeList(importForHttp);
+                    break;
+                }
+            }
+        }
+        return imports;
     }
 
     /**

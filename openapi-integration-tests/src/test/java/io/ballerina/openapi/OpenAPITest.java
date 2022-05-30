@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -20,6 +20,7 @@ package io.ballerina.openapi;
 import io.ballerina.openapi.cmd.TestUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 
 import java.io.ByteArrayOutputStream;
@@ -68,11 +69,14 @@ public abstract class OpenAPITest {
         TestUtil.cleanDistribution();
     }
 
-    //Delete generated service and schema files.
+    @AfterTest
+    public void removeGeneratedFile() {
+        deleteGeneratedFiles();
+    }
+
+    // Delete generated service and schema files.
     public void deleteGeneratedFiles() {
-//        File serviceFile = new File(this.tmpDir.resolve(fileName).toString());
         File schemaFile = new File(this.tmpDir.resolve("types.bal").toString());
-//        serviceFile.delete();
         schemaFile.delete();
     }
 

@@ -80,10 +80,9 @@ public class BallerinaServiceGenerator {
     private boolean isNullableRequired;
     private OpenAPI openAPI;
     private Filter filter;
-
-    // initialize the instance as null.
     private static BallerinaServiceGenerator instance = null;
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
+
     public List<TypeDefinitionNode> getTypeInclusionRecords() {
         List<TypeDefinitionNode> typeRecords = new ArrayList<>();
         if (this.typeInclusionRecords.size() > 0) {
@@ -97,7 +96,7 @@ public class BallerinaServiceGenerator {
     BallerinaServiceGenerator() {}
 
     // Check if the instance is null, within a synchronized block. If so, create the object
-    public static BallerinaServiceGenerator getInstanceDoubleLocking() {
+    public static BallerinaServiceGenerator getInstance() {
         synchronized (BallerinaServiceGenerator.class) {
             if (instance == null) {
                 instance = new BallerinaServiceGenerator();
@@ -105,6 +104,7 @@ public class BallerinaServiceGenerator {
         }
         return instance;
     }
+
     public void initialize(OpenAPI openApi, Filter filter) {
             this.openAPI = openApi;
             this.filter = filter;
