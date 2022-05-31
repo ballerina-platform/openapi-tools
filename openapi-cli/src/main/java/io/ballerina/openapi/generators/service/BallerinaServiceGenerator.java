@@ -78,9 +78,8 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.gen
  */
 public class BallerinaServiceGenerator {
     private boolean isNullableRequired;
-    private OpenAPI openAPI;
-    private Filter filter;
-    private static BallerinaServiceGenerator instance = null;
+    private final OpenAPI openAPI;
+    private final Filter filter;
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
 
     public List<TypeDefinitionNode> getTypeInclusionRecords() {
@@ -93,19 +92,7 @@ public class BallerinaServiceGenerator {
         return typeRecords;
     }
 
-    BallerinaServiceGenerator() {}
-
-    // Check if the instance is null, within a synchronized block. If so, create the object
-    public static BallerinaServiceGenerator getInstance() {
-        synchronized (BallerinaServiceGenerator.class) {
-            if (instance == null) {
-                instance = new BallerinaServiceGenerator();
-            }
-        }
-        return instance;
-    }
-
-    public void initialize(OpenAPI openAPI, Filter filter) {
+    public  BallerinaServiceGenerator(OpenAPI openAPI, Filter filter) {
             this.openAPI = openAPI;
             this.filter = filter;
             this.isNullableRequired = false;

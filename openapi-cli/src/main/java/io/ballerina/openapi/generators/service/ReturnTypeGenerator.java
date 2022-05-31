@@ -21,7 +21,6 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
@@ -53,11 +52,15 @@ import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordFieldNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
@@ -264,33 +267,33 @@ public class ReturnTypeGenerator {
     /**
      * Create recordType TypeDescriptor.
      */
-    private SimpleNameReferenceNode createReturnTypeInclusionRecord(String code, TypeDescriptorNode type) {
-        String recordName = code + getValidName(type.toString(), true);
+    private SimpleNameReferenceNode createReturnTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
+        String recordName = statusCode + getValidName(type.toString(), true);
         Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
         List<Node> recordFields = new ArrayList<>();
         // Type reference node
         Token asteriskToken = createIdentifierToken("*");
-        QualifiedNameReferenceNode typeNameField = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
-        TypeReferenceNode typeReferenceNode = NodeFactory.createTypeReferenceNode(
+        QualifiedNameReferenceNode typeNameField = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, statusCode);
+        TypeReferenceNode typeReferenceNode = createTypeReferenceNode(
                 asteriskToken,
                 typeNameField,
                 createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(typeReferenceNode);
 
         IdentifierToken fieldName = createIdentifierToken(BODY, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
-        RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(
+        RecordFieldNode recordFieldNode = createRecordFieldNode(
                 null, null,
                 type,
                 fieldName, null,
                 createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(recordFieldNode);
 
-        NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordFields);
+        NodeList<Node> fieldsList = createSeparatedNodeList(recordFields);
         Token bodyEndDelimiter = createIdentifierToken("|}");
 
-        RecordTypeDescriptorNode recordTypeDescriptorNode = NodeFactory.createRecordTypeDescriptorNode(
+        RecordTypeDescriptorNode recordTypeDescriptorNode = createRecordTypeDescriptorNode(
                 recordKeyWord,
                 bodyStartDelimiter,
                 fieldsList, null,

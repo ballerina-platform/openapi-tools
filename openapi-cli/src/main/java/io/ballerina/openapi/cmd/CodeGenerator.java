@@ -598,8 +598,7 @@ public class CodeGenerator {
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
         String srcFile = concatTitle + "_service.bal";
         OpenAPI openAPIDef = normalizeOpenAPI(openAPI, false);
-        BallerinaServiceGenerator ballerinaServiceGenerator = BallerinaServiceGenerator.getInstance();
-        ballerinaServiceGenerator.initialize(openAPIDef, filter);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPIDef, filter);
         String mainContent = Formatter.format
                 (ballerinaServiceGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
