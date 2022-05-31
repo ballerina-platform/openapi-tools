@@ -50,6 +50,9 @@ ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
 ext.stdlibUrlVersion = project.stdlibUrlVersion
 ext.stdlibXmldataVersion = project.stdlibXmldataVersion
+ext.stdlibGraphqlVersion = project.stdlibGraphqlVersion
+ext.stdlibGrpcVersion = project.stdlibGrpcVersion
+ext.stdlibWebsubVersion = project.stdlibWebsubVersion
 ext.jacocoVersion = project.jacocoVersion
 ext.puppycrawlCheckstyleVersion = "8.18"
 
@@ -132,6 +135,9 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:xmldata-ballerina:${stdlibXmldataVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:observe-ballerina:${observeVersion}"
         ballerinaStdLibs "io.ballerina:observe-ballerina:${observeInternalVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:graphql-ballerina:${stdlibGraphqlVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:grpc-ballerina:${stdlibGrpcVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:websub-ballerina:${stdlibWebsubVersion}"
 
     }
 }
