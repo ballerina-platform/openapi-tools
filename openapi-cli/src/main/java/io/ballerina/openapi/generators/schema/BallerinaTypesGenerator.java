@@ -98,7 +98,7 @@ public class BallerinaTypesGenerator {
         //Create imports for the http module, when record has http type inclusions.
         NodeList<ImportDeclarationNode> imports = AbstractNodeFactory.createEmptyNodeList();
         if (!typeDefinitionNodeList.isEmpty()) {
-            imports = getImportNodeForHttpModule(imports);
+            imports = generateImportNodes(imports);
         }
 
         OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
@@ -129,7 +129,7 @@ public class BallerinaTypesGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
-    private NodeList<ImportDeclarationNode> getImportNodeForHttpModule(NodeList<ImportDeclarationNode> imports) {
+    private NodeList<ImportDeclarationNode> generateImportNodes(NodeList<ImportDeclarationNode> imports) {
         for (TypeDefinitionNode node: typeDefinitionNodeList) {
             if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
                 continue;
