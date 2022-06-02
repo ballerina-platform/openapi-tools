@@ -82,20 +82,18 @@ public class BallerinaServiceGenerator {
     private final Filter filter;
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
 
-    public List<TypeDefinitionNode> getTypeInclusionRecords() {
-        List<TypeDefinitionNode> typeRecords = new ArrayList<>();
-        if (this.typeInclusionRecords.size() > 0) {
-            this.typeInclusionRecords.forEach((key, value) -> {
-                typeRecords.add(value);
-            });
-        }
-        return typeRecords;
-    }
-
-    public  BallerinaServiceGenerator(OpenAPI openAPI, Filter filter) {
+    public BallerinaServiceGenerator(OpenAPI openAPI, Filter filter) {
             this.openAPI = openAPI;
             this.filter = filter;
             this.isNullableRequired = false;
+    }
+
+    public List<TypeDefinitionNode> getTypeInclusionRecords() {
+        List<TypeDefinitionNode> typeRecords = new ArrayList<>();
+        this.typeInclusionRecords.forEach((key, value) -> {
+            typeRecords.add(value);
+        });
+        return typeRecords;
     }
 
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {

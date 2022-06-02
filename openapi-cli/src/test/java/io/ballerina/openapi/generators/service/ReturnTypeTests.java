@@ -275,7 +275,7 @@ public class ReturnTypeTests {
                 "response/response_codes.bal", syntaxTree);
     }
 
-    @Test(description = "Single response has without content type.")
+    @Test(description = "Single response without content type.")
     public void singleResponseWithOutContent() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/response/content_null.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

@@ -35,14 +35,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * This class to handle temp dirs and outputs.
+ * This is abstract class for containing the main common test methods for the other subclasses.
  */
 public abstract class OpenAPITest {
     protected Path tmpDir;
     protected PrintStream printStream;
     private ByteArrayOutputStream console;
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
-
 
     @BeforeClass
     public void setup() throws IOException {
