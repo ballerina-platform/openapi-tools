@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 /**
  * This is abstract class for containing the main common test methods for the other subclasses.
  */
-public abstract class OpenAPITest {
+public class OpenAPITest {
     protected Path tmpDir;
     protected PrintStream printStream;
     private ByteArrayOutputStream console;
