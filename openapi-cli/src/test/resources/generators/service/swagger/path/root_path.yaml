@@ -1,0 +1,24 @@
+openapi: 3.0.0
+info:
+  title: PizzaShackAPI
+  description: |
+    This is a RESTFul API for Pizza Shack online pizza delivery store.
+  version: 1.0.0
+servers:
+  - url: https://localhost:8243/pizzashack/1.0.0/
+paths:
+  /:
+    get:
+      description: Return a list of available menu items
+      responses:
+        "200":
+          description: OK. List of APIs is returned.
+#    post:
+#      responses:
+#        "200":
+#          description: OK. List of APIs is returned.
+#    delete:
+#      operationId: deleteId
+#      responses:
+#        "204":
+#          description: Accepted
