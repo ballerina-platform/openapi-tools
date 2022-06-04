@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.generators.service;
 
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -175,7 +174,7 @@ public class BallerinaServiceGenerator {
             if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
                 if (operationTags != null || ((!filterOperations.isEmpty())
                         && (operation.getValue().getOperationId() != null))) {
-                    if (GeneratorUtils.hasTags(operationTags, filterTags) ||
+                    if ((operationTags != null && GeneratorUtils.hasTags(operationTags, filterTags)) ||
                             ((operation.getValue().getOperationId() != null) &&
                             filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                         // getRelative resource path

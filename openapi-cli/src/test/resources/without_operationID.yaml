@@ -13,12 +13,3 @@ paths:
       responses:
         "200":
           description: OK. List of APIs is returned.
-#    post:
-#      responses:
-#        "200":
-#          description: OK. List of APIs is returned.
-#    delete:
-#      operationId: deleteId
-#      responses:
-#        "204":
-#          description: Accepted

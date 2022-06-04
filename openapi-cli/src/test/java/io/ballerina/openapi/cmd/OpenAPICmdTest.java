@@ -406,6 +406,23 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         }
     }
 
+    @Test(description = "Test for service generation with yaml contract without operationID")
+    public void testForYamlContractWithoutOperationID() throws IOException {
+        Path petstoreYaml = resourceDir.resolve(Paths.get("without_operationID.yaml"));
+        String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        if (Files.exists(this.tmpDir.resolve("without_operationid_service.bal"))) {
+            Assert.assertTrue(true);
+            File schemaFile = new File(this.tmpDir.resolve("types.bal").toString());
+            File serviceFile = new File(this.tmpDir.resolve("without_operationid_service.bal").toString());
+            serviceFile.delete();
+            schemaFile.delete();
+        } else {
+            Assert.fail("Code generation failed. : " + readOutput(true));
+        }
+    }
 
     // Delete the generated files
     private void deleteGeneratedFiles(boolean isConfigGenerated) throws IOException {
