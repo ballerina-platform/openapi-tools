@@ -94,6 +94,12 @@ public class RecordTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/cyclic_record.yaml");
     }
 
+    @Test(description = "When the record is readOnly type")
+    public void testReadOnlyRecord() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/with_readonly_keyword.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/with_read_only_keyword.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

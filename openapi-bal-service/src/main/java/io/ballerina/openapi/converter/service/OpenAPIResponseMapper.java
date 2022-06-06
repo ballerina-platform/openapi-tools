@@ -22,6 +22,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
+import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MapTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
@@ -541,10 +542,9 @@ public class OpenAPIResponseMapper {
                 TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) symbol;
                 TypeSymbol typeSymbol = typeRef.typeDescriptor();
                 if (typeSymbol.typeKind() == TypeDescKind.RECORD) {
-                    RecordTypeSymbol recordType = (RecordTypeSymbol) typeSymbol;
                     ApiResponses responses = handleRecordTypeSymbol(qNode.identifier().text().trim(),
-                            components.getSchemas(), customMediaPrefix, typeRef,
-                            new OpenAPIComponentMapper(components), recordType, headers);
+                            components.getSchemas(), customMediaPrefix, typeRef, new OpenAPIComponentMapper(components),
+                            headers);
                     apiResponses.putAll(responses);
                     return Optional.of(apiResponses);
                 }
@@ -813,25 +813,35 @@ public class OpenAPIResponseMapper {
 
         } else if (typeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE) {
             TypeReferenceTypeSymbol typeReferenceTypeSymbol = (TypeReferenceTypeSymbol) typeSymbol;
-            if (typeReferenceTypeSymbol.typeDescriptor().typeKind() == TypeDescKind.RECORD) {
-                RecordTypeSymbol returnRecord = (RecordTypeSymbol) typeReferenceTypeSymbol.typeDescriptor();
-                String referenceName = referenceNode.name().toString().trim();
-                ApiResponses responses = handleRecordTypeSymbol(referenceName, schema, customMediaPrefix,
-                        typeSymbol, componentMapper, returnRecord, headers);
-                apiResponses.putAll(responses);
-            }
+            String referenceName = referenceNode.name().toString().trim();
+            ApiResponses responses = handleRecordTypeSymbol(referenceName, schema, customMediaPrefix,
+                    typeReferenceTypeSymbol, componentMapper, headers);
+            apiResponses.putAll(responses);
         }
         //Check content and status code if it is in 200 range then add the header
         operationAdaptor.getOperation().setResponses(apiResponses);
     }
 
     private ApiResponses handleRecordTypeSymbol(String referenceName, Map<String, Schema> schema,
-                                                Optional<String> customMediaPrefix, TypeSymbol typeSymbol,
+                                                Optional<String> customMediaPrefix, TypeReferenceTypeSymbol typeSymbol,
                                                 OpenAPIComponentMapper componentMapper,
-                                                RecordTypeSymbol returnRecord,
                                                 Map<String, Header> headers) {
+        //Handle both intersection and record
         ApiResponses apiResponses = new ApiResponses();
-
+        RecordTypeSymbol returnRecord = null;
+        if (typeSymbol.typeDescriptor().typeKind() == TypeDescKind.RECORD) {
+            returnRecord = (RecordTypeSymbol) typeSymbol.typeDescriptor();
+        } else if (typeSymbol.typeDescriptor().typeKind() == TypeDescKind.INTERSECTION) {
+            IntersectionTypeSymbol typeIntersection = (IntersectionTypeSymbol) typeSymbol.typeDescriptor();
+            for (TypeSymbol memberTypeDescriptor : typeIntersection.memberTypeDescriptors()) {
+                if (memberTypeDescriptor.typeKind() == TypeDescKind.RECORD) {
+                    returnRecord = (RecordTypeSymbol) memberTypeDescriptor;
+                }
+            }
+        }
+        if (returnRecord == null) {
+            return apiResponses;
+        }
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
         List<TypeSymbol> typeInclusions = returnRecord.typeInclusions();
         if (!typeInclusions.isEmpty()) {
@@ -876,8 +886,8 @@ public class OpenAPIResponseMapper {
                                                                          OpenAPIComponentMapper componentMapper,
                                                                          RecordTypeSymbol returnRecord,
                                                                          List<TypeSymbol> typeInclusions,
-                                                                         Optional<String> customMediaPrefix, Map<String,
-            Header> headers) {
+                                                                         Optional<String> customMediaPrefix,
+                                                                         Map<String, Header> headers) {
         ApiResponses apiResponses = new ApiResponses();
         ApiResponse apiResponse = new ApiResponse();
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();
