@@ -36,6 +36,7 @@ import java.util.List;
  * All the tests related to the {@code io.ballerina.openapi.generators.service.RequestBodyGenerator} util.
  */
 public class ReturnTypeTests {
+
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/service").toAbsolutePath();
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
@@ -272,5 +273,14 @@ public class ReturnTypeTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "response/response_codes.bal", syntaxTree);
+    }
+
+    @Test(description = "Single response without content type.")
+    public void singleResponseWithOutContent() throws IOException, BallerinaOpenApiException, FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/response/content_null.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/content_null.bal", syntaxTree);
     }
 }

@@ -35,6 +35,7 @@ import java.util.List;
  * This test class contains all the query parameter tests.
  */
 public class QueryParameterTests {
+
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/service").toAbsolutePath();
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
@@ -81,6 +82,7 @@ public class QueryParameterTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
     }
+
     /*
     ex: 05
        parameters:
@@ -130,16 +132,17 @@ public class QueryParameterTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("query/query.bal", syntaxTree);
     }
-/*
-      parameters:
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 10
-            format: int32
-      ballerina -> int limit = 10;
- */
+
+    /*
+          parameters:
+            - name: limit
+              in: query
+              schema:
+                type: integer
+                default: 10
+                format: int32
+          ballerina -> int limit = 10;
+     */
     @Test(description = "09. Default query parameter has primitive data type and array")
     public void defaultQueryParameter()
             throws IOException, BallerinaOpenApiException, FormatterException {

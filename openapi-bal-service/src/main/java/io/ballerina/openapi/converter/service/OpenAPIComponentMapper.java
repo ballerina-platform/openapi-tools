@@ -27,6 +27,7 @@ import io.ballerina.compiler.api.symbols.EnumSymbol;
 import io.ballerina.compiler.api.symbols.FloatTypeSymbol;
 import io.ballerina.compiler.api.symbols.IntTypeSymbol;
 import io.ballerina.compiler.api.symbols.MapTypeSymbol;
+import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.StringTypeSymbol;
@@ -85,15 +86,14 @@ public class OpenAPIComponentMapper {
         // Handle record type request body
         if (typeRef.typeDescriptor() instanceof RecordTypeSymbol) {
             // Handle typeInclusions with allOf type binding
-            RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeRef.typeDescriptor();
-            List<TypeSymbol> typeInclusions = recordTypeSymbol.typeInclusions();
-            Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
-            HashSet<String> unionKeys = new HashSet<>(rfields.keySet());
-            if (typeInclusions.isEmpty()) {
-                // Handle like object
-                generateObjectSchemaFromRecordFields(schema, componentName, rfields, apiDocs);
-            } else {
-                mapTypeInclusionToAllOfSchema(schema, componentName, typeInclusions, rfields, unionKeys, apiDocs);
+            handleRecordTypeSymbol((RecordTypeSymbol) typeRef.typeDescriptor(), schema, componentName, apiDocs);
+        } else if (typeRef.typeDescriptor() instanceof IntersectionTypeSymbol) {
+            List<TypeSymbol> typeSymbols = ((IntersectionTypeSymbol) typeRef.typeDescriptor()).memberTypeDescriptors();
+            for (TypeSymbol symbol: typeSymbols) {
+                if (!(symbol instanceof RecordTypeSymbol)) {
+                    continue;
+                }
+                handleRecordTypeSymbol((RecordTypeSymbol) symbol, schema, componentName, apiDocs);
             }
         } else if (typeRef.typeDescriptor() instanceof StringTypeSymbol) {
             schema.put(componentName, new StringSchema());
@@ -127,6 +127,20 @@ public class OpenAPIComponentMapper {
             } else {
                 components.setSchemas(schema);
             }
+        }
+    }
+
+    private void handleRecordTypeSymbol(RecordTypeSymbol recordTypeSymbol, Map<String, Schema> schema,
+                                        String componentName,
+                                        Map<String, String> apiDocs) {
+        // Handle typeInclusions with allOf type binding
+        List<TypeSymbol> typeInclusions = recordTypeSymbol.typeInclusions();
+        Map<String, RecordFieldSymbol> rfields = recordTypeSymbol.fieldDescriptors();
+        HashSet<String> unionKeys = new HashSet<>(rfields.keySet());
+        if (typeInclusions.isEmpty()) {
+            generateObjectSchemaFromRecordFields(schema, componentName, rfields, apiDocs);
+        } else {
+            mapTypeInclusionToAllOfSchema(schema, componentName, typeInclusions, rfields, unionKeys, apiDocs);
         }
     }
 

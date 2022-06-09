@@ -604,6 +604,7 @@ public class CodeGenerator {
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
 
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
+        ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaServiceGenerator.getTypeInclusionRecords());
         String schemaContent = Formatter.format(
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME, schemaContent));

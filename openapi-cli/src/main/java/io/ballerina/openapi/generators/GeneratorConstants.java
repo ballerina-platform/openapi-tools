@@ -307,5 +307,6 @@ public class GeneratorConstants {
     public static final String HEADER_ANNOT = "Header";
     public static final String MAP_STRING = "map<string>";
     public static final String TEXT_WILDCARD_REGEX = "text/.*";
+    public static final String BODY = "body";
 
 }

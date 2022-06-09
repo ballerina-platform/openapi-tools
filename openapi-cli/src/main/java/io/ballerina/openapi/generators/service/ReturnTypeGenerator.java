@@ -17,12 +17,10 @@
  */
 package io.ballerina.openapi.generators.service;
 
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
@@ -31,6 +29,7 @@ import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
@@ -46,19 +45,31 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordFieldNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createRecordTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeDefinitionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypeReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
+import static io.ballerina.openapi.generators.GeneratorConstants.BODY;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
+import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
@@ -70,6 +81,11 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.get
  * @since 2.0.0
  */
 public class ReturnTypeGenerator {
+    private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
+
+    public Map<String, TypeDefinitionNode> getTypeInclusionRecords() {
+        return this.typeInclusionRecords;
+    }
     /**
      * This function used to generate return function node in the function signature.
      * Payload media type will not be added to the annotation.
@@ -93,7 +109,8 @@ public class ReturnTypeGenerator {
             } else {
                 while (responseIter.hasNext()) {
                     Map.Entry<String, ApiResponse> response = responseIter.next();
-                    if (response.getValue().getContent() == null && response.getValue().get$ref() == null) {
+                    if (response.getValue().getContent() == null &&
+                            response.getValue().get$ref() == null || response.getValue().getContent().size() == 0) {
                         String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
                         // Scenario 01: Response has single response without content type
                         TypeDescriptorNode statues;
@@ -133,7 +150,7 @@ public class ReturnTypeGenerator {
                                 // Handle for only first content type
                                 type = getNodeForContent(contentItr);
                             }
-                            RecordTypeDescriptorNode recordType = createReturnTypeInclusionRecord(code, type);
+                            SimpleNameReferenceNode recordType = createReturnTypeInclusionRecord(code, type);
                             NodeList<AnnotationNode> annotation  = createEmptyNodeList();
                             returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotation, recordType);
                         }
@@ -163,7 +180,7 @@ public class ReturnTypeGenerator {
             if (mediaTypeEntry.getValue().getSchema() != null) {
                 Schema schema = mediaTypeEntry.getValue().getSchema();
                 if (schema.get$ref() != null) {
-                    dataType = extractReferenceType(schema.get$ref().trim());
+                    dataType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
                     type = createBuiltinSimpleNameReferenceNode(null,
                             createIdentifierToken(dataType));
                 } else if (schema instanceof ComposedSchema) {
@@ -183,14 +200,16 @@ public class ReturnTypeGenerator {
     private UnionTypeDescriptorNode getUnionNode(Iterator<Map.Entry<String, ApiResponse>> responseIter)
             throws BallerinaOpenApiException {
         List<TypeDescriptorNode> qualifiedNodes = new ArrayList<>();
-        Token pipeToken = createIdentifierToken("|");
+        Token pipeToken = createToken(SyntaxKind.PIPE_TOKEN);
         while (responseIter.hasNext()) {
             Map.Entry<String, ApiResponse> response = responseIter.next();
             String responseCode = response.getKey().trim();
             String code = GeneratorConstants.HTTP_CODES_DES.get(responseCode);
+
             if (code == null && !responseCode.equals(GeneratorConstants.DEFAULT)) {
                 throw new BallerinaOpenApiException(String.format(OAS_SERVICE_107.getDescription(), responseCode));
             }
+
             if (responseCode.equals(GeneratorConstants.DEFAULT)) {
                 TypeDescriptorNode record = createSimpleNameReferenceNode(createIdentifierToken(
                         GeneratorConstants.HTTP_RESPONSE));
@@ -206,7 +225,7 @@ public class ReturnTypeGenerator {
                 if (responseCode.equals(GeneratorConstants.HTTP_200))  {
                     qualifiedNodes.add(record);
                 }  else {
-                    RecordTypeDescriptorNode node = createReturnTypeInclusionRecord(code, record);
+                    SimpleNameReferenceNode node = createReturnTypeInclusionRecord(code, record);
                     qualifiedNodes.add(node);
                 }
             }
@@ -248,26 +267,47 @@ public class ReturnTypeGenerator {
     /**
      * Create recordType TypeDescriptor.
      */
-    private static RecordTypeDescriptorNode createReturnTypeInclusionRecord(String code, TypeDescriptorNode type) {
-        Token recordKeyWord = createIdentifierToken("record", AbstractNodeFactory.createEmptyMinutiaeList(),
-                SINGLE_WS_MINUTIAE);
+    private SimpleNameReferenceNode createReturnTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
+        String recordName = statusCode + getValidName(type.toString(), true);
+        Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
         List<Node> recordFields = new ArrayList<>();
         // Type reference node
         Token asteriskToken = createIdentifierToken("*");
-        QualifiedNameReferenceNode typeNameField = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
-        TypeReferenceNode typeReferenceNode = NodeFactory.createTypeReferenceNode(asteriskToken, typeNameField,
+        QualifiedNameReferenceNode typeNameField = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, statusCode);
+        TypeReferenceNode typeReferenceNode = createTypeReferenceNode(
+                asteriskToken,
+                typeNameField,
                 createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(typeReferenceNode);
-        // Record field name
-        IdentifierToken fieldName = createIdentifierToken("body", SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
-        RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(null, null, type,
-                fieldName, null, createToken(SyntaxKind.SEMICOLON_TOKEN));
+
+        IdentifierToken fieldName = createIdentifierToken(BODY, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+        RecordFieldNode recordFieldNode = createRecordFieldNode(
+                null, null,
+                type,
+                fieldName, null,
+                createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(recordFieldNode);
-        NodeList<Node> fieldsList = NodeFactory.createSeparatedNodeList(recordFields);
+
+        NodeList<Node> fieldsList = createSeparatedNodeList(recordFields);
         Token bodyEndDelimiter = createIdentifierToken("|}");
-        return NodeFactory.createRecordTypeDescriptorNode(recordKeyWord, bodyStartDelimiter, fieldsList,
-                null, bodyEndDelimiter);
+
+        RecordTypeDescriptorNode recordTypeDescriptorNode = createRecordTypeDescriptorNode(
+                recordKeyWord,
+                bodyStartDelimiter,
+                fieldsList, null,
+                bodyEndDelimiter);
+
+        TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
+                createToken(PUBLIC_KEYWORD),
+                createToken(TYPE_KEYWORD),
+                createIdentifierToken(recordName),
+                recordTypeDescriptorNode,
+                createToken(SEMICOLON_TOKEN));
+
+        typeInclusionRecords.put(recordName, typeDefinitionNode);
+
+        return createSimpleNameReferenceNode(createIdentifierToken(recordName));
     }
 }
