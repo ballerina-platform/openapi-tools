@@ -20,11 +20,16 @@ package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
+import io.ballerina.compiler.api.symbols.DecimalTypeSymbol;
 import io.ballerina.compiler.api.symbols.Documentable;
 import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.EnumSymbol;
+import io.ballerina.compiler.api.symbols.FloatTypeSymbol;
+import io.ballerina.compiler.api.symbols.IntTypeSymbol;
+import io.ballerina.compiler.api.symbols.MapTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.StringTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
@@ -36,11 +41,14 @@ import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,6 +75,9 @@ public class OpenAPIComponentMapper {
      * @param typeSymbol     Record Name as a TypeSymbol
      */
     public void createComponentSchema(Map<String, Schema> schema, TypeSymbol typeSymbol) {
+        if (schema == null) {
+            schema = new HashMap<>();
+        }
         // Getting main record description
         String componentName = ConverterCommonUtils.unescapeIdentifier(typeSymbol.getName().orElseThrow().trim());
         Map<String, String> apiDocs = getRecordFieldsAPIDocsMap((TypeReferenceTypeSymbol) typeSymbol, componentName);
@@ -83,6 +94,38 @@ public class OpenAPIComponentMapper {
                 generateObjectSchemaFromRecordFields(schema, componentName, rfields, apiDocs);
             } else {
                 mapTypeInclusionToAllOfSchema(schema, componentName, typeInclusions, rfields, unionKeys, apiDocs);
+            }
+        } else if (typeRef.typeDescriptor() instanceof StringTypeSymbol) {
+            schema.put(componentName, new StringSchema());
+            components.setSchemas(schema);
+        } else if (typeRef.typeDescriptor() instanceof IntTypeSymbol) {
+            schema.put(componentName, new IntegerSchema());
+            components.setSchemas(schema);
+        } else if (typeRef.typeDescriptor() instanceof DecimalTypeSymbol) {
+            schema.put(componentName, new NumberSchema().format("double"));
+            components.setSchemas(schema);
+        } else if (typeRef.typeDescriptor() instanceof FloatTypeSymbol) {
+            schema.put(componentName, new NumberSchema().format("float"));
+            components.setSchemas(schema);
+        } else if (typeRef.typeDescriptor() instanceof ArrayTypeSymbol) {
+            ArraySchema arraySchema = mapArrayToArraySchema(schema, typeRef.typeDescriptor(), componentName);
+            schema.put(componentName, arraySchema);
+            components.setSchemas(schema);
+        } else if (typeRef.typeDescriptor() instanceof UnionTypeSymbol) {
+            Schema unionSchema = handleUnionType((UnionTypeSymbol) typeRef.typeDescriptor(), new Schema<>(),
+                    componentName);
+            schema.put(componentName, unionSchema);
+            components.setSchemas(schema);
+        } else if (typeRef.typeDescriptor() instanceof MapTypeSymbol) {
+            MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) typeRef.typeDescriptor();
+            TypeDescKind typeDescKind = mapTypeSymbol.typeParam().typeKind();
+            Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeDescKind.getName());
+            schema.put(componentName, new ObjectSchema().additionalProperties(openApiSchema));
+            Map<String, Schema> schemas = components.getSchemas();
+            if (schemas != null) {
+                schemas.putAll(schema);
+            } else {
+                components.setSchemas(schema);
             }
         }
     }
@@ -193,7 +236,7 @@ public class OpenAPIComponentMapper {
                 schema = components.getSchemas();
             }
             if (property instanceof ArraySchema) {
-                mapArrayToArraySchema(schema, field.getValue(), (ArraySchema) property, componentName);
+                property = mapArrayToArraySchema(schema, field.getValue().typeDescriptor(), componentName);
                 schema = components.getSchemas();
             }
             // Add API documentation for record field
@@ -243,7 +286,7 @@ public class OpenAPIComponentMapper {
      * </pre>
      */
     private Schema handleUnionType(UnionTypeSymbol unionType, Schema property, String parentComponentName) {
-        List<TypeSymbol> unionTypes = unionType.userSpecifiedMemberTypes();
+        List<TypeSymbol> unionTypes = unionType.memberTypeDescriptors();
         List<Schema> properties = new ArrayList<>();
         boolean nullable = false;
         for (TypeSymbol union: unionTypes) {
@@ -256,14 +299,32 @@ public class OpenAPIComponentMapper {
                         isSameRecord(parentComponentName, typeReferenceTypeSymbol));
                 properties.add(property);
                 // TODO: uncomment after fixing ballerina lang union type handling issue
-//            } else if (union.typeKind() == TypeDescKind.UNION) {
-//                property = handleUnionType((UnionTypeSymbol) union, property, properties);
-//                properties.add(property);
+            } else if (union.typeKind() == TypeDescKind.UNION) {
+                property = handleUnionType((UnionTypeSymbol) union, property, parentComponentName);
+                properties.add(property);
+            } else if (union.typeKind() == TypeDescKind.ARRAY) {
+                property = mapArrayToArraySchema(components.getSchemas(), union, parentComponentName);
+                properties.add(property);
+            } else if (union.typeKind() == TypeDescKind.MAP) {
+                MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) union;
+                TypeDescKind typeDescKind = mapTypeSymbol.typeParam().typeKind();
+                Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeDescKind.getName());
+                property = new ObjectSchema().additionalProperties(openApiSchema);
+                properties.add(property);
+                Map<String, Schema> schemas = components.getSchemas();
+                if (schemas != null) {
+                    schemas.put(parentComponentName, property);;
+                } else {
+                    Map<String, Schema> schema = new HashMap<>();
+                    schema.put(parentComponentName, property);
+                    components.setSchemas(schema);
+                }
             } else {
                 property = ConverterCommonUtils.getOpenApiSchema(union.typeKind().getName().trim());
                 properties.add(property);
             }
         }
+
         property = generateOneOfSchema(property, properties);
         if (nullable) {
             property.setNullable(true);
@@ -312,10 +373,9 @@ public class OpenAPIComponentMapper {
     /**
      * Generate arraySchema for ballerina record  as array type.
      */
-    private void mapArrayToArraySchema(Map<String, Schema> schema, RecordFieldSymbol field, ArraySchema property,
+    private ArraySchema mapArrayToArraySchema(Map<String, Schema> schema, TypeSymbol symbol,
                                        String componentName) {
-
-        TypeSymbol symbol = field.typeDescriptor();
+        ArraySchema property = new ArraySchema();
         int arrayDimensions = 0;
         while (symbol instanceof ArrayTypeSymbol) {
             arrayDimensions = arrayDimensions + 1;
@@ -338,6 +398,7 @@ public class OpenAPIComponentMapper {
         } else {
             property.setItems(symbolProperty);
         }
+        return property;
     }
 
     /**
