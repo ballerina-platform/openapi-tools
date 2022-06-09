@@ -230,4 +230,5 @@ public class Constants {
     public static final String JSON_EXTENSION = ".json";
     public static final String YML_EXTENSION = ".yml";
     public static final String PLUS = "+";
+    public static final String UNDERSCORE = "_";
 }
