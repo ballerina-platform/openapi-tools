@@ -12,19 +12,6 @@ paths:
           description: Accepted
 components:
   schemas:
-    Pet:
-      required:
-        - id
-        - name
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        tag:
-          type: string
     Dog:
       required:
         - bark
@@ -39,3 +26,16 @@ components:
               $ref: '#/components/schemas/Pet'
         bark:
           type: boolean
+    Pet:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string

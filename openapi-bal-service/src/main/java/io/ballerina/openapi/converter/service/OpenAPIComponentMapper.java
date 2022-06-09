@@ -236,7 +236,9 @@ public class OpenAPIComponentMapper {
                 schema = components.getSchemas();
             }
             if (property instanceof ArraySchema) {
+                Boolean nullable = property.getNullable();
                 property = mapArrayToArraySchema(schema, field.getValue().typeDescriptor(), componentName);
+                property.setNullable(nullable);
                 schema = components.getSchemas();
             }
             // Add API documentation for record field
