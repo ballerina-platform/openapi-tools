@@ -27,6 +27,7 @@ components:
   schemas:
     Action:
       type: string
+      description: Adding doc
     Count:
       type: integer
       format: int32

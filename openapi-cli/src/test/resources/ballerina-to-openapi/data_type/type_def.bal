@@ -1,5 +1,6 @@
 import ballerina/http;
 
+# Adding doc
 public type Action string;
 public type Count int;
 public type Rels string[];
