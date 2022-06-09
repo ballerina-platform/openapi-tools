@@ -183,6 +183,7 @@ public class OpenAPIParameterMapper {
                         operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
                         operationAdaptor, semanticModel));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
+                errors.addAll(openAPIRequestBodyMapper.getDiagnostics());
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
                     (Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;

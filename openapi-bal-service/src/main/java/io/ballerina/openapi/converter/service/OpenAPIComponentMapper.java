@@ -34,6 +34,9 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
+import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -64,11 +67,17 @@ import static io.ballerina.openapi.converter.Constants.FLOAT;
  */
 public class OpenAPIComponentMapper {
     private final Components components;
+    private final List<OpenAPIConverterDiagnostic> diagnostics;
+
 
     public OpenAPIComponentMapper(Components components) {
          this.components = components;
+         this.diagnostics = new ArrayList<>();
     }
 
+    public List<OpenAPIConverterDiagnostic> getDiagnostics() {
+        return diagnostics;
+    }
     /**
      * This function for doing the mapping with ballerina record to object schema.
      *
@@ -143,6 +152,11 @@ public class OpenAPIComponentMapper {
                 }
                 break;
             default:
+                // Diagnostic for currently unsupported data types.
+                DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_114;
+                IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
+                        typeRef.getLocation().get(), type.typeKind().getName());
+                diagnostics.add(error);
                 break;
         }
     }
