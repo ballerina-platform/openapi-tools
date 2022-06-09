@@ -26,8 +26,8 @@ import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.EnumSymbol;
 import io.ballerina.compiler.api.symbols.FloatTypeSymbol;
 import io.ballerina.compiler.api.symbols.IntTypeSymbol;
-import io.ballerina.compiler.api.symbols.MapTypeSymbol;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
+import io.ballerina.compiler.api.symbols.MapTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.StringTypeSymbol;
@@ -83,41 +83,42 @@ public class OpenAPIComponentMapper {
         String componentName = ConverterCommonUtils.unescapeIdentifier(typeSymbol.getName().orElseThrow().trim());
         Map<String, String> apiDocs = getRecordFieldsAPIDocsMap((TypeReferenceTypeSymbol) typeSymbol, componentName);
         TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
+        TypeSymbol type = typeRef.typeDescriptor();
         // Handle record type request body
-        if (typeRef.typeDescriptor() instanceof RecordTypeSymbol) {
+        if (type instanceof RecordTypeSymbol) {
             // Handle typeInclusions with allOf type binding
-            handleRecordTypeSymbol((RecordTypeSymbol) typeRef.typeDescriptor(), schema, componentName, apiDocs);
-        } else if (typeRef.typeDescriptor() instanceof IntersectionTypeSymbol) {
-            List<TypeSymbol> typeSymbols = ((IntersectionTypeSymbol) typeRef.typeDescriptor()).memberTypeDescriptors();
+            handleRecordTypeSymbol((RecordTypeSymbol) type, schema, componentName, apiDocs);
+        } else if (type instanceof IntersectionTypeSymbol) {
+            List<TypeSymbol> typeSymbols = ((IntersectionTypeSymbol) type).memberTypeDescriptors();
             for (TypeSymbol symbol: typeSymbols) {
                 if (!(symbol instanceof RecordTypeSymbol)) {
                     continue;
                 }
                 handleRecordTypeSymbol((RecordTypeSymbol) symbol, schema, componentName, apiDocs);
             }
-        } else if (typeRef.typeDescriptor() instanceof StringTypeSymbol) {
+        } else if (type instanceof StringTypeSymbol) {
             schema.put(componentName, new StringSchema());
             components.setSchemas(schema);
-        } else if (typeRef.typeDescriptor() instanceof IntTypeSymbol) {
+        } else if (type instanceof IntTypeSymbol) {
             schema.put(componentName, new IntegerSchema());
             components.setSchemas(schema);
-        } else if (typeRef.typeDescriptor() instanceof DecimalTypeSymbol) {
+        } else if (type instanceof DecimalTypeSymbol) {
             schema.put(componentName, new NumberSchema().format("double"));
             components.setSchemas(schema);
-        } else if (typeRef.typeDescriptor() instanceof FloatTypeSymbol) {
+        } else if (type instanceof FloatTypeSymbol) {
             schema.put(componentName, new NumberSchema().format("float"));
             components.setSchemas(schema);
-        } else if (typeRef.typeDescriptor() instanceof ArrayTypeSymbol) {
-            ArraySchema arraySchema = mapArrayToArraySchema(schema, typeRef.typeDescriptor(), componentName);
+        } else if (type instanceof ArrayTypeSymbol) {
+            ArraySchema arraySchema = mapArrayToArraySchema(schema, type, componentName);
             schema.put(componentName, arraySchema);
             components.setSchemas(schema);
-        } else if (typeRef.typeDescriptor() instanceof UnionTypeSymbol) {
-            Schema unionSchema = handleUnionType((UnionTypeSymbol) typeRef.typeDescriptor(), new Schema<>(),
+        } else if (type instanceof UnionTypeSymbol) {
+            Schema unionSchema = handleUnionType((UnionTypeSymbol) type, new Schema<>(),
                     componentName);
             schema.put(componentName, unionSchema);
             components.setSchemas(schema);
-        } else if (typeRef.typeDescriptor() instanceof MapTypeSymbol) {
-            MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) typeRef.typeDescriptor();
+        } else if (type instanceof MapTypeSymbol) {
+            MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) type;
             TypeDescKind typeDescKind = mapTypeSymbol.typeParam().typeKind();
             Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeDescKind.getName());
             schema.put(componentName, new ObjectSchema().additionalProperties(openApiSchema));
