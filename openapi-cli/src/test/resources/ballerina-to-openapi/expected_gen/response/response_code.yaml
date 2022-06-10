@@ -1,0 +1,99 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pet:
+    post:
+      operationId: operation_post_/pet
+      responses:
+        "100":
+          description: Continue
+        "101":
+          description: SwitchingProtocols
+        "200":
+          description: Ok
+        "201":
+          description: Created
+        "202":
+          description: Accepted
+        "203":
+          description: NonAuthoritativeInformation
+        "204":
+          description: NoContent
+        "206":
+          description: PartialContent
+        "300":
+          description: MultipleChoices
+        "301":
+          description: MovedPermanently
+        "302":
+          description: Found
+        "303":
+          description: SeeOther
+        "304":
+          description: NotModified
+        "305":
+          description: UseProxy
+        "307":
+          description: TemporaryRedirect
+        "308":
+          description: PermanentRedirect
+        "400":
+          description: BadRequest
+        "401":
+          description: Unauthorized
+        "402":
+          description: PaymentRequired
+        "403":
+          description: Forbidden
+        "404":
+          description: NotFound
+        "405":
+          description: MethodNotAllowed
+        "406":
+          description: NotAcceptable
+        "407":
+          description: ProxyAuthenticationRequired
+        "409":
+          description: Conflict
+        "410":
+          description: Gone
+        "411":
+          description: LengthRequired
+        "412":
+          description: PreconditionFailed
+        "413":
+          description: PayloadTooLarge
+        "414":
+          description: UriTooLong
+        "415":
+          description: UnsupportedMediaType
+        "416":
+          description: RangeNotSatisfiable
+        "417":
+          description: ExpectationFailed
+        "426":
+          description: UpgradeRequired
+        "429":
+          description: TooManyRequests
+        "431":
+          description: RequestHeaderFieldsTooLarge
+        "500":
+          description: InternalServerError
+        "501":
+          description: NotImplemented
+        "502":
+          description: BadGateway
+        "503":
+          description: ServiceUnavailable
+        "505":
+          description: HttpVersionNotSupported
+components: {}
