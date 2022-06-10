@@ -420,6 +420,8 @@ public class OpenAPIResponseMapper {
             case QUALIFIED_NAME_REFERENCE:
                 QualifiedNameReferenceNode qNode = (QualifiedNameReferenceNode) typeNode;
                 return  handleQualifiedNameType(apiResponses, customMediaPrefix, headers, apiResponse, qNode);
+            case FLOAT_TYPE_DESC:
+            case DECIMAL_TYPE_DESC:
             case INT_TYPE_DESC:
             case STRING_TYPE_DESC:
             case BOOLEAN_TYPE_DESC:
