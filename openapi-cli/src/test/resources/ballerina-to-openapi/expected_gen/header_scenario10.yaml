@@ -1,7 +1,18 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /ping:
     get:
-      operationId: operation_get_/ping
+      operationId: getPing
       parameters:
         - name: headerValue
           in: header
@@ -12,7 +23,7 @@ paths:
           description: Ok
   /ping02:
     get:
-      operationId: operation_get_/ping02
+      operationId: getPing02
       parameters:
         - name: headerValue
           in: header

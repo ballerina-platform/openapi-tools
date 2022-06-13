@@ -1,7 +1,7 @@
 paths:
   /ping:
     get:
-      operationId: operation_get_/ping
+      operationId: getPing
       parameters:
         - name: x-client
           in: header
@@ -12,3 +12,4 @@ paths:
       responses:
         "200":
           description: Ok
+components: {}

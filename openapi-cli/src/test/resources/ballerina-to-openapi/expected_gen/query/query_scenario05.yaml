@@ -2,7 +2,7 @@ paths:
   /pets:
     get:
       summary: Mock example
-      operationId: operation_get_/pets
+      operationId: getPets
       parameters:
         - name: pet
           in: query

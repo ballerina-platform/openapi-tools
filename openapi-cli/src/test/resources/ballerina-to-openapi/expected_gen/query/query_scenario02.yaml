@@ -1,7 +1,7 @@
 paths:
   /pets:
     get:
-      operationId: operation_get_/pets
+      operationId: getPets
       parameters:
         - name: offset
           in: query

@@ -1,7 +1,7 @@
 paths:
   /cachingBackEnd:
     get:
-      operationId: operation_get_/cachingBackEnd
+      operationId: getCachingbackend
       responses:
         "200":
           description: Ok
@@ -22,7 +22,7 @@ paths:
                 type: string
   /cachingBackEnd01:
     get:
-      operationId: operation_get_/cachingBackEnd01
+      operationId: getCachingbackend01
       responses:
         "200":
           description: Ok

@@ -1,7 +1,7 @@
 paths:
   /pets:
     get:
-      operationId: operation_get_/pets
+      operationId: getPets
       parameters:
         - name: pet
           in: query
@@ -12,7 +12,7 @@ paths:
           description: Ok
   /pet:
     get:
-      operationId: operation_get_/pet
+      operationId: getPet
       parameters:
         - name: pet
           in: query
@@ -23,7 +23,7 @@ paths:
           description: Ok
   /ping:
     get:
-      operationId: operation_get_/ping
+      operationId: getPing
       parameters:
         - name: offest
           in: query
@@ -35,7 +35,7 @@ paths:
           description: Ok
   /ping02:
     get:
-      operationId: operation_get_/ping02
+      operationId: getPing02
       parameters:
         - name: limitV
           in: query

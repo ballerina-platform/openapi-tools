@@ -13,7 +13,7 @@ paths:
   /say-hello/{path-param}:
     get:
       summary: Description
-      operationId: "operation_get_/say-hello/{path-param}"
+      operationId: getSayHelloPathParam
       parameters:
         - name: path-param
           in: path
@@ -36,7 +36,7 @@ paths:
   /v2/say-hello:
     post:
       summary: Description
-      operationId: operation_post_/v2/say-hello
+      operationId: postV2SayHello
       parameters:
         - name: x-client
           in: header

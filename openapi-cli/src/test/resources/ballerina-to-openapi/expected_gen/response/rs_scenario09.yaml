@@ -12,13 +12,13 @@ servers:
 paths:
   /:
     get:
-      operationId: operation_get
+      operationId: get
       responses:
         "202":
           description: Accepted
   /hi:
     get:
-      operationId: operation_get_/hi
+      operationId: getHi
       parameters:
         - name: X-client
           in: header
@@ -29,12 +29,12 @@ paths:
         "202":
           description: Accepted
     put:
-      operationId: operation_put_/hi
+      operationId: putHi
       responses:
         "200":
           description: Ok
     post:
-      operationId: operation_post_/hi
+      operationId: postHi
       responses:
         "200":
           description: Ok
@@ -44,7 +44,7 @@ paths:
                 $ref: '#/components/schemas/Pet'
   /hi/{id}:
     get:
-      operationId: "operation_get_/hi/{id}"
+      operationId: getHiId
       parameters:
         - name: id
           in: path
@@ -67,7 +67,7 @@ paths:
                 type: string
   /v1:
     post:
-      operationId: operation_post_/v1
+      operationId: postV1
       requestBody:
         content:
           application/json:

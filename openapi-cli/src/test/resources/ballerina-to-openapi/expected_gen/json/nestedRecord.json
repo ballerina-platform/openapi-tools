@@ -18,7 +18,7 @@
   "paths" : {
     "/hi" : {
       "post" : {
-        "operationId" : "operation_post_/hi",
+        "operationId" : "postHi",
         "requestBody" : {
           "content" : {
             "application/json" : {

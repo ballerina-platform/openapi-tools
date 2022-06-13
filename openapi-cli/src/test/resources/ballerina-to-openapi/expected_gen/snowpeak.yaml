@@ -13,7 +13,7 @@ paths:
   /locations:
     get:
       summary: Represents Snowpeak location resource
-      operationId: operation_get_/locations
+      operationId: getLocations
       responses:
         "200":
           description: Ok
@@ -35,7 +35,7 @@ paths:
   /locations/{id}/rooms:
     get:
       summary: Reperesents Snowpeak room collection resource
-      operationId: "operation_get_/locations/{id}/rooms"
+      operationId: getLocationsIdRooms
       parameters:
         - name: id
           in: path
@@ -65,7 +65,7 @@ paths:
   /reservation:
     put:
       summary: Represents Snowpeak reservation resource
-      operationId: operation_put_/reservation
+      operationId: putReservation
       requestBody:
         description: Reservation representation
         content:
@@ -87,7 +87,7 @@ paths:
                 type: string
     post:
       summary: Represents Snowpeak reservation resource
-      operationId: operation_post_/reservation
+      operationId: postReservation
       requestBody:
         description: Reservation representation
         content:
@@ -121,7 +121,7 @@ paths:
   /payment/{id}:
     post:
       summary: Represents Snowpeak payment resource
-      operationId: "operation_post_/payment/{id}"
+      operationId: postPaymentId
       parameters:
         - name: id
           in: path
