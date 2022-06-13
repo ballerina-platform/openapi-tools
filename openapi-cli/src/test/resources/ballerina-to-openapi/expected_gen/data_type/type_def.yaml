@@ -11,6 +11,17 @@ servers:
         default: "9090"
 paths:
   /reservation:
+    get:
+      operationId: getReservation
+      parameters:
+        - name: count
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Count'
+      responses:
+        "202":
+          description: Accepted
     post:
       summary: Represents Snowpeak reservation resource
       operationId: postReservation
@@ -23,11 +34,48 @@ paths:
       responses:
         "202":
           description: Accepted
+  /reservation/{id}:
+    get:
+      operationId: getReservationId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/PetId'
+      responses:
+        "202":
+          description: Accepted
 components:
   schemas:
+    PriceMap:
+      required:
+        - price
+        - salary
+      type: object
+      properties:
+        price:
+          type: integer
+          format: int64
+        salary:
+          type: number
+          format: double
+    Salary:
+      oneOf:
+        - type: integer
+          format: int64
+        - type: number
+          format: float
+        - type: number
+          format: double
     Action:
       type: string
       description: Adding doc
+    Price:
+      oneOf:
+        - type: number
+          format: float
+        - $ref: '#/components/schemas/PriceMap'
     Count:
       type: integer
       format: int32
@@ -39,10 +87,15 @@ components:
       type: object
       additionalProperties:
         type: string
+    PetId:
+      type: integer
+      format: int32
     Link:
       required:
         - count
+        - price
         - rels
+        - salary
       type: object
       properties:
         rels:
@@ -55,3 +108,7 @@ components:
             - $ref: '#/components/schemas/Count'
         books:
           $ref: '#/components/schemas/Books'
+        price:
+          $ref: '#/components/schemas/Price'
+        salary:
+          $ref: '#/components/schemas/Salary'

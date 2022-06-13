@@ -4,12 +4,14 @@ public type Action string?;
 public type Count decimal?;
 public type Rels string[]?;
 public type Books map<string>?;
+public type Salary int|float|decimal?;
 
 type Link record {|
     Rels rels;
     Action actions;
     Count count?;
     Books books;
+    Salary salary;
 |};
 
 service /payloadV on new http:Listener(9090) {

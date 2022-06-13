@@ -59,10 +59,8 @@ public enum DiagnosticMessages {
             "Generated OpenAPI definition does not contain request body information of the `GET` method," +
                     " as it's not supported by the OpenAPI specification.",
             DiagnosticSeverity.WARNING),
-    OAS_CONVERTOR_114("OAS_CONVERTOR_114",
-                              "Generated OpenAPI definition does not contain information for" +
-                                      " Ballerina type '%s'. ",
-                      DiagnosticSeverity.WARNING);
+    OAS_CONVERTOR_114("OAS_CONVERTOR_114", "Generated OpenAPI definition does not contain information " +
+            "for Ballerina type '%s'. ", DiagnosticSeverity.WARNING);
 
     private final String code;
     private final String description;
