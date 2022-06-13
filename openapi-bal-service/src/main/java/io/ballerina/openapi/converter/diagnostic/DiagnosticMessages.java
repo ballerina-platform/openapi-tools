@@ -60,8 +60,8 @@ public enum DiagnosticMessages {
                     " as it's not supported by the OpenAPI specification.",
             DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_114("OAS_CONVERTOR_114",
-                              "Generated OpenAPI definition does not contain information for '%s'" +
-                                      " Ballerina type.",
+                              "Generated OpenAPI definition does not contain information for" +
+                                      " Ballerina type '%s'. ",
                       DiagnosticSeverity.WARNING);
 
     private final String code;
