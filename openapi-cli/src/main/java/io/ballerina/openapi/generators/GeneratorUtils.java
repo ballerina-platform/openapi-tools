@@ -48,7 +48,6 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -65,9 +64,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.ws.rs.core.MediaType;
 
@@ -93,18 +89,11 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_PDF;
 import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
-import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.generators.GeneratorConstants.EXPLODE;
-import static io.ballerina.openapi.generators.GeneratorConstants.GET;
-import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.generators.GeneratorConstants.LINE_SEPARATOR;
-import static io.ballerina.openapi.generators.GeneratorConstants.OPTIONS;
-import static io.ballerina.openapi.generators.GeneratorConstants.PATCH;
-import static io.ballerina.openapi.generators.GeneratorConstants.PUT;
 import static io.ballerina.openapi.generators.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.generators.GeneratorConstants.STYLE;
-import static io.ballerina.openapi.generators.GeneratorConstants.TRACE;
 
 /**
  * This class util for store all the common scenarios.
@@ -350,147 +339,6 @@ public class GeneratorUtils {
                 return SyntaxKind.JSON_KEYWORD.stringValue();
             // TODO: fill other types
         }
-    }
-
-    /**
-     * Generate remote function method name , when operation ID is not available for given operation.
-     *
-     * @param paths - swagger paths object
-     * @return {@link io.swagger.v3.oas.models.Paths }
-     */
-    public static Paths setOperationId(Paths paths) {
-        Set<Map.Entry<String, PathItem>> entries = paths.entrySet();
-        for (Map.Entry<String, PathItem> entry: entries) {
-            PathItem pathItem = entry.getValue();
-            int countMissId = 0;
-            for (Operation operation : entry.getValue().readOperations()) {
-                if (operation.getOperationId() == null) {
-                    //simplify here with 1++
-                    countMissId = countMissId + 1;
-                } else {
-                    String operationId = getValidName(operation.getOperationId(), false);
-                    operation.setOperationId(operationId);
-                }
-            }
-
-            if (pathItem.getGet() != null) {
-                Operation getOp = pathItem.getGet();
-                if (getOp.getOperationId() == null) {
-                    String operationId;
-                    String[] split = entry.getKey().trim().split("/");
-                    if (countMissId > 1) {
-                        operationId = getOperationId(split, GET);
-                    } else {
-                        operationId = getOperationId(split, " ");
-                    }
-                    getOp.setOperationId(operationId);
-                }
-            }
-            if (pathItem.getPut() != null) {
-                Operation putOp = pathItem.getPut();
-                if (putOp.getOperationId() == null) {
-                    String operationId;
-                    String[] split = entry.getKey().trim().split("/");
-                    if (countMissId > 1) {
-                        operationId = getOperationId(split, PUT);
-                    } else {
-                        operationId = getOperationId(split, " ");
-                    }
-                    putOp.setOperationId(operationId);
-                }
-            }
-            if (pathItem.getPost() != null) {
-                Operation postOp = pathItem.getPost();
-                if (postOp.getOperationId() == null) {
-                    String operationId;
-                    String[] split = entry.getKey().trim().split("/");
-                    if (countMissId > 1) {
-                        operationId = getOperationId(split, "post");
-                    } else {
-                        operationId = getOperationId(split, " ");
-                    }
-                    postOp.setOperationId(operationId);
-                }
-            }
-            if (pathItem.getDelete() != null) {
-                Operation deleteOp = pathItem.getDelete();
-                if (deleteOp.getOperationId() == null) {
-                    String operationId;
-                    String[] split = entry.getKey().trim().split("/");
-                    if (countMissId > 1) {
-                        operationId = getOperationId(split, DELETE);
-                    } else {
-                        operationId = getOperationId(split, " ");
-                    }
-                    deleteOp.setOperationId(operationId);
-                }
-            }
-            if (pathItem.getOptions() != null) {
-                Operation optionOp = pathItem.getOptions();
-                if (optionOp.getOperationId() == null) {
-                    String operationId;
-                    String[] split = entry.getKey().trim().split("/");
-                    if (countMissId > 1) {
-                        operationId = getOperationId(split, OPTIONS);
-                    } else {
-                        operationId = getOperationId(split, " ");
-                    }
-                    optionOp.setOperationId(operationId);
-                }
-            }
-            if (pathItem.getHead() != null) {
-                Operation headOp = pathItem.getHead();
-                if (headOp.getOperationId() == null) {
-                    String operationId;
-                    String[] split = entry.getKey().trim().split("/");
-                    if (countMissId > 1) {
-                        operationId = getOperationId(split, HEAD);
-                    } else {
-                        operationId = getOperationId(split, " ");
-                    }
-                    headOp.setOperationId(operationId);
-                }
-            }
-            if (pathItem.getPatch() != null) {
-                Operation patchOp = pathItem.getPatch();
-                if (patchOp.getOperationId() == null) {
-                    String operationId;
-                    String[] split = entry.getKey().trim().split("/");
-                    if (countMissId > 1) {
-                        operationId = getOperationId(split, PATCH);
-                    } else {
-                        operationId = getOperationId(split, " ");
-                    }
-                    patchOp.setOperationId(operationId);
-                }
-            }
-            if (pathItem.getTrace() != null) {
-                Operation traceOp = pathItem.getTrace();
-                if (traceOp.getOperationId() == null) {
-                    String operationId;
-                    String[] split = entry.getKey().trim().split("/");
-                    if (countMissId > 1) {
-                        operationId = getOperationId(split, TRACE);
-                    } else {
-                        operationId = getOperationId(split, " ");
-                    }
-                    traceOp.setOperationId(operationId);
-                }
-            }
-        }
-        return paths;
-    }
-
-    private static String getOperationId(String[] split, String method) {
-        String operationId;
-        String regEx = "\\{([^}]*)\\}";
-        Matcher matcher = Pattern.compile(regEx).matcher(split[split.length - 1]);
-        if (matcher.matches()) {
-            operationId = method + split[split.length - 2] + "By" + matcher.group(1);
-        } else {
-            operationId = method + split[split.length - 1];
-        }
-        return Character.toLowerCase(operationId.charAt(0)) + operationId.substring(1);
     }
 
     /*

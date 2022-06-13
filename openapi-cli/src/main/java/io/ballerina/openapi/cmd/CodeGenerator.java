@@ -625,8 +625,6 @@ public class CodeGenerator {
         io.swagger.v3.oas.models.Paths openAPIPaths = openAPI.getPaths();
         if (isClient) {
             validateOperationIds(openAPIPaths.entrySet());
-        } else {
-            GeneratorUtils.setOperationId(openAPIPaths);
         }
         validateRequestBody(openAPIPaths.entrySet());
 
