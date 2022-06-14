@@ -54,14 +54,6 @@ paths:
           description: Accepted
 components:
   schemas:
-    Pet-Store:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
     Pet-Task:
       required:
         - pet-id
@@ -79,3 +71,11 @@ components:
         store:
           $ref: '#/components/schemas/Pet-Store'
       description: Description
+    Pet-Store:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64

@@ -38,6 +38,18 @@
   },
   "components" : {
     "schemas" : {
+      "Dog" : {
+        "required" : [ "bark", "perant" ],
+        "type" : "object",
+        "properties" : {
+          "perant" : {
+            "$ref" : "#/components/schemas/Pet"
+          },
+          "bark" : {
+            "type" : "boolean"
+          }
+        }
+      },
       "Pet" : {
         "required" : [ "id", "name" ],
         "type" : "object",
@@ -51,18 +63,6 @@
           },
           "tag" : {
             "type" : "string"
-          }
-        }
-      },
-      "Dog" : {
-        "required" : [ "bark", "perant" ],
-        "type" : "object",
-        "properties" : {
-          "perant" : {
-            "$ref" : "#/components/schemas/Pet"
-          },
-          "bark" : {
-            "type" : "boolean"
           }
         }
       }

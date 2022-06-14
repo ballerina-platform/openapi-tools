@@ -19,6 +19,7 @@
 package io.ballerina.openapi.converter.service;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
@@ -30,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
@@ -65,17 +67,22 @@ public class OpenAPIParameterMapper {
     private final OperationAdaptor operationAdaptor;
     private final Map<String, String> apidocs;
     private final List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
+    private final Components components;
+    private final SemanticModel semanticModel;
 
     public List<OpenAPIConverterDiagnostic> getErrors() {
         return errors;
     }
 
     public OpenAPIParameterMapper(FunctionDefinitionNode functionDefinitionNode,
-                                  OperationAdaptor operationAdaptor, Map<String, String> apidocs) {
+                                  OperationAdaptor operationAdaptor, Map<String, String> apidocs,
+                                  Components components, SemanticModel semanticModel) {
 
         this.functionDefinitionNode = functionDefinitionNode;
         this.operationAdaptor = operationAdaptor;
         this.apidocs = apidocs;
+        this.components = components;
+        this.semanticModel = semanticModel;
     }
 
 
@@ -92,7 +99,8 @@ public class OpenAPIParameterMapper {
         FunctionSignatureNode functionSignature = functionDefinitionNode.functionSignature();
         SeparatedNodeList<ParameterNode> parameterList = functionSignature.parameters();
         for (ParameterNode parameterNode : parameterList) {
-            OpenAPIQueryParameterMapper queryParameterMapper = new OpenAPIQueryParameterMapper(apidocs);
+            OpenAPIQueryParameterMapper queryParameterMapper = new OpenAPIQueryParameterMapper(apidocs, components,
+                    semanticModel);
             if (parameterNode.kind() == SyntaxKind.REQUIRED_PARAM) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNode;
                 // Handle query parameter
@@ -143,8 +151,19 @@ public class OpenAPIParameterMapper {
             if (param instanceof ResourcePathParameterNode) {
                 PathParameter pathParameterOAS = new PathParameter();
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
-                pathParameterOAS.schema(ConverterCommonUtils.getOpenApiSchema(
-                        pathParam.typeDescriptor().toString().trim()));
+                if (pathParam.typeDescriptor().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
+                    SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) pathParam.typeDescriptor();
+                    OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+                    TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
+                    componentMapper.createComponentSchema(components.getSchemas(), typeSymbol);
+                    Schema schema = new Schema();
+                    schema.set$ref(ConverterCommonUtils.unescapeIdentifier(queryNode.name().text().trim()));
+                    pathParameterOAS.setSchema(schema);
+                } else {
+                    pathParameterOAS.schema(ConverterCommonUtils.getOpenApiSchema(
+                            pathParam.typeDescriptor().toString().trim()));
+                }
+
                 pathParameterOAS.setName(ConverterCommonUtils.unescapeIdentifier(pathParam.paramName().text()));
 
                 // Check the parameter has doc
@@ -180,9 +199,10 @@ public class OpenAPIParameterMapper {
                 Optional<String> customMediaType = extractCustomMediaType(functionDefinitionNode);
                 OpenAPIRequestBodyMapper openAPIRequestBodyMapper = customMediaType.map(
                         value -> new OpenAPIRequestBodyMapper(components,
-                        operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
+                                operationAdaptor, semanticModel, value)).orElse(new OpenAPIRequestBodyMapper(components,
                         operationAdaptor, semanticModel));
                 openAPIRequestBodyMapper.handlePayloadAnnotation(requiredParameterNode, schema, annotation, apidocs);
+                errors.addAll(openAPIRequestBodyMapper.getDiagnostics());
             } else if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD) &&
                     (Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
                 DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
