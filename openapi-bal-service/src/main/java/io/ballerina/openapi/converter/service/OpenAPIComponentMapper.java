@@ -54,7 +54,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import static io.ballerina.openapi.converter.Constants.DOUBLE;
@@ -121,8 +120,7 @@ public class OpenAPIComponentMapper {
                 components.setSchemas(schema);
                 break;
             case DECIMAL:
-                Objects.requireNonNull(schema.put(componentName, new NumberSchema().format(DOUBLE)))
-                        .description(typeDoc);
+                schema.put(componentName, new NumberSchema().format(DOUBLE).description(typeDoc));
                 components.setSchemas(schema);
                 break;
             case FLOAT:
