@@ -109,38 +109,56 @@ components:
           type: string
           description: End date in yyyy-mm-dd
       description: Represents a reservation of rooms
-    Link:
+    Payment:
       required:
-        - href
-        - rel
+        - cardNumber
+        - cardholderName
+        - expiryMonth
+        - expiryYear
       type: object
       properties:
-        rel:
+        cardholderName:
           type: string
-          description: Names the relationship of the linked target to the current
-            representation
-        href:
+          description: Name of the card holder
+        cardNumber:
+          type: integer
+          description: Card number
+          format: int64
+        expiryMonth:
           type: string
-          description: Target URL
-        types:
+          description: Expiration month of the card in mm
+        expiryYear:
+          type: string
+          description: Expiaration year of the card in yyyy
+      description: Reperesents payement for rooms
+    PaymentReceipt:
+      required:
+        - currency
+        - id
+        - lastUpdated
+        - rooms
+        - total
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identification
+        currency:
+          type: string
+          description: Currency used in price
+        total:
+          type: number
+          description: Total amount paid
+          format: double
+        lastUpdated:
+          type: string
+          description: Last updated time stamp
+        rooms:
           type: array
-          description: Expected resource representation media types
+          description: Booked rooms
           items:
-            type: string
-        methods:
-          type: array
-          description: Allowed resource methods
-          items:
-            type: string
-            enum:
-              - OPTIONS
-              - HEAD
-              - PATCH
-              - DELETE
-              - PUT
-              - POST
-              - GET
-      description: Represents a server-provided hyperlink
+            $ref: '#/components/schemas/Room'
+      description: Reperesents receipt for the payment
     Links:
       required:
         - links
@@ -180,28 +198,6 @@ components:
               format: double
             reservation:
               $ref: '#/components/schemas/Reservation'
-    Payment:
-      required:
-        - cardNumber
-        - cardholderName
-        - expiryMonth
-        - expiryYear
-      type: object
-      properties:
-        cardholderName:
-          type: string
-          description: Name of the card holder
-        cardNumber:
-          type: integer
-          description: Card number
-          format: int64
-        expiryMonth:
-          type: string
-          description: Expiration month of the card in mm
-        expiryYear:
-          type: string
-          description: Expiaration year of the card in yyyy
-      description: Reperesents payement for rooms
     Room:
       required:
         - capacity
@@ -250,31 +246,35 @@ components:
           description: Number of rooms as per the status
           format: int64
       description: Represents resort room
-    PaymentReceipt:
+    Link:
       required:
-        - currency
-        - id
-        - lastUpdated
-        - rooms
-        - total
+        - href
+        - rel
       type: object
       properties:
-        id:
+        rel:
           type: string
-          description: Unique identification
-        currency:
+          description: Names the relationship of the linked target to the current
+            representation
+        href:
           type: string
-          description: Currency used in price
-        total:
-          type: number
-          description: Total amount paid
-          format: double
-        lastUpdated:
-          type: string
-          description: Last updated time stamp
-        rooms:
+          description: Target URL
+        types:
           type: array
-          description: Booked rooms
+          description: Expected resource representation media types
           items:
-            $ref: '#/components/schemas/Room'
-      description: Reperesents receipt for the payment
+            type: string
+        methods:
+          type: array
+          description: Allowed resource methods
+          items:
+            type: string
+            enum:
+              - OPTIONS
+              - HEAD
+              - PATCH
+              - DELETE
+              - PUT
+              - POST
+              - GET
+      description: Represents a server-provided hyperlink

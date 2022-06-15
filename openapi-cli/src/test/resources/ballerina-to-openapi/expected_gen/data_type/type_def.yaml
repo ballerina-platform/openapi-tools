@@ -1,0 +1,114 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /reservation:
+    get:
+      operationId: getReservation
+      parameters:
+        - name: count
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Count'
+      responses:
+        "202":
+          description: Accepted
+    post:
+      summary: Represents Snowpeak reservation resource
+      operationId: postReservation
+      requestBody:
+        description: Reservation representation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Link'
+      responses:
+        "202":
+          description: Accepted
+  /reservation/{id}:
+    get:
+      operationId: getReservationId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/PetId'
+      responses:
+        "202":
+          description: Accepted
+components:
+  schemas:
+    PriceMap:
+      required:
+        - price
+        - salary
+      type: object
+      properties:
+        price:
+          type: integer
+          format: int64
+        salary:
+          type: number
+          format: double
+    Salary:
+      oneOf:
+        - type: integer
+          format: int64
+        - type: number
+          format: float
+        - type: number
+          format: double
+    Action:
+      type: string
+      description: Adding doc
+    Price:
+      oneOf:
+        - type: number
+          format: float
+        - $ref: '#/components/schemas/PriceMap'
+    Count:
+      type: integer
+      format: int32
+    Rels:
+      type: array
+      items:
+        type: string
+    Books:
+      type: object
+      additionalProperties:
+        type: string
+    PetId:
+      type: integer
+      format: int32
+    Link:
+      required:
+        - count
+        - price
+        - rels
+        - salary
+      type: object
+      properties:
+        rels:
+          $ref: '#/components/schemas/Rels'
+        actions:
+          $ref: '#/components/schemas/Action'
+        count:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Count'
+        books:
+          $ref: '#/components/schemas/Books'
+        price:
+          $ref: '#/components/schemas/Price'
+        salary:
+          $ref: '#/components/schemas/Salary'

@@ -1,0 +1,71 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /reservation:
+    post:
+      summary: Represents Snowpeak reservation resource
+      operationId: postReservation
+      requestBody:
+        description: Reservation representation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Link'
+      responses:
+        "202":
+          description: Accepted
+components:
+  schemas:
+    Salary:
+      nullable: true
+      oneOf:
+        - type: integer
+          format: int64
+        - type: number
+          format: float
+        - type: number
+          format: double
+    Action:
+      type: string
+      nullable: true
+    Count:
+      type: number
+      format: double
+      nullable: true
+    Rels:
+      type: array
+      nullable: true
+      items:
+        type: string
+    Books:
+      type: object
+      additionalProperties:
+        type: string
+      nullable: true
+    Link:
+      required:
+        - actions
+        - books
+        - rels
+        - salary
+      type: object
+      properties:
+        rels:
+          $ref: '#/components/schemas/Rels'
+        actions:
+          $ref: '#/components/schemas/Action'
+        count:
+          $ref: '#/components/schemas/Count'
+        books:
+          $ref: '#/components/schemas/Books'
+        salary:
+          $ref: '#/components/schemas/Salary'
