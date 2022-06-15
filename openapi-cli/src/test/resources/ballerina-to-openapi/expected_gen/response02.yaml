@@ -1,18 +1,7 @@
-openapi: 3.0.1
-info:
-  title: PayloadV
-  version: 0.0.0
-servers:
-  - url: "{server}:{port}/payloadV"
-    variables:
-      server:
-        default: http://petstore.openapi.io
-      port:
-        default: "80"
 paths:
   /user:
     post:
-      operationId: operation_post_/user
+      operationId: postUser
       responses:
         "200":
           description: Ok

@@ -1,19 +1,8 @@
-openapi: 3.0.1
-info:
-  title: PayloadV
-  version: 0.1.0
-servers:
-  - url: "{server}:{port}/payloadV"
-    variables:
-      server:
-        default: http://localhost
-      port:
-        default: "9090"
 paths:
   /reservation:
     post:
       summary: Represents Snowpeak reservation resource
-      operationId: operation_post_/reservation
+      operationId: postReservation
       requestBody:
         description: Reservation representation
         content:
@@ -47,7 +36,7 @@ paths:
   /payment/{id}:
     post:
       summary: Represents Snowpeak payment resource
-      operationId: "operation_post_/payment/{id}"
+      operationId: postPaymentId
       parameters:
         - name: id
           in: path

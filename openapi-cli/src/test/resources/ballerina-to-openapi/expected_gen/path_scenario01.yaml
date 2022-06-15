@@ -1,8 +1,7 @@
-
 paths:
   /:
     post:
-      operationId: operation_post
+      operationId: post
       responses:
         "202":
           description: Accepted

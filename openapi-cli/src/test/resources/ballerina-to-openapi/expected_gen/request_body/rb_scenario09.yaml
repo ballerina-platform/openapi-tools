@@ -1,7 +1,7 @@
 paths:
   /ping:
     post:
-      operationId: operation_post_/ping
+      operationId: postPing
       requestBody:
         content:
           application/octet-stream:

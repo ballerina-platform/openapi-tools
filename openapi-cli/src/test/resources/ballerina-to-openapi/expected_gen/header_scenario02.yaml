@@ -1,7 +1,7 @@
 paths:
   /ping:
     get:
-      operationId: operation_get_/ping
+      operationId: getPing
       parameters:
         - name: x-item
           in: header
@@ -13,7 +13,7 @@ paths:
           description: Ok
   /ping02:
     get:
-      operationId: operation_get_/ping02
+      operationId: getPing02
       parameters:
         - name: x-item
           in: header

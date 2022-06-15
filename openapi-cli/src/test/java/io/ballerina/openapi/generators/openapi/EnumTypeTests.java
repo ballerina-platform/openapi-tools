@@ -32,8 +32,7 @@ import java.nio.file.Paths;
  * This test class for the covering the unit tests for record scenarios.
  */
 public class EnumTypeTests {
-    private static final Path RES_DIR =
-            Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
+    private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
     private Path tempDir;
 
     @BeforeMethod
