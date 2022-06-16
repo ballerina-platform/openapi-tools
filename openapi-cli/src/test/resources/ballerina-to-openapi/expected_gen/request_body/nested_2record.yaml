@@ -23,6 +23,16 @@ components:
           format: int64
         name:
           type: string
+    Dog:
+      required:
+        - bark
+        - perant
+      type: object
+      properties:
+        perant:
+          $ref: '#/components/schemas/Pet'
+        bark:
+          type: boolean
     Pet:
       required:
         - id
@@ -36,13 +46,3 @@ components:
           type: string
         tag:
           $ref: '#/components/schemas/Tag'
-    Dog:
-      required:
-        - bark
-        - perant
-      type: object
-      properties:
-        perant:
-          $ref: '#/components/schemas/Pet'
-        bark:
-          type: boolean

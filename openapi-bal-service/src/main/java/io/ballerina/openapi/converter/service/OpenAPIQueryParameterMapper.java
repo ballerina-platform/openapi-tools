@@ -17,6 +17,8 @@
  */
 package io.ballerina.openapi.converter.service;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
@@ -25,10 +27,12 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -57,12 +61,17 @@ import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.unescape
  * @since 2.0.0
  */
 public class OpenAPIQueryParameterMapper {
+    private final Components components;
+    private final SemanticModel semanticModel;
     private final Map<String, String> apidocs;
     private final SyntaxKind[] validExpressionKind = {STRING_LITERAL, NUMERIC_LITERAL, BOOLEAN_LITERAL,
             LIST_CONSTRUCTOR, NIL_LITERAL, MAPPING_CONSTRUCTOR};
 
-    public OpenAPIQueryParameterMapper(Map<String, String> apidocs) {
+    public OpenAPIQueryParameterMapper(Map<String, String> apidocs, Components components,
+                                       SemanticModel semanticModel) {
         this.apidocs = apidocs;
+        this.components = components;
+        this.semanticModel = semanticModel;
     }
 
     /**
@@ -99,6 +108,21 @@ public class OpenAPIQueryParameterMapper {
             // Handle required array type query parameter
             ArrayTypeDescriptorNode arrayNode = (ArrayTypeDescriptorNode) queryParam.typeName();
             return handleArrayTypeQueryParameter(queryParamName, arrayNode);
+        } else if (queryParam.typeName() instanceof SimpleNameReferenceNode && isQuery) {
+            QueryParameter queryParameter = new QueryParameter();
+            queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
+            SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) queryParam.typeName();
+            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+            TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
+            componentMapper.createComponentSchema(components.getSchemas(), typeSymbol);
+            Schema schema = new Schema();
+            schema.set$ref(ConverterCommonUtils.unescapeIdentifier(queryNode.name().text().trim()));
+            queryParameter.setSchema(schema);
+            queryParameter.setRequired(true);
+            if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
+                queryParameter.setDescription(apidocs.get(queryParamName.trim()));
+            }
+            return queryParameter;
         } else {
             QueryParameter queryParameter = createContentTypeForMapJson(queryParamName, false);
             if (!apidocs.isEmpty() && queryParam.paramName().isPresent() && apidocs.containsKey(queryParamName)) {
@@ -197,7 +221,7 @@ public class OpenAPIQueryParameterMapper {
      * Handle optional query parameter.
      */
     private QueryParameter setOptionalQueryParameter(String queryParamName, OptionalTypeDescriptorNode typeNode,
-                                                String isOptional) {
+                                                     String isOptional) {
         QueryParameter queryParameter = new QueryParameter();
         if (isOptional.equals(Constants.FALSE)) {
             queryParameter.setRequired(true);
