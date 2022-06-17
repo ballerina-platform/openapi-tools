@@ -37,14 +37,13 @@ import java.util.List;
  * All the tests related to the {@code io.ballerina.openapi.generators.service.RequestBodyGenerator} util.
  */
 public class RequestBodyTests {
+
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/service").toAbsolutePath();
     List<String> list1 = new ArrayList<>();
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
     SyntaxTree syntaxTree;
     public static final CodeGenerator CODE_GENERATOR = new CodeGenerator();
-
-
 
     @Test(description = "Scenario 01 - Request Body has single content type(application/json)")
     public void generateJsonPayload() throws IOException, BallerinaOpenApiException {

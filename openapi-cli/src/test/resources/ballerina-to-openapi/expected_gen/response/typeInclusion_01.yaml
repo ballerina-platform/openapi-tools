@@ -68,30 +68,6 @@ components:
           type: string
           description: End date in yyyy-mm-dd
       description: Represents a reservation of rooms
-    Link:
-      required:
-        - href
-        - rel
-      type: object
-      properties:
-        rel:
-          type: string
-        href:
-          type: string
-        mediaTypes:
-          type: array
-          items:
-            type: string
-        actions:
-          type: array
-          items:
-            type: string
-            enum:
-              - PATCH
-              - DELETE
-              - PUT
-              - POST
-              - GET
     Links:
       required:
         - links
@@ -122,3 +98,27 @@ components:
               description: Last updated time stamp
             reservation:
               $ref: '#/components/schemas/Reservation'
+    Link:
+      required:
+        - href
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+        mediaTypes:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            type: string
+            enum:
+              - PATCH
+              - DELETE
+              - PUT
+              - POST
+              - GET
