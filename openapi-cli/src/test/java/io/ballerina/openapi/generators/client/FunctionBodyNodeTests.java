@@ -85,7 +85,9 @@ public class FunctionBodyNodeTests {
                         "http:Responseresponse=check self.clientEp-> head(resourcePath, httpHeaders);returnresponse;}"},
                 {"diagnostic_files/operation_delete.yaml", "/pets/{petId}", "{string resourcePath = " +
                         "string `/pets/${getEncodedUri(petId)}`;" +
-                        "http:Response response = check self.clientEp-> delete(resourcePath);" +
+                        "http:Request request = new;" +
+                        "//TODO: Update the request as needed;\n" +
+                        "http:Response response = check self.clientEp-> delete(resourcePath, request);" +
                         "return response;}"},
                 {"diagnostic_files/json_payload.yaml", "/pets", "{string resourcePath = string `/pets`;" +
                         "http:Request request = new; request.setPayload(payload, \"application/json\"); " +

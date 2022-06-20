@@ -92,7 +92,6 @@ import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_FILE_NAM
 import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_CLIENT_PKG;
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_MOCK_PKG;
-import static io.ballerina.openapi.generators.GeneratorConstants.DELETE;
 import static io.ballerina.openapi.generators.GeneratorConstants.DOUBLE_LINE_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.ESCAPE_PATTERN;
 import static io.ballerina.openapi.generators.GeneratorConstants.GET;
@@ -686,7 +685,7 @@ public class CodeGenerator {
                 for (Map.Entry<PathItem.HttpMethod, Operation> operation : entry.getValue().readOperationsMap()
                         .entrySet()) {
                     String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
-                    boolean isRequestBodyInvalid = method.equals(GET) || method.equals(DELETE) || method.equals(HEAD);
+                    boolean isRequestBodyInvalid = method.equals(GET) || method.equals(HEAD);
                     if (isRequestBodyInvalid && operation.getValue().getRequestBody() != null) {
                         errorList.add(method.toUpperCase(Locale.ENGLISH) + " operation cannot have a requestBody. "
                                 + "Error at operationId: " + operation.getValue().getOperationId());

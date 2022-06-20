@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: Shopify Admin API
+  version: "2021-10"
+security:
+  - api_token: []
+tags:
+  - name: customers
+  - name: products
+  - name: orders
+  - name: fulfillments
+  - name: order_risks
+paths:
+  /admin/api/2021-10/orders/{order_id}/risks/{risk_id}.json:
+    delete:
+      summary: "Deletes an order risk for an order."
+      parameters:
+        - in: "path"
+          name: "order_id"
+          description: "Order ID"
+          schema:
+            type: string
+          required: true
+        - in: "path"
+          name: "risk_id"
+          description: "Order Risk ID"
+          schema:
+            type: string
+          required: true
+      tags:
+        - "order_risks"
+      responses:
+        200:
+          description: Status OK
+      operationId: "delete_order_risk"
+  /admin/api/2021-10:
+    delete:
+      summary: "Deletes an order risk for an order."
+      responses:
+        200:
+          description: Status OK
+      operationId: "order_risk"
+      requestBody:
+        content:
+          "application/json":
+            schema: { }
+components:
+  schemas: {}
+  securitySchemes:
+    api_token:
+      type: apiKey
+      name: X-Shopify-Access-Token
+      in: header
+      description: Represents API Key `X-Shopify-Access-Token`

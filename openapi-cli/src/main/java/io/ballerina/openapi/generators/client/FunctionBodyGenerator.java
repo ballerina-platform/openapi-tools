@@ -187,7 +187,7 @@ public class FunctionBodyGenerator {
             RequestBody requestBody = operation.getValue().getRequestBody();
             handleRequestBodyInOperation(statementsList, method, returnType, requestBody);
         } else {
-            createCommonFunctionBodyStatements(statementsList, method, rType, returnType);
+            createCommonFunctionBodyStatements(statementsList, method, returnType);
         }
         //Create statements
         NodeList<StatementNode> statements = createNodeList(statementsList);
@@ -497,15 +497,16 @@ public class FunctionBodyGenerator {
     /**
      * Generate common statements in function bosy.
      */
-    private void createCommonFunctionBodyStatements(List<StatementNode> statementsList, String method, String rType,
+    private void createCommonFunctionBodyStatements(List<StatementNode> statementsList, String method,
                                                     String returnType) {
 
         String clientCallStatement;
 
         // This condition for several methods.
-        boolean isMethod = method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(EXECUTE);
+        boolean isEntityBodyMethods = method.equals(POST) || method.equals(PUT) || method.equals(PATCH)
+                || method.equals(EXECUTE) || method.equals(DELETE);
         if (isHeader) {
-            if (isMethod) {
+            if (isEntityBodyMethods) {
                 ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "http:Request request = new");
                 statementsList.add(requestStatementNode);
@@ -524,7 +525,7 @@ public class FunctionBodyGenerator {
                             HTTP_HEADERS + ")";
                 }
             }
-        } else if (isMethod) {
+        } else if (isEntityBodyMethods) {
             ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "http:Request request = new");
             statementsList.add(requestStatementNode);
