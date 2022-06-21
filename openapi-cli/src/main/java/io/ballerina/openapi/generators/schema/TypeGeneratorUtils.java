@@ -20,16 +20,21 @@ package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MarkdownDocumentationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
@@ -47,24 +52,41 @@ import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.DECIMAL_INTEGER_LITERAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -151,28 +173,31 @@ public class TypeGeneratorUtils {
         for (Map.Entry<String, Schema> field : fields) {
             String fieldNameStr = escapeIdentifier(field.getKey().trim());
             // API doc generations
-            List<Node> schemaDoc = getFieldApiDocs(field.getValue());
+            Schema fieldSchema = field.getValue();
+            List<Node> schemaDoc = getFieldApiDocs(fieldSchema);
             NodeList<Node> schemaDocNodes = createNodeList(schemaDoc);
             IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldNameStr);
-            TypeDescriptorNode fieldTypeName = getTypeGenerator(field.getValue(), fieldNameStr)
+            TypeDescriptorNode fieldTypeName = getTypeGenerator(fieldSchema, fieldNameStr)
                     .generateTypeDescriptorNode();
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
-            MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+//            MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+            //Generate constraint annotation.
+            MetadataNode metadataNode = addConstraint(fieldSchema, documentationNode);
             if (required != null) {
                 if (!required.contains(field.getKey().trim())) {
-                    if (field.getValue().getDefault() != null) {
+                    if (fieldSchema.getDefault() != null) {
                         Token defaultValue;
-                        if ((field.getValue().getType()).equals(STRING)) {
-                            if (field.getValue().getDefault().toString().trim().equals("\"")) {
+                        if (fieldSchema instanceof StringSchema) {
+                            if (fieldSchema.getDefault().toString().trim().equals("\"")) {
                                 defaultValue = AbstractNodeFactory.createIdentifierToken("\"" + "\\" +
-                                        field.getValue().getDefault().toString() + "\"");
+                                        fieldSchema.getDefault().toString() + "\"");
                             } else {
                                 defaultValue = AbstractNodeFactory.createIdentifierToken("\"" +
-                                        field.getValue().getDefault().toString() + "\"");
+                                        fieldSchema.getDefault().toString() + "\"");
                             }
                         } else {
                             defaultValue = AbstractNodeFactory.createIdentifierToken
-                                    (field.getValue().getDefault().toString());
+                                    (fieldSchema.getDefault().toString());
                         }
                         ExpressionNode expressionNode = createRequiredExpressionNode(defaultValue);
                         RecordFieldWithDefaultValueNode defaultNode = NodeFactory.createRecordFieldWithDefaultValueNode
@@ -199,6 +224,113 @@ public class TypeGeneratorUtils {
         return recordFieldList;
 
     }
+
+    /**
+     *
+     * @param fieldSchema
+     * @param documentationNode
+     * @return
+     */
+    private static MetadataNode addConstraint(Schema<?> fieldSchema, MarkdownDocumentationNode documentationNode) {
+        if (fieldSchema instanceof StringSchema) {
+            StringSchema stringSchema = (StringSchema) fieldSchema;
+            // Attributes : maxLength, minLength, pattern
+            return generateStringConstraint(documentationNode, stringSchema);
+        } else if (fieldSchema instanceof IntegerSchema || fieldSchema instanceof NumberSchema) {
+            // Attribute : minimum, maximum, exclusiveMinimum, exclusiveMaximum, multipleOf
+            return generateNumberConstraint(fieldSchema, documentationNode);
+        } else if (fieldSchema instanceof ArraySchema) {
+            ArraySchema arraySchema = (ArraySchema) fieldSchema;
+            //Attributes: maxItems, minItems
+
+        }
+        // Ignore Object, Map and Composed schemas.
+        return createMetadataNode(documentationNode, createEmptyNodeList());
+    }
+
+    private static MetadataNode generateNumberConstraint(Schema<?> fieldSchema,
+                                                         MarkdownDocumentationNode documentationNode) {
+        List<String> fields = getNumberAnnotFields(fieldSchema);
+        if (fields.isEmpty()) {
+            return createMetadataNode(documentationNode, createEmptyNodeList());
+        }
+        String annotBody = "{" + String.join(",", fields) + "}";
+        AnnotationNode annotationNode = createAnnotationNode("constraint:Int", annotBody);
+
+        if (fieldSchema instanceof NumberSchema) {
+            if (fieldSchema.getFormat() == null || fieldSchema.getFormat().equals("float")) {
+                annotationNode = createAnnotationNode("constraint:Float", annotBody);
+            } else {
+                annotationNode = createAnnotationNode("constraint:Number", annotBody);
+            }
+        }
+        return createMetadataNode(documentationNode, createNodeList(annotationNode));
+    }
+
+    private static MetadataNode generateStringConstraint(MarkdownDocumentationNode documentationNode,
+                                                         StringSchema stringSchema) {
+        List<String> fields = getStringAnnotFields(stringSchema);
+        if (fields.isEmpty()) {
+            return createMetadataNode(documentationNode, createEmptyNodeList());
+        }
+        String annotBody = "{" + String.join(",", fields) + "}";
+        AnnotationNode annotationNode = createAnnotationNode("constraint:String", annotBody);
+        return createMetadataNode(documentationNode, createNodeList(annotationNode));
+    }
+
+    private static List<String> getNumberAnnotFields(Schema<?> numberSchema) {
+        List<String> fields = new ArrayList<>();
+        if (numberSchema.getMinimum() != null && numberSchema.getExclusiveMinimum() == null) {
+            String value = numberSchema.getMinimum().toString();
+            String fieldRef = "minimum:" + value;
+            fields.add(fieldRef);
+        }
+        if (numberSchema.getMaximum() != null && numberSchema.getExclusiveMaximum() == null) {
+            String value = numberSchema.getMaximum().toString();
+            String fieldRef = "maximum:" + value;
+            fields.add(fieldRef);
+        }
+        if (numberSchema.getExclusiveMinimum() != null &&
+                numberSchema.getExclusiveMinimum() && numberSchema.getMaximum() != null) {
+            String value = numberSchema.getMinimum().toString();
+            String fieldRef = "exclusiveMinimum:" + value;
+            fields.add(fieldRef);
+        }
+        if (numberSchema.getExclusiveMaximum() != null &&
+                numberSchema.getExclusiveMaximum() &&
+                numberSchema.getMaximum() != null) {
+            String value = numberSchema.getMaximum().toString();
+            String fieldRef = "exclusiveMaximum:" + value;
+            fields.add(fieldRef);
+        }
+        if (numberSchema.getMultipleOf() != null) {
+            String value = numberSchema.getMultipleOf().toString();
+            String fieldRef = "multipleOf:" + value;
+            fields.add(fieldRef);
+        }
+        return fields;
+    }
+
+    private static List<String> getStringAnnotFields(StringSchema stringSchema) {
+        List<String> fields = new ArrayList<>();
+        if (stringSchema.getMaxLength() != null) {
+            String value = stringSchema.getMaxLength().toString();
+            String fieldRef = "maxLength:" + value;
+            fields.add(fieldRef);
+        }
+        if (stringSchema.getMinLength() != null) {
+            String value = stringSchema.getMinLength().toString();
+            String fieldRef = "minLength:" + value;
+            fields.add(fieldRef);
+        }
+        if (stringSchema.getPattern() != null) {
+            String value = stringSchema.getPattern();
+            String fieldRef = "pattern:" + "\"" + value + "\"";
+            fields.add(fieldRef);
+        }
+        return fields;
+    }
+
 
     /**
      * Creates API documentation for record fields.
@@ -286,5 +418,25 @@ public class TypeGeneratorUtils {
         } else {
             return typeDescriptorNodes.get(0);
         }
+    }
+
+    /**
+     *
+     * @param annotationReference
+     * @param annotFields
+     * @return
+     */
+    private static AnnotationNode createAnnotationNode(String annotationReference,String annotFields) {
+        MappingConstructorExpressionNode annotationBody = null;
+        SimpleNameReferenceNode annotReference = createSimpleNameReferenceNode(
+                createIdentifierToken(annotationReference));
+        ExpressionNode expressionNode = NodeParser.parseExpression(annotFields);
+        if (expressionNode.kind() == MAPPING_CONSTRUCTOR) {
+            annotationBody = (MappingConstructorExpressionNode) expressionNode;
+        }
+        return NodeFactory.createAnnotationNode(
+                createToken(AT_TOKEN),
+                annotReference,
+                annotationBody);
     }
 }
