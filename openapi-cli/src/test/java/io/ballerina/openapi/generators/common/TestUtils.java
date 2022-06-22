@@ -153,7 +153,6 @@ public class TestUtils {
 
         String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve(s));
         String generatedSyntaxTree = syntaxTree.toString();
-
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));

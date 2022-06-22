@@ -48,6 +48,8 @@ import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -460,5 +462,43 @@ public class GeneratorUtils {
             ImportDeclarationNode importModule = GeneratorUtils.getImportDeclarationNode(BALLERINA, module);
             imports.add(importModule);
         }
+    }
+
+    public static boolean isConstraint(OpenAPI openAPI) {
+        if (openAPI.getComponents() != null && openAPI.getComponents().getSchemas() != null) {
+            Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
+            for (Map.Entry<String, Schema> entry : schemas.entrySet()) {
+                Schema<?> value = entry.getValue();
+                if (value instanceof ObjectSchema) {
+                    for (Map.Entry<String, Schema> e : value.getProperties().entrySet()) {
+                        Schema<?> propertyValue = e.getValue();
+                        boolean constraintExists = propertyValue.getMaximum() != null ||
+                                        propertyValue.getMinimum() != null ||
+                                        propertyValue.getMaxLength() != null ||
+                                        propertyValue.getMinLength() != null ||
+                                        propertyValue.getMaxItems() != null ||
+                                        propertyValue.getMinItems() != null ||
+                                        propertyValue.getExclusiveMinimum() != null ||
+                                        propertyValue.getExclusiveMaximum() != null;
+
+                        if (constraintExists) {
+                            return true;
+                        }
+                    }
+                }
+                boolean constraintExists = value.getMaximum() != null || value.getMinimum() != null ||
+                        value.getMaxLength() != null ||
+                        value.getMinLength() != null ||
+                        value.getMaxItems() != null ||
+                        value.getMinItems() != null ||
+                        value.getExclusiveMinimum() != null ||
+                        value.getExclusiveMaximum() != null;
+
+                if (constraintExists) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

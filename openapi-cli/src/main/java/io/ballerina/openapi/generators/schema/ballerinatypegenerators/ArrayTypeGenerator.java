@@ -85,10 +85,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         }
 
         if (arraySchema.getMaxItems() != null) {
-            if (arraySchema.getMaxItems() <= MAX_ARRAY_LENGTH) {
-                outStream.println("WARNING: Maximum array item count defined for the property '" + typeName +
-                        "' in the definition will be ignored");
-            } else {
+            if (arraySchema.getMaxItems() > MAX_ARRAY_LENGTH) {
                 throw new BallerinaOpenApiException("Maximum item count defined in the definition exceeds the " +
                         "maximum ballerina array length.");
             }

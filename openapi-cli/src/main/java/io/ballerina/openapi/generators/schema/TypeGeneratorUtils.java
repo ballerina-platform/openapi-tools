@@ -20,7 +20,6 @@ package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
@@ -34,7 +33,6 @@ import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
@@ -60,40 +58,46 @@ import io.swagger.v3.oas.models.media.StringSchema;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMarkdownDocumentationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.DECIMAL_INTEGER_LITERAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
+import static io.ballerina.openapi.generators.GeneratorConstants.CLOSE_BRACE;
+import static io.ballerina.openapi.generators.GeneratorConstants.COLON;
+import static io.ballerina.openapi.generators.GeneratorConstants.COMMA;
+import static io.ballerina.openapi.generators.GeneratorConstants.CONSTRAINT_ARRAY;
+import static io.ballerina.openapi.generators.GeneratorConstants.CONSTRAINT_FLOAT;
+import static io.ballerina.openapi.generators.GeneratorConstants.CONSTRAINT_INT;
+import static io.ballerina.openapi.generators.GeneratorConstants.CONSTRAINT_NUMBER;
+import static io.ballerina.openapi.generators.GeneratorConstants.CONSTRAINT_STRING;
+import static io.ballerina.openapi.generators.GeneratorConstants.EXCLUSIVE_MAX;
+import static io.ballerina.openapi.generators.GeneratorConstants.EXCLUSIVE_MIN;
+import static io.ballerina.openapi.generators.GeneratorConstants.FLOAT;
 import static io.ballerina.openapi.generators.GeneratorConstants.INTEGER;
+import static io.ballerina.openapi.generators.GeneratorConstants.MAXIMUM;
+import static io.ballerina.openapi.generators.GeneratorConstants.MAX_LENGTH;
+import static io.ballerina.openapi.generators.GeneratorConstants.MINIMUM;
+import static io.ballerina.openapi.generators.GeneratorConstants.MIN_LENGTH;
 import static io.ballerina.openapi.generators.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.generators.GeneratorConstants.OBJECT;
+import static io.ballerina.openapi.generators.GeneratorConstants.OPEN_BRACE;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
@@ -180,9 +184,15 @@ public class TypeGeneratorUtils {
             TypeDescriptorNode fieldTypeName = getTypeGenerator(fieldSchema, fieldNameStr)
                     .generateTypeDescriptorNode();
             MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
-//            MetadataNode metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
             //Generate constraint annotation.
-            MetadataNode metadataNode = addConstraint(fieldSchema, documentationNode);
+            AnnotationNode constraintNode = addConstraint(fieldSchema);
+            MetadataNode metadataNode;
+            if (constraintNode == null) {
+                metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+            } else {
+                metadataNode = createMetadataNode(documentationNode, createNodeList(constraintNode));
+            }
+
             if (required != null) {
                 if (!required.contains(field.getKey().trim())) {
                     if (fieldSchema.getDefault() != null) {
@@ -226,88 +236,104 @@ public class TypeGeneratorUtils {
     }
 
     /**
+     * This util is to set the constraint validation for given data type in the record field and user define type.
      *
-     * @param fieldSchema
-     * @param documentationNode
-     * @return
+     * @param fieldSchema Schema for data type
+     * @return {@link MetadataNode}
      */
-    private static MetadataNode addConstraint(Schema<?> fieldSchema, MarkdownDocumentationNode documentationNode) {
+    public static AnnotationNode addConstraint(Schema<?> fieldSchema) {
         if (fieldSchema instanceof StringSchema) {
             StringSchema stringSchema = (StringSchema) fieldSchema;
-            // Attributes : maxLength, minLength, pattern
-            return generateStringConstraint(documentationNode, stringSchema);
+            // Attributes : maxLength, minLength
+            return generateStringConstraint(stringSchema);
         } else if (fieldSchema instanceof IntegerSchema || fieldSchema instanceof NumberSchema) {
-            // Attribute : minimum, maximum, exclusiveMinimum, exclusiveMaximum, multipleOf
-            return generateNumberConstraint(fieldSchema, documentationNode);
+            // Attribute : minimum, maximum, exclusiveMinimum, exclusiveMaximum
+            return generateNumberConstraint(fieldSchema);
         } else if (fieldSchema instanceof ArraySchema) {
             ArraySchema arraySchema = (ArraySchema) fieldSchema;
-            //Attributes: maxItems, minItems
-
+            // Attributes: maxItems, minItems
+            return generateArrayConstraint(arraySchema);
         }
         // Ignore Object, Map and Composed schemas.
-        return createMetadataNode(documentationNode, createEmptyNodeList());
+        return null;
     }
 
-    private static MetadataNode generateNumberConstraint(Schema<?> fieldSchema,
-                                                         MarkdownDocumentationNode documentationNode) {
+    /**
+     * Generate constraint for numbers : int, float, decimal.
+     */
+    private static AnnotationNode generateNumberConstraint(Schema<?> fieldSchema) {
         List<String> fields = getNumberAnnotFields(fieldSchema);
         if (fields.isEmpty()) {
-            return createMetadataNode(documentationNode, createEmptyNodeList());
+            return null;
         }
-        String annotBody = "{" + String.join(",", fields) + "}";
-        AnnotationNode annotationNode = createAnnotationNode("constraint:Int", annotBody);
+        String annotBody = OPEN_BRACE + String.join(COMMA, fields) + CLOSE_BRACE;
+        AnnotationNode annotationNode = createAnnotationNode(CONSTRAINT_INT, annotBody);
 
         if (fieldSchema instanceof NumberSchema) {
-            if (fieldSchema.getFormat() == null || fieldSchema.getFormat().equals("float")) {
-                annotationNode = createAnnotationNode("constraint:Float", annotBody);
+            if (fieldSchema.getFormat() != null && fieldSchema.getFormat().equals(FLOAT)) {
+                annotationNode = createAnnotationNode(CONSTRAINT_FLOAT, annotBody);
             } else {
-                annotationNode = createAnnotationNode("constraint:Number", annotBody);
+                annotationNode = createAnnotationNode(CONSTRAINT_NUMBER, annotBody);
             }
         }
-        return createMetadataNode(documentationNode, createNodeList(annotationNode));
+        return annotationNode;
     }
 
-    private static MetadataNode generateStringConstraint(MarkdownDocumentationNode documentationNode,
-                                                         StringSchema stringSchema) {
+    /**
+     * Generate constraint for string.
+     */
+    private static AnnotationNode generateStringConstraint(StringSchema stringSchema) {
         List<String> fields = getStringAnnotFields(stringSchema);
         if (fields.isEmpty()) {
-            return createMetadataNode(documentationNode, createEmptyNodeList());
+            return null;
         }
-        String annotBody = "{" + String.join(",", fields) + "}";
-        AnnotationNode annotationNode = createAnnotationNode("constraint:String", annotBody);
-        return createMetadataNode(documentationNode, createNodeList(annotationNode));
+        String annotBody = OPEN_BRACE + String.join(COMMA, fields) + CLOSE_BRACE;
+        return createAnnotationNode(CONSTRAINT_STRING, annotBody);
+    }
+
+    /**
+     * Generate constraint for array.
+     */
+    private static AnnotationNode generateArrayConstraint(ArraySchema arraySchema) {
+        List<String> fields = getArrayAnnotFields(arraySchema);
+        if (fields.isEmpty()) {
+            return null;
+        }
+        String annotBody = OPEN_BRACE + String.join(COMMA, fields) + CLOSE_BRACE;
+        return createAnnotationNode(CONSTRAINT_ARRAY, annotBody);
     }
 
     private static List<String> getNumberAnnotFields(Schema<?> numberSchema) {
         List<String> fields = new ArrayList<>();
         if (numberSchema.getMinimum() != null && numberSchema.getExclusiveMinimum() == null) {
             String value = numberSchema.getMinimum().toString();
-            String fieldRef = "minimum:" + value;
+            String fieldRef = MINIMUM + COLON + value;
             fields.add(fieldRef);
         }
         if (numberSchema.getMaximum() != null && numberSchema.getExclusiveMaximum() == null) {
             String value = numberSchema.getMaximum().toString();
-            String fieldRef = "maximum:" + value;
+            String fieldRef = MAXIMUM + COLON + value;
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMinimum() != null &&
                 numberSchema.getExclusiveMinimum() && numberSchema.getMaximum() != null) {
             String value = numberSchema.getMinimum().toString();
-            String fieldRef = "exclusiveMinimum:" + value;
+            String fieldRef = EXCLUSIVE_MIN + COLON + value;
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMaximum() != null &&
                 numberSchema.getExclusiveMaximum() &&
                 numberSchema.getMaximum() != null) {
             String value = numberSchema.getMaximum().toString();
-            String fieldRef = "exclusiveMaximum:" + value;
+            String fieldRef = EXCLUSIVE_MAX + COLON + value;
             fields.add(fieldRef);
         }
-        if (numberSchema.getMultipleOf() != null) {
-            String value = numberSchema.getMultipleOf().toString();
-            String fieldRef = "multipleOf:" + value;
-            fields.add(fieldRef);
-        }
+        //TODO: This will be enable once constraint package gives this support.
+//        if (numberSchema.getMultipleOf() != null) {
+//            String value = numberSchema.getMultipleOf().toString();
+//            String fieldRef = "multipleOf:" + value;
+//            fields.add(fieldRef);
+//        }
         return fields;
     }
 
@@ -315,22 +341,58 @@ public class TypeGeneratorUtils {
         List<String> fields = new ArrayList<>();
         if (stringSchema.getMaxLength() != null) {
             String value = stringSchema.getMaxLength().toString();
-            String fieldRef = "maxLength:" + value;
+            String fieldRef = MAX_LENGTH + COLON + value;
             fields.add(fieldRef);
         }
         if (stringSchema.getMinLength() != null) {
             String value = stringSchema.getMinLength().toString();
-            String fieldRef = "minLength:" + value;
+            String fieldRef = MIN_LENGTH + COLON + value;
             fields.add(fieldRef);
         }
-        if (stringSchema.getPattern() != null) {
-            String value = stringSchema.getPattern();
-            String fieldRef = "pattern:" + "\"" + value + "\"";
+        //TODO: This will be enable once constraint package gives this support.
+//        if (stringSchema.getPattern() != null) {
+//            String value = stringSchema.getPattern();
+//            String fieldRef = "pattern:" + "\"" + value + "\"";
+//            fields.add(fieldRef);
+//        }
+        return fields;
+    }
+
+    private static List<String> getArrayAnnotFields(ArraySchema arraySchema) {
+        List<String> fields = new ArrayList<>();
+        if (arraySchema.getMaxItems() != null) {
+            String value = arraySchema.getMaxItems().toString();
+            String fieldRef = MAX_LENGTH + COLON + value;
+            fields.add(fieldRef);
+        }
+        if (arraySchema.getMinItems() != null) {
+            String value = arraySchema.getMinItems().toString();
+            String fieldRef = MIN_LENGTH + COLON + value;
             fields.add(fieldRef);
         }
         return fields;
     }
 
+    /**
+     * This util create any annotation node by providing annotation reference and annotation body content.
+     *
+     * @param annotationReference Annotation reference value
+     * @param annotFields         Annotation body content fields with single string
+     * @return {@link AnnotationNode}
+     */
+    private static AnnotationNode createAnnotationNode(String annotationReference, String annotFields) {
+        MappingConstructorExpressionNode annotationBody = null;
+        SimpleNameReferenceNode annotReference = createSimpleNameReferenceNode(
+                createIdentifierToken(annotationReference));
+        ExpressionNode expressionNode = NodeParser.parseExpression(annotFields);
+        if (expressionNode.kind() == MAPPING_CONSTRUCTOR) {
+            annotationBody = (MappingConstructorExpressionNode) expressionNode;
+        }
+        return NodeFactory.createAnnotationNode(
+                createToken(AT_TOKEN),
+                annotReference,
+                annotationBody);
+    }
 
     /**
      * Creates API documentation for record fields.
@@ -418,25 +480,5 @@ public class TypeGeneratorUtils {
         } else {
             return typeDescriptorNodes.get(0);
         }
-    }
-
-    /**
-     *
-     * @param annotationReference
-     * @param annotFields
-     * @return
-     */
-    private static AnnotationNode createAnnotationNode(String annotationReference,String annotFields) {
-        MappingConstructorExpressionNode annotationBody = null;
-        SimpleNameReferenceNode annotReference = createSimpleNameReferenceNode(
-                createIdentifierToken(annotationReference));
-        ExpressionNode expressionNode = NodeParser.parseExpression(annotFields);
-        if (expressionNode.kind() == MAPPING_CONSTRUCTOR) {
-            annotationBody = (MappingConstructorExpressionNode) expressionNode;
-        }
-        return NodeFactory.createAnnotationNode(
-                createToken(AT_TOKEN),
-                annotReference,
-                annotationBody);
     }
 }

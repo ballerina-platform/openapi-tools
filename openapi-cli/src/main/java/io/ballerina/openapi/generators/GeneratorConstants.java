@@ -308,5 +308,20 @@ public class GeneratorConstants {
     public static final String MAP_STRING = "map<string>";
     public static final String TEXT_WILDCARD_REGEX = "text/.*";
     public static final String BODY = "body";
-
+    public static final String CONSTRAINT = "constraint";
+    public static final String CONSTRAINT_STRING = "constraint:String";
+    public static final String CONSTRAINT_NUMBER = "constraint:Number";
+    public static final String CONSTRAINT_FLOAT = "constraint:Float";
+    public static final String CONSTRAINT_INT = "constraint:Int";
+    public static final String CONSTRAINT_ARRAY = "constraint:Array";
+    public static final String OPEN_BRACE = "{";
+    public static final String CLOSE_BRACE =  "}";
+    public static final String COLON = ":";
+    public static final String COMMA = ",";
+    public static final String MAX_LENGTH =  "maxLength";
+    public static final String MIN_LENGTH =  "minLength";
+    public static final String MINIMUM =  "minimum";
+    public static final String MAXIMUM =  "maximum";
+    public static final String EXCLUSIVE_MAX = "maxValueExclusive";
+    public static final String EXCLUSIVE_MIN = "minValueExclusive";
 }
