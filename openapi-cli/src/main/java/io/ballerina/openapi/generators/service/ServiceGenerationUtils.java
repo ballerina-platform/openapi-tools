@@ -37,6 +37,7 @@ import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -79,6 +80,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.convertOpenAPITypeT
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.generators.GeneratorUtils.isConstraint;
 
 /**
  * This store all the util functions related service generation process.
@@ -241,9 +243,17 @@ public class ServiceGenerationUtils {
     /**
      * This util function is for generating the import node for http module.
      */
-    public static NodeList<ImportDeclarationNode> createImportDeclarationNodes() {
+    public static NodeList<ImportDeclarationNode> createImportDeclarationNodes(OpenAPI openAPI) {
+        List<ImportDeclarationNode> imports = new ArrayList<>();
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
                 , GeneratorConstants.HTTP);
-        return AbstractNodeFactory.createNodeList(importForHttp);
+        imports.add(importForHttp);
+        if (isConstraint(openAPI)) {
+            ImportDeclarationNode importForConstraint = GeneratorUtils.getImportDeclarationNode(
+                    GeneratorConstants.BALLERINA, GeneratorConstants.CONSTRAINT);
+            imports.add(importForConstraint);
+
+        }
+        return AbstractNodeFactory.createNodeList(imports);
     }
 }

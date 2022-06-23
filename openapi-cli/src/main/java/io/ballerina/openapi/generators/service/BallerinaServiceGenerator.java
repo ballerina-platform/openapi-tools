@@ -35,6 +35,7 @@ import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
@@ -48,6 +49,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,7 +105,7 @@ public class BallerinaServiceGenerator {
 
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
         // Create imports http and openapi
-        NodeList<ImportDeclarationNode> imports = createImportDeclarationNodes();
+        NodeList<ImportDeclarationNode> imports = createImportDeclarationNodes(this.openAPI);
         // Need to Generate Base path
         ListenerGenerator listener = new ListenerGenerator();
         ListenerDeclarationNode listenerDeclarationNode = listener.getListenerDeclarationNodes(openAPI.getServers());
@@ -223,8 +225,33 @@ public class BallerinaServiceGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
                 .toLowerCase(Locale.ENGLISH), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         NodeList<Node> relativeResourcePath = createNodeList(pathNodes);
-        ParametersGenerator parametersGenerator = new ParametersGenerator(false, openAPI.getComponents());
-        List<Node> params = parametersGenerator.generateResourcesInputs(operation);
+        ParametersGenerator parametersGenerator = new ParametersGenerator(false);
+        parametersGenerator.generateResourcesInputs(operation);
+        List<Node> params = new ArrayList<>(parametersGenerator.getRequiredParams());
+
+        // Handle request Body (Payload)
+        List<StatementNode> statementsList = new ArrayList<>();
+        if (operation.getValue().getRequestBody() != null) {
+            RequestBody requestBody = operation.getValue().getRequestBody();
+            if (requestBody.getContent() != null) {
+                RequestBodyGenerator requestBodyGen = new RequestBodyGenerator(this.openAPI.getComponents(),
+                        requestBody);
+                params.add(requestBodyGen.createNodeForRequestBody());
+                params.add(createToken(SyntaxKind.COMMA_TOKEN));
+                if (requestBodyGen.getRequestStatement() != null) {
+                    statementsList.add(requestBodyGen.getRequestStatement());
+                }
+            }
+        }
+
+        // For creating the order of the parameters in the function
+        if (!parametersGenerator.getDefaultableParams().isEmpty()) {
+            params.addAll(parametersGenerator.getDefaultableParams());
+        }
+        if (params.size() > 1) {
+            params.remove(params.size() - 1);
+        }
+
         if (!isNullableRequired) {
             isNullableRequired = parametersGenerator.isNullableRequired();
         }
@@ -235,12 +262,18 @@ public class BallerinaServiceGenerator {
         typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());
 
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
-                createToken(SyntaxKind.OPEN_PAREN_TOKEN), parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN),
-                        returnNode);
+                createToken(SyntaxKind.OPEN_PAREN_TOKEN),
+                parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN), returnNode);
 
-        // Function Body Node
+        // Function body generation
+        NodeList<StatementNode> statements;
+        if (!statementsList.isEmpty()) {
+            statements = createNodeList(statementsList);
+        } else {
+            statements = createEmptyNodeList();
+        }
         FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
-                createToken(SyntaxKind.OPEN_BRACE_TOKEN), null, createEmptyNodeList(),
+                createToken(SyntaxKind.OPEN_BRACE_TOKEN), null, statements,
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
