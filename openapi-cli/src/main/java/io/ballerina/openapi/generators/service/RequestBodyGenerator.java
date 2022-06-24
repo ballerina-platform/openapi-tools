@@ -27,11 +27,9 @@ import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
-import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
@@ -67,7 +65,6 @@ import static io.ballerina.openapi.generators.GeneratorConstants.TEXT;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEXT_WILDCARD_REGEX;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.generators.GeneratorUtils.isAvailableConstraint;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
@@ -78,7 +75,6 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.get
  * @since 2.0.0
  */
 public class RequestBodyGenerator {
-    private StatementNode requestStatement = null;
     private final Components components;
     private final RequestBody requestBody;
 
@@ -87,9 +83,6 @@ public class RequestBodyGenerator {
         this.requestBody = requestBody;
     }
 
-    public StatementNode getRequestStatement() {
-        return requestStatement;
-    }
     /**
      * This for creating request Body for given request object.
      */
@@ -133,9 +126,6 @@ public class RequestBodyGenerator {
         if (mediaType.getValue().getSchema().get$ref() != null) {
             String schemaName = extractReferenceType(mediaType.getValue().getSchema().get$ref());
             Map<String, Schema> schemas = components.getSchemas();
-            if (schemas != null && schemas.get(schemaName) != null && isAvailableConstraint(schemas.get(schemaName))) {
-                requestStatement = NodeParser.parseStatement("payload = check constraint:validate(payload);");
-            }
             String mediaTypeContent = mediaType.getKey().trim();
             if (mediaTypeContent.matches(TEXT_WILDCARD_REGEX)) {
                 mediaTypeContent = TEXT;

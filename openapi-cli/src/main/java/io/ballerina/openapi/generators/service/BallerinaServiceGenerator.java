@@ -105,7 +105,7 @@ public class BallerinaServiceGenerator {
 
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
         // Create imports http and openapi
-        NodeList<ImportDeclarationNode> imports = createImportDeclarationNodes(this.openAPI);
+        NodeList<ImportDeclarationNode> imports = createImportDeclarationNodes();
         // Need to Generate Base path
         ListenerGenerator listener = new ListenerGenerator();
         ListenerDeclarationNode listenerDeclarationNode = listener.getListenerDeclarationNodes(openAPI.getServers());
@@ -238,9 +238,6 @@ public class BallerinaServiceGenerator {
                         requestBody);
                 params.add(requestBodyGen.createNodeForRequestBody());
                 params.add(createToken(SyntaxKind.COMMA_TOKEN));
-                if (requestBodyGen.getRequestStatement() != null) {
-                    statementsList.add(requestBodyGen.getRequestStatement());
-                }
             }
         }
 
