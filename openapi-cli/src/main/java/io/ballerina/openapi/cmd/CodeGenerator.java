@@ -34,6 +34,7 @@ import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.cmd.model.GenSrcFile;
 import io.ballerina.openapi.converter.utils.CodegenUtils;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
@@ -102,6 +103,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.generators.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.generators.GeneratorConstants.LINE_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
+import static io.ballerina.openapi.generators.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEMPLATES_DIR_PATH_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEMPLATES_SUFFIX;
 import static io.ballerina.openapi.generators.GeneratorConstants.TEST_DIR;
@@ -156,13 +158,74 @@ public class CodeGenerator {
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
-        List<GenSrcFile> genSrcFiles = generateBalSource(GEN_SERVICE, definitionPath, serviceName, filter, nullable)
-                .stream().filter(genSrcFile -> !genSrcFile.getFileName().equals(TYPE_FILE_NAME))
-                        .collect(Collectors.toList());
-        genSrcFiles.addAll(generateBalSource(GEN_CLIENT, definitionPath, serviceName, filter,
-                nullable));
-        List<GenSrcFile> newGenFiles = genSrcFiles.stream().filter(distinctByKey(
-                GenSrcFile::getFileName)).collect(Collectors.toList());
+
+        List<GenSrcFile> sourceFiles = new ArrayList<>();
+        Path openAPIPath = Path.of(definitionPath);
+        // Normalize OpenAPI definition, in the client generation we suppose to terminate code generation when the
+        // absence of the operationId in operation. Therefor we enable client flag true as default code generation.
+        OpenAPI openAPIDef = normalizeOpenAPI(openAPIPath, true);
+
+        // Generate service
+        String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
+        String srcFile = concatTitle + "_service.bal";
+        BallerinaServiceGenerator serviceGenerator = new BallerinaServiceGenerator(openAPIDef, filter);
+        String serviceContent = Formatter.format
+                (serviceGenerator.generateSyntaxTree()).toString();
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, serviceContent));
+
+        // Generate client.
+        // Generate ballerina client remote.
+        BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable);
+        String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toString();
+        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME, clientContent));
+        String utilContent = Formatter.format(clientGenerator
+                .getBallerinaUtilGenerator()
+                .generateUtilSyntaxTree()).toString();
+        if (!utilContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, UTIL_FILE_NAME, utilContent));
+        }
+
+        // Generate ballerina types.
+        // Generate ballerina records to represent schemas.
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
+
+        //Update type definition list
+        List<TypeDefinitionNode> typeInclusionRecords = serviceGenerator.getTypeInclusionRecords();
+        List<TypeDefinitionNode> typeDefinitionNodeList = clientGenerator.getTypeDefinitionNodeList();
+        List<TypeDefinitionNode> externalTypeDefNodes = new ArrayList<>();
+        externalTypeDefNodes.addAll(typeInclusionRecords);
+        externalTypeDefNodes.addAll(typeDefinitionNodeList);
+
+        ballerinaSchemaGenerator.setTypeDefinitionNodeList(externalTypeDefNodes);
+        SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        String schemaContent = Formatter.format(schemaSyntaxTree).toString();
+
+        if (filter.getTags().size() > 0) {
+            // Remove unused records and enums when generating the client by the tags given.
+            schemaContent = modifySchemaContent(schemaSyntaxTree, clientContent, schemaContent, serviceContent);
+        }
+        if (!schemaContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
+                    schemaContent));
+        }
+
+        // Generate test boilerplate code for test cases
+        if (this.includeTestFiles) {
+            BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(clientGenerator);
+            String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
+
+            String configContent = ballerinaTestGenerator.getConfigTomlFile();
+            if (!configContent.isBlank()) {
+                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
+                        CONFIG_FILE_NAME, configContent));
+            }
+        }
+
+        List<GenSrcFile> newGenFiles = sourceFiles.stream()
+                .filter(distinctByKey(GenSrcFile::getFileName))
+                .collect(Collectors.toList());
+
         writeGeneratedSources(newGenFiles, srcPath, implPath, type);
     }
 
@@ -456,7 +519,7 @@ public class CodeGenerator {
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
-            schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent);
+            schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent, null);
         }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
@@ -479,11 +542,14 @@ public class CodeGenerator {
         return sourceFiles;
     }
 
-    private String modifySchemaContent(SyntaxTree schemaSyntaxTree, String clientContent, String schemaContent)
-            throws IOException, FormatterException {
+    private String modifySchemaContent(SyntaxTree schemaSyntaxTree, String clientContent, String schemaContent,
+                                       String serviceContent) throws IOException, FormatterException {
         Map<String, String> tempSourceFiles = new HashMap<>();
         tempSourceFiles.put(CLIENT_FILE_NAME, clientContent);
         tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
+        if (serviceContent != null) {
+            tempSourceFiles.put(SERVICE_FILE_NAME, schemaContent);
+        }
         List<String> unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
         while (unusedTypeDefinitionNameList.size() > 0) {
             ModulePartNode modulePartNode = schemaSyntaxTree.rootNode();
@@ -607,8 +673,10 @@ public class CodeGenerator {
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaServiceGenerator.getTypeInclusionRecords());
         String schemaContent = Formatter.format(
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME, schemaContent));
-
+        if (!schemaContent.isBlank()) {
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TYPE_FILE_NAME,
+                    schemaContent));
+        }
         return sourceFiles;
     }
 
