@@ -478,7 +478,7 @@ public class GeneratorUtils {
     }
 
     public static boolean isAvailableConstraint(Schema<?> value) {
-        if (value instanceof ObjectSchema) {
+        if (value instanceof ObjectSchema && value.getProperties() != null) {
             for (Map.Entry<String, Schema> e : value.getProperties().entrySet()) {
                 Schema<?> propertyValue = e.getValue();
                 boolean constraintExists = propertyValue.getMaximum() != null ||

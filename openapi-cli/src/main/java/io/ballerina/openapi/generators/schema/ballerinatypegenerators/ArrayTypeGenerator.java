@@ -18,27 +18,34 @@
 
 package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
+import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.generators.GeneratorUtils.isAvailableConstraint;
 import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNullableType;
 
 /**
@@ -59,10 +66,20 @@ import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNulla
  * @since 2.0.0
  */
 public class ArrayTypeGenerator extends TypeGenerator {
-    private final PrintStream outStream = System.out;
+    private String parentType = null;
+    private TypeDefinitionNode arrayItemWithConstraint = null;
+    public ArrayTypeGenerator(Schema schema, String typeName, String parentType) {
+
+        super(schema, typeName);
+        this.parentType = parentType;
+    }
 
     public ArrayTypeGenerator(Schema schema, String typeName) {
         super(schema, typeName);
+    }
+
+    public TypeDefinitionNode getArrayItemWithConstraint() {
+        return arrayItemWithConstraint;
     }
 
     /**
@@ -73,8 +90,36 @@ public class ArrayTypeGenerator extends TypeGenerator {
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
-        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(arraySchema.getItems(), typeName);
-        TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
+        Schema<?> items = arraySchema.getItems();
+        boolean availableConstraint = isAvailableConstraint(items);
+        TypeGenerator typeGenerator;
+        if (availableConstraint) {
+            typeName = getValidName(
+                    parentType != null ?
+                            parentType + "-" + typeName + "-Items-" + items.getType() :
+                            typeName + "-Items-" + items.getType(),
+                    true);
+            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
+            List<AnnotationNode> typeAnnotations = new ArrayList<>();
+            AnnotationNode constraintNode = TypeGeneratorUtils.addConstraint(items);
+            if (constraintNode != null) {
+                typeAnnotations.add(constraintNode);
+            }
+            arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(
+                    createIdentifierToken(typeName),
+                    new ArrayList<>(),
+                    typeAnnotations);
+        } else {
+            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
+        }
+
+        TypeDescriptorNode typeDescriptorNode;
+        if (typeGenerator instanceof PrimitiveTypeGenerator && availableConstraint) {
+            typeDescriptorNode = NodeParser.parseTypeDescriptor(typeName);
+        } else {
+            typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
+        }
+
         if (typeGenerator instanceof UnionTypeGenerator) {
             typeDescriptorNode = createParenthesisedTypeDescriptorNode(
                     createToken(OPEN_PAREN_TOKEN), typeDescriptorNode, createToken(CLOSE_PAREN_TOKEN));

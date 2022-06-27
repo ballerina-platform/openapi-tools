@@ -1,3 +1,5 @@
+import ballerina/constraint;
+
 public type CustomersCustomerBody record {
     # The customer's address.
     CustomerAddress|string? address?;
@@ -12,10 +14,16 @@ public type Customer record {
 };
 
 public type CustomerAddress record {
+    @constraint:String {maxLength: 5000}
     string city?;
+    @constraint:String {maxLength: 5000}
     string country?;
+    @constraint:String {maxLength: 5000}
     string line1?;
+    @constraint:String {maxLength: 5000}
     string line2?;
+    @constraint:String {maxLength: 5000}
     string postal_code?;
+    @constraint:String {maxLength: 5000}
     string state?;
 };

@@ -36,6 +36,9 @@ import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
+import io.ballerina.openapi.generators.schema.ballerinatypegenerators.AllOfRecordTypeGenerator;
+import io.ballerina.openapi.generators.schema.ballerinatypegenerators.ArrayTypeGenerator;
+import io.ballerina.openapi.generators.schema.ballerinatypegenerators.RecordTypeGenerator;
 import io.ballerina.openapi.generators.schema.ballerinatypegenerators.TypeGenerator;
 import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.ballerina.tools.text.TextDocument;
@@ -183,14 +186,26 @@ public class BallerinaTypesGenerator {
         IdentifierToken typeNameToken = AbstractNodeFactory.createIdentifierToken(getValidName(
                 typeName.trim(), true));
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, getValidName(
-                typeName.trim(), true));
+                typeName.trim(), true), null);
         List<AnnotationNode> typeAnnotations = new ArrayList<>();
         AnnotationNode constraintNode = TypeGeneratorUtils.addConstraint(schema);
         if (constraintNode != null) {
             typeAnnotations.add(constraintNode);
         }
         TypeGeneratorUtils.getRecordDocs(schemaDocs, schema, typeAnnotations);
-        return typeGenerator.generateTypeDefinitionNode(typeNameToken,
-                schemaDocs, typeAnnotations);
+        TypeDefinitionNode typeDefinitionNode =
+                typeGenerator.generateTypeDefinitionNode(typeNameToken, schemaDocs, typeAnnotations);
+
+        if (typeGenerator instanceof ArrayTypeGenerator &&
+                ((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint() != null) {
+            typeDefinitionNodeList.add(((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint());
+        } else if (typeGenerator instanceof RecordTypeGenerator &&
+                !((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
+            typeDefinitionNodeList.addAll(((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
+        }  else if (typeGenerator instanceof AllOfRecordTypeGenerator &&
+                !((AllOfRecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
+            typeDefinitionNodeList.addAll(((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
+        }
+        return typeDefinitionNode;
     }
 }

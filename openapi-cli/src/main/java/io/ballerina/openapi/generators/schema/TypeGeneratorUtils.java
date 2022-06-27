@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -99,7 +98,6 @@ import static io.ballerina.openapi.generators.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.generators.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.generators.GeneratorConstants.OPEN_BRACE;
 import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
-import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
@@ -119,7 +117,7 @@ public class TypeGeneratorUtils {
      * @param typeName parameter name
      * @return Relevant SchemaType object
      */
-    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName) {
+    public static TypeGenerator getTypeGenerator(Schema<?> schemaValue, String typeName, String parentName) {
         if (schemaValue.get$ref() != null) {
             return new ReferencedTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ComposedSchema) {
@@ -133,7 +131,7 @@ public class TypeGeneratorUtils {
                 schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null) {
             return new RecordTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ArraySchema) {
-            return new ArrayTypeGenerator(schemaValue, typeName);
+            return new ArrayTypeGenerator(schemaValue, typeName, parentName);
         } else if (schemaValue.getType() != null && primitiveTypeList.contains(schemaValue.getType())) {
             return new PrimitiveTypeGenerator(schemaValue, typeName);
         } else { // when schemaValue.type == null
@@ -167,72 +165,80 @@ public class TypeGeneratorUtils {
         return nillableType;
     }
 
-    /**
-     * This util for generating record field with given schema properties.
-     */
-    public static List<Node> addRecordFields(List<String> required, Set<Map.Entry<String, Schema>> fields)
-            throws BallerinaOpenApiException {
-        // TODO: Handle allOf , oneOf, anyOf
-        List<Node> recordFieldList = new ArrayList<>();
-        for (Map.Entry<String, Schema> field : fields) {
-            String fieldNameStr = escapeIdentifier(field.getKey().trim());
-            // API doc generations
-            Schema fieldSchema = field.getValue();
-            List<Node> schemaDoc = getFieldApiDocs(fieldSchema);
-            NodeList<Node> schemaDocNodes = createNodeList(schemaDoc);
-            IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldNameStr);
-            TypeDescriptorNode fieldTypeName = getTypeGenerator(fieldSchema, fieldNameStr)
-                    .generateTypeDescriptorNode();
-            MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
-            //Generate constraint annotation.
-            AnnotationNode constraintNode = addConstraint(fieldSchema);
-            MetadataNode metadataNode;
-            if (constraintNode == null) {
-                metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
-            } else {
-                metadataNode = createMetadataNode(documentationNode, createNodeList(constraintNode));
-            }
 
-            if (required != null) {
-                if (!required.contains(field.getKey().trim())) {
-                    if (fieldSchema.getDefault() != null) {
-                        Token defaultValue;
-                        if (fieldSchema instanceof StringSchema) {
-                            if (fieldSchema.getDefault().toString().trim().equals("\"")) {
-                                defaultValue = AbstractNodeFactory.createIdentifierToken("\"" + "\\" +
-                                        fieldSchema.getDefault().toString() + "\"");
-                            } else {
-                                defaultValue = AbstractNodeFactory.createIdentifierToken("\"" +
-                                        fieldSchema.getDefault().toString() + "\"");
-                            }
-                        } else {
-                            defaultValue = AbstractNodeFactory.createIdentifierToken
-                                    (fieldSchema.getDefault().toString());
-                        }
-                        ExpressionNode expressionNode = createRequiredExpressionNode(defaultValue);
-                        RecordFieldWithDefaultValueNode defaultNode = NodeFactory.createRecordFieldWithDefaultValueNode
-                                (metadataNode, null, fieldTypeName, fieldName, createToken(EQUAL_TOKEN),
-                                        expressionNode, createToken(SEMICOLON_TOKEN));
-                        recordFieldList.add(defaultNode);
-                    } else {
-                        RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
-                                fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN),
-                                createToken(SEMICOLON_TOKEN));
-                        recordFieldList.add(recordFieldNode);
-                    }
-                } else {
-                    RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
-                            fieldTypeName, fieldName, null, createToken(SEMICOLON_TOKEN));
-                    recordFieldList.add(recordFieldNode);
-                }
+    public static void updateRecordFieldList(List<String> required,
+                                             List<Node> recordFieldList,
+                                             Map.Entry<String, Schema> field,
+                                             Schema<?> fieldSchema,
+                                             NodeList<Node> schemaDocNodes,
+                                             IdentifierToken fieldName,
+                                             TypeDescriptorNode fieldTypeName) {
+
+        MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
+        //Generate constraint annotation.
+        AnnotationNode constraintNode = addConstraint(fieldSchema);
+        MetadataNode metadataNode;
+        if (constraintNode == null) {
+            metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
+        } else {
+            metadataNode = createMetadataNode(documentationNode, createNodeList(constraintNode));
+        }
+
+        if (required != null) {
+            setRequiredFields(required, recordFieldList, field, fieldSchema, fieldName, fieldTypeName, metadataNode);
+        } else {
+            RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
+                    fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
+            recordFieldList.add(recordFieldNode);
+        }
+    }
+
+    private static void setRequiredFields(List<String> required, List<Node> recordFieldList,
+                                          Map.Entry<String, Schema> field,
+                                          Schema<?> fieldSchema,
+                                          IdentifierToken fieldName,
+                                          TypeDescriptorNode fieldTypeName,
+                                          MetadataNode metadataNode) {
+
+        if (!required.contains(field.getKey().trim())) {
+            if (fieldSchema.getDefault() != null) {
+                RecordFieldWithDefaultValueNode defaultNode =
+                        getRecordFieldWithDefaultValueNode(fieldSchema, fieldName, fieldTypeName, metadataNode);
+                recordFieldList.add(defaultNode);
             } else {
                 RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
-                        fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN), createToken(SEMICOLON_TOKEN));
+                        fieldTypeName, fieldName, createToken(QUESTION_MARK_TOKEN),
+                        createToken(SEMICOLON_TOKEN));
                 recordFieldList.add(recordFieldNode);
             }
+        } else {
+            RecordFieldNode recordFieldNode = NodeFactory.createRecordFieldNode(metadataNode, null,
+                    fieldTypeName, fieldName, null, createToken(SEMICOLON_TOKEN));
+            recordFieldList.add(recordFieldNode);
         }
-        return recordFieldList;
+    }
 
+    private static RecordFieldWithDefaultValueNode getRecordFieldWithDefaultValueNode(Schema<?> fieldSchema,
+                                                                                      IdentifierToken fieldName,
+                                                                                      TypeDescriptorNode fieldTypeName,
+                                                                                      MetadataNode metadataNode) {
+
+        Token defaultValue;
+        if (fieldSchema instanceof StringSchema) {
+            if (fieldSchema.getDefault().toString().trim().equals("\"")) {
+                defaultValue = AbstractNodeFactory.createIdentifierToken("\"" + "\\" +
+                        fieldSchema.getDefault().toString() + "\"");
+            } else {
+                defaultValue = AbstractNodeFactory.createIdentifierToken("\"" +
+                        fieldSchema.getDefault().toString() + "\"");
+            }
+        } else {
+            defaultValue = AbstractNodeFactory.createIdentifierToken(fieldSchema.getDefault().toString());
+        }
+        ExpressionNode expressionNode = createRequiredExpressionNode(defaultValue);
+        return NodeFactory.createRecordFieldWithDefaultValueNode
+                (metadataNode, null, fieldTypeName, fieldName, createToken(EQUAL_TOKEN),
+                        expressionNode, createToken(SEMICOLON_TOKEN));
     }
 
     /**
@@ -459,7 +465,8 @@ public class TypeGeneratorUtils {
             throws BallerinaOpenApiException {
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema schema : schemas) {
-            TypeDescriptorNode typeDescriptorNode = getTypeGenerator(schema, typeName).generateTypeDescriptorNode();
+            TypeDescriptorNode typeDescriptorNode = getTypeGenerator(schema, typeName, null)
+                    .generateTypeDescriptorNode();
             if (typeDescriptorNode instanceof OptionalTypeDescriptorNode &&
                     GeneratorMetaData.getInstance().isNullable()) {
                 Node internalTypeDesc = ((OptionalTypeDescriptorNode) typeDescriptorNode).typeDescriptor();

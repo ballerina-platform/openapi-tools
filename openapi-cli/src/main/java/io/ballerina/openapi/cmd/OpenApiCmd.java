@@ -100,10 +100,6 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Option(names = {"--with-tests"}, hidden = true, description = "Generate test files")
     private boolean includeTestFiles;
 
-    @CommandLine.Option(names = {"--enable-client-validation"}, hidden = true, description = "Add constraint " +
-            "validation to client file.")
-    private boolean enableClientValidation;
-
     @CommandLine.Parameters
     private List<String> argList;
 
