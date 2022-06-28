@@ -90,7 +90,6 @@ public class ParametersGenerator {
         this.isNullableRequired = isNullableRequired;
         this.requiredParams = new ArrayList<>();
         this.defaultableParams = new ArrayList<>();
-
     }
 
     public List<Node> getRequiredParams() {

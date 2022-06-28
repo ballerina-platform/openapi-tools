@@ -464,6 +464,9 @@ public class GeneratorUtils {
         }
     }
 
+    /**
+     * This util class is to check the availability of the constraint support to data type.
+     */
     public static boolean isConstraint(OpenAPI openAPI) {
         if (openAPI.getComponents() != null && openAPI.getComponents().getSchemas() != null) {
             Map<String, Schema> schemas = openAPI.getComponents().getSchemas();

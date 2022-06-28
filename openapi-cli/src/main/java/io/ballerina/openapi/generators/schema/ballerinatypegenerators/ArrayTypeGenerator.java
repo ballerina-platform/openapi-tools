@@ -69,7 +69,6 @@ public class ArrayTypeGenerator extends TypeGenerator {
     private String parentType = null;
     private TypeDefinitionNode arrayItemWithConstraint = null;
     public ArrayTypeGenerator(Schema schema, String typeName, String parentType) {
-
         super(schema, typeName);
         this.parentType = parentType;
     }
