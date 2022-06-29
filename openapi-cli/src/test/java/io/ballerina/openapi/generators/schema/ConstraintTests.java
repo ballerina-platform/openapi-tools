@@ -22,7 +22,6 @@ import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -46,11 +45,24 @@ public class ConstraintTests {
     }
 
     @Test(description = "Tests for all the array type scenarios")
-    public void array() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testForArray() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/array.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/array.bal",
                 syntaxTree);
     }
+
+    @Test(description = "Tests for all the field has reference type scenarios")
+    public void testForReference() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/type_def_node.yaml"),
+                true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/type_def_node.bal",
+                syntaxTree);
+    }
+
+    //TODO current tool doesn't handle union type: therefore union type constraint will handle once union type
+    // generation available in tool.
 }

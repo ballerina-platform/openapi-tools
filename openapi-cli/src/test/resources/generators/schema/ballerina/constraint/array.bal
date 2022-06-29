@@ -12,10 +12,15 @@ public type PersonDetailsItemsString string;
 @constraint:Float {maximum: 445.4}
 public type PersonFeeItemsNumber float;
 
+@constraint:Int {maximum: 67}
+public type PersonLimitItemsInteger int;
+
 public type Person record {
     Hobby hobby?;
     @constraint:Array {maxLength: 5}
-    PersonDetailsItemsString[] salaryDetails?;
+    PersonDetailsItemsString[] Details?;
     int id;
     PersonFeeItemsNumber[] fee?;
+    # The maximum number of items in the response (as set in the query or by default).
+    PersonLimitItemsInteger[] 'limit?;
 };

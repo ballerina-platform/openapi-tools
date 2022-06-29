@@ -44,6 +44,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
+import static io.ballerina.openapi.generators.GeneratorConstants.SPECIAL_CHARACTER_REGEX;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.GeneratorUtils.isAvailableConstraint;
 import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNullableType;
@@ -73,10 +74,6 @@ public class ArrayTypeGenerator extends TypeGenerator {
         this.parentType = parentType;
     }
 
-    public ArrayTypeGenerator(Schema schema, String typeName) {
-        super(schema, typeName);
-    }
-
     public TypeDefinitionNode getArrayItemWithConstraint() {
         return arrayItemWithConstraint;
     }
@@ -93,10 +90,11 @@ public class ArrayTypeGenerator extends TypeGenerator {
         boolean availableConstraint = isAvailableConstraint(items);
         TypeGenerator typeGenerator;
         if (availableConstraint) {
+            String normalizedTypeName = typeName.replaceAll(SPECIAL_CHARACTER_REGEX, "").trim();
             typeName = getValidName(
                     parentType != null ?
-                            parentType + "-" + typeName + "-Items-" + items.getType() :
-                            typeName + "-Items-" + items.getType(),
+                            parentType + "-" + normalizedTypeName + "-Items-" + items.getType() :
+                            normalizedTypeName + "-Items-" + items.getType(),
                     true);
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
             List<AnnotationNode> typeAnnotations = new ArrayList<>();
