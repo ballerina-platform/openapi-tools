@@ -518,14 +518,21 @@ public class BallerinaClientGenerator {
         }
 
         //Create qualifier list
-        NodeList<Token> qualifierList = createNodeList(createIdentifierToken("remote isolated"));
+
+        NodeList<Token> qualifierList = createNodeList(createIdentifierToken(
+                isResource ?
+                        "resource isolated" :
+                        "remote isolated"));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
-        IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
-        NodeList<Node> relativeResourcePath = createEmptyNodeList();
+        IdentifierToken functionName = createIdentifierToken(
+                isResource ?
+                        operation.getKey().name() :
+                        operation.getValue().getOperationId());
+
         remoteFunctionNameList.add(operation.getValue().getOperationId());
 
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                ballerinaSchemaGenerator, typeDefinitionNodeList);
+                ballerinaSchemaGenerator, typeDefinitionNodeList, isResource);
         FunctionSignatureNode functionSignatureNode =
                 functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
                         remoteFunctionDocs);
@@ -544,6 +551,11 @@ public class BallerinaClientGenerator {
                 openAPI, ballerinaSchemaGenerator, ballerinaAuthConfigGenerator, ballerinaUtilGenerator);
         FunctionBodyNode functionBodyNode = functionBodyGenerator.getFunctionBodyNode(path, operation);
         imports = functionBodyGenerator.getImports();
+
+        //Generate relative path
+        NodeList<Node> relativeResourcePath = isResource ?
+        createNodeList(GeneratorUtils.getRelativeResourcePath(path, operation)) :
+                createEmptyNodeList();
         return createFunctionDefinitionNode(null,
                 metadataNode, qualifierList, functionKeyWord, functionName, relativeResourcePath,
                 functionSignatureNode, functionBodyNode);

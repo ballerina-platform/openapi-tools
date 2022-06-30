@@ -131,12 +131,12 @@ public class GeneratorUtils {
 
 
 
-    public static List<Node> getRelativeResourcePath(Map.Entry<String, PathItem> path,
+    public static List<Node> getRelativeResourcePath(String path,
                                                      Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
-        String[] pathNodes = path.getKey().trim().split("/");
+        String[] pathNodes = path.split("/");
         Token slash = AbstractNodeFactory.createIdentifierToken("/");
         if (pathNodes.length >= 2) {
             for (String pathNode: pathNodes) {

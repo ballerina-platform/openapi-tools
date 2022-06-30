@@ -151,7 +151,7 @@ public class BallerinaServiceGenerator {
             for (Map.Entry<String, PathItem> path : pathsItems) {
                 if (!path.getValue().readOperationsMap().isEmpty()) {
                     Map<PathItem.HttpMethod, Operation> operationMap = path.getValue().readOperationsMap();
-                    functions.addAll(applyFiltersForOperations(filter, path, operationMap));
+                    functions.addAll(applyFiltersForOperations(filter, path.getKey(), operationMap));
                 }
             }
         }
@@ -170,7 +170,7 @@ public class BallerinaServiceGenerator {
         }
     }
 
-    private List<Node> applyFiltersForOperations(Filter filter, Map.Entry<String, PathItem> path,
+    private List<Node> applyFiltersForOperations(Filter filter, String path,
                                                  Map<PathItem.HttpMethod, Operation> operationMap)
             throws BallerinaOpenApiException {
         List<Node> functions = new ArrayList<>();

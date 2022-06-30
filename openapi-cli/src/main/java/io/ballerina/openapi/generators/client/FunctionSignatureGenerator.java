@@ -115,19 +115,21 @@ public class FunctionSignatureGenerator {
     private FunctionReturnTypeGenerator functionReturnType;
     private boolean deprecatedParamFound = false;
 
+    private boolean isResource;
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
         return typeDefinitionNodeList;
     }
 
     public FunctionSignatureGenerator(OpenAPI openAPI,
                                       BallerinaTypesGenerator ballerinaSchemaGenerator,
-                                      List<TypeDefinitionNode> typeDefinitionNodeList) {
+                                      List<TypeDefinitionNode> typeDefinitionNodeList, boolean isResource) {
 
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.typeDefinitionNodeList = typeDefinitionNodeList;
         this.functionReturnType =  new FunctionReturnTypeGenerator
                 (openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
+        this.isResource = isResource;
 
     }
 
@@ -193,9 +195,10 @@ public class FunctionSignatureGenerator {
                     case "path":
                         Node param = getPathParameters(parameter, createNodeList(parameterAnnotationNodeList));
                         // Path parameters are always required.
-                        parameterList.add(param);
-                        parameterList.add(comma);
-
+                        if (!isResource) {
+                            parameterList.add(param);
+                            parameterList.add(comma);
+                        }
                         break;
                     case "query":
                         Node paramq = getQueryParameters(parameter, createNodeList(parameterAnnotationNodeList));
