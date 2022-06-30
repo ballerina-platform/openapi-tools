@@ -68,6 +68,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -518,7 +519,6 @@ public class BallerinaClientGenerator {
         }
 
         //Create qualifier list
-
         NodeList<Token> qualifierList = createNodeList(createIdentifierToken(
                 isResource ?
                         "resource isolated" :
@@ -526,7 +526,7 @@ public class BallerinaClientGenerator {
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(
                 isResource ?
-                        operation.getKey().name() :
+                        operation.getKey().name().toLowerCase(Locale.ENGLISH) :
                         operation.getValue().getOperationId());
 
         remoteFunctionNameList.add(operation.getValue().getOperationId());

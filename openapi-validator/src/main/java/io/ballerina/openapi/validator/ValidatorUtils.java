@@ -333,7 +333,7 @@ public class ValidatorUtils {
             String node = next.toString().trim();
             if (next instanceof ResourcePathParameterNode) {
                 ResourcePathParameterNode pathParameterNode = (ResourcePathParameterNode) next;
-                String paramName = unescapeIdentifier(pathParameterNode.paramName().text().trim());
+                String paramName = unescapeIdentifier(pathParameterNode.paramName().get().text().trim());
                 node = "{" + paramName + "}";
                 parameterNodeMap.put(paramName, next);
             }
