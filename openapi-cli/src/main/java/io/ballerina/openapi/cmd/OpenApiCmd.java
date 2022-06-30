@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.generators.GeneratorConstants.BAL_EXTENSION;
+import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT;
 import static io.ballerina.openapi.generators.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorConstants.YML_EXTENSION;
@@ -100,6 +101,10 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Option(names = {"--with-tests"}, hidden = true, description = "Generate test files")
     private boolean includeTestFiles;
 
+    @CommandLine.Option(names = {"--resource-functions"}, hidden = true, description = "Generate client with resource" +
+            " functions files")
+    private boolean generateClientResourceFunctions;
+
     @CommandLine.Parameters
     private List<String> argList;
 
@@ -153,6 +158,13 @@ public class OpenApiCmd implements BLauncherCmd {
                     operation.addAll(normalizedOperationIds);
                 }
                 Filter filter = new Filter(tag, operation);
+
+                // Add the resource flag enable
+                if (generateClientResourceFunctions && mode != null && mode.equals("service")) {
+                    // Exit the code generation process
+                    outStream.println("'----resource-functions' option is only available with the client mode.");
+                    exitError(this.exitWhenFinish);
+                }
                 try {
                     openApiToBallerina(fileName, filter);
                 } catch (IOException e) {
@@ -160,6 +172,12 @@ public class OpenApiCmd implements BLauncherCmd {
                     exitError(this.exitWhenFinish);
                 }
             } else if (fileName.endsWith(BAL_EXTENSION)) {
+                // Add the resource flag enable
+                if (generateClientResourceFunctions) {
+                    // Exit the code generation process
+                    outStream.println("'----resource-functions' option is only available with the client mode.");
+                    exitError(this.exitWhenFinish);
+                }
                 ballerinaToOpenApi(fileName);
             } else {
                 outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
