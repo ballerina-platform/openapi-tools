@@ -70,7 +70,7 @@ public class BallerinaTestGeneratorTests {
         CodeGenerator codeGenerator = new CodeGenerator();
         codeGenerator.setIncludeTestFiles(true);
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(openAPI);
         schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);

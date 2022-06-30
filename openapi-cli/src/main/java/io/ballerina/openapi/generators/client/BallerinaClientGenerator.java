@@ -130,6 +130,7 @@ public class BallerinaClientGenerator {
     private final List<String> remoteFunctionNameList;
     private String serverURL;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
+    private final boolean isResource;
 
     /**
      * Returns a list of type definition nodes.
@@ -166,7 +167,7 @@ public class BallerinaClientGenerator {
         return serverURL;
     }
 
-    public BallerinaClientGenerator(OpenAPI openAPI, Filter filters, boolean nullable) {
+    public BallerinaClientGenerator(OpenAPI openAPI, Filter filters, boolean nullable, boolean isResource) {
 
         this.filters = filters;
         this.imports = new ArrayList<>();
@@ -177,6 +178,7 @@ public class BallerinaClientGenerator {
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
+        this.isResource = isResource;
     }
 
     /**

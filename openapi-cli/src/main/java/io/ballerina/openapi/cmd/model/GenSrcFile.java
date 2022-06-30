@@ -46,7 +46,6 @@ public class GenSrcFile {
 
     public GenSrcFile(GenFileType type, String pkgName, String fileName, String content) {
         this.type = type;
-        this.pkgName = pkgName;
         this.fileName = fileName;
         this.content = content;
     }

@@ -307,9 +307,9 @@ public class GeneratorUtils {
         parseOptions.setFlatten(true);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder("OpenAPI file has errors: \n\n");
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
             for (String message: parseResult.getMessages()) {
-                errorMessage.append(message);
+                errorMessage.append(message).append(LINE_SEPARATOR);
             }
             throw new BallerinaOpenApiException(errorMessage.toString());
         }
