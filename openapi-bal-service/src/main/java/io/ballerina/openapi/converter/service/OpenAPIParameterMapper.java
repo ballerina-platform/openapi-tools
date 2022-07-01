@@ -108,7 +108,8 @@ public class OpenAPIParameterMapper {
                     QualifiedNameReferenceNode referenceNode =
                             (QualifiedNameReferenceNode) requiredParameterNode.typeName();
                     String typeName = (referenceNode).modulePrefix().text() + ":" + (referenceNode).identifier().text();
-                    if (typeName.equals(HTTP_REQUEST)) {
+                    if (typeName.equals(HTTP_REQUEST) && (!Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
+                            operationAdaptor.getHttpOperation()))) {
                         RequestBody requestBody = new RequestBody();
                         MediaType mediaType = new MediaType();
                         mediaType.setSchema(new Schema<>().description(WILD_CARD_SUMMARY));
