@@ -31,9 +31,11 @@ import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.Package;
+import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -97,7 +99,15 @@ public class OpenApiConverter {
         Path inputPath = path.orElse(null);
 
         syntaxTree = doc.syntaxTree();
-        semanticModel = project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
+        PackageCompilation compilation = project.currentPackage().getCompilation();
+        boolean errorsAvailable = compilation.diagnosticResult()
+                .diagnostics().stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        if (errorsAvailable) {
+            // if there are any compilation errors, do not proceed
+            return;
+        }
+        semanticModel = compilation.getSemanticModel(docId.moduleId());
         List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(syntaxTree,
                 semanticModel, serviceName, needJson, inputPath);
 
@@ -124,6 +134,9 @@ public class OpenApiConverter {
                             null);
                     this.errors.add(error);
                 }
+            }
+            if (fileNames.isEmpty()) {
+                return;
             }
             outStream.println("OpenAPI definition(s) generated successfully and copy to :");
             Iterator<String> iterator = fileNames.iterator();

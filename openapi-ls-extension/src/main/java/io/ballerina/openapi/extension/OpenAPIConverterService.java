@@ -33,7 +33,12 @@ import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
+import io.ballerina.projects.ModuleCompilation;
+import io.ballerina.projects.ModuleId;
+import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import org.ballerinalang.annotation.JavaSPIService;
 import org.ballerinalang.langserver.commons.service.spi.ExtendedLanguageServerService;
@@ -47,6 +52,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -124,7 +130,6 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             Path filePath = Path.of(request.getDocumentFilePath());
             Optional<SemanticModel> semanticModel = workspaceManager.semanticModel(filePath);
             Optional<Project> module = workspaceManager.project(filePath);
-
             if (semanticModel.isEmpty()) {
                 response.setError("Error while generating semantic model.");
                 return response;
@@ -133,7 +138,17 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
                 response.setError("Error while getting the project.");
                 return response;
             }
-            Module defaultModule = module.get().currentPackage().getDefaultModule();
+            Package aPackage = module.get().currentPackage();
+            Collection<Diagnostic> diagnostics = aPackage.getCompilation().diagnosticResult().diagnostics();
+            boolean errorsAvailable = diagnostics.stream()
+                    .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+            if (errorsAvailable) {
+                // if there are any compilation errors, do not proceed
+                response.setError("Given ballerina file content compilation issue.");
+                return response;
+            }
+            Module defaultModule = aPackage.getDefaultModule();
+
             JsonArray specs = new JsonArray();
             for (DocumentId currentDocumentID : defaultModule.documentIds()) {
                 Document document = defaultModule.document(currentDocumentID);

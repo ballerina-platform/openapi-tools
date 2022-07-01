@@ -97,9 +97,8 @@ public class PreValidator implements Validator {
     @Override
     public void validate() {
         // 1. Checking receive service node has compilation issue
-        SemanticModel semanticModel = context.semanticModel();
-        List<Diagnostic> diagnostics = semanticModel.diagnostics();
-        boolean erroneousCompilation = diagnostics.stream()
+        boolean erroneousCompilation = context.compilation().diagnosticResult()
+                .diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR == d.diagnosticInfo().severity());
         if (erroneousCompilation) {
             return;

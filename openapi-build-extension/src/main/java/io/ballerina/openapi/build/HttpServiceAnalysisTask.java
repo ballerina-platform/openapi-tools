@@ -33,10 +33,12 @@ import io.ballerina.openapi.converter.service.OpenAPIEndpointMapper;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.Package;
+import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -77,6 +79,13 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         //Used build option exportOpenapi() to enable plugin at the build time.
         BuildOptions buildOptions = project.buildOptions();
         if (!buildOptions.exportOpenAPI()) {
+            return;
+        }
+        boolean errorsAvailable = context.compilation().diagnosticResult()
+                .diagnostics().stream()
+                .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
+        if (errorsAvailable) {
+            // if there are any compilation errors, do not proceed
             return;
         }
         Path outPath = project.targetDir();
