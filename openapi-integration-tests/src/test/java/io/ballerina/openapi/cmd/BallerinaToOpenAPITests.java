@@ -121,7 +121,7 @@ public class BallerinaToOpenAPITests {
         buildArgs.add("-i");
         buildArgs.add("project_11/service.bal");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        Assert.assertTrue(!Files.exists(TEST_RESOURCE.resolve("query_openapi.yaml")));
+        Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("query_openapi.yaml")));
     }
 
     @AfterClass

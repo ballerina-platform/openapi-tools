@@ -135,9 +135,7 @@ public class BallerinaToOASTests extends OpenAPICommandTest {
         try {
             cmd.execute();
             output = readOutput(true);
-            Assert.assertTrue(output.trim().contains("WARNING [http_request.bal:(4:31,4:44)] Generated OpenAPI " +
-                    "definition does not contain request body information of the `GET` method," +
-                    " as its not supported by the OpenAPI specification."));
+            Assert.assertFalse(Files.exists(this.tmpDir.resolve("http_request_openapi.yaml")));
         } catch (BLauncherException | IOException e) {
             output = e.toString();
             Assert.fail(output);

@@ -81,8 +81,7 @@ public class ListenerTests {
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
         List<OpenAPIConverterDiagnostic> errors = openApiConverter.getErrors();
-        Assert.assertFalse(errors.isEmpty());
-        Assert.assertEquals(errors.get(0).getMessage(), "Given Ballerina file contains compilation error(s).");
+        Assert.assertTrue(errors.isEmpty());
     }
 
     @Test(description = "Generate OpenAPI spec for http load balancer listeners")
