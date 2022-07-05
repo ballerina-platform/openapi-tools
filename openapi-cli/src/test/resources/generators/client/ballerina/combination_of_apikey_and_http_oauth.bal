@@ -81,7 +81,7 @@ public isolated client class Client {
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
         http:Request request = new;
         //TODO: Update the request as needed;
-        Pet response = check self.clientEp->post(resourcePath, request, headers = httpHeaders);
+        Pet response = check self.clientEp->post(resourcePath, request, httpHeaders);
         return response;
     }
     # Delete a pet
@@ -98,9 +98,7 @@ public isolated client class Client {
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Request request = new;
-        //TODO: Update the request as needed;
-        Pet response = check self.clientEp->delete(resourcePath, request, headers = httpHeaders);
+        Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
         return response;
     }
     # Delete a pet 2
@@ -117,9 +115,7 @@ public isolated client class Client {
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Request request = new;
-        //TODO: Update the request as needed;
-        Pet response = check self.clientEp->delete(resourcePath, request, headers = httpHeaders);
+        Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
         return response;
     }
 }

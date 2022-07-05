@@ -13,7 +13,7 @@ tags:
 paths:
   /admin/api/2021-10/orders/{order_id}/risks/{risk_id}.json:
     delete:
-      summary: "Deletes an order risk for an order."
+      summary: "Delete neither header nor request body."
       parameters:
         - in: "path"
           name: "order_id"
@@ -33,9 +33,9 @@ paths:
         200:
           description: Status OK
       operationId: "delete_order_risk"
-  /admin/api/2021-10:
+  /request-body:
     delete:
-      summary: "Deletes an order risk for an order."
+      summary: "Delete with request body."
       responses:
         200:
           description: Status OK
@@ -44,11 +44,39 @@ paths:
         content:
           "application/json":
             schema: { }
+  /header:
+    delete:
+      summary: "Delete with header."
+      parameters:
+        - in: header
+          description: Tests header 01
+          name: X-Request-ID
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        200:
+          description: Status OK
+      operationId: "delete-header"
+  /header-with-request-body:
+    delete:
+      summary: "Delete with header and request body."
+      parameters:
+        - in: header
+          description: Tests header 01
+          name: X-Request-ID
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        200:
+          description: Status OK
+      operationId: "delete-header-request-body"
+      requestBody:
+        content:
+          "application/json":
+            schema: { }
 components:
   schemas: {}
-  securitySchemes:
-    api_token:
-      type: apiKey
-      name: X-Shopify-Access-Token
-      in: header
-      description: Represents API Key `X-Shopify-Access-Token`
