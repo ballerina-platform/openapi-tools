@@ -127,7 +127,8 @@ public class CodeGenerator {
         Path openAPIPath = Path.of(definitionPath);
         // Normalize OpenAPI definition, in the client generation we suppose to terminate code generation when the
         // absence of the operationId in operation. Therefor we enable client flag true as default code generation.
-        OpenAPI openAPIDef = normalizeOpenAPI(openAPIPath, true);
+        // if resource is enabled, we avoid checking operationId.
+        OpenAPI openAPIDef = normalizeOpenAPI(openAPIPath, !isResource);
 
         // Generate service
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
@@ -335,7 +336,7 @@ public class CodeGenerator {
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         // Normalize OpenAPI definition
-        OpenAPI openAPIDef = normalizeOpenAPI(openAPI, true);
+        OpenAPI openAPIDef = normalizeOpenAPI(openAPI, !isResource);
         // Generate ballerina service and resources.
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable
                 , isResource);
