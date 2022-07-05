@@ -80,10 +80,10 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
         if (!buildOptions.exportOpenAPI()) {
             return;
         }
-        boolean errorsAvailable = context.compilation().diagnosticResult()
+        boolean hasErrors = context.compilation().diagnosticResult()
                 .diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-        if (errorsAvailable) {
+        if (hasErrors) {
             // if there are any compilation errors, do not proceed
             return;
         }

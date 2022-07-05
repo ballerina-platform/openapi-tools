@@ -138,11 +138,11 @@ public class OpenAPIConverterService implements ExtendedLanguageServerService {
             }
             Package aPackage = module.get().currentPackage();
             Collection<Diagnostic> diagnostics = aPackage.getCompilation().diagnosticResult().diagnostics();
-            boolean errorsAvailable = diagnostics.stream()
+            boolean hasErrors = diagnostics.stream()
                     .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-            if (errorsAvailable) {
+            if (hasErrors) {
                 // if there are any compilation errors, do not proceed
-                response.setError("Given ballerina file content compilation issue.");
+                response.setError("Given Ballerina file contains compilation error(s).");
                 return response;
             }
             Module defaultModule = aPackage.getDefaultModule();

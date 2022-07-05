@@ -108,9 +108,8 @@ public class OpenAPIParameterMapper {
                     QualifiedNameReferenceNode referenceNode =
                             (QualifiedNameReferenceNode) requiredParameterNode.typeName();
                     String typeName = (referenceNode).modulePrefix().text() + ":" + (referenceNode).identifier().text();
-                    //TODO: add warning common hhtp:Resuqt not caontain details in get method
-                    if (typeName.equals(HTTP_REQUEST) && (Constants.GET.toLowerCase(Locale.ENGLISH).equalsIgnoreCase(
-                            operationAdaptor.getHttpOperation()))) {
+                    if (typeName.equals(HTTP_REQUEST) &&
+                            (Constants.GET.equalsIgnoreCase(operationAdaptor.getHttpOperation()))) {
                         DiagnosticMessages errorMessage = DiagnosticMessages.OAS_CONVERTOR_113;
                         IncompatibleResourceDiagnostic error = new IncompatibleResourceDiagnostic(errorMessage,
                                 referenceNode.location());

@@ -100,10 +100,10 @@ public class OpenApiConverter {
 
         syntaxTree = doc.syntaxTree();
         PackageCompilation compilation = project.currentPackage().getCompilation();
-        boolean errorsAvailable = compilation.diagnosticResult()
+        boolean hasErrors = compilation.diagnosticResult()
                 .diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
-        if (errorsAvailable) {
+        if (hasErrors) {
             // if there are any compilation errors, do not proceed
             return;
         }
