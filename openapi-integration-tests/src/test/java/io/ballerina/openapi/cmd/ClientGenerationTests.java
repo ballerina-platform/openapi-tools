@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.openapi.OpenAPITest;
@@ -15,7 +32,7 @@ import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
 import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
 
 /**
- * Integration tests for client resource function.
+ * Integration tests for client resource functions.
  */
 public class ClientGenerationTests extends OpenAPITest {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
@@ -31,7 +48,7 @@ public class ClientGenerationTests extends OpenAPITest {
         buildArgs.add("client");
         buildArgs.add("-o");
         buildArgs.add(tmpDir.toString());
-        buildArgs.add("--resource-function");
+        buildArgs.add("--resource-functions");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("client.bal")));
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("client.bal", "expected_client.bal");
@@ -47,7 +64,7 @@ public class ClientGenerationTests extends OpenAPITest {
         buildArgs.add("service");
         buildArgs.add("-o");
         buildArgs.add(tmpDir.toString());
-        buildArgs.add("--resource-function");
+        buildArgs.add("--resource-functions");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
         Assert.assertFalse(Files.exists(TEST_RESOURCE.resolve("client.bal")));
     }
@@ -60,7 +77,7 @@ public class ClientGenerationTests extends OpenAPITest {
         buildArgs.add(openapiFilePath);
         buildArgs.add("-o");
         buildArgs.add(tmpDir.toString());
-        buildArgs.add("--resource-function");
+        buildArgs.add("--resource-functions");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("client.bal")));
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("openapi_service.bal")));
