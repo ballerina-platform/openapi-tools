@@ -215,8 +215,8 @@ public class RequestBodyTest {
                 , true);
         Assert.assertFalse(openApiConverterUtils.getErrors().isEmpty());
         Assert.assertEquals(openApiConverterUtils.getErrors().get(0).getMessage(), "Generated OpenAPI" +
-                " definition does not contain request body information of the `GET` method, as it's not supported" +
-                " by the OpenAPI specification.");
+                " definition does not contain `http:Request` body information of the `GET` method, as it's not " +
+                "supported by the OpenAPI specification.");
         compareWithGeneratedFile(ballerinaFilePath, "rb_scenario14.yaml");
     }
 
