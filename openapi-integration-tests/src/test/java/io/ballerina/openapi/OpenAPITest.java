@@ -69,14 +69,17 @@ public class OpenAPITest {
     }
 
     @AfterTest
-    public void removeGeneratedFile() {
+    public void removeGeneratedFile() throws IOException {
         deleteGeneratedFiles();
     }
 
     // Delete generated service and schema files.
-    public void deleteGeneratedFiles() {
+    public void deleteGeneratedFiles() throws IOException {
+
         File schemaFile = new File(this.tmpDir.resolve("types.bal").toString());
         schemaFile.delete();
+        File clientFile = new File(this.tmpDir.resolve("client.bal").toString());
+        clientFile.delete();
     }
 
     private static String getStringFromGivenBalFile(Path expectedServiceFile) throws IOException {

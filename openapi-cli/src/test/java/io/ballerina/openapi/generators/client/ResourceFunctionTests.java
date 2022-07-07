@@ -20,6 +20,8 @@ import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.Formatter;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -62,13 +64,14 @@ public class ResourceFunctionTests {
     }
 
     @Test(description = "Generate Client for pathParameters")
-    public void generateForPathParameters() throws IOException, BallerinaOpenApiException {
+    public void generateForPathParameters() throws IOException, BallerinaOpenApiException, FormatterException {
         CodeGenerator codeGenerator = new CodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/pathParameters.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/pathParameters.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, true);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        System.out.println(Formatter.format(syntaxTree));
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 

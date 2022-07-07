@@ -32,6 +32,7 @@ import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
@@ -40,6 +41,7 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxInfo;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.ErrorMessages;
@@ -141,13 +143,21 @@ public class GeneratorUtils {
         if (pathNodes.length >= 2) {
             for (String pathNode: pathNodes) {
                 if (pathNode.contains("{")) {
-                    String pathParam = escapeIdentifier(pathNode.replaceAll("[{}]", ""));
+                    String pathParam = pathNode;
+                    pathParam = pathParam.substring(pathParam.indexOf("{") + 1);
+                    pathParam = pathParam.substring(0, pathParam.indexOf("}"));
+                    pathParam = getValidName(pathParam, false);
+                    /**
+                     * TODO -> `onCall/[string id]\.json` type of url won't support from syntax
+                     * issue https://github.com/ballerina-platform/ballerina-spec/issues/1138
+                     * <pre>resource function get onCall/[string id]\.json() returns string {}</>
+                     */
                     if (operation.getValue().getParameters() != null) {
                         for (Parameter parameter: operation.getValue().getParameters()) {
                             if (parameter.getIn() == null) {
                                 break;
                             }
-                            if (pathParam.trim().equals(escapeIdentifier(parameter.getName().trim()))
+                            if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
                                     && parameter.getIn().equals("path")) {
 
                                 Token ppOpenB = AbstractNodeFactory.createIdentifierToken("[");
@@ -162,15 +172,12 @@ public class GeneratorUtils {
                                 }
                                 BuiltinSimpleNameReferenceNode builtSNRNode =
                                         NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
-                                String parameterName = " " + escapeIdentifier(parameter.getName().trim());
-                                IdentifierToken paramName = AbstractNodeFactory.createIdentifierToken(parameterName);
+                                IdentifierToken paramName = AbstractNodeFactory.createIdentifierToken(pathParam);
                                 Token ppCloseB = AbstractNodeFactory.createIdentifierToken("]");
-
                                 ResourcePathParameterNode resourcePathParameterNode = NodeFactory
                                         .createResourcePathParameterNode(
                                                 SyntaxKind.RESOURCE_PATH_SEGMENT_PARAM, ppOpenB,
                                                 ppAnnotation, builtSNRNode, null, paramName, ppCloseB);
-
                                 functionRelativeResourcePath.add(resourcePathParameterNode);
                                 functionRelativeResourcePath.add(slash);
                                 break;
