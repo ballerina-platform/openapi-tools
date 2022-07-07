@@ -56,7 +56,7 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_112("OAS_CONVERTOR_112", "Provided OpenAPI contract contains parsing error(s).",
                       DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_113("OAS_CONVERTOR_113",
-            "Generated OpenAPI definition does not contain request body information of the `GET` method," +
+            "Generated OpenAPI definition does not contain `http:Request` body information of the `GET` method," +
                     " as it's not supported by the OpenAPI specification.",
             DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_114("OAS_CONVERTOR_114", "Generated OpenAPI definition does not contain information " +

@@ -27,7 +27,7 @@ service /payloadV on helloEp {
         return "pet";
     }
 
-    resource function get pets(@http:Payload {} Pet payload) returns json {
+    resource function get pets() returns json {
         json ok = "Apple";
         return ok;
     }
