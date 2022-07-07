@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
@@ -49,6 +50,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -70,6 +72,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.BODY;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.generators.GeneratorUtils.isComplexURL;
 import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
@@ -95,7 +98,7 @@ public class ReturnTypeGenerator {
      * @throws BallerinaOpenApiException
      */
     public ReturnTypeDescriptorNode getReturnTypeDescriptorNode(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                                NodeList<AnnotationNode> annotations)
+                                                                NodeList<AnnotationNode> annotations, String path)
             throws BallerinaOpenApiException {
 
         Token returnKeyWord = createIdentifierToken("returns", SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
@@ -161,6 +164,12 @@ public class ReturnTypeGenerator {
             // --error node TypeDescriptor
             returnNode = createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken("error?")));
+        }
+        if (isComplexURL(path)) {
+            assert returnNode != null;
+            String returnStatement = returnNode.toString().trim() + "|error";
+            return createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
+                    createSimpleNameReferenceNode(createIdentifierToken(returnStatement)));
         }
         return returnNode;
     }

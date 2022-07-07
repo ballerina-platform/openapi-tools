@@ -63,7 +63,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Generate functionDefinitionNode for multiple operations")
-    public void generateMultipleOperations() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateMultipleOperations() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/multiOperations.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -72,7 +72,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Generate functionDefinitionNode for multiple paths")
-    public void generateMultiplePath() throws IOException, BallerinaOpenApiException {
+    public void generateMultiplePath() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPaths.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);

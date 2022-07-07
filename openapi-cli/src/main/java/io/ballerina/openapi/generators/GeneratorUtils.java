@@ -32,7 +32,6 @@ import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
@@ -41,7 +40,6 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxInfo;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.ErrorMessages;
@@ -66,6 +64,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.core.MediaType;
 
@@ -147,6 +147,12 @@ public class GeneratorUtils {
                     pathParam = pathParam.substring(pathParam.indexOf("{") + 1);
                     pathParam = pathParam.substring(0, pathParam.indexOf("}"));
                     pathParam = getValidName(pathParam, false);
+                    // check whether path parameter segment has special character
+                    String[] split = pathNode.split("}", 2);
+                    Pattern pattern = Pattern.compile("[^a-zA-Z0-9]");
+                    Matcher matcher = pattern.matcher(split[1]);
+                    boolean isPathNameContainsSpecialCharacter = matcher.find();
+
                     /**
                      * TODO -> `onCall/[string id]\.json` type of url won't support from syntax
                      * issue https://github.com/ballerina-platform/ballerina-spec/issues/1138
@@ -172,7 +178,10 @@ public class GeneratorUtils {
                                 }
                                 BuiltinSimpleNameReferenceNode builtSNRNode =
                                         NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
-                                IdentifierToken paramName = AbstractNodeFactory.createIdentifierToken(pathParam);
+                                IdentifierToken paramName = AbstractNodeFactory.createIdentifierToken(
+                                                isPathNameContainsSpecialCharacter ?
+                                                        getValidName(pathNode, false) :
+                                                        pathParam);
                                 Token ppCloseB = AbstractNodeFactory.createIdentifierToken("]");
                                 ResourcePathParameterNode resourcePathParameterNode = NodeFactory
                                         .createResourcePathParameterNode(
@@ -467,5 +476,16 @@ public class GeneratorUtils {
             ImportDeclarationNode importModule = GeneratorUtils.getImportDeclarationNode(BALLERINA, module);
             imports.add(importModule);
         }
+    }
+
+    public static boolean isComplexURL(String path) {
+        String[] subPathSegment = path.split("/");
+        Pattern pattern = Pattern.compile("[^a-zA-Z0-9]");
+        for (String subPath: subPathSegment) {
+            if (subPath.contains("{") && pattern.matcher(subPath.split("}", 2)[1]).find()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

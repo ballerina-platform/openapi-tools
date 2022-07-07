@@ -30,11 +30,13 @@ import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
@@ -56,6 +58,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -69,12 +73,14 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignat
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
+import static io.ballerina.openapi.generators.GeneratorConstants.ESCAPE_PATTERN;
 import static io.ballerina.openapi.generators.GeneratorConstants.FUNCTION;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
+import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.generateServiceConfigAnnotation;
 
@@ -192,7 +198,7 @@ public class BallerinaServiceGenerator {
                         List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation);
                         // function call
                         FunctionDefinitionNode functionDefinitionNode = getResourceFunction(operation,
-                                functionRelativeResourcePath);
+                                functionRelativeResourcePath, path);
                         functions.add(functionDefinitionNode);
                     }
                 }
@@ -200,7 +206,7 @@ public class BallerinaServiceGenerator {
                 // getRelative resource path
                 List<Node> relativeResourcePath = getRelativeResourcePath(path, operation);
                 // function call
-                FunctionDefinitionNode resourceFunction = getResourceFunction(operation, relativeResourcePath);
+                FunctionDefinitionNode resourceFunction = getResourceFunction(operation, relativeResourcePath, path);
                 functions.add(resourceFunction);
             }
         }
@@ -216,7 +222,7 @@ public class BallerinaServiceGenerator {
      * @throws BallerinaOpenApiException when the process failure occur
      */
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                       List<Node> pathNodes) throws BallerinaOpenApiException {
+                                                       List<Node> pathNodes, String path) throws BallerinaOpenApiException {
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(RESOURCE, SINGLE_WS_MINUTIAE,
                 SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(FUNCTION, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
@@ -231,7 +237,7 @@ public class BallerinaServiceGenerator {
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
         ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
-                createEmptyNodeList());
+                createEmptyNodeList(), path);
         typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());
 
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
@@ -239,12 +245,54 @@ public class BallerinaServiceGenerator {
                         returnNode);
 
         // Function Body Node
+        //if path parameter have some special characters
+        List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
         FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
-                createToken(SyntaxKind.OPEN_BRACE_TOKEN), null, createEmptyNodeList(),
+                createToken(SyntaxKind.OPEN_BRACE_TOKEN),
+                null,
+                bodyStatements.isEmpty() ?
+                        createEmptyNodeList() :
+                        createNodeList(bodyStatements),
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
                 functionBodyBlockNode);
+    }
+
+    private List<StatementNode> generateBodyStatementForComplexUrl(String path) {
+        String[] subPathSegment = path.split("/");
+        Pattern pattern = Pattern.compile("[^a-zA-Z0-9]");
+        List<StatementNode> bodyStatements = new ArrayList<>();
+        for (String subPath: subPathSegment) {
+            if (subPath.contains("{") && pattern.matcher(subPath.split("}", 2)[1]).find()) {
+                /**
+                 * Add function statements for handle complex URL ex: /admin/api/2021-10/customers/{customer_id}.json
+                 * <pre>
+                 *     if !customerIdDotJson.endsWith(".json") { return error("bad URL"); }
+                 *     string customerId = customerIdDotJson.substring(0, customerIdDotJson.length() - 4);
+                 * </pre>
+                 */
+                String pathParam = subPath;
+                pathParam = pathParam.substring(pathParam.indexOf("{") + 1);
+                pathParam = pathParam.substring(0, pathParam.indexOf("}"));
+                pathParam = getValidName(pathParam, false);
+                String[] subPathSplit = subPath.split("}", 2);
+                //pathPramName -> subPath.removeescpe
+                String pathParameter = getValidName(subPath, false);
+                //".json" -> subPathSplit.length
+                String restSubPath = subPathSplit[1];
+                String resSubPathLength = String.valueOf(restSubPath.length() - 1);
+                String ifBlock = "if !" + pathParameter + ".endsWith(\"" + restSubPath + "\") { return error(\"bad " +
+                        "URL\"); }";
+                StatementNode ifBlockStatement = NodeParser.parseStatement(ifBlock);
+                String pathParameterState = "string " + pathParam + " = " + pathParameter + ".substring(0, " +
+                        pathParameter + ".length() - " + resSubPathLength + ");";
+                StatementNode pathParamStatement = NodeParser.parseStatement(pathParameterState);
+                bodyStatements.add(ifBlockStatement);
+                bodyStatements.add(pathParamStatement);
+            }
+        }
+        return bodyStatements;
     }
 }
