@@ -35,7 +35,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, headers = httpHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
         return response;
     }
     # Convert URL to PDF
@@ -61,7 +61,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, headers = httpHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
         return response;
     }
     # Convert office document or image to PDF
@@ -75,7 +75,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, headers = httpHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
         return response;
     }
     # Merge multiple PDFs together
@@ -89,7 +89,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, headers = httpHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
         return response;
     }
     # Convert raw HTML to PDF
@@ -103,7 +103,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, headers = httpHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
         return response;
     }
     # Convert URL to PDF
@@ -129,7 +129,7 @@ public isolated client class Client {
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
         request.setPayload(jsonBody, "application/json");
-        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, headers = httpHeaders);
+        ApiResponseSuccess response = check self.clientEp->post(resourcePath, request, httpHeaders);
         return response;
     }
     # Generate bar codes and QR codes with ZXING.

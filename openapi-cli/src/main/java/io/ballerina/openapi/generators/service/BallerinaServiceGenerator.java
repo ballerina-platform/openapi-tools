@@ -246,7 +246,7 @@ public class BallerinaServiceGenerator {
                         returnNode);
 
         // Function Body Node
-        //if path parameter have some special characters
+        // If path parameter has some special characters, extra body statements are added to handle the complexity.
         List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
         FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN),
@@ -260,5 +260,4 @@ public class BallerinaServiceGenerator {
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
                 functionBodyBlockNode);
     }
-
 }

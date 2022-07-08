@@ -1,15 +1,23 @@
 openapi: 3.0.1
 info:
-  title: Sample API
-  description: API description in Markdown.
-  version: 1.0.0
+  title: MTitle01
+  version: 0.1.0
 servers:
-  - url: 'https://api.example.com'
+  - url: "{server}:{port}/mTitle01"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
-  /users:
+  /title:
     get:
-      summary: Returns a list of users.
-      description: Optional extended description in Markdown.
+      operationId: operation_get_/title
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}

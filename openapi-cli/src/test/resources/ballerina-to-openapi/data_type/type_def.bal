@@ -30,9 +30,9 @@ service /payloadV on new http:Listener(9090) {
     # + link - Reservation representation
     resource function post reservation(@http:Payload Link link) {
     }
-
-    resource function get reservation(Count count) {
-    }
+    // Current http module doesn't support define datatype
+    // resource function get reservation(Count count) {
+    // }
 
     resource function get reservation/[PetId id]() {
     }

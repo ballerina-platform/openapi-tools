@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: Shopify Admin API
+  version: "2021-10"
+security:
+  - api_token: []
+tags:
+  - name: customers
+  - name: products
+  - name: orders
+  - name: fulfillments
+  - name: order_risks
+paths:
+  /admin/api/2021-10/orders/{order_id}/risks/{risk_id}.json:
+    delete:
+      summary: "Delete neither header nor request body."
+      parameters:
+        - in: "path"
+          name: "order_id"
+          description: "Order ID"
+          schema:
+            type: string
+          required: true
+        - in: "path"
+          name: "risk_id"
+          description: "Order Risk ID"
+          schema:
+            type: string
+          required: true
+      tags:
+        - "order_risks"
+      responses:
+        200:
+          description: Status OK
+      operationId: "delete_order_risk"
+  /request-body:
+    delete:
+      summary: "Delete with request body."
+      responses:
+        200:
+          description: Status OK
+      operationId: "order_risk"
+      requestBody:
+        content:
+          "application/json":
+            schema: { }
+  /header:
+    delete:
+      summary: "Delete with header."
+      parameters:
+        - in: header
+          description: Tests header 01
+          name: X-Request-ID
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        200:
+          description: Status OK
+      operationId: "delete-header"
+  /header-with-request-body:
+    delete:
+      summary: "Delete with header and request body."
+      parameters:
+        - in: header
+          description: Tests header 01
+          name: X-Request-ID
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        200:
+          description: Status OK
+      operationId: "delete-header-request-body"
+      requestBody:
+        content:
+          "application/json":
+            schema: { }
+components:
+  schemas: {}
