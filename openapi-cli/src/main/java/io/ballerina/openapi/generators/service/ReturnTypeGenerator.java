@@ -167,7 +167,7 @@ public class ReturnTypeGenerator {
         }
         if (isComplexURL(path)) {
             assert returnNode != null;
-            String returnStatement = returnNode.toString().trim() + "|error";
+            String returnStatement = returnNode.toString().trim().replace("returns", "") + "|error";
             return createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken(returnStatement)));
         }

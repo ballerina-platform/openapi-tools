@@ -79,6 +79,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARA
 import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.generators.GeneratorUtils.generateBodyStatementForComplexUrl;
 import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
@@ -260,39 +261,4 @@ public class BallerinaServiceGenerator {
                 functionBodyBlockNode);
     }
 
-    private List<StatementNode> generateBodyStatementForComplexUrl(String path) {
-        String[] subPathSegment = path.split("/");
-        Pattern pattern = Pattern.compile("[^a-zA-Z0-9]");
-        List<StatementNode> bodyStatements = new ArrayList<>();
-        for (String subPath: subPathSegment) {
-            if (subPath.contains("{") && pattern.matcher(subPath.split("}", 2)[1]).find()) {
-                /**
-                 * Add function statements for handle complex URL ex: /admin/api/2021-10/customers/{customer_id}.json
-                 * <pre>
-                 *     if !customerIdDotJson.endsWith(".json") { return error("bad URL"); }
-                 *     string customerId = customerIdDotJson.substring(0, customerIdDotJson.length() - 4);
-                 * </pre>
-                 */
-                String pathParam = subPath;
-                pathParam = pathParam.substring(pathParam.indexOf("{") + 1);
-                pathParam = pathParam.substring(0, pathParam.indexOf("}"));
-                pathParam = getValidName(pathParam, false);
-                String[] subPathSplit = subPath.split("}", 2);
-                //pathPramName -> subPath.removeescpe
-                String pathParameter = getValidName(subPath, false);
-                //".json" -> subPathSplit.length
-                String restSubPath = subPathSplit[1];
-                String resSubPathLength = String.valueOf(restSubPath.length() - 1);
-                String ifBlock = "if !" + pathParameter + ".endsWith(\"" + restSubPath + "\") { return error(\"bad " +
-                        "URL\"); }";
-                StatementNode ifBlockStatement = NodeParser.parseStatement(ifBlock);
-                String pathParameterState = "string " + pathParam + " = " + pathParameter + ".substring(0, " +
-                        pathParameter + ".length() - " + resSubPathLength + ");";
-                StatementNode pathParamStatement = NodeParser.parseStatement(pathParameterState);
-                bodyStatements.add(ifBlockStatement);
-                bodyStatements.add(pathParamStatement);
-            }
-        }
-        return bodyStatements;
-    }
 }

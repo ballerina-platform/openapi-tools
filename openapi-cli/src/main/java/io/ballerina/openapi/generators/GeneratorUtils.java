@@ -32,11 +32,13 @@ import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxInfo;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
@@ -91,9 +93,13 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_PDF;
 import static io.ballerina.openapi.generators.GeneratorConstants.BALLERINA;
+import static io.ballerina.openapi.generators.GeneratorConstants.CLOSE_CURLY_BRACE;
 import static io.ballerina.openapi.generators.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.generators.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.generators.GeneratorConstants.LINE_SEPARATOR;
+import static io.ballerina.openapi.generators.GeneratorConstants.OPEN_CURLY_BRACE;
+import static io.ballerina.openapi.generators.GeneratorConstants.SLASH;
+import static io.ballerina.openapi.generators.GeneratorConstants.SPECIAL_CHARACTERS_REGEX;
 import static io.ballerina.openapi.generators.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.generators.GeneratorConstants.STYLE;
 
@@ -138,18 +144,18 @@ public class GeneratorUtils {
             throws BallerinaOpenApiException {
 
         List<Node> functionRelativeResourcePath = new ArrayList<>();
-        String[] pathNodes = path.split("/");
-        Token slash = AbstractNodeFactory.createIdentifierToken("/");
+        String[] pathNodes = path.split(SLASH);
+        Token slash = AbstractNodeFactory.createIdentifierToken(SLASH);
         if (pathNodes.length >= 2) {
             for (String pathNode: pathNodes) {
-                if (pathNode.contains("{")) {
+                if (pathNode.contains(OPEN_CURLY_BRACE)) {
                     String pathParam = pathNode;
-                    pathParam = pathParam.substring(pathParam.indexOf("{") + 1);
-                    pathParam = pathParam.substring(0, pathParam.indexOf("}"));
+                    pathParam = pathParam.substring(pathParam.indexOf(OPEN_CURLY_BRACE) + 1);
+                    pathParam = pathParam.substring(0, pathParam.indexOf(CLOSE_CURLY_BRACE));
                     pathParam = getValidName(pathParam, false);
                     // check whether path parameter segment has special character
-                    String[] split = pathNode.split("}", 2);
-                    Pattern pattern = Pattern.compile("[^a-zA-Z0-9]");
+                    String[] split = pathNode.split(CLOSE_CURLY_BRACE, 2);
+                    Pattern pattern = Pattern.compile(SPECIAL_CHARACTERS_REGEX);
                     Matcher matcher = pattern.matcher(split[1]);
                     boolean isPathNameContainsSpecialCharacter = matcher.find();
 
@@ -478,14 +484,57 @@ public class GeneratorUtils {
         }
     }
 
+    /**
+     * Check the given URL include complex scenarios.
+     */
     public static boolean isComplexURL(String path) {
-        String[] subPathSegment = path.split("/");
-        Pattern pattern = Pattern.compile("[^a-zA-Z0-9]");
+        String[] subPathSegment = path.split(SLASH);
+        Pattern pattern = Pattern.compile(SPECIAL_CHARACTERS_REGEX);
         for (String subPath: subPathSegment) {
-            if (subPath.contains("{") && pattern.matcher(subPath.split("}", 2)[1]).find()) {
+            if (subPath.contains(OPEN_CURLY_BRACE) &&
+                    pattern.matcher(subPath.split(CLOSE_CURLY_BRACE, 2)[1]).find()) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Add function statements for handle complex URL ex: /admin/api/2021-10/customers/{customer_id}.json.
+     *
+     * <pre>
+     *     if !customerIdDotJson.endsWith(".json") { return error("bad URL"); }
+     *     string customerId = customerIdDotJson.substring(0, customerIdDotJson.length() - 4);
+     * </pre>
+     */
+    public static List<StatementNode> generateBodyStatementForComplexUrl(String path) {
+        String[] subPathSegment = path.split(SLASH);
+        Pattern pattern = Pattern.compile(SPECIAL_CHARACTERS_REGEX);
+        List<StatementNode> bodyStatements = new ArrayList<>();
+        for (String subPath: subPathSegment) {
+            if (subPath.contains(OPEN_CURLY_BRACE) &&
+                    pattern.matcher(subPath.split(CLOSE_CURLY_BRACE, 2)[1]).find()) {
+                String pathParam = subPath;
+                pathParam = pathParam.substring(pathParam.indexOf(OPEN_CURLY_BRACE) + 1);
+                pathParam = pathParam.substring(0, pathParam.indexOf(CLOSE_CURLY_BRACE));
+                pathParam = getValidName(pathParam, false);
+
+                String[] subPathSplit = subPath.split(CLOSE_CURLY_BRACE, 2);
+                String pathParameter = getValidName(subPath, false);
+                String restSubPath = subPathSplit[1];
+                String resSubPathLength = String.valueOf(restSubPath.length() - 1);
+
+                String ifBlock = "if !" + pathParameter + ".endsWith(\"" + restSubPath + "\") { return error(\"bad " +
+                        "URL\"); }";
+                StatementNode ifBlockStatement = NodeParser.parseStatement(ifBlock);
+
+                String pathParameterState = "string " + pathParam + " = " + pathParameter + ".substring(0, " +
+                        pathParameter + ".length() - " + resSubPathLength + ");";
+                StatementNode pathParamStatement = NodeParser.parseStatement(pathParameterState);
+                bodyStatements.add(ifBlockStatement);
+                bodyStatements.add(pathParamStatement);
+            }
+        }
+        return bodyStatements;
     }
 }

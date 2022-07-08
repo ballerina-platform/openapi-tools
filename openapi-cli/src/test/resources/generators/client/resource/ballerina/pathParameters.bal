@@ -64,7 +64,11 @@ public isolated client class Client {
     # + customerId - Customer ID
     # + fields - Show only certain fields, specified by a comma-separated list of field names.
     # + return - Requested customer
-    resource isolated function get admin/api/'2021\-10/customers/[string customerId](string? fields = ()) returns http:Response|error {
+    resource isolated function get admin/api/'2021\-10/customers/[string customerIdJson](string? fields = ()) returns http:Response|error {
+        if !customerIdJson.endsWith(".json") {
+            return error("bad URL");
+        }
+        string customerId = customerIdJson.substring(0, customerIdJson.length() - 4);
         string resourcePath = string `/admin/api/2021-10/customers/${getEncodedUri(customerId)}.json`;
         map<anydata> queryParam = {"fields": fields};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);

@@ -161,7 +161,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 // Add the resource flag enable
                 if (generateClientResourceFunctions && mode != null && mode.equals("service")) {
                     // Exit the code generation process
-                    outStream.println("'----resource-functions' option is only available with the client mode.");
+                    outStream.println("'--resource-functions' option is only available with the client mode.");
                     exitError(this.exitWhenFinish);
                 }
                 try {
@@ -174,7 +174,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 // Add the resource flag enable
                 if (generateClientResourceFunctions) {
                     // Exit the code generation process
-                    outStream.println("'----resource-functions' option is only available with the client mode.");
+                    outStream.println("'--resource-functions' option is only available with the client mode.");
                     exitError(this.exitWhenFinish);
                 }
                 ballerinaToOpenApi(fileName);

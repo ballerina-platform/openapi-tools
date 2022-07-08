@@ -309,5 +309,9 @@ public class GeneratorConstants {
     public static final String MAP_STRING = "map<string>";
     public static final String TEXT_WILDCARD_REGEX = "text/.*";
     public static final String BODY = "body";
+    public static final String SPECIAL_CHARACTERS_REGEX = "[^a-zA-Z0-9]";
+    public static final String OPEN_CURLY_BRACE = "{";
+    public static final String CLOSE_CURLY_BRACE = "}";
+    public static final String SLASH = "/";
 
 }
