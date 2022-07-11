@@ -75,6 +75,7 @@ public class GeneratorConstants {
     public static final String CLIENT_FILE_NAME = "client.bal";
     public static final String UTIL_FILE_NAME = "utils.bal";
     public static final String TEST_FILE_NAME = "test.bal";
+    public static final String SERVICE_FILE_NAME = "service.bal";
     public static final String CONFIG_FILE_NAME = "Config.toml";
     public static final String BALLERINA_TOML = "Ballerina.toml";
     public static final String BALLERINA_TOML_CONTENT = "[package]\n" +

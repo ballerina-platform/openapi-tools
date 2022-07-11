@@ -80,7 +80,8 @@ public class QueryParameterTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario06.yaml");
     }
 
-    @Test(description = "Query parameter has array type with null values (ex: int?[] offset)")
+    //Disable till http module support the nilable array `int?[]` in query parameter
+    @Test(description = "Query parameter has array type with null values (ex: int?[] offset)", enabled = false)
     public void testQueryscenario07() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario07.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario07.yaml");

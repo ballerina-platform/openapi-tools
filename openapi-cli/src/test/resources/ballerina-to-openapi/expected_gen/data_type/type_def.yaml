@@ -11,17 +11,6 @@ servers:
         default: "9090"
 paths:
   /reservation:
-    get:
-      operationId: getReservation
-      parameters:
-        - name: count
-          in: query
-          required: true
-          schema:
-            $ref: '#/components/schemas/Count'
-      responses:
-        "202":
-          description: Accepted
     post:
       summary: Represents Snowpeak reservation resource
       operationId: postReservation
