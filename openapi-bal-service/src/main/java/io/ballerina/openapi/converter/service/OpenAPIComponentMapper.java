@@ -448,12 +448,13 @@ public class OpenAPIComponentMapper {
         }
         // Handle the tuple type
         if (symbol.typeKind().equals(TypeDescKind.TUPLE)) {
-            // Add it to oneOF
+            // Add all the schema related to typeSymbols into the list. Then the list can be mapped into oneOf
+            // type.
             TupleTypeSymbol tuple = (TupleTypeSymbol) symbol;
             List<Schema> arrayItems = new ArrayList<>();
             for (TypeSymbol typeSymbol : tuple.memberTypeDescriptors()) {
                 Schema<?> openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeSymbol.signature());
-                // Handle type reference type
+                // Handle type_reference type
                 if (typeSymbol instanceof TypeReferenceTypeSymbol) {
                     openApiSchema.set$ref(typeSymbol.signature());
                     createComponentSchema(schema, typeSymbol);
