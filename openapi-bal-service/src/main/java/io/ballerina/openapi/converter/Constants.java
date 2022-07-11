@@ -78,6 +78,7 @@ public class Constants {
     public static final String WILD_CARD_CONTENT_KEY = "*/*";
     public static final String WILD_CARD_SUMMARY = "Any type of entity body";
     public static final String MEDIA_TYPE = "mediaType";
+    public static final String TUPLE = "tuple";
 
     /**
      * Enum to select the Ballerina Type.
