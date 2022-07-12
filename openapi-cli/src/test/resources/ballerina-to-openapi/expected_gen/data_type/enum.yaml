@@ -23,6 +23,17 @@ paths:
       responses:
         "202":
           description: Accepted
+  /getOrder:
+    post:
+      operationId: postGetorder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        "202":
+          description: Accepted
 components:
   schemas:
     Link:
@@ -40,3 +51,15 @@ components:
             - PUT
             - POST
             - GET
+    Order:
+      required:
+        - rel
+      type: object
+      properties:
+        rel:
+          type: string
+        actions:
+          type: string
+          enum:
+            - Half "Portion"
+            - full
