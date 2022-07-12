@@ -406,7 +406,7 @@ public class OpenAPIComponentMapper {
         for (ConstantSymbol enumMember : enumMembers) {
             if (enumMember.typeDescriptor().typeKind() == TypeDescKind.SINGLETON) {
                 String signatureValue = enumMember.typeDescriptor().signature();
-                if (signatureValue.startsWith("\"") && signatureValue.startsWith("\"")) {
+                if (signatureValue.startsWith("\"") && signatureValue.endsWith("\"")) {
                     signatureValue = signatureValue.substring(1, signatureValue.length() - 1);
                 }
                 enums.add(signatureValue);

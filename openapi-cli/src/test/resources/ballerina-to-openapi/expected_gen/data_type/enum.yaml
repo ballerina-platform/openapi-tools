@@ -61,5 +61,6 @@ components:
         actions:
           type: string
           enum:
+            - custom size
             - Half "Portion"
             - full
