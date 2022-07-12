@@ -34,7 +34,8 @@ import java.nio.file.Paths;
 public class ConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     CodeGenerator codeGenerator = new CodeGenerator();
-    @Test(description = "Tests with record field has constraint")
+    @Test(description = "Tests with record field has constraint and record field type can be user defined datatype " +
+            "with constraint.")
     public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -44,7 +45,12 @@ public class ConstraintTests {
                 syntaxTree);
     }
 
-    @Test(description = "Tests for all the array type scenarios")
+    @Test(description = "Tests for all the array type scenarios:" +
+            "Use case 01 : User define array (Annotations on a type)" +
+            "Use case 02 : For both array type and array items have constraints," +
+            "Use case 03 : Reference array" +
+            "Use case 04 : Array items have constrained with number format" +
+            "Use case 05 : Only array items have constrained with number format")
     public void testForArray() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/array.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -53,7 +59,10 @@ public class ConstraintTests {
                 syntaxTree);
     }
 
-    @Test(description = "Tests for all the field has reference type scenarios")
+    @Test(description = "Tests for the field has reference type scenarios" +
+            "Use case 01 : Annotations on a record field" +
+            "Use case 02 : Annotations on a type" +
+            "Use case 03 : Annotations on a type used as a record field")
     public void testForReference() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/type_def_node.yaml"),
                 true);

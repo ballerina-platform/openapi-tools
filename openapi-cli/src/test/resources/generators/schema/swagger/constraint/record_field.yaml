@@ -23,7 +23,7 @@ paths:
 
 components:
   schemas:
-    Address:
+    Address:  # Use case 02 : Annotations on a type
       type: string
       minLength: 5
     Person:
@@ -33,7 +33,7 @@ components:
       properties:
         name:
           type: string
-          maxLength: 14
+          maxLength: 14 # Use case 01 : Annotations on a record field
         hobby:
           type: array
           items:
@@ -43,7 +43,7 @@ components:
         id:
           type: integer
           maximum: 5
-        address:
+        address:  # Use case 03 : Annotations on a type used as a record field
           $ref: "#/components/schemas/Address"
         salary:
           type: number

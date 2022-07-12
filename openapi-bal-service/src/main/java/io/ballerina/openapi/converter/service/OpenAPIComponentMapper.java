@@ -405,6 +405,8 @@ public class OpenAPIComponentMapper {
         List<ConstantSymbol> enumMembers = enumSymbol.members();
         for (ConstantSymbol enumMember : enumMembers) {
             if (enumMember.typeDescriptor().typeKind() == TypeDescKind.SINGLETON) {
+                // TODO: this temp fix will remove after fixing this issue in ballerina lang:
+                // https://github.com/ballerina-platform/ballerina-lang/issues/35783
                 enums.add(enumMember.typeDescriptor().signature().replaceAll("\"", ""));
             } else {
                 enums.add(enumMember.constValue().toString().trim());

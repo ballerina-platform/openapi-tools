@@ -23,11 +23,11 @@ paths:
 
 components:
   schemas:
-    Hobby:
+    Hobby: #scenario 01 : User define array (Annotations on a type)
       type: array
       items:
           type: string
-          maxLength: 23
+          maxLength: 23 # scenario 02: For both array type and array items have constraints
       maxItems: 5
       minItems: 2
     Person:
@@ -36,9 +36,9 @@ components:
         - id
       properties:
         hobby:
-          $ref: '#/components/schemas/Hobby' #reference array
+          $ref: '#/components/schemas/Hobby' # scenario 03: Reference array
         Details:
-          type: array #inline array
+          type: array
           items:
             type: string
             minLength: 7
@@ -48,11 +48,11 @@ components:
         fee:
           type: array
           items:
-            type: number     #number format
+            type: number     #scenario 04 : Array items have constrained with number format
             format: float
             maximum: 445.4
         limit:
           description: The maximum number of items in the response (as set in the query or by default).
           items:
             type: integer
-            maximum: 67
+            maximum: 67   #scenario 05 : Only array items have constrained with number format
