@@ -187,7 +187,7 @@ public class FunctionBodyGenerator {
             RequestBody requestBody = operation.getValue().getRequestBody();
             handleRequestBodyInOperation(statementsList, method, returnType, requestBody);
         } else {
-            createCommonFunctionBodyStatements(statementsList, method, rType, returnType);
+            createCommonFunctionBodyStatements(statementsList, method, returnType);
         }
         //Create statements
         NodeList<StatementNode> statements = createNodeList(statementsList);
@@ -497,15 +497,16 @@ public class FunctionBodyGenerator {
     /**
      * Generate common statements in function bosy.
      */
-    private void createCommonFunctionBodyStatements(List<StatementNode> statementsList, String method, String rType,
+    private void createCommonFunctionBodyStatements(List<StatementNode> statementsList, String method,
                                                     String returnType) {
 
         String clientCallStatement;
 
         // This condition for several methods.
-        boolean isMethod = method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(EXECUTE);
+        boolean isEntityBodyMethods = method.equals(POST) || method.equals(PUT) || method.equals(PATCH)
+                || method.equals(EXECUTE);
         if (isHeader) {
-            if (isMethod) {
+            if (isEntityBodyMethods) {
                 ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                         "http:Request request = new");
                 statementsList.add(requestStatementNode);
@@ -513,26 +514,27 @@ public class FunctionBodyGenerator {
                         "//TODO: Update the request as needed");
                 statementsList.add(expressionStatementNode);
                 clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH +
-                        ", request, headers = " + HTTP_HEADERS + ")";
-
+                        ", request, " + HTTP_HEADERS + ")";
+            } else if (method.equals(DELETE)) {
+                clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH +
+                        ", headers = " + HTTP_HEADERS + ")";
+            } else if (method.equals(HEAD)) {
+                clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", " +
+                        HTTP_HEADERS + ")";
             } else {
-                if (method.equals(HEAD)) {
-                    clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", " +
-                            HTTP_HEADERS + ")";
-                } else {
-                    clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", " +
-                            HTTP_HEADERS + ")";
-                }
+                clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", " +
+                        HTTP_HEADERS + ")";
             }
-        } else if (isMethod) {
+        } else if (method.equals(DELETE)) {
+            clientCallStatement = "check self.clientEp-> " + method + "(" + RESOURCE_PATH + ")";
+        } else if (isEntityBodyMethods) {
             ExpressionStatementNode requestStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "http:Request request = new");
             statementsList.add(requestStatementNode);
             ExpressionStatementNode expressionStatementNode = GeneratorUtils.getSimpleExpressionStatementNode(
                     "//TODO: Update the request as needed");
             statementsList.add(expressionStatementNode);
-            clientCallStatement =
-                        "check self.clientEp-> " + method + "(" + RESOURCE_PATH + ", request)";
+            clientCallStatement = "check self.clientEp-> " + method + "(" + RESOURCE_PATH + ", request)";
         } else {
             clientCallStatement = "check self.clientEp->" + method + "(" + RESOURCE_PATH + ")";
         }
@@ -643,7 +645,7 @@ public class FunctionBodyGenerator {
             if (method.equals(POST) || method.equals(PUT) || method.equals(PATCH) || method.equals(DELETE)
                     || method.equals(EXECUTE)) {
                 requestStatement = GeneratorUtils.getSimpleStatement(returnType, RESPONSE,
-                        "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", request, headers = " +
+                        "check self.clientEp->" + method + "(" + RESOURCE_PATH + ", request, " +
                                 HTTP_HEADERS + ")");
                 statementsList.add(requestStatement);
                 Token returnKeyWord = createIdentifierToken("return");
