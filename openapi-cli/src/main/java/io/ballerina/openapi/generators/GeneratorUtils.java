@@ -465,46 +465,28 @@ public class GeneratorUtils {
     }
 
     /**
-     * This util class is to check the availability of the constraint support to data type.
+     * This util is to check given schema contains constraints value.
      */
-    public static boolean isConstraint(OpenAPI openAPI) {
-        if (openAPI.getComponents() != null && openAPI.getComponents().getSchemas() != null) {
-            Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
-            for (Map.Entry<String, Schema> entry : schemas.entrySet()) {
-                Schema<?> value = entry.getValue();
-                if (isAvailableConstraint(value)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     public static boolean isAvailableConstraint(Schema<?> value) {
         if (value instanceof ObjectSchema && value.getProperties() != null) {
-            for (Map.Entry<String, Schema> e : value.getProperties().entrySet()) {
-                Schema<?> propertyValue = e.getValue();
-                boolean constraintExists = propertyValue.getMaximum() != null ||
-                                propertyValue.getMinimum() != null ||
-                                propertyValue.getMaxLength() != null ||
-                                propertyValue.getMinLength() != null ||
-                                propertyValue.getMaxItems() != null ||
-                                propertyValue.getMinItems() != null ||
-                                propertyValue.getExclusiveMinimum() != null ||
-                                propertyValue.getExclusiveMaximum() != null;
-
-                if (constraintExists) {
-                    return true;
-                }
+            boolean constraintExists = value.getProperties().values().stream()
+                    .anyMatch(GeneratorUtils::isConstraintExists);
+            if (constraintExists) {
+                return true;
             }
         }
 
-        return value.getMaximum() != null || value.getMinimum() != null ||
-                value.getMaxLength() != null ||
-                value.getMinLength() != null ||
-                value.getMaxItems() != null ||
-                value.getMinItems() != null ||
-                value.getExclusiveMinimum() != null ||
-                value.getExclusiveMaximum() != null;
+        return isConstraintExists(value);
+    }
+
+    public static boolean isConstraintExists(Schema<?> propertyValue) {
+        return propertyValue.getMaximum() != null ||
+                propertyValue.getMinimum() != null ||
+                propertyValue.getMaxLength() != null ||
+                propertyValue.getMinLength() != null ||
+                propertyValue.getMaxItems() != null ||
+                propertyValue.getMinItems() != null ||
+                propertyValue.getExclusiveMinimum() != null ||
+                propertyValue.getExclusiveMaximum() != null;
     }
 }

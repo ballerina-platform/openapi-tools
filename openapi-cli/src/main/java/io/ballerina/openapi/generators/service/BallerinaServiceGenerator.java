@@ -230,7 +230,6 @@ public class BallerinaServiceGenerator {
         List<Node> params = new ArrayList<>(parametersGenerator.getRequiredParams());
 
         // Handle request Body (Payload)
-        List<StatementNode> statementsList = new ArrayList<>();
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
             if (requestBody.getContent() != null) {
@@ -263,12 +262,8 @@ public class BallerinaServiceGenerator {
                 parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN), returnNode);
 
         // Function body generation
-        NodeList<StatementNode> statements;
-        if (!statementsList.isEmpty()) {
-            statements = createNodeList(statementsList);
-        } else {
-            statements = createEmptyNodeList();
-        }
+        NodeList<StatementNode> statements = createEmptyNodeList();
+
         FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN), null, statements,
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN));

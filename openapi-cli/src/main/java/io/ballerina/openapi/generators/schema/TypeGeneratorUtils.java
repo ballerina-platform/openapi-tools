@@ -176,7 +176,7 @@ public class TypeGeneratorUtils {
 
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
         //Generate constraint annotation.
-        AnnotationNode constraintNode = addConstraint(fieldSchema);
+        AnnotationNode constraintNode = generateConstraintNode(fieldSchema);
         MetadataNode metadataNode;
         if (constraintNode == null) {
             metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
@@ -247,7 +247,7 @@ public class TypeGeneratorUtils {
      * @param fieldSchema Schema for data type
      * @return {@link MetadataNode}
      */
-    public static AnnotationNode addConstraint(Schema<?> fieldSchema) {
+    public static AnnotationNode generateConstraintNode(Schema<?> fieldSchema) {
         if (fieldSchema instanceof StringSchema) {
             StringSchema stringSchema = (StringSchema) fieldSchema;
             // Attributes : maxLength, minLength
@@ -273,14 +273,15 @@ public class TypeGeneratorUtils {
             return null;
         }
         String annotBody = OPEN_BRACE + String.join(COMMA, fields) + CLOSE_BRACE;
-        AnnotationNode annotationNode = createAnnotationNode(CONSTRAINT_INT, annotBody);
-
+        AnnotationNode annotationNode;
         if (fieldSchema instanceof NumberSchema) {
             if (fieldSchema.getFormat() != null && fieldSchema.getFormat().equals(FLOAT)) {
                 annotationNode = createAnnotationNode(CONSTRAINT_FLOAT, annotBody);
             } else {
                 annotationNode = createAnnotationNode(CONSTRAINT_NUMBER, annotBody);
             }
+        } else {
+            annotationNode = createAnnotationNode(CONSTRAINT_INT, annotBody);
         }
         return annotationNode;
     }

@@ -21,6 +21,7 @@ import io.ballerina.openapi.cmd.model.GenSrcFile;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
+import io.ballerina.openapi.generators.common.TestUtils;
 import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
@@ -542,8 +543,9 @@ public class CodeGeneratorTest {
     }
 
     @AfterTest
-    public void clean() {
+    public void clean() throws IOException {
         System.setErr(null);
         System.setOut(null);
+        TestUtils.deleteGeneratedFiles();
     }
 }

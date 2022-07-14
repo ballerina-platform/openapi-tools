@@ -87,9 +87,9 @@ public class ArrayTypeGenerator extends TypeGenerator {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         Schema<?> items = arraySchema.getItems();
-        boolean availableConstraint = isAvailableConstraint(items);
+        boolean isConstraintsAvailable = isAvailableConstraint(items);
         TypeGenerator typeGenerator;
-        if (availableConstraint) {
+        if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(SPECIAL_CHARACTER_REGEX, "").trim();
             typeName = getValidName(
                     parentType != null ?
@@ -98,7 +98,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
                     true);
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
             List<AnnotationNode> typeAnnotations = new ArrayList<>();
-            AnnotationNode constraintNode = TypeGeneratorUtils.addConstraint(items);
+            AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(items);
             if (constraintNode != null) {
                 typeAnnotations.add(constraintNode);
             }
@@ -111,7 +111,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         }
 
         TypeDescriptorNode typeDescriptorNode;
-        if (typeGenerator instanceof PrimitiveTypeGenerator && availableConstraint) {
+        if (typeGenerator instanceof PrimitiveTypeGenerator && isConstraintsAvailable) {
             typeDescriptorNode = NodeParser.parseTypeDescriptor(typeName);
         } else {
             typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();

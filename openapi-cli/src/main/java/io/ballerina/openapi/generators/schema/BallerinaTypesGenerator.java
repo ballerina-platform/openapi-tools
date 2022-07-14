@@ -56,7 +56,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyN
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.generators.GeneratorUtils.isConstraint;
+import static io.ballerina.openapi.generators.GeneratorUtils.isAvailableConstraint;
 import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
 
 /**
@@ -65,6 +65,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
  */
 public class BallerinaTypesGenerator {
     private List<TypeDefinitionNode> typeDefinitionNodeList;
+    private boolean hasConstraints;
 
     /**
      * This public constructor is used to generate record and other relevant data type when the nullable flag is
@@ -76,6 +77,7 @@ public class BallerinaTypesGenerator {
     public BallerinaTypesGenerator(OpenAPI openAPI, boolean isNullable) {
         GeneratorMetaData.createInstance(openAPI, isNullable);
         this.typeDefinitionNodeList = new LinkedList<>();
+        this.hasConstraints = false;
     }
 
     /**
@@ -101,9 +103,7 @@ public class BallerinaTypesGenerator {
      */
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
-
-       //Create imports for the http module, when record has http type inclusions.
-        NodeList<ImportDeclarationNode> imports = generateImportNodes(openAPI);
+        List<TypeDefinitionNode> typeDefinitionNodeListForSchema = new ArrayList<>();
         if (openAPI.getComponents() != null) {
             // Create typeDefinitionNode
             Components components = openAPI.getComponents();
@@ -111,14 +111,20 @@ public class BallerinaTypesGenerator {
             if (schemas != null) {
                 for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
                     String schemaKey = schema.getKey().trim();
+                    if (!hasConstraints) {
+                        hasConstraints = isAvailableConstraint(schema.getValue());
+                    }
                     if (isValidSchemaName(schemaKey)) {
                         List<Node> schemaDoc = new ArrayList<>();
-                        typeDefinitionNodeList.add(getTypeDefinitionNode
+                        typeDefinitionNodeListForSchema.add(getTypeDefinitionNode
                                 (schema.getValue(), schemaKey, schemaDoc));
                     }
                 }
             }
         }
+        //Create imports for the http module, when record has http type inclusions.
+        NodeList<ImportDeclarationNode> imports = generateImportNodes();
+        typeDefinitionNodeList.addAll(typeDefinitionNodeListForSchema);
         // Create module member declaration
         NodeList<ModuleMemberDeclarationNode> moduleMembers = AbstractNodeFactory.createNodeList(
                 typeDefinitionNodeList.toArray(new TypeDefinitionNode[typeDefinitionNodeList.size()]));
@@ -131,12 +137,12 @@ public class BallerinaTypesGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
-    private NodeList<ImportDeclarationNode> generateImportNodes(OpenAPI openAPI) {
+    private NodeList<ImportDeclarationNode> generateImportNodes() {
         List<ImportDeclarationNode> imports = new ArrayList<>();
         if (!typeDefinitionNodeList.isEmpty()) {
             importsForTypeDefinitions(imports);
         }
-        if (isConstraint(openAPI)) {
+        if (hasConstraints) {
             //import for constraint
             ImportDeclarationNode importForConstraint = GeneratorUtils.getImportDeclarationNode(
                     GeneratorConstants.BALLERINA,
@@ -188,7 +194,7 @@ public class BallerinaTypesGenerator {
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, getValidName(
                 typeName.trim(), true), null);
         List<AnnotationNode> typeAnnotations = new ArrayList<>();
-        AnnotationNode constraintNode = TypeGeneratorUtils.addConstraint(schema);
+        AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(schema);
         if (constraintNode != null) {
             typeAnnotations.add(constraintNode);
         }

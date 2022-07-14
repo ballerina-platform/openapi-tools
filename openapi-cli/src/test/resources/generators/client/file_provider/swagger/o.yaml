@@ -4,8 +4,6 @@ info:
   description: This is the swagger definition of the WSO2 Central Organization Registry
     service.
   termsOfService: https://wso2.com/cloud/terms-of-use/
-  contact:
-    email: dileesha@wso2.com
   version: 1.0.0
 servers:
   - url: https://localhost:8081/v1
