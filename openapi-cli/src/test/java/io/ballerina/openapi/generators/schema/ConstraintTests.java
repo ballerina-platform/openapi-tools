@@ -21,12 +21,19 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+
+import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
 
 /**
  * This test class is to contain the test related to constraint validation.
@@ -36,13 +43,15 @@ public class ConstraintTests {
     CodeGenerator codeGenerator = new CodeGenerator();
     @Test(description = "Tests with record field has constraint and record field type can be user defined datatype " +
             "with constraint.")
-    public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException {
+    public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
 
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/record_field.bal",
                 syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        Assert.assertTrue(diagnostics.isEmpty());
     }
 
     @Test(description = "Tests for all the array type scenarios:" +
@@ -51,25 +60,34 @@ public class ConstraintTests {
             "Use case 03 : Reference array" +
             "Use case 04 : Array items have constrained with number format" +
             "Use case 05 : Only array items have constrained with number format")
-    public void testForArray() throws IOException, BallerinaOpenApiException {
+    public void testForArray() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/array.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/array.bal",
                 syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        Assert.assertTrue(diagnostics.isEmpty());
     }
 
     @Test(description = "Tests for the field has reference type scenarios" +
             "Use case 01 : Annotations on a record field" +
             "Use case 02 : Annotations on a type" +
             "Use case 03 : Annotations on a type used as a record field")
-    public void testForReference() throws IOException, BallerinaOpenApiException {
+    public void testForReference() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/type_def_node.yaml"),
                 true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/type_def_node.bal",
                 syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        Assert.assertTrue(diagnostics.isEmpty());
+    }
+
+    @AfterTest
+    public void cleanUp() throws IOException {
+        TestUtils.deleteGeneratedFiles();
     }
 
     //TODO current tool doesn't handle union type: therefore union type constraint will handle once union type

@@ -14,6 +14,7 @@ import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -186,6 +187,11 @@ public class UtilGenerationTests {
             return true;
         }
         return false;
+    }
+
+    @AfterTest
+    public void cleanUp() throws IOException {
+        TestUtils.deleteGeneratedFiles();
     }
 }
 

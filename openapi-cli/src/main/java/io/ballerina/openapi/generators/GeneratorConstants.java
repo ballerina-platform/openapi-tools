@@ -314,8 +314,8 @@ public class GeneratorConstants {
     public static final String COMMA = ",";
     public static final String MAX_LENGTH =  "maxLength";
     public static final String MIN_LENGTH =  "minLength";
-    public static final String MINIMUM =  "minimum";
-    public static final String MAXIMUM =  "maximum";
+    public static final String MINIMUM =  "minValue";
+    public static final String MAXIMUM =  "maxValue";
     public static final String EXCLUSIVE_MAX = "maxValueExclusive";
     public static final String EXCLUSIVE_MIN = "minValueExclusive";
     public static final String SPECIAL_CHARACTER_REGEX = "([\\[\\]\\\\?!<>@#&~`*\\-=^+'();:\\/\\_{}\\s|.$])";

@@ -6,7 +6,7 @@ public type Address string;
 public type Book record {
     @constraint:String {maxLength: 67}
     string name?;
-    @constraint:Number {maximum: 89.0}
+    @constraint:Number {maxValue: 89.0}
     decimal price?;
 };
 
@@ -15,12 +15,12 @@ public type Person record {
     string name?;
     @constraint:Array {maxLength: 5, minLength: 2}
     string[] hobby?;
-    @constraint:Int {maximum: 5}
+    @constraint:Int {maxValue: 5}
     int id;
     Address address?;
-    @constraint:Float {maximum: 100000}
+    @constraint:Float {maxValue: 100000}
     float salary?;
-    @constraint:Number {minimum: 500000}
+    @constraint:Number {minValue: 500000}
     decimal net?;
     Book fav?;
 };

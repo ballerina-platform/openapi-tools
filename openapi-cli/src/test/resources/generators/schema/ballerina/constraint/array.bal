@@ -9,10 +9,10 @@ public type Hobby HobbyItemsString[];
 @constraint:String {minLength: 7}
 public type PersonDetailsItemsString string;
 
-@constraint:Float {maximum: 445.4}
+@constraint:Float {maxValue: 445.4}
 public type PersonFeeItemsNumber float;
 
-@constraint:Int {maximum: 67}
+@constraint:Int {maxValue: 67}
 public type PersonLimitItemsInteger int;
 
 public type Person record {
