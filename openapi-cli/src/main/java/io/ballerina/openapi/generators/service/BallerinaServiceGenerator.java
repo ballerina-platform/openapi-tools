@@ -30,7 +30,6 @@ import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
@@ -58,8 +57,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -73,7 +70,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignat
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.openapi.generators.GeneratorConstants.ESCAPE_PATTERN;
 import static io.ballerina.openapi.generators.GeneratorConstants.FUNCTION;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
@@ -81,7 +77,6 @@ import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.generateBodyStatementForComplexUrl;
 import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
-import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.generateServiceConfigAnnotation;
 
@@ -223,7 +218,8 @@ public class BallerinaServiceGenerator {
      * @throws BallerinaOpenApiException when the process failure occur
      */
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
-                                                       List<Node> pathNodes, String path) throws BallerinaOpenApiException {
+                                                       List<Node> pathNodes, String path)
+            throws BallerinaOpenApiException {
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(RESOURCE, SINGLE_WS_MINUTIAE,
                 SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(FUNCTION, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);

@@ -91,7 +91,8 @@ public class HeadersTests {
         Path definitionPath = RES_DIR.resolve("swagger/delete_with_header.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/delete_with_header.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter,
+                false, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
