@@ -56,7 +56,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyN
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.openapi.converter.Constants.HTTP;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.generators.GeneratorUtils.isAvailableConstraint;
+import static io.ballerina.openapi.generators.GeneratorUtils.hasConstraints;
 import static io.ballerina.openapi.generators.GeneratorUtils.isValidSchemaName;
 
 /**
@@ -112,7 +112,7 @@ public class BallerinaTypesGenerator {
                 for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
                     String schemaKey = schema.getKey().trim();
                     if (!hasConstraints) {
-                        hasConstraints = isAvailableConstraint(schema.getValue());
+                        hasConstraints = hasConstraints(schema.getValue());
                     }
                     if (isValidSchemaName(schemaKey)) {
                         List<Node> schemaDoc = new ArrayList<>();

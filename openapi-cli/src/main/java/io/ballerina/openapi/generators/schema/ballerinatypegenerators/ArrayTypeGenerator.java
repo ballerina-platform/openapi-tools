@@ -46,7 +46,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
 import static io.ballerina.openapi.generators.GeneratorConstants.SPECIAL_CHARACTER_REGEX;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.generators.GeneratorUtils.isAvailableConstraint;
+import static io.ballerina.openapi.generators.GeneratorUtils.hasConstraints;
 import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNullableType;
 
 /**
@@ -87,7 +87,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         Schema<?> items = arraySchema.getItems();
-        boolean isConstraintsAvailable = isAvailableConstraint(items);
+        boolean isConstraintsAvailable = hasConstraints(items);
         TypeGenerator typeGenerator;
         if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(SPECIAL_CHARACTER_REGEX, "").trim();

@@ -39,14 +39,17 @@ public class GeneratorConstants {
         private String name;
 
         GenType(String name) {
+
             this.name = name;
         }
 
         @Override
         public String toString() {
+
             return this.name;
         }
     }
+
     /**
      * Enum to select the relevant ballerina http auth record.
      */
@@ -63,10 +66,12 @@ public class GeneratorConstants {
         private final String authType;
 
         AuthConfigTypes(String authType) {
+
             this.authType = authType;
         }
 
         public String getValue() {
+
             return authType;
         }
     }
@@ -96,7 +101,7 @@ public class GeneratorConstants {
     //ClientCode generator
     public static final String HTTP = "http";
     public static final String URL = "url";
-    public static final String MODULE_TEST  = "test";
+    public static final String MODULE_TEST = "test";
     public static final String BALLERINA = "ballerina";
     public static final String CLIENT_CLASS = "Client";
     public static final String CLIENT_EP = "clientEp";
@@ -204,10 +209,12 @@ public class GeneratorConstants {
     public static final String DEFAULT = "default";
     /**
      * Util for select http key words with http codes.
+     *
      * @param code http code.
      * @return Http identification word.
      */
     public static final Map<String, String> HTTP_CODES_DES;
+
     static {
         Map<String, String> httpCodeMap = new HashMap<>();
         httpCodeMap.put("100", "Continue");
@@ -256,6 +263,7 @@ public class GeneratorConstants {
         httpCodeMap.put("505", "HttpVersionNotSupported");
         HTTP_CODES_DES = Collections.unmodifiableMap(httpCodeMap);
     }
+
     public static final String HTTP_200 = "200";
     public static final String INTEGER = "integer";
     public static final String BOOLEAN = "boolean";
@@ -270,6 +278,7 @@ public class GeneratorConstants {
     public static final String YML_EXTENSION = ".yml";
 
     public static final Map<String, String> TYPE_MAP;
+
     static {
         Map<String, String> typeMap = new HashMap<>();
         typeMap.put("integer", "int");
@@ -309,13 +318,13 @@ public class GeneratorConstants {
     public static final String CONSTRAINT_INT = "constraint:Int";
     public static final String CONSTRAINT_ARRAY = "constraint:Array";
     public static final String OPEN_BRACE = "{";
-    public static final String CLOSE_BRACE =  "}";
+    public static final String CLOSE_BRACE = "}";
     public static final String COLON = ":";
     public static final String COMMA = ",";
-    public static final String MAX_LENGTH =  "maxLength";
-    public static final String MIN_LENGTH =  "minLength";
-    public static final String MINIMUM =  "minValue";
-    public static final String MAXIMUM =  "maxValue";
+    public static final String MAX_LENGTH = "maxLength";
+    public static final String MIN_LENGTH = "minLength";
+    public static final String MINIMUM = "minValue";
+    public static final String MAXIMUM = "maxValue";
     public static final String EXCLUSIVE_MAX = "maxValueExclusive";
     public static final String EXCLUSIVE_MIN = "minValueExclusive";
     public static final String SPECIAL_CHARACTER_REGEX = "([\\[\\]\\\\?!<>@#&~`*\\-=^+'();:\\/\\_{}\\s|.$])";

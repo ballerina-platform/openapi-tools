@@ -465,9 +465,9 @@ public class GeneratorUtils {
     }
 
     /**
-     * This util is to check given schema contains constraints value.
+     * This util is to check if the given schema contains any constraints.
      */
-    public static boolean isAvailableConstraint(Schema<?> value) {
+    public static boolean hasConstraints(Schema<?> value) {
         if (value instanceof ObjectSchema && value.getProperties() != null) {
             boolean constraintExists = value.getProperties().values().stream()
                     .anyMatch(GeneratorUtils::isConstraintExists);
@@ -479,7 +479,7 @@ public class GeneratorUtils {
         return isConstraintExists(value);
     }
 
-    public static boolean isConstraintExists(Schema<?> propertyValue) {
+    private static boolean isConstraintExists(Schema<?> propertyValue) {
         return propertyValue.getMaximum() != null ||
                 propertyValue.getMinimum() != null ||
                 propertyValue.getMaxLength() != null ||
