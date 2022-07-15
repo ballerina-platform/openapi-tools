@@ -40,21 +40,21 @@ public class EnumTypeTests {
     public void setup() throws IOException {
         this.tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
     }
-    @Test(description = "When the record field has reference to enum type")
+    @Test(description = "When the record field has reference to enum type", enabled = false)
     public void testEnumType() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum.yaml");
     }
 
-    @Test(description = "When the record field has reference to enum type array")
+    @Test(description = "When the record field has reference to enum type array", enabled = false)
     public void testEnumTypeInArray() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_array.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_array_type.yaml");
     }
 
-    @Test(description = "When the record field has reference to enum with constant value")
+    @Test(description = "When the record field has reference to enum with constant value", enabled = false)
     public void testEnumWithConstantValue() throws OpenApiConverterException, IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_with_constant_value.bal");
         //Compare generated yaml file with expected yaml content
