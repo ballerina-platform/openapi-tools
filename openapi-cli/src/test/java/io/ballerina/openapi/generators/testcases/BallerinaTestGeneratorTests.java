@@ -62,7 +62,7 @@ public class BallerinaTestGeneratorTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
 
-    @Test(description = "Generate Client with test skelotins", dataProvider = "httpAuthIOProvider", enabled = false)
+    @Test(description = "Generate Client with test skelotins", dataProvider = "httpAuthIOProvider")
     public void generateclientWithTestSkel(String yamlFile) throws IOException, BallerinaOpenApiException,
             FormatterException, BallerinaOpenApiException, URISyntaxException {
         Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));

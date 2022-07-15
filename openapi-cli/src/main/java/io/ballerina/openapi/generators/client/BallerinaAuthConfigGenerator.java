@@ -149,6 +149,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG_RECORD_A
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAUTH2;
 import static io.ballerina.openapi.generators.GeneratorConstants.PASSWORD;
+import static io.ballerina.openapi.generators.GeneratorConstants.PROXY_CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.REFRESH_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.SELF;
 import static io.ballerina.openapi.generators.GeneratorConstants.SSL_FIELD_NAME;
@@ -290,6 +291,8 @@ public class BallerinaAuthConfigGenerator {
      *          http:ResponseLimitConfigs responseLimits = {};
      *          #SSL/TLS-related options
      *          http:ClientSecureSocket? secureSocket = ();
+     *          # Proxy server related options
+     *          ProxyConfig? proxy = ();
      * |};
      * </pre>
      * -- ex: Config record for API Key Authentication mechanism.
@@ -925,6 +928,16 @@ public class BallerinaAuthConfigGenerator {
                 secureSocketMetadata, null, secureSocketfieldType, secureSocketFieldName,
                 equalToken, nilLiteralNode, semicolonToken);
         recordFieldNodes.add(secureSocketFieldNode);
+
+        // add proxy server field
+        MetadataNode proxyConfigMetadata = getMetadataNode("Proxy server related options");
+        IdentifierToken proxyConfigFieldName = AbstractNodeFactory.createIdentifierToken(PROXY_CONFIG);
+        TypeDescriptorNode proxyConfigFieldType = createOptionalTypeDescriptorNode(
+                createIdentifierToken("http:ProxyConfig"), createToken(QUESTION_MARK_TOKEN));
+        RecordFieldWithDefaultValueNode proxyConfigFieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
+                proxyConfigMetadata, null, proxyConfigFieldType, proxyConfigFieldName,
+                equalToken, nilLiteralNode, semicolonToken);
+        recordFieldNodes.add(proxyConfigFieldNode);
 
         return recordFieldNodes;
     }

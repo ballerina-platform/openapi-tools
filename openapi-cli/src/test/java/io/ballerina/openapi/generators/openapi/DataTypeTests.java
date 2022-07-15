@@ -54,7 +54,7 @@ public class DataTypeTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/nullable_type_def.yaml");
     }
 
-    @Test(description = "test for tuple type scenarios")
+    @Test(description = "test for tuple type scenarios", enabled = false)
     public void testForTupleType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/tuple_types.bal");
         //Compare generated yaml file with expected yaml content
