@@ -405,7 +405,11 @@ public class OpenAPIComponentMapper {
         List<ConstantSymbol> enumMembers = enumSymbol.members();
         for (ConstantSymbol enumMember : enumMembers) {
             if (enumMember.typeDescriptor().typeKind() == TypeDescKind.SINGLETON) {
-                enums.add(enumMember.typeDescriptor().signature());
+                String signatureValue = enumMember.typeDescriptor().signature();
+                if (signatureValue.startsWith("\"") && signatureValue.endsWith("\"")) {
+                    signatureValue = signatureValue.substring(1, signatureValue.length() - 1);
+                }
+                enums.add(signatureValue);
             } else {
                 enums.add(enumMember.constValue().toString().trim());
             }
