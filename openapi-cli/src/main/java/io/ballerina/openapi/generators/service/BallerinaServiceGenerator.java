@@ -263,9 +263,6 @@ public class BallerinaServiceGenerator {
                 createToken(SyntaxKind.OPEN_PAREN_TOKEN),
                 parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN), returnNode);
 
-        // Function body generation
-        NodeList<StatementNode> statements = createEmptyNodeList();
-
         // Function Body Node
         // If path parameter has some special characters, extra body statements are added to handle the complexity.
         List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
