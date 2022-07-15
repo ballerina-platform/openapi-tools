@@ -290,7 +290,7 @@ public class OpenAPIResourceMapper {
                 if (node instanceof ResourcePathParameterNode) {
                     ResourcePathParameterNode pathNode = (ResourcePathParameterNode) node;
                     relativePath.append("{");
-                    relativePath.append(pathNode.paramName());
+                    relativePath.append(pathNode.paramName().get());
                     relativePath.append("}");
                 } else if ((resource.relativeResourcePath().size() == 1) && (node.toString().trim().equals("."))) {
                     return relativePath.toString();
