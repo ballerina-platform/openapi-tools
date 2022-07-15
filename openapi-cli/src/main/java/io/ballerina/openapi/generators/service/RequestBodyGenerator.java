@@ -75,11 +75,21 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.get
  * @since 2.0.0
  */
 public class RequestBodyGenerator {
+    private final Components components;
+    private final RequestBody requestBody;
+
+    public RequestBodyGenerator(Components components, RequestBody requestBody) {
+        this.components = components;
+        this.requestBody = requestBody;
+    }
+
     /**
      * This for creating request Body for given request object.
      */
-    public RequiredParameterNode createNodeForRequestBody(Components components, RequestBody requestBody)
+    public RequiredParameterNode createNodeForRequestBody()
             throws BallerinaOpenApiException {
+        // type CustomRecord record {| anydata...; |};
+        // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[] ;
         List<Node> literals = new ArrayList<>();
         MappingConstructorExpressionNode annotValue = null;
         TypeDescriptorNode typeName;
@@ -115,6 +125,7 @@ public class RequestBodyGenerator {
         TypeDescriptorNode typeName;
         if (mediaType.getValue().getSchema().get$ref() != null) {
             String schemaName = extractReferenceType(mediaType.getValue().getSchema().get$ref());
+            Map<String, Schema> schemas = components.getSchemas();
             String mediaTypeContent = mediaType.getKey().trim();
             if (mediaTypeContent.matches(TEXT_WILDCARD_REGEX)) {
                 mediaTypeContent = TEXT;
@@ -138,7 +149,7 @@ public class RequestBodyGenerator {
                             NodeFactory.createNodeList(dimensionNode));
                     break;
                 case APPLICATION_JSON:
-                    Schema<?> schema = components.getSchemas().get(getValidName(schemaName, true));
+                    Schema<?> schema = schemas.get(getValidName(schemaName, true));
                     // This condition is to avoid wrong code generation for union type request body. If given schema
                     // has oneOf type , then it will not be able to support via ballerina. We need to pick it mime
                     // type instead of schema type.

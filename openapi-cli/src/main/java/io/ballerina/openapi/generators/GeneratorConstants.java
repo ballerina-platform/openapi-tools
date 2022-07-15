@@ -39,14 +39,17 @@ public class GeneratorConstants {
         private String name;
 
         GenType(String name) {
+
             this.name = name;
         }
 
         @Override
         public String toString() {
+
             return this.name;
         }
     }
+
     /**
      * Enum to select the relevant ballerina http auth record.
      */
@@ -63,15 +66,16 @@ public class GeneratorConstants {
         private final String authType;
 
         AuthConfigTypes(String authType) {
+
             this.authType = authType;
         }
 
         public String getValue() {
+
             return authType;
         }
     }
 
-    public static final String CLIENT_TEMPLATE_NAME = "client-ep";
     public static final String TYPE_FILE_NAME = "types.bal";
     public static final String CLIENT_FILE_NAME = "client.bal";
     public static final String UTIL_FILE_NAME = "utils.bal";
@@ -97,18 +101,13 @@ public class GeneratorConstants {
     //ClientCode generator
     public static final String HTTP = "http";
     public static final String URL = "url";
-    public static final String MODULE_TEST  = "test";
+    public static final String MODULE_TEST = "test";
     public static final String BALLERINA = "ballerina";
-    public static final String PUBLIC = "public";
-    public static final String PUBLIC_ISOLATED = "public isolated";
-    public static final String CLIENT = "client";
     public static final String CLIENT_CLASS = "Client";
     public static final String CLIENT_EP = "clientEp";
-    public static final String CLASS = "class";
     public static final String EQUAL = "=";
     public static final String CONFIG = "config";
     public static final String FUNCTION = "function";
-    public static final String RETURN = "returns";
     public static final String PREFIX_TEST = " test";
     public static final String ANNOT_TEST = "test:Config";
     public static final String TEST_DIR = "tests";
@@ -117,7 +116,6 @@ public class GeneratorConstants {
     public static final String BYTE = "byte";
     public static final String JSON = "json";
     public static final String SERVICE_URL = "serviceUrl";
-    public static final String RECORD = "record";
     public static final String IDENTIFIER = "identifier";
     public static final String TYPE_NAME = "typeName";
     public static final String BINARY = "binary";
@@ -211,10 +209,12 @@ public class GeneratorConstants {
     public static final String DEFAULT = "default";
     /**
      * Util for select http key words with http codes.
+     *
      * @param code http code.
      * @return Http identification word.
      */
     public static final Map<String, String> HTTP_CODES_DES;
+
     static {
         Map<String, String> httpCodeMap = new HashMap<>();
         httpCodeMap.put("100", "Continue");
@@ -263,6 +263,7 @@ public class GeneratorConstants {
         httpCodeMap.put("505", "HttpVersionNotSupported");
         HTTP_CODES_DES = Collections.unmodifiableMap(httpCodeMap);
     }
+
     public static final String HTTP_200 = "200";
     public static final String INTEGER = "integer";
     public static final String BOOLEAN = "boolean";
@@ -277,6 +278,7 @@ public class GeneratorConstants {
     public static final String YML_EXTENSION = ".yml";
 
     public static final Map<String, String> TYPE_MAP;
+
     static {
         Map<String, String> typeMap = new HashMap<>();
         typeMap.put("integer", "int");
@@ -286,7 +288,7 @@ public class GeneratorConstants {
         typeMap.put("object", "record {}");
         typeMap.put("decimal", "decimal");
         typeMap.put("number", "decimal");
-        typeMap.put("double", "float");
+        typeMap.put("double", "decimal");
         typeMap.put("float", "float");
         typeMap.put("binary", "byte[]");
         typeMap.put("byte", "byte[]");
@@ -309,5 +311,21 @@ public class GeneratorConstants {
     public static final String MAP_STRING = "map<string>";
     public static final String TEXT_WILDCARD_REGEX = "text/.*";
     public static final String BODY = "body";
-
+    public static final String CONSTRAINT = "constraint";
+    public static final String CONSTRAINT_STRING = "constraint:String";
+    public static final String CONSTRAINT_NUMBER = "constraint:Number";
+    public static final String CONSTRAINT_FLOAT = "constraint:Float";
+    public static final String CONSTRAINT_INT = "constraint:Int";
+    public static final String CONSTRAINT_ARRAY = "constraint:Array";
+    public static final String OPEN_BRACE = "{";
+    public static final String CLOSE_BRACE = "}";
+    public static final String COLON = ":";
+    public static final String COMMA = ",";
+    public static final String MAX_LENGTH = "maxLength";
+    public static final String MIN_LENGTH = "minLength";
+    public static final String MINIMUM = "minValue";
+    public static final String MAXIMUM = "maxValue";
+    public static final String EXCLUSIVE_MAX = "maxValueExclusive";
+    public static final String EXCLUSIVE_MIN = "minValueExclusive";
+    public static final String SPECIAL_CHARACTER_REGEX = "([\\[\\]\\\\?!<>@#&~`*\\-=^+'();:\\/\\_{}\\s|.$])";
 }

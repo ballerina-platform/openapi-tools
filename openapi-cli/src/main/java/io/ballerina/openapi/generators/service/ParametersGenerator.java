@@ -34,7 +34,6 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -44,7 +43,6 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,11 +84,20 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.get
 public class ParametersGenerator {
 
     private boolean isNullableRequired;
-    private final Components components;
-
-    public ParametersGenerator(boolean isNullableRequired, Components components) {
+    private List<Node> requiredParams;
+    private List<Node> defaultableParams;
+    public ParametersGenerator(boolean isNullableRequired) {
         this.isNullableRequired = isNullableRequired;
-        this.components = components;
+        this.requiredParams = new ArrayList<>();
+        this.defaultableParams = new ArrayList<>();
+    }
+
+    public List<Node> getRequiredParams() {
+        return requiredParams;
+    }
+
+    public List<Node> getDefaultableParams() {
+        return defaultableParams;
     }
 
     public boolean isNullableRequired() {
@@ -100,13 +107,10 @@ public class ParametersGenerator {
      * This function for generating operation parameters.
      *
      * @param operation OAS operation
-     * @return          List with parameterNodes
      * @throws BallerinaOpenApiException when the parameter generation fails.
      */
-    public List<Node> generateResourcesInputs(Map.Entry<PathItem.HttpMethod, Operation> operation)
+    public void generateResourcesInputs(Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
-        List<Node> requiredParams = new ArrayList<>();
-        List<Node> defaultableParams = new ArrayList<>();
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
         // Handle header and query parameters
         if (operation.getValue().getParameters() != null) {
@@ -139,24 +143,6 @@ public class ParametersGenerator {
                 }
             }
         }
-        // Handle request Body (Payload)
-        // type CustomRecord record {| anydata...; |};
-        // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[] ;
-        if (operation.getValue().getRequestBody() != null) {
-            RequestBody requestBody = operation.getValue().getRequestBody();
-            if (requestBody.getContent() != null) {
-                RequestBodyGenerator requestBodyGen = new RequestBodyGenerator();
-                requiredParams.add(requestBodyGen.createNodeForRequestBody(this.components, requestBody));
-                requiredParams.add(comma);
-            }
-        }
-        if (!defaultableParams.isEmpty()) {
-            requiredParams.addAll(defaultableParams);
-        }
-        if (requiredParams.size() > 1) {
-            requiredParams.remove(requiredParams.size() - 1);
-        }
-        return requiredParams;
     }
 
     /**

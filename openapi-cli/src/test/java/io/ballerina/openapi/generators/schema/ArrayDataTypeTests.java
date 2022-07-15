@@ -22,7 +22,6 @@ import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -122,10 +121,6 @@ public class ArrayDataTypeTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        this.pause(50);
-        String out = "Maximum array item count defined for the property";
-        Assert.assertTrue(this.consoleContent.toString().replaceAll("\\s+", "")
-                .contains(out.replaceAll("\\s+", "")));
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/array_max_item.bal",
                 syntaxTree);
     }

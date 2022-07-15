@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: Shopify Admin API
+  version: "2021-10"
+tags:
+  - name: customers
+  - name: products
+  - name: orders
+  - name: fulfillments
+  - name: order_risks
+paths:
+  /admin:
+    post:
+      operationId: "test1"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/Person"
+      responses:
+        200:
+          description: Status OK
+
+components:
+  schemas:
+    Hobby: #scenario 01 : User define array (Annotations on a type)
+      type: array
+      items:
+          type: string
+          maxLength: 23 # scenario 02: For both array type and array items have constraints
+      maxItems: 5
+      minItems: 2
+    Person:
+      type: object
+      required:
+        - id
+      properties:
+        hobby:
+          $ref: '#/components/schemas/Hobby' # scenario 03: Reference array
+        Details:
+          type: array
+          items:
+            type: string
+            minLength: 7
+          maxItems: 5
+        id:
+          type: integer
+        fee:
+          type: array
+          items:
+            type: number     #scenario 04 : Array items have constrained with number format
+            format: float
+            maximum: 445.4
+        limit:
+          description: The maximum number of items in the response (as set in the query or by default).
+          items:
+            type: integer
+            maximum: 67   #scenario 05 : Only array items have constrained with number format

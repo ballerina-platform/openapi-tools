@@ -26,7 +26,6 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -67,8 +66,7 @@ import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
  *
  * @since 2.0.0
  */
-public class AllOfRecordTypeGenerator extends TypeGenerator {
-
+public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
     public AllOfRecordTypeGenerator(Schema schema, String typeName) {
         super(schema, typeName);
     }
@@ -106,7 +104,7 @@ public class AllOfRecordTypeGenerator extends TypeGenerator {
             } else if (allOfSchema.getProperties() != null) {
                 Map<String, Schema> properties = allOfSchema.getProperties();
                 List<String> required = allOfSchema.getRequired();
-                recordFieldList.addAll(TypeGeneratorUtils.addRecordFields(required, properties.entrySet()));
+                recordFieldList.addAll(addRecordFields(required, properties.entrySet(), typeName));
             } else if (allOfSchema instanceof ComposedSchema) {
                 ComposedSchema nestedComposedSchema = (ComposedSchema) allOfSchema;
                 if (nestedComposedSchema.getAllOf() != null) {

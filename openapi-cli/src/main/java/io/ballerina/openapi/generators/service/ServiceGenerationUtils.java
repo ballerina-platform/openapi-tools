@@ -242,8 +242,10 @@ public class ServiceGenerationUtils {
      * This util function is for generating the import node for http module.
      */
     public static NodeList<ImportDeclarationNode> createImportDeclarationNodes() {
+        List<ImportDeclarationNode> imports = new ArrayList<>();
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
                 , GeneratorConstants.HTTP);
-        return AbstractNodeFactory.createNodeList(importForHttp);
+        imports.add(importForHttp);
+        return AbstractNodeFactory.createNodeList(imports);
     }
 }
