@@ -39,14 +39,17 @@ import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,6 +78,12 @@ public class TestUtils {
         writeFile(schemaPath, Formatter.format(schemaSyntax).toString());
         writeFile(utilPath, Formatter.format(utilSyntaxTree).toString());
         SemanticModel semanticModel = getSemanticModel(clientPath);
+        return semanticModel.diagnostics();
+    }
+
+    public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree) throws FormatterException, IOException {
+        writeFile(schemaPath, Formatter.format(syntaxTree).toString());
+        SemanticModel semanticModel = getSemanticModel(schemaPath);
         return semanticModel.diagnostics();
     }
 
@@ -153,10 +162,25 @@ public class TestUtils {
 
         String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve(s));
         String generatedSyntaxTree = syntaxTree.toString();
-
         generatedSyntaxTree = (generatedSyntaxTree.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedSyntaxTree.contains(expectedBallerinaContent));
     }
 
+    /**
+     * Delete generated ballerina files.
+     */
+    public static void deleteGeneratedFiles() throws IOException {
+        Path resourcesPath = RES_DIR.resolve("ballerina_project");
+        if (Files.exists(resourcesPath)) {
+            List<File> listFiles = Arrays.asList(
+                    Objects.requireNonNull(new File(String.valueOf(resourcesPath)).listFiles()));
+            for (File existsFile: listFiles) {
+                String fileName = existsFile.getName();
+                if (fileName.endsWith(".bal")) {
+                    existsFile.delete();
+                }
+            }
+        }
+    }
 }

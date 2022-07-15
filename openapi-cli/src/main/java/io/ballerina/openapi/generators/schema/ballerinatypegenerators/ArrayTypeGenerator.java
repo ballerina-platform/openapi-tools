@@ -18,27 +18,35 @@
 
 package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.MAX_ARRAY_LENGTH;
+import static io.ballerina.openapi.generators.GeneratorConstants.SPECIAL_CHARACTER_REGEX;
+import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.generators.GeneratorUtils.hasConstraints;
 import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNullableType;
 
 /**
@@ -59,10 +67,15 @@ import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getNulla
  * @since 2.0.0
  */
 public class ArrayTypeGenerator extends TypeGenerator {
-    private final PrintStream outStream = System.out;
-
-    public ArrayTypeGenerator(Schema schema, String typeName) {
+    private String parentType = null;
+    private TypeDefinitionNode arrayItemWithConstraint = null;
+    public ArrayTypeGenerator(Schema schema, String typeName, String parentType) {
         super(schema, typeName);
+        this.parentType = parentType;
+    }
+
+    public TypeDefinitionNode getArrayItemWithConstraint() {
+        return arrayItemWithConstraint;
     }
 
     /**
@@ -73,8 +86,37 @@ public class ArrayTypeGenerator extends TypeGenerator {
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
-        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(arraySchema.getItems(), typeName);
-        TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
+        Schema<?> items = arraySchema.getItems();
+        boolean isConstraintsAvailable = hasConstraints(items);
+        TypeGenerator typeGenerator;
+        if (isConstraintsAvailable) {
+            String normalizedTypeName = typeName.replaceAll(SPECIAL_CHARACTER_REGEX, "").trim();
+            typeName = getValidName(
+                    parentType != null ?
+                            parentType + "-" + normalizedTypeName + "-Items-" + items.getType() :
+                            normalizedTypeName + "-Items-" + items.getType(),
+                    true);
+            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
+            List<AnnotationNode> typeAnnotations = new ArrayList<>();
+            AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(items);
+            if (constraintNode != null) {
+                typeAnnotations.add(constraintNode);
+            }
+            arrayItemWithConstraint = typeGenerator.generateTypeDefinitionNode(
+                    createIdentifierToken(typeName),
+                    new ArrayList<>(),
+                    typeAnnotations);
+        } else {
+            typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
+        }
+
+        TypeDescriptorNode typeDescriptorNode;
+        if (typeGenerator instanceof PrimitiveTypeGenerator && isConstraintsAvailable) {
+            typeDescriptorNode = NodeParser.parseTypeDescriptor(typeName);
+        } else {
+            typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
+        }
+
         if (typeGenerator instanceof UnionTypeGenerator) {
             typeDescriptorNode = createParenthesisedTypeDescriptorNode(
                     createToken(OPEN_PAREN_TOKEN), typeDescriptorNode, createToken(CLOSE_PAREN_TOKEN));
@@ -85,10 +127,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         }
 
         if (arraySchema.getMaxItems() != null) {
-            if (arraySchema.getMaxItems() <= MAX_ARRAY_LENGTH) {
-                outStream.println("WARNING: Maximum array item count defined for the property '" + typeName +
-                        "' in the definition will be ignored");
-            } else {
+            if (arraySchema.getMaxItems() > MAX_ARRAY_LENGTH) {
                 throw new BallerinaOpenApiException("Maximum item count defined in the definition exceeds the " +
                         "maximum ballerina array length.");
             }

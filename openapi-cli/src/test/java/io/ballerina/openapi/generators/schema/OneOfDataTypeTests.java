@@ -74,7 +74,7 @@ public class OneOfDataTypeTests {
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, true);
-        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error");
+        TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error", null);
         String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile?");
     }

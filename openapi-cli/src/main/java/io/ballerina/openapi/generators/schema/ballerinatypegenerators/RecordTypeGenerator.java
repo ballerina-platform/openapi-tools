@@ -19,22 +19,30 @@
 package io.ballerina.openapi.generators.schema.ballerinatypegenerators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
+import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getFieldApiDocs;
+import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.getTypeGenerator;
+import static io.ballerina.openapi.generators.schema.TypeGeneratorUtils.updateRecordFieldList;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for object type schema.
@@ -71,9 +79,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
  * @since 2.0.0
  */
 public class RecordTypeGenerator extends TypeGenerator {
+    private final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
 
     public RecordTypeGenerator(Schema schema, String typeName) {
         super(schema, typeName);
+    }
+
+    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
+        return typeDefinitionNodeList;
     }
 
     /**
@@ -84,7 +97,7 @@ public class RecordTypeGenerator extends TypeGenerator {
         if (schema.getProperties() != null) {
             Map<String, Schema> properties = schema.getProperties();
             List<String> required = schema.getRequired();
-            List<Node> recordFList = TypeGeneratorUtils.addRecordFields(required, properties.entrySet());
+            List<Node> recordFList = addRecordFields(required, properties.entrySet(), typeName);
             NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     createToken(OPEN_BRACE_TOKEN), fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
@@ -93,5 +106,33 @@ public class RecordTypeGenerator extends TypeGenerator {
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     createToken(OPEN_BRACE_TOKEN), fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
         }
+    }
+
+    /**
+     * This util for generating record field with given schema properties.
+     */
+    public  List<Node> addRecordFields(List<String> required,
+                                       Set<Map.Entry<String, Schema>> fields,
+                                       String recordName) throws BallerinaOpenApiException {
+        // TODO: Handle allOf , oneOf, anyOf
+        List<Node> recordFieldList = new ArrayList<>();
+        for (Map.Entry<String, Schema> field : fields) {
+            String fieldNameStr = escapeIdentifier(field.getKey().trim());
+            // API doc generations
+            Schema<?> fieldSchema = field.getValue();
+            List<Node> schemaDoc = getFieldApiDocs(fieldSchema);
+            NodeList<Node> schemaDocNodes = createNodeList(schemaDoc);
+
+            IdentifierToken fieldName = AbstractNodeFactory.createIdentifierToken(fieldNameStr);
+            TypeGenerator typeGenerator = getTypeGenerator(fieldSchema, fieldNameStr, recordName);
+            TypeDescriptorNode fieldTypeName = typeGenerator.generateTypeDescriptorNode();
+            if (typeGenerator instanceof ArrayTypeGenerator &&
+                    ((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint() != null) {
+                        typeDefinitionNodeList.add(((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint());
+            }
+            updateRecordFieldList(required, recordFieldList, field, fieldSchema, schemaDocNodes,
+                    fieldName, fieldTypeName);
+        }
+        return recordFieldList;
     }
 }

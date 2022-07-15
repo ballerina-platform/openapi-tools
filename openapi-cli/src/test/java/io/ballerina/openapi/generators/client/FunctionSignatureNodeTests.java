@@ -70,10 +70,10 @@ public class FunctionSignatureNodeTests {
         RequiredParameterNode param04 = (RequiredParameterNode) parameters.get(3);
 
         Assert.assertEquals(param01.paramName().orElseThrow().text(), "latitude");
-        Assert.assertEquals(param01.typeName().toString(), "float");
+        Assert.assertEquals(param01.typeName().toString(), "decimal");
 
         Assert.assertEquals(param02.paramName().orElseThrow().text(), "longitude");
-        Assert.assertEquals(param02.typeName().toString(), "float");
+        Assert.assertEquals(param02.typeName().toString(), "decimal");
 
         Assert.assertEquals(param03.paramName().orElseThrow().text(), "country");
         Assert.assertEquals(param03.typeName().toString(), "string");

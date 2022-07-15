@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: Shopify Admin API
+  version: "2021-10"
+tags:
+  - name: customers
+  - name: products
+  - name: orders
+  - name: fulfillments
+  - name: order_risks
+paths:
+  /admin:
+    post:
+      operationId: "test1"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/Person"
+      responses:
+        200:
+          description: Status OK
+
+components:
+  schemas:
+    Book:
+      properties:
+        name:
+          type: string
+          maxLength: 67
+        price:
+          type: number
+          format: double
+          maximum: 89.0
+    Address:
+      type: string
+      minLength: 5
+    Person:
+      type: object
+      required:
+        - id
+      properties:
+        name:
+          type: string
+          maxLength: 14
+        hobby:
+          type: array
+          items:
+            type: string
+          maxItems: 5
+          minItems: 2
+        id:
+          type: integer
+          maximum: 5
+        address:
+          $ref: "#/components/schemas/Address"
+        salary:
+          type: number
+          format: float
+          maximum: 100000
+        net:
+          type: number
+          minimum: 500000
+        fav:
+          $ref: "#/components/schemas/Book"

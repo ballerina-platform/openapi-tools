@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: Shopify Admin API
+  version: "2021-10"
+tags:
+  - name: customers
+  - name: products
+  - name: orders
+  - name: fulfillments
+  - name: order_risks
+paths:
+  /admin:
+    post:
+      operationId: "test1"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/Person"
+      responses:
+        200:
+          description: Status OK
+
+components:
+  schemas:
+    Address:  # Use case 02 : Annotations on a type
+      type: string
+      minLength: 5
+    Person:
+      type: object
+      required:
+        - id
+      properties:
+        name:
+          type: string
+          maxLength: 14 # Use case 01 : Annotations on a record field
+        hobby:
+          type: array
+          items:
+            type: string
+          maxItems: 5
+          minItems: 2
+        id:
+          type: integer
+          maximum: 5
+        address:  # Use case 03 : Annotations on a type used as a record field
+          $ref: "#/components/schemas/Address"
+        salary:
+          type: number
+          format: float
+          maximum: 100000
+        net:
+          type: number
+          minimum: 500000

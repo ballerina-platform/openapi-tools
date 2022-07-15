@@ -54,6 +54,13 @@ public class DataTypeTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/nullable_type_def.yaml");
     }
 
+    @Test(description = "test for tuple type scenarios")
+    public void testForTupleType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/tuple_types.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/tuple_type.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

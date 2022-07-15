@@ -88,6 +88,7 @@ under the License.
             <class name="io.ballerina.openapi.generators.schema.NestedRecordInclusionTests"/>
             <class name="io.ballerina.openapi.generators.schema.FieldGenWithNullableOption"/>
             <class name="io.ballerina.openapi.generators.schema.AnnotationTests"/>
+            <class name="io.ballerina.openapi.generators.schema.ConstraintTests"/>
             <class name="io.ballerina.openapi.generators.testcases.BallerinaTestGeneratorTests"/>
             <class name="io.ballerina.openapi.generators.client.OneOfResponsesTests"/>
             <class name="io.ballerina.openapi.generators.openapi.DataTypeTests"/>

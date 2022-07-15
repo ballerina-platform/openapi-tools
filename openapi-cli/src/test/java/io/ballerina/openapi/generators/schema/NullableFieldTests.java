@@ -115,7 +115,6 @@ public class NullableFieldTests {
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/" +
-                        "nullable_anyof_array_schema.bal",
-                syntaxTree);
+                        "nullable_anyof_array_schema.bal", syntaxTree);
     }
 }

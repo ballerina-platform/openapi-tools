@@ -1,0 +1,81 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /:
+    post:
+      operationId: post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        "202":
+          description: Accepted
+components:
+  schemas:
+    User:
+      required:
+        - age
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        age:
+          type: integer
+          format: int64
+    ReturnTypes:
+      type: array
+      items:
+        oneOf:
+          - type: integer
+            format: int64
+          - type: number
+            format: double
+    Pet:
+      required:
+        - address
+        - id
+        - tuples
+        - unionTuple
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        address:
+          type: array
+          items:
+            oneOf:
+              - type: integer
+                format: int64
+              - type: string
+              - type: number
+                format: double
+              - type: number
+                format: float
+              - $ref: '#/components/schemas/User'
+        tuples:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/ReturnTypes'
+        unionTuple:
+          type: array
+          nullable: true
+          items:
+            oneOf:
+              - type: integer
+                format: int64
+              - type: number
+                format: double

@@ -22,10 +22,12 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -79,5 +81,10 @@ public class BallerinaDiagnosticTests {
                 {"duplicated_response.yaml"},
                 {"complex_oneOf_schema.yaml"}
         };
+    }
+
+    @AfterTest
+    public void cleanUp() throws IOException {
+        TestUtils.deleteGeneratedFiles();
     }
 }

@@ -49,6 +49,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -226,8 +227,29 @@ public class BallerinaServiceGenerator {
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
                 .toLowerCase(Locale.ENGLISH), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
         NodeList<Node> relativeResourcePath = createNodeList(pathNodes);
-        ParametersGenerator parametersGenerator = new ParametersGenerator(false, openAPI.getComponents());
-        List<Node> params = parametersGenerator.generateResourcesInputs(operation);
+        ParametersGenerator parametersGenerator = new ParametersGenerator(false);
+        parametersGenerator.generateResourcesInputs(operation);
+        List<Node> params = new ArrayList<>(parametersGenerator.getRequiredParams());
+
+        // Handle request Body (Payload)
+        if (operation.getValue().getRequestBody() != null) {
+            RequestBody requestBody = operation.getValue().getRequestBody();
+            if (requestBody.getContent() != null) {
+                RequestBodyGenerator requestBodyGen = new RequestBodyGenerator(this.openAPI.getComponents(),
+                        requestBody);
+                params.add(requestBodyGen.createNodeForRequestBody());
+                params.add(createToken(SyntaxKind.COMMA_TOKEN));
+            }
+        }
+
+        // For creating the order of the parameters in the function
+        if (!parametersGenerator.getDefaultableParams().isEmpty()) {
+            params.addAll(parametersGenerator.getDefaultableParams());
+        }
+        if (params.size() > 1) {
+            params.remove(params.size() - 1);
+        }
+
         if (!isNullableRequired) {
             isNullableRequired = parametersGenerator.isNullableRequired();
         }
@@ -238,8 +260,11 @@ public class BallerinaServiceGenerator {
         typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());
 
         FunctionSignatureNode functionSignatureNode = createFunctionSignatureNode(
-                createToken(SyntaxKind.OPEN_PAREN_TOKEN), parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN),
-                        returnNode);
+                createToken(SyntaxKind.OPEN_PAREN_TOKEN),
+                parameters, createToken(SyntaxKind.CLOSE_PAREN_TOKEN), returnNode);
+
+        // Function body generation
+        NodeList<StatementNode> statements = createEmptyNodeList();
 
         // Function Body Node
         // If path parameter has some special characters, extra body statements are added to handle the complexity.

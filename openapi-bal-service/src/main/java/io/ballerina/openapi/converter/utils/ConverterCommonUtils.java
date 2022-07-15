@@ -115,6 +115,7 @@ public class ConverterCommonUtils {
                 schema = new BooleanSchema();
                 break;
             case Constants.ARRAY:
+            case Constants.TUPLE:
                 schema = new ArraySchema();
                 break;
             case Constants.INT:
