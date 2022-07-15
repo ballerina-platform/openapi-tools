@@ -25,10 +25,12 @@ import io.ballerina.compiler.api.symbols.Documentation;
 import io.ballerina.compiler.api.symbols.EnumSymbol;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MapTypeSymbol;
+import io.ballerina.compiler.api.symbols.ReadonlyTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.SymbolKind;
+import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
@@ -97,19 +99,19 @@ public class OpenAPIComponentMapper {
         TypeReferenceTypeSymbol typeRef = (TypeReferenceTypeSymbol) typeSymbol;
         TypeSymbol type = typeRef.typeDescriptor();
         // Handle record type request body
+        if (type.typeKind() == TypeDescKind.INTERSECTION) {
+            List<TypeSymbol> typeSymbols = ((IntersectionTypeSymbol) type).memberTypeDescriptors();
+            for (TypeSymbol symbol: typeSymbols) {
+                if (!(symbol instanceof ReadonlyTypeSymbol)) {
+                    type = symbol;
+                    break;
+                }
+            }
+        }
         switch (type.typeKind()) {
             case RECORD:
                 // Handle typeInclusions with allOf type binding
                 handleRecordTypeSymbol((RecordTypeSymbol) type, schema, componentName, apiDocs);
-                break;
-            case INTERSECTION:
-                List<TypeSymbol> typeSymbols = ((IntersectionTypeSymbol) type).memberTypeDescriptors();
-                for (TypeSymbol symbol: typeSymbols) {
-                    if (!(symbol instanceof RecordTypeSymbol)) {
-                        continue;
-                    }
-                    handleRecordTypeSymbol((RecordTypeSymbol) symbol, schema, componentName, apiDocs);
-                }
                 break;
             case STRING:
                 schema.put(componentName, new StringSchema().description(typeDoc));
@@ -128,6 +130,7 @@ public class OpenAPIComponentMapper {
                 components.setSchemas(schema);
                 break;
             case ARRAY:
+            case TUPLE:
                 ArraySchema arraySchema = mapArrayToArraySchema(schema, type, componentName);
                 schema.put(componentName, arraySchema.description(typeDoc));
                 components.setSchemas(schema);
@@ -277,7 +280,7 @@ public class OpenAPIComponentMapper {
                         componentName);
                 schema = components.getSchemas();
             }
-            if (property instanceof ArraySchema) {
+            if (property instanceof ArraySchema && !(((ArraySchema) property).getItems() instanceof ComposedSchema)) {
                 Boolean nullable = property.getNullable();
                 property = mapArrayToArraySchema(schema, field.getValue().typeDescriptor(), componentName);
                 property.setNullable(nullable);
@@ -306,8 +309,8 @@ public class OpenAPIComponentMapper {
     /**
      * This function uses to handle the field datatype has TypeReference(ex: Record or Enum).
      */
-    private Schema handleTypeReference(Map<String, Schema> schema, TypeReferenceTypeSymbol typeReferenceSymbol,
-                                       Schema property, boolean isCyclicRecord) {
+    private Schema<?> handleTypeReference(Map<String, Schema> schema, TypeReferenceTypeSymbol typeReferenceSymbol,
+                                       Schema<?> property, boolean isCyclicRecord) {
         if (typeReferenceSymbol.definition().kind() == SymbolKind.ENUM) {
             EnumSymbol enumSymbol = (EnumSymbol) typeReferenceSymbol.definition();
             property = mapEnumValues(enumSymbol);
@@ -346,7 +349,7 @@ public class OpenAPIComponentMapper {
             } else if (union.typeKind() == TypeDescKind.UNION) {
                 property = handleUnionType((UnionTypeSymbol) union, property, parentComponentName);
                 properties.add(property);
-            } else if (union.typeKind() == TypeDescKind.ARRAY) {
+            } else if (union.typeKind() == TypeDescKind.ARRAY || union.typeKind() == TypeDescKind.TUPLE) {
                 property = mapArrayToArraySchema(components.getSchemas(), union, parentComponentName);
                 properties.add(property);
             } else if (union.typeKind() == TypeDescKind.MAP) {
@@ -431,7 +434,7 @@ public class OpenAPIComponentMapper {
             symbol = arrayTypeSymbol.memberTypeDescriptor();
         }
         // Handle record fields have reference record array type (ex: Tag[] tags)
-        Schema symbolProperty  = ConverterCommonUtils.getOpenApiSchema(symbol.typeKind().getName());
+        Schema<?> symbolProperty  = ConverterCommonUtils.getOpenApiSchema(symbol.typeKind().getName());
         // Handle record fields have union type array (ex: string[]? name)
         if (symbol.typeKind() == TypeDescKind.UNION) {
             symbolProperty = getSchemaForUnionType((UnionTypeSymbol) symbol, symbolProperty, componentName, schema);
@@ -439,6 +442,23 @@ public class OpenAPIComponentMapper {
         // Set the record model to the definition
         if (symbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
             symbolProperty = getSchemaForTypeReferenceSymbol(symbol, symbolProperty, componentName, schema);
+        }
+        // Handle the tuple type
+        if (symbol.typeKind().equals(TypeDescKind.TUPLE)) {
+            // Add all the schema related to typeSymbols into the list. Then the list can be mapped into oneOf
+            // type.
+            TupleTypeSymbol tuple = (TupleTypeSymbol) symbol;
+            List<Schema> arrayItems = new ArrayList<>();
+            for (TypeSymbol typeSymbol : tuple.memberTypeDescriptors()) {
+                Schema<?> openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeSymbol.signature());
+                // Handle type_reference type
+                if (typeSymbol instanceof TypeReferenceTypeSymbol) {
+                    openApiSchema.set$ref(typeSymbol.signature());
+                    createComponentSchema(schema, typeSymbol);
+                }
+                arrayItems.add(openApiSchema);
+            }
+            symbolProperty = new ComposedSchema().oneOf(arrayItems);
         }
         // Handle nested array type
         if (arrayDimensions > 1) {
