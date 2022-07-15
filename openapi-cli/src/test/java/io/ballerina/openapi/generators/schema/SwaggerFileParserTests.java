@@ -40,16 +40,16 @@ public class SwaggerFileParserTests {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("user.yaml"));
     }
 
+    //TODO: expectedExceptionsMessageRegExp = "Invalid file type.*"
     @Test(description = "Test invalid file type",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Invalid file type.*")
+            expectedExceptions = BallerinaOpenApiException.class)
     public void testInvalidFileType() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/petstore.txt"));
     }
 
+    //TODO expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*"
     @Test(description = "Test invalid swagger file ",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
+            expectedExceptions = BallerinaOpenApiException.class)
     public void testInvalidFile() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/invalid.yaml"));
     }
