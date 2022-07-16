@@ -60,6 +60,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private Path executionPath = Paths.get(System.getProperty("user.dir"));
     private Path targetOutputPath;
     private boolean exitWhenFinish;
+    private boolean isClientResources;
 
     @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
     private boolean helpFlag;
@@ -100,9 +101,9 @@ public class OpenApiCmd implements BLauncherCmd {
     @CommandLine.Option(names = {"--with-tests"}, hidden = true, description = "Generate test files")
     private boolean includeTestFiles;
 
-    @CommandLine.Option(names = {"--resource-functions"}, hidden = true, description = "Generate client with resource" +
-            " functions files")
-    private boolean generateClientResourceFunctions;
+    @CommandLine.Option(names = {"--client-methods"}, hidden = true, description = "Generate the client" +
+            " using resource functions (instead of using remote functions)")
+    private String generateClientMethods;
 
     @CommandLine.Parameters
     private List<String> argList;
@@ -159,7 +160,9 @@ public class OpenApiCmd implements BLauncherCmd {
                 Filter filter = new Filter(tag, operation);
 
                 // Add the resource flag enable
-                if (generateClientResourceFunctions && mode != null && mode.equals("service")) {
+                 isClientResources = generateClientMethods != null && !generateClientMethods.isBlank() &&
+                                (generateClientMethods.equals("resource"));
+                if (isClientResources && mode != null && mode.equals("service")) {
                     // Exit the code generation process
                     outStream.println("'--resource-functions' option is only available with the client mode.");
                     exitError(this.exitWhenFinish);
@@ -172,7 +175,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 }
             } else if (fileName.endsWith(BAL_EXTENSION)) {
                 // Add the resource flag enable
-                if (generateClientResourceFunctions) {
+                if (!generateClientMethods.isBlank()) {
                     // Exit the code generation process
                     outStream.println("'--resource-functions' option is only available with the client mode.");
                     exitError(this.exitWhenFinish);
@@ -261,13 +264,13 @@ public class OpenApiCmd implements BLauncherCmd {
                     generateServiceFile(generator, serviceName, resourcePath, filter);
                     break;
                 case "client":
-                    generatesClientFile(generator, resourcePath, filter, this.generateClientResourceFunctions);
+                    generatesClientFile(generator, resourcePath, filter, this.isClientResources);
                     break;
                 default:
                     break;
             }
         } else {
-            generateBothFiles(generator, serviceName, resourcePath, filter, this.generateClientResourceFunctions);
+            generateBothFiles(generator, serviceName, resourcePath, filter, this.isClientResources);
         }
     }
 
