@@ -71,6 +71,7 @@ public class Constants {
     public static final String TEXT_PREFIX = "text/";
     public static final String MAP_JSON = "map<json>";
     public static final String MAP_STRING = "map<string>";
+    public static final String MAP = "map";
     public static final String HTTP_REQUEST = "http:Request";
     public static final String DEFAULT = "default";
     public static final String HTTP_RESPONSE = "http:Response";
