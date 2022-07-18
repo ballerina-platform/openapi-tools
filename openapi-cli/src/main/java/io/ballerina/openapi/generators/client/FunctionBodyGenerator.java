@@ -134,7 +134,7 @@ public class FunctionBodyGenerator {
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
-    private final boolean isResource;
+    private final boolean resourceMode;
 
     public List<ImportDeclarationNode> getImports() {
         return imports;
@@ -147,7 +147,7 @@ public class FunctionBodyGenerator {
     public FunctionBodyGenerator(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
                                  OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
                                  BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator,
-                                 BallerinaUtilGenerator ballerinaUtilGenerator, boolean isResource) {
+                                 BallerinaUtilGenerator ballerinaUtilGenerator, boolean resourceMode) {
 
         this.imports = imports;
         this.isHeader = false;
@@ -156,7 +156,7 @@ public class FunctionBodyGenerator {
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
         this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
-        this.isResource = isResource;
+        this.resourceMode = resourceMode;
     }
 
     /**
@@ -176,7 +176,7 @@ public class FunctionBodyGenerator {
         // Create statements
         List<StatementNode> statementsList =  new ArrayList<>();
         // Check whether given path is complex path , if complex it will handle adding these two statement
-        if (isResource && isComplexURL(path)) {
+        if (resourceMode && isComplexURL(path)) {
             List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
             statementsList.addAll(bodyStatements);
         }

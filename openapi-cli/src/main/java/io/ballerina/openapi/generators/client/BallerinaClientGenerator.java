@@ -133,7 +133,7 @@ public class BallerinaClientGenerator {
     private final List<String> remoteFunctionNameList;
     private String serverURL;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
-    private final boolean isResource;
+    private final boolean resourceMode;
 
     /**
      * Returns a list of type definition nodes.
@@ -170,7 +170,7 @@ public class BallerinaClientGenerator {
         return serverURL;
     }
 
-    public BallerinaClientGenerator(OpenAPI openAPI, Filter filters, boolean nullable, boolean isResource) {
+    public BallerinaClientGenerator(OpenAPI openAPI, Filter filters, boolean nullable, boolean resourceMode) {
 
         this.filters = filters;
         this.imports = new ArrayList<>();
@@ -181,7 +181,7 @@ public class BallerinaClientGenerator {
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
-        this.isResource = isResource;
+        this.resourceMode = resourceMode;
     }
 
     /**
@@ -530,19 +530,20 @@ public class BallerinaClientGenerator {
 
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(
-                isResource ?
+                resourceMode ?
                         RESOURCE_KEYWORD :
-                        REMOTE_KEYWORD), createToken(ISOLATED_KEYWORD));
+                        REMOTE_KEYWORD),
+                createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(
-                isResource ?
+                resourceMode ?
                         operation.getKey().name().toLowerCase(Locale.ENGLISH) :
                         operation.getValue().getOperationId());
 
         remoteFunctionNameList.add(operation.getValue().getOperationId());
 
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                ballerinaSchemaGenerator, typeDefinitionNodeList, isResource);
+                ballerinaSchemaGenerator, typeDefinitionNodeList, resourceMode);
         FunctionSignatureNode functionSignatureNode =
                 functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
                         remoteFunctionDocs);
@@ -558,12 +559,12 @@ public class BallerinaClientGenerator {
 
         // Create Function Body
         FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(imports, typeDefinitionNodeList,
-                openAPI, ballerinaSchemaGenerator, ballerinaAuthConfigGenerator, ballerinaUtilGenerator, isResource);
+                openAPI, ballerinaSchemaGenerator, ballerinaAuthConfigGenerator, ballerinaUtilGenerator, resourceMode);
         FunctionBodyNode functionBodyNode = functionBodyGenerator.getFunctionBodyNode(path, operation);
         imports = functionBodyGenerator.getImports();
 
         //Generate relative path
-        NodeList<Node> relativeResourcePath = isResource ?
+        NodeList<Node> relativeResourcePath = resourceMode ?
         createNodeList(GeneratorUtils.getRelativeResourcePath(path, operation.getValue())) :
                 createEmptyNodeList();
         return createFunctionDefinitionNode(null,

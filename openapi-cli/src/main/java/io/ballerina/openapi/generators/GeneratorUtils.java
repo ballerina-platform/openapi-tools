@@ -498,7 +498,7 @@ public class GeneratorUtils {
     /**
      * Check the given URL include complex scenarios.
      * ex: /admin/api/2021-10/customers/{customer_id}.json parameterised path parameters
-     * TODO: address the other /{id}.json.{name}
+     * TODO: address the other /{id}.json.{name}, /report.{format}
      */
     public static boolean isComplexURL(String path) {
         String[] subPathSegment = path.split(SLASH);

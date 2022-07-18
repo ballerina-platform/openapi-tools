@@ -63,7 +63,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private Path executionPath = Paths.get(System.getProperty("user.dir"));
     private Path targetOutputPath;
     private boolean exitWhenFinish;
-    private boolean isClientResources;
+    private boolean clientResourceMode;
 
     @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
     private boolean helpFlag;
@@ -105,7 +105,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private boolean includeTestFiles;
 
     @CommandLine.Option(names = {"--client-methods"}, hidden = true, description = "Generate the client methods" +
-            " according to the given type `resource` or `remote` (by default it generates remote methods)")
+            " with provided type . Only \"remote\"(default) and \"resource\" options are supported.")
     private String generateClientMethods;
 
     @CommandLine.Parameters
@@ -165,16 +165,16 @@ public class OpenApiCmd implements BLauncherCmd {
                 if (generateClientMethods != null && !generateClientMethods.isBlank() &&
                         (!generateClientMethods.equals(RESOURCE) && !generateClientMethods.equals(REMOTE))) {
                     // Exit the code generation process
-                    outStream.println("'--client-methods' option can have `remote` or `resource` methods.");
+                    outStream.println("'--client-methods' only supports `remote` or `resource` options.");
                     exitError(this.exitWhenFinish);
                 }
                 // Add the resource flag enable
-                isClientResources = generateClientMethods != null && !generateClientMethods.isBlank() &&
+                clientResourceMode = generateClientMethods != null && !generateClientMethods.isBlank() &&
                                 (generateClientMethods.equals(CmdConstants.RESOURCE));
                 
-                if (isClientResources && mode != null && mode.equals(SERVICE)) {
+                if (clientResourceMode && mode != null && mode.equals(SERVICE)) {
                     // Exit the code generation process
-                    outStream.println("'--client-methods' option is only available with the client mode.");
+                    outStream.println("'--client-methods' option is only available in client generation mode.");
                     exitError(this.exitWhenFinish);
                 }
                 try {
@@ -187,7 +187,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 // Add the resource flag enable
                 if (generateClientMethods != null && !generateClientMethods.isBlank()) {
                     // Exit the code generation process
-                    outStream.println("'--client-methods' option is only available with the client mode.");
+                    outStream.println("'--client-methods' option is only available in client generation mode.");
                     exitError(this.exitWhenFinish);
                 }
                 ballerinaToOpenApi(fileName);
@@ -274,13 +274,13 @@ public class OpenApiCmd implements BLauncherCmd {
                     generateServiceFile(generator, serviceName, resourcePath, filter);
                     break;
                 case "client":
-                    generatesClientFile(generator, resourcePath, filter, this.isClientResources);
+                    generatesClientFile(generator, resourcePath, filter, this.clientResourceMode);
                     break;
                 default:
                     break;
             }
         } else {
-            generateBothFiles(generator, serviceName, resourcePath, filter, this.isClientResources);
+            generateBothFiles(generator, serviceName, resourcePath, filter, this.clientResourceMode);
         }
     }
 
@@ -341,13 +341,13 @@ public class OpenApiCmd implements BLauncherCmd {
      * A Util to Client generation.
      * @param generator         generator object
      * @param resourcePath      resource Path
-     * @param isResource        boolean value for the
+     * @param resourceMode      flag for client resource method generation
      */
     private void generatesClientFile(CodeGenerator generator,  Path resourcePath, Filter filter,
-                                     boolean isResource) {
+                                     boolean resourceMode) {
         try {
             generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, nullable,
-                    isResource);
+                    resourceMode);
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             if (e.getLocalizedMessage() != null) {
                 outStream.println(e.getLocalizedMessage());

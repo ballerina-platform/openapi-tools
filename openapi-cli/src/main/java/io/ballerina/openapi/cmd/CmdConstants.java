@@ -19,6 +19,8 @@ package io.ballerina.openapi.cmd;
 
 /**
  * Constants for openapi commands.
+ *
+ * @since 1.2.0
  */
 public class CmdConstants {
     public static final String RESOURCE = "resource";
