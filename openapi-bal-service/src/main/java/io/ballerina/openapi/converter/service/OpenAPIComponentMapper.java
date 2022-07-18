@@ -144,7 +144,11 @@ public class OpenAPIComponentMapper {
                 MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) type;
                 TypeDescKind typeDescKind = mapTypeSymbol.typeParam().typeKind();
                 Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeDescKind.getName());
-                schema.put(componentName, new ObjectSchema().additionalProperties(openApiSchema).description(typeDoc));
+                schema.put(componentName, new ObjectSchema().additionalProperties(
+                        openApiSchema.getType() == null ?
+                                true :
+                                openApiSchema)
+                        .description(typeDoc));
                 Map<String, Schema> schemas = components.getSchemas();
                 if (schemas != null) {
                     schemas.putAll(schema);
@@ -188,8 +192,7 @@ public class OpenAPIComponentMapper {
             apiDocs.put(componentName, description.get().trim());
         }
         // Record field apidoc mapping
-        TypeReferenceTypeSymbol recordTypeReference = typeSymbol;
-        TypeDefinitionSymbol recordTypeDefinitionSymbol = (TypeDefinitionSymbol) ((recordTypeReference).definition());
+        TypeDefinitionSymbol recordTypeDefinitionSymbol = (TypeDefinitionSymbol) ((typeSymbol).definition());
         if (recordTypeDefinitionSymbol.typeDescriptor() instanceof RecordTypeSymbol) {
             RecordTypeSymbol recordType = (RecordTypeSymbol) recordTypeDefinitionSymbol.typeDescriptor();
             Map<String, RecordFieldSymbol> recordFieldSymbols = recordType.fieldDescriptors();
@@ -268,17 +271,35 @@ public class OpenAPIComponentMapper {
             if (!field.getValue().isOptional()) {
                 required.add(fieldName);
             }
-            String type = field.getValue().typeDescriptor().typeKind().toString().toLowerCase(Locale.ENGLISH);
+            TypeDescKind fieldTypeKind = field.getValue().typeDescriptor().typeKind();
+            String type = fieldTypeKind.toString().toLowerCase(Locale.ENGLISH);
             Schema property = ConverterCommonUtils.getOpenApiSchema(type);
-            if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE) {
+
+            if (fieldTypeKind == TypeDescKind.TYPE_REFERENCE) {
                 TypeReferenceTypeSymbol typeReference = (TypeReferenceTypeSymbol) field.getValue().typeDescriptor();
                 property = handleTypeReference(schema, typeReference, property, isSameRecord(componentName,
                         typeReference));
                 schema = components.getSchemas();
-            } else if (field.getValue().typeDescriptor().typeKind() == TypeDescKind.UNION) {
+            } else if (fieldTypeKind == TypeDescKind.UNION) {
                 property = handleUnionType((UnionTypeSymbol) field.getValue().typeDescriptor(), property,
                         componentName);
                 schema = components.getSchemas();
+            } else if (fieldTypeKind == TypeDescKind.MAP) {
+                MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) field.getValue().typeDescriptor();
+                TypeDescKind typeDescKind = mapTypeSymbol.typeParam().typeKind();
+                if (typeDescKind == TypeDescKind.TYPE_REFERENCE) {
+                    TypeReferenceTypeSymbol typeReference = (TypeReferenceTypeSymbol) mapTypeSymbol.typeParam();
+                    Schema reference = handleTypeReference(schema, typeReference, new Schema<>(),
+                            isSameRecord(componentName, typeReference));
+                    schema = components.getSchemas();
+                    property = property.additionalProperties(reference);
+                } else if (typeDescKind == TypeDescKind.ARRAY) {
+                    ArraySchema arraySchema = mapArrayToArraySchema(schema, mapTypeSymbol.typeParam(), componentName);
+                    property = property.additionalProperties(arraySchema);
+                } else {
+                    Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeDescKind.getName());
+                    property = property.additionalProperties(openApiSchema.getType() == null ? true : openApiSchema);
+                }
             }
             if (property instanceof ArraySchema && !(((ArraySchema) property).getItems() instanceof ComposedSchema)) {
                 Boolean nullable = property.getNullable();
