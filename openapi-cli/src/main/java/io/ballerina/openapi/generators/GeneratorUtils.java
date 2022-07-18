@@ -86,10 +86,12 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldN
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
@@ -103,6 +105,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.OPEN_CURLY_BRAC
 import static io.ballerina.openapi.generators.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.generators.GeneratorConstants.SPECIAL_CHARACTERS_REGEX;
 import static io.ballerina.openapi.generators.GeneratorConstants.SQUARE_BRACKETS;
+import static io.ballerina.openapi.generators.GeneratorConstants.STRING;
 import static io.ballerina.openapi.generators.GeneratorConstants.STYLE;
 
 /**
@@ -174,12 +177,12 @@ public class GeneratorUtils {
                             if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
                                     && parameter.getIn().equals("path")) {
 
-                                Token ppOpenB = AbstractNodeFactory.createIdentifierToken("[");
+                                Token ppOpenB = AbstractNodeFactory.createToken(OPEN_BRACKET_TOKEN);
                                 NodeList<AnnotationNode> ppAnnotation = NodeFactory.createEmptyNodeList();
                                 // TypeDescriptor
                                 Token name;
                                 if (parameter.getSchema() == null) {
-                                    name = AbstractNodeFactory.createIdentifierToken("string");
+                                    name = AbstractNodeFactory.createIdentifierToken(STRING);
                                 } else {
                                     name = AbstractNodeFactory.createIdentifierToken(
                                                     convertOpenAPITypeToBallerina(parameter.getSchema().getType()));
@@ -190,7 +193,7 @@ public class GeneratorUtils {
                                                 isPathNameContainsSpecialCharacter ?
                                                         getValidName(pathNode, false) :
                                                         pathParam);
-                                Token ppCloseB = AbstractNodeFactory.createIdentifierToken("]");
+                                Token ppCloseB = AbstractNodeFactory.createToken(CLOSE_BRACKET_TOKEN);
                                 ResourcePathParameterNode resourcePathParameterNode = NodeFactory
                                         .createResourcePathParameterNode(
                                                 SyntaxKind.RESOURCE_PATH_SEGMENT_PARAM, ppOpenB,
@@ -488,6 +491,8 @@ public class GeneratorUtils {
 
     /**
      * Check the given URL include complex scenarios.
+     * ex: /admin/api/2021-10/customers/{customer_id}.json parameterised path parameters
+     * TODO: address the other /{id}.json.{name}
      */
     public static boolean isComplexURL(String path) {
         String[] subPathSegment = path.split(SLASH);

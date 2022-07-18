@@ -48,12 +48,13 @@ public class ClientGenerationTests extends OpenAPITest {
         buildArgs.add("client");
         buildArgs.add("-o");
         buildArgs.add(tmpDir.toString());
-        buildArgs.add("--resource-functions");
+        buildArgs.add("--client-methods");
+        buildArgs.add("resource");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
         Assert.assertTrue(Files.exists(Paths.get(tmpDir.toString()).resolve("client.bal")));
     }
 
-    @Test(description = "`--resource-functions` option with service")
+    @Test(description = "`--client-methods` option with service")
     public void serviceWithResourceFunction() throws IOException, InterruptedException {
         String openapiFilePath = "openapi.yaml";
         List<String> buildArgs = new LinkedList<>();
@@ -63,11 +64,12 @@ public class ClientGenerationTests extends OpenAPITest {
         buildArgs.add("service");
         buildArgs.add("-o");
         buildArgs.add(tmpDir.toString());
-        buildArgs.add("--resource-functions");
+        buildArgs.add("--client-methods");
+        buildArgs.add("resource");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
     }
 
-    @Test(description = "`--resource-functions` option without any mode")
+    @Test(description = "`--client-methods` option without any mode")
     public void commonWithResourceFunction() throws IOException, InterruptedException {
         String openapiFilePath = "openapi.yaml";
         List<String> buildArgs = new LinkedList<>();
@@ -75,7 +77,8 @@ public class ClientGenerationTests extends OpenAPITest {
         buildArgs.add(openapiFilePath);
         buildArgs.add("-o");
         buildArgs.add(tmpDir.toString());
-        buildArgs.add("--resource-functions");
+        buildArgs.add("--client-methods");
+        buildArgs.add("resource");
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
         Assert.assertTrue(Files.exists(Paths.get(tmpDir.toString()).resolve("client.bal")));
         Assert.assertTrue(Files.exists(Paths.get(tmpDir.toString()).resolve("openapi_service.bal")));

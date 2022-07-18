@@ -109,6 +109,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -474,14 +476,14 @@ public class BallerinaClientGenerator {
                                     ((operationId != null) && filterOperations.contains(operationId.trim()))) {
                                 // Generate remote function
                                 FunctionDefinitionNode functionDefinitionNode =
-                                        getRemoteFunctionDefinitionNode(
+                                        getClientMethodFunctionDefinitionNode(
                                                 functionLevelAnnotationNodes, path.getKey(), operation);
                                 functionDefinitionNodeList.add(functionDefinitionNode);
                             }
                         }
                     } else {
                         // Generate remote function
-                        FunctionDefinitionNode functionDefinitionNode = getRemoteFunctionDefinitionNode(
+                        FunctionDefinitionNode functionDefinitionNode = getClientMethodFunctionDefinitionNode(
                                 functionLevelAnnotationNodes, path.getKey(), operation);
                         functionDefinitionNodeList.add(functionDefinitionNode);
                     }
@@ -499,10 +501,18 @@ public class BallerinaClientGenerator {
      *          string response = check self.clientEp-> get(path);
      *          return response;
      *    }
+     *    or
+     *     resource isolated function get v1/[string 'version]/v2/[sting name]() returns string|error {
+     *         string  path = string `/v1/${'version}/v2/${name}`;
+     *         string response = check self.clientEp-> get(path);
+     *         return response;
+     *     }
      * </pre>
      */
-    private  FunctionDefinitionNode getRemoteFunctionDefinitionNode(List<AnnotationNode> annotationNodes, String path,
-                                                                    Map.Entry<PathItem.HttpMethod, Operation> operation)
+    private  FunctionDefinitionNode getClientMethodFunctionDefinitionNode(List<AnnotationNode> annotationNodes,
+                                                                          String path,
+                                                                          Map.Entry<PathItem.HttpMethod, Operation>
+                                                                                  operation)
             throws BallerinaOpenApiException {
         // Create api doc for function
         List<Node> remoteFunctionDocs = new ArrayList<>();
@@ -519,10 +529,10 @@ public class BallerinaClientGenerator {
         }
 
         //Create qualifier list
-        NodeList<Token> qualifierList = createNodeList(createIdentifierToken(
+        NodeList<Token> qualifierList = createNodeList(createToken(
                 isResource ?
-                        "resource isolated" :
-                        "remote isolated"));
+                        RESOURCE_KEYWORD :
+                        REMOTE_KEYWORD), createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(
                 isResource ?
