@@ -192,7 +192,7 @@ public class BallerinaServiceGenerator {
                             ((operation.getValue().getOperationId() != null) &&
                             filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                         // getRelative resource path
-                        List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation);
+                        List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation.getValue());
                         // function call
                         FunctionDefinitionNode functionDefinitionNode = getResourceFunction(operation,
                                 functionRelativeResourcePath, path);
@@ -201,7 +201,7 @@ public class BallerinaServiceGenerator {
                 }
             } else {
                 // getRelative resource path
-                List<Node> relativeResourcePath = getRelativeResourcePath(path, operation);
+                List<Node> relativeResourcePath = getRelativeResourcePath(path, operation.getValue());
                 // function call
                 FunctionDefinitionNode resourceFunction = getResourceFunction(operation, relativeResourcePath, path);
                 functions.add(resourceFunction);

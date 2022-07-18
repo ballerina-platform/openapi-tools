@@ -19,7 +19,6 @@
 package io.ballerina.openapi.generators;
 
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
-import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -31,7 +30,6 @@ import io.ballerina.compiler.syntax.tree.Minutiae;
 import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
-import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
@@ -49,7 +47,6 @@ import io.ballerina.openapi.cmd.model.GenSrcFile;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -77,10 +74,12 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyN
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createCaptureBindingPatternNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createExpressionStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMappingConstructorExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
+import static io.ballerina.compiler.syntax.tree.NodeFactory.createResourcePathParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSpecificFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPatternNode;
@@ -93,6 +92,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACKET_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.SLASH_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_PDF;
@@ -141,16 +141,17 @@ public class GeneratorUtils {
         return NodeFactory.createQualifiedNameReferenceNode(modulePrefixToken, colon, identifierToken);
     }
 
-
-
-
-    public static List<Node> getRelativeResourcePath(String path,
-                                                     Map.Entry<PathItem.HttpMethod, Operation> operation)
+    /**
+     * Generated resource function relative path node list.
+     * @param path - resource path
+     * @param operation - resource operation
+     * @return - node lists
+     * @throws BallerinaOpenApiException
+     */
+    public static List<Node> getRelativeResourcePath(String path, Operation operation)
             throws BallerinaOpenApiException {
-
         List<Node> functionRelativeResourcePath = new ArrayList<>();
         String[] pathNodes = path.split(SLASH);
-        Token slash = AbstractNodeFactory.createIdentifierToken(SLASH);
         if (pathNodes.length >= 2) {
             for (String pathNode: pathNodes) {
                 if (pathNode.contains(OPEN_CURLY_BRACE)) {
@@ -158,68 +159,73 @@ public class GeneratorUtils {
                     pathParam = pathParam.substring(pathParam.indexOf(OPEN_CURLY_BRACE) + 1);
                     pathParam = pathParam.substring(0, pathParam.indexOf(CLOSE_CURLY_BRACE));
                     pathParam = getValidName(pathParam, false);
-                    // check whether path parameter segment has special character
-                    String[] split = pathNode.split(CLOSE_CURLY_BRACE, 2);
-                    Pattern pattern = Pattern.compile(SPECIAL_CHARACTERS_REGEX);
-                    Matcher matcher = pattern.matcher(split[1]);
-                    boolean isPathNameContainsSpecialCharacter = matcher.find();
 
                     /**
                      * TODO -> `onCall/[string id]\.json` type of url won't support from syntax
                      * issue https://github.com/ballerina-platform/ballerina-spec/issues/1138
                      * <pre>resource function get onCall/[string id]\.json() returns string {}</>
                      */
-                    if (operation.getValue().getParameters() != null) {
-                        for (Parameter parameter: operation.getValue().getParameters()) {
-                            if (parameter.getIn() == null) {
-                                break;
-                            }
-                            if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
-                                    && parameter.getIn().equals("path")) {
-
-                                Token ppOpenB = AbstractNodeFactory.createToken(OPEN_BRACKET_TOKEN);
-                                NodeList<AnnotationNode> ppAnnotation = NodeFactory.createEmptyNodeList();
-                                // TypeDescriptor
-                                Token name;
-                                if (parameter.getSchema() == null) {
-                                    name = AbstractNodeFactory.createIdentifierToken(STRING);
-                                } else {
-                                    name = AbstractNodeFactory.createIdentifierToken(
-                                                    convertOpenAPITypeToBallerina(parameter.getSchema().getType()));
-                                }
-                                BuiltinSimpleNameReferenceNode builtSNRNode =
-                                        NodeFactory.createBuiltinSimpleNameReferenceNode(null, name);
-                                IdentifierToken paramName = AbstractNodeFactory.createIdentifierToken(
-                                                isPathNameContainsSpecialCharacter ?
-                                                        getValidName(pathNode, false) :
-                                                        pathParam);
-                                Token ppCloseB = AbstractNodeFactory.createToken(CLOSE_BRACKET_TOKEN);
-                                ResourcePathParameterNode resourcePathParameterNode = NodeFactory
-                                        .createResourcePathParameterNode(
-                                                SyntaxKind.RESOURCE_PATH_SEGMENT_PARAM, ppOpenB,
-                                                ppAnnotation, builtSNRNode, null, paramName, ppCloseB);
-                                functionRelativeResourcePath.add(resourcePathParameterNode);
-                                functionRelativeResourcePath.add(slash);
-                                break;
-                            }
-                        }
+                    if (operation.getParameters() != null) {
+                        extractPathParameterDetails(operation, functionRelativeResourcePath, pathNode, pathParam);
                     }
                 } else if (!pathNode.isBlank()) {
-                    IdentifierToken idToken =
-                            AbstractNodeFactory.createIdentifierToken(escapeIdentifier(pathNode.trim()));
+                    IdentifierToken idToken = createIdentifierToken(escapeIdentifier(pathNode.trim()));
                     functionRelativeResourcePath.add(idToken);
-                    functionRelativeResourcePath.add(slash);
+                    functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
                 }
             }
             functionRelativeResourcePath.remove(functionRelativeResourcePath.size() - 1);
         } else if (pathNodes.length == 0) {
-            IdentifierToken idToken = AbstractNodeFactory.createIdentifierToken(".");
+            IdentifierToken idToken = createIdentifierToken(".");
             functionRelativeResourcePath.add(idToken);
         } else {
-            IdentifierToken idToken = AbstractNodeFactory.createIdentifierToken(pathNodes[1].trim());
+            IdentifierToken idToken = createIdentifierToken(pathNodes[1].trim());
             functionRelativeResourcePath.add(idToken);
         }
         return functionRelativeResourcePath;
+    }
+
+    private static void extractPathParameterDetails(Operation operation, List<Node> functionRelativeResourcePath,
+                                                    String pathNode, String pathParam)
+            throws BallerinaOpenApiException {
+        // check whether path parameter segment has special character
+        String[] split = pathNode.split(CLOSE_CURLY_BRACE, 2);
+        Pattern pattern = Pattern.compile(SPECIAL_CHARACTERS_REGEX);
+        Matcher matcher = pattern.matcher(split[1]);
+        boolean hasSpecialCharacter = matcher.find();
+
+        for (Parameter parameter : operation.getParameters()) {
+            if (parameter.getIn() == null) {
+                break;
+            }
+            if (pathParam.trim().equals(getValidName(parameter.getName().trim(), false))
+                    && parameter.getIn().equals("path")) {
+
+                // TypeDescriptor
+                BuiltinSimpleNameReferenceNode builtSNRNode = createBuiltinSimpleNameReferenceNode(
+                        null,
+                        parameter.getSchema() == null ?
+                                createIdentifierToken(STRING) :
+                                createIdentifierToken(
+                                        convertOpenAPITypeToBallerina(parameter.getSchema().getType())));
+                IdentifierToken paramName = createIdentifierToken(
+                        hasSpecialCharacter ?
+                                getValidName(pathNode, false) :
+                                pathParam);
+                ResourcePathParameterNode resourcePathParameterNode =
+                        createResourcePathParameterNode(
+                                SyntaxKind.RESOURCE_PATH_SEGMENT_PARAM,
+                                createToken(OPEN_BRACKET_TOKEN),
+                                NodeFactory.createEmptyNodeList(),
+                                builtSNRNode,
+                                null,
+                                paramName,
+                                createToken(CLOSE_BRACKET_TOKEN));
+                functionRelativeResourcePath.add(resourcePathParameterNode);
+                functionRelativeResourcePath.add(createToken(SLASH_TOKEN));
+                break;
+            }
+        }
     }
 
     /**

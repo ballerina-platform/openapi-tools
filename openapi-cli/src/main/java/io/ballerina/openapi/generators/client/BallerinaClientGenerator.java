@@ -564,7 +564,7 @@ public class BallerinaClientGenerator {
 
         //Generate relative path
         NodeList<Node> relativeResourcePath = isResource ?
-        createNodeList(GeneratorUtils.getRelativeResourcePath(path, operation)) :
+        createNodeList(GeneratorUtils.getRelativeResourcePath(path, operation.getValue())) :
                 createEmptyNodeList();
         return createFunctionDefinitionNode(null,
                 metadataNode, qualifierList, functionKeyWord, functionName, relativeResourcePath,

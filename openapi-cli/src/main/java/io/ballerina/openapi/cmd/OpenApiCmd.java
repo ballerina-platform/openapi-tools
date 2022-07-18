@@ -39,8 +39,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.cmd.CmdConstants.REMOTE;
+import static io.ballerina.openapi.cmd.CmdConstants.SERVICE;
 import static io.ballerina.openapi.generators.GeneratorConstants.BAL_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorConstants.JSON_EXTENSION;
+import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
 import static io.ballerina.openapi.generators.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorConstants.YML_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
@@ -160,16 +163,16 @@ public class OpenApiCmd implements BLauncherCmd {
                 Filter filter = new Filter(tag, operation);
 
                 if (generateClientMethods != null && !generateClientMethods.isBlank() &&
-                        (!generateClientMethods.equals("resource") && !generateClientMethods.equals("remote"))) {
+                        (!generateClientMethods.equals(RESOURCE) && !generateClientMethods.equals(REMOTE))) {
                     // Exit the code generation process
                     outStream.println("'--client-methods' option can have `remote` or `resource` methods.");
                     exitError(this.exitWhenFinish);
                 }
                 // Add the resource flag enable
                 isClientResources = generateClientMethods != null && !generateClientMethods.isBlank() &&
-                                (generateClientMethods.equals("resource"));
+                                (generateClientMethods.equals(CmdConstants.RESOURCE));
                 
-                if (isClientResources && mode != null && mode.equals("service")) {
+                if (isClientResources && mode != null && mode.equals(SERVICE)) {
                     // Exit the code generation process
                     outStream.println("'--client-methods' option is only available with the client mode.");
                     exitError(this.exitWhenFinish);
