@@ -32,7 +32,6 @@ components:
     Link:
       required:
         - href
-        - rel
       type: object
       properties:
         rel:
@@ -63,12 +62,12 @@ components:
       description: Represents a server-provided hyperlink
     Links:
       required:
-        - links
+        - _links
       type: object
       properties:
-        links:
-          type: array
-          items:
+        _links:
+          type: object
+          additionalProperties:
             $ref: '#/components/schemas/Link'
     Location:
       allOf:

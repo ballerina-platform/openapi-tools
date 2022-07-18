@@ -30,31 +30,31 @@ public class ModuleReferenceTests {
     private static final Path RES_DIR = Paths.get(
             "src/test/resources/ballerina-to-openapi/ballerina-project/service").toAbsolutePath();
 
-    @Test(description = "Response with separate modules", enabled = false)
+    @Test(description = "Response with separate modules")
     public void testResponse01() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("snowpeak.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak.yaml");
     }
 
-    @Test(description = "Response in separate modules with cache config", enabled = false)
+    @Test(description = "Response in separate modules with cache config")
     public void testResponse02() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("snowpeak_cache_config.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak_cache.yaml");
     }
 
-    @Test(description = "Request Body with separate modules", enabled = false)
+    @Test(description = "Request Body with separate modules")
     public void testResponse03() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("snowpeak_request_body.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak_request_body_ref.yaml");
     }
 
-    @Test(description = "Request Body with separate modules when serivce configuration enable", enabled = false)
+    @Test(description = "Request Body with separate modules when serivce configuration enable")
     public void testResponse04() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("snowpeak_service_config.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "snowpeak_service_config.yaml");
     }
 
-    @Test(description = "Response has array type the array item type in separate module", enabled = false)
+    @Test(description = "Response has array type the array item type in separate module")
     public void testResponse05() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("arrayTypeResponse.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "arrayTypeResponse.yaml");
