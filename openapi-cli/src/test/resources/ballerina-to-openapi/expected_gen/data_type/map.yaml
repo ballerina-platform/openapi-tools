@@ -79,3 +79,9 @@ components:
           additionalProperties:
             type: object
             additionalProperties: true
+        arrayItemMap:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
