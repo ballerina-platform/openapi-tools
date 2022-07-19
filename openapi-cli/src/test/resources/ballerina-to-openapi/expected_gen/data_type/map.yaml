@@ -1,0 +1,87 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /locations:
+    get:
+      operationId: getLocations
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+components:
+  schemas:
+    Link:
+      required:
+        - href
+      type: object
+      properties:
+        rel:
+          type: string
+        href:
+          type: string
+        types:
+          type: array
+          items:
+            type: string
+        methods:
+          type: array
+          items:
+            type: string
+    Location:
+      required:
+        - _links
+        - addressCode
+        - id
+        - name
+      type: object
+      properties:
+        _links:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+        name:
+          type: object
+          additionalProperties:
+            type: string
+        id:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        addressCode:
+          type: object
+          additionalProperties:
+            type: number
+            format: float
+        item:
+          type: object
+          additionalProperties: true
+        mapArray:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        mapMap:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: true
+        arrayItemMap:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
