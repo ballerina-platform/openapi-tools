@@ -16,6 +16,7 @@ public type Location record {|
     map<json> item?;
     map<string[]> mapArray?;
     map<map<json>> mapMap?;
+    map<string>[] arrayItemMap?;
 |};
 
 @openapi:ServiceInfo {
