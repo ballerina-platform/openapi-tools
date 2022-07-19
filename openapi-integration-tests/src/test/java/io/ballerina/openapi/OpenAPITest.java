@@ -69,14 +69,17 @@ public class OpenAPITest {
     }
 
     @AfterTest
-    public void removeGeneratedFile() {
+    public void removeGeneratedFile() throws IOException {
         deleteGeneratedFiles();
     }
 
     // Delete generated service and schema files.
-    public void deleteGeneratedFiles() {
+    public void deleteGeneratedFiles() throws IOException {
+
         File schemaFile = new File(this.tmpDir.resolve("types.bal").toString());
         schemaFile.delete();
+        File clientFile = new File(this.tmpDir.resolve("client.bal").toString());
+        clientFile.delete();
     }
 
     private static String getStringFromGivenBalFile(Path expectedServiceFile) throws IOException {
@@ -86,10 +89,10 @@ public class OpenAPITest {
         return expectedServiceContent.trim().replaceAll("\\s+", "").replaceAll(System.lineSeparator(), "");
     }
 
-    public void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String balfile) throws IOException {
+    public void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String generated, String balfile) throws IOException {
         String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve(
                 "service/return/ballerina").resolve(balfile));
-        String generatedFile = getStringFromGivenBalFile(this.tmpDir.resolve("types.bal"));
+        String generatedFile = getStringFromGivenBalFile(this.tmpDir.resolve(generated));
         generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedFile.contains(expectedBallerinaContent));

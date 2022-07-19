@@ -60,7 +60,8 @@ public class FunctionBodyNodeTests {
         Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
         FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(new ArrayList<>(),
                 new ArrayList<>(), display, new BallerinaTypesGenerator(display),
-                new BallerinaAuthConfigGenerator(false, false), new BallerinaUtilGenerator());
+                new BallerinaAuthConfigGenerator(false, false), new BallerinaUtilGenerator(),
+                false);
         FunctionBodyNode bodyNode = functionBodyGenerator.getFunctionBodyNode(path, iterator.next());
         content = content.trim().replaceAll("\n", "").replaceAll("\\s+", "");
         String bodyNodeContent = bodyNode.toString().trim().replaceAll("\n", "")

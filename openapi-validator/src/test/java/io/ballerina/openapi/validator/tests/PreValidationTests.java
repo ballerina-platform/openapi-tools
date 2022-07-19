@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getCompilation;
+import static io.ballerina.openapi.validator.tests.ValidatorTest.getDiagnostics;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
 /**
@@ -40,8 +41,7 @@ public class PreValidationTests {
         Path path = RES_DIR.resolve("non_http.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
-        int i = diagnostic.diagnosticCount();
-        Assert.assertEquals(i, 1);
+        Assert.assertEquals(getDiagnostics(diagnostic).length, 0);
     }
 
     @Test(description = "Given ballerina file has compilation issue")
@@ -49,8 +49,7 @@ public class PreValidationTests {
         Path path = RES_DIR.resolve("compilation_error.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
-        int i = diagnostic.diagnosticCount();
-        Assert.assertEquals(i, 2);
+        Assert.assertEquals(getDiagnostics(diagnostic).length, 2);
     }
 
     @Test(description = "Given ballerina file has compilation issue as warning")
@@ -58,10 +57,7 @@ public class PreValidationTests {
         Path path = RES_DIR.resolve("compilation_warning.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
-        int i = diagnostic.diagnosticCount();
-        Object[] errors = diagnostic.diagnostics().stream().filter(d ->
-                DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
-        Assert.assertEquals(errors.length, 0);
+        Assert.assertEquals(getDiagnostics(diagnostic).length, 0);
     }
 
     @Test(description = "Given ballerina file has compilation issue as warning")
@@ -85,8 +81,7 @@ public class PreValidationTests {
         Path path = RES_DIR.resolve("undocumented_resources.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
-        int i = diagnostic.diagnosticCount();
-        Assert.assertEquals(i, 6);
+        Assert.assertEquals(getDiagnostics(diagnostic).length, 2);
     }
 
     @Test(description = "OpenAPI annotation with failOnErrors turn off with multiple resources")
@@ -96,6 +91,6 @@ public class PreValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = diagnostic.diagnostics().stream().filter(d ->
                         DiagnosticSeverity.WARNING == d.diagnosticInfo().severity()).toArray();
-        Assert.assertEquals(errors.length, 3);
+        Assert.assertEquals(errors.length, 5);
     }
 }

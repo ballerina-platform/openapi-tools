@@ -119,7 +119,9 @@ import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE_PATH;
 import static io.ballerina.openapi.generators.GeneratorConstants.RESPONSE;
 import static io.ballerina.openapi.generators.GeneratorConstants.SELF;
 import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
+import static io.ballerina.openapi.generators.GeneratorUtils.generateBodyStatementForComplexUrl;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.generators.GeneratorUtils.isComplexURL;
 
 /**
  * This Util class uses for generating remote function body  {@link io.ballerina.compiler.syntax.tree.FunctionBodyNode}.
@@ -132,6 +134,7 @@ public class FunctionBodyGenerator {
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
+    private final boolean resourceMode;
 
     public List<ImportDeclarationNode> getImports() {
         return imports;
@@ -144,7 +147,7 @@ public class FunctionBodyGenerator {
     public FunctionBodyGenerator(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
                                  OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
                                  BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator,
-                                 BallerinaUtilGenerator ballerinaUtilGenerator) {
+                                 BallerinaUtilGenerator ballerinaUtilGenerator, boolean resourceMode) {
 
         this.imports = imports;
         this.isHeader = false;
@@ -153,6 +156,7 @@ public class FunctionBodyGenerator {
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
         this.ballerinaAuthConfigGenerator = ballerinaAuthConfigGenerator;
+        this.resourceMode = resourceMode;
     }
 
     /**
@@ -171,6 +175,11 @@ public class FunctionBodyGenerator {
         isHeader = false;
         // Create statements
         List<StatementNode> statementsList =  new ArrayList<>();
+        // Check whether given path is complex path , if complex it will handle adding these two statement
+        if (resourceMode && isComplexURL(path)) {
+            List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
+            statementsList.addAll(bodyStatements);
+        }
         //string path - common for every remote functions
         VariableDeclarationNode pathInt = getPathStatement(path, annotationNodes);
         statementsList.add(pathInt);

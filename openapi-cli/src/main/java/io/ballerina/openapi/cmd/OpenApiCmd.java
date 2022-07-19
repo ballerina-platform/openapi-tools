@@ -39,8 +39,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.cmd.CmdConstants.REMOTE;
+import static io.ballerina.openapi.cmd.CmdConstants.SERVICE;
 import static io.ballerina.openapi.generators.GeneratorConstants.BAL_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorConstants.JSON_EXTENSION;
+import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
 import static io.ballerina.openapi.generators.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorConstants.YML_EXTENSION;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
@@ -60,6 +63,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private Path executionPath = Paths.get(System.getProperty("user.dir"));
     private Path targetOutputPath;
     private boolean exitWhenFinish;
+    private boolean clientResourceMode;
 
     @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
     private boolean helpFlag;
@@ -99,6 +103,10 @@ public class OpenApiCmd implements BLauncherCmd {
 
     @CommandLine.Option(names = {"--with-tests"}, hidden = true, description = "Generate test files")
     private boolean includeTestFiles;
+
+    @CommandLine.Option(names = {"--client-methods"}, hidden = true, description = "Generate the client methods" +
+            " with provided type . Only \"remote\"(default) and \"resource\" options are supported.")
+    private String generateClientMethods;
 
     @CommandLine.Parameters
     private List<String> argList;
@@ -153,6 +161,22 @@ public class OpenApiCmd implements BLauncherCmd {
                     operation.addAll(normalizedOperationIds);
                 }
                 Filter filter = new Filter(tag, operation);
+
+                if (generateClientMethods != null && !generateClientMethods.isBlank() &&
+                        (!generateClientMethods.equals(RESOURCE) && !generateClientMethods.equals(REMOTE))) {
+                    // Exit the code generation process
+                    outStream.println("'--client-methods' only supports `remote` or `resource` options.");
+                    exitError(this.exitWhenFinish);
+                }
+                // Add the resource flag enable
+                clientResourceMode = generateClientMethods != null && !generateClientMethods.isBlank() &&
+                                (generateClientMethods.equals(CmdConstants.RESOURCE));
+                
+                if (clientResourceMode && mode != null && mode.equals(SERVICE)) {
+                    // Exit the code generation process
+                    outStream.println("'--client-methods' option is only available in client generation mode.");
+                    exitError(this.exitWhenFinish);
+                }
                 try {
                     openApiToBallerina(fileName, filter);
                 } catch (IOException e) {
@@ -160,6 +184,12 @@ public class OpenApiCmd implements BLauncherCmd {
                     exitError(this.exitWhenFinish);
                 }
             } else if (fileName.endsWith(BAL_EXTENSION)) {
+                // Add the resource flag enable
+                if (generateClientMethods != null && !generateClientMethods.isBlank()) {
+                    // Exit the code generation process
+                    outStream.println("'--client-methods' option is only available in client generation mode.");
+                    exitError(this.exitWhenFinish);
+                }
                 ballerinaToOpenApi(fileName);
             } else {
                 outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
@@ -237,7 +267,6 @@ public class OpenApiCmd implements BLauncherCmd {
             serviceName = openApiFile.getName().split("\\.")[0];
         }
         getTargetOutputPath();
-        Path relativePath = getRelativePath(openApiFile, this.targetOutputPath.toString());
         Path resourcePath = Paths.get(openApiFile.getCanonicalPath());
         if (mode != null) {
             switch (mode) {
@@ -245,13 +274,13 @@ public class OpenApiCmd implements BLauncherCmd {
                     generateServiceFile(generator, serviceName, resourcePath, filter);
                     break;
                 case "client":
-                    generatesClientFile(generator, serviceName, resourcePath, filter);
+                    generatesClientFile(generator, resourcePath, filter, this.clientResourceMode);
                     break;
                 default:
                     break;
             }
         } else {
-            generateBothFiles(generator, serviceName, resourcePath, relativePath, filter);
+            generateBothFiles(generator, serviceName, resourcePath, filter, this.clientResourceMode);
         }
     }
 
@@ -311,13 +340,14 @@ public class OpenApiCmd implements BLauncherCmd {
     /**
      * A Util to Client generation.
      * @param generator         generator object
-     * @param clientName        file name uses to name the generated file
      * @param resourcePath      resource Path
+     * @param resourceMode      flag for client resource method generation
      */
-    private void generatesClientFile(CodeGenerator generator, String clientName, Path resourcePath, Filter filter) {
+    private void generatesClientFile(CodeGenerator generator,  Path resourcePath, Filter filter,
+                                     boolean resourceMode) {
         try {
-            generator.generateClient(resourcePath.toString(), clientName, targetOutputPath.toString(), filter,
-                    nullable);
+            generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, nullable,
+                    resourceMode);
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             if (e.getLocalizedMessage() != null) {
                 outStream.println(e.getLocalizedMessage());
@@ -354,12 +384,13 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName          service name  use for naming the files
      * @param resourcePath      resource path
      */
-    private void generateBothFiles(CodeGenerator generator, String fileName, Path resourcePath, Path relativePath,
-                                   Filter filter) {
+    private void generateBothFiles(CodeGenerator generator, String fileName, Path resourcePath, Filter filter,
+                                   boolean generateClientResourceFunctions) {
         try {
             assert resourcePath != null;
             generator.generateBothFiles(GeneratorConstants.GenType.GEN_BOTH,
-                    resourcePath.toString(), fileName, targetOutputPath.toString(), filter, nullable);
+                    resourcePath.toString(), fileName, targetOutputPath.toString(), filter, nullable,
+                    generateClientResourceFunctions);
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             outStream.println("Error occurred when generating service for openAPI contract at " + argList.get(0) + "." +
                     " " + e.getMessage() + ".");

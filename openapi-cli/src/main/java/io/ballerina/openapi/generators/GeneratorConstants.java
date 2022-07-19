@@ -167,6 +167,7 @@ public class GeneratorConstants {
     public static final String CLIENT_CONFIG = "ClientConfig";
     public static final String OAUTH2 = "oauth2";
     public static final String SSL_FIELD_NAME = "secureSocket";
+    public static final String PROXY_CONFIG = "proxy";
     public static final String DEFAULT_API_KEY_DESC = "API keys for authorization";
 
     public static final String RESPONSE = "response";
@@ -311,6 +312,11 @@ public class GeneratorConstants {
     public static final String MAP_STRING = "map<string>";
     public static final String TEXT_WILDCARD_REGEX = "text/.*";
     public static final String BODY = "body";
+    public static final String SPECIAL_CHARACTERS_REGEX = "[^a-zA-Z0-9]";
+    public static final String OPEN_CURLY_BRACE = "{";
+    public static final String CLOSE_CURLY_BRACE = "}";
+    public static final String SLASH = "/";
+
     public static final String CONSTRAINT = "constraint";
     public static final String CONSTRAINT_STRING = "constraint:String";
     public static final String CONSTRAINT_NUMBER = "constraint:Number";

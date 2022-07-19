@@ -1,0 +1,132 @@
+openapi: 3.0.1
+info:
+  title: 'payloadV'
+  version: 1.0.0
+servers:
+  - url: localhost:9090/payloadV
+paths:
+  /:
+    get:
+      operationId: operationId01
+      description: "op1"
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+    post:
+      operationId: operationId02
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /v1/{id}:
+    get:
+      operationId: operationId03
+      description: "op2"
+      parameters:
+        - name: id
+          description: "id value"
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /v1/{version}/v2/{name}:
+    get:
+      operationId: operationId04
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /v1/{version}/v2/{limit}:
+    get:
+      operationId: operationId05
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /v1/{age}/v2/{name}:
+    get:
+      operationId: operationId06
+      parameters:
+        - name: age
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+  /admin/api/2021-10/customers/{customer_id}.json:
+    get:
+      summary: "Retrieves a single customer."
+      description: "https://shopify.dev/docs/admin-api/rest/reference/customers/customer#show-2021-10"
+      parameters:
+        - in: "path"
+          name: "customer_id"
+          description: "Customer ID"
+          schema:
+            type: string
+          required: true
+        - in: "query"
+          name: "fields"
+          description: "Show only certain fields, specified by a comma-separated list of field names."
+          schema:
+            type: string
+          required: false
+      tags:
+        - "customers"
+      responses:
+        200:
+          description: "Requested customer"
+      operationId: "get_customer"
+components: {}

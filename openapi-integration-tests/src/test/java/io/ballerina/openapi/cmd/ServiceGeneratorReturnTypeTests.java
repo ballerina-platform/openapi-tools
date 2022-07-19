@@ -48,7 +48,7 @@ public class ServiceGeneratorReturnTypeTests extends OpenAPITest {
         buildArgs.add("-o");
         buildArgs.add(tmpDir.toString());
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
-        compareGeneratedSyntaxTreewithExpectedSyntaxTree(expectedFilePath);
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", expectedFilePath);
     }
 
     @DataProvider(name = "returnSampleProvider")

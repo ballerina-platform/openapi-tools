@@ -68,6 +68,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -108,6 +109,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.REMOTE_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.RESOURCE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
@@ -130,6 +133,7 @@ public class BallerinaClientGenerator {
     private final List<String> remoteFunctionNameList;
     private String serverURL;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
+    private final boolean resourceMode;
 
     /**
      * Returns a list of type definition nodes.
@@ -166,7 +170,7 @@ public class BallerinaClientGenerator {
         return serverURL;
     }
 
-    public BallerinaClientGenerator(OpenAPI openAPI, Filter filters, boolean nullable) {
+    public BallerinaClientGenerator(OpenAPI openAPI, Filter filters, boolean nullable, boolean resourceMode) {
 
         this.filters = filters;
         this.imports = new ArrayList<>();
@@ -177,6 +181,7 @@ public class BallerinaClientGenerator {
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
+        this.resourceMode = resourceMode;
     }
 
     /**
@@ -471,14 +476,14 @@ public class BallerinaClientGenerator {
                                     ((operationId != null) && filterOperations.contains(operationId.trim()))) {
                                 // Generate remote function
                                 FunctionDefinitionNode functionDefinitionNode =
-                                        getRemoteFunctionDefinitionNode(
+                                        getClientMethodFunctionDefinitionNode(
                                                 functionLevelAnnotationNodes, path.getKey(), operation);
                                 functionDefinitionNodeList.add(functionDefinitionNode);
                             }
                         }
                     } else {
                         // Generate remote function
-                        FunctionDefinitionNode functionDefinitionNode = getRemoteFunctionDefinitionNode(
+                        FunctionDefinitionNode functionDefinitionNode = getClientMethodFunctionDefinitionNode(
                                 functionLevelAnnotationNodes, path.getKey(), operation);
                         functionDefinitionNodeList.add(functionDefinitionNode);
                     }
@@ -496,10 +501,18 @@ public class BallerinaClientGenerator {
      *          string response = check self.clientEp-> get(path);
      *          return response;
      *    }
+     *    or
+     *     resource isolated function get v1/[string 'version]/v2/[sting name]() returns string|error {
+     *         string  path = string `/v1/${'version}/v2/${name}`;
+     *         string response = check self.clientEp-> get(path);
+     *         return response;
+     *     }
      * </pre>
      */
-    private  FunctionDefinitionNode getRemoteFunctionDefinitionNode(List<AnnotationNode> annotationNodes, String path,
-                                                                    Map.Entry<PathItem.HttpMethod, Operation> operation)
+    private  FunctionDefinitionNode getClientMethodFunctionDefinitionNode(List<AnnotationNode> annotationNodes,
+                                                                          String path,
+                                                                          Map.Entry<PathItem.HttpMethod, Operation>
+                                                                                  operation)
             throws BallerinaOpenApiException {
         // Create api doc for function
         List<Node> remoteFunctionDocs = new ArrayList<>();
@@ -516,14 +529,21 @@ public class BallerinaClientGenerator {
         }
 
         //Create qualifier list
-        NodeList<Token> qualifierList = createNodeList(createIdentifierToken("remote isolated"));
+        NodeList<Token> qualifierList = createNodeList(createToken(
+                resourceMode ?
+                        RESOURCE_KEYWORD :
+                        REMOTE_KEYWORD),
+                createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
-        IdentifierToken functionName = createIdentifierToken(operation.getValue().getOperationId());
-        NodeList<Node> relativeResourcePath = createEmptyNodeList();
+        IdentifierToken functionName = createIdentifierToken(
+                resourceMode ?
+                        operation.getKey().name().toLowerCase(Locale.ENGLISH) :
+                        operation.getValue().getOperationId());
+
         remoteFunctionNameList.add(operation.getValue().getOperationId());
 
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                ballerinaSchemaGenerator, typeDefinitionNodeList);
+                ballerinaSchemaGenerator, typeDefinitionNodeList, resourceMode);
         FunctionSignatureNode functionSignatureNode =
                 functionSignatureGenerator.getFunctionSignatureNode(operation.getValue(),
                         remoteFunctionDocs);
@@ -539,9 +559,14 @@ public class BallerinaClientGenerator {
 
         // Create Function Body
         FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(imports, typeDefinitionNodeList,
-                openAPI, ballerinaSchemaGenerator, ballerinaAuthConfigGenerator, ballerinaUtilGenerator);
+                openAPI, ballerinaSchemaGenerator, ballerinaAuthConfigGenerator, ballerinaUtilGenerator, resourceMode);
         FunctionBodyNode functionBodyNode = functionBodyGenerator.getFunctionBodyNode(path, operation);
         imports = functionBodyGenerator.getImports();
+
+        //Generate relative path
+        NodeList<Node> relativeResourcePath = resourceMode ?
+        createNodeList(GeneratorUtils.getRelativeResourcePath(path, operation.getValue())) :
+                createEmptyNodeList();
         return createFunctionDefinitionNode(null,
                 metadataNode, qualifierList, functionKeyWord, functionName, relativeResourcePath,
                 functionSignatureNode, functionBodyNode);

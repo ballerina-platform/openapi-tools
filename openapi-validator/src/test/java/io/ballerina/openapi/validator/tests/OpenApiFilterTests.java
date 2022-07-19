@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getCompilation;
+import static io.ballerina.openapi.validator.tests.ValidatorTest.getDiagnostics;
 import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 
 /**
@@ -36,7 +37,6 @@ public class OpenApiFilterTests {
         Path path = RES_DIR.resolve("positive/without_filters.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
-        int i = diagnostic.diagnosticCount();
-        Assert.assertEquals(2, i);
+        Assert.assertEquals(getDiagnostics(diagnostic).length, 0);
     }
 }

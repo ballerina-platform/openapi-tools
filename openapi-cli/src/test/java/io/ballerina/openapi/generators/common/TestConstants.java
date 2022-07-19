@@ -37,6 +37,8 @@ public class TestConstants {
             "    http:ResponseLimitConfigs responseLimits = {};\n" +
             "    # SSL/TLS-related options\n" +
             "    http:ClientSecureSocket? secureSocket = ();\n" +
+            "    # Proxy server related options\n" +
+            "    http:ProxyConfig? proxy = ();\n" +
             "|};";
             
     public static final String HTTP_BASIC_AUTH_CONFIG_REC = "" +

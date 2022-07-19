@@ -30,29 +30,9 @@ tags:
   - name: list
     description: List Tag
 security:
-  - petstore_auth:
-      - write:pets
-      - read:pets
-  - user_auth:
-      - read:user
-
+  - app_id_1: []
+  - app_id_2: []
 paths:
-  /:
-    get:
-      summary: Info for a specific user
-      operationId: showUserId
-      responses:
-        '200':
-          description: An paged array of pets
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pets"
   /pets:
     get:
       summary: List all pets
@@ -81,76 +61,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Pets"
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
     post:
       summary: Create a pet
+      operationId: createPet
       tags:
         - pets
       responses:
         '201':
           description: Null response
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /pets/{petId}:
-    get:
-      summary: Info for a specific pet
-      operationId: showPetById
+    put:
+      summary: Update a pet
+      operationId: updatePet
       tags:
         - pets
-      parameters:
-        - name: petId
-          in: path
-          required: true
-          description: The id of the pet to retrieve
-          schema:
-            type: string
+      responses:
+        '201':
+          description: Null response
+    delete:
+      summary: Delete a pet
+      operationId: deletePet
       responses:
         '200':
-          description: Expected response to a valid request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pets"
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /admin/api/2021-10/customers/{customer_id}.json:
-    get:
-      summary: "Retrieves a single customer."
-      description: "https://shopify.dev/docs/admin-api/rest/reference/customers/customer#show-2021-10"
-      parameters:
-        - in: "path"
-          name: "customer_id"
-          description: "Customer ID"
-          schema:
-            type: string
-          required: true
-        - in: "query"
-          name: "fields"
-          description: "Show only certain fields, specified by a comma-separated list of field names."
-          schema:
-            type: string
-          required: false
-      tags:
-        - "customers"
-      responses:
-        200:
-          description: "Requested customer"
-      operationId: "get_customer"
-
+          description: Ok response
 components:
+  securitySchemes:
+    app_id_1:
+      type: apiKey
+      description: API key to authorize requests.
+      name: appid1
+      in: query
+    app_id_2:
+      type: apiKey
+      description: API key to authorize requests.
+      name: appid2
+      in: query
   schemas:
     Pet:
       required:

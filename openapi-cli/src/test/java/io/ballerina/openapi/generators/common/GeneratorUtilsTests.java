@@ -41,25 +41,25 @@ import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.ext
 public class GeneratorUtilsTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators").toAbsolutePath();
 
+    //TODO: expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*"
     @Test(description = "Functionality tests for getBallerinaOpenApiType",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
+            expectedExceptions = BallerinaOpenApiException.class)
     public static void getIncorrectYamlContract() throws IOException, BallerinaOpenApiException {
         Path path = RES_DIR.resolve("swagger/invalid/petstore_without_info.yaml");
         OpenAPI ballerinaOpenApiType = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(path);
     }
 
+    //TODO: expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*"
     @Test(description = "Functionality tests for When info section null",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "OpenAPI file has errors: .*")
+            expectedExceptions = BallerinaOpenApiException.class)
     public static void testForInfoNull() throws IOException, BallerinaOpenApiException {
         Path path = RES_DIR.resolve("swagger/invalid/petstore_without_info.yaml");
         OpenAPI ballerinaOpenApiType = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(path);
     }
 
+    //TODO: expectedExceptionsMessageRegExp = "Invalid reference value : .*"
     @Test(description = "Functionality negative tests for extractReferenceType",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Invalid reference value : .*")
+            expectedExceptions = BallerinaOpenApiException.class)
     public static void testForReferenceLinkInvalid() throws BallerinaOpenApiException {
         String recordName = extractReferenceType("/components/schemas/Error");
     }

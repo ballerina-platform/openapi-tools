@@ -170,11 +170,11 @@ public class OpenAPIParameterMapper {
                             pathParam.typeDescriptor().toString().trim()));
                 }
 
-                pathParameterOAS.setName(ConverterCommonUtils.unescapeIdentifier(pathParam.paramName().text()));
+                pathParameterOAS.setName(ConverterCommonUtils.unescapeIdentifier(pathParam.paramName().get().text()));
 
                 // Check the parameter has doc
-                if (!apidocs.isEmpty() && apidocs.containsKey(pathParam.paramName().text().trim())) {
-                    pathParameterOAS.setDescription(apidocs.get(pathParam.paramName().text().trim()));
+                if (!apidocs.isEmpty() && apidocs.containsKey(pathParam.paramName().get().text().trim())) {
+                    pathParameterOAS.setDescription(apidocs.get(pathParam.paramName().get().text().trim()));
                 }
                 // Set param description
                 pathParameterOAS.setRequired(true);
