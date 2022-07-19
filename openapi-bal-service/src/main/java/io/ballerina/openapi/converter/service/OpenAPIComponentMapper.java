@@ -144,11 +144,10 @@ public class OpenAPIComponentMapper {
                 MapTypeSymbol mapTypeSymbol = (MapTypeSymbol) type;
                 TypeDescKind typeDescKind = mapTypeSymbol.typeParam().typeKind();
                 Schema openApiSchema = ConverterCommonUtils.getOpenApiSchema(typeDescKind.getName());
-                schema.put(componentName, new ObjectSchema().additionalProperties(
-                        openApiSchema.getType() == null ?
-                                true :
-                                openApiSchema)
-                        .description(typeDoc));
+                schema.put(componentName,
+                        new ObjectSchema().additionalProperties(
+                                openApiSchema.getType() == null ? true : openApiSchema)
+                                .description(typeDoc));
                 Map<String, Schema> schemas = components.getSchemas();
                 if (schemas != null) {
                     schemas.putAll(schema);
@@ -259,8 +258,8 @@ public class OpenAPIComponentMapper {
      * This function is to map ballerina record type symbol to OAS objectSchema.
      */
     private ObjectSchema generateObjectSchemaFromRecordFields(Map<String, Schema> schema,
-                                                              String componentName, Map<String,
-                                                              RecordFieldSymbol> rfields,
+                                                              String componentName,
+                                                              Map<String, RecordFieldSymbol> rfields,
                                                               Map<String, String> apiDocs) {
         ObjectSchema componentSchema = new ObjectSchema();
         List<String> required = new ArrayList<>();
