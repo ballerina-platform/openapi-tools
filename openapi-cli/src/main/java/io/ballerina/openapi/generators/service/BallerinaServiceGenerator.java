@@ -76,6 +76,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARA
 import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
 import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
 import static io.ballerina.openapi.generators.GeneratorUtils.generateBodyStatementForComplexUrl;
 import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
 import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
@@ -234,6 +235,7 @@ public class BallerinaServiceGenerator {
         // Handle request Body (Payload)
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
+            requestBody = resolveRequestBodyReference(requestBody);
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGen = new RequestBodyGenerator(this.openAPI.getComponents(),
                         requestBody);
@@ -277,5 +279,17 @@ public class BallerinaServiceGenerator {
         return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
                 functionBodyBlockNode);
+    }
+
+    /**
+     * Resolve requestBody reference.
+     */
+    private RequestBody resolveRequestBodyReference(RequestBody requestBody) throws BallerinaOpenApiException {
+        if (requestBody.get$ref() != null) {
+            String requestBodyName = extractReferenceType(requestBody.get$ref());
+            requestBody = resolveRequestBodyReference(openAPI.getComponents()
+                    .getRequestBodies().get(requestBodyName.trim()));
+        }
+        return requestBody;
     }
 }
