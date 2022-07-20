@@ -126,7 +126,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "RequestBody has reference to component requestBody sections")
-    public void referenceRequestBody() throws IOException, BallerinaOpenApiException {
+    public void referenceRequestBody() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/reference_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);

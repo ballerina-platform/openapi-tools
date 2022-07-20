@@ -145,10 +145,7 @@ public class ParametersGenerator {
         // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[] ;
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
-            if (requestBody.get$ref() != null) {
-                String requestBodyName = extractReferenceType(requestBody.get$ref());
-                requestBody = this.components.getRequestBodies().get(requestBodyName.trim());
-            }
+            requestBody = resolveRequestBodyReference(requestBody);
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGen = new RequestBodyGenerator();
                 requiredParams.add(requestBodyGen.createNodeForRequestBody(this.components, requestBody));
@@ -162,6 +159,17 @@ public class ParametersGenerator {
             requiredParams.remove(requiredParams.size() - 1);
         }
         return requiredParams;
+    }
+
+    /**
+     * Resolve requestBody reference.
+     */
+    private RequestBody resolveRequestBodyReference(RequestBody requestBody) throws BallerinaOpenApiException {
+        if (requestBody.get$ref() != null) {
+            String requestBodyName = extractReferenceType(requestBody.get$ref());
+            requestBody = resolveRequestBodyReference(this.components.getRequestBodies().get(requestBodyName.trim()));
+        }
+        return requestBody;
     }
 
     /**
