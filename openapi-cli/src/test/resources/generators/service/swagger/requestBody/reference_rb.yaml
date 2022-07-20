@@ -109,6 +109,8 @@ components:
           description: Preferably an url with more details about the error.
   requestBodies:
     Order:
+      $ref: '#/components/requestBodies/Order1'
+    Order1:
       description: Order object that needs to be added
       content:
         application/json:

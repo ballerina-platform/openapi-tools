@@ -235,10 +235,7 @@ public class BallerinaServiceGenerator {
         // Handle request Body (Payload)
         if (operation.getValue().getRequestBody() != null) {
             RequestBody requestBody = operation.getValue().getRequestBody();
-            if (requestBody.get$ref() != null) {
-                String requestBodyName = extractReferenceType(requestBody.get$ref());
-                requestBody = openAPI.getComponents().getRequestBodies().get(requestBodyName.trim());
-            }
+            requestBody = resolveRequestBodyReference(requestBody);
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGen = new RequestBodyGenerator(this.openAPI.getComponents(),
                         requestBody);
@@ -282,5 +279,17 @@ public class BallerinaServiceGenerator {
         return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,
                 functionBodyBlockNode);
+    }
+
+    /**
+     * Resolve requestBody reference.
+     */
+    private RequestBody resolveRequestBodyReference(RequestBody requestBody) throws BallerinaOpenApiException {
+        if (requestBody.get$ref() != null) {
+            String requestBodyName = extractReferenceType(requestBody.get$ref());
+            requestBody = resolveRequestBodyReference(openAPI.getComponents()
+                    .getRequestBodies().get(requestBodyName.trim()));
+        }
+        return requestBody;
     }
 }
