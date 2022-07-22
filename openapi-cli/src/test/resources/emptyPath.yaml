@@ -3,7 +3,7 @@ info:
   title: serviceName
   version: 1.0.0
 servers:
-- url: /serviceName
+  - url: http://petstore.openapi.io
 paths:
   /user: {}
 components: {}

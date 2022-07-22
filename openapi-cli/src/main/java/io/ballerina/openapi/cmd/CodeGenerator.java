@@ -83,6 +83,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_CLIENT_
 import static io.ballerina.openapi.generators.GeneratorConstants.DEFAULT_MOCK_PKG;
 import static io.ballerina.openapi.generators.GeneratorConstants.DOUBLE_LINE_SEPARATOR;
 import static io.ballerina.openapi.generators.GeneratorConstants.GET;
+import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_BOTH;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.generators.GeneratorConstants.GenType.GEN_SERVICE;
 import static io.ballerina.openapi.generators.GeneratorConstants.HEAD;
@@ -116,8 +117,8 @@ public class CodeGenerator {
      * <p>Method can be user for generating Ballerina mock services and clients</p>
      */
 
-    public void generateBothFiles(GeneratorConstants.GenType type, String definitionPath, String serviceName,
-                                  String outPath, Filter filter, boolean nullable, boolean isResource)
+    public void generateClientAndService(String definitionPath, String serviceName,
+                                         String outPath, Filter filter, boolean nullable, boolean isResource)
             throws IOException, BallerinaOpenApiException, FormatterException {
         Path srcPath = Paths.get(outPath);
         Path implPath = CodegenUtils.getImplPath(srcPackage, srcPath);
@@ -191,7 +192,7 @@ public class CodeGenerator {
                 .filter(distinctByKey(GenSrcFile::getFileName))
                 .collect(Collectors.toList());
 
-        writeGeneratedSources(newGenFiles, srcPath, implPath, type);
+        writeGeneratedSources(newGenFiles, srcPath, implPath, GEN_BOTH);
     }
 
     public static <T> Predicate<T> distinctByKey(
