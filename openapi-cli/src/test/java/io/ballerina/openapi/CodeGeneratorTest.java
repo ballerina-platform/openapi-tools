@@ -19,7 +19,6 @@ import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.cmd.model.GenSrcFile;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorConstants;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.common.TestUtils;
 import org.apache.commons.io.FileUtils;
@@ -463,12 +462,10 @@ public class CodeGeneratorTest {
         CodeGenerator generator = new CodeGenerator();
         try {
             generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
-            if (Files.exists(resourcePath.resolve("client.bal")) &&
-                    Files.notExists(resourcePath.resolve("types.bal"))) {
-                Assert.assertTrue(true);
-            } else {
-                Assert.fail("Empty types.bal file has been generated");
-            }
+            boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("client.bal")) &&
+                    Files.notExists(resourcePath.resolve("types.bal"));
+            Assert.assertTrue(hasTypeFileGenerated, "Empty types.bal file has been generated");
+
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the client. " + e.getMessage());
         } finally {
@@ -483,12 +480,9 @@ public class CodeGeneratorTest {
         CodeGenerator generator = new CodeGenerator();
         try {
             generator.generateService(definitionPath, serviceName, resourcePath.toString(),  filter, false);
-            if (Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
-                    Files.notExists(resourcePath.resolve("types.bal"))) {
-                Assert.assertTrue(true);
-            } else {
-                Assert.fail("Empty types.bal file has been generated");
-            }
+            boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
+                    Files.notExists(resourcePath.resolve("types.bal"));
+            Assert.assertTrue(hasTypeFileGenerated, "Empty types.bal file has been generated");
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
@@ -504,12 +498,9 @@ public class CodeGeneratorTest {
         CodeGenerator generator = new CodeGenerator();
         try {
             generator.generateService(definitionPath, serviceName, resourcePath.toString(),  filter, false);
-            if (Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
-                    Files.exists(resourcePath.resolve("types.bal"))) {
-                Assert.assertTrue(true);
-            } else {
-                Assert.fail("types.bal file has not been generated");
-            }
+            boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
+                    Files.exists(resourcePath.resolve("types.bal"));
+            Assert.assertTrue(hasTypeFileGenerated, "types.bal file has not been generated");
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
@@ -523,16 +514,14 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("no_schema.yaml").toString();
         CodeGenerator generator = new CodeGenerator();
         try {
-            generator.generateBothFiles(
-                    GeneratorConstants.GenType.GEN_BOTH, definitionPath, serviceName, resourcePath.toString(),  filter
+            generator.generateClientAndService(definitionPath, serviceName, resourcePath.toString(),  filter
                     , false, false);
-            if (Files.exists(resourcePath.resolve("client.bal")) &&
+            boolean fileAvailabilityCheck = Files.exists(resourcePath.resolve("client.bal")) &&
                     Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
-                    Files.notExists(resourcePath.resolve("types.bal"))) {
-                Assert.assertTrue(true);
-            } else {
-                Assert.fail("Empty types.bal file has been generated");
-            }
+                    Files.notExists(resourcePath.resolve("types.bal"));
+
+            Assert.assertTrue(fileAvailabilityCheck, "Empty types.bal file has been generated");
+
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the both files. " + e.getMessage());
         } finally {
