@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
@@ -72,6 +73,7 @@ public class OpenAPIRequestBodyMapper {
     private final SemanticModel semanticModel;
     private final String customMediaType;
     private final List<OpenAPIConverterDiagnostic> diagnostics;
+    private NonTerminalNode rootNode;
 
     /**
      * This constructor uses to create OpenAPIRequestBodyMapper instance when customMedia type enable.
@@ -115,7 +117,7 @@ public class OpenAPIRequestBodyMapper {
      */
     public void handlePayloadAnnotation(RequiredParameterNode payloadNode, Map<String, Schema> schema,
                                         AnnotationNode annotation, Map<String, String> apiDocs) {
-
+        rootNode = payloadNode;
         if ((annotation.annotReference().toString()).trim().equals(Constants.HTTP_PAYLOAD)) {
             // Creating request body - required.
             RequestBody bodyParameter = new RequestBody();
@@ -228,7 +230,7 @@ public class OpenAPIRequestBodyMapper {
             //handle record for components
             SimpleNameReferenceNode referenceNode = (SimpleNameReferenceNode) typeDescriptorNode;
             TypeSymbol typeSymbol = getReferenceTypeSymbol(semanticModel.symbol(referenceNode));
-            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, referenceNode);
             componentMapper.createComponentSchema(schema, typeSymbol);
             diagnostics.addAll(componentMapper.getDiagnostics());
             Schema itemSchema = new Schema();
@@ -283,7 +285,7 @@ public class OpenAPIRequestBodyMapper {
     private void handleReferencePayload(TypeSymbol typeSymbol, String recordName,
                                         Map<String, Schema> schema, String mediaType, RequestBody bodyParameter) {
         //handle record for components
-        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, rootNode);
         componentMapper.createComponentSchema(schema, typeSymbol);
         diagnostics.addAll(componentMapper.getDiagnostics());
         io.swagger.v3.oas.models.media.MediaType media = new io.swagger.v3.oas.models.media.MediaType();

@@ -1,0 +1,59 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pet:
+    post:
+      operationId: postPet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
+      responses:
+        "500":
+          description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    Address:
+      type: string
+    Person:
+      required:
+        - id
+      type: object
+      properties:
+        name:
+          maxLength: 14
+          type: string
+        hobby:
+          maxItems: 5
+          minItems: 2
+          type: array
+          items:
+            type: string
+        id:
+          maximum: 5
+          type: integer
+          format: int64
+        address:
+          $ref: '#/components/schemas/Address'
+        salary:
+          maximum: 100000
+          type: number
+          format: float
+        net:
+          minimum: 500000
+          type: number
+          format: double

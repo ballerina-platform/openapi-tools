@@ -112,7 +112,7 @@ public class OpenAPIQueryParameterMapper {
             QueryParameter queryParameter = new QueryParameter();
             queryParameter.setName(ConverterCommonUtils.unescapeIdentifier(queryParamName));
             SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) queryParam.typeName();
-            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+            OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, queryNode);
             TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
             componentMapper.createComponentSchema(components.getSchemas(), typeSymbol);
             Schema schema = new Schema();

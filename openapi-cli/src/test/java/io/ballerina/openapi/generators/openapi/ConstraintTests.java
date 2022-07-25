@@ -35,6 +35,6 @@ public class ConstraintTests {
     public void testMapFiled() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint/record_field.bal");
         //Compare generated yaml file with expected yaml content
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/map.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/record_field.yaml");
     }
 }

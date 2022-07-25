@@ -37,6 +37,19 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NonTerminalNode;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.RecordFieldNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
@@ -50,6 +63,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,6 +72,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Spliterator;
 
 import static io.ballerina.openapi.converter.Constants.DOUBLE;
 import static io.ballerina.openapi.converter.Constants.FLOAT;
@@ -70,10 +85,12 @@ import static io.ballerina.openapi.converter.Constants.FLOAT;
 public class OpenAPIComponentMapper {
     private final Components components;
     private final List<OpenAPIConverterDiagnostic> diagnostics;
+    private final NonTerminalNode rootNode;
 
 
-    public OpenAPIComponentMapper(Components components) {
+    public OpenAPIComponentMapper(Components components, NonTerminalNode rootNode) {
          this.components = components;
+         this.rootNode = rootNode;
          this.diagnostics = new ArrayList<>();
     }
 
@@ -266,24 +283,20 @@ public class OpenAPIComponentMapper {
         List<String> required = new ArrayList<>();
         componentSchema.setDescription(apiDocs.get(componentName));
         Map<String, Schema> schemaProperties = new LinkedHashMap<>();
-        for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
-            List<AnnotationSymbol> annotations = field.getValue().annotations();
-            ((RecordTypeSymbol)((TypeReferenceTypeSymbol)field.getValue().annotations().get(0).typeDescriptor().get()).typeDescriptor()).fieldDescriptors();
-            annotations.stream().filter(annotSymbol->annotSymbol.getModule().get().getName().get().equals("constraint"))
-                    .forEach(value-> {
-                        ConstraintAnnotation.ConstraintAnnotationBuilder constraintAnnotBuilder =
-                                new ConstraintAnnotation.ConstraintAnnotationBuilder();
-                        Map<String, RecordFieldSymbol> recordFields =
-                                ((RecordTypeSymbol) ((TypeReferenceTypeSymbol) value.typeDescriptor()
-                                        .get()).typeDescriptor()).fieldDescriptors();
-                        recordFields.forEach((k,v) -> {
-                            RecordFieldSymbol fieldSymbol = v;
-                            switch (k) {
-                                case "length":
-//                                    fieldSymbol.
-                            }
-                        });
-                    });
+        for (Map.Entry<String, RecordFieldSymbol> field : rfields.entrySet()) {
+            ModulePartNode modulePartNode = rootNode.syntaxTree().rootNode();
+
+            RecordFieldNode fieldNode = (RecordFieldNode) modulePartNode.
+                    findNode(field.getValue().getLocation().get().textRange());
+            Optional<MetadataNode> metadata = fieldNode.metadata();
+            ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder =
+                    new ConstraintAnnotation.ConstraintAnnotationBuilder();
+
+            if (metadata.isPresent()) {
+                extractedConstraintAnnotation(metadata, constraintBuilder);
+            }
+
+            ConstraintAnnotation constraintAnnot = constraintBuilder.build();
 
             String fieldName = ConverterCommonUtils.unescapeIdentifier(field.getKey().trim());
             if (!field.getValue().isOptional()) {
@@ -317,6 +330,8 @@ public class OpenAPIComponentMapper {
             if (apiDocs.containsKey(fieldName)) {
                 property.setDescription(apiDocs.get(fieldName));
             }
+            // Assign value to property - string, number, array
+            setConstraintValueToSchema(constraintAnnot, property);
             schemaProperties.put(fieldName, property);
         }
         componentSchema.setProperties(schemaProperties);
@@ -331,6 +346,88 @@ public class OpenAPIComponentMapper {
             this.components.setSchemas(schema);
         }
         return componentSchema;
+    }
+
+    private void setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema property) {
+
+        if (property instanceof ArraySchema) {
+            property.setMaxItems(constraintAnnot.getMaxLength().isPresent()?
+                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+            property.setMinItems(constraintAnnot.getMinLength().isPresent()?
+                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        } else {
+            property.setMaxLength(constraintAnnot.getMaxLength().isPresent()?
+                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+            property.setMinLength(constraintAnnot.getMinLength().isPresent()?
+                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        }
+        property.setMinimum(constraintAnnot.getMinValue().isPresent()?
+                BigDecimal.valueOf(Long.parseLong(constraintAnnot.getMinValue().get())): null);
+
+        property.setMaximum(constraintAnnot.getMaxValue().isPresent()?
+                BigDecimal.valueOf(Long.parseLong(constraintAnnot.getMaxValue().get())): null);
+    }
+
+    private void extractedConstraintAnnotation(Optional<MetadataNode> metadata,
+                           ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+
+        NodeList<AnnotationNode> annotations = metadata.get().annotations();
+        annotations.stream().filter(annot ->
+                        (annot.annotReference() instanceof QualifiedNameReferenceNode &&
+                                ((QualifiedNameReferenceNode) annot.annotReference()).modulePrefix().text()
+                                        .equals("constraint")))
+                .forEach(value -> {
+
+                    Optional<MappingConstructorExpressionNode> fieldValues = value.annotValue();
+
+                    if (fieldValues.isPresent()) {
+                        Spliterator<MappingFieldNode> spliterator = fieldValues.get().fields().spliterator();
+                        spliterator.forEachRemaining(fieldV -> {
+                            if (fieldV.kind() == SyntaxKind.SPECIFIC_FIELD) {
+                                SpecificFieldNode specificFieldNode = (SpecificFieldNode) fieldV;
+                                // generate string
+                                String name = specificFieldNode.fieldName().toString().trim();
+                                if (specificFieldNode.valueExpr().isPresent()) {
+                                    ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
+                                    SyntaxKind kind = expressionNode.kind();
+                                    if (kind == SyntaxKind.NUMERIC_LITERAL) {
+                                        String constraintValue = expressionNode.toString();
+                                        fillConstraintValue(constraintBuilder, name, constraintValue);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+    }
+
+    private void fillConstraintValue(ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder,
+                                     String name, String constraintValue) {
+        switch (name) {
+            case "minValue":
+                constraintBuilder.withMinValue(constraintValue);
+                break;
+            case "maxValue":
+                constraintBuilder.withMaxValue(constraintValue);
+                break;
+            case "minValueExclusive":
+                constraintBuilder.withMinValueExclusive(constraintValue);
+                break;
+            case "maxValueExclusive":
+                constraintBuilder.withMaxValueExclusive(constraintValue);
+                break;
+            case "length":
+                constraintBuilder.withLength(constraintValue);
+                break;
+            case "maxLength":
+                constraintBuilder.withMaxLength(constraintValue);
+                break;
+            case "minLength":
+                constraintBuilder.withMinLength(constraintValue);
+                break;
+            default:
+                break;
+        }
     }
 
     private Schema handleMapType(Map<String, Schema> schema, String componentName, Schema property,

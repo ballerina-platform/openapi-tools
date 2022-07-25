@@ -159,7 +159,7 @@ public class OpenAPIParameterMapper {
                 ResourcePathParameterNode pathParam = (ResourcePathParameterNode) param;
                 if (pathParam.typeDescriptor().kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
                     SimpleNameReferenceNode queryNode = (SimpleNameReferenceNode) pathParam.typeDescriptor();
-                    OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+                    OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, pathParam);
                     TypeSymbol typeSymbol = (TypeSymbol) semanticModel.symbol(queryNode).orElseThrow();
                     componentMapper.createComponentSchema(components.getSchemas(), typeSymbol);
                     Schema schema = new Schema();

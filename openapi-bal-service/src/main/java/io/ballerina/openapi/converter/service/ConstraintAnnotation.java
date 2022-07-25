@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.converter.service;
 
+import java.util.Optional;
 
 /**
  *
@@ -41,32 +42,32 @@ public class ConstraintAnnotation {
         this.maxValueExclusive = builder.maxValueExclusive;
     }
 
-    public String getMinValue() {
-        return minValue;
+    public Optional<String> getMinValue() {
+        return Optional.ofNullable(minValue);
     }
 
-    public String getMaxValue() {
-        return maxValue;
+    public Optional<String> getMaxValue() {
+        return Optional.ofNullable(maxValue);
     }
 
-    public String getLength() {
-        return length;
+    public Optional<String> getLength() {
+        return Optional.ofNullable(length);
     }
 
-    public String getMinLength() {
-        return minLength;
+    public Optional<String> getMinLength() {
+        return Optional.ofNullable(minLength);
     }
 
-    public String getMaxLength() {
-        return maxLength;
+    public Optional<String> getMaxLength() {
+        return Optional.ofNullable(maxLength);
     }
 
-    public String getMinValueExclusive() {
-        return minValueExclusive;
+    public Optional<String> getMinValueExclusive() {
+        return Optional.ofNullable(minValueExclusive);
     }
 
-    public String getMaxValueExclusive() {
-        return maxValueExclusive;
+    public Optional<String> getMaxValueExclusive() {
+        return Optional.ofNullable(maxValueExclusive);
     }
 
     /**
@@ -91,7 +92,7 @@ public class ConstraintAnnotation {
             return this;
         }
 
-        public ConstraintAnnotationBuilder setMaxValue(String maxValue) {
+        public ConstraintAnnotationBuilder withMaxValue(String maxValue) {
             this.maxValue = maxValue;
             return this;
         }

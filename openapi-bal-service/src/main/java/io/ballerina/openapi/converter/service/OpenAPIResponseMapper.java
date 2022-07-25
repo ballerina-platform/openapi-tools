@@ -543,7 +543,8 @@ public class OpenAPIResponseMapper {
                 TypeSymbol typeSymbol = typeRef.typeDescriptor();
                 if (typeSymbol.typeKind() == TypeDescKind.RECORD) {
                     ApiResponses responses = handleRecordTypeSymbol(qNode.identifier().text().trim(),
-                            components.getSchemas(), customMediaPrefix, typeRef, new OpenAPIComponentMapper(components),
+                            components.getSchemas(), customMediaPrefix, typeRef,
+                            new OpenAPIComponentMapper(components, qNode),
                             headers);
                     apiResponses.putAll(responses);
                     return Optional.of(apiResponses);
@@ -795,7 +796,7 @@ public class OpenAPIResponseMapper {
         Optional<Symbol> symbol = semanticModel.symbol(referenceNode);
         TypeSymbol typeSymbol = (TypeSymbol) symbol.orElseThrow();
         //handle record for components
-        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components);
+        OpenAPIComponentMapper componentMapper = new OpenAPIComponentMapper(components, referenceNode);
         String mediaTypeString;
         // Check typeInclusion is related to the http status code
         if (referenceNode.parent().kind().equals(ARRAY_TYPE_DESC)) {
