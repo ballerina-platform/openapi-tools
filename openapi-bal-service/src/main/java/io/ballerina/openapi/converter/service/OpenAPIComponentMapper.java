@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.converter.service;
 
+import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Documentable;
@@ -266,6 +267,24 @@ public class OpenAPIComponentMapper {
         componentSchema.setDescription(apiDocs.get(componentName));
         Map<String, Schema> schemaProperties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> field: rfields.entrySet()) {
+            List<AnnotationSymbol> annotations = field.getValue().annotations();
+            ((RecordTypeSymbol)((TypeReferenceTypeSymbol)field.getValue().annotations().get(0).typeDescriptor().get()).typeDescriptor()).fieldDescriptors();
+            annotations.stream().filter(annotSymbol->annotSymbol.getModule().get().getName().get().equals("constraint"))
+                    .forEach(value-> {
+                        ConstraintAnnotation.ConstraintAnnotationBuilder constraintAnnotBuilder =
+                                new ConstraintAnnotation.ConstraintAnnotationBuilder();
+                        Map<String, RecordFieldSymbol> recordFields =
+                                ((RecordTypeSymbol) ((TypeReferenceTypeSymbol) value.typeDescriptor()
+                                        .get()).typeDescriptor()).fieldDescriptors();
+                        recordFields.forEach((k,v) -> {
+                            RecordFieldSymbol fieldSymbol = v;
+                            switch (k) {
+                                case "length":
+//                                    fieldSymbol.
+                            }
+                        });
+                    });
+
             String fieldName = ConverterCommonUtils.unescapeIdentifier(field.getKey().trim());
             if (!field.getValue().isOptional()) {
                 required.add(fieldName);
