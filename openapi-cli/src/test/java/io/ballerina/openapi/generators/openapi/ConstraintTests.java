@@ -31,10 +31,17 @@ import java.nio.file.Paths;
 public class ConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi").toAbsolutePath();
 
-    @Test(description = "When the record field has map type")
+    @Test(description = "When the record field has constraint type")
     public void testMapFiled() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint/record_field.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/record_field.yaml");
+    }
+
+    @Test(description = "When the record field has array type")
+    public void testArrayType() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/array.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/array.yaml");
     }
 }

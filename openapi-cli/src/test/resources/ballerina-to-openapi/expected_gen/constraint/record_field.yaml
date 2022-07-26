@@ -28,6 +28,7 @@ paths:
 components:
   schemas:
     Address:
+      minLength: 5
       type: string
     Person:
       required:

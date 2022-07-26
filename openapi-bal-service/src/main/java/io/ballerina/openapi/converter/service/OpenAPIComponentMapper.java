@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.converter.service;
 
-import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Documentable;
@@ -43,14 +42,15 @@ import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
@@ -64,6 +64,8 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,6 +88,7 @@ public class OpenAPIComponentMapper {
     private final Components components;
     private final List<OpenAPIConverterDiagnostic> diagnostics;
     private final NonTerminalNode rootNode;
+
 
 
     public OpenAPIComponentMapper(Components components, NonTerminalNode rootNode) {
@@ -126,31 +129,51 @@ public class OpenAPIComponentMapper {
                 }
             }
         }
+        //Access module part node for finding the node to given typeSymbol.
+        //TODO: this works for module reference.
+        ModulePartNode modulePartNode = rootNode.syntaxTree().rootNode();
+        NonTerminalNode nonTerminalNode = modulePartNode.findNode(typeSymbol.getLocation().get().textRange());
+        ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder =
+                new ConstraintAnnotation.ConstraintAnnotationBuilder();
+        if (nonTerminalNode instanceof TypeDefinitionNode) {
+            TypeDefinitionNode node = (TypeDefinitionNode) nonTerminalNode;
+
+            if (node.metadata().isPresent()) {
+                extractedConstraintAnnotation(node.metadata().get(), constraintBuilder);
+            }
+        }
+        ConstraintAnnotation constraintAnnot = constraintBuilder.build();
+
         switch (type.typeKind()) {
             case RECORD:
                 // Handle typeInclusions with allOf type binding
                 handleRecordTypeSymbol((RecordTypeSymbol) type, schema, componentName, apiDocs);
                 break;
             case STRING:
-                schema.put(componentName, new StringSchema().description(typeDoc));
+                schema.put(componentName, setConstraintValueToSchema(constraintAnnot,
+                        new StringSchema().description(typeDoc)));
                 components.setSchemas(schema);
                 break;
             case INT:
-                schema.put(componentName, new IntegerSchema().description(typeDoc));
+                schema.put(componentName, setConstraintValueToSchema(constraintAnnot,
+                        new IntegerSchema().description(typeDoc)));
                 components.setSchemas(schema);
                 break;
             case DECIMAL:
-                schema.put(componentName, new NumberSchema().format(DOUBLE).description(typeDoc));
+                schema.put(componentName, setConstraintValueToSchema(constraintAnnot,
+                        new NumberSchema().format(DOUBLE).description(typeDoc)));
                 components.setSchemas(schema);
                 break;
             case FLOAT:
-                schema.put(componentName, new NumberSchema().format(FLOAT).description(typeDoc));
+                schema.put(componentName, setConstraintValueToSchema(constraintAnnot,
+                        new NumberSchema().format(FLOAT).description(typeDoc)));
                 components.setSchemas(schema);
                 break;
             case ARRAY:
             case TUPLE:
                 ArraySchema arraySchema = mapArrayToArraySchema(schema, type, componentName);
-                schema.put(componentName, arraySchema.description(typeDoc));
+                schema.put(componentName, setConstraintValueToSchema(constraintAnnot,
+                        arraySchema.description(typeDoc)));
                 components.setSchemas(schema);
                 break;
             case UNION:
@@ -284,16 +307,18 @@ public class OpenAPIComponentMapper {
         componentSchema.setDescription(apiDocs.get(componentName));
         Map<String, Schema> schemaProperties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> field : rfields.entrySet()) {
-            ModulePartNode modulePartNode = rootNode.syntaxTree().rootNode();
-
-            RecordFieldNode fieldNode = (RecordFieldNode) modulePartNode.
-                    findNode(field.getValue().getLocation().get().textRange());
-            Optional<MetadataNode> metadata = fieldNode.metadata();
             ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder =
                     new ConstraintAnnotation.ConstraintAnnotationBuilder();
 
-            if (metadata.isPresent()) {
-                extractedConstraintAnnotation(metadata, constraintBuilder);
+            if (!(rootNode instanceof QualifiedNameReferenceNode)) {
+                ModulePartNode modulePartNode = rootNode.syntaxTree().rootNode();
+                NonTerminalNode node = modulePartNode.findNode(field.getValue().getLocation().get().textRange());
+                if (node instanceof RecordFieldNode) {
+                    RecordFieldNode fieldNode = (RecordFieldNode) modulePartNode.
+                            findNode(field.getValue().getLocation().get().textRange());
+                    Optional<MetadataNode> metadata = fieldNode.metadata();
+                    metadata.ifPresent(metadataNode -> extractedConstraintAnnotation(metadataNode, constraintBuilder));
+                }
             }
 
             ConstraintAnnotation constraintAnnot = constraintBuilder.build();
@@ -346,88 +371,6 @@ public class OpenAPIComponentMapper {
             this.components.setSchemas(schema);
         }
         return componentSchema;
-    }
-
-    private void setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema property) {
-
-        if (property instanceof ArraySchema) {
-            property.setMaxItems(constraintAnnot.getMaxLength().isPresent()?
-                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
-            property.setMinItems(constraintAnnot.getMinLength().isPresent()?
-                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
-        } else {
-            property.setMaxLength(constraintAnnot.getMaxLength().isPresent()?
-                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
-            property.setMinLength(constraintAnnot.getMinLength().isPresent()?
-                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
-        }
-        property.setMinimum(constraintAnnot.getMinValue().isPresent()?
-                BigDecimal.valueOf(Long.parseLong(constraintAnnot.getMinValue().get())): null);
-
-        property.setMaximum(constraintAnnot.getMaxValue().isPresent()?
-                BigDecimal.valueOf(Long.parseLong(constraintAnnot.getMaxValue().get())): null);
-    }
-
-    private void extractedConstraintAnnotation(Optional<MetadataNode> metadata,
-                           ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
-
-        NodeList<AnnotationNode> annotations = metadata.get().annotations();
-        annotations.stream().filter(annot ->
-                        (annot.annotReference() instanceof QualifiedNameReferenceNode &&
-                                ((QualifiedNameReferenceNode) annot.annotReference()).modulePrefix().text()
-                                        .equals("constraint")))
-                .forEach(value -> {
-
-                    Optional<MappingConstructorExpressionNode> fieldValues = value.annotValue();
-
-                    if (fieldValues.isPresent()) {
-                        Spliterator<MappingFieldNode> spliterator = fieldValues.get().fields().spliterator();
-                        spliterator.forEachRemaining(fieldV -> {
-                            if (fieldV.kind() == SyntaxKind.SPECIFIC_FIELD) {
-                                SpecificFieldNode specificFieldNode = (SpecificFieldNode) fieldV;
-                                // generate string
-                                String name = specificFieldNode.fieldName().toString().trim();
-                                if (specificFieldNode.valueExpr().isPresent()) {
-                                    ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
-                                    SyntaxKind kind = expressionNode.kind();
-                                    if (kind == SyntaxKind.NUMERIC_LITERAL) {
-                                        String constraintValue = expressionNode.toString();
-                                        fillConstraintValue(constraintBuilder, name, constraintValue);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                });
-    }
-
-    private void fillConstraintValue(ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder,
-                                     String name, String constraintValue) {
-        switch (name) {
-            case "minValue":
-                constraintBuilder.withMinValue(constraintValue);
-                break;
-            case "maxValue":
-                constraintBuilder.withMaxValue(constraintValue);
-                break;
-            case "minValueExclusive":
-                constraintBuilder.withMinValueExclusive(constraintValue);
-                break;
-            case "maxValueExclusive":
-                constraintBuilder.withMaxValueExclusive(constraintValue);
-                break;
-            case "length":
-                constraintBuilder.withLength(constraintValue);
-                break;
-            case "maxLength":
-                constraintBuilder.withMaxLength(constraintValue);
-                break;
-            case "minLength":
-                constraintBuilder.withMinLength(constraintValue);
-                break;
-            default:
-                break;
-        }
     }
 
     private Schema handleMapType(Map<String, Schema> schema, String componentName, Schema property,
@@ -680,4 +623,122 @@ public class OpenAPIComponentMapper {
         return arrayProperty;
     }
 
+    /**
+     * This util uses to set the constraint value for relevant schema field.
+     */
+    private Schema setConstraintValueToSchema(ConstraintAnnotation constraintAnnot, Schema property) {
+
+        if (property instanceof ArraySchema) {
+            property.setMaxItems(constraintAnnot.getMaxLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+            property.setMinItems(constraintAnnot.getMinLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        } else {
+            property.setMaxLength(constraintAnnot.getMaxLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMaxLength().get()) : null);
+            property.setMinLength(constraintAnnot.getMinLength().isPresent() ?
+                    Integer.valueOf(constraintAnnot.getMinLength().get()) : null);
+        }
+
+        try {
+
+            BigDecimal minimum = null;
+            BigDecimal maximum = null;
+            if (constraintAnnot.getMinValue().isPresent()) {
+                try {
+                    minimum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMinValue().get()));
+                } catch (NumberFormatException e) {
+                    minimum = BigDecimal.valueOf(NumberFormat.getInstance().parse(
+                            constraintAnnot.getMinValue().get()).doubleValue());
+                }
+            }
+
+            if (constraintAnnot.getMaxValue().isPresent()) {
+                try {
+                    maximum = BigDecimal.valueOf(Integer.parseInt(constraintAnnot.getMaxValue().get()));
+                } catch (NumberFormatException e) {
+                    maximum = BigDecimal.valueOf((NumberFormat.getInstance()
+                                    .parse(constraintAnnot.getMaxValue().get()).doubleValue()));
+                }
+
+            }
+            property.setMinimum(minimum);
+            property.setMaximum(maximum);
+
+        } catch (ParseException parserMessage) {
+            DiagnosticMessages error = DiagnosticMessages.OAS_CONVERTOR_110;
+            ExceptionDiagnostic diagnostic = new ExceptionDiagnostic(error.getCode(),
+                    error.getDescription(), null, parserMessage.getMessage());
+            diagnostics.add(diagnostic);
+        }
+
+        return property;
+    }
+
+    /**
+     * This util uses to extract the annotation values in `@constraint` and store it in builder.
+     */
+    private void extractedConstraintAnnotation(MetadataNode metadata,
+                                               ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+
+        NodeList<AnnotationNode> annotations = metadata.annotations();
+        annotations.stream().filter(annot ->
+                        (annot.annotReference() instanceof QualifiedNameReferenceNode &&
+                                ((QualifiedNameReferenceNode) annot.annotReference()).modulePrefix().text()
+                                        .equals("constraint")))
+                .forEach(value -> {
+
+                    Optional<MappingConstructorExpressionNode> fieldValues = value.annotValue();
+                    if (fieldValues.isPresent()) {
+                        Spliterator<MappingFieldNode> spliterator = fieldValues.get().fields().spliterator();
+                        spliterator.forEachRemaining(fieldV -> {
+                            if (fieldV.kind() == SyntaxKind.SPECIFIC_FIELD) {
+                                SpecificFieldNode specificFieldNode = (SpecificFieldNode) fieldV;
+                                // generate string
+                                String name = specificFieldNode.fieldName().toString().trim();
+                                if (specificFieldNode.valueExpr().isPresent()) {
+                                    ExpressionNode expressionNode = specificFieldNode.valueExpr().get();
+                                    SyntaxKind kind = expressionNode.kind();
+                                    if (kind == SyntaxKind.NUMERIC_LITERAL) {
+                                        String constraintValue = expressionNode.toString();
+                                        fillConstraintValue(constraintBuilder, name, constraintValue);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+    }
+
+    /**
+     * This util uses to build the constraint builder with available constraint annotation field value.
+     */
+    private void fillConstraintValue(ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder,
+                                     String name, String constraintValue) {
+        switch (name) {
+            case "minValue":
+                constraintBuilder.withMinValue(constraintValue);
+                break;
+            case "maxValue":
+                constraintBuilder.withMaxValue(constraintValue);
+                break;
+            case "minValueExclusive":
+                constraintBuilder.withMinValueExclusive(constraintValue);
+                break;
+            case "maxValueExclusive":
+                constraintBuilder.withMaxValueExclusive(constraintValue);
+                break;
+            case "length":
+                constraintBuilder.withLength(constraintValue);
+                break;
+            case "maxLength":
+                constraintBuilder.withMaxLength(constraintValue);
+                break;
+            case "minLength":
+                constraintBuilder.withMinLength(constraintValue);
+                break;
+            default:
+                break;
+        }
+    }
 }

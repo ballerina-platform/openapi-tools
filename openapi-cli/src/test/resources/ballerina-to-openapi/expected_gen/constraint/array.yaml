@@ -1,0 +1,74 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /pet:
+    post:
+      operationId: postPet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
+      responses:
+        "500":
+          description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    PersonDetailsItemsString:
+      minLength: 7
+      type: string
+    PersonFeeItemsNumber:
+      maximum: 445.4
+      type: number
+      format: float
+    PersonLimitItemsInteger:
+      maximum: 67
+      type: integer
+      format: int32
+    Hobby:
+      maxItems: 5
+      minItems: 2
+      type: array
+      items:
+        $ref: '#/components/schemas/HobbyItemsString'
+    HobbyItemsString:
+      maxLength: 23
+      type: string
+    Person:
+      required:
+        - id
+      type: object
+      properties:
+        hobby:
+          $ref: '#/components/schemas/Hobby'
+        Details:
+          maxItems: 5
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonDetailsItemsString'
+        id:
+          type: integer
+          format: int64
+        fee:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonFeeItemsNumber'
+        limit:
+          type: array
+          description: The maximum number of items in the response (as set in the
+            query or by default).
+          items:
+            $ref: '#/components/schemas/PersonLimitItemsInteger'
