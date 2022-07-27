@@ -41,7 +41,10 @@ public class PreValidationTests {
         Path path = RES_DIR.resolve("non_http.bal");
         Project project = getProject(path);
         DiagnosticResult diagnostic = getCompilation(project);
-        Assert.assertEquals(getDiagnostics(diagnostic).length, 0);
+        boolean isOpenapi = diagnostic.diagnostics().stream()
+                .anyMatch(d -> (d.properties().stream()
+                        .anyMatch(p -> p.value().toString().contains("openapi"))));
+        Assert.assertFalse(isOpenapi);
     }
 
     @Test(description = "Given ballerina file has compilation issue")
