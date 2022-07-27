@@ -1,20 +1,10 @@
 import ballerina/http;
-import ballerina/openapi;
 
-listener http:Listener ep0 = new(9090);
+listener http:Listener ep0 = new (80, config = {host: "petstore.openapi.io"});
 
-@openapi:ServiceInfo {
-    contract: ""
-}
-
-service /  on ep0 {
-
-    resource function get  user(http:Caller caller, http:Request req) returns error? {
-
+service / on ep0 {
+    resource function get user() returns json {
     }
-
-    resource function post user(http:Caller caller, http:Request req) returns error? {
-
+    resource function post user() returns json {
     }
-
 }

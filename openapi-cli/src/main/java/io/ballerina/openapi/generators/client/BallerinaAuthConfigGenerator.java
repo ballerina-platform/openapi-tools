@@ -41,7 +41,6 @@ import io.ballerina.compiler.syntax.tree.NilLiteralNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.ObjectFieldNode;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
@@ -111,7 +110,6 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createTypedBindingPa
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createVariableDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ASTERISK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.BITWISE_AND_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.BOOLEAN_TYPE_DESC;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CHECK_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
@@ -765,7 +763,8 @@ public class BallerinaAuthConfigGenerator {
      *     http:ClientSecureSocket? secureSocket = ();
      *     # Proxy server related options
      *     ProxyConfig? proxy = ();
-     *     # Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default
+     *     # Enables the inbound payload validation functionality which provided by the constraint package.
+     *     Enabled by default
      *     boolean validation = true;
      * </pre>
      *
