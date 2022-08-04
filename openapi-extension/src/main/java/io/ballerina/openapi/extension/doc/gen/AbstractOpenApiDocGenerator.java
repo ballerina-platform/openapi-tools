@@ -155,17 +155,17 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
         List<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
         OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(
                 config.getServiceNode(), listenerNodes, config.getSemanticModel(), targetFile, null);
-        Optional<OpenAPI> openAPIOpt = oasResult.getOpenAPI();
-        if (!oasResult.getDiagnostics().isEmpty() || openAPIOpt.isEmpty()) {
+        Optional<OpenAPI> openApiOpt = oasResult.getOpenAPI();
+        if (!oasResult.getDiagnostics().isEmpty() || openApiOpt.isEmpty()) {
             OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
             updateCompilerContext(context, location, errorCode);
             return;
         }
-        OpenAPI OpenAPI = openAPIOpt.get();
-        if (OpenAPI.getInfo().getTitle() == null || OpenAPI.getInfo().getTitle().equals(SLASH)) {
-            OpenAPI.getInfo().setTitle(normalizeTitle(targetFile));
+        OpenAPI openApi = openApiOpt.get();
+        if (openApi.getInfo().getTitle() == null || openApi.getInfo().getTitle().equals(SLASH)) {
+            openApi.getInfo().setTitle(normalizeTitle(targetFile));
         }
-        String openApiDefinition = Json.pretty(OpenAPI);
+        String openApiDefinition = Json.pretty(openApi);
         updateOpenApiContext(context, serviceId, openApiDefinition, false);
     }
 
