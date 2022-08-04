@@ -16,7 +16,6 @@
 
 package io.ballerina.openapi.extension.doc.gen;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
@@ -27,7 +26,7 @@ import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.openapi.converter.model.OASResult;
 import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
 import io.ballerina.openapi.extension.Constants;
 import io.ballerina.openapi.extension.OpenApiDiagnosticCode;
@@ -35,13 +34,18 @@ import io.ballerina.openapi.extension.context.OpenApiDocContext;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.converter.Constants.SLASH;
+import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.normalizeTitle;
 import static io.ballerina.openapi.extension.context.OpenApiDocContextHandler.getContextHandler;
 import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnostics;
 
@@ -49,6 +53,8 @@ import static io.ballerina.openapi.extension.doc.DocGenerationUtils.getDiagnosti
  * {@code AbstractOpenApiDocGenerator} contains the basic utilities required for OpenAPI doc generation.
  */
 public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator {
+    private static final String FILE_NAME_FORMAT = "%d.json";
+
     private final OpenApiContractResolver contractResolver;
 
     public AbstractOpenApiDocGenerator() {
@@ -67,7 +73,6 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
 
             ServiceDeclarationNode serviceNode = config.getServiceNode();
             Optional<AnnotationNode> serviceInfoAnnotationOpt = getServiceInfoAnnotation(serviceNode);
-            String targetFile = String.format("%d.json", serviceId);
             if (serviceInfoAnnotationOpt.isPresent()) {
                 AnnotationNode serviceInfoAnnotation = serviceInfoAnnotationOpt.get();
 
@@ -88,27 +93,13 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                     updateOpenApiContext(context, serviceId, openApiDefinition, embed);
                 } else {
                     // generate open-api doc and update the context if the `contract` configuration is not available
-                    String openApiDefinition = generateOpenApiDoc(
-                            config.getSemanticModel(), config.getSyntaxTree(), serviceNode, targetFile);
-                    if (null != openApiDefinition && !openApiDefinition.isBlank()) {
-                        updateOpenApiContext(context, serviceId, openApiDefinition, embed);
-                    } else {
-                        OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
-                        updateCompilerContext(context, location, errorCode);
-                    }
+                    generateOpenApiDoc(config, context, location);
                 }
             } else {
                 // generate open-api doc and update the context
-                String openApiDefinition = generateOpenApiDoc(
-                        config.getSemanticModel(), config.getSyntaxTree(), serviceNode, targetFile);
-                if (null != openApiDefinition && !openApiDefinition.isBlank()) {
-                    updateOpenApiContext(context, serviceId, openApiDefinition, false);
-                } else {
-                    OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
-                    updateCompilerContext(context, location, errorCode);
-                }
+                generateOpenApiDoc(config, context, location);
             }
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             // currently, we do not have open-api doc generation logic for following scenarios:
             //  1. default resources and for scenarios
             //  2. returning http-response from a resource
@@ -157,12 +148,25 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 .map(en -> en.toString().trim());
     }
 
-    private String generateOpenApiDoc(SemanticModel semanticModel, SyntaxTree syntaxTree,
-                                      ServiceDeclarationNode serviceNode, String outputFileName) {
-        ModulePartNode modulePartNode = syntaxTree.rootNode();
+    private void generateOpenApiDoc(OpenApiDocConfig config, SyntaxNodeAnalysisContext context, NodeLocation location) {
+        int serviceId = config.getSemanticModel().hashCode();
+        String targetFile = String.format(FILE_NAME_FORMAT, serviceId);
+        ModulePartNode modulePartNode = config.getSyntaxTree().rootNode();
         List<ListenerDeclarationNode> listenerNodes = extractListenerNodes(modulePartNode);
-        return ServiceToOpenAPIConverterUtils.generateOASForGivenFormat(serviceNode, true, listenerNodes,
-                semanticModel, outputFileName);
+        OASResult oasResult = ServiceToOpenAPIConverterUtils.generateOAS(
+                config.getServiceNode(), listenerNodes, config.getSemanticModel(), targetFile, null);
+        Optional<OpenAPI> openAPIOpt = oasResult.getOpenAPI();
+        if (!oasResult.getDiagnostics().isEmpty() || openAPIOpt.isEmpty()) {
+            OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
+            updateCompilerContext(context, location, errorCode);
+            return;
+        }
+        OpenAPI OpenAPI = openAPIOpt.get();
+        if (OpenAPI.getInfo().getTitle() == null || OpenAPI.getInfo().getTitle().equals(SLASH)) {
+            OpenAPI.getInfo().setTitle(normalizeTitle(targetFile));
+        }
+        String openApiDefinition = Json.pretty(OpenAPI);
+        updateOpenApiContext(context, serviceId, openApiDefinition, false);
     }
 
     private List<ListenerDeclarationNode> extractListenerNodes(ModulePartNode modulePartNode) {
