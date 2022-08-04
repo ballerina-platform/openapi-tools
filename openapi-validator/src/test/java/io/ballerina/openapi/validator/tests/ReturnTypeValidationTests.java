@@ -233,4 +233,13 @@ public class ReturnTypeValidationTests {
         // TODO: res:ResRecord
     }
 
+    @Test(description = "Test for avoid the tool breaking from NPE when mediaType has customized prefix")
+    public void avoidCustomizedMediaType() {
+        Path path = RES_DIR.resolve("customized_mediaType.bal");
+        Project project = getProject(path);
+        DiagnosticResult diagnostic = getCompilation(project);
+        Object[] errors = getDiagnostics(diagnostic);
+        Assert.assertEquals(errors.length, 0);
+    }
+
 }
