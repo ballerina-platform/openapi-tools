@@ -133,6 +133,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.TRUE_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEY;
 import static io.ballerina.openapi.generators.GeneratorConstants.API_KEYS_CONFIG;
@@ -143,6 +144,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.AUTH_CONFIG_REC
 import static io.ballerina.openapi.generators.GeneratorConstants.AuthConfigTypes;
 import static io.ballerina.openapi.generators.GeneratorConstants.BASIC;
 import static io.ballerina.openapi.generators.GeneratorConstants.BEARER;
+import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_CRED;
 import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG_RECORD_ARG;
@@ -153,6 +155,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.PROXY_CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.REFRESH_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.SELF;
 import static io.ballerina.openapi.generators.GeneratorConstants.SSL_FIELD_NAME;
+import static io.ballerina.openapi.generators.GeneratorConstants.VALIDATION;
 import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
 import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
 
@@ -758,6 +761,11 @@ public class BallerinaAuthConfigGenerator {
      *     http:ResponseLimitConfigs responseLimits = {};
      *     #SSL/TLS-related options
      *     http:ClientSecureSocket? secureSocket = ();
+     *     # Proxy server related options
+     *     ProxyConfig? proxy = ();
+     *     # Enables the inbound payload validation functionality which provided by the constraint package.
+     *     Enabled by default
+     *     boolean validation = true;
      * </pre>
      *
      * @return {@link List<Node>}   ClientConfig record fields' node list
@@ -939,6 +947,15 @@ public class BallerinaAuthConfigGenerator {
                 equalToken, nilLiteralNode, semicolonToken);
         recordFieldNodes.add(proxyConfigFieldNode);
 
+        // add validation for constraint
+        MetadataNode validationMetadata = getMetadataNode("Enables the inbound payload validation " +
+                "functionality which provided by the constraint package. Enabled by default");
+        IdentifierToken validationFieldName = AbstractNodeFactory.createIdentifierToken(VALIDATION);
+        TypeDescriptorNode validationFieldType = createSimpleNameReferenceNode(createIdentifierToken(BOOLEAN));
+        RecordFieldWithDefaultValueNode validateFieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
+                validationMetadata, null, validationFieldType, validationFieldName,
+                equalToken, createRequiredExpressionNode(createToken(TRUE_KEYWORD)), semicolonToken);
+        recordFieldNodes.add(validateFieldNode);
         return recordFieldNodes;
     }
 

@@ -39,6 +39,9 @@ public class TestConstants {
             "    http:ClientSecureSocket? secureSocket = ();\n" +
             "    # Proxy server related options\n" +
             "    http:ProxyConfig? proxy = ();\n" +
+            "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
+            "Enabled by default\n" +
+            "    boolean validation = true;" +
             "|};";
             
     public static final String HTTP_BASIC_AUTH_CONFIG_REC = "" +

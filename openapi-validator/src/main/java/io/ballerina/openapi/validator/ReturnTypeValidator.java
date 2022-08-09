@@ -219,7 +219,7 @@ public class ReturnTypeValidator extends NodeValidator {
                     }
                 }
                 if (!isHttp) {
-                    // validate normal Record status code 200 and application json
+                    // validate normal Record status code 200 and application json , customized json
                     if (responses.containsKey(HTTP_200)) {
                         // record validation
                         ApiResponse apiResponse = responses.get(HTTP_200);
@@ -227,7 +227,18 @@ public class ReturnTypeValidator extends NodeValidator {
                         MediaType oasMType = content.get(APPLICATION_JSON);
                         balStatusCodes.put(HTTP_200, simpleRefNode);
                         fillMediaTypes(HTTP_200, APPLICATION_JSON);
-                        if (oasMType.getSchema() != null && oasMType.getSchema().get$ref() != null) {
+                        //TODO: handle customized mediaType in ballerina service return and request body
+                        /**
+                         * <pre>
+                         * @openapi:ServiceInfo {
+                         *    contract: "snowpeak_openapi.yaml"}
+                         * @http:ServiceConfig { mediaTypeSubtypePrefix: "vnd.snowpeak.resort" }
+                         * service /snowpeak on new http:Listener(9090) {}
+                         * </pre>
+                         * issue: https://github.com/ballerina-platform/openapi-tools/issues/1044
+                         */
+                        if (oasMType != null && oasMType.getSchema() != null &&
+                                oasMType.getSchema().get$ref() != null) {
                             Optional<String> schemaName = extractReferenceType(oasMType.getSchema().get$ref());
                             if (schemaName.isEmpty()) {
                                 return;
