@@ -10,7 +10,7 @@ public class TestConstants {
     public static String authConfigRecordDoc = "" +
             "# Provides Auth configurations needed when communicating with a remote HTTP endpoint.";
     private static String commonClientConfigurationFields = "# The HTTP version understood by the client\n" +
-            "    string httpVersion = \"1.1\";\n" +
+            "    http:HttpVersion httpVersion = http:HTTP_1_1;\n" +
             "    # Configurations related to HTTP/1.x protocol\n" +
             "    http:ClientHttp1Settings http1Settings = {};\n" +
             "    # Configurations related to HTTP/2 protocol\n" +
