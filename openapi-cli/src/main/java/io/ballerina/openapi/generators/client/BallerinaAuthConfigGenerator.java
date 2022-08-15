@@ -149,6 +149,7 @@ import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_CONFIG;
 import static io.ballerina.openapi.generators.GeneratorConstants.CLIENT_CRED;
 import static io.ballerina.openapi.generators.GeneratorConstants.CONFIG_RECORD_ARG;
 import static io.ballerina.openapi.generators.GeneratorConstants.HTTP;
+import static io.ballerina.openapi.generators.GeneratorConstants.HTTP_VERSION;
 import static io.ballerina.openapi.generators.GeneratorConstants.OAUTH2;
 import static io.ballerina.openapi.generators.GeneratorConstants.PASSWORD;
 import static io.ballerina.openapi.generators.GeneratorConstants.PROXY_CONFIG;
@@ -734,7 +735,7 @@ public class BallerinaAuthConfigGenerator {
      *     # Configurations related to client authentication
      *     http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig auth;
      *     # The HTTP version understood by the client
-     *     string httpVersion = "1.1";
+     *     http:HttpVersion httpVersion = http:HTTP_1_1;
      *     # Configurations related to HTTP/1.x protocol
      *     http:ClientHttp1Settings http1Settings = {};
      *     # Configurations related to HTTP/2 protocol
@@ -791,10 +792,10 @@ public class BallerinaAuthConfigGenerator {
 
         // add httpVersion field
         MetadataNode httpVersionMetadata = getMetadataNode("The HTTP version understood by the client");
-        TypeDescriptorNode httpVersionFieldType = createSimpleNameReferenceNode(createToken(STRING_KEYWORD));
+        TypeDescriptorNode httpVersionFieldType = createSimpleNameReferenceNode(createIdentifierToken(HTTP_VERSION));
         IdentifierToken httpVersionFieldName = createIdentifierToken("httpVersion");
         RequiredExpressionNode httpVersionExpression =
-                createRequiredExpressionNode(createIdentifierToken("\"1.1\""));
+                createRequiredExpressionNode(createIdentifierToken("http:HTTP_1_1"));
         RecordFieldWithDefaultValueNode httpVersionFieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
                 httpVersionMetadata, null, httpVersionFieldType, httpVersionFieldName,
                 equalToken, httpVersionExpression, semicolonToken);
