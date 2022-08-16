@@ -335,4 +335,5 @@ public class GeneratorConstants {
     public static final String EXCLUSIVE_MAX = "maxValueExclusive";
     public static final String EXCLUSIVE_MIN = "minValueExclusive";
     public static final String SPECIAL_CHARACTER_REGEX = "([\\[\\]\\\\?!<>@#&~`*\\-=^+'();:\\/\\_{}\\s|.$])";
+    public static final String HTTP_VERSION = "http:HttpVersion";
 }
