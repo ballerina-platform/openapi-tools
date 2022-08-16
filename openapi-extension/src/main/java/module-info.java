@@ -15,6 +15,8 @@
  */
 
 module ballerina.openapi.extension {
+    requires io.swagger.v3.core;
+    requires io.swagger.v3.oas.models;
     requires io.ballerina.lang;
     requires io.ballerina.tools.api;
     requires io.ballerina.parser;
