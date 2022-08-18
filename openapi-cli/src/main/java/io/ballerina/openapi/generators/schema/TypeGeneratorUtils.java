@@ -56,6 +56,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -312,25 +313,31 @@ public class TypeGeneratorUtils {
 
     private static List<String> getNumberAnnotFields(Schema<?> numberSchema) {
         List<String> fields = new ArrayList<>();
-        if (numberSchema.getMinimum() != null && numberSchema.getExclusiveMinimum() == null) {
+
+        if ((numberSchema.getMinimum() != null) &&
+                (BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0)
+                && (numberSchema.getExclusiveMinimum() == null)) {
             String value = numberSchema.getMinimum().toString();
             String fieldRef = MINIMUM + COLON + value;
             fields.add(fieldRef);
         }
-        if (numberSchema.getMaximum() != null && numberSchema.getExclusiveMaximum() == null) {
+        if (numberSchema.getMaximum() != null &&
+                (BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0)
+                && numberSchema.getExclusiveMaximum() == null) {
             String value = numberSchema.getMaximum().toString();
             String fieldRef = MAXIMUM + COLON + value;
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMinimum() != null &&
-                numberSchema.getExclusiveMinimum() && numberSchema.getMaximum() != null) {
+                numberSchema.getExclusiveMinimum() && numberSchema.getMinimum() != null &&
+               (BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0)) {
             String value = numberSchema.getMinimum().toString();
             String fieldRef = EXCLUSIVE_MIN + COLON + value;
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMaximum() != null &&
                 numberSchema.getExclusiveMaximum() &&
-                numberSchema.getMaximum() != null) {
+                numberSchema.getMaximum() != null && (BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0)) {
             String value = numberSchema.getMaximum().toString();
             String fieldRef = EXCLUSIVE_MAX + COLON + value;
             fields.add(fieldRef);
@@ -346,12 +353,12 @@ public class TypeGeneratorUtils {
 
     private static List<String> getStringAnnotFields(StringSchema stringSchema) {
         List<String> fields = new ArrayList<>();
-        if (stringSchema.getMaxLength() != null) {
+        if (stringSchema.getMaxLength() != null && stringSchema.getMaxLength() != 0) {
             String value = stringSchema.getMaxLength().toString();
             String fieldRef = MAX_LENGTH + COLON + value;
             fields.add(fieldRef);
         }
-        if (stringSchema.getMinLength() != null) {
+        if (stringSchema.getMinLength() != null && stringSchema.getMinLength() != 0) {
             String value = stringSchema.getMinLength().toString();
             String fieldRef = MIN_LENGTH + COLON + value;
             fields.add(fieldRef);
@@ -367,12 +374,12 @@ public class TypeGeneratorUtils {
 
     private static List<String> getArrayAnnotFields(ArraySchema arraySchema) {
         List<String> fields = new ArrayList<>();
-        if (arraySchema.getMaxItems() != null) {
+        if (arraySchema.getMaxItems() != null && arraySchema.getMaxItems() != 0) {
             String value = arraySchema.getMaxItems().toString();
             String fieldRef = MAX_LENGTH + COLON + value;
             fields.add(fieldRef);
         }
-        if (arraySchema.getMinItems() != null) {
+        if (arraySchema.getMinItems() != null && arraySchema.getMinItems() != 0) {
             String value = arraySchema.getMinItems().toString();
             String fieldRef = MIN_LENGTH + COLON + value;
             fields.add(fieldRef);
