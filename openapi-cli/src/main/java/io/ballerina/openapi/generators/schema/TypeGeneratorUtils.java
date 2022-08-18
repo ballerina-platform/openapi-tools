@@ -314,15 +314,15 @@ public class TypeGeneratorUtils {
     private static List<String> getNumberAnnotFields(Schema<?> numberSchema) {
         List<String> fields = new ArrayList<>();
 
-        if ((numberSchema.getMinimum() != null) &&
-                (BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0)
-                && (numberSchema.getExclusiveMinimum() == null)) {
+        if (numberSchema.getMinimum() != null &&
+                BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0
+                && numberSchema.getExclusiveMinimum() == null) {
             String value = numberSchema.getMinimum().toString();
             String fieldRef = MINIMUM + COLON + value;
             fields.add(fieldRef);
         }
         if (numberSchema.getMaximum() != null &&
-                (BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0)
+                BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0
                 && numberSchema.getExclusiveMaximum() == null) {
             String value = numberSchema.getMaximum().toString();
             String fieldRef = MAXIMUM + COLON + value;
@@ -330,14 +330,14 @@ public class TypeGeneratorUtils {
         }
         if (numberSchema.getExclusiveMinimum() != null &&
                 numberSchema.getExclusiveMinimum() && numberSchema.getMinimum() != null &&
-               (BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0)) {
+               BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0) {
             String value = numberSchema.getMinimum().toString();
             String fieldRef = EXCLUSIVE_MIN + COLON + value;
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMaximum() != null &&
                 numberSchema.getExclusiveMaximum() &&
-                numberSchema.getMaximum() != null && (BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0)) {
+                numberSchema.getMaximum() != null && BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0) {
             String value = numberSchema.getMaximum().toString();
             String fieldRef = EXCLUSIVE_MAX + COLON + value;
             fields.add(fieldRef);
