@@ -90,6 +90,21 @@ public class ConstraintTests {
         TestUtils.deleteGeneratedFiles();
     }
 
+    @Test(description = "Tests with record field has constraint value with zero.")
+    public void testRecordFiledConstraintWithZeroValue() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field_02.yaml"),
+                true);
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
+
+        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
+        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/record_field_02.bal",
+                syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        Assert.assertTrue(diagnostics.isEmpty());
+    }
+
+
     //TODO current tool doesn't handle union type: therefore union type constraint will handle once union type
     // generation available in tool.
 }
