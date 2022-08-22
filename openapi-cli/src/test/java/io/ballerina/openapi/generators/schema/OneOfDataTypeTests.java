@@ -23,6 +23,7 @@ import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.openapi.generators.schema.ballerinatypegenerators.TypeGenerator;
+import io.ballerina.openapi.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
 import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -49,9 +50,10 @@ public class OneOfDataTypeTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        List<Schema> oneOf = composedSchema.getOneOf();
         GeneratorMetaData.createInstance(openAPI, false);
-        String oneOfUnionType = TypeGeneratorUtils.getUnionType(oneOf, "Error").toString().trim();
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error");
+        String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
+
         Assert.assertEquals(oneOfUnionType, "Activity|Profile");
     }
 
@@ -63,7 +65,8 @@ public class OneOfDataTypeTests {
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> oneOf = composedSchema.getOneOf();
         GeneratorMetaData.createInstance(openAPI, false);
-        String oneOfUnionType = TypeGeneratorUtils.getUnionType(oneOf, "Error").toString().trim();
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error");
+        String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(oneOfUnionType, "Activity|Profile01");
     }
 

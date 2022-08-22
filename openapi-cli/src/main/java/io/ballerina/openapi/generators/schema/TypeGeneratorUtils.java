@@ -29,13 +29,11 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
-import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.ballerina.openapi.generators.schema.ballerinatypegenerators.AllOfRecordTypeGenerator;
@@ -71,11 +69,9 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
@@ -458,42 +454,6 @@ public class TypeGeneratorUtils {
         if (schemaValue.getDeprecated() != null && schemaValue.getDeprecated()) {
             DocCommentsGenerator.extractDeprecatedAnnotation(schemaValue.getExtensions(),
                     documentation, typeAnnotations);
-        }
-    }
-
-    /**
-     * Creates the UnionType string to generate bal type for a given oneOf or anyOf type schema.
-     *
-     * @param schemas  List of schemas included in the anyOf or oneOf schema
-     * @param typeName This is parameter or variable name that used to populate error message meaningful
-     * @return Union type
-     * @throws BallerinaOpenApiException when unsupported combination of schemas found
-     */
-    public static TypeDescriptorNode getUnionType(List<Schema> schemas, String typeName)
-            throws BallerinaOpenApiException {
-        List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
-        for (Schema schema : schemas) {
-            TypeDescriptorNode typeDescriptorNode = getTypeGenerator(schema, typeName, null)
-                    .generateTypeDescriptorNode();
-            if (typeDescriptorNode instanceof OptionalTypeDescriptorNode &&
-                    GeneratorMetaData.getInstance().isNullable()) {
-                Node internalTypeDesc = ((OptionalTypeDescriptorNode) typeDescriptorNode).typeDescriptor();
-                typeDescriptorNode = (TypeDescriptorNode) internalTypeDesc;
-            }
-            typeDescriptorNodes.add(typeDescriptorNode);
-        }
-        if (typeDescriptorNodes.size() > 1) {
-            UnionTypeDescriptorNode unionTypeDescriptorNode = null;
-            TypeDescriptorNode leftTypeDesc = typeDescriptorNodes.get(0);
-            for (int i = 1; i < typeDescriptorNodes.size(); i++) {
-                TypeDescriptorNode rightTypeDesc = typeDescriptorNodes.get(i);
-                unionTypeDescriptorNode = createUnionTypeDescriptorNode(leftTypeDesc, createToken(PIPE_TOKEN),
-                        rightTypeDesc);
-                leftTypeDesc = unionTypeDescriptorNode;
-            }
-            return unionTypeDescriptorNode;
-        } else {
-            return typeDescriptorNodes.get(0);
         }
     }
 }

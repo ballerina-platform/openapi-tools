@@ -21,17 +21,18 @@ package io.ballerina.openapi.generators.schema;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.CodeGenerator;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
 import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
@@ -50,14 +51,14 @@ public class AnyOfDataTypeTests {
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         Schema schema = openAPI.getComponents().getSchemas().get("AnyOF");
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        List<Schema> anyOf = composedSchema.getAnyOf();
         GeneratorMetaData.createInstance(openAPI, false);
-        String anyOfUnionType = TypeGeneratorUtils.getUnionType(anyOf, "AnyOF").toString().trim();
+        UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "AnyOF");
+        String anyOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
         Assert.assertEquals(anyOfUnionType, "User|Activity");
     }
 
     @Test(description = "Test for the schema generations")
-    public void testAnyOfSchema() throws BallerinaOpenApiException, IOException {
+    public void testAnyOfSchema() throws BallerinaOpenApiException, IOException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/schema15.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
