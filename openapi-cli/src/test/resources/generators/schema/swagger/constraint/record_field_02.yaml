@@ -53,3 +53,8 @@ components:
           type: number
           exclusiveMinimum: true
           minimum: 0
+        maxDeliveryCount:
+          maximum: 1E+2
+          minimum: 1
+          type: integer
+          format: int32

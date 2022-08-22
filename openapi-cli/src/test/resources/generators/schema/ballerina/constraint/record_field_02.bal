@@ -12,4 +12,6 @@ public type Person record {
     Address address?;
     float salary?;
     decimal net?;
+    @constraint:Int {minValue: 1, maxValue: 100}
+    int maxDeliveryCount?;
 };

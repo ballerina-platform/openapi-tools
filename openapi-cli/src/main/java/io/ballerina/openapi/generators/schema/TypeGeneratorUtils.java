@@ -309,33 +309,33 @@ public class TypeGeneratorUtils {
 
     private static List<String> getNumberAnnotFields(Schema<?> numberSchema) {
         List<String> fields = new ArrayList<>();
-
+        boolean isInt = numberSchema instanceof IntegerSchema;
         if (numberSchema.getMinimum() != null &&
                 BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0
                 && numberSchema.getExclusiveMinimum() == null) {
             String value = numberSchema.getMinimum().toString();
-            String fieldRef = MINIMUM + COLON + value;
+            String fieldRef = MINIMUM + COLON + (isInt ? numberSchema.getMinimum().intValue(): value);
             fields.add(fieldRef);
         }
         if (numberSchema.getMaximum() != null &&
                 BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0
                 && numberSchema.getExclusiveMaximum() == null) {
             String value = numberSchema.getMaximum().toString();
-            String fieldRef = MAXIMUM + COLON + value;
+            String fieldRef = MAXIMUM + COLON + (isInt ? numberSchema.getMaximum().intValue(): value);
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMinimum() != null &&
                 numberSchema.getExclusiveMinimum() && numberSchema.getMinimum() != null &&
                BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0) {
             String value = numberSchema.getMinimum().toString();
-            String fieldRef = EXCLUSIVE_MIN + COLON + value;
+            String fieldRef = EXCLUSIVE_MIN + COLON + (isInt ? numberSchema.getMinimum().intValue(): value);
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMaximum() != null &&
                 numberSchema.getExclusiveMaximum() &&
                 numberSchema.getMaximum() != null && BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0) {
             String value = numberSchema.getMaximum().toString();
-            String fieldRef = EXCLUSIVE_MAX + COLON + value;
+            String fieldRef = EXCLUSIVE_MAX + COLON + (isInt ? numberSchema.getMaximum().intValue(): value);
             fields.add(fieldRef);
         }
         //TODO: This will be enable once constraint package gives this support.
