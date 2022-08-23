@@ -222,7 +222,6 @@ public class BallerinaTypesGenerator {
 
     /**
      * Remove duplicate of the TypeDefinitionNode.
-     *
      */
     private void removeDuplicateNode(List<TypeDefinitionNode> newConstraintNode) {
         for (TypeDefinitionNode newNode: newConstraintNode) {

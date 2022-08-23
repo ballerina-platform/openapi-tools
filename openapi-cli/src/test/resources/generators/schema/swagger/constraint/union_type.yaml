@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: Shopify Admin API
+  version: "2021-10"
+tags:
+  - name: customers
+  - name: products
+  - name: orders
+  - name: fulfillments
+  - name: order_risks
+paths:
+  /admin:
+    post:
+      operationId: "test1"
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/Person"
+      responses:
+        200:
+          description: Status OK
+
+components:
+  schemas:
+    Person:
+      type: object
+      required:
+        - service_class
+      properties:
+        service_class:
+          description: scenario 01 - field with nullable.
+          maxLength: 5000
+          nullable: true
+          type: string
+        tax_rates:
+          description: scenario 02 - field with oneOf type.
+          oneOf:
+            - items:
+                maxLength: 5000
+                type: string
+              type: array
+              maxItems: 6
+            - type: integer
+        tax_rates_anyOf:
+          description: scenario 03 - field with anyOf.
+          anyOf:
+            - items:
+                maxLength: 5000
+                type: string
+              type: array
+              maxItems: 6
+            - type: integer
+        tax_rates_oneOF_array:
+          description: scenario 03 - field with a oneOf type array that items has oneOf.
+          oneOf:
+            - type: array
+              maxItems: 6
+              items:
+                oneOf:
+                  - type: string
+                    maxLength: 500
+                  - type: integer
+            - type: string
+        tax_rates_anyOf_array:
+          description: scenario 04 - field with a anyOf type array items has anyOf.
+          anyOf:
+            - items:
+                anyOf:
+                  - type: integer
+                    maximum: 60
+                  - type: string
+              type: array
+              maxItems: 6
+            - type: integer

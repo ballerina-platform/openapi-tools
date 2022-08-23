@@ -185,8 +185,8 @@ public class TypeGeneratorUtils {
             constraintNode = null;
         } else if (isConstraintSupport) {
             PrintStream outStream = System.out;
-            outStream.println(String.format("WARNING: `@constraint` support will not be available with " +
-                    "union type in given `%s` field", fieldName.toString().trim()));
+            outStream.println(String.format("WARNING: constraints in OpenAPI contract will be ignored for the field " +
+                    "`%s`, as constraints are not supported on Ballerina union types", fieldName.toString().trim()));
             constraintNode = null;
         }
         if (constraintNode == null) {
@@ -272,7 +272,6 @@ public class TypeGeneratorUtils {
             return generateArrayConstraint(arraySchema);
         }
         // Ignore Object, Map and Composed schemas.
-
         return null;
     }
 
