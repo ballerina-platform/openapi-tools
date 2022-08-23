@@ -54,6 +54,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -175,6 +176,16 @@ public class TypeGeneratorUtils {
         //Generate constraint annotation.
         AnnotationNode constraintNode = generateConstraintNode(fieldSchema);
         MetadataNode metadataNode;
+        boolean isConstraintSupport =
+                constraintNode != null && fieldSchema.getNullable() != null && fieldSchema.getNullable() ||
+                (fieldSchema instanceof ComposedSchema && (((ComposedSchema) fieldSchema).getOneOf() != null ||
+                                ((ComposedSchema) fieldSchema).getAnyOf() != null));
+        if (isConstraintSupport) {
+            PrintStream outStream = System.out;
+            outStream.println(String.format("WARNING: `@constraint` support will not be available with " +
+                    "union type in given `%s` field", fieldName.toString().trim()));
+            constraintNode = null;
+        }
         if (constraintNode == null) {
             metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
         } else {
@@ -258,6 +269,7 @@ public class TypeGeneratorUtils {
             return generateArrayConstraint(arraySchema);
         }
         // Ignore Object, Map and Composed schemas.
+
         return null;
     }
 

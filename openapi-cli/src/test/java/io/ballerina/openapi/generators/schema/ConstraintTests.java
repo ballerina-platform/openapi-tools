@@ -103,6 +103,15 @@ public class ConstraintTests {
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
         Assert.assertTrue(diagnostics.isEmpty());
     }
+    /**
+     * example warnings for union type has constraint
+     *
+     * WARNING: `@constraint` support will not be available with union type in given `service_class` field
+     * WARNING: `@constraint` support will not be available with union type in given `tax_rates` field
+     * WARNING: `@constraint` support will not be available with union type in given `tax_rates_anyOf` field
+     * WARNING: `@constraint` support will not be available with union type in given `tax_rates_oneOF_array` field
+     * WARNING: `@constraint` support will not be available with union type in given `tax_rates_anyOf_array` field
+     */
 
 
     //TODO current tool doesn't handle union type: therefore union type constraint will handle once union type
