@@ -143,7 +143,8 @@ public class BallerinaTypesGenerator {
         if (!typeDefinitionNodeList.isEmpty()) {
             importsForTypeDefinitions(imports);
         }
-        if (hasConstraints) {
+        boolean nullable = GeneratorMetaData.getInstance().isNullable();
+        if (hasConstraints && !nullable) {
             //import for constraint
             ImportDeclarationNode importForConstraint = GeneratorUtils.getImportDeclarationNode(
                     GeneratorConstants.BALLERINA,

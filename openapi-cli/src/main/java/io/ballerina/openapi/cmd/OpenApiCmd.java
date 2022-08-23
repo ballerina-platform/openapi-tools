@@ -267,6 +267,9 @@ public class OpenApiCmd implements BLauncherCmd {
         }
         getTargetOutputPath();
         Path resourcePath = Paths.get(openApiFile.getCanonicalPath());
+        if (nullable) {
+            outStream.println("WARNING: `@constraint` support will not be available with `--nullable` option");
+        }
         if (mode != null) {
             switch (mode) {
                 case "service":

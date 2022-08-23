@@ -180,7 +180,10 @@ public class TypeGeneratorUtils {
                 constraintNode != null && fieldSchema.getNullable() != null && fieldSchema.getNullable() ||
                 (fieldSchema instanceof ComposedSchema && (((ComposedSchema) fieldSchema).getOneOf() != null ||
                                 ((ComposedSchema) fieldSchema).getAnyOf() != null));
-        if (isConstraintSupport) {
+        boolean nullable = GeneratorMetaData.getInstance().isNullable();
+        if (nullable) {
+            constraintNode = null;
+        } else if (isConstraintSupport) {
             PrintStream outStream = System.out;
             outStream.println(String.format("WARNING: `@constraint` support will not be available with " +
                     "union type in given `%s` field", fieldName.toString().trim()));
