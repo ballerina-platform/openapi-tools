@@ -163,7 +163,6 @@ public class TypeGeneratorUtils {
         return nillableType;
     }
 
-
     public static void updateRecordFieldList(List<String> required,
                                              List<Node> recordFieldList,
                                              Map.Entry<String, Schema> field,
@@ -171,6 +170,19 @@ public class TypeGeneratorUtils {
                                              NodeList<Node> schemaDocNodes,
                                              IdentifierToken fieldName,
                                              TypeDescriptorNode fieldTypeName) {
+
+        updateRecordFieldList(required, recordFieldList, field, fieldSchema, schemaDocNodes, fieldName,
+                fieldTypeName, System.err);
+    }
+
+    public static void updateRecordFieldList(List<String> required,
+                                             List<Node> recordFieldList,
+                                             Map.Entry<String, Schema> field,
+                                             Schema<?> fieldSchema,
+                                             NodeList<Node> schemaDocNodes,
+                                             IdentifierToken fieldName,
+                                             TypeDescriptorNode fieldTypeName,
+                                             PrintStream outStream) {
 
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
         //Generate constraint annotation.
@@ -184,9 +196,9 @@ public class TypeGeneratorUtils {
         if (nullable) {
             constraintNode = null;
         } else if (isConstraintSupport) {
-            PrintStream outStream = System.out;
-            outStream.println(String.format("WARNING: constraints in OpenAPI contract will be ignored for the field " +
-                    "`%s`, as constraints are not supported on Ballerina union types", fieldName.toString().trim()));
+            outStream.printf("WARNING: constraints in the OpenAPI contract will be ignored for the " +
+                            "field `%s`, as constraints are not supported on Ballerina union types%n",
+                    fieldName.toString().trim());
             constraintNode = null;
         }
         if (constraintNode == null) {

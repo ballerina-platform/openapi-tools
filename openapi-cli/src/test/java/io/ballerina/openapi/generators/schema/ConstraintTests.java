@@ -24,20 +24,15 @@ import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
 import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * This test class is to contain the test related to constraint validation.
@@ -45,12 +40,7 @@ import static org.testng.Assert.assertEquals;
 public class ConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     CodeGenerator codeGenerator = new CodeGenerator();
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
-    @BeforeTest
-    public void setUpStreams() {
-        System.setOut(new PrintStream(outContent));
-    }
+
     @Test(description = "Tests with record field has constraint and record field type can be user defined datatype " +
             "with constraint.")
     public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException, FormatterException {
@@ -61,7 +51,7 @@ public class ConstraintTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/record_field.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
+        assertTrue(diagnostics.isEmpty());
     }
 
     @Test(description = "Tests for all the array type scenarios:" +
@@ -77,7 +67,7 @@ public class ConstraintTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/array.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
+        assertTrue(diagnostics.isEmpty());
     }
 
     @Test(description = "Tests for the field has reference type scenarios" +
@@ -92,13 +82,9 @@ public class ConstraintTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/type_def_node.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
+        assertTrue(diagnostics.isEmpty());
     }
 
-    @AfterTest
-    public void cleanUp() throws IOException {
-        TestUtils.deleteGeneratedFiles();
-    }
 
     @Test(description = "Tests with record field has constraint value with zero.")
     public void testRecordFiledConstraintWithZeroValue() throws IOException, BallerinaOpenApiException,
@@ -111,35 +97,8 @@ public class ConstraintTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/record_field_02.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
+        assertTrue(diagnostics.isEmpty());
     }
-
-    @Test(description = "Tests with record field has constraint value with union type.")
-    public void constraintWithUnionType() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/union_type.yaml"),
-                true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        String out = "WARNING: constraints in OpenAPI contract will be ignored for the field `service_class`," +
-                " as constraints are not supported on Ballerina union types\n" +
-                "WARNING: constraints in OpenAPI contract will be ignored for the field `tax_rates`, " +
-                "as constraints are not supported on Ballerina union types\n" +
-                "WARNING: constraints in OpenAPI contract will be ignored for the field `tax_rates_anyOf`," +
-                " as constraints are not supported on Ballerina union types\n" +
-                "WARNING: constraints in OpenAPI contract will be ignored for the field `tax_rates_oneOF_array`," +
-                " as constraints are not supported on Ballerina union types\n" +
-                "WARNING: constraints in OpenAPI contract will be ignored for the field `tax_rates_anyOf_array`, as " +
-                "constraints are not supported on Ballerina union types";
-        assertEquals(out.replaceAll("\\s+", ""),
-                outContent.toString().replaceAll("\\s+", ""));
-    }
-
-    @AfterTest
-    public void restoreStreams() {
-        System.setOut(originalOut);
-    }
-
 
     //TODO current tool doesn't handle union type: therefore union type constraint will handle once union type
     // generation available in tool.

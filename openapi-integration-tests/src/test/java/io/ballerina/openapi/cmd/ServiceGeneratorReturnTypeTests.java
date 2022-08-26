@@ -54,16 +54,18 @@ public class ServiceGeneratorReturnTypeTests extends OpenAPITest {
     @DataProvider(name = "returnSampleProvider")
     public Object[][] dataProvider() {
         return new Object[][]{
-                {"content_schema_null.yaml", "content_schema_null.bal"}, // When the response content payload schema
-                // type is null
-                {"content_schema_has_one_of_type.yaml", "content_schema_has_one_of_type.bal"}, // content type has
-                // one of type schemas
-                {"multiple_media_types_for_one_response_code.yaml", "multiple_mediatype_for_one_response_code.bal"}, //
+                {"content_schema_null.yaml", "service/return/ballerina/content_schema_null.bal"}, // When the
+                // response content payload schema type is null
+                {"content_schema_has_one_of_type.yaml", "service/return/ballerina/" +
+                        "content_schema_has_one_of_type.bal"}, // content type has one of type schemas
+                {"multiple_media_types_for_one_response_code.yaml", "service/return/ballerina/" +
+                        "multiple_mediatype_for_one_response_code.bal"}, //
                 // one response code has multiple media types (content types)
-                {"response_has_inline_record.yaml", "response_has_inline_record.bal"}, // Response has inline object
+                {"response_has_inline_record.yaml", "service/return/ballerina/" +
+                        "response_has_inline_record.bal"}, // Response has inline object
                 // schema for content schema.
-                {"same_response.yaml", "same_response.bal"} // Two resources have same error code with same body type
-                // for return type.
+                {"same_response.yaml", "service/return/ballerina/same_response.bal"} // Two resources have
+                // same error code with same body type for return type.
         };
     }
 }
