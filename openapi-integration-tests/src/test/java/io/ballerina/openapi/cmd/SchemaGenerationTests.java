@@ -62,6 +62,8 @@ public class SchemaGenerationTests extends OpenAPITest {
                 " as constraints are not supported on Ballerina union types\n" +
                 "WARNING: constraints in OpenAPI contract will be ignored for the field `tax_rates_anyOf_array`, as " +
                 "constraints are not supported on Ballerina union types";
+        //Thread for wait out put generate
+        Thread.sleep(5000);
         // compare generated file has not included constraint annotation for scenario record field.
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", "schema/union.bal");
         process.waitFor();
