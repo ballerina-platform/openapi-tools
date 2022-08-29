@@ -23,41 +23,11 @@ paths:
 
 components:
   schemas:
-    Address:  # Use case 02 : Annotations on a type
-      type: string
-      minLength: 0
     Person:
       type: object
       required:
-        - id
+        - service_class
       properties:
-        name:
-          type: string
-          maxLength: 14 # Use case 01 : Annotations on a record field
-        hobby:
-          type: array
-          items:
-            type: string
-          maxItems: 5
-          minItems: 0
-        id:
-          type: integer
-          maximum: 5
-        address:  # Use case 03 : Annotations on a type used as a record field
-          $ref: "#/components/schemas/Address"
-        salary:
-          type: number
-          format: float
-          maximum: 0
-        net:
-          type: number
-          exclusiveMinimum: true
-          minimum: 0
-        maxDeliveryCount:
-          maximum: 1E+2
-          minimum: 1
-          type: integer
-          format: int32
         service_class:
           description: scenario 01 - field with nullable.
           maxLength: 5000

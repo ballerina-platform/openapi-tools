@@ -40,6 +40,7 @@ import io.ballerina.openapi.generators.schema.ballerinatypegenerators.AllOfRecor
 import io.ballerina.openapi.generators.schema.ballerinatypegenerators.ArrayTypeGenerator;
 import io.ballerina.openapi.generators.schema.ballerinatypegenerators.RecordTypeGenerator;
 import io.ballerina.openapi.generators.schema.ballerinatypegenerators.TypeGenerator;
+import io.ballerina.openapi.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
 import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -142,7 +143,8 @@ public class BallerinaTypesGenerator {
         if (!typeDefinitionNodeList.isEmpty()) {
             importsForTypeDefinitions(imports);
         }
-        if (hasConstraints) {
+        boolean nullable = GeneratorMetaData.getInstance().isNullable();
+        if (hasConstraints && !nullable) {
             //import for constraint
             ImportDeclarationNode importForConstraint = GeneratorUtils.getImportDeclarationNode(
                     GeneratorConstants.BALLERINA,
@@ -207,11 +209,32 @@ public class BallerinaTypesGenerator {
             typeDefinitionNodeList.add(((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint());
         } else if (typeGenerator instanceof RecordTypeGenerator &&
                 !((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-            typeDefinitionNodeList.addAll(((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
+            removeDuplicateNode(((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
         }  else if (typeGenerator instanceof AllOfRecordTypeGenerator &&
                 !((AllOfRecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
-            typeDefinitionNodeList.addAll(((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
+            removeDuplicateNode(((AllOfRecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
+        } else if (typeGenerator instanceof UnionTypeGenerator &&
+                !((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
+            removeDuplicateNode(((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
         }
         return typeDefinitionNode;
+    }
+
+    /**
+     * Remove duplicate of the TypeDefinitionNode.
+     */
+    private void removeDuplicateNode(List<TypeDefinitionNode> newConstraintNode) {
+        for (TypeDefinitionNode newNode: newConstraintNode) {
+            boolean isExist = false;
+            for (TypeDefinitionNode oldNode: typeDefinitionNodeList) {
+                if (newNode.typeName().text().equals(oldNode.typeName().text())) {
+                    isExist = true;
+                    break;
+                }
+            }
+            if (!isExist) {
+                typeDefinitionNodeList.add(newNode);
+            }
+        }
     }
 }

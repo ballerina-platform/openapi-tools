@@ -74,8 +74,8 @@ task copyOpenAPI() {
 
 test {
     systemProperties =  [ jacocoAgentLine: "-javaagent:${configurations.jacocoRuntime.asPath}=destfile=${test.jacoco.destinationFile.absolutePath},append=true,inclnolocationclasses=true,exclclassloader=jdk.internal.reflect.DelegatingClassLoader" ,
-                        "distributions.dir": bDistribution,
-                        "target.dir": "$project.buildDir"
+                          "distributions.dir": bDistribution,
+                          "target.dir": "$project.buildDir"
     ]
 
     useTestNG() {

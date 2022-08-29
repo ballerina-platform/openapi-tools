@@ -29,13 +29,11 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
-import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.DocCommentsGenerator;
 import io.ballerina.openapi.generators.schema.ballerinatypegenerators.AllOfRecordTypeGenerator;
@@ -56,6 +54,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,11 +70,9 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createUnionTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.AT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.MAPPING_CONSTRUCTOR;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.generators.GeneratorConstants.BOOLEAN;
@@ -166,7 +163,6 @@ public class TypeGeneratorUtils {
         return nillableType;
     }
 
-
     public static void updateRecordFieldList(List<String> required,
                                              List<Node> recordFieldList,
                                              Map.Entry<String, Schema> field,
@@ -175,10 +171,36 @@ public class TypeGeneratorUtils {
                                              IdentifierToken fieldName,
                                              TypeDescriptorNode fieldTypeName) {
 
+        updateRecordFieldList(required, recordFieldList, field, fieldSchema, schemaDocNodes, fieldName,
+                fieldTypeName, System.err);
+    }
+
+    public static void updateRecordFieldList(List<String> required,
+                                             List<Node> recordFieldList,
+                                             Map.Entry<String, Schema> field,
+                                             Schema<?> fieldSchema,
+                                             NodeList<Node> schemaDocNodes,
+                                             IdentifierToken fieldName,
+                                             TypeDescriptorNode fieldTypeName,
+                                             PrintStream outStream) {
+
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(schemaDocNodes);
         //Generate constraint annotation.
         AnnotationNode constraintNode = generateConstraintNode(fieldSchema);
         MetadataNode metadataNode;
+        boolean isConstraintSupport =
+                constraintNode != null && fieldSchema.getNullable() != null && fieldSchema.getNullable() ||
+                (fieldSchema instanceof ComposedSchema && (((ComposedSchema) fieldSchema).getOneOf() != null ||
+                                ((ComposedSchema) fieldSchema).getAnyOf() != null));
+        boolean nullable = GeneratorMetaData.getInstance().isNullable();
+        if (nullable) {
+            constraintNode = null;
+        } else if (isConstraintSupport) {
+            outStream.printf("WARNING: constraints in the OpenAPI contract will be ignored for the " +
+                            "field `%s`, as constraints are not supported on Ballerina union types%n",
+                    fieldName.toString().trim());
+            constraintNode = null;
+        }
         if (constraintNode == null) {
             metadataNode = createMetadataNode(documentationNode, createEmptyNodeList());
         } else {
@@ -313,33 +335,33 @@ public class TypeGeneratorUtils {
 
     private static List<String> getNumberAnnotFields(Schema<?> numberSchema) {
         List<String> fields = new ArrayList<>();
-
+        boolean isInt = numberSchema instanceof IntegerSchema;
         if (numberSchema.getMinimum() != null &&
                 BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0
                 && numberSchema.getExclusiveMinimum() == null) {
             String value = numberSchema.getMinimum().toString();
-            String fieldRef = MINIMUM + COLON + value;
+            String fieldRef = MINIMUM + COLON + (isInt ? numberSchema.getMinimum().intValue() : value);
             fields.add(fieldRef);
         }
         if (numberSchema.getMaximum() != null &&
                 BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0
                 && numberSchema.getExclusiveMaximum() == null) {
             String value = numberSchema.getMaximum().toString();
-            String fieldRef = MAXIMUM + COLON + value;
+            String fieldRef = MAXIMUM + COLON + (isInt ? numberSchema.getMaximum().intValue() : value);
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMinimum() != null &&
                 numberSchema.getExclusiveMinimum() && numberSchema.getMinimum() != null &&
                BigDecimal.ZERO.compareTo(numberSchema.getMinimum()) != 0) {
             String value = numberSchema.getMinimum().toString();
-            String fieldRef = EXCLUSIVE_MIN + COLON + value;
+            String fieldRef = EXCLUSIVE_MIN + COLON + (isInt ? numberSchema.getMinimum().intValue() : value);
             fields.add(fieldRef);
         }
         if (numberSchema.getExclusiveMaximum() != null &&
                 numberSchema.getExclusiveMaximum() &&
                 numberSchema.getMaximum() != null && BigDecimal.ZERO.compareTo(numberSchema.getMaximum()) != 0) {
             String value = numberSchema.getMaximum().toString();
-            String fieldRef = EXCLUSIVE_MAX + COLON + value;
+            String fieldRef = EXCLUSIVE_MAX + COLON + (isInt ? numberSchema.getMaximum().intValue() : value);
             fields.add(fieldRef);
         }
         //TODO: This will be enable once constraint package gives this support.
@@ -458,42 +480,6 @@ public class TypeGeneratorUtils {
         if (schemaValue.getDeprecated() != null && schemaValue.getDeprecated()) {
             DocCommentsGenerator.extractDeprecatedAnnotation(schemaValue.getExtensions(),
                     documentation, typeAnnotations);
-        }
-    }
-
-    /**
-     * Creates the UnionType string to generate bal type for a given oneOf or anyOf type schema.
-     *
-     * @param schemas  List of schemas included in the anyOf or oneOf schema
-     * @param typeName This is parameter or variable name that used to populate error message meaningful
-     * @return Union type
-     * @throws BallerinaOpenApiException when unsupported combination of schemas found
-     */
-    public static TypeDescriptorNode getUnionType(List<Schema> schemas, String typeName)
-            throws BallerinaOpenApiException {
-        List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
-        for (Schema schema : schemas) {
-            TypeDescriptorNode typeDescriptorNode = getTypeGenerator(schema, typeName, null)
-                    .generateTypeDescriptorNode();
-            if (typeDescriptorNode instanceof OptionalTypeDescriptorNode &&
-                    GeneratorMetaData.getInstance().isNullable()) {
-                Node internalTypeDesc = ((OptionalTypeDescriptorNode) typeDescriptorNode).typeDescriptor();
-                typeDescriptorNode = (TypeDescriptorNode) internalTypeDesc;
-            }
-            typeDescriptorNodes.add(typeDescriptorNode);
-        }
-        if (typeDescriptorNodes.size() > 1) {
-            UnionTypeDescriptorNode unionTypeDescriptorNode = null;
-            TypeDescriptorNode leftTypeDesc = typeDescriptorNodes.get(0);
-            for (int i = 1; i < typeDescriptorNodes.size(); i++) {
-                TypeDescriptorNode rightTypeDesc = typeDescriptorNodes.get(i);
-                unionTypeDescriptorNode = createUnionTypeDescriptorNode(leftTypeDesc, createToken(PIPE_TOKEN),
-                        rightTypeDesc);
-                leftTypeDesc = unionTypeDescriptorNode;
-            }
-            return unionTypeDescriptorNode;
-        } else {
-            return typeDescriptorNodes.get(0);
         }
     }
 }

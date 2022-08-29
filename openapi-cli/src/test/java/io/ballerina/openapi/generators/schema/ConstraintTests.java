@@ -24,8 +24,6 @@ import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -34,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
+import static org.testng.Assert.assertTrue;
 
 /**
  * This test class is to contain the test related to constraint validation.
@@ -41,6 +40,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
 public class ConstraintTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     CodeGenerator codeGenerator = new CodeGenerator();
+
     @Test(description = "Tests with record field has constraint and record field type can be user defined datatype " +
             "with constraint.")
     public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException, FormatterException {
@@ -51,7 +51,7 @@ public class ConstraintTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/record_field.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
+        assertTrue(diagnostics.isEmpty());
     }
 
     @Test(description = "Tests for all the array type scenarios:" +
@@ -67,7 +67,7 @@ public class ConstraintTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/array.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
+        assertTrue(diagnostics.isEmpty());
     }
 
     @Test(description = "Tests for the field has reference type scenarios" +
@@ -82,13 +82,9 @@ public class ConstraintTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/type_def_node.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
+        assertTrue(diagnostics.isEmpty());
     }
 
-    @AfterTest
-    public void cleanUp() throws IOException {
-        TestUtils.deleteGeneratedFiles();
-    }
 
     @Test(description = "Tests with record field has constraint value with zero.")
     public void testRecordFiledConstraintWithZeroValue() throws IOException, BallerinaOpenApiException,
@@ -101,9 +97,8 @@ public class ConstraintTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/constraint/record_field_02.bal",
                 syntaxTree);
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
-        Assert.assertTrue(diagnostics.isEmpty());
+        assertTrue(diagnostics.isEmpty());
     }
-
 
     //TODO current tool doesn't handle union type: therefore union type constraint will handle once union type
     // generation available in tool.

@@ -90,8 +90,7 @@ public class OpenAPITest {
     }
 
     public void compareGeneratedSyntaxTreewithExpectedSyntaxTree(String generated, String balfile) throws IOException {
-        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve(
-                "service/return/ballerina").resolve(balfile));
+        String expectedBallerinaContent = getStringFromGivenBalFile(RES_DIR.resolve(balfile));
         String generatedFile = getStringFromGivenBalFile(this.tmpDir.resolve(generated));
         generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");

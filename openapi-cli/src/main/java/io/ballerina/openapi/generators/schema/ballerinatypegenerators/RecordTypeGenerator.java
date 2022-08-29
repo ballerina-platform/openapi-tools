@@ -129,6 +129,11 @@ public class RecordTypeGenerator extends TypeGenerator {
             if (typeGenerator instanceof ArrayTypeGenerator &&
                     ((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint() != null) {
                         typeDefinitionNodeList.add(((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint());
+            } else if (typeGenerator instanceof UnionTypeGenerator &&
+                    !((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
+                List<TypeDefinitionNode> newConstraintNode =
+                        ((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList();
+                typeDefinitionNodeList.addAll(newConstraintNode);
             }
             updateRecordFieldList(required, recordFieldList, field, fieldSchema, schemaDocNodes,
                     fieldName, fieldTypeName);

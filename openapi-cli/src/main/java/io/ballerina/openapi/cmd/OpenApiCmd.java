@@ -267,6 +267,10 @@ public class OpenApiCmd implements BLauncherCmd {
         }
         getTargetOutputPath();
         Path resourcePath = Paths.get(openApiFile.getCanonicalPath());
+        if (nullable) {
+            outStream.println("WARNING: All the constraints in the OpenAPI contract will be ignored when generating" +
+                    " the Ballerina client/service with the `--nullable` option");
+        }
         if (mode != null) {
             switch (mode) {
                 case "service":

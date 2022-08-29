@@ -47,7 +47,8 @@ import io.ballerina.openapi.cmd.model.GenSrcFile;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -555,14 +556,33 @@ public class GeneratorUtils {
      * This util is to check if the given schema contains any constraints.
      */
     public static boolean hasConstraints(Schema<?> value) {
-        if (value instanceof ObjectSchema && value.getProperties() != null) {
+        if (value.getProperties() != null) {
             boolean constraintExists = value.getProperties().values().stream()
-                    .anyMatch(GeneratorUtils::isConstraintExists);
+                    .anyMatch(GeneratorUtils::hasConstraints);
             if (constraintExists) {
                 return true;
             }
-        }
+        } else if (value instanceof ComposedSchema) {
+            List<Schema> allOf = ((ComposedSchema) value).getAllOf();
+            List<Schema> oneOf = ((ComposedSchema) value).getOneOf();
+            List<Schema> anyOf = ((ComposedSchema) value).getAnyOf();
+            boolean constraintExists = false;
+            if (allOf != null) {
+                constraintExists = allOf.stream().anyMatch(GeneratorUtils::hasConstraints);
+            } else if (oneOf != null) {
+                constraintExists = oneOf.stream().anyMatch(GeneratorUtils::hasConstraints);
+            } else if (anyOf != null) {
+                constraintExists = anyOf.stream().anyMatch(GeneratorUtils::hasConstraints);
+            }
+            if (constraintExists) {
+                return true;
+            }
 
+        } else if (value instanceof ArraySchema) {
+            if (!isConstraintExists(value)) {
+                return isConstraintExists(((ArraySchema) value).getItems());
+            }
+        }
         return isConstraintExists(value);
     }
 

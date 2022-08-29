@@ -26,6 +26,7 @@
             <class name="io.ballerina.openapi.extension.build.ValidatorTests"/>
             <class name="io.ballerina.openapi.cmd.ServiceGeneratorReturnTypeTests"/>
             <class name="io.ballerina.openapi.cmd.ClientGenerationTests"/>
+            <class name="io.ballerina.openapi.cmd.SchemaGenerationTests"/>
         </classes>
     </test>
 </suite>
