@@ -22,7 +22,8 @@ import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.openapi.OpenApiConverter;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
@@ -351,7 +352,7 @@ public class OpenApiCmd implements BLauncherCmd {
         try {
             generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, nullable,
                     resourceMode);
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | FormatterException | BallerinaOpenApiException e) {
             if (e.getLocalizedMessage() != null) {
                 outStream.println(e.getLocalizedMessage());
                 exitError(this.exitWhenFinish);
@@ -374,7 +375,7 @@ public class OpenApiCmd implements BLauncherCmd {
             assert resourcePath != null;
             generator.generateService(resourcePath.toString(), serviceName, targetOutputPath.toString(), filter,
                     nullable);
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | FormatterException | BallerinaOpenApiException e) {
             outStream.println("Error occurred when generating service for OpenAPI contract at " + argList.get(0) +
                     ". " + e.getMessage() + ".");
             exitError(this.exitWhenFinish);

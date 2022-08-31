@@ -25,7 +25,7 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public class RecordTypeGenerator extends TypeGenerator {
      * Generate TypeDescriptorNode for object type schemas.
      */
     @Override
-    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
+    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException, BallerinaOpenApiException {
         if (schema.getProperties() != null) {
             Map<String, Schema> properties = schema.getProperties();
             List<String> required = schema.getRequired();

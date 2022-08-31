@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.generators.service;
+package io.ballerina.openapi.core.generators.service;
 
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 

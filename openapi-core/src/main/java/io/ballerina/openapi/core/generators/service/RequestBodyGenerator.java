@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.service;
+package io.ballerina.openapi.core.generators.service;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
@@ -33,8 +33,9 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorConstants;
+import io.ballerina.openapi.core.GeneratorConstants;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -54,20 +55,9 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createArrayTypeDescr
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createBuiltinSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createRequiredParameterNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_JSON;
-import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_OCTET_STREAM;
-import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_URL_ENCODE;
-import static io.ballerina.openapi.generators.GeneratorConstants.APPLICATION_XML;
-import static io.ballerina.openapi.generators.GeneratorConstants.MEDIA_TYPE_KEYWORD;
-import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD;
-import static io.ballerina.openapi.generators.GeneratorConstants.PAYLOAD_KEYWORD;
-import static io.ballerina.openapi.generators.GeneratorConstants.TEXT;
-import static io.ballerina.openapi.generators.GeneratorConstants.TEXT_WILDCARD_REGEX;
-import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
-import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getAnnotationNode;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getAnnotationNode;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getMediaTypeToken;
 
 /**
  * This class for generating request body payload for OAS requestBody section.
@@ -86,8 +76,7 @@ public class RequestBodyGenerator {
     /**
      * This for creating request Body for given request object.
      */
-    public RequiredParameterNode createNodeForRequestBody()
-            throws BallerinaOpenApiException {
+    public RequiredParameterNode createNodeForRequestBody() throws BallerinaOpenApiException {
         // type CustomRecord record {| anydata...; |};
         // public type PayloadType string|json|xml|byte[]|CustomRecord|CustomRecord[] ;
         List<Node> literals = new ArrayList<>();
@@ -105,15 +94,15 @@ public class RequestBodyGenerator {
             Map.Entry<String, MediaType> mime = content.next();
             equalDataType.add(mime);
             typeName = getNodeForPayloadType(components, mime);
-            if (mime.getKey().equals(APPLICATION_URL_ENCODE)) {
+            if (mime.getKey().equals(GeneratorConstants.APPLICATION_URL_ENCODE)) {
                 SeparatedNodeList<MappingFieldNode> fields = fillRequestAnnotationValues(literals, equalDataType);
                 annotValue = NodeFactory.createMappingConstructorExpressionNode(
                         createToken(SyntaxKind.OPEN_BRACE_TOKEN), fields, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             }
         }
-        AnnotationNode annotationNode = getAnnotationNode(PAYLOAD_KEYWORD, annotValue);
+        AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, annotValue);
         NodeList<AnnotationNode> annotation =  NodeFactory.createNodeList(annotationNode);
-        Token paramName = createIdentifierToken(PAYLOAD, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+        Token paramName = createIdentifierToken(GeneratorConstants.PAYLOAD, GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
         return createRequiredParameterNode(annotation, typeName, paramName);
     }
 
@@ -127,20 +116,20 @@ public class RequestBodyGenerator {
             String schemaName = extractReferenceType(mediaType.getValue().getSchema().get$ref());
             Map<String, Schema> schemas = components.getSchemas();
             String mediaTypeContent = mediaType.getKey().trim();
-            if (mediaTypeContent.matches(TEXT_WILDCARD_REGEX)) {
-                mediaTypeContent = TEXT;
+            if (mediaTypeContent.matches(GeneratorConstants.TEXT_WILDCARD_REGEX)) {
+                mediaTypeContent = GeneratorConstants.TEXT;
             }
             IdentifierToken identifierToken;
             switch (mediaTypeContent) {
-                case APPLICATION_XML:
+                case GeneratorConstants.APPLICATION_XML:
                     identifierToken = createIdentifierToken(GeneratorConstants.XML);
                     typeName = createSimpleNameReferenceNode(identifierToken);
                     break;
-                case TEXT:
+                case GeneratorConstants.TEXT:
                     identifierToken = createIdentifierToken(GeneratorConstants.STRING);
                     typeName = createSimpleNameReferenceNode(identifierToken);
                     break;
-                case APPLICATION_OCTET_STREAM:
+                case GeneratorConstants.APPLICATION_OCTET_STREAM:
                     ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                             createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                             createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
@@ -148,8 +137,8 @@ public class RequestBodyGenerator {
                                     null, createIdentifierToken(GeneratorConstants.BYTE)),
                             NodeFactory.createNodeList(dimensionNode));
                     break;
-                case APPLICATION_JSON:
-                    Schema<?> schema = schemas.get(getValidName(schemaName, true));
+                case GeneratorConstants.APPLICATION_JSON:
+                    Schema<?> schema = schemas.get(GeneratorUtils.getValidName(schemaName, true));
                     // This condition is to avoid wrong code generation for union type request body. If given schema
                     // has oneOf type , then it will not be able to support via ballerina. We need to pick it mime
                     // type instead of schema type.
@@ -158,12 +147,12 @@ public class RequestBodyGenerator {
                         typeName = createSimpleNameReferenceNode(identifierToken);
                     } else {
                         typeName = createSimpleNameReferenceNode(createIdentifierToken(
-                                getValidName(schemaName, true)));
+                                GeneratorUtils.getValidName(schemaName, true)));
                     }
                     break;
-                case APPLICATION_URL_ENCODE:
+                case GeneratorConstants.APPLICATION_URL_ENCODE:
                     typeName = createSimpleNameReferenceNode(createIdentifierToken(
-                            getValidName(schemaName, true)));
+                            GeneratorUtils.getValidName(schemaName, true)));
                     break;
                 default:
                     identifierToken = createIdentifierToken(GeneratorConstants.JSON);
@@ -188,14 +177,14 @@ public class RequestBodyGenerator {
                                                                             HashSet<Map.Entry<String,
                                                                                     MediaType>> equalDataTypes) {
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
-        IdentifierToken mediaType = createIdentifierToken(MEDIA_TYPE_KEYWORD);
+        IdentifierToken mediaType = createIdentifierToken(GeneratorConstants.MEDIA_TYPE_KEYWORD);
 
         Iterator<Map.Entry<String, MediaType>> iter = equalDataTypes.iterator();
         SpecificFieldNode specificFieldNode;
         while (iter.hasNext()) {
             Map.Entry<String, MediaType> next = iter.next();
-            literals.add(createIdentifierToken('"' + next.getKey().trim() + '"', SINGLE_WS_MINUTIAE,
-                    SINGLE_WS_MINUTIAE));
+            literals.add(createIdentifierToken('"' + next.getKey().trim() + '"', GeneratorUtils.SINGLE_WS_MINUTIAE,
+                    GeneratorUtils.SINGLE_WS_MINUTIAE));
             literals.add(comma);
         }
         literals.remove(literals.size() - 1);

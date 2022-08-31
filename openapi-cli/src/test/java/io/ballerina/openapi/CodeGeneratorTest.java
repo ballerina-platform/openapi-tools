@@ -16,9 +16,9 @@
 package io.ballerina.openapi;
 
 import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.cmd.model.GenSrcFile;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.GeneratorUtils;
 import io.ballerina.openapi.generators.common.TestUtils;
 import org.apache.commons.io.FileUtils;
@@ -483,7 +483,7 @@ public class CodeGeneratorTest {
             boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
                     Files.notExists(resourcePath.resolve("types.bal"));
             Assert.assertTrue(hasTypeFileGenerated, "Empty types.bal file has been generated");
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+        } catch (IOException | FormatterException | BallerinaOpenApiException e) {
             Assert.fail("Error while generating the service. " + e.getMessage());
         } finally {
             deleteGeneratedFiles("no_schema_service.bal");

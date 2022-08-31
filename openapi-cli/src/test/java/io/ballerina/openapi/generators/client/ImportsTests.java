@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.openapi.cmd.Filter;
+import io.ballerina.openapi.core.model.Filter;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

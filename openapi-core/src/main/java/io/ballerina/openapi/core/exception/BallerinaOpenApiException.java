@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.openapi.exception;
+package io.ballerina.openapi.core.exception;
 
 /**
  * Exception type definition for OpenAPI to Ballerina parsing related errors.

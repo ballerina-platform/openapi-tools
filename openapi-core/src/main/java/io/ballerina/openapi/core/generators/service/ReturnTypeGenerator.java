@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.generators.service;
+package io.ballerina.openapi.core.generators.service;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
@@ -33,8 +33,9 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorConstants;
+import io.ballerina.openapi.core.GeneratorConstants;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -66,15 +67,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
-import static io.ballerina.openapi.generators.GeneratorConstants.BODY;
-import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
-import static io.ballerina.openapi.generators.GeneratorUtils.getQualifiedNameReferenceNode;
-import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
-import static io.ballerina.openapi.generators.GeneratorUtils.isComplexURL;
-import static io.ballerina.openapi.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.extractReferenceType;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getMediaTypeToken;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.getUnionNodeForOneOf;
+import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getMediaTypeToken;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getUnionNodeForOneOf;
 
 /**
  * This class for generating return type definition node according to the OpenAPI specification response section.
@@ -99,7 +95,8 @@ public class ReturnTypeGenerator {
                                                                 NodeList<AnnotationNode> annotations, String path)
             throws BallerinaOpenApiException {
 
-        Token returnKeyWord = createIdentifierToken("returns", SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+        Token returnKeyWord = createIdentifierToken("returns", GeneratorUtils.SINGLE_WS_MINUTIAE,
+                GeneratorUtils.SINGLE_WS_MINUTIAE);
         ReturnTypeDescriptorNode returnNode = null;
         if (operation.getValue().getResponses() != null) {
             ApiResponses responses = operation.getValue().getResponses();
@@ -119,7 +116,7 @@ public class ReturnTypeGenerator {
                             statues = createSimpleNameReferenceNode(createIdentifierToken(
                                     GeneratorConstants.HTTP_RESPONSE));
                         } else {
-                            statues = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
+                            statues = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
                         }
                         returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotations, statues);
                     } else if (response.getValue().getContent() != null) {
@@ -163,7 +160,7 @@ public class ReturnTypeGenerator {
             returnNode = createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken("error?")));
         }
-        if (isComplexURL(path)) {
+        if (GeneratorUtils.isComplexURL(path)) {
             assert returnNode != null;
             String returnStatement = returnNode.toString().trim().replace("returns", "") + "|error";
             return createReturnTypeDescriptorNode(createToken(SyntaxKind.RETURNS_KEYWORD), createEmptyNodeList(),
@@ -187,7 +184,7 @@ public class ReturnTypeGenerator {
             if (mediaTypeEntry.getValue().getSchema() != null) {
                 Schema schema = mediaTypeEntry.getValue().getSchema();
                 if (schema.get$ref() != null) {
-                    dataType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
+                    dataType = GeneratorUtils.getValidName(extractReferenceType(schema.get$ref().trim()), true);
                     type = createBuiltinSimpleNameReferenceNode(null,
                             createIdentifierToken(dataType));
                 } else if (schema instanceof ComposedSchema) {
@@ -224,7 +221,8 @@ public class ReturnTypeGenerator {
             } else if (response.getValue().getContent() == null && response.getValue().get$ref() == null ||
                     response.getValue().getContent() != null && response.getValue().getContent().size() == 0) {
                 //key and value
-                QualifiedNameReferenceNode node = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, code);
+                QualifiedNameReferenceNode node = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
+                        code);
                 qualifiedNodes.add(node);
             } else if (response.getValue().getContent() != null) {
                 TypeDescriptorNode record = getMediaTypeToken(response.getValue().getContent().entrySet()
@@ -275,21 +273,22 @@ public class ReturnTypeGenerator {
      * Create recordType TypeDescriptor.
      */
     private SimpleNameReferenceNode createReturnTypeInclusionRecord(String statusCode, TypeDescriptorNode type) {
-        String recordName = statusCode + getValidName(type.toString(), true);
+        String recordName = statusCode + GeneratorUtils.getValidName(type.toString(), true);
         Token recordKeyWord = createToken(RECORD_KEYWORD);
         Token bodyStartDelimiter = createIdentifierToken("{|");
         // Create record fields
         List<Node> recordFields = new ArrayList<>();
         // Type reference node
         Token asteriskToken = createIdentifierToken("*");
-        QualifiedNameReferenceNode typeNameField = getQualifiedNameReferenceNode(GeneratorConstants.HTTP, statusCode);
+        QualifiedNameReferenceNode typeNameField = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
+                statusCode);
         TypeReferenceNode typeReferenceNode = createTypeReferenceNode(
                 asteriskToken,
                 typeNameField,
                 createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(typeReferenceNode);
 
-        IdentifierToken fieldName = createIdentifierToken(BODY, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+        IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.BODY, GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
         RecordFieldNode recordFieldNode = createRecordFieldNode(
                 null, null,
                 type,

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.openapi.generators.service;
+package io.ballerina.openapi.core.generators.service;
 
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyBlockNode;
@@ -40,9 +40,10 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.cmd.Filter;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorUtils;
+import io.ballerina.openapi.core.GeneratorConstants;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -71,16 +72,8 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignat
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createServiceDeclarationNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
-import static io.ballerina.openapi.generators.GeneratorConstants.FUNCTION;
-import static io.ballerina.openapi.generators.GeneratorConstants.OAS_PATH_SEPARATOR;
-import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
-import static io.ballerina.openapi.generators.GeneratorUtils.SINGLE_WS_MINUTIAE;
-import static io.ballerina.openapi.generators.GeneratorUtils.escapeIdentifier;
-import static io.ballerina.openapi.generators.GeneratorUtils.extractReferenceType;
-import static io.ballerina.openapi.generators.GeneratorUtils.generateBodyStatementForComplexUrl;
-import static io.ballerina.openapi.generators.GeneratorUtils.getRelativeResourcePath;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
-import static io.ballerina.openapi.generators.service.ServiceGenerationUtils.generateServiceConfigAnnotation;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.createImportDeclarationNodes;
+import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.generateServiceConfigAnnotation;
 
 /**
  * This Util class use for generating ballerina service file according to given yaml file.
@@ -130,9 +123,9 @@ public class BallerinaServiceGenerator {
         }
         ServiceDeclarationNode serviceDeclarationNode = createServiceDeclarationNode(
                 metadataNode, createEmptyNodeList(), createToken(SyntaxKind.SERVICE_KEYWORD,
-                        SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE),
+                        GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE),
                 null, absoluteResourcePath, createToken(SyntaxKind.ON_KEYWORD,
-                        SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE), expressions,
+                        GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE), expressions,
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         // Create module member declaration
@@ -163,13 +156,13 @@ public class BallerinaServiceGenerator {
     }
 
     private NodeList<Node> createBasePathNodeList(ListenerGenerator listener) {
-        if (OAS_PATH_SEPARATOR.equals(listener.getBasePath())) {
+        if (GeneratorConstants.OAS_PATH_SEPARATOR.equals(listener.getBasePath())) {
             return createNodeList(createIdentifierToken(listener.getBasePath()));
         } else {
-            String[] basePathNode = listener.getBasePath().split(OAS_PATH_SEPARATOR);
+            String[] basePathNode = listener.getBasePath().split(GeneratorConstants.OAS_PATH_SEPARATOR);
             List<Node> basePath = Arrays.stream(basePathNode).filter(node -> !node.isBlank())
-                    .map(node -> createIdentifierToken(OAS_PATH_SEPARATOR +
-                            escapeIdentifier(node))).collect(Collectors.toList());
+                    .map(node -> createIdentifierToken(GeneratorConstants.OAS_PATH_SEPARATOR +
+                            GeneratorUtils.escapeIdentifier(node))).collect(Collectors.toList());
             return createNodeList(basePath);
         }
     }
@@ -193,7 +186,8 @@ public class BallerinaServiceGenerator {
                             ((operation.getValue().getOperationId() != null) &&
                             filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                         // getRelative resource path
-                        List<Node> functionRelativeResourcePath = getRelativeResourcePath(path, operation.getValue());
+                        List<Node> functionRelativeResourcePath = GeneratorUtils.getRelativeResourcePath(path,
+                                operation.getValue());
                         // function call
                         FunctionDefinitionNode functionDefinitionNode = getResourceFunction(operation,
                                 functionRelativeResourcePath, path);
@@ -202,7 +196,7 @@ public class BallerinaServiceGenerator {
                 }
             } else {
                 // getRelative resource path
-                List<Node> relativeResourcePath = getRelativeResourcePath(path, operation.getValue());
+                List<Node> relativeResourcePath = GeneratorUtils.getRelativeResourcePath(path, operation.getValue());
                 // function call
                 FunctionDefinitionNode resourceFunction = getResourceFunction(operation, relativeResourcePath, path);
                 functions.add(resourceFunction);
@@ -222,11 +216,12 @@ public class BallerinaServiceGenerator {
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                        List<Node> pathNodes, String path)
             throws BallerinaOpenApiException {
-        NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(RESOURCE, SINGLE_WS_MINUTIAE,
-                SINGLE_WS_MINUTIAE));
-        Token functionKeyWord = createIdentifierToken(FUNCTION, SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+        NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
+                GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
+        Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
+                GeneratorUtils.SINGLE_WS_MINUTIAE);
         IdentifierToken functionName = createIdentifierToken(operation.getKey().name()
-                .toLowerCase(Locale.ENGLISH), SINGLE_WS_MINUTIAE, SINGLE_WS_MINUTIAE);
+                .toLowerCase(Locale.ENGLISH), GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
         NodeList<Node> relativeResourcePath = createNodeList(pathNodes);
         ParametersGenerator parametersGenerator = new ParametersGenerator(false);
         parametersGenerator.generateResourcesInputs(operation);
@@ -267,7 +262,7 @@ public class BallerinaServiceGenerator {
 
         // Function Body Node
         // If path parameter has some special characters, extra body statements are added to handle the complexity.
-        List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
+        List<StatementNode> bodyStatements = GeneratorUtils.generateBodyStatementForComplexUrl(path);
         FunctionBodyBlockNode functionBodyBlockNode = createFunctionBodyBlockNode(
                 createToken(SyntaxKind.OPEN_BRACE_TOKEN),
                 null,
@@ -286,7 +281,7 @@ public class BallerinaServiceGenerator {
      */
     private RequestBody resolveRequestBodyReference(RequestBody requestBody) throws BallerinaOpenApiException {
         if (requestBody.get$ref() != null) {
-            String requestBodyName = extractReferenceType(requestBody.get$ref());
+            String requestBodyName = GeneratorUtils.extractReferenceType(requestBody.get$ref());
             requestBody = resolveRequestBodyReference(openAPI.getComponents()
                     .getRequestBodies().get(requestBodyName.trim()));
         }

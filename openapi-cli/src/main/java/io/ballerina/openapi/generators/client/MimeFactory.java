@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.client.mime.AnyType;
 import io.ballerina.openapi.generators.client.mime.CustomType;
 import io.ballerina.openapi.generators.client.mime.JsonType;
