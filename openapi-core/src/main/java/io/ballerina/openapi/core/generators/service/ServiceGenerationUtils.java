@@ -139,8 +139,8 @@ public class ServiceGenerationUtils {
                 TypeDescriptorNode member;
                 if (((ArraySchema) schema).getItems().get$ref() != null) {
                     member = createBuiltinSimpleNameReferenceNode(null,
-                            createIdentifierToken(GeneratorUtils.getValidName(extractReferenceType(((ArraySchema) schema).
-                                    getItems().get$ref()), true)));
+                            createIdentifierToken(GeneratorUtils.getValidName(
+                                    extractReferenceType(((ArraySchema) schema).getItems().get$ref()), true)));
                 } else if (!(((ArraySchema) schema).getItems() instanceof ArraySchema)) {
                     member = createBuiltinSimpleNameReferenceNode(null,
                             createIdentifierToken(GeneratorConstants.JSON));

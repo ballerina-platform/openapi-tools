@@ -1,8 +1,9 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
+import io.ballerina.openapi.cmd.OpenAPIToBallerina;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
@@ -17,7 +18,7 @@ import java.nio.file.Paths;
 public class NestedRecordInclusionTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-    CodeGenerator codeGenerator = new CodeGenerator();
+    OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
 
     @Test(description = "Generate records for nested referenced schemas")
     public void generateAllOf() throws IOException, BallerinaOpenApiException {

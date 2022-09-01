@@ -108,8 +108,8 @@ public class ListenerGenerator {
         // Create type descriptor
         Token modulePrefix = AbstractNodeFactory.createIdentifierToken("http", GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
-        IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("Listener", GeneratorUtils.SINGLE_WS_MINUTIAE,
-                AbstractNodeFactory.createEmptyMinutiaeList());
+        IdentifierToken identifier = AbstractNodeFactory.createIdentifierToken("Listener",
+                GeneratorUtils.SINGLE_WS_MINUTIAE, AbstractNodeFactory.createEmptyMinutiaeList());
         QualifiedNameReferenceNode typeDescriptor = NodeFactory.createQualifiedNameReferenceNode(modulePrefix,
                 AbstractNodeFactory.createToken(SyntaxKind.COLON_TOKEN), identifier);
         // Create variable

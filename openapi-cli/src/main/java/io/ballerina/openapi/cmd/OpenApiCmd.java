@@ -24,7 +24,6 @@ import io.ballerina.openapi.converter.diagnostic.IncompatibleResourceDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.model.Filter;
-import io.ballerina.openapi.generators.openapi.OpenApiConverter;
 import org.ballerinalang.formatter.core.FormatterException;
 import picocli.CommandLine;
 
@@ -39,14 +38,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.cmd.CmdConstants.BAL_EXTENSION;
+import static io.ballerina.openapi.cmd.CmdConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.REMOTE;
+import static io.ballerina.openapi.cmd.CmdConstants.RESOURCE;
 import static io.ballerina.openapi.cmd.CmdConstants.SERVICE;
-import static io.ballerina.openapi.generators.GeneratorConstants.BAL_EXTENSION;
-import static io.ballerina.openapi.generators.GeneratorConstants.JSON_EXTENSION;
-import static io.ballerina.openapi.generators.GeneratorConstants.RESOURCE;
-import static io.ballerina.openapi.generators.GeneratorConstants.YAML_EXTENSION;
-import static io.ballerina.openapi.generators.GeneratorConstants.YML_EXTENSION;
-import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.cmd.CmdConstants.YAML_EXTENSION;
+import static io.ballerina.openapi.cmd.CmdConstants.YML_EXTENSION;
+import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 
 /**
  * Main class to implement "openapi" command for ballerina. Commands for Client Stub, Service file and OpenApi contract
@@ -170,7 +169,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 }
                 // Add the resource flag enable
                 clientResourceMode = generateClientMethods != null && !generateClientMethods.isBlank() &&
-                                (generateClientMethods.equals(CmdConstants.RESOURCE));
+                                (generateClientMethods.equals(RESOURCE));
                 
                 if (clientResourceMode && mode != null && mode.equals(SERVICE)) {
                     // Exit the code generation process
@@ -225,7 +224,7 @@ public class OpenApiCmd implements BLauncherCmd {
         }
         getTargetOutputPath();
         // Check service name it is mandatory
-        OpenApiConverter openApiConverter = new OpenApiConverter();
+        BallerinaToOpenAPI openApiConverter = new BallerinaToOpenAPI();
         openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
                 generatedFileType);
         errors.addAll(openApiConverter.getErrors());
@@ -256,7 +255,7 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName input resource file
      */
     private void openApiToBallerina(String fileName, Filter filter) throws IOException {
-        CodeGenerator generator = new CodeGenerator();
+        OpenAPIToBallerina generator = new OpenAPIToBallerina();
         generator.setLicenseHeader(this.setLicenseHeader());
         generator.setIncludeTestFiles(this.includeTestFiles);
         final File openApiFile = new File(fileName);
@@ -347,7 +346,7 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param resourcePath      resource Path
      * @param resourceMode      flag for client resource method generation
      */
-    private void generatesClientFile(CodeGenerator generator,  Path resourcePath, Filter filter,
+    private void generatesClientFile(OpenAPIToBallerina generator, Path resourcePath, Filter filter,
                                      boolean resourceMode) {
         try {
             generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, nullable,
@@ -369,7 +368,8 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param serviceName   service name uses for naming the generated file
      * @param resourcePath  resource Path
      */
-    private void generateServiceFile(CodeGenerator generator, String serviceName, Path resourcePath, Filter filter) {
+    private void generateServiceFile(OpenAPIToBallerina generator, String serviceName, Path resourcePath,
+                                     Filter filter) {
 
         try {
             assert resourcePath != null;
@@ -388,7 +388,7 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName          service name  use for naming the files
      * @param resourcePath      resource path
      */
-    private void generateBothFiles(CodeGenerator generator, String fileName, Path resourcePath, Filter filter,
+    private void generateBothFiles(OpenAPIToBallerina generator, String fileName, Path resourcePath, Filter filter,
                                    boolean generateClientResourceFunctions) {
         try {
             assert resourcePath != null;

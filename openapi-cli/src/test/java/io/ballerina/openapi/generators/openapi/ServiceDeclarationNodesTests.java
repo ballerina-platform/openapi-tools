@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
+import io.ballerina.openapi.cmd.BallerinaToOpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -87,7 +88,7 @@ public class ServiceDeclarationNodesTests {
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("openapi"),
                     yamlFile);
-            OpenApiConverter openApiConverter = new OpenApiConverter();
+            BallerinaToOpenAPI openApiConverter = new BallerinaToOpenAPI();
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
 
             if (Files.exists(tempDir.resolve(generatedYamlFile)) && findFile(tempDir, secondGeneratedFile) != null) {

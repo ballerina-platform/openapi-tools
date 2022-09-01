@@ -102,7 +102,8 @@ public class RequestBodyGenerator {
         }
         AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, annotValue);
         NodeList<AnnotationNode> annotation =  NodeFactory.createNodeList(annotationNode);
-        Token paramName = createIdentifierToken(GeneratorConstants.PAYLOAD, GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
+        Token paramName = createIdentifierToken(GeneratorConstants.PAYLOAD, GeneratorUtils.SINGLE_WS_MINUTIAE,
+                GeneratorUtils.SINGLE_WS_MINUTIAE);
         return createRequiredParameterNode(annotation, typeName, paramName);
     }
 

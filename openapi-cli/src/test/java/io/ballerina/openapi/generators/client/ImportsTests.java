@@ -28,7 +28,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.generators.GeneratorUtils.getImportDeclarationNode;
+import static io.ballerina.openapi.core.GeneratorUtils.getImportDeclarationNode;
 
 /**
  * This tests class for the tests imports in the generation.

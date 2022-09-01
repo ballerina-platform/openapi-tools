@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.generators.openapi;
 
+import io.ballerina.openapi.cmd.BallerinaToOpenAPI;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -50,7 +51,7 @@ public class HttpMethodTests {
     @Test(description = "Compiler warning for 'default' resource methods.")
     public void testForCompilerWarningForDefault() {
         Path ballerinaFilePath = RES_DIR.resolve("default_bal.bal");
-        OpenApiConverter openApiConverter = new OpenApiConverter();
+        BallerinaToOpenAPI openApiConverter = new BallerinaToOpenAPI();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
         List<OpenAPIConverterDiagnostic> errors = openApiConverter.getErrors();

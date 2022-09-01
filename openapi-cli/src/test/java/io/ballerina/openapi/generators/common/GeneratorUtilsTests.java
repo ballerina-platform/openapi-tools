@@ -19,10 +19,10 @@
 package io.ballerina.openapi.generators.common;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
+import io.ballerina.openapi.cmd.OpenAPIToBallerina;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorUtils;
-import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -32,7 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static io.ballerina.openapi.core.GeneratorUtils.extractReferenceType;
-import static io.ballerina.openapi.generators.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
@@ -84,7 +84,7 @@ public class GeneratorUtilsTests {
 
     @Test(description = "Set record name with removing special Characters")
     public static void testRecordName() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("schema/swagger/recordName" +
                 ".yaml"), false);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);

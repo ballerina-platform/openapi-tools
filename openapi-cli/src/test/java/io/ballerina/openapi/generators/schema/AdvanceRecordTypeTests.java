@@ -21,8 +21,9 @@ package io.ballerina.openapi.generators.schema;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.cmd.CodeGenerator;
+import io.ballerina.openapi.cmd.OpenAPIToBallerina;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -42,7 +43,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedS
 public class AdvanceRecordTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-    CodeGenerator codeGenerator = new CodeGenerator();
+    OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
 
 
     // Enable after adding `not` data bind support

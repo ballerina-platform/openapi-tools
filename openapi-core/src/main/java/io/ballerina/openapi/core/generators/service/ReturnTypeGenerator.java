@@ -288,7 +288,8 @@ public class ReturnTypeGenerator {
                 createToken(SyntaxKind.SEMICOLON_TOKEN));
         recordFields.add(typeReferenceNode);
 
-        IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.BODY, GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE);
+        IdentifierToken fieldName = createIdentifierToken(GeneratorConstants.BODY, GeneratorUtils.SINGLE_WS_MINUTIAE,
+                GeneratorUtils.SINGLE_WS_MINUTIAE);
         RecordFieldNode recordFieldNode = createRecordFieldNode(
                 null, null,
                 type,

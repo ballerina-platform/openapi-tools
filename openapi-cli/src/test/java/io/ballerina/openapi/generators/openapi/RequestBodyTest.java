@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.generators.openapi;
 
+import io.ballerina.openapi.cmd.BallerinaToOpenAPI;
 import io.ballerina.openapi.converter.OpenApiConverterException;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -57,7 +58,7 @@ public class RequestBodyTest {
     @Test(description = "Generate OpenAPI spec with xml payload")
     public void testXmlPayLoad()  {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/xml_payload_service.bal");
-        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        BallerinaToOpenAPI openApiConverterUtils = new BallerinaToOpenAPI();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null,
                 false);
         Assert.assertTrue(Files.exists(this.tempDir.resolve("payloadXml_openapi.yaml")));
@@ -200,7 +201,7 @@ public class RequestBodyTest {
     @Test(description = "Generate OpenAPI spec for request body with http:Request req")
     public void testRequestBodyWithDefault() {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario13.bal");
-        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        BallerinaToOpenAPI openApiConverterUtils = new BallerinaToOpenAPI();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
         Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
@@ -210,7 +211,7 @@ public class RequestBodyTest {
     @Test(description = "Generate OpenAPI spec for GET method having a request body")
     public void testRequestBodyWithGETMethod() {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario14.bal");
-        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        BallerinaToOpenAPI openApiConverterUtils = new BallerinaToOpenAPI();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
         Assert.assertFalse(openApiConverterUtils.getErrors().isEmpty());
@@ -223,7 +224,7 @@ public class RequestBodyTest {
     @Test(description = "Generate OpenAPI spec for request body having map<string> type")
     public void testRequestBodyWithMapString() {
         Path ballerinaFilePath = RES_DIR.resolve("request_body/rb_scenario15.bal");
-        OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+        BallerinaToOpenAPI openApiConverterUtils = new BallerinaToOpenAPI();
         openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                 , true);
         Assert.assertTrue(openApiConverterUtils.getErrors().isEmpty());
@@ -235,7 +236,7 @@ public class RequestBodyTest {
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen/json"),
                     "nestedRecord.json");
-            OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+            BallerinaToOpenAPI openApiConverterUtils = new BallerinaToOpenAPI();
             openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                     , true);
             if (Files.exists(this.tempDir.resolve("payloadV_openapi.json"))) {
@@ -291,7 +292,7 @@ public class RequestBodyTest {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen/request_body"),
                     yamlFile);
 
-            OpenApiConverter openApiConverterUtils = new OpenApiConverter();
+            BallerinaToOpenAPI openApiConverterUtils = new BallerinaToOpenAPI();
             openApiConverterUtils.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, null
                     , false);
             if (Files.exists(this.tempDir.resolve("payloadV_openapi.yaml"))) {

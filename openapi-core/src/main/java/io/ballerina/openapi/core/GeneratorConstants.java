@@ -31,50 +31,50 @@ public class GeneratorConstants {
      * Enum to select the code generation mode.
      * Ballerina service, mock and client generation is available
      */
-//    public enum GenType {
-//        GEN_SERVICE("gen_service"),
-//        GEN_CLIENT("gen_client"),
-//        GEN_BOTH("gen_both");
-//
-//        private String name;
-//
-//        GenType(String name) {
-//
-//            this.name = name;
-//        }
-//
-//        @Override
-//        public String toString() {
-//
-//            return this.name;
-//        }
-//    }
-//
-//    /**
-//     * Enum to select the relevant ballerina http auth record.
-//     */
-//    public enum AuthConfigTypes {
-//        BASIC("http:CredentialsConfig"),
-//        BEARER("http:BearerTokenConfig"),
-//        CLIENT_CREDENTIAL("http:OAuth2ClientCredentialsGrantConfig"),
-//        CUSTOM_CLIENT_CREDENTIAL("OAuth2ClientCredentialsGrantConfig"),
-//        REFRESH_TOKEN("http:OAuth2RefreshTokenGrantConfig"),
-//        CUSTOM_REFRESH_TOKEN("OAuth2RefreshTokenGrantConfig"),
-//        PASSWORD("http:OAuth2PasswordGrantConfig"),
-//        CUSTOM_PASSWORD("OAuth2PasswordGrantConfig");
-//
-//        private final String authType;
-//
-//        AuthConfigTypes(String authType) {
-//
-//            this.authType = authType;
-//        }
-//
-//        public String getValue() {
-//
-//            return authType;
-//        }
-//    }
+    public enum GenType {
+        GEN_SERVICE("gen_service"),
+        GEN_CLIENT("gen_client"),
+        GEN_BOTH("gen_both");
+
+        private String name;
+
+        GenType(String name) {
+
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+
+            return this.name;
+        }
+    }
+
+    /**
+     * Enum to select the relevant ballerina http auth record.
+     */
+    public enum AuthConfigTypes {
+        BASIC("http:CredentialsConfig"),
+        BEARER("http:BearerTokenConfig"),
+        CLIENT_CREDENTIAL("http:OAuth2ClientCredentialsGrantConfig"),
+        CUSTOM_CLIENT_CREDENTIAL("OAuth2ClientCredentialsGrantConfig"),
+        REFRESH_TOKEN("http:OAuth2RefreshTokenGrantConfig"),
+        CUSTOM_REFRESH_TOKEN("OAuth2RefreshTokenGrantConfig"),
+        PASSWORD("http:OAuth2PasswordGrantConfig"),
+        CUSTOM_PASSWORD("OAuth2PasswordGrantConfig");
+
+        private final String authType;
+
+        AuthConfigTypes(String authType) {
+
+            this.authType = authType;
+        }
+
+        public String getValue() {
+
+            return authType;
+        }
+    }
 
     public static final String TYPE_FILE_NAME = "types.bal";
     public static final String CLIENT_FILE_NAME = "client.bal";
@@ -95,7 +95,6 @@ public class GeneratorConstants {
     public static final String DEFAULT_CLIENT_PKG = "client";
     public static final String DEFAULT_MOCK_PKG = "mock";
     public static final String OAS_PATH_SEPARATOR = "/";
-    public static final String USER_DIR = "user.dir";
     public static final String UNTITLED_SERVICE = "UntitledAPI";
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
     //ClientCode generator
@@ -274,10 +273,6 @@ public class GeneratorConstants {
     public static final Integer MAX_ARRAY_LENGTH = 2147483637;
     public static final String NILLABLE = "?";
     public static final String SQUARE_BRACKETS = "[]";
-    public static final String BAL_EXTENSION = ".bal";
-    public static final String JSON_EXTENSION = ".json";
-    public static final String YAML_EXTENSION = ".yaml";
-    public static final String YML_EXTENSION = ".yml";
 
     public static final Map<String, String> TYPE_MAP;
 
