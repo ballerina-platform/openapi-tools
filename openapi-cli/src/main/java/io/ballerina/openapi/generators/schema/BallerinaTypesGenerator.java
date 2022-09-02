@@ -170,7 +170,10 @@ public class BallerinaTypesGenerator {
                 }
                 TypeReferenceNode recordField = (TypeReferenceNode) field;
                 QualifiedNameReferenceNode typeInclusion = (QualifiedNameReferenceNode) recordField.typeName();
-                if (typeInclusion.modulePrefix().text().equals(HTTP)) {
+                boolean isHttpImportExist = imports.stream().anyMatch(importNode -> importNode.moduleName().stream()
+                        .anyMatch(moduleName -> moduleName.text().equals(HTTP)));
+
+                if (!isHttpImportExist && typeInclusion.modulePrefix().text().equals(HTTP)) {
                     ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(
                             GeneratorConstants.BALLERINA,
                             GeneratorConstants.HTTP);
