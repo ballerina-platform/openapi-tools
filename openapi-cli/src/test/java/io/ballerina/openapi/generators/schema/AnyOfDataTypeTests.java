@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
@@ -43,7 +43,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedS
  */
 public class AnyOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
+    BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
 
 
     @Test(description = "Test for the schema has anyOf dataType")

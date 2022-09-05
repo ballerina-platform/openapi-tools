@@ -40,17 +40,17 @@ public abstract class MimeType {
     /**
      * Generate statements of defining structure and setting payload.
      *
-     * @param statementsList    - Previous statements list
-     * @param mediaTypeEntry    - Media type entry
+     * @param statementsList - Previous statements list
+     * @param mediaTypeEntry - Media type entry
      */
     public abstract void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry);
 
     /**
      * Generate statements for setting payload in the request.
      *
-     * @param statementsList    - Previous statements list
-     * @param payloadName       - Payload name
-     * @param mediaType         - Media type
+     * @param statementsList - Previous statements list
+     * @param payloadName    - Payload name
+     * @param mediaType      - Media type
      */
     public void setPayload(List<StatementNode> statementsList, String payloadName, String mediaType) {
         ExpressionStatementNode setPayloadExpression = GeneratorUtils.getSimpleExpressionStatementNode(

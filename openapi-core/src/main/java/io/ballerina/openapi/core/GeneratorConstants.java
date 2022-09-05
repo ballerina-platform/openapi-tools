@@ -207,7 +207,7 @@ public class GeneratorConstants {
     public static final String HTTP_RESPONSE = "http:Response";
     public static final String DEFAULT = "default";
     /**
-     * Util for select http key words with http codes.
+     * Util for select http keywords with http codes.
      *
      * @param code http code.
      * @return Http identification word.

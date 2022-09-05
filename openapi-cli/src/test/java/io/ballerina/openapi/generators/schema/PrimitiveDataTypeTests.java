@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
@@ -42,7 +42,7 @@ public class PrimitiveDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     private SyntaxTree syntaxTree;
     private ByteArrayOutputStream outContent;
-    OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
+    BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
 
     @BeforeTest
     public void setUp() {

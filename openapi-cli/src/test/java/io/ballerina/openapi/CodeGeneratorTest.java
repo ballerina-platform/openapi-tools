@@ -15,7 +15,7 @@
  */
 package io.ballerina.openapi;
 
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.model.Filter;
@@ -46,7 +46,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.UTIL_FILE_NAME;
 import static io.ballerina.openapi.core.model.GenSrcFile.GenFileType.GEN_SRC;
 
 /**
- * Unit tests for {@link OpenAPIToBallerinaCommand}.
+ * Unit tests for {@link BallerinaCodeGenerator}.
  */
 public class CodeGeneratorTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
@@ -61,7 +61,7 @@ public class CodeGeneratorTest {
     public void generateSkeleton() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
 
         try {
             String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generateSkeleton.bal");
@@ -84,7 +84,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina client generation")
     public void generateClient() {
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "generate_client.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
@@ -135,7 +135,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina client generation with doc comments in class init function")
     public void generateClientWithInitDocComments() {
         String definitionPath = RES_DIR.resolve("x_init_description.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "x_init_description.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
@@ -158,7 +158,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina types generation when nullable option is given")
     public void generateTypesWithNullableFields() {
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "nullable_types.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false);
@@ -181,7 +181,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina types generation when nullable option is given in the cmd and definition both")
     public void generateTypesWithNullableFieldsAndGlobalNullableTrue() {
         String definitionPath = RES_DIR.resolve("petstore_nullable_false.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "nullable_false_types.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false);
@@ -204,7 +204,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina utils file generation")
     public void generateUtilsFile() {
         String definitionPath = RES_DIR.resolve("petstore.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile, "utils.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter, true, false);
@@ -227,7 +227,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina Config.toml file generation for API Key authentication")
     public void generateConfigFile() {
         String definitionPath = RES_DIR.resolve("petstore_with_apikey_auth.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedConfigContent = getStringFromGivenBalFile(expectedServiceFile, "api_key_config.toml");
             generator.setIncludeTestFiles(true);
@@ -251,7 +251,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina client generation")
     public void generateFilteredClient() {
         String definitionPath = RES_DIR.resolve("petstore_tags.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         List<String> listTags = new ArrayList<>();
         listTags.add("pets");
         listTags.add("dogs");
@@ -278,7 +278,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test Ballerina client generation with request body")
     public void generateClientwithRequestBody() {
         String definitionPath = RES_DIR.resolve("openapi-client-rb.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile,
                     "generate_client_requestbody.bal");
@@ -303,7 +303,7 @@ public class CodeGeneratorTest {
     public void generateSkeletonForRequestbody() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("requestBody.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
 
         try {
             String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generatedRB.bal");
@@ -328,7 +328,7 @@ public class CodeGeneratorTest {
     public void generateSkeletonForTwoPathParameter() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("multiPathParam.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
 
         try {
             String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "generated_bal.bal");       
@@ -355,7 +355,7 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve(yamlFile).toString();
         Path expectedFilePath = RES_DIR.resolve(Paths.get("expected", expectedFile));
 
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             String expectedContent = new String(Files.readAllBytes(expectedFilePath));
             List<GenSrcFile> generatedFileList = generator.generateBallerinaService(
@@ -376,7 +376,7 @@ public class CodeGeneratorTest {
     public void generateSkeletonForTwoQueryParameter() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("multiQueryParam.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
 
         try {
             String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile, "multi_query_para.bal");
@@ -401,7 +401,7 @@ public class CodeGeneratorTest {
     public void generateSkeletonForTagFilter() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("petstoreTag.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         List<String> list1 = new ArrayList<>();
         List<String> list2 = new ArrayList<>();
         list1.add("list");
@@ -430,7 +430,7 @@ public class CodeGeneratorTest {
     public void generateSkeletonForOperationFilter() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("petstoreOperation.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         List<String> list1 = new ArrayList<>();
         List<String> list2 = new ArrayList<>();
         list1.add("list");
@@ -459,7 +459,7 @@ public class CodeGeneratorTest {
     @Test(description = "Test code generation when no schemas given")
     public void testCodeGenerationWithoutSchemas() {
         String definitionPath = RES_DIR.resolve("no_schema.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
             boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("client.bal")) &&
@@ -477,7 +477,7 @@ public class CodeGeneratorTest {
     public void testCodeGenerationWithoutSchemasService() {
         final String serviceName = "no_schema";
         String definitionPath = RES_DIR.resolve("no_schema.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             generator.generateService(definitionPath, serviceName, resourcePath.toString(),  filter, false);
             boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
@@ -495,7 +495,7 @@ public class CodeGeneratorTest {
     public void testForGeneratingTypeFileWhenNoSchema() {
         final String serviceName = "no_schema";
         String definitionPath = RES_DIR.resolve("no_schema_with_type_bal.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             generator.generateService(definitionPath, serviceName, resourcePath.toString(),  filter, false);
             boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
@@ -512,7 +512,7 @@ public class CodeGeneratorTest {
     public void testCodeGenerationWithoutSchemasBothFiles() {
         final String serviceName = "no_schema";
         String definitionPath = RES_DIR.resolve("no_schema.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
             generator.generateClientAndService(definitionPath, serviceName, resourcePath.toString(),  filter
                     , false, false);
@@ -535,7 +535,7 @@ public class CodeGeneratorTest {
     public void testForInvalidDefinition() throws IOException, BallerinaOpenApiException,
             FormatterException {
         String definitionPath = RES_DIR.resolve("invalid_petstore.yaml").toString();
-        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         generator.generateClient(definitionPath, "", filter, false, false);
     }
 

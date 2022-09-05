@@ -17,6 +17,7 @@
  */
 
 package io.ballerina.openapi.core.generators.service;
+
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayDimensionNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
@@ -101,7 +102,7 @@ public class RequestBodyGenerator {
             }
         }
         AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, annotValue);
-        NodeList<AnnotationNode> annotation =  NodeFactory.createNodeList(annotationNode);
+        NodeList<AnnotationNode> annotation = NodeFactory.createNodeList(annotationNode);
         Token paramName = createIdentifierToken(GeneratorConstants.PAYLOAD, GeneratorUtils.SINGLE_WS_MINUTIAE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
         return createRequiredParameterNode(annotation, typeName, paramName);
@@ -112,6 +113,7 @@ public class RequestBodyGenerator {
      */
     private TypeDescriptorNode getNodeForPayloadType(Components components, Map.Entry<String, MediaType> mediaType)
             throws BallerinaOpenApiException {
+
         TypeDescriptorNode typeName;
         if (mediaType.getValue().getSchema().get$ref() != null) {
             String schemaName = extractReferenceType(mediaType.getValue().getSchema().get$ref());
@@ -166,17 +168,17 @@ public class RequestBodyGenerator {
     }
 
     /**
-     *  This function fill the annotation values.
-     *
-     *  01. when field has some override media type
-     *  <pre> @http:Payload{mediaType: "application/x-www-form-urlencoded"} User payload</pre>
-     *  02. when field has list media value
-     *  <pre> @http:Payload{mediaType: ["application/json", "application/snowflake+json"]} User payload</pre>
-     *
+     * This function fill the annotation values.
+     * <p>
+     * 01. when field has some override media type
+     * <pre> @http:Payload{mediaType: "application/x-www-form-urlencoded"} User payload</pre>
+     * 02. when field has list media value
+     * <pre> @http:Payload{mediaType: ["application/json", "application/snowflake+json"]} User payload</pre>
      */
     private SeparatedNodeList<MappingFieldNode> fillRequestAnnotationValues(List<Node> literals,
                                                                             HashSet<Map.Entry<String,
                                                                                     MediaType>> equalDataTypes) {
+
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
         IdentifierToken mediaType = createIdentifierToken(GeneratorConstants.MEDIA_TYPE_KEYWORD);
 
@@ -208,6 +210,7 @@ public class RequestBodyGenerator {
     //Extract same datatype
     private HashSet<Map.Entry<String, MediaType>> filterMediaTypes(RequestBody requestBody)
             throws BallerinaOpenApiException {
+
         HashSet<Map.Entry<String, MediaType>> equalDataType = new HashSet<>();
         Set<Map.Entry<String, MediaType>> entries = requestBody.getContent().entrySet();
         Iterator<Map.Entry<String, MediaType>> iterator = entries.iterator();
@@ -230,6 +233,7 @@ public class RequestBodyGenerator {
     private void getSameDataTypeMedia(HashSet<Map.Entry<String, MediaType>> equalDataType,
                                       List<Map.Entry<String, MediaType>> updatedEntries,
                                       Map.Entry<String, MediaType> mediaTypeEntry) throws BallerinaOpenApiException {
+
         for (Map.Entry<String, MediaType> updateNext : updatedEntries) {
             MediaType parentValue = mediaTypeEntry.getValue();
             MediaType childValue = updateNext.getValue();

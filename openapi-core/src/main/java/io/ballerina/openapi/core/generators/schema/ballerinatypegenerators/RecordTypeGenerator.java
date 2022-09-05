@@ -77,6 +77,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
  * @since 1.3.0
  */
 public class RecordTypeGenerator extends TypeGenerator {
+
     private final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
 
     public RecordTypeGenerator(Schema schema, String typeName) {
@@ -92,6 +93,7 @@ public class RecordTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException, BallerinaOpenApiException {
+
         if (schema.getProperties() != null) {
             Map<String, Schema> properties = schema.getProperties();
             List<String> required = schema.getRequired();
@@ -109,9 +111,9 @@ public class RecordTypeGenerator extends TypeGenerator {
     /**
      * This util for generating record field with given schema properties.
      */
-    public  List<Node> addRecordFields(List<String> required,
-                                       Set<Map.Entry<String, Schema>> fields,
-                                       String recordName) throws BallerinaOpenApiException {
+    public List<Node> addRecordFields(List<String> required,
+                                      Set<Map.Entry<String, Schema>> fields,
+                                      String recordName) throws BallerinaOpenApiException {
         // TODO: Handle allOf , oneOf, anyOf
         List<Node> recordFieldList = new ArrayList<>();
         for (Map.Entry<String, Schema> field : fields) {
@@ -126,7 +128,7 @@ public class RecordTypeGenerator extends TypeGenerator {
             TypeDescriptorNode fieldTypeName = typeGenerator.generateTypeDescriptorNode();
             if (typeGenerator instanceof ArrayTypeGenerator &&
                     ((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint() != null) {
-                        typeDefinitionNodeList.add(((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint());
+                typeDefinitionNodeList.add(((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint());
             } else if (typeGenerator instanceof UnionTypeGenerator &&
                     !((UnionTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
                 List<TypeDefinitionNode> newConstraintNode =

@@ -18,7 +18,7 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
@@ -39,7 +39,7 @@ import java.nio.file.Paths;
 public class ArrayDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-    OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
+    BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
     private final PrintStream originalStdOut = System.out;
     private ByteArrayOutputStream consoleContent = new ByteArrayOutputStream();
 

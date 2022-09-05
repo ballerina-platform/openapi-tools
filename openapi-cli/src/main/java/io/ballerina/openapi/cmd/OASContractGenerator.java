@@ -53,7 +53,7 @@ import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractF
  * @since 1.3.0
  */
 
-public class BallerinaToOpenAPICommand {
+public class OASContractGenerator {
     private SyntaxTree syntaxTree;
     private SemanticModel semanticModel;
     private Project project;
@@ -63,7 +63,7 @@ public class BallerinaToOpenAPICommand {
     /**
      * Initialize constructor.
      */
-    public BallerinaToOpenAPICommand() {
+    public OASContractGenerator() {
 
     }
 

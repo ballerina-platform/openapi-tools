@@ -131,10 +131,11 @@ public class BallerinaTestGenerator {
      * Generate test.bal file synatx tree.
      *
      * @return {@link SyntaxTree}
-     * @throws IOException                  Throws exception when syntax tree not modified
-     * @throws BallerinaOpenApiException    Throws exception if open api validation failed
+     * @throws IOException               Throws exception when syntax tree not modified
+     * @throws BallerinaOpenApiException Throws exception if open api validation failed
      */
     public SyntaxTree generateSyntaxTree() throws IOException, BallerinaOpenApiException {
+
         List<FunctionDefinitionNode> functions = new ArrayList<>();
         getFunctionDefinitionNodes(functions);
         List<ModuleMemberDeclarationNode> nodes = new ArrayList<>(getModuleVariableDeclarationNodes());
@@ -150,9 +151,10 @@ public class BallerinaTestGenerator {
     /**
      * Generate import nodes for test.bal file.
      *
-     * @return  Import node list
+     * @return Import node list
      */
-    private NodeList<ImportDeclarationNode> getImportNodes () {
+    private NodeList<ImportDeclarationNode> getImportNodes() {
+
         NodeList<ImportDeclarationNode> imports;
         ImportDeclarationNode importForTest = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA,
                 GeneratorConstants.MODULE_TEST);
@@ -170,15 +172,16 @@ public class BallerinaTestGenerator {
      * Returns String of the relevant config file to the generated test.bal.
      *
      * @return {@link String}
-     * @throws IOException  Throws an exception if file not exists
+     * @throws IOException Throws an exception if file not exists
      */
-    public String getConfigTomlFile () throws IOException {
+    public String getConfigTomlFile() throws IOException {
+
         ClassLoader classLoader = getClass().getClassLoader();
         if (!configFileName.isBlank()) {
             if (!isHttpOrOAuth) {
                 StringBuilder configFileContent = new StringBuilder("[" + API_KEY_CONFIG_PARAM + "]\n");
 
-                for (String apiKey: ballerinaClientGenerator.getApiKeyNameList()) {
+                for (String apiKey : ballerinaClientGenerator.getApiKeyNameList()) {
                     configFileContent.append(GeneratorUtils.getValidName(apiKey, false)).
                             append(" = \"<Enter Value>\"\n");
                 }
@@ -201,9 +204,9 @@ public class BallerinaTestGenerator {
      *      Client baseClient = check new Client(clientConfig, serviceUrl = "https://domain/services/data");
      * </pre>
      *
-     * @return  {@link List<ModuleVariableDeclarationNode>} List of variable declaration nodes
+     * @return {@link List<ModuleVariableDeclarationNode>} List of variable declaration nodes
      */
-    private List<ModuleVariableDeclarationNode> getModuleVariableDeclarationNodes () {
+    private List<ModuleVariableDeclarationNode> getModuleVariableDeclarationNodes() {
         isHttpOrOAuth = true;
         Set<String> authTypes = ballerinaClientGenerator.getAuthType();
         List<ModuleVariableDeclarationNode> moduleVariableDeclarationNodes = new ArrayList<>();
@@ -280,14 +283,14 @@ public class BallerinaTestGenerator {
         return moduleVariableDeclarationNodes;
     }
 
-
     /**
      * Generate the configurable variable to get auth record from Config.toml.
      * --ex     {@code ClientConfig clientConfig = {authConfig : authConfig};}
      *
-     * @return  {@link ModuleVariableDeclarationNode}   ClientConfig declaration node
+     * @return {@link ModuleVariableDeclarationNode}   ClientConfig declaration node
      */
-    private ModuleVariableDeclarationNode getAuthConfigAssignmentNode () {
+    private ModuleVariableDeclarationNode getAuthConfigAssignmentNode() {
+
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(CLIENT_CONFIG));
@@ -305,17 +308,18 @@ public class BallerinaTestGenerator {
     /**
      * Generate the configurable variable to get auth record from Config.toml.
      * -- ex: Configurable variable for bearer auth mechanism.
-     *        {@code configurable http:BearerTokenConfig & readonly authConfig = ?;}
+     * {@code configurable http:BearerTokenConfig & readonly authConfig = ?;}
      * -- ex: Configurable variable for API Key auth mechanism.
-     *        {@code configurable ApiKeysConfig & readonly apiKeyConfig = ?;}
+     * {@code configurable ApiKeysConfig & readonly apiKeyConfig = ?;}
      * -- ex: Configurable variable for combination of ApiKey and HTTP/OAuth authentication mechanism.
-     *        {@code configurable AuthConfig & readonly authConfig = ?;}
+     * {@code configurable AuthConfig & readonly authConfig = ?;}
      *
-     * @param   typeBindingPattern                      Variable name
-     * @return  {@link ModuleVariableDeclarationNode}   Configurable variable declaration node
+     * @param typeBindingPattern Variable name
+     * @return {@link ModuleVariableDeclarationNode}   Configurable variable declaration node
      */
-    private ModuleVariableDeclarationNode getConfigurableVariable (
+    private ModuleVariableDeclarationNode getConfigurableVariable(
             BuiltinSimpleNameReferenceNode typeBindingPattern) {
+
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         Token configurableNode = createIdentifierToken("configurable");
         NodeList<Token> nodeList = createNodeList(configurableNode);
@@ -339,14 +343,15 @@ public class BallerinaTestGenerator {
     /**
      * Generate client initialization node.
      * -- ex: Client initialization node of http or OAuth mechanisms.
-     *        {@code Client baseClient = check new Client(clientConfig, serviceUrl = "https://domain/services/data");}
+     * {@code Client baseClient = check new Client(clientConfig, serviceUrl = "https://domain/services/data");}
      * -- ex: CClient initialization node for API key auth mechanism.
-     *        {@code Client baseClient = check new Client(apiKeyConfig, serviceUrl = "https://domain/services/data");}
+     * {@code Client baseClient = check new Client(apiKeyConfig, serviceUrl = "https://domain/services/data");}
      *
-     * @param   configRecordName                        Config record name
-     * @return  {@link ModuleVariableDeclarationNode}   Client initialization node
+     * @param configRecordName Config record name
+     * @return {@link ModuleVariableDeclarationNode}   Client initialization node
      */
-    private ModuleVariableDeclarationNode getClientInitializationNode (String configRecordName) {
+    private ModuleVariableDeclarationNode getClientInitializationNode(String configRecordName) {
+
         String serverURL = ballerinaClientGenerator.getServerUrl();
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
@@ -362,7 +367,7 @@ public class BallerinaTestGenerator {
         PositionalArgumentNode positionalArgumentNode1 = createPositionalArgumentNode(createSimpleNameReferenceNode(
                 createIdentifierToken(configRecordName)));
         argumentsList.add(positionalArgumentNode1);
-        Token commaToken =  createToken(COMMA_TOKEN);
+        Token commaToken = createToken(COMMA_TOKEN);
         argumentsList.add(commaToken);
         ExpressionNode expressionNode = createRequiredExpressionNode(createIdentifierToken
                 ("\"" + serverURL + "\""));
@@ -389,7 +394,8 @@ public class BallerinaTestGenerator {
      *
      * @return {@link ModuleVariableDeclarationNode}
      */
-    private ModuleVariableDeclarationNode getClientInitForNoAuth () {
+    private ModuleVariableDeclarationNode getClientInitForNoAuth() {
+
         String serverURL = ballerinaClientGenerator.getServerUrl();
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
@@ -433,6 +439,7 @@ public class BallerinaTestGenerator {
      * @param functions Empty function definition node list
      */
     private void getFunctionDefinitionNodes(List<FunctionDefinitionNode> functions) {
+
         if (!remoteFunctionNameList.isEmpty()) {
             for (String functionName : remoteFunctionNameList) {
                 MetadataNode metadataNode = getAnnotation();
@@ -485,6 +492,7 @@ public class BallerinaTestGenerator {
      * @return {@link MetadataNode}
      */
     private MetadataNode getAnnotation() {
+
         SimpleNameReferenceNode annotateReference =
                 createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.ANNOT_TEST));
         List<Node> fileds = new ArrayList<>();
@@ -499,8 +507,8 @@ public class BallerinaTestGenerator {
     /**
      * Modify function name by capitalizing the first letter.
      *
-     * @param   name    remote function name
-     * @return  formatted name
+     * @param name remote function name
+     * @return formatted name
      */
     private String modifyFunctionName(String name) {
         return name.substring(0, 1).toUpperCase(Locale.getDefault()) + name.substring(1);

@@ -80,9 +80,10 @@ public class ServiceGenerationUtils {
      * @param referenceVariable - Reference String
      * @return Reference variable name
      * @throws BallerinaOpenApiException - Throws an exception if the reference string is incompatible.
-     *                                     Note : Current implementation will not support external links a references.
+     *                                   Note : Current implementation will not support external links a references.
      */
-    public  static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
+    public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
+
         if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
             String[] refArray = referenceVariable.split("/");
             return GeneratorUtils.escapeIdentifier(refArray[refArray.length - 1]);
@@ -93,6 +94,7 @@ public class ServiceGenerationUtils {
     }
 
     public static AnnotationNode getAnnotationNode(String identifier, MappingConstructorExpressionNode annotValue) {
+
         Token atToken = createIdentifierToken("@");
         QualifiedNameReferenceNode annotReference = GeneratorUtils.getQualifiedNameReferenceNode(
                 GeneratorConstants.HTTP, identifier);
@@ -126,7 +128,8 @@ public class ServiceGenerationUtils {
      * Generate typeDescriptor for given schema.
      */
     public static TypeDescriptorNode generateNodeForOASSchema(Schema<?> schema) throws BallerinaOpenApiException {
-        IdentifierToken identifierToken =  createIdentifierToken(GeneratorConstants.JSON,
+
+        IdentifierToken identifierToken = createIdentifierToken(GeneratorConstants.JSON,
                 AbstractNodeFactory.createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);
         if (schema == null) {
             return createSimpleNameReferenceNode(identifierToken);
@@ -152,9 +155,9 @@ public class ServiceGenerationUtils {
                         createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
                 NodeList<ArrayDimensionNode> nodeList = createNodeList(dimensionNode);
-                return  createArrayTypeDescriptorNode(member, nodeList);
+                return createArrayTypeDescriptorNode(member, nodeList);
             } else {
-                identifierToken =  createIdentifierToken(schema.getType(),
+                identifierToken = createIdentifierToken(schema.getType(),
                         AbstractNodeFactory.createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);
                 return createSimpleNameReferenceNode(identifierToken);
             }
@@ -170,6 +173,7 @@ public class ServiceGenerationUtils {
      */
     public static TypeDescriptorNode getMediaTypeToken(Map.Entry<String, MediaType> mediaType)
             throws BallerinaOpenApiException {
+
         String mediaTypeContent = mediaType.getKey().trim();
         if (mediaTypeContent.matches("text/.*")) {
             mediaTypeContent = GeneratorConstants.TEXT;
@@ -194,7 +198,7 @@ public class ServiceGenerationUtils {
                         createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
                 return createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(
-                        null, createIdentifierToken(GeneratorConstants.BYTE)),
+                                null, createIdentifierToken(GeneratorConstants.BYTE)),
                         NodeFactory.createNodeList(dimensionNode));
             default:
                 identifierToken = createIdentifierToken(GeneratorConstants.JSON);
@@ -211,6 +215,7 @@ public class ServiceGenerationUtils {
      * </pre>
      */
     public static MetadataNode generateServiceConfigAnnotation() {
+
         MetadataNode metadataNode;
         BasicLiteralNode valueExpr = createBasicLiteralNode(STRING_LITERAL,
                 createLiteralValueToken(SyntaxKind.STRING_LITERAL_TOKEN, GeneratorConstants.FALSE,
@@ -233,6 +238,7 @@ public class ServiceGenerationUtils {
      * This util function is for generating the import node for http module.
      */
     public static NodeList<ImportDeclarationNode> createImportDeclarationNodes() {
+
         List<ImportDeclarationNode> imports = new ArrayList<>();
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
                 , GeneratorConstants.HTTP);

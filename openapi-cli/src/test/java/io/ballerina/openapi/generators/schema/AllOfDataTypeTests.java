@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
@@ -36,7 +36,7 @@ import java.nio.file.Paths;
 public class AllOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-    OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
+    BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
 
     @Test(description = "Generate record for schema has allOf reference")
     public void generateAllOf() throws IOException, BallerinaOpenApiException {

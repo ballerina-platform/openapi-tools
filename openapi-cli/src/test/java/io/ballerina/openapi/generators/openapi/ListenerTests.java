@@ -17,7 +17,7 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.cmd.BallerinaToOpenAPICommand;
+import io.ballerina.openapi.cmd.OASContractGenerator;
 import io.ballerina.openapi.converter.OpenApiConverterException;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import org.testng.Assert;
@@ -78,7 +78,7 @@ public class ListenerTests {
     @Test(description = "When given ballerina file contain some compilation issue.")
     public void testListeners06() {
         Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario06.bal");
-        BallerinaToOpenAPICommand openApiConverter = new BallerinaToOpenAPICommand();
+        OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                 , false);
         List<OpenAPIConverterDiagnostic> errors = openApiConverter.getErrors();

@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.model.Filter;
@@ -57,7 +57,7 @@ public class BallerinaDiagnosticTests {
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
             FormatterException, URISyntaxException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);

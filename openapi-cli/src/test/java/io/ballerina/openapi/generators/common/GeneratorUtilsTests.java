@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.common;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
@@ -84,7 +84,7 @@ public class GeneratorUtilsTests {
 
     @Test(description = "Set record name with removing special Characters")
     public static void testRecordName() throws IOException, BallerinaOpenApiException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("schema/swagger/recordName" +
                 ".yaml"), false);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);

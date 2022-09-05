@@ -107,7 +107,7 @@ import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
  *
  * @since 1.3.0
  */
-public class OpenAPIToBallerinaCommand {
+public class BallerinaCodeGenerator {
     private String srcPackage;
     private String licenseHeader = "";
     private boolean includeTestFiles;
@@ -120,7 +120,6 @@ public class OpenAPIToBallerinaCommand {
      * Generated source will be written to a ballerina module at {@code outPath}
      * <p>Method can be user for generating Ballerina mock services and clients</p>
      */
-
     public void generateClientAndService(String definitionPath, String serviceName,
                                          String outPath, Filter filter, boolean nullable, boolean isResource)
             throws IOException, FormatterException,

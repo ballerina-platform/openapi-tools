@@ -141,7 +141,7 @@ public class BallerinaUtilGenerator {
     /**
      * Set `queryParamsFound` flag to `true` when at least one query parameter found.
      *
-     * @param flag     Function will be called only in the occasions where flag needs to be set to `true`
+     * @param flag Function will be called only in the occasions where flag needs to be set to `true`
      */
     public void setQueryParamsFound(boolean flag) {
         this.queryParamsFound = flag;
@@ -150,16 +150,17 @@ public class BallerinaUtilGenerator {
     /**
      * Set `headersFound` flag to `true` when at least one header found.
      *
-     * @param flag     Function will be called only in the occasions where flag needs to be set to `true`
+     * @param flag Function will be called only in the occasions where flag needs to be set to `true`
      */
     public void setHeadersFound(boolean flag) {
+
         this.headersFound = flag;
     }
 
     /**
      * Set `pathParametersFound` flag to `true` when at least one path parameter found.
      *
-     * @param flag     Function will be called only in the occasions where flag needs to be set to `true`
+     * @param flag Function will be called only in the occasions where flag needs to be set to `true`
      */
     public void setPathParametersFound(boolean flag) {
         this.pathParametersFound = flag;
@@ -168,7 +169,7 @@ public class BallerinaUtilGenerator {
     /**
      * Set `setRequestBodyEncodingFound` flag to `true` when at least one function found with URL-encoded request body.
      *
-     * @param flag     Function will be called only in the occasions where value needs to be set to `true`.
+     * @param flag Function will be called only in the occasions where value needs to be set to `true`.
      */
     public void setRequestBodyEncodingFound(boolean flag) {
         this.requestBodyEncodingFound = flag;
@@ -178,7 +179,7 @@ public class BallerinaUtilGenerator {
      * Set `setRequestBodyMultipartFormDatafound` flag to `true` when at least one function found with multipart
      * form-data request body.
      *
-     * @param flag     Function will be called only in the occasions where value needs to be set to `true`.
+     * @param flag Function will be called only in the occasions where value needs to be set to `true`.
      */
     public void setRequestBodyMultipartFormDatafound(boolean flag) {
         this.requestBodyMultipartFormDatafound = flag;
@@ -187,7 +188,7 @@ public class BallerinaUtilGenerator {
     /**
      * Generates util file syntax tree.
      *
-     * @return  Syntax tree of the util.bal file
+     * @return Syntax tree of the util.bal file
      */
     public SyntaxTree generateUtilSyntaxTree() throws IOException {
         Set<String> functionNameList = new LinkedHashSet<>();
@@ -195,14 +196,14 @@ public class BallerinaUtilGenerator {
             functionNameList.addAll(Arrays.asList(
                     CREATE_FORM_URLENCODED_REQUEST_BODY, GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST,
                     GET_ENCODED_URI, GET_ORIGINAL_KEY, GET_SERIALIZED_ARRAY, GET_SERIALIZED_RECORD_ARRAY
-            ));
+                                                 ));
         }
         if (queryParamsFound) {
             functionNameList.addAll(Arrays.asList(
                     GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST,
                     GET_ENCODED_URI, GET_ORIGINAL_KEY, GET_SERIALIZED_ARRAY, GET_PATH_FOR_QUERY_PARAM,
                     GET_SERIALIZED_RECORD_ARRAY
-            ));
+                                                 ));
         }
         if (headersFound) {
             functionNameList.add(GET_MAP_FOR_HEADERS);
@@ -244,7 +245,7 @@ public class BallerinaUtilGenerator {
             imports.add(importForUrl);
         }
         if (requestBodyMultipartFormDatafound) {
-            ImportDeclarationNode importMime =  GeneratorUtils.getImportDeclarationNode(BALLERINA, MIME);
+            ImportDeclarationNode importMime = GeneratorUtils.getImportDeclarationNode(BALLERINA, MIME);
             imports.add(importMime);
         }
 
@@ -259,7 +260,7 @@ public class BallerinaUtilGenerator {
     /**
      * Set the type definition nodes related to the util functions generated.
      *
-     * @param memberDeclarationNodes    {@link ModuleMemberDeclarationNode}
+     * @param memberDeclarationNodes {@link ModuleMemberDeclarationNode}
      */
     private void getUtilTypeDeclarationNodes(List<ModuleMemberDeclarationNode> memberDeclarationNodes) {
         if (requestBodyEncodingFound || queryParamsFound || headersFound || requestBodyMultipartFormDatafound) {
@@ -285,7 +286,7 @@ public class BallerinaUtilGenerator {
      *      };
      * </pre>
      *
-     * @return  {@link TypeDefinitionNode}
+     * @return {@link TypeDefinitionNode}
      */
     private TypeDefinitionNode getEncodingRecord() {
         // create `style` field
@@ -351,7 +352,8 @@ public class BallerinaUtilGenerator {
      *          PIPEDELIMITED
      *     }
      * </pre>
-     * @return  {@link EnumDeclarationNode}
+     *
+     * @return {@link EnumDeclarationNode}
      */
     private EnumDeclarationNode getStyleEnum() {
         EnumMemberNode deepObject = createEnumMemberNode(null,
@@ -375,9 +377,11 @@ public class BallerinaUtilGenerator {
      * <pre>
      *     type SimpleBasicType string|boolean|int|float|decimal;
      * </pre>
+     *
      * @return
      */
     private TypeDefinitionNode getSimpleBasicTypeDefinitionNode() {
+
         TypeDescriptorNode typeDescriptorNode = createSingletonTypeDescriptorNode(
                 createSimpleNameReferenceNode(createIdentifierToken("string|boolean|int|float|decimal")));
         return createTypeDefinitionNode(null, null,
@@ -390,6 +394,7 @@ public class BallerinaUtilGenerator {
      * <pre>
      *     final Encoding & readonly defaultEncoding = {};
      * </pre>
+     *
      * @return
      */
     private ModuleVariableDeclarationNode getDefaultEncoding() {
@@ -410,8 +415,8 @@ public class BallerinaUtilGenerator {
     /**
      * Gets the path of the utils_openapi.bal template at the time of execution.
      *
-     * @return  Path to utils_openapi.bal file in the temporary directory created
-     * @throws  IOException     When failed to get the templates/utils_openapi.bal file from resources
+     * @return Path to utils_openapi.bal file in the temporary directory created
+     * @throws IOException When failed to get the templates/utils_openapi.bal file from resources
      */
     private Path getResourceFilePath() throws IOException {
         Path path = null;

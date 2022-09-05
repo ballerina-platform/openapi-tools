@@ -59,14 +59,16 @@ public class UnionTypeGenerator extends TypeGenerator {
     public UnionTypeGenerator(Schema schema, String typeName) {
         super(schema, typeName);
     }
+
     private final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
+
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
         return typeDefinitionNodeList;
     }
 
-
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
+
         assert schema instanceof ComposedSchema;
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> schemas;
@@ -89,6 +91,7 @@ public class UnionTypeGenerator extends TypeGenerator {
      */
     private TypeDescriptorNode getUnionType(List<Schema> schemas, String typeName)
             throws BallerinaOpenApiException {
+
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema schema : schemas) {
             TypeGenerator typeGenerator = getTypeGenerator(schema, typeName, null);

@@ -46,26 +46,26 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 
-
 /**
- *  Factory class for mime type creation.
+ * Factory class for mime type creation.
  *
- *  @since 1.3.0
+ * @since 1.3.0
  */
 public class MimeFactory {
 
     /**
      * Get the relevant mime object.
      *
-     * @param mediaTypeEntry            - Media type entry
-     * @param ballerinaUtilGenerator    - Ballerina util generator
-     * @param imports                   - Ballerina imports
+     * @param mediaTypeEntry         - Media type entry
+     * @param ballerinaUtilGenerator - Ballerina util generator
+     * @param imports                - Ballerina imports
      * @return mimetype
      * @throws BallerinaOpenApiException throws an exception on unsupported mime types.
      */
     public MimeType getMimeType(Map.Entry<String, MediaType> mediaTypeEntry,
                                 BallerinaUtilGenerator ballerinaUtilGenerator, List<ImportDeclarationNode> imports)
             throws BallerinaOpenApiException {
+
         Schema requestBodySchema = mediaTypeEntry.getValue().getSchema();
         if (requestBodySchema != null && (requestBodySchema.get$ref() != null || requestBodySchema.getType() != null
                 || requestBodySchema.getProperties() != null)) {

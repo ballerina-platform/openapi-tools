@@ -87,9 +87,9 @@ public class BallerinaServiceGenerator {
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
 
     public BallerinaServiceGenerator(OpenAPI openAPI, Filter filter) {
-            this.openAPI = openAPI;
-            this.filter = filter;
-            this.isNullableRequired = false;
+        this.openAPI = openAPI;
+        this.filter = filter;
+        this.isNullableRequired = false;
     }
 
     public List<TypeDefinitionNode> getTypeInclusionRecords() {
@@ -143,7 +143,8 @@ public class BallerinaServiceGenerator {
     }
 
     private List<Node> createResourceFunctions(OpenAPI openApi, Filter filter) throws BallerinaOpenApiException {
-        List<Node> functions =  new ArrayList<>();
+
+        List<Node> functions = new ArrayList<>();
         if (!openApi.getPaths().isEmpty()) {
             Paths paths = openApi.getPaths();
             Set<Map.Entry<String, PathItem>> pathsItems = paths.entrySet();
@@ -158,6 +159,7 @@ public class BallerinaServiceGenerator {
     }
 
     private NodeList<Node> createBasePathNodeList(ListenerGenerator listener) {
+
         if (GeneratorConstants.OAS_PATH_SEPARATOR.equals(listener.getBasePath())) {
             return createNodeList(createIdentifierToken(listener.getBasePath()));
         } else {
@@ -172,6 +174,7 @@ public class BallerinaServiceGenerator {
     private List<Node> applyFiltersForOperations(Filter filter, String path,
                                                  Map<PathItem.HttpMethod, Operation> operationMap)
             throws BallerinaOpenApiException {
+
         List<Node> functions = new ArrayList<>();
         for (Map.Entry<PathItem.HttpMethod, Operation> operation : operationMap.entrySet()) {
             //Add filter availability
@@ -180,13 +183,13 @@ public class BallerinaServiceGenerator {
             //3. Both tag and operation filter
             List<String> filterTags = filter.getTags();
             List<String> operationTags = operation.getValue().getTags();
-            List<String> filterOperations  = filter.getOperations();
+            List<String> filterOperations = filter.getOperations();
             if (!filterTags.isEmpty() || !filterOperations.isEmpty()) {
                 if (operationTags != null || ((!filterOperations.isEmpty())
                         && (operation.getValue().getOperationId() != null))) {
                     if ((operationTags != null && GeneratorUtils.hasTags(operationTags, filterTags)) ||
                             ((operation.getValue().getOperationId() != null) &&
-                            filterOperations.contains(operation.getValue().getOperationId().trim()))) {
+                                    filterOperations.contains(operation.getValue().getOperationId().trim()))) {
                         // getRelative resource path
                         List<Node> functionRelativeResourcePath = GeneratorUtils.getRelativeResourcePath(path,
                                 operation.getValue());
@@ -210,14 +213,15 @@ public class BallerinaServiceGenerator {
     /**
      * Generate resource function for given operation.
      *
-     * @param operation     -  OAS operation
-     * @param pathNodes     -  Relative path nodes
-     * @return              - {@link FunctionDefinitionNode} relevant resource
+     * @param operation -  OAS operation
+     * @param pathNodes -  Relative path nodes
+     * @return - {@link FunctionDefinitionNode} relevant resource
      * @throws BallerinaOpenApiException when the process failure occur
      */
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                        List<Node> pathNodes, String path)
             throws BallerinaOpenApiException {
+
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
@@ -282,6 +286,7 @@ public class BallerinaServiceGenerator {
      * Resolve requestBody reference.
      */
     private RequestBody resolveRequestBodyReference(RequestBody requestBody) throws BallerinaOpenApiException {
+
         if (requestBody.get$ref() != null) {
             String requestBodyName = GeneratorUtils.extractReferenceType(requestBody.get$ref());
             requestBody = resolveRequestBodyReference(openAPI.getComponents()
