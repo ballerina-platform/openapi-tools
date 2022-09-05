@@ -41,13 +41,11 @@ public class GeneratorConstants {
         private String name;
 
         GenType(String name) {
-
             this.name = name;
         }
 
         @Override
         public String toString() {
-
             return this.name;
         }
     }
@@ -68,12 +66,10 @@ public class GeneratorConstants {
         private final String authType;
 
         AuthConfigTypes(String authType) {
-
             this.authType = authType;
         }
 
         public String getValue() {
-
             return authType;
         }
     }
