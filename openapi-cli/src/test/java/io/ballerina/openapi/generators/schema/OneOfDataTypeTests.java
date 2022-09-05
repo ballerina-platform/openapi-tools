@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerina;
+import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
@@ -44,7 +44,7 @@ import java.util.List;
  */
 public class OneOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
-    OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+    OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
 
     @Test(description = "Generate record for schema has oneOF")
     public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException {

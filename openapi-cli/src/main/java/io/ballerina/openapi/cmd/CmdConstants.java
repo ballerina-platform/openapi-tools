@@ -91,12 +91,10 @@ public class CmdConstants {
             "name= \"testopenapi\"\n" +
             "version= \"0.0.0\"\n";
 
-    public static final String DEFAULT_TEMPLATE_DIR = "/templates";
     public static final String DEFAULT_CLIENT_PKG = "client";
     public static final String DEFAULT_MOCK_PKG = "mock";
     public static final String OAS_PATH_SEPARATOR = "/";
     public static final String UNTITLED_SERVICE = "UntitledAPI";
-    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
     public static final String URL = "url";
@@ -109,7 +107,6 @@ public class CmdConstants {
     public static final String DOUBLE = "double";
     public static final String FLOAT = "float";
     public static final String MIME = "mime";
-    public static final String ERROR = "error";
 
     // auth related constants
     public static final String API_KEY = "apikey";
@@ -123,7 +120,7 @@ public class CmdConstants {
     public static final String HEAD = "head";
     public static final String OPTIONS = "options";
     /**
-     * Util for select http key words with http codes.
+     * Util for select http keywords with http codes.
      *
      * @param code http code.
      * @return Http identification word.

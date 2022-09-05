@@ -1,7 +1,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerina;
+import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.model.Filter;
@@ -34,7 +34,7 @@ public class RemoteFunctionNameValidationTests {
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: " +
                     "\\R\\ROperationId is missing in the resource path: .*")
     public void testMissionOperationId() throws IOException, BallerinaOpenApiException {
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("petstore_without_operation_id.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false,

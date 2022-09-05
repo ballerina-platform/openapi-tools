@@ -21,7 +21,7 @@ package io.ballerina.openapi.generators.client;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerina;
+import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
@@ -97,7 +97,7 @@ public class AnnotationTests {
         List<String> list1 = new ArrayList<>();
         List<String> list2 = new ArrayList<>();
         Filter filter = new Filter(list1, list2);
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();

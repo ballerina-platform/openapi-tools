@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerina;
+import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
@@ -35,7 +35,7 @@ import java.nio.file.Paths;
  */
 public class RecordDefaultValueTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+    OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
 
     @Test(description = "Test for default optional primitive fields in records")
     public void testDefaultPrimitive() throws IOException, BallerinaOpenApiException {

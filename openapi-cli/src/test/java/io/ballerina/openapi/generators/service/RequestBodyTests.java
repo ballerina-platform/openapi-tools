@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerina;
+import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
@@ -44,7 +44,7 @@ public class RequestBodyTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
     SyntaxTree syntaxTree;
-    public static final OpenAPIToBallerina CODE_GENERATOR = new OpenAPIToBallerina();
+    public static final OpenAPIToBallerinaCommand CODE_GENERATOR = new OpenAPIToBallerinaCommand();
 
     @Test(description = "Scenario 01 - Request Body has single content type(application/json)")
     public void generateJsonPayload() throws IOException, BallerinaOpenApiException {

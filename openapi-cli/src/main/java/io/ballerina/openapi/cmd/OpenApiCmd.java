@@ -137,7 +137,7 @@ public class OpenApiCmd implements BLauncherCmd {
         if (inputPath) {
             //Check if an OpenApi definition is provided
             if (argList == null) {
-                outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
+                outStream.println(OpenApiMessages.MESSAGE_FOR_MISSING_INPUT);
                 exitError(this.exitWhenFinish);
                 return;
             }
@@ -191,7 +191,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 }
                 ballerinaToOpenApi(fileName);
             } else {
-                outStream.println(OpenApiMesseges.MESSAGE_FOR_MISSING_INPUT);
+                outStream.println(OpenApiMessages.MESSAGE_FOR_MISSING_INPUT);
                 exitError(this.exitWhenFinish);
             }
         } else {
@@ -224,7 +224,7 @@ public class OpenApiCmd implements BLauncherCmd {
         }
         getTargetOutputPath();
         // Check service name it is mandatory
-        BallerinaToOpenAPI openApiConverter = new BallerinaToOpenAPI();
+        BallerinaToOpenAPICommand openApiConverter = new BallerinaToOpenAPICommand();
         openApiConverter.generateOAS3DefinitionsAllService(balFilePath, targetOutputPath, service,
                 generatedFileType);
         errors.addAll(openApiConverter.getErrors());
@@ -255,7 +255,7 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName input resource file
      */
     private void openApiToBallerina(String fileName, Filter filter) throws IOException {
-        OpenAPIToBallerina generator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand generator = new OpenAPIToBallerinaCommand();
         generator.setLicenseHeader(this.setLicenseHeader());
         generator.setIncludeTestFiles(this.includeTestFiles);
         final File openApiFile = new File(fileName);
@@ -346,7 +346,7 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param resourcePath      resource Path
      * @param resourceMode      flag for client resource method generation
      */
-    private void generatesClientFile(OpenAPIToBallerina generator, Path resourcePath, Filter filter,
+    private void generatesClientFile(OpenAPIToBallerinaCommand generator, Path resourcePath, Filter filter,
                                      boolean resourceMode) {
         try {
             generator.generateClient(resourcePath.toString(), targetOutputPath.toString(), filter, nullable,
@@ -356,7 +356,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 outStream.println(e.getLocalizedMessage());
                 exitError(this.exitWhenFinish);
             } else {
-                outStream.println(OpenApiMesseges.OPENAPI_CLIENT_EXCEPTION);
+                outStream.println(OpenApiMessages.OPENAPI_CLIENT_EXCEPTION);
                 exitError(this.exitWhenFinish);
             }
         }
@@ -368,7 +368,7 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param serviceName   service name uses for naming the generated file
      * @param resourcePath  resource Path
      */
-    private void generateServiceFile(OpenAPIToBallerina generator, String serviceName, Path resourcePath,
+    private void generateServiceFile(OpenAPIToBallerinaCommand generator, String serviceName, Path resourcePath,
                                      Filter filter) {
 
         try {
@@ -388,8 +388,8 @@ public class OpenApiCmd implements BLauncherCmd {
      * @param fileName          service name  use for naming the files
      * @param resourcePath      resource path
      */
-    private void generateBothFiles(OpenAPIToBallerina generator, String fileName, Path resourcePath, Filter filter,
-                                   boolean generateClientResourceFunctions) {
+    private void generateBothFiles(OpenAPIToBallerinaCommand generator, String fileName, Path resourcePath,
+                                   Filter filter, boolean generateClientResourceFunctions) {
         try {
             assert resourcePath != null;
             generator.generateClientAndService(resourcePath.toString(), fileName, targetOutputPath.toString(), filter,

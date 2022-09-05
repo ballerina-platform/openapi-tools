@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerina;
+import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.model.Filter;
@@ -62,7 +62,7 @@ public class ComparedGeneratedFileTests {
 //        Path definitionPath = RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml");
         Path definitionPath = RES_DIR.resolve("openapi.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/jira_openapi.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
@@ -77,7 +77,7 @@ public class ComparedGeneratedFileTests {
             BallerinaOpenApiException, FormatterException, URISyntaxException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/" + yamlFile);
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/" + expectedFile);
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();

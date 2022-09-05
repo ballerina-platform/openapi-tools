@@ -104,5 +104,4 @@ public class CmdUtils {
         gFile.setFileName(gFile.getFileName().split("\\.")[0] + "." + (duplicateCount) + "." +
                 gFile.getFileName().split("\\.")[1]);
     }
-
 }

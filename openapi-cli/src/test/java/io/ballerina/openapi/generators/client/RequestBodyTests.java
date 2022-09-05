@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerina;
+import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.model.Filter;
@@ -53,7 +53,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generate request body payload when operation has request body")
     public void testForRequestBody() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_basic_scenarios.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_basic_scenarios.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -64,7 +64,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generate request body payload when operation has request body with AllOf scenarios")
     public void testForRequestBodyWithAllOf() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_allOf_scenarios.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_allOf_scenarios.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -75,7 +75,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generate request body payload when operation has request body OneOf scenarios")
     public void testForRequestBodyWithOneOf() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_oneOf_scenarios.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -86,7 +86,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generate request body payload with array schema")
     public void testForRequestBodyWithArraySchema() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_array.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_array.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -97,7 +97,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generate request body payload with empty array schema")
     public void testForRequestBodyWithEmptyArraySchema() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_empty_array.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_empty_array.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -108,7 +108,7 @@ public class RequestBodyTests {
     @Test(description = "Test client generation for unsupported request body media type",
             expectedExceptions = BallerinaOpenApiException.class)
     public void testRequestBodyWithUnsupportedMediaType() throws IOException, BallerinaOpenApiException {
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RES_DIR.resolve("swagger/unsupported_request_body.yaml");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -119,7 +119,7 @@ public class RequestBodyTests {
             expectedExceptions = BallerinaOpenApiException.class, expectedExceptionsMessageRegExp =
                                     ".*GET operation cannot have a requestBody.*")
     public void testGetOrDeleteOrHeadContainRequestBody() throws IOException, BallerinaOpenApiException {
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RES_DIR.resolve("swagger/request_body_in_get_delete_head.yaml");
         codeGenerator.normalizeOpenAPI(definitionPath, true);
     }
@@ -127,7 +127,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generating request body when operation has form url encoded media type")
     public void testRequestBodyWithURLEncodedType() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/url_encoded_payload.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("utils/swagger/url_encoded.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -138,7 +138,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generating request body when operation has binary octet-stream media type")
     public void testRequestBodyWithBinaryOctetStreamMediaType() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/binary_format_octet_stream_payload.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/binary_format_octet_stream_payload.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -149,7 +149,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generating request body when operation has byte octet-stream media type")
     public void testRequestBodyWithByteOctetStreamMediaType() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/byte_format_octet_stream_payload.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/byte_format_octet_stream_payload.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -160,7 +160,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generating request body when operation has */* media type")
     public void testRequestBodyWithAllTypeMediaType() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/any_types_payload.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/any_types_payload.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -171,7 +171,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generating request body when operation has vendor specific media type")
     public void testRequestBodyWithVendorSpecificMimeType() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/vendor_specific_payload.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/vendor_specific_payload.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -182,7 +182,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generating request body when operation has multipart form-data media type")
     public void testRequestBodyWithMultipartMediaType() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/multipart_formdata.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("utils/swagger/multipart_formdata.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
@@ -193,7 +193,7 @@ public class RequestBodyTests {
     @Test(description = "Test for generating request body when schema is empty")
     public void testRequestBodyWithoutSchema() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_without_schema.bal");
-        OpenAPIToBallerina codeGenerator = new OpenAPIToBallerina();
+        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_without_schema.yaml"), true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
