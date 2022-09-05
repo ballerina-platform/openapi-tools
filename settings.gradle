@@ -38,4 +38,7 @@ gradleEnterprise {
 }
 include 'openapi-build-extension'
 include 'openapi-core'
+include 'openapi-client-idl-plugin'
+include 'openapi-client-idl-plugin'
+include 'openapi-client-idl-plugin'
 
