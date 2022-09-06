@@ -1,6 +1,7 @@
 package io.ballerina.openapi.idl.client;
 
 import io.ballerina.projects.DiagnosticResult;
+import io.ballerina.projects.IDLClientGeneratorResult;
 import io.ballerina.projects.Project;
 import org.testng.annotations.Test;
 
@@ -14,6 +15,7 @@ public class IDLClientGenPluginTests {
     public void validSwaggerContract() {
         Project project = TestUtils.loadBuildProject(RESOURCE_DIRECTORY.resolve("project_01"));
         // Check whether there are any diagnostics
+        IDLClientGeneratorResult idlClientGeneratorResult = project.currentPackage().runIDLGeneratorPlugins();
         DiagnosticResult diagnosticResult = project.currentPackage().getCompilation().diagnosticResult();
     }
 }
