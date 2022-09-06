@@ -73,7 +73,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("An OpenAPI definition file is required to generate the service."));
+        Assert.assertTrue(output.contains("An OpenAPI definition path is required to generate the service."));
     }
 
     @Test(description = "Test openapi gen-service for successful service generation")

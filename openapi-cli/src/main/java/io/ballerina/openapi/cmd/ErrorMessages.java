@@ -23,14 +23,14 @@ package io.ballerina.openapi.cmd;
  *
  * @since 1.3.0
  */
-public class OpenApiMessages {
+public class ErrorMessages {
 
-    public static final String OPENAPI_CLIENT_EXCEPTION = "Error occurred when generating client for OpenAPI contract";
+    public static final String CLIENT_GENERATION_FAILED = "Error occurred when generating client for OpenAPI contract";
 
-    public static final String MESSAGE_FOR_MISSING_INPUT = "An OpenAPI definition file is required to generate the " +
+    public static final String MISSING_CONTRACT_PATH = "An OpenAPI definition path is required to generate the " +
             "service. \ne.g: bal openapi --input <OpenAPIContract> or <Ballerina file>";
 
-    private OpenApiMessages() {
+    private ErrorMessages() {
         throw new AssertionError();
     }
 }

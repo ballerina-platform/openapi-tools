@@ -137,7 +137,7 @@ public class OpenApiCmd implements BLauncherCmd {
         if (inputPath) {
             //Check if an OpenApi definition is provided
             if (argList == null) {
-                outStream.println(OpenApiMessages.MESSAGE_FOR_MISSING_INPUT);
+                outStream.println(ErrorMessages.MISSING_CONTRACT_PATH);
                 exitError(this.exitWhenFinish);
                 return;
             }
@@ -191,7 +191,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 }
                 ballerinaToOpenApi(fileName);
             } else {
-                outStream.println(OpenApiMessages.MESSAGE_FOR_MISSING_INPUT);
+                outStream.println(ErrorMessages.MISSING_CONTRACT_PATH);
                 exitError(this.exitWhenFinish);
             }
         } else {
@@ -356,7 +356,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 outStream.println(e.getLocalizedMessage());
                 exitError(this.exitWhenFinish);
             } else {
-                outStream.println(OpenApiMessages.OPENAPI_CLIENT_EXCEPTION);
+                outStream.println(ErrorMessages.CLIENT_GENERATION_FAILED);
                 exitError(this.exitWhenFinish);
             }
         }
