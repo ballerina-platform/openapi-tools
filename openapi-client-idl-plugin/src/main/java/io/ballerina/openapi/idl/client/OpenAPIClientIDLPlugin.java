@@ -72,9 +72,10 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
         @Override
         public boolean canHandle(IDLSourceGeneratorContext idlSourceGeneratorContext) {
             // Check given contract is valid for the generating the client.
-            Path oasPath = idlSourceGeneratorContext.resourcePath();
-            BasicLiteralNode pathNode =
-                    ((ModuleClientDeclarationNode) ((IDLPluginManager.IDLSourceGeneratorContextImpl) idlSourceGeneratorContext).clientNode).clientUri();
+//            Path oasPath = idlSourceGeneratorContext.resourcePath();
+            Path oasPath = Path.of("/home/hansani/ballerina_projects/openapi-features/idl_import/idl_01/openapi.yaml");
+//            BasicLiteralNode pathNode =
+//                    ((ModuleClientDeclarationNode) ((IDLPluginManager.IDLSourceGeneratorContextImpl) idlSourceGeneratorContext).clientNode).clientUri();
             try {
                 OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(oasPath);
             } catch (IOException | BallerinaOpenApiException | NullPointerException e) {
@@ -86,12 +87,13 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
         @Override
         public void perform(IDLSourceGeneratorContext idlSourceGeneratorContext) {
 
-            Path oasPath = idlSourceGeneratorContext.resourcePath();
+//            Path oasPath = idlSourceGeneratorContext.resourcePath();
 
             // Call client generation logic
             // Filters
             // nullable
             // is resource method
+            Path oasPath = Path.of("/home/hansani/ballerina_projects/openapi-features/idl_import/idl_01/openapi.yaml");
             try {
                 List<GenSrcFile> genSrcFiles = generateClientFiles(oasPath, new Filter(), true, true);
                 ModuleId moduleId = ModuleId.create("client1",
@@ -139,6 +141,7 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
                 idlSourceGeneratorContext.addClient(moduleConfig);
             } catch (IOException | BallerinaOpenApiException | FormatterException e) {
                 // Ignore need to handle with proper error handle
+                // Error while generating the client as warning
             }
         }
 

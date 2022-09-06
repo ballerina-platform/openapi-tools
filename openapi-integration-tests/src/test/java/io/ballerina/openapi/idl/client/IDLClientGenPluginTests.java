@@ -36,6 +36,18 @@ public class IDLClientGenPluginTests {
         // Check whether there are any diagnostics
         DiagnosticResult diagnosticResult = project.currentPackage().getCompilation().diagnosticResult();
     }
+
+    @Test(description = "")
+    public void withAnnotation() {
+
+    }
+
+    @Test(description = "When client declaration inside the function")
+    public void withCDwithFunction() {
+
+    }
+
+
     public static BuildProject loadBuildProject(Path projectPath) {
         BuildOptions buildOptions = BuildOptions.builder().setOffline(true).build();
         return BuildProject.load(projectPath, buildOptions);
