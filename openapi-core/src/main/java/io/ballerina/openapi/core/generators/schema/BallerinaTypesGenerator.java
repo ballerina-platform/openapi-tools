@@ -64,6 +64,7 @@ import static io.ballerina.openapi.converter.Constants.HTTP;
  * @since 1.3.0
  */
 public class BallerinaTypesGenerator {
+
     private List<TypeDefinitionNode> typeDefinitionNodeList;
     private boolean hasConstraints;
 
@@ -157,7 +158,7 @@ public class BallerinaTypesGenerator {
     }
 
     private void importsForTypeDefinitions(List<ImportDeclarationNode> imports) {
-        for (TypeDefinitionNode node: typeDefinitionNodeList) {
+        for (TypeDefinitionNode node : typeDefinitionNodeList) {
             if (!(node.typeDescriptor() instanceof RecordTypeDescriptorNode)) {
                 continue;
             }
@@ -212,7 +213,7 @@ public class BallerinaTypesGenerator {
         } else if (typeGenerator instanceof RecordTypeGenerator &&
                 !((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
             removeDuplicateNode(((RecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
-        }  else if (typeGenerator instanceof AllOfRecordTypeGenerator &&
+        } else if (typeGenerator instanceof AllOfRecordTypeGenerator &&
                 !((AllOfRecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList().isEmpty()) {
             removeDuplicateNode(((AllOfRecordTypeGenerator) typeGenerator).getTypeDefinitionNodeList());
         } else if (typeGenerator instanceof UnionTypeGenerator &&
@@ -226,9 +227,10 @@ public class BallerinaTypesGenerator {
      * Remove duplicate of the TypeDefinitionNode.
      */
     private void removeDuplicateNode(List<TypeDefinitionNode> newConstraintNode) {
-        for (TypeDefinitionNode newNode: newConstraintNode) {
+
+        for (TypeDefinitionNode newNode : newConstraintNode) {
             boolean isExist = false;
-            for (TypeDefinitionNode oldNode: typeDefinitionNodeList) {
+            for (TypeDefinitionNode oldNode : typeDefinitionNodeList) {
                 if (newNode.typeName().text().equals(oldNode.typeName().text())) {
                     isExist = true;
                     break;

@@ -30,6 +30,7 @@ public class CmdConstants {
     public static final String RESOURCE = "resource";
     public static final String REMOTE = "remote";
     public static final String SERVICE = "service";
+
     /**
      * Enum to select the code generation mode.
      * Ballerina service, mock and client generation is available
@@ -42,13 +43,11 @@ public class CmdConstants {
         private String name;
 
         GenType(String name) {
-
             this.name = name;
         }
 
         @Override
         public String toString() {
-
             return this.name;
         }
     }
@@ -69,12 +68,10 @@ public class CmdConstants {
         private final String authType;
 
         AuthConfigTypes(String authType) {
-
             this.authType = authType;
         }
 
         public String getValue() {
-
             return authType;
         }
     }

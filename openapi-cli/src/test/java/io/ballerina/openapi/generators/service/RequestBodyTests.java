@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
@@ -44,7 +44,6 @@ public class RequestBodyTests {
     List<String> list2 = new ArrayList<>();
     Filter filter = new Filter(list1, list2);
     SyntaxTree syntaxTree;
-    public static final OpenAPIToBallerinaCommand CODE_GENERATOR = new OpenAPIToBallerinaCommand();
 
     @Test(description = "Scenario 01 - Request Body has single content type(application/json)")
     public void generateJsonPayload() throws IOException, BallerinaOpenApiException {
@@ -110,7 +109,7 @@ public class RequestBodyTests {
     public void oneOfScenarios() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/oneOf_request_body.yaml");
         BallerinaServiceGenerator ballerinaServiceGenerator =
-                new BallerinaServiceGenerator(CODE_GENERATOR.normalizeOpenAPI(definitionPath, false), filter);
+                new BallerinaServiceGenerator(GeneratorUtils.normalizeOpenAPI(definitionPath, false), filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "requestBody/oneof_requestBody.bal", syntaxTree);

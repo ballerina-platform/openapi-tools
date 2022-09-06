@@ -39,7 +39,7 @@ public class XmlType extends MimeType {
     private List<ImportDeclarationNode> imports;
 
     public XmlType(List<ImportDeclarationNode> imports) {
-       this.imports = imports;
+        this.imports = imports;
     }
 
     @Override

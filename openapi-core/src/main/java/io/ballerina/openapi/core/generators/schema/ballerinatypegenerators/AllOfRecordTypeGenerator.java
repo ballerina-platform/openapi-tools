@@ -67,6 +67,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
  */
 public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
     public AllOfRecordTypeGenerator(Schema schema, String typeName) {
+
         super(schema, typeName);
     }
 
@@ -75,6 +76,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
+
         assert schema instanceof ComposedSchema;
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> allOfSchemas = composedSchema.getAllOf();
@@ -92,6 +94,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
     }
 
     private List<Node> generateAllOfRecordFields(List<Schema> allOfSchemas) throws BallerinaOpenApiException {
+
         List<Node> recordFieldList = new ArrayList<>();
         for (Schema allOfSchema : allOfSchemas) {
             if (allOfSchema.get$ref() != null) {

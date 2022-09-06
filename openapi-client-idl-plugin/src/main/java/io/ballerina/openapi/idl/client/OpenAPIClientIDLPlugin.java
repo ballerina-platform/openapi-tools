@@ -18,6 +18,8 @@
 
 package io.ballerina.openapi.idl.client;
 
+import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.ModuleClientDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
@@ -71,9 +73,11 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
         public boolean canHandle(IDLSourceGeneratorContext idlSourceGeneratorContext) {
             // Check given contract is valid for the generating the client.
             Path oasPath = idlSourceGeneratorContext.resourcePath();
+            BasicLiteralNode pathNode =
+                    ((ModuleClientDeclarationNode) ((IDLPluginManager.IDLSourceGeneratorContextImpl) idlSourceGeneratorContext).clientNode).clientUri();
             try {
                 OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(oasPath);
-            } catch (IOException | BallerinaOpenApiException e) {
+            } catch (IOException | BallerinaOpenApiException | NullPointerException e) {
                 return false;
             }
             return true;

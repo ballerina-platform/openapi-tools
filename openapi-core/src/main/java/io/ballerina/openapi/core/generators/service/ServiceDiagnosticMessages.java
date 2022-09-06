@@ -47,7 +47,7 @@ public enum ServiceDiagnosticMessages {
             "Header '%s' with no header type can not be mapped to the Ballerina headers.",
             DiagnosticSeverity.ERROR),
     OAS_SERVICE_107("OAS_SERVICE_107", "HTTP status code '%s' is not supported in Ballerina.",
-                    DiagnosticSeverity.ERROR);
+            DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;
@@ -60,14 +60,17 @@ public enum ServiceDiagnosticMessages {
     }
 
     public String getCode() {
+
         return code;
     }
 
     public String getDescription() {
+
         return description;
     }
 
     public DiagnosticSeverity getSeverity() {
+
         return severity;
     }
 }

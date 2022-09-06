@@ -129,6 +129,7 @@ import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtil
  * @since 1.3.0
  */
 public class FunctionBodyGenerator {
+
     private List<ImportDeclarationNode> imports;
     private boolean isHeader;
     private final List<TypeDefinitionNode> typeDefinitionNodeList;
@@ -171,12 +172,13 @@ public class FunctionBodyGenerator {
      */
     public FunctionBodyNode getFunctionBodyNode(String path, Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
+
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(
                 openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
         isHeader = false;
         // Create statements
-        List<StatementNode> statementsList =  new ArrayList<>();
+        List<StatementNode> statementsList = new ArrayList<>();
         // Check whether given path is complex path , if complex it will handle adding these two statement
         if (resourceMode && isComplexURL(path)) {
             List<StatementNode> bodyStatements = generateBodyStatementForComplexUrl(path);
@@ -234,7 +236,7 @@ public class FunctionBodyGenerator {
 
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
-            for (Parameter parameter: parameters) {
+            for (Parameter parameter : parameters) {
                 if (parameter.getIn().trim().equals(QUERY)) {
                     queryParameters.add(parameter);
                 } else if (parameter.getIn().trim().equals(HEADER)) {
@@ -250,8 +252,9 @@ public class FunctionBodyGenerator {
      * Handle query parameters and headers within a remote function.
      */
     public void handleQueryParamsAndHeaders(List<Parameter> queryParameters, List<Parameter> headerParameters,
-                                               List<StatementNode> statementsList, List<String> queryApiKeyNameList,
-                                               List<String> headerApiKeyNameList) throws BallerinaOpenApiException {
+                                            List<StatementNode> statementsList, List<String> queryApiKeyNameList,
+                                            List<String> headerApiKeyNameList) throws BallerinaOpenApiException {
+
         boolean combinationOfApiKeyAndHTTPOAuth = ballerinaAuthConfigGenerator.isHttpOROAuth() &&
                 ballerinaAuthConfigGenerator.isApiKey();
         if (combinationOfApiKeyAndHTTPOAuth) {
@@ -282,6 +285,7 @@ public class FunctionBodyGenerator {
     private void addUpdatedPathAndHeaders(List<StatementNode> statementsList, List<String> queryApiKeyNameList,
                                           List<Parameter> queryParameters, List<String> headerApiKeyNameList,
                                           List<Parameter> headerParameters) throws BallerinaOpenApiException {
+
         List<StatementNode> ifBodyStatementsList = new ArrayList<>();
 
         if (!headerParameters.isEmpty() || !headerApiKeyNameList.isEmpty()) {
@@ -334,11 +338,12 @@ public class FunctionBodyGenerator {
 
     /**
      * Add apiKeys to a given map (queryParam or headerValues).
-     *
+     * <p>
      * `queryParam["api-key"] = self.apiKeyConfig?.apiKey;`
      * `headerValues["api-key"] = self.apiKeyConfig?.apiKey;`
      */
     private void addApiKeysToMap(String mapName, List<String> apiKeyNames, List<StatementNode> statementNodeList) {
+
         if (!apiKeyNames.isEmpty()) {
             for (String apiKey : apiKeyNames) {
                 IdentifierToken fieldName = createIdentifierToken(mapName + "[" + '"' + apiKey.trim() + '"' + "]");
@@ -359,10 +364,10 @@ public class FunctionBodyGenerator {
 
     /**
      * Get updated path considering queryParamEncodingMap.
-     *
      */
     private void getUpdatedPathHandlingQueryParamEncoding(List<StatementNode> statementsList, List<Parameter>
             queryParameters) throws BallerinaOpenApiException {
+
         VariableDeclarationNode queryParamEncodingMap = getQueryParameterEncodingMap(queryParameters);
         if (queryParamEncodingMap != null) {
             statementsList.add(queryParamEncodingMap);
@@ -388,6 +393,7 @@ public class FunctionBodyGenerator {
      */
     private void generateIfBlockToAddApiKeysToMaps(List<StatementNode> statementsList,
                                                    List<StatementNode> ifBodyStatementsList) {
+
         if (!ifBodyStatementsList.isEmpty()) {
             NodeList<StatementNode> ifBodyStatementsNodeList = createNodeList(ifBodyStatementsList);
             BlockStatementNode ifBody = createBlockStatementNode(createToken(OPEN_BRACE_TOKEN),
@@ -409,15 +415,16 @@ public class FunctionBodyGenerator {
      * included to the map even when the serialization mechanisms are specified. These data is given in the `style` and
      * `explode` sections of the OpenAPI definition. Style defines how multiple values are delimited and explode
      * specifies whether arrays and objects should generate separate parameters
-     *
+     * <p>
      * --ex: {@code map<Encoding> queryParamEncoding = {"expand": ["deepObject", true]};}
      *
-     * @param queryParameters               List of query parameters defined in a particular function
-     * @return                              {@link VariableDeclarationNode}
-     * @throws BallerinaOpenApiException    When invalid referenced schema is given.
+     * @param queryParameters List of query parameters defined in a particular function
+     * @return {@link VariableDeclarationNode}
+     * @throws BallerinaOpenApiException When invalid referenced schema is given.
      */
     private VariableDeclarationNode getQueryParameterEncodingMap(List<Parameter> queryParameters)
             throws BallerinaOpenApiException {
+
         List<Node> filedOfMap = new ArrayList<>();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken("map<" + ENCODING + ">"));
@@ -425,10 +432,10 @@ public class FunctionBodyGenerator {
                 createIdentifierToken("queryParamEncoding"));
         TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
 
-        for (Parameter parameter: queryParameters) {
+        for (Parameter parameter : queryParameters) {
             Schema paramSchema = parameter.getSchema();
             if (paramSchema.get$ref() != null) {
-                paramSchema  = openAPI.getComponents().getSchemas().get(
+                paramSchema = openAPI.getComponents().getSchemas().get(
                         getValidName(extractReferenceType(paramSchema.get$ref()), true));
             }
             if (paramSchema != null && (paramSchema.getProperties() != null ||
@@ -455,10 +462,12 @@ public class FunctionBodyGenerator {
 
     /**
      * Provides the list of security schemes available for the given operation.
-     * @param operation     Current operation
-     * @return              Security schemes that can be used to authorize the given operation
+     *
+     * @param operation Current operation
+     * @return Security schemes that can be used to authorize the given operation
      */
     private Set<String> getSecurityRequirementForOperation(Operation operation) {
+
         Set<String> securitySchemasAvailable = new LinkedHashSet<>();
         List<SecurityRequirement> securityRequirements = new ArrayList<>();
         if (operation.getSecurity() != null) {
@@ -468,7 +477,7 @@ public class FunctionBodyGenerator {
         }
 
         if (securityRequirements.size() > 0) {
-            for (SecurityRequirement requirement: securityRequirements) {
+            for (SecurityRequirement requirement : securityRequirements) {
                 securitySchemasAvailable.addAll(requirement.keySet());
             }
         }
@@ -562,13 +571,13 @@ public class FunctionBodyGenerator {
 
     /**
      * This method use to generate Path statement inside the function body node.
-     *
+     * <p>
      * ex:
      * <pre> string  path = string `/weather`; </pre>
      *
-     * @param path              - Given path
-     * @param annotationNodes   - Node list for path implementation
-     * @return                  - VariableDeclarationNode for path statement.
+     * @param path            - Given path
+     * @param annotationNodes - Node list for path implementation
+     * @return - VariableDeclarationNode for path statement.
      */
     private VariableDeclarationNode getPathStatement(String path, NodeList<AnnotationNode> annotationNodes) {
 
@@ -587,7 +596,6 @@ public class FunctionBodyGenerator {
                 typedBindingPatternNode, createToken(EQUAL_TOKEN), initializer, createToken(SEMICOLON_TOKEN));
     }
 
-
     /**
      * This method is to used for generating path when it has path parameters.
      *
@@ -595,6 +603,7 @@ public class FunctionBodyGenerator {
      * @return string of path
      */
     public String generatePathWithPathParameter(String path) {
+
         if (path.contains("{")) {
             String refinedPath = path;
             Pattern p = Pattern.compile("\\{[^}]*}");
@@ -629,9 +638,9 @@ public class FunctionBodyGenerator {
      * @param returnType     - Response type
      * @param iterator       - RequestBody media type
      */
-    private  void createRequestBodyStatements(boolean isHeader, List<StatementNode> statementsList,
-                                              String method, String returnType, Iterator<Map.Entry<String,
-                                              MediaType>> iterator)
+    private void createRequestBodyStatements(boolean isHeader, List<StatementNode> statementsList,
+                                             String method, String returnType, Iterator<Map.Entry<String,
+            MediaType>> iterator)
             throws BallerinaOpenApiException {
 
         //Create Request statement
@@ -678,8 +687,8 @@ public class FunctionBodyGenerator {
     /**
      * This function is used for generating function body statements according to the given request body media type.
      *
-     * @param statementsList    - Previous statements list
-     * @param mediaTypeEntry    - Media type entry
+     * @param statementsList - Previous statements list
+     * @param mediaTypeEntry - Media type entry
      */
     private void genStatementsForRequestMediaType(List<StatementNode> statementsList,
                                                   Map.Entry<String, MediaType> mediaTypeEntry)
@@ -693,7 +702,7 @@ public class FunctionBodyGenerator {
      * This util function for getting type to the targetType data binding.
      *
      * @param rType - Given Data type
-     * @return      - return type
+     * @return - return type
      */
     private String returnTypeForTargetTypeField(String rType) {
 
@@ -707,7 +716,7 @@ public class FunctionBodyGenerator {
      * Generate map variable for query parameters and headers.
      */
     private VariableDeclarationNode getMapForParameters(List<Parameter> parameters, String mapDataType,
-                                                         String mapName, List<String> apiKeyNames) {
+                                                        String mapName, List<String> apiKeyNames) {
         List<Node> filedOfMap = new ArrayList<>();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken(mapDataType));
@@ -715,7 +724,7 @@ public class FunctionBodyGenerator {
                 createIdentifierToken(mapName));
         TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
 
-        for (Parameter parameter: parameters) {
+        for (Parameter parameter : parameters) {
             // Initializer
             IdentifierToken fieldName = createIdentifierToken('"' + (parameter.getName().trim()) + '"');
             Token colon = createToken(COLON_TOKEN);

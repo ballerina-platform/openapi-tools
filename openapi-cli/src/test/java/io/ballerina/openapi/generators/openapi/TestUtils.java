@@ -17,7 +17,7 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.cmd.BallerinaToOpenAPICommand;
+import io.ballerina.openapi.cmd.OASContractGenerator;
 import org.testng.Assert;
 
 import java.io.File;
@@ -54,7 +54,7 @@ public class TestUtils {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
-            BallerinaToOpenAPICommand openApiConverter = new BallerinaToOpenAPICommand();
+            OASContractGenerator openApiConverter = new OASContractGenerator();
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null
                     , false);
             if (Files.exists(tempDir.resolve("payloadV_openapi.yaml"))) {

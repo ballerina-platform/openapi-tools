@@ -176,6 +176,7 @@ public class GeneratorUtils {
     }
 
     public static QualifiedNameReferenceNode getQualifiedNameReferenceNode(String modulePrefix, String identifier) {
+
         Token modulePrefixToken = AbstractNodeFactory.createIdentifierToken(modulePrefix);
         Token colon = AbstractNodeFactory.createIdentifierToken(":");
         IdentifierToken identifierToken = AbstractNodeFactory.createIdentifierToken(identifier, SINGLE_WS_MINUTIAE
@@ -185,17 +186,19 @@ public class GeneratorUtils {
 
     /**
      * Generated resource function relative path node list.
-     * @param path - resource path
+     *
+     * @param path      - resource path
      * @param operation - resource operation
      * @return - node lists
      * @throws BallerinaOpenApiException
      */
     public static List<Node> getRelativeResourcePath(String path, Operation operation)
             throws BallerinaOpenApiException {
+
         List<Node> functionRelativeResourcePath = new ArrayList<>();
         String[] pathNodes = path.split(SLASH);
         if (pathNodes.length >= 2) {
-            for (String pathNode: pathNodes) {
+            for (String pathNode : pathNodes) {
                 if (pathNode.contains(OPEN_CURLY_BRACE)) {
                     String pathParam = pathNode;
                     pathParam = pathParam.substring(pathParam.indexOf(OPEN_CURLY_BRACE) + 1);
@@ -272,17 +275,18 @@ public class GeneratorUtils {
 
     /**
      * Method for convert openApi type to ballerina type.
-     * @param type  OpenApi parameter types
+     *
+     * @param type OpenApi parameter types
      * @return ballerina type
      */
     public static String convertOpenAPITypeToBallerina(String type) throws BallerinaOpenApiException {
+
         if (GeneratorConstants.TYPE_MAP.containsKey(type)) {
             return GeneratorConstants.TYPE_MAP.get(type);
         } else {
             throw new BallerinaOpenApiException("Unsupported OAS data type `" + type + "`");
         }
     }
-
 
     /**
      * This method will escape special characters used in method names and identifiers.
@@ -291,6 +295,7 @@ public class GeneratorUtils {
      * @return - escaped string
      */
     public static String escapeIdentifier(String identifier) {
+
         if (identifier.matches("\\b[0-9]*\\b")) {
             return "'" + identifier;
         } else if (!identifier.matches("\\b[_a-zA-Z][_a-zA-Z0-9]*\\b") || BAL_KEYWORDS.contains(identifier)) {
@@ -312,7 +317,7 @@ public class GeneratorUtils {
         if (!identifier.matches("\\b[0-9]*\\b")) {
             String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN);
             StringBuilder validName = new StringBuilder();
-            for (String part: split) {
+            for (String part : split) {
                 if (!part.isBlank()) {
                     if (split.length > 1) {
                         part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) +
@@ -334,9 +339,10 @@ public class GeneratorUtils {
      * Check the given recordName is valid name.
      *
      * @param recordName - String record name
-     * @return           - boolean value
+     * @return - boolean value
      */
     public static boolean isValidSchemaName(String recordName) {
+
         return !recordName.matches("\\b[0-9]*\\b");
     }
 
@@ -346,9 +352,10 @@ public class GeneratorUtils {
      * @param referenceVariable - Reference String
      * @return Reference variable name
      * @throws BallerinaOpenApiException - Throws an exception if the reference string is incompatible.
-     *                                     Note : Current implementation will not support external links a references.
+     *                                   Note : Current implementation will not support external links a references.
      */
     public static String extractReferenceType(String referenceVariable) throws BallerinaOpenApiException {
+
         if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
             String[] refArray = referenceVariable.split("/");
             return refArray[refArray.length - 1];
@@ -359,6 +366,7 @@ public class GeneratorUtils {
     }
 
     public static boolean hasTags(List<String> tags, List<String> filterTags) {
+
         return !Collections.disjoint(filterTags, tags);
     }
 
@@ -383,7 +391,7 @@ public class GeneratorUtils {
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
-            for (String message: parseResult.getMessages()) {
+            for (String message : parseResult.getMessages()) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }
             throw new BallerinaOpenApiException(errorMessage.toString());
@@ -391,11 +399,11 @@ public class GeneratorUtils {
         return parseResult.getOpenAPI();
     }
 
-
     /**
      * Generate BallerinaMediaType for all the mediaTypes.
      */
     public static String getBallerinaMediaType(String mediaType) {
+
         switch (mediaType) {
             case MediaType.APPLICATION_JSON:
                 return SyntaxKind.JSON_KEYWORD.stringValue();
@@ -421,6 +429,7 @@ public class GeneratorUtils {
      */
     public static VariableDeclarationNode getSimpleStatement(String responseType, String variable,
                                                              String initializer) {
+
         SimpleNameReferenceNode resTypeBind = createSimpleNameReferenceNode(createIdentifierToken(responseType));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(createIdentifierToken(variable));
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(resTypeBind, bindingPattern);
@@ -434,6 +443,7 @@ public class GeneratorUtils {
      * Generate expressionStatementNode.
      */
     public static ExpressionStatementNode getSimpleExpressionStatementNode(String expression) {
+
         SimpleNameReferenceNode expressionNode = createSimpleNameReferenceNode(
                 createIdentifierToken(expression));
         return createExpressionStatementNode(null, expressionNode, createToken(SEMICOLON_TOKEN));
@@ -442,11 +452,12 @@ public class GeneratorUtils {
     /**
      * If there are template values in the {@code absUrl} derive resolved url using {@code variables}.
      *
-     * @param absUrl abstract url with template values
+     * @param absUrl    abstract url with template values
      * @param variables variable values to populate the url template
      * @return resolved url
      */
     public static String buildUrl(String absUrl, ServerVariables variables) {
+
         String url = absUrl;
         if (variables != null) {
             for (Map.Entry<String, ServerVariable> entry : variables.entrySet()) {
@@ -478,6 +489,7 @@ public class GeneratorUtils {
      * @param duplicateCount add the tag with duplicate number if file already exist
      */
     public static void setGeneratedFileName(List<File> listFiles, GenSrcFile gFile, int duplicateCount) {
+
         for (File listFile : listFiles) {
             String listFileName = listFile.getName();
             if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2) &&
@@ -492,12 +504,13 @@ public class GeneratorUtils {
     /**
      * Create each item of the encoding map.
      *
-     * @param filedOfMap    Includes all the items in the encoding map
-     * @param style         Defines how multiple values are delimited and explode
-     * @param explode       Specifies whether arrays and objects should generate separate parameters
-     * @param key           Key of the item in the map
+     * @param filedOfMap Includes all the items in the encoding map
+     * @param style      Defines how multiple values are delimited and explode
+     * @param explode    Specifies whether arrays and objects should generate separate parameters
+     * @param key        Key of the item in the map
      */
     public static void createEncodingMap(List<Node> filedOfMap, String style, Boolean explode, String key) {
+
         IdentifierToken fieldName = createIdentifierToken('"' + key + '"');
         Token colon = createToken(COLON_TOKEN);
         SpecificFieldNode styleField = createSpecificFieldNode(null,
@@ -517,7 +530,8 @@ public class GeneratorUtils {
     }
 
     public static boolean checkImportDuplicate(List<ImportDeclarationNode> imports, String module) {
-        for (ImportDeclarationNode importModule:imports) {
+
+        for (ImportDeclarationNode importModule : imports) {
             StringBuilder moduleBuilder = new StringBuilder();
             for (IdentifierToken identifierToken : importModule.moduleName()) {
                 moduleBuilder.append(identifierToken.toString().trim());
@@ -531,6 +545,7 @@ public class GeneratorUtils {
     }
 
     public static void addImport(List<ImportDeclarationNode> imports, String module) {
+
         if (!checkImportDuplicate(imports, module)) {
             ImportDeclarationNode importModule = GeneratorUtils.getImportDeclarationNode(BALLERINA, module);
             imports.add(importModule);
@@ -543,9 +558,10 @@ public class GeneratorUtils {
      * TODO: address the other /{id}.json.{name}, /report.{format}
      */
     public static boolean isComplexURL(String path) {
+
         String[] subPathSegment = path.split(SLASH);
         Pattern pattern = Pattern.compile(SPECIAL_CHARACTERS_REGEX);
-        for (String subPath: subPathSegment) {
+        for (String subPath : subPathSegment) {
             if (subPath.contains(OPEN_CURLY_BRACE) &&
                     pattern.matcher(subPath.split(CLOSE_CURLY_BRACE, 2)[1]).find()) {
                 return true;
@@ -563,10 +579,11 @@ public class GeneratorUtils {
      * </pre>
      */
     public static List<StatementNode> generateBodyStatementForComplexUrl(String path) {
+
         String[] subPathSegment = path.split(SLASH);
         Pattern pattern = Pattern.compile(SPECIAL_CHARACTERS_REGEX);
         List<StatementNode> bodyStatements = new ArrayList<>();
-        for (String subPath: subPathSegment) {
+        for (String subPath : subPathSegment) {
             if (subPath.contains(OPEN_CURLY_BRACE) &&
                     pattern.matcher(subPath.split(CLOSE_CURLY_BRACE, 2)[1]).find()) {
                 String pathParam = subPath;
@@ -591,12 +608,13 @@ public class GeneratorUtils {
             }
         }
         return bodyStatements;
-      }
-      
+    }
+
     /**
      * This util is to check if the given schema contains any constraints.
      */
     public static boolean hasConstraints(Schema<?> value) {
+
         if (value.getProperties() != null) {
             boolean constraintExists = value.getProperties().values().stream()
                     .anyMatch(GeneratorUtils::hasConstraints);
@@ -628,6 +646,7 @@ public class GeneratorUtils {
     }
 
     private static boolean isConstraintExists(Schema<?> propertyValue) {
+
         return propertyValue.getMaximum() != null ||
                 propertyValue.getMinimum() != null ||
                 propertyValue.getMaxLength() != null ||
@@ -646,7 +665,8 @@ public class GeneratorUtils {
      * @throws IOException
      * @throws BallerinaOpenApiException
      */
-    public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean isClient) throws IOException, BallerinaOpenApiException {
+    public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean isClient) throws IOException,
+            BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPIFromOpenAPIV3Parser(openAPIPath);
         io.swagger.v3.oas.models.Paths openAPIPaths = openAPI.getPaths();
         if (isClient) {

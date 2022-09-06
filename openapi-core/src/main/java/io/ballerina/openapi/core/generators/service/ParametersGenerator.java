@@ -77,6 +77,7 @@ public class ParametersGenerator {
     private boolean isNullableRequired;
     private List<Node> requiredParams;
     private List<Node> defaultableParams;
+
     public ParametersGenerator(boolean isNullableRequired) {
         this.isNullableRequired = isNullableRequired;
         this.requiredParams = new ArrayList<>();
@@ -94,6 +95,7 @@ public class ParametersGenerator {
     public boolean isNullableRequired() {
         return isNullableRequired;
     }
+
     /**
      * This function for generating operation parameters.
      *
@@ -102,11 +104,12 @@ public class ParametersGenerator {
      */
     public void generateResourcesInputs(Map.Entry<PathItem.HttpMethod, Operation> operation)
             throws BallerinaOpenApiException {
+
         Token comma = createToken(SyntaxKind.COMMA_TOKEN);
         // Handle header and query parameters
         if (operation.getValue().getParameters() != null) {
             List<Parameter> parameters = operation.getValue().getParameters();
-            for (Parameter parameter: parameters) {
+            for (Parameter parameter : parameters) {
                 if (parameter.getIn().trim().equals(GeneratorConstants.HEADER)) {
                     ParameterNode param = handleHeader(parameter);
                     if (param.kind() == SyntaxKind.DEFAULTABLE_PARAM) {
@@ -118,7 +121,7 @@ public class ParametersGenerator {
                     }
                 } else if (parameter.getIn().trim().equals(GeneratorConstants.QUERY)) {
                     if (parameter.getRequired() != null && parameter.getRequired() &&
-                            (parameter.getSchema().getNullable() != null &&  parameter.getSchema().getNullable())) {
+                            (parameter.getSchema().getNullable() != null && parameter.getSchema().getNullable())) {
                         isNullableRequired = true;
                     }
                     // type  BasicType boolean|int|float|decimal|string ;
@@ -140,19 +143,20 @@ public class ParametersGenerator {
      * This function for generating parameter ST node for header.
      * <pre> resource function get pets(@http:Header {name:"x-request-id"} string header) </pre>
      */
-    private ParameterNode handleHeader(Parameter parameter)throws BallerinaOpenApiException {
+    private ParameterNode handleHeader(Parameter parameter) throws BallerinaOpenApiException {
+
         Schema<?> schema = parameter.getSchema();
         TypeDescriptorNode headerTypeName;
         IdentifierToken parameterName = createIdentifierToken(GeneratorUtils.escapeIdentifier(parameter.getName()
-                .toLowerCase(Locale.ENGLISH)), AbstractNodeFactory.createEmptyMinutiaeList(),
+                        .toLowerCase(Locale.ENGLISH)), AbstractNodeFactory.createEmptyMinutiaeList(),
                 GeneratorUtils.SINGLE_WS_MINUTIAE);
         if (schema.getType() == null) {
-             // Header example:
-             // 01.<pre>
-             //       in: header
-             //       name: X-Request-ID
-             //       schema: {}
-             //  </pre>
+            // Header example:
+            // 01.<pre>
+            //       in: header
+            //       name: X-Request-ID
+            //       schema: {}
+            //  </pre>
             throw new BallerinaOpenApiException(String.format(OAS_SERVICE_106.getDescription(), parameter.getName()));
         } else {
             if (!schema.getType().equals(GeneratorConstants.STRING) && !(schema instanceof ArraySchema)) {
@@ -211,8 +215,9 @@ public class ParametersGenerator {
      * Generate ballerina default headers.
      */
     private DefaultableParameterNode getDefaultableHeaderNode(Schema<?> schema, TypeDescriptorNode headerTypeName,
-                                                                 IdentifierToken parameterName,
-                                                                 NodeList<AnnotationNode> headerAnnotations) {
+                                                              IdentifierToken parameterName,
+                                                              NodeList<AnnotationNode> headerAnnotations) {
+
         if (!schema.getType().equals(GeneratorConstants.ARRAY)) {
             return createDefaultableParameterNode(headerAnnotations, headerTypeName, parameterName,
                     createToken(SyntaxKind.EQUAL_TOKEN),
@@ -226,12 +231,13 @@ public class ParametersGenerator {
 
     /**
      * This for generate query parameter nodes.
-     *
+     * <p>
      * Ballerina support query parameter types :
      * type BasicType boolean|int|float|decimal|string ;
      * public type  QueryParamType <map>json | () |BasicType|BasicType[];
      */
     private Node createNodeForQueryParam(Parameter parameter) throws BallerinaOpenApiException {
+
         Schema<?> schema = parameter.getSchema();
         NodeList<AnnotationNode> annotations = createEmptyNodeList();
         IdentifierToken parameterName = createIdentifierToken(
@@ -277,8 +283,8 @@ public class ParametersGenerator {
      * </pre>
      */
     private RequiredParameterNode handleMapJsonQueryParameter(Parameter parameter, NodeList<AnnotationNode> annotations,
-                                                           IdentifierToken parameterName,
-                                                           Map.Entry<String, MediaType> mediaTypeEntry)
+                                                              IdentifierToken parameterName,
+                                                              Map.Entry<String, MediaType> mediaTypeEntry)
             throws BallerinaOpenApiException {
 
         if (mediaTypeEntry.getKey().equals(GeneratorConstants.APPLICATION_JSON) &&
@@ -306,6 +312,7 @@ public class ParametersGenerator {
      */
     private Node handleOptionalQueryParameter(Schema<?> schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
+
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
             if (items.getType() == null) {
@@ -329,7 +336,7 @@ public class ParametersGenerator {
             }
         } else {
             Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-                    schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
+                            schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             OptionalTypeDescriptorNode optionalNode = createOptionalTypeDescriptorNode(rTypeName,
@@ -340,6 +347,7 @@ public class ParametersGenerator {
 
     private Node handleRequiredQueryParameter(Schema<?> schema, NodeList<AnnotationNode> annotations,
                                               IdentifierToken parameterName) throws BallerinaOpenApiException {
+
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
             if (!(items instanceof ArraySchema) && items.getType() != null) {
@@ -359,7 +367,7 @@ public class ParametersGenerator {
             }
         } else {
             Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-                    schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
+                            schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             return createRequiredParameterNode(annotations, rTypeName, parameterName);
@@ -367,10 +375,10 @@ public class ParametersGenerator {
     }
 
     /**
-     *  This function generate default query parameter when OAS gives default value.
-     *
-     *  OAS code example:
-     *  <pre>
+     * This function generate default query parameter when OAS gives default value.
+     * <p>
+     * OAS code example:
+     * <pre>
      *      parameters:
      *         - name: limit
      *           in: query
@@ -379,11 +387,12 @@ public class ParametersGenerator {
      *             default: 10
      *             format: int32
      *  </pre>
-     *  generated ballerina -> int limit = 10;
+     * generated ballerina -> int limit = 10;
      */
 
     private Node handleDefaultQueryParameter(Schema<?> schema, NodeList<AnnotationNode> annotations,
-                                              IdentifierToken parameterName) throws BallerinaOpenApiException {
+                                             IdentifierToken parameterName) throws BallerinaOpenApiException {
+
         if (schema instanceof ArraySchema) {
             Schema<?> items = ((ArraySchema) schema).getItems();
             if (!(items instanceof ArraySchema) && items.getType() != null) {
@@ -402,7 +411,7 @@ public class ParametersGenerator {
             }
         } else {
             Token name = createIdentifierToken(GeneratorUtils.convertOpenAPITypeToBallerina(
-                    schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
+                            schema.getType().toLowerCase(Locale.ENGLISH).trim()), GeneratorUtils.SINGLE_WS_MINUTIAE,
                     GeneratorUtils.SINGLE_WS_MINUTIAE);
             BuiltinSimpleNameReferenceNode rTypeName = createBuiltinSimpleNameReferenceNode(null, name);
             if (schema.getType().equals(GeneratorConstants.STRING)) {
@@ -417,9 +426,8 @@ public class ParametersGenerator {
         }
     }
 
-
     // Create ArrayTypeDescriptorNode using Schema
-    private  ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) throws BallerinaOpenApiException {
+    private ArrayTypeDescriptorNode getArrayTypeDescriptorNode(Schema<?> items) throws BallerinaOpenApiException {
 
         Token arrayName = createIdentifierToken(
                 GeneratorUtils.convertOpenAPITypeToBallerina(items.getType().toLowerCase(

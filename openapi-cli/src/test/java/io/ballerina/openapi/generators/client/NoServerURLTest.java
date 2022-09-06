@@ -2,7 +2,8 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
@@ -32,11 +33,11 @@ public class NoServerURLTest {
 
     @Test(description = "Test for no server url with no security schema given")
     public void getClientForNoServerURL() throws IOException, BallerinaOpenApiException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/missing_server_url.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/missing_server_url.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);

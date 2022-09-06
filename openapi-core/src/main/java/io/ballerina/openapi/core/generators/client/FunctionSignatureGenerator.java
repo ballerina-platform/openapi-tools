@@ -118,6 +118,7 @@ public class FunctionSignatureGenerator {
     private boolean deprecatedParamFound = false;
 
     private boolean isResource;
+
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
         return typeDefinitionNodeList;
     }
@@ -129,7 +130,7 @@ public class FunctionSignatureGenerator {
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
         this.typeDefinitionNodeList = typeDefinitionNodeList;
-        this.functionReturnType =  new FunctionReturnTypeGenerator
+        this.functionReturnType = new FunctionReturnTypeGenerator
                 (openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
         this.isResource = isResource;
 
@@ -138,15 +139,15 @@ public class FunctionSignatureGenerator {
     /**
      * This function for generate function signatures.
      *
-     * @param operation     - openapi operation
+     * @param operation - openapi operation
      * @return {@link FunctionSignatureNode}
      * @throws BallerinaOpenApiException - throws exception when node creation fails.
      */
     public FunctionSignatureNode getFunctionSignatureNode(Operation operation, List<Node> remoteFunctionDoc)
             throws BallerinaOpenApiException {
         // Store the parameters for method.
-        List<Node> parameterList =  new ArrayList<>();
-        functionReturnType =  new FunctionReturnTypeGenerator
+        List<Node> parameterList = new ArrayList<>();
+        functionReturnType = new FunctionReturnTypeGenerator
                 (openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
         setFunctionParameters(operation, parameterList, createToken(COMMA_TOKEN), remoteFunctionDoc);
 
@@ -178,16 +179,17 @@ public class FunctionSignatureGenerator {
      * Generate function parameters.
      */
     private void setFunctionParameters(Operation operation, List<Node> parameterList, Token comma,
-                                        List<Node> remoteFunctionDoc) throws BallerinaOpenApiException {
+                                       List<Node> remoteFunctionDoc) throws BallerinaOpenApiException {
+
         List<Parameter> parameters = operation.getParameters();
         List<Node> defaultable = new ArrayList<>();
         List<Node> deprecatedParamDocComments = new ArrayList<>();
         if (parameters != null) {
-            for (Parameter parameter: parameters) {
+            for (Parameter parameter : parameters) {
                 if (parameter.getDescription() != null && !parameter.getDescription().isBlank()) {
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
                             DocCommentsGenerator.createAPIParamDoc(getValidName(
-                                            parameter.getName(), false), parameter.getDescription());
+                                    parameter.getName(), false), parameter.getDescription());
                     remoteFunctionDoc.add(paramAPIDoc);
                 }
                 List<AnnotationNode> parameterAnnotationNodeList =
@@ -249,7 +251,7 @@ public class FunctionSignatureGenerator {
     }
 
     private List<AnnotationNode> getParameterAnnotationNodeList(Parameter parameter,
-                                                      List<Node> deprecatedParamDocComments) {
+                                                                List<Node> deprecatedParamDocComments) {
         List<AnnotationNode> parameterAnnotationNodeList = new ArrayList<>();
         DocCommentsGenerator.extractDisplayAnnotation(parameter.getExtensions(), parameterAnnotationNodeList);
         if (parameter.getDeprecated() != null && parameter.getDeprecated()) {
@@ -260,7 +262,7 @@ public class FunctionSignatureGenerator {
             }
             String deprecatedDescription = "";
             if (parameter.getExtensions() != null) {
-                for (Map.Entry<String, Object> extension: parameter.getExtensions().entrySet()) {
+                for (Map.Entry<String, Object> extension : parameter.getExtensions().entrySet()) {
                     if (extension.getKey().trim().equals(X_BALLERINA_DEPRECATED_REASON)) {
                         deprecatedDescription = extension.getValue().toString();
                         break;
@@ -279,13 +281,14 @@ public class FunctionSignatureGenerator {
 
     /**
      * Create query parameters.
-     *
+     * <p>
      * Note: currently ballerina supports for this data type.
      * type BasicType boolean|int|float|decimal|string;
      * public type QueryParamType ()|BasicType|BasicType[];
      */
     public Node getQueryParameters(Parameter parameter, NodeList<AnnotationNode> parameterAnnotationNodeList)
             throws BallerinaOpenApiException {
+
         TypeDescriptorNode typeName;
 
         Schema parameterSchema = parameter.getSchema();
@@ -335,7 +338,7 @@ public class FunctionSignatureGenerator {
                 if (parameterSchema.getType().equals(STRING)) {
                     literalValueToken = createLiteralValueToken(null,
                             '"' + parameterSchema.getDefault().toString() + '"', createEmptyMinutiaeList(),
-                                    createEmptyMinutiaeList());
+                            createEmptyMinutiaeList());
                 } else {
                     literalValueToken =
                             createLiteralValueToken(null, parameterSchema.getDefault().toString(),
@@ -387,6 +390,7 @@ public class FunctionSignatureGenerator {
      */
     private Node getHeaderParameter(Parameter parameter, NodeList<AnnotationNode> parameterAnnotationNodeList)
             throws BallerinaOpenApiException {
+
         Schema schema = parameter.getSchema();
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getName().trim(), false));
         return getHeader(parameter.getRequired(), schema, paramName, parameterAnnotationNodeList);
@@ -397,6 +401,7 @@ public class FunctionSignatureGenerator {
      */
     private Node getHeaderEncoding(Map.Entry<String, Header> parameter, List<Node> remoteFunctionDoc)
             throws BallerinaOpenApiException {
+
         boolean isRequired = false;
         Schema schema = parameter.getValue().getSchema();
         IdentifierToken paramName = createIdentifierToken(getValidName(parameter.getKey(), false));
@@ -421,6 +426,7 @@ public class FunctionSignatureGenerator {
      */
     private Node getHeader(boolean isRequiredHeader, Schema schema, IdentifierToken paramName,
                            NodeList<AnnotationNode> parameterAnnotationNodeList) throws BallerinaOpenApiException {
+
         if (isRequiredHeader) {
             String type = convertOpenAPITypeToBallerina(schema.getType().trim());
             if (schema instanceof ArraySchema) {
@@ -476,6 +482,7 @@ public class FunctionSignatureGenerator {
     private void setRequestBodyParameters(String operationId, RequestBody requestBody, List<Node> requestBodyDoc,
                                           List<Node> parameterList, List<Node> defaultable)
             throws BallerinaOpenApiException {
+
         Content content = requestBody.getContent();
         Iterator<Map.Entry<String, MediaType>> iterator = content.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -509,7 +516,7 @@ public class FunctionSignatureGenerator {
                 paramType = GeneratorUtils.getBallerinaMediaType(next.getKey());
             }
             if (!paramType.isBlank()) {
-                List<AnnotationNode> annotationNodes  = new ArrayList<>();
+                List<AnnotationNode> annotationNodes = new ArrayList<>();
                 DocCommentsGenerator.extractDisplayAnnotation(requestBody.getExtensions(), annotationNodes);
                 SimpleNameReferenceNode typeName = createSimpleNameReferenceNode(createIdentifierToken(paramType));
                 IdentifierToken paramName = createIdentifierToken(PAYLOAD);
@@ -563,7 +570,7 @@ public class FunctionSignatureGenerator {
         } else if (arrayItems.get$ref() != null) {
             paramType = getValidName(extractReferenceType(arrayItems.get$ref()), true) + SQUARE_BRACKETS;
         } else if (arrayItems instanceof ComposedSchema) {
-            paramType = "CompoundArrayItem" +  getValidName(operationId, true) + "Request";
+            paramType = "CompoundArrayItem" + getValidName(operationId, true) + "Request";
             // TODO - Add API doc by checking requestBody
             TypeDefinitionNode arrayTypeNode =
                     ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());

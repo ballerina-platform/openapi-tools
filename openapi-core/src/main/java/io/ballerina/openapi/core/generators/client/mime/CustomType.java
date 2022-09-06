@@ -30,6 +30,7 @@ import java.util.Map;
  * @since 1.3.0
  */
 public class CustomType extends MimeType {
+
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
         setPayload(statementsList, payloadName, mediaTypeEntry.getKey());

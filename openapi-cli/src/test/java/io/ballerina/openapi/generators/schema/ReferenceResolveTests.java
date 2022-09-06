@@ -18,7 +18,8 @@
 
 package io.ballerina.openapi.generators.schema;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
@@ -35,10 +36,9 @@ import java.nio.file.Paths;
  */
 public class ReferenceResolveTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
     @Test(description = "Tests with object type include reference")
     public void testReferenceIncludeWithObjectType() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"), true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/world_bank.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
 
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -47,7 +47,7 @@ public class ReferenceResolveTests {
 
     @Test(description = "Test for object data type when absent reference and properties fields")
     public void testWorldBank() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/object_without_fields_reference.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
 
@@ -57,7 +57,7 @@ public class ReferenceResolveTests {
     }
     @Test(description = "Test for type generation for query parameters with referenced schemas")
     public void testParameterSchemaReferences() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/schema_referenced_in_parameters.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
 
@@ -68,7 +68,7 @@ public class ReferenceResolveTests {
 
     @Test(description = "Test Ballerina types generation when referred by another record with no additional fields")
     public void testReferredTypesWithoutAdditionalFields() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/referred_inclusion.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -78,7 +78,7 @@ public class ReferenceResolveTests {
 
     @Test(description = "Test doc comment generation of record fields when property is reffered to another schema")
     public void testDocCommentResolvingForRefferedSchemas() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/resolve_reference_docs.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -90,7 +90,7 @@ public class ReferenceResolveTests {
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Undefined \\$ref: '#/components/schemas/Person01' in openAPI.*")
     public void testForUndocumentedReference() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger/undocument_ref.yaml"), true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/undocument_ref.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
     }

@@ -67,6 +67,7 @@ import static io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils.get
 public class ArrayTypeGenerator extends TypeGenerator {
     private String parentType = null;
     private TypeDefinitionNode arrayItemWithConstraint = null;
+
     public ArrayTypeGenerator(Schema schema, String typeName, String parentType) {
         super(schema, typeName);
         this.parentType = parentType;
@@ -82,6 +83,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
+
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         Schema<?> items = arraySchema.getItems();

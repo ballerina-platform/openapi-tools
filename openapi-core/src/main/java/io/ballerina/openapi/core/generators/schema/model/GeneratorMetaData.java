@@ -26,6 +26,7 @@ import io.swagger.v3.oas.models.OpenAPI;
  * @since 1.3.0
  */
 public class GeneratorMetaData {
+
     private final OpenAPI openAPI;
     private final boolean nullable;
     private static GeneratorMetaData generatorMetaData = null;

@@ -19,7 +19,8 @@ package io.ballerina.openapi.generators.testcases;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
@@ -67,9 +68,9 @@ public class BallerinaTestGeneratorTests {
             FormatterException, BallerinaOpenApiException, URISyntaxException {
         Files.createDirectories(Paths.get(PROJECT_DIR + OAS_PATH_SEPARATOR + TEST_DIR));
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         codeGenerator.setIncludeTestFiles(true);
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(openAPI);
         schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());

@@ -45,8 +45,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
  * @since 1.3.0
  */
 public abstract class TypeGenerator {
+
     Schema schema;
     String typeName;
+
     public TypeGenerator(Schema schema, String typeName) {
         this.schema = schema;
         this.typeName = typeName;
@@ -64,6 +66,7 @@ public abstract class TypeGenerator {
     public TypeDefinitionNode generateTypeDefinitionNode(IdentifierToken typeName, List<Node> schemaDoc,
                                                          List<AnnotationNode> typeAnnotations)
             throws BallerinaOpenApiException {
+
         MarkdownDocumentationNode documentationNode = createMarkdownDocumentationNode(createNodeList(schemaDoc));
         MetadataNode metadataNode = createMetadataNode(documentationNode, createNodeList(typeAnnotations));
         return createTypeDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), createToken(TYPE_KEYWORD),

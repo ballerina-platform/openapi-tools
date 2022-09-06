@@ -50,6 +50,7 @@ public class CmdUtils {
      */
     public static OpenAPIDiagnostic constructOpenAPIDiagnostic(String code, String message, DiagnosticSeverity severity,
                                                                Location location, Object... args) {
+
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(code, message, severity);
         if (location == null) {
             location = new ConverterCommonUtils.NullLocation();
@@ -78,7 +79,7 @@ public class CmdUtils {
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
             StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
-            for (String message: parseResult.getMessages()) {
+            for (String message : parseResult.getMessages()) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }
             throw new BallerinaOpenApiException(errorMessage.toString());
@@ -94,6 +95,7 @@ public class CmdUtils {
      * @param duplicateCount add the tag with duplicate number if file already exist
      */
     public static void setGeneratedFileName(List<File> listFiles, GenSrcFile gFile, int duplicateCount) {
+
         for (File listFile : listFiles) {
             String listFileName = listFile.getName();
             if (listFileName.contains(".") && ((listFileName.split("\\.")).length >= 2) &&

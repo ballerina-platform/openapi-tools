@@ -32,7 +32,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameRefe
  * Generate TypeDefinitionNode and TypeDescriptorNode for referenced schemas.
  * -- ex:
  * Sample OpenAPI :
- *  <pre>
+ * <pre>
  *      components:
  *          schemas:
  *              PetName:
@@ -58,6 +58,7 @@ public class ReferencedTypeGenerator extends TypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
+
         String typeName = GeneratorUtils.getValidName(GeneratorUtils.extractReferenceType(schema.get$ref()), true);
         Schema<?> refSchema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName);
         TypeDescriptorNode typeDescriptorNode = createSimpleNameReferenceNode(createIdentifierToken(typeName));

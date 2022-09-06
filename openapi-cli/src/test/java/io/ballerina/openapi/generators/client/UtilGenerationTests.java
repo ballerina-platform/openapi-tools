@@ -6,7 +6,8 @@ import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.model.Filter;
@@ -50,9 +51,8 @@ public class UtilGenerationTests {
 
     @Test(description = "Test default util file generation")
     public void testDefaultUtilFileGen() throws IOException, BallerinaOpenApiException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/no_util.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         SyntaxTree utlisSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
@@ -63,9 +63,8 @@ public class UtilGenerationTests {
     @Test(description = "Validate the util functions generated for OpenAPI definition with query parameters")
     public void testUtilFileGenForQueryParams() throws IOException, BallerinaOpenApiException,
             FormatterException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/query_param.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<String> invalidFunctionNames = Arrays.asList(CREATE_FORM_URLENCODED_REQUEST_BODY, GET_MAP_FOR_HEADERS);
@@ -78,9 +77,8 @@ public class UtilGenerationTests {
     @Test(description = "Validate the util functions generated for OpenAPI definition with headers")
     public void testUtilFileGenForHeader() throws IOException, BallerinaOpenApiException,
             FormatterException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/header.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<String> invalidFunctionNames = Arrays.asList(CREATE_FORM_URLENCODED_REQUEST_BODY,
@@ -95,9 +93,8 @@ public class UtilGenerationTests {
     @Test(description = "Validate the util functions generated for OpenAPI definition with URL encoded request body")
     public void testUtilFileGenURLEncodedRequestBody() throws IOException, BallerinaOpenApiException,
             FormatterException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/url_encoded.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<String> invalidFunctionNames = Arrays.asList(GET_PATH_FOR_QUERY_PARAM, GET_MAP_FOR_HEADERS);
@@ -111,9 +108,8 @@ public class UtilGenerationTests {
             "request body with encoding styles specified")
     public void testUtilFileGenURLEncodedRequestWithEncoding() throws IOException, BallerinaOpenApiException,
             FormatterException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/url_encoded_with_map.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<String> invalidFunctionNames = Arrays.asList(GET_PATH_FOR_QUERY_PARAM, GET_MAP_FOR_HEADERS);
@@ -126,9 +122,8 @@ public class UtilGenerationTests {
     @Test(description = "Validate the util functions generated for OpenAPI definition when all the scenarios are given")
     public void testCompleteUtilFileGen() throws IOException, BallerinaOpenApiException,
             FormatterException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/complete_util_gen.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
@@ -138,9 +133,8 @@ public class UtilGenerationTests {
     @Test(description = "Test the utilsbal file generation when only in:query api-key auth given")
     public void testApiKeyauthUtilGen() throws IOException, BallerinaOpenApiException,
             FormatterException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/apikey_with_no_query_param.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
@@ -149,9 +143,8 @@ public class UtilGenerationTests {
 
     @Test(description = "Validate the util functions generated for OpenAPI definition with multi part request bodies")
     public void testMultipartBodyParts() throws IOException, BallerinaOpenApiException, FormatterException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/multipart_formdata.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
@@ -161,9 +154,8 @@ public class UtilGenerationTests {
     @Test(description = "Validate the util functions generated for OpenAPI definition with multi part " +
             "request custom bodies")
     public void testMultipartCustomBodyParts() throws IOException, BallerinaOpenApiException, FormatterException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/multipart_formdata_custom.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);

@@ -195,6 +195,7 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link boolean}
      */
     public boolean isHttpOROAuth() {
+
         return httpOROAuth;
     }
 
@@ -222,18 +223,20 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link Set<String>}
      */
     public Set<String> getAuthType() {
+
         return authTypes;
     }
 
     /**
      * Add authentication related records.
      *
-     * @param openAPI   OpenAPI object received from swagger open-api parser
-     * @param nodes     List of ModuleMemberDeclarationNode nodes
-     * @throws BallerinaOpenApiException    When function fails
+     * @param openAPI OpenAPI object received from swagger open-api parser
+     * @param nodes   List of ModuleMemberDeclarationNode nodes
+     * @throws BallerinaOpenApiException When function fails
      */
-    public void addAuthRelatedRecords (OpenAPI openAPI, List<ModuleMemberDeclarationNode> nodes) throws
+    public void addAuthRelatedRecords(OpenAPI openAPI, List<ModuleMemberDeclarationNode> nodes) throws
             BallerinaOpenApiException {
+
         if (openAPI.getComponents() != null && openAPI.getComponents().getSecuritySchemes() != null) {
             // Add ApiKeysConfig or ClientConfig record
             nodes.add(getConfigRecord(openAPI));
@@ -309,7 +312,7 @@ public class BallerinaAuthConfigGenerator {
      *     };
      * </pre>
      *
-     * @param openAPI                       OpenApi object received from swagger open-api parser
+     * @param openAPI OpenApi object received from swagger open-api parser
      * @return {@link TypeDefinitionNode}   Syntax tree node of config record
      */
     public TypeDefinitionNode getConfigRecord(OpenAPI openAPI) throws BallerinaOpenApiException {
@@ -441,6 +444,7 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link List<Node>}
      */
     private List<Node> getPasswordGrantConfigFields() {
+
         List<Node> recordFieldNodes = new ArrayList<>();
         Token semicolonToken = createToken(SEMICOLON_TOKEN);
         Token equalToken = createToken(EQUAL_TOKEN);
@@ -501,6 +505,7 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link List<Node>}
      */
     private List<Node> getRefreshTokenGrantConfigFields() {
+
         List<Node> recordFieldNodes = new ArrayList<>();
         Token semicolonToken = createToken(SEMICOLON_TOKEN);
         Token equalToken = createToken(EQUAL_TOKEN);
@@ -535,6 +540,7 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link TypeDefinitionNode}   Syntax tree node of config record
      */
     public TypeDefinitionNode getAuthConfigRecord() {
+
         Token typeName = AbstractNodeFactory.createIdentifierToken(AUTH_CONFIG_RECORD);
         NodeList<Node> recordFieldList = createNodeList(getAuthConfigRecordFields());
         MetadataNode configRecordMetadataNode = getMetadataNode("Provides Auth configurations needed when " +
@@ -576,24 +582,25 @@ public class BallerinaAuthConfigGenerator {
     /**
      * Generate the config parameters of the client class init method.
      * -- ex: Config param for Http and OAuth 2.0 Authentication mechanisms.
-     *          {@code ClientConfig clientConfig, string serviceUrl = "https://petstore.swagger.io:443/v2" }
+     * {@code ClientConfig clientConfig, string serviceUrl = "https://petstore.swagger.io:443/v2" }
      * -- ex: Config param for API Key Authentication mechanism.
-     *          {@code ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig = {},
-     *          string serviceUrl = "https://petstore.swagger.io:443/v2" }
-     *        Config param for API Key Authentication mechanism with no server URL given
-     *          {@code ApiKeysConfig apiKeyConfig, string serviceUrl; http:ClientConfiguration clientConfig = {}}
+     * {@code ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig = {},
+     * string serviceUrl = "https://petstore.swagger.io:443/v2" }
+     * Config param for API Key Authentication mechanism with no server URL given
+     * {@code ApiKeysConfig apiKeyConfig, string serviceUrl; http:ClientConfiguration clientConfig = {}}
      * -- ex: Config param when no authentication mechanism given.
-     *          {@code http:ClientConfiguration clientConfig = {},
-     *          string serviceUrl = "https://petstore.swagger.io:443/v2" }
-     *        Config param when no authentication mechanism given with no server URL
-     *          {@code string serviceUrl, http:ClientConfiguration clientConfig = {}}
+     * {@code http:ClientConfiguration clientConfig = {},
+     * string serviceUrl = "https://petstore.swagger.io:443/v2" }
+     * Config param when no authentication mechanism given with no server URL
+     * {@code string serviceUrl, http:ClientConfiguration clientConfig = {}}
      * -- ex: Config param for combination of API Key and Http or OAuth 2.0 Authentication mechanisms.
-     *          {@code AuthConfig authConfig, http:ClientConfiguration clientConfig =  {},
-     *          string serviceUrl = "https://petstore.swagger.io:443/v2" }
+     * {@code AuthConfig authConfig, http:ClientConfiguration clientConfig =  {},
+     * string serviceUrl = "https://petstore.swagger.io:443/v2" }
      *
      * @return {@link List<Node>}  syntax tree node list of config parameters
      */
     public List<Node> getConfigParamForClassInit(String serviceUrl) {
+
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         Node serviceURLNode = getServiceURLNode(serviceUrl);
         List<Node> parameters = new ArrayList<>();
@@ -646,9 +653,10 @@ public class BallerinaAuthConfigGenerator {
 
     /**
      * Generate the serviceUrl parameters of the client class init method.
-     * @param serviceUrl        service Url given in the OpenAPI file
-     * @return  {@link DefaultableParameterNode} when server URl is given in the OpenAPI file
-     *          {@link RequiredParameterNode} when server URL is not given in the OpenAPI file
+     *
+     * @param serviceUrl service Url given in the OpenAPI file
+     * @return {@link DefaultableParameterNode} when server URl is given in the OpenAPI file
+     * {@link RequiredParameterNode} when server URL is not given in the OpenAPI file
      */
     private Node getServiceURLNode(String serviceUrl) {
         Node serviceURLNode;
@@ -677,6 +685,7 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link VariableDeclarationNode}   Synatx tree node of client initialization
      */
     public VariableDeclarationNode getClientInitializationNode() {
+
         NodeList<AnnotationNode> annotationNodes = createEmptyNodeList();
         // http:Client variable declaration
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
@@ -717,6 +726,7 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link AssignmentStatementNode} syntax tree assignment statement node.
      */
     public AssignmentStatementNode getApiKeyAssignmentNode() {
+
         if (apiKey) {
             FieldAccessExpressionNode varRefApiKey = createFieldAccessExpressionNode(
                     createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
@@ -776,6 +786,7 @@ public class BallerinaAuthConfigGenerator {
      * @return {@link List<Node>}   ClientConfig record fields' node list
      */
     private List<Node> getClientConfigRecordFields() {
+
         List<Node> recordFieldNodes = new ArrayList<>();
         Token semicolonToken = createToken(SEMICOLON_TOKEN);
         Token equalToken = createToken(EQUAL_TOKEN);
@@ -976,7 +987,7 @@ public class BallerinaAuthConfigGenerator {
      *     }
      * </pre>
      *
-     * @param assignmentNodes   List of Assignment Nodes
+     * @param assignmentNodes List of Assignment Nodes
      */
     public void handleInitForMixOfApiKeyAndHTTPOrOAuth(List<StatementNode> assignmentNodes) {
         List<StatementNode> apiKeyConfigAssignmentNodes = new ArrayList<>();
@@ -1026,7 +1037,7 @@ public class BallerinaAuthConfigGenerator {
                 createIdentifierToken(AUTH_CONFIG + DOT_TOKEN.stringValue() + AUTH),
                 createToken(IS_KEYWORD),
                 createIdentifierToken(API_KEYS_CONFIG)
-        );
+                                                             );
         IfElseStatementNode ifElseStatementNode = createIfElseStatementNode(createToken(IF_KEYWORD), condition,
                 ifBody, elseBody);
         assignmentNodes.add(ifElseStatementNode);
@@ -1057,6 +1068,7 @@ public class BallerinaAuthConfigGenerator {
     }
 
     private MetadataNode getMetadataNode(String comment) {
+
         List<Node> docs = new ArrayList<>(DocCommentsGenerator.createAPIDescriptionDoc(comment, false));
         MarkdownDocumentationNode authDocumentationNode = createMarkdownDocumentationNode(
                 createNodeList(docs));
@@ -1067,10 +1079,11 @@ public class BallerinaAuthConfigGenerator {
      * Travers through the security schemas of the given open api spec.
      * Store api key names which needs to send in the query string and as a request header separately.
      *
-     * @param securitySchemeMap     Map of security schemas of the given open api spec
+     * @param securitySchemeMap Map of security schemas of the given open api spec
      */
     private void setAuthTypes(Map<String, SecurityScheme> securitySchemeMap) throws
             BallerinaOpenApiException {
+
         for (Map.Entry<String, SecurityScheme> securitySchemeEntry : securitySchemeMap.entrySet()) {
             SecurityScheme schemaValue = securitySchemeEntry.getValue();
             if (schemaValue != null && schemaValue.getType() != null) {
@@ -1139,9 +1152,9 @@ public class BallerinaAuthConfigGenerator {
      *     # API key related to connector authentication
      *     string apiKey;
      * </pre>
-     *
      */
     private void setApiKeysConfigRecordFields(SecurityScheme securityScheme) {
+
         MetadataNode metadataNode = null;
         if (securityScheme.getDescription() != null) {
             metadataNode = getMetadataNode(securityScheme.getDescription());
@@ -1156,9 +1169,10 @@ public class BallerinaAuthConfigGenerator {
      * Travers through the authTypes and generate the field type name of auth field in ClientConfig record.
      *
      * @return {@link String}   Field type name of auth field
-     *                          Ex: {@code http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig}
+     * Ex: {@code http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig}
      */
     public String getAuthFieldTypeName() {
+
         Set<String> httpFieldTypeNames = new HashSet<>();
         for (String authType : authTypes) {
             switch (authType) {
@@ -1203,7 +1217,7 @@ public class BallerinaAuthConfigGenerator {
     /**
      * This method is used concat the config record authConfig field type.
      *
-     * @param fieldtypes        Type name set from {@link #setAuthTypes(Map)} method.
+     * @param fieldtypes Type name set from {@link #setAuthTypes(Map)} method.
      * @return {@link String}   Pipe concatenated list of type names
      */
     private StringBuilder buildConfigRecordFieldTypes(Set<String> fieldtypes) {

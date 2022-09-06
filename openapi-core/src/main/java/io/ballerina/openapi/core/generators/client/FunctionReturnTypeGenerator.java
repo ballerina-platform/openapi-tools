@@ -68,7 +68,9 @@ public class FunctionReturnTypeGenerator {
     private BallerinaTypesGenerator ballerinaSchemaGenerator;
     private List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
 
-    public FunctionReturnTypeGenerator() {}
+    public FunctionReturnTypeGenerator() {
+
+    }
 
     public FunctionReturnTypeGenerator(OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
                                        List<TypeDefinitionNode> typeDefinitionNodeList) {
@@ -81,8 +83,8 @@ public class FunctionReturnTypeGenerator {
     /**
      * Get return type of the remote function.
      *
-     * @param operation     swagger operation.
-     * @return              string with return type.
+     * @param operation swagger operation.
+     * @return string with return type.
      * @throws BallerinaOpenApiException - throws exception if creating return type fails.
      */
     public String getReturnType(Operation operation, boolean isSignature) throws BallerinaOpenApiException {
@@ -146,7 +148,7 @@ public class FunctionReturnTypeGenerator {
         } else if (schema instanceof MapSchema) {
             MapSchema mapSchema = (MapSchema) schema;
             type = handleResponseWithMapSchema(operation, media, mapSchema);
-        } else  if (schema.get$ref() != null) {
+        } else if (schema.get$ref() != null) {
             type = getValidName(extractReferenceType(schema.get$ref()), true);
             Schema componentSchema = openAPI.getComponents().getSchemas().get(type);
             if (!isValidSchemaName(type)) {
@@ -181,6 +183,7 @@ public class FunctionReturnTypeGenerator {
      */
     private String generateReturnTypeForArraySchema(Map.Entry<String, MediaType> media, ArraySchema arraySchema,
                                                     boolean isSignature) throws BallerinaOpenApiException {
+
         String type;
         if (arraySchema.getItems().get$ref() != null) {
             String name = getValidName(extractReferenceType(arraySchema.getItems().get$ref()), true);
@@ -216,7 +219,7 @@ public class FunctionReturnTypeGenerator {
                 Schema nestedSchema = arraySchema.getItems();
                 ArraySchema nestedArraySchema = (ArraySchema) nestedSchema;
                 String inlineArrayType = convertOpenAPITypeToBallerina(nestedArraySchema.getItems().getType());
-                typeName =  inlineArrayType + "NestedArr";
+                typeName = inlineArrayType + "NestedArr";
                 type = inlineArrayType + "[][]";
             } else {
                 typeName = convertOpenAPITypeToBallerina(Objects.requireNonNull(arraySchema.getItems()).getType()) +
@@ -234,9 +237,10 @@ public class FunctionReturnTypeGenerator {
     private String generateReturnDataTypeForComposedSchema(Operation operation, String type,
                                                            ComposedSchema composedSchema, boolean isSignature)
             throws BallerinaOpenApiException {
+
         if (composedSchema.getOneOf() != null) {
             // Get oneOfUnionType name
-            String typeName = "OneOf" + getValidName(operation.getOperationId().trim(), true) +  "Response";
+            String typeName = "OneOf" + getValidName(operation.getOperationId().trim(), true) + "Response";
             TypeDefinitionNode typeDefNode = ballerinaSchemaGenerator.getTypeDefinitionNode(
                     composedSchema, typeName, new ArrayList<>());
             updateTypeDefinitionNodeList(typeName, typeDefNode);
@@ -261,6 +265,7 @@ public class FunctionReturnTypeGenerator {
     private String handleInLineRecordInResponse(Operation operation, Map.Entry<String, MediaType> media,
                                                 ObjectSchema objectSchema)
             throws BallerinaOpenApiException {
+
         Map<String, Schema> properties = objectSchema.getProperties();
         String ref = objectSchema.get$ref();
         String type = getValidName(operation.getOperationId(), true) + "Response";
@@ -292,6 +297,7 @@ public class FunctionReturnTypeGenerator {
      */
     private String handleResponseWithMapSchema(Operation operation, Map.Entry<String, MediaType> media,
                                                MapSchema mapSchema) throws BallerinaOpenApiException {
+
         Map<String, Schema> properties = mapSchema.getProperties();
         String ref = mapSchema.get$ref();
         String type = getValidName(operation.getOperationId(), true) + "Response";
@@ -343,13 +349,13 @@ public class FunctionReturnTypeGenerator {
     /**
      * This util function for update the typeDefinition node after check it duplicates.
      *
-     * @param typeName      - Given Node name
-     * @param typeDefNode   - Generated Node
+     * @param typeName    - Given Node name
+     * @param typeDefNode - Generated Node
      */
     public void updateTypeDefinitionNodeList(String typeName, TypeDefinitionNode typeDefNode) {
         boolean isExit = false;
         if (!typeDefinitionNodeList.isEmpty()) {
-            for (TypeDefinitionNode typeNode: typeDefinitionNodeList) {
+            for (TypeDefinitionNode typeNode : typeDefinitionNodeList) {
                 if (typeNode.typeName().toString().trim().equals(typeName)) {
                     isExit = true;
                 }

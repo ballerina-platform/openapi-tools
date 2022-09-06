@@ -65,6 +65,7 @@ public class UrlEncodedType extends MimeType {
 
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
+
         ballerinaUtilGenerator.setRequestBodyEncodingFound(true);
         VariableDeclarationNode requestBodyEncodingMap = getRequestBodyEncodingMap(
                 mediaTypeEntry.getValue().getEncoding());
@@ -96,6 +97,7 @@ public class UrlEncodedType extends MimeType {
      * @return {@link VariableDeclarationNode}
      */
     public VariableDeclarationNode getRequestBodyEncodingMap(Map<String, Encoding> encodingMap) {
+
         List<Node> filedOfMap = new ArrayList<>();
         BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
                 createIdentifierToken("map<" + ENCODING + ">"));

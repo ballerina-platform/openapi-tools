@@ -34,8 +34,10 @@ import static io.ballerina.openapi.core.GeneratorConstants.BYTE;
  * @since 1.3.0
  */
 public class OctedStreamType extends MimeType {
+
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
+
         if (mediaTypeEntry.getValue().getSchema().getFormat().equals(BYTE)) {
             payloadName = "encodedRequestBody";
             VariableDeclarationNode encodedVariable = GeneratorUtils.getSimpleStatement("string",

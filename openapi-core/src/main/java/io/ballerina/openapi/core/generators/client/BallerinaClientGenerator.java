@@ -125,6 +125,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.X_BALLERINA_INIT_DESC
  * @since 1.3.0
  */
 public class BallerinaClientGenerator {
+
     private final Filter filters;
     private List<ImportDeclarationNode> imports;
     private List<TypeDefinitionNode> typeDefinitionNodeList;
@@ -149,6 +150,7 @@ public class BallerinaClientGenerator {
      * Returns ballerinaAuthConfigGenerator.
      */
     public BallerinaAuthConfigGenerator getBallerinaAuthConfigGenerator() {
+
         return ballerinaAuthConfigGenerator;
     }
 
@@ -160,15 +162,19 @@ public class BallerinaClientGenerator {
 
         this.typeDefinitionNodeList = typeDefinitionNodeList;
     }
-    public List<String> getRemoteFunctionNameList () {
+
+    public List<String> getRemoteFunctionNameList() {
+
         return remoteFunctionNameList;
     }
 
     /**
      * Returns server URL.
+     *
      * @return {@link String}
      */
-    public String getServerUrl () {
+    public String getServerUrl() {
+
         return serverURL;
     }
 
@@ -189,8 +195,8 @@ public class BallerinaClientGenerator {
     /**
      * This method for generate the client syntax tree.
      *
-     * @return                              return Syntax tree for the ballerina code.
-     * @throws BallerinaOpenApiException    When function fail in process.
+     * @return return Syntax tree for the ballerina code.
+     * @throws BallerinaOpenApiException When function fail in process.
      */
     public SyntaxTree generateSyntaxTree() throws BallerinaOpenApiException {
 
@@ -198,7 +204,7 @@ public class BallerinaClientGenerator {
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
                 , HTTP);
         imports.add(importForHttp);
-        List<ModuleMemberDeclarationNode> nodes =  new ArrayList<>();
+        List<ModuleMemberDeclarationNode> nodes = new ArrayList<>();
         // Add authentication related records
         ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI, nodes);
 
@@ -214,6 +220,7 @@ public class BallerinaClientGenerator {
     }
 
     public BallerinaUtilGenerator getBallerinaUtilGenerator() {
+
         return ballerinaUtilGenerator;
     }
 
@@ -236,9 +243,9 @@ public class BallerinaClientGenerator {
      * }
      * </pre>
      */
-    private  ClassDefinitionNode getClassDefinitionNode() throws BallerinaOpenApiException {
+    private ClassDefinitionNode getClassDefinitionNode() throws BallerinaOpenApiException {
         // Collect members for class definition node
-        List<Node> memberNodeList =  new ArrayList<>();
+        List<Node> memberNodeList = new ArrayList<>();
         // Add instance variable to class definition node
         memberNodeList.addAll(createClassInstanceVariables());
         // Add init function to class definition node
@@ -251,7 +258,7 @@ public class BallerinaClientGenerator {
         NodeList<Token> classTypeQualifiers = createNodeList(
                 createToken(ISOLATED_KEYWORD), createToken(CLIENT_KEYWORD));
         return createClassDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), classTypeQualifiers,
-                createToken(CLASS_KEYWORD),  className, createToken(OPEN_BRACE_TOKEN),
+                createToken(CLASS_KEYWORD), className, createToken(OPEN_BRACE_TOKEN),
                 createNodeList(memberNodeList), createToken(CLOSE_BRACE_TOKEN));
     }
 
@@ -259,10 +266,11 @@ public class BallerinaClientGenerator {
      * Generate metadata node of the class including documentation and display annotation. Content of the documentation
      * will be taken from the `description` section inside the `info` section in OpenAPI definition.
      *
-     * @return  {@link MetadataNode}    Metadata node of the client class
+     * @return {@link MetadataNode}    Metadata node of the client class
      */
     private MetadataNode getClassMetadataNode() {
-        List<AnnotationNode> classLevelAnnotationNodes  = new ArrayList<>();
+
+        List<AnnotationNode> classLevelAnnotationNodes = new ArrayList<>();
         if (openAPI.getInfo().getExtensions() != null) {
             Map<String, Object> extensions = openAPI.getInfo().getExtensions();
             DocCommentsGenerator.extractDisplayAnnotation(extensions, classLevelAnnotationNodes);
@@ -305,9 +313,10 @@ public class BallerinaClientGenerator {
      * </pre>
      *
      * @return {@link FunctionDefinitionNode}   Class init function
-     * @throws BallerinaOpenApiException        When invalid server URL is provided
+     * @throws BallerinaOpenApiException When invalid server URL is provided
      */
     private FunctionDefinitionNode createInitFunction() throws BallerinaOpenApiException {
+
         FunctionSignatureNode functionSignatureNode = getInitFunctionSignatureNode();
         FunctionBodyNode functionBodyNode = getInitFunctionBodyNode();
         NodeList<Token> qualifierList = createNodeList(createToken(PUBLIC_KEYWORD), createToken(ISOLATED_KEYWORD));
@@ -319,9 +328,10 @@ public class BallerinaClientGenerator {
     /**
      * Create function body node of client init function.
      *
-     * @return  {@link FunctionBodyNode}
+     * @return {@link FunctionBodyNode}
      */
     private FunctionBodyNode getInitFunctionBodyNode() {
+
         List<StatementNode> assignmentNodes = new ArrayList<>();
 
         // If both apiKey and httpOrOAuth is supported
@@ -362,10 +372,11 @@ public class BallerinaClientGenerator {
     /**
      * Create function signature node of client init function.
      *
-     * @return  {@link FunctionSignatureNode}
-     * @throws  BallerinaOpenApiException   When invalid server URL is provided
+     * @return {@link FunctionSignatureNode}
+     * @throws BallerinaOpenApiException When invalid server URL is provided
      */
     private FunctionSignatureNode getInitFunctionSignatureNode() throws BallerinaOpenApiException {
+
         serverURL = getServerURL(openAPI.getServers());
         SeparatedNodeList<ParameterNode> parameterList = createSeparatedNodeList(
                 ballerinaAuthConfigGenerator.getConfigParamForClassInit(serverURL));
@@ -379,14 +390,16 @@ public class BallerinaClientGenerator {
 
     /**
      * Provide client class init function's documentation including function description and parameter descriptions.
-     * @return  {@link MetadataNode}    Metadata node containing entire function documentation comment.
+     *
+     * @return {@link MetadataNode}    Metadata node containing entire function documentation comment.
      */
     private MetadataNode getInitDocComment() {
+
         List<Node> docs = new ArrayList<>();
         String clientInitDocComment = "Gets invoked to initialize the `connector`.\n";
         if (openAPI.getInfo().getExtensions() != null && !openAPI.getInfo().getExtensions().isEmpty()) {
             Map<String, Object> extensions = openAPI.getInfo().getExtensions();
-            for (Map.Entry<String, Object> extension: extensions.entrySet()) {
+            for (Map.Entry<String, Object> extension : extensions.entrySet()) {
                 if (extension.getKey().trim().equals(X_BALLERINA_INIT_DESCRIPTION)) {
                     clientInitDocComment = clientInitDocComment.concat(extension.getValue().toString());
                     break;
@@ -418,13 +431,13 @@ public class BallerinaClientGenerator {
         return createMetadataNode(clientInitDoc, createEmptyNodeList());
     }
 
-
     /**
      * Generate client class instance variables.
      *
      * @return {@link List<ObjectFieldNode>}    List of instance variables
      */
     private List<ObjectFieldNode> createClassInstanceVariables() {
+
         List<ObjectFieldNode> fieldNodeList = new ArrayList<>();
         Token finalKeywordToken = createToken(FINAL_KEYWORD);
         NodeList<Token> qualifierList = createNodeList(finalKeywordToken);
@@ -443,16 +456,15 @@ public class BallerinaClientGenerator {
         return fieldNodeList;
     }
 
-
     /**
      * Generate remote functions for OpenAPI operations.
      *
-     * @param paths     openAPI Paths
-     * @param filter    user given tags and operations
-     * @return          FunctionDefinitionNodes list
+     * @param paths  openAPI Paths
+     * @param filter user given tags and operations
+     * @return FunctionDefinitionNodes list
      * @throws BallerinaOpenApiException - throws when creating remote functions fails
      */
-    private  List<FunctionDefinitionNode> createRemoteFunctions(Paths paths, Filter filter)
+    private List<FunctionDefinitionNode> createRemoteFunctions(Paths paths, Filter filter)
             throws BallerinaOpenApiException {
 
         List<String> filterTags = filter.getTags();
@@ -464,7 +476,7 @@ public class BallerinaClientGenerator {
                 for (Map.Entry<PathItem.HttpMethod, Operation> operation :
                         path.getValue().readOperationsMap().entrySet()) {
                     // create display annotation of the operation
-                    List<AnnotationNode> functionLevelAnnotationNodes  = new ArrayList<>();
+                    List<AnnotationNode> functionLevelAnnotationNodes = new ArrayList<>();
                     if (operation.getValue().getExtensions() != null) {
                         Map<String, Object> extensions = operation.getValue().getExtensions();
                         DocCommentsGenerator.extractDisplayAnnotation(extensions, functionLevelAnnotationNodes);
@@ -511,10 +523,10 @@ public class BallerinaClientGenerator {
      *     }
      * </pre>
      */
-    private  FunctionDefinitionNode getClientMethodFunctionDefinitionNode(List<AnnotationNode> annotationNodes,
-                                                                          String path,
-                                                                          Map.Entry<PathItem.HttpMethod, Operation>
-                                                                                  operation)
+    private FunctionDefinitionNode getClientMethodFunctionDefinitionNode(List<AnnotationNode> annotationNodes,
+                                                                         String path,
+                                                                         Map.Entry<PathItem.HttpMethod, Operation>
+                                                                                 operation)
             throws BallerinaOpenApiException {
         // Create api doc for function
         List<Node> remoteFunctionDocs = new ArrayList<>();
@@ -532,9 +544,9 @@ public class BallerinaClientGenerator {
 
         //Create qualifier list
         NodeList<Token> qualifierList = createNodeList(createToken(
-                resourceMode ?
-                        RESOURCE_KEYWORD :
-                        REMOTE_KEYWORD),
+                        resourceMode ?
+                                RESOURCE_KEYWORD :
+                                REMOTE_KEYWORD),
                 createToken(ISOLATED_KEYWORD));
         Token functionKeyWord = createToken(FUNCTION_KEYWORD);
         IdentifierToken functionName = createIdentifierToken(
@@ -567,7 +579,7 @@ public class BallerinaClientGenerator {
 
         //Generate relative path
         NodeList<Node> relativeResourcePath = resourceMode ?
-        createNodeList(GeneratorUtils.getRelativeResourcePath(path, operation.getValue())) :
+                createNodeList(GeneratorUtils.getRelativeResourcePath(path, operation.getValue())) :
                 createEmptyNodeList();
         return createFunctionDefinitionNode(null,
                 metadataNode, qualifierList, functionKeyWord, functionName, relativeResourcePath,
@@ -578,6 +590,7 @@ public class BallerinaClientGenerator {
      * Generate serverUrl for client default value.
      */
     private String getServerURL(List<Server> servers) throws BallerinaOpenApiException {
+
         String serverURL;
         Server selectedServer = servers.get(0);
         if (!selectedServer.getUrl().startsWith("https:") && servers.size() > 1) {
@@ -604,7 +617,7 @@ public class BallerinaClientGenerator {
         } else {
             serverURL = selectedServer.getUrl();
         }
-        return  serverURL;
+        return serverURL;
     }
 
     /**
@@ -612,14 +625,14 @@ public class BallerinaClientGenerator {
      *
      * @return {@link Set<String>}
      */
-    public Set<String> getAuthType () {
+    public Set<String> getAuthType() {
         return ballerinaAuthConfigGenerator.getAuthType();
     }
 
     /**
      * Provide list of the field names in ApiKeysConfig record to generate the Config.toml file.
      *
-     * @return  {@link List<String>}
+     * @return {@link List<String>}
      */
     public List<String> getApiKeyNameList() {
         return apiKeyNameList;
@@ -627,7 +640,8 @@ public class BallerinaClientGenerator {
 
     /**
      * Set the `apiKeyNameList` by adding the Api Key names available under security schemas.
-     * @param apiKeyNameList    {@link List<String>}
+     *
+     * @param apiKeyNameList {@link List<String>}
      */
     public void setApiKeyNameList(List<String> apiKeyNameList) {
         this.apiKeyNameList = apiKeyNameList;

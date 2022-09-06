@@ -66,15 +66,17 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
  * @since 1.3.0
  */
 public class DocCommentsGenerator {
+
     /**
      * Extract extension for find the display annotation.
      *
-     * @param extensions    OpenAPI extension.
-     * */
+     * @param extensions OpenAPI extension.
+     */
     public static void extractDisplayAnnotation(Map<String, Object> extensions,
-                                                          List<AnnotationNode> annotationNodes) {
+                                                List<AnnotationNode> annotationNodes) {
+
         if (extensions != null) {
-            for (Map.Entry<String, Object> extension: extensions.entrySet()) {
+            for (Map.Entry<String, Object> extension : extensions.entrySet()) {
                 if (extension.getKey().trim().equals(GeneratorConstants.X_BALLERINA_DISPLAY)) {
                     annotationNodes.add(getAnnotationNode(extension));
                 }
@@ -85,12 +87,13 @@ public class DocCommentsGenerator {
     /**
      * Extract annotation and documentation related for deprecated records and schemas.
      *
-     * @param extensions        OpenAPI extensions
-     * @param documentation     List of documentation nodes to be updated with documentation related to deprecation
-     * @param annotationNodes   List of annotation nodes to be updated with deprecated annotation
+     * @param extensions      OpenAPI extensions
+     * @param documentation   List of documentation nodes to be updated with documentation related to deprecation
+     * @param annotationNodes List of annotation nodes to be updated with deprecated annotation
      */
     public static void extractDeprecatedAnnotation(Map<String, Object> extensions, List<Node> documentation,
                                                    List<AnnotationNode> annotationNodes) {
+
         AnnotationNode deprecatedAnnotation = createAnnotationNode(createToken(AT_TOKEN),
                 createSimpleNameReferenceNode(createIdentifierToken("deprecated")), null);
         if (documentation.size() > 0) {
@@ -113,7 +116,7 @@ public class DocCommentsGenerator {
         LinkedHashMap<String, String> extFields = (LinkedHashMap<String, String>) extension.getValue();
         List<Node> annotFields = new ArrayList<>();
         if (!extFields.isEmpty()) {
-            for (Map.Entry<String, String> field: extFields.entrySet()) {
+            for (Map.Entry<String, String> field : extFields.entrySet()) {
 
                 BasicLiteralNode valueExpr = createBasicLiteralNode(STRING_LITERAL,
                         createLiteralValueToken(SyntaxKind.STRING_LITERAL_TOKEN,
@@ -140,8 +143,8 @@ public class DocCommentsGenerator {
                 , annotateReference, annotValue);
     }
 
-    public static List<MarkdownDocumentationLineNode> createAPIDescriptionDoc(
-            String description, boolean addExtraLine) {
+    public static List<MarkdownDocumentationLineNode> createAPIDescriptionDoc(String description,
+                                                                              boolean addExtraLine) {
         String[] descriptionLines = description.split("\n");
         List<MarkdownDocumentationLineNode> documentElements = new ArrayList<>();
         Token hashToken = createToken(HASH_TOKEN, createEmptyMinutiaeList(), GeneratorUtils.SINGLE_WS_MINUTIAE);

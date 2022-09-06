@@ -16,7 +16,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.OpenAPIToBallerinaCommand;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.model.Filter;
@@ -43,10 +43,9 @@ public class ResourceFunctionTests {
     Filter filter = new Filter(list1, list2);
     @Test(description = "Generate Client for all methods with resource function")
     public void generateForAllMethods() throws IOException, BallerinaOpenApiException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/all_methods.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/all_methods.bal");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, true);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -54,10 +53,9 @@ public class ResourceFunctionTests {
 
     @Test(description = "Generate Client for headers")
     public void generateForHeaders() throws IOException, BallerinaOpenApiException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/header.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/header.bal");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, true);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -65,10 +63,9 @@ public class ResourceFunctionTests {
 
     @Test(description = "Generate Client for pathParameters")
     public void generateForPathParameters() throws IOException, BallerinaOpenApiException, FormatterException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/pathParameters.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/pathParameters.bal");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, true);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
@@ -76,10 +73,9 @@ public class ResourceFunctionTests {
 
     @Test(description = "Generate Client for request body")
     public void generateForRequestBody() throws IOException, BallerinaOpenApiException {
-        OpenAPIToBallerinaCommand codeGenerator = new OpenAPIToBallerinaCommand();
         Path definitionPath = RESDIR.resolve("swagger/request_body.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/request_body.bal");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, true);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);

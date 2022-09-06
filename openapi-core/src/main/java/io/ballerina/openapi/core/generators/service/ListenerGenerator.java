@@ -45,7 +45,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-
 /**
  * This util class for processing the mapping in between openAPI server section with ballerina listeners.
  *
@@ -66,8 +65,8 @@ public class ListenerGenerator {
     /**
      * Generate listener accoring to the given server details.
      *
-     * @param servers  OAS server details
-     * @return         {@link ListenerDeclarationNode} for server.
+     * @param servers OAS server details
+     * @return {@link ListenerDeclarationNode} for server.
      * @throws BallerinaOpenApiException when process break with exception
      */
     public ListenerDeclarationNode getListenerDeclarationNodes(List<Server> servers) throws BallerinaOpenApiException {
@@ -137,8 +136,8 @@ public class ListenerGenerator {
         SeparatedNodeList<MappingFieldNode> fields = NodeFactory.createSeparatedNodeList(hostNode);
 
         MappingConstructorExpressionNode hostExpression = NodeFactory.createMappingConstructorExpressionNode(
-                        AbstractNodeFactory.createToken(SyntaxKind.OPEN_BRACE_TOKEN),
-                        fields, AbstractNodeFactory.createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+                AbstractNodeFactory.createToken(SyntaxKind.OPEN_BRACE_TOKEN),
+                fields, AbstractNodeFactory.createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         NamedArgumentNode namedArgumentNode = NodeFactory.createNamedArgumentNode(argumentName,
                 AbstractNodeFactory.createToken(SyntaxKind.EQUAL_TOKEN), hostExpression);

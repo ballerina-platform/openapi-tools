@@ -143,7 +143,7 @@ public class MultipartFormData extends MimeType {
         }
 
         if (entry.getValue().getHeaders() != null) {
-            headersField =  getHeaderEncoding(entry);
+            headersField = getHeaderEncoding(entry);
         }
 
         if (headersField != null && contentField != null) {
