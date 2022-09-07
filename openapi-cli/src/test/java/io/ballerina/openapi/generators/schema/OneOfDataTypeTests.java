@@ -19,12 +19,14 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
+import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.TypeGenerator;
+import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
+import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.ballerina.openapi.generators.common.TestUtils;
-import io.ballerina.openapi.generators.schema.ballerinatypegenerators.TypeGenerator;
-import io.ballerina.openapi.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
-import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -42,7 +44,7 @@ import java.util.List;
  */
 public class OneOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
-    CodeGenerator codeGenerator = new CodeGenerator();
+    BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
 
     @Test(description = "Generate record for schema has oneOF")
     public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException {

@@ -19,8 +19,11 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
+import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
+import io.ballerina.openapi.core.generators.client.FunctionBodyGenerator;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -41,8 +44,8 @@ import java.util.Set;
 import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to the FunctionBodyNode generation in {@link BallerinaClientGenerator}
- * util.
+ * All the tests related to the FunctionBodyNode generation in {
+ * {@link io.ballerina.openapi.core.generators.client.BallerinaClientGenerator}} util.
  */
 public class FunctionBodyNodeTests {
     private static final Path RESDIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();

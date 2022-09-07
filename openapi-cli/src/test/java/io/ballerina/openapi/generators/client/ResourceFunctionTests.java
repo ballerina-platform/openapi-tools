@@ -16,9 +16,10 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.cmd.Filter;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
@@ -42,7 +43,7 @@ public class ResourceFunctionTests {
     Filter filter = new Filter(list1, list2);
     @Test(description = "Generate Client for all methods with resource function")
     public void generateForAllMethods() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/all_methods.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/all_methods.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
@@ -53,7 +54,7 @@ public class ResourceFunctionTests {
 
     @Test(description = "Generate Client for headers")
     public void generateForHeaders() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/header.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/header.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
@@ -64,7 +65,7 @@ public class ResourceFunctionTests {
 
     @Test(description = "Generate Client for pathParameters")
     public void generateForPathParameters() throws IOException, BallerinaOpenApiException, FormatterException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/pathParameters.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/pathParameters.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
@@ -75,7 +76,7 @@ public class ResourceFunctionTests {
 
     @Test(description = "Generate Client for request body")
     public void generateForRequestBody() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RESDIR.resolve("swagger/request_body.yaml");
         Path expectedPath = RESDIR.resolve("ballerina/request_body.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);

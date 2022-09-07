@@ -19,9 +19,10 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.cmd.Filter;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -42,7 +43,7 @@ import static io.ballerina.openapi.generators.common.TestUtils.getDiagnostics;
 
 /**
  * All the tests related to the check diagnostic issue in code generators
- * {@link BallerinaClientGenerator} util.
+ * {{@link io.ballerina.openapi.core.generators.client.BallerinaClientGenerator}} util.
  */
 public class BallerinaDiagnosticTests {
     private static final Path RESDIR =
@@ -56,7 +57,7 @@ public class BallerinaDiagnosticTests {
             dataProvider = "singleFileProviderForDiagnosticCheck")
     public void checkDiagnosticIssues(String yamlFile) throws IOException, BallerinaOpenApiException,
             FormatterException, URISyntaxException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RESDIR.resolve(yamlFile);
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);

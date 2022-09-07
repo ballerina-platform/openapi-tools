@@ -27,6 +27,7 @@ dependencies {
     }
     implementation project(':openapi-bal-service')
     implementation project(':openapi-validator')
+    implementation project(':openapi-core')
     implementation project(':openapi-cli')
     implementation project(':openapi-ls-extension')
     implementation project(':openapi-extension')
@@ -55,6 +56,7 @@ def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def targetNativeJar = file("""$project.rootDir/${packageName}-validator/build/libs/${packageName}-validator-${project.version}.jar""")
 def targetOpenApiCommonJar = file("$project.rootDir/openapi-bal-service/build/libs/openapi-bal-service-${project.version}.jar")
+def targetOpenApiCoreJar = file("$project.rootDir/openapi-core/build/libs/openapi-core-${project.version}.jar")
 def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
 def targetOpenApiBuiltInExtensionJar = file("$project.rootDir/openapi-extension/build/libs/openapi-extension-${project.version}.jar")
 def targetOpenApiBuildExtensionJar = file("$project.rootDir/openapi-build-extension/build/libs/openapi-build-extension-${project.version}.jar")
@@ -207,6 +209,11 @@ task ballerinaBuild {
 
         copy {
             from targetOpenApiCommonJar
+            into file("$artifactLibParent/libs")
+        }
+
+        copy {
+            from targetOpenApiCoreJar
             into file("$artifactLibParent/libs")
         }
 

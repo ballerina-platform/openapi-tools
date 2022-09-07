@@ -37,4 +37,5 @@ gradleEnterprise {
     }
 }
 include 'openapi-build-extension'
+include 'openapi-core'
 

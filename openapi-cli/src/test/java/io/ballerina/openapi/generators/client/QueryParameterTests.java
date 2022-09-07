@@ -18,9 +18,10 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.cmd.Filter;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
@@ -45,7 +46,7 @@ public class QueryParameterTests {
 
     @Test(description = "Generate Client for query parameter has default value")
     public void generateQueryParamWithDefault() throws IOException, BallerinaOpenApiException, FormatterException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_default_value.bal");
 
@@ -57,7 +58,7 @@ public class QueryParameterTests {
 
     @Test(description = "Generate Client for query parameter without default value")
     public void generateQueryParamWithOutDefault() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/query_param_without_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_without_default_value.bal");
 
@@ -69,7 +70,7 @@ public class QueryParameterTests {
 
     @Test(description = "Generate Client for query parameter with referenced schema")
     public void generateQueryParamWithReferencedSchema() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/query_param_with_ref_schema.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/query_param_with_ref_schema.bal");
 
@@ -81,7 +82,7 @@ public class QueryParameterTests {
 
     @Test(description = "Generate query parameters when both apikeys and http/OAuth is supported")
     public void genQueryParamsForCombinationOfApiKeyAndHTTPOrOAuth() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/combination_of_apikey_and_http_oauth.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/combination_of_apikey_and_http_oauth.bal");
 
@@ -93,7 +94,7 @@ public class QueryParameterTests {
 
     @Test(description = "Generate encoding map for query parameters")
     public void genQueryParamEncodingMap() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/queryparam_encoding_map_gen.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/queryparam_encoding_map_gen.bal");
 

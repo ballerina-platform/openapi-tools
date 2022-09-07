@@ -18,7 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.launcher.BLauncherException;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -73,7 +73,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("An OpenAPI definition file is required to generate the service."));
+        Assert.assertTrue(output.contains("An OpenAPI definition path is required to generate the service."));
     }
 
     @Test(description = "Test openapi gen-service for successful service generation")

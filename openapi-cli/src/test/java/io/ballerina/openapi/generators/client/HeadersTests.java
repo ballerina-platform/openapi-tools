@@ -18,9 +18,10 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.cmd.Filter;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.Test;
 
@@ -44,7 +45,7 @@ public class HeadersTests {
 
     @Test(description = "Test for header that comes under the parameter section")
     public void getHeaderTests() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/header_parameter.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_parameter.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
@@ -55,7 +56,7 @@ public class HeadersTests {
 
     @Test(description = "Test for header that comes under the parameter section")
     public void getHeaderTestsWithoutParameter() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/header_without_parameter.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_without_parameter.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
@@ -65,7 +66,7 @@ public class HeadersTests {
     }
     @Test(description = "Test for header with default values")
     public void getHeaderTestsWithDefaultValues() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/header_param_with_default_value.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_param_with_default_value.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
@@ -76,7 +77,7 @@ public class HeadersTests {
 
     @Test(description = "Test for optional headers without default values")
     public void getOptionalHeaderTestsWithoutDefaultValues() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/header_optional.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/header_optional.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
@@ -87,7 +88,7 @@ public class HeadersTests {
 
     @Test(description = "Test for headers with delete values")
     public void getHeaderWithDeleteOperation() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/delete_with_header.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/delete_with_header.bal");
         OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
