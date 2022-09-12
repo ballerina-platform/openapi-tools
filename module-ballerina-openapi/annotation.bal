@@ -36,5 +36,23 @@ public type ServiceInformation record {|
     string 'version?;
 |};
 
+# Client information code.
+# + tags - OpenAPI tags
+# + operations - OpenAPI operations
+# + nullable -
+# + withTests -
+# + isResource -
+# + license -
+public type ClientInformation record {|
+    string[]? tags = [];
+    string[]? operations = [];
+    boolean nullable = true;
+    boolean withTests = false;
+    boolean isResource = true;
+    string license?;
+|};
+
 # Annotation for additional OpenAPI information of a Ballerina service.
 public annotation ServiceInformation ServiceInfo on service;
+# Annotation for additional OpenAPI information of a Ballerina client.
+public const annotation ClientInformation ClientInfo on source client;
