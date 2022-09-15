@@ -37,6 +37,7 @@ public class GenSrcFile {
         MODEL_SRC,
         IMPL_SRC,
         TEST_SRC,
+        CONFIG_SRC,
         RES,
         UTIL_SRC;
 

@@ -1,13 +1,14 @@
 package io.ballerina.openapi.idl.client;
 
-import io.ballerina.projects.DiagnosticResult;
-import io.ballerina.projects.IDLClientGeneratorResult;
-import io.ballerina.projects.Project;
 import org.testng.annotations.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ *
+ * Client IDL test.
+ */
 public class IDLClientGenPluginTests {
     private static final Path RESOURCE_DIRECTORY = Paths.get(
             "src/test/resources/client-projects").toAbsolutePath();

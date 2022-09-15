@@ -44,7 +44,8 @@ public class ConstraintTests {
     @Test(description = "Tests with record field has constraint and record field type can be user defined datatype " +
             "with constraint.")
     public void testRecordFiledConstraint() throws IOException, BallerinaOpenApiException, FormatterException {
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field.yaml"), true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/constraint/record_field.yaml"),
+                true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
 
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();

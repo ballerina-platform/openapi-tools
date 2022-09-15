@@ -1,7 +1,6 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;

@@ -27,6 +27,9 @@ import org.testng.annotations.Test;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Client IDL import integration tests.
+ */
 public class IDLClientGenPluginTests {
     private static final Path RESOURCE_DIRECTORY = Paths.get(
             "src/test/resources/client-projects").toAbsolutePath();
@@ -37,13 +40,23 @@ public class IDLClientGenPluginTests {
         DiagnosticResult diagnosticResult = project.currentPackage().getCompilation().diagnosticResult();
     }
 
-    @Test(description = "")
+    @Test(description = "When client declaration without annotation")
+    public void withOutAnnotation() {
+
+    }
+
+    @Test(description = "Provide client annotation symbol")
     public void withAnnotation() {
 
     }
 
     @Test(description = "When client declaration inside the function")
-    public void withCDwithFunction() {
+    public void withClientDeclarationNode() {
+
+    }
+
+    @Test(description = "When client declaration in module level the function")
+    public void withModuleClientDeclarationNode() {
 
     }
 

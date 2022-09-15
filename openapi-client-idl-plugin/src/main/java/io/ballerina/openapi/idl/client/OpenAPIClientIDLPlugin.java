@@ -20,6 +20,7 @@ package io.ballerina.openapi.idl.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.ClientDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
@@ -27,6 +28,7 @@ import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.ModuleClientDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -35,6 +37,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
@@ -45,27 +48,44 @@ import io.ballerina.projects.ModuleConfig;
 import io.ballerina.projects.ModuleDescriptor;
 import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.ModuleName;
+import io.ballerina.projects.Package;
 import io.ballerina.projects.plugins.IDLClientGenerator;
 import io.ballerina.projects.plugins.IDLGeneratorPlugin;
 import io.ballerina.projects.plugins.IDLPluginContext;
 import io.ballerina.projects.plugins.IDLSourceGeneratorContext;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticFactory;
+import io.ballerina.tools.diagnostics.DiagnosticInfo;
+import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
+import static io.ballerina.openapi.core.GeneratorConstants.CONFIG_FILE_NAME;
+import static io.ballerina.openapi.core.GeneratorConstants.TEST_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.UTIL_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorUtils.modifySchemaContent;
 import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
+import static io.ballerina.openapi.idl.client.Constants.IS_RESOURCE;
+import static io.ballerina.openapi.idl.client.Constants.LICENSE;
+import static io.ballerina.openapi.idl.client.Constants.NULLABLE;
+import static io.ballerina.openapi.idl.client.Constants.OPENAPI_CLIENT_REFERENCE;
+import static io.ballerina.openapi.idl.client.Constants.OPERATIONS;
+import static io.ballerina.openapi.idl.client.Constants.TAGS;
+import static io.ballerina.openapi.idl.client.Constants.TRUE;
+import static io.ballerina.openapi.idl.client.Constants.WITH_TESTS;
 
 /**
  * IDL client generation class.
@@ -80,16 +100,16 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
     }
 
     private static class OpenAPIClientGenerator extends IDLClientGenerator {
-
+        private OpenAPI openAPI = null;
         @Override
         public boolean canHandle(IDLSourceGeneratorContext idlSourceGeneratorContext) {
             // Check given contract is valid for the generating the client.
+            //TODO: enable this after fixing the
 //            Path oasPath = idlSourceGeneratorContext.resourcePath();
             // resource with yaml, json extension
             String oasPath = "/home/hansani/ballerina_projects/openapi-features/idl_import/idl_01/openapi.yaml";
             try {
-//                OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(Path.of(oasPath.toString() + ".yaml"));
-                OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(Path.of(oasPath));
+                 openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(Path.of(oasPath));
             } catch (IOException | BallerinaOpenApiException | NullPointerException e) {
                 return false;
             }
@@ -98,17 +118,26 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
 
         @Override
         public void perform(IDLSourceGeneratorContext idlSourceContext) {
-
-//            Path oasPath = idlSourceContext.resourcePath();
+            //TODO: remove hardcode URL
             String oasPath = "/home/hansani/ballerina_projects/openapi-features/idl_import/idl_01/openapi.yaml";
-            ModuleClientDeclarationNode clientNode = (ModuleClientDeclarationNode) idlSourceContext.clientNode();
-            OASClientIDLMetaData clientIDLMetaData = extractAnnotationDetails(clientNode);
             try {
-                List<GenSrcFile> genSrcFiles = generateClientFiles(Path.of(oasPath), clientIDLMetaData);
-                ModuleId moduleId = ModuleId.create(Path.of(oasPath).getFileName().toString(),
-                        idlSourceContext.currentPackage().packageId());
+                List<GenSrcFile> genSrcFiles = generateClientFiles(idlSourceContext);
+                if (genSrcFiles.isEmpty() || openAPI == null) {
+                    return;
+                }
+                //TODO: proper module name
+                String moduleName;
+                Path fileName = Path.of(oasPath).getFileName();
+                if (fileName == null) {
+                    moduleName = "openapi-client";
+                } else {
+                    moduleName = fileName.toString();
+                }
+                ModuleId moduleId = ModuleId.create(moduleName, idlSourceContext.currentPackage().packageId());
                 List<DocumentConfig> documents = new ArrayList<>();
-                genSrcFiles.stream().forEach(genSrcFile -> {
+                List<DocumentConfig> testDocuments = new ArrayList<>();
+
+                genSrcFiles.forEach(genSrcFile -> {
                     GenSrcFile.GenFileType fileType = genSrcFile.getType();
                     switch (fileType) {
                         case GEN_SRC:
@@ -129,47 +158,91 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
                                     utilId, genSrcFile.getContent(), UTIL_FILE_NAME);
                             documents.add(utilConfig);
                             break;
+                        case TEST_SRC:
+                            DocumentId testId = DocumentId.create(TEST_FILE_NAME, moduleId);
+                            DocumentConfig testConfig = DocumentConfig.from(
+                                    testId, genSrcFile.getContent(), TEST_FILE_NAME);
+                            testDocuments.add(testConfig);
+                            break;
+                        case CONFIG_SRC:
+                            DocumentId configId = DocumentId.create(CONFIG_FILE_NAME, moduleId);
+                            DocumentConfig configConfig = DocumentConfig.from(
+                                    configId, genSrcFile.getContent(), CONFIG_FILE_NAME);
+                            testDocuments.add(configConfig);
+                            break;
                         default:
                             break;
                     }
 
                 });
-                // Take spec name
+
                 ModuleDescriptor moduleDescriptor = ModuleDescriptor.from(
-                        ModuleName.from(idlSourceContext.currentPackage().packageName(),
-                                Path.of(oasPath).getFileName().toString()),
+                        ModuleName.from(idlSourceContext.currentPackage().packageName(), moduleName),
                         idlSourceContext.currentPackage().descriptor());
                 ModuleConfig moduleConfig =
-                        ModuleConfig.from(moduleId, moduleDescriptor, documents, Collections.emptyList(), null,
+                        ModuleConfig.from(moduleId, moduleDescriptor, documents, testDocuments, null,
                                 new ArrayList<>());
                 idlSourceContext.addClient(moduleConfig);
             } catch (IOException | BallerinaOpenApiException | FormatterException e) {
                 // Ignore need to handle with proper error handle
-                // Error while generating the client as warning
+                // Error while generating the client as error
+                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
+                reportDiagnostic(idlSourceContext, error, idlSourceContext.clientNode().location());
+                return;
+
             }
         }
 
-        private List<GenSrcFile> generateClientFiles(Path openAPI, OASClientIDLMetaData clientMetaData)
+        private List<GenSrcFile> generateClientFiles(IDLSourceGeneratorContext context)
                 throws IOException, BallerinaOpenApiException, FormatterException {
 
+            //            Path openAPI = idlSourceContext.resourcePath();
+            // TODO: remove hardcode URL
+            String openAPI = "/home/hansani/ballerina_projects/openapi-features/idl_import/idl_01/openapi.yaml";
+
+            // extract annotation details
+            Node clientNode = context.clientNode();
+            NodeList<AnnotationNode> annotations = null;
+            if (clientNode instanceof ClientDeclarationNode) {
+                annotations = ((ClientDeclarationNode) clientNode).annotations();
+            } else if (clientNode instanceof ModuleClientDeclarationNode) {
+                annotations = ((ModuleClientDeclarationNode) clientNode).annotations();
+            }
+            OASClientIDLMetaData clientMetaData = extractAnnotationDetails(annotations);
+
+            // create filter values (tags, operations)
             Filter filter = new Filter(
                     clientMetaData.getTags().isPresent() ? clientMetaData.getTags().get() : new ArrayList<>(),
                     clientMetaData.getOperations().isPresent() ? clientMetaData.getOperations().get() :
                             new ArrayList<>());
 
+            // set license header content
+            String licenseContent = "";
+            if (clientMetaData.getLicense() != null) {
+                licenseContent = getLicenseContent(context, Paths.get(clientMetaData.getLicense()));
+                if (licenseContent == null) {
+                    return new ArrayList<>();
+                }
+            }
+
             List<GenSrcFile> sourceFiles = new ArrayList<>();
-            // Normalize OpenAPI definition
-            OpenAPI openAPIDef = normalizeOpenAPI(openAPI, !clientMetaData.isResource());
-            // Generate ballerina service and resources.
+            // Normalize OpenAPI definition.
+            OpenAPI openAPIDef = normalizeOpenAPI(Path.of(openAPI), !clientMetaData.isResource());
+
+            // Generate ballerina client files.
             BallerinaClientGenerator ballerinaClientGenerator =
                     new BallerinaClientGenerator(openAPIDef, filter, clientMetaData.isNullable(),
                             clientMetaData.isResource());
             String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME, mainContent));
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
+                    licenseContent.isBlank() ? mainContent : licenseContent + System.lineSeparator() + mainContent));
             String utilContent = Formatter.format(
                     ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
+
             if (!utilContent.isBlank()) {
-                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, null, UTIL_FILE_NAME, utilContent));
+                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, null, UTIL_FILE_NAME,
+                        licenseContent.isBlank() ? utilContent :
+                                licenseContent + System.lineSeparator() + utilContent));
             }
 
             // Generate ballerina records to represent schemas.
@@ -178,111 +251,219 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
             ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
             SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
             String schemaContent = Formatter.format(schemaSyntaxTree).toString();
+
             if (filter.getTags().size() > 0) {
                 // Remove unused records and enums when generating the client by the tags given.
                 schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent, null);
             }
             if (!schemaContent.isBlank()) {
                 sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
-                        schemaContent));
+                        licenseContent.isBlank() ? schemaContent :
+                                licenseContent + System.lineSeparator() + schemaContent));
             }
 
             // Generate test boilerplate code for test cases
-//            if (this.includeTestFiles) {
-//                BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
-//                String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
-//                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, TEST_FILE_NAME, testContent));
-//
-//                String configContent = ballerinaTestGenerator.getConfigTomlFile();
-//                if (!configContent.isBlank()) {
-//                    sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage,
-//                            CONFIG_FILE_NAME, configContent));
-//                }
-//            }
+            if (clientMetaData.isWithTest()) {
+                BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
+                String testContent = Formatter.format(ballerinaTestGenerator.generateSyntaxTree()).toString();
+                sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.TEST_SRC, null, TEST_FILE_NAME,
+                        licenseContent.isBlank() ? testContent :
+                                licenseContent + System.lineSeparator() + testContent));
 
+                String configContent = ballerinaTestGenerator.getConfigTomlFile();
+                if (!configContent.isBlank()) {
+                    sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.CONFIG_SRC, null,
+                            CONFIG_FILE_NAME, configContent));
+                }
+            }
             return sourceFiles;
         }
-    }
 
-    private static OASClientIDLMetaData extractAnnotationDetails(ModuleClientDeclarationNode clientNode) {
+        /**
+         * Extract openapi client annotation details.
+         * ex: openapi annotation
+         * <pre>
+         * public type ClientInformation record {|
+         *     string[]? tags = [];
+         *     string[]? operations = [];
+         *     boolean nullable = true;
+         *     boolean withTests = false;
+         *     boolean isResource = true;
+         *     string license?;
+         * |};
+         * </pre>
+         *
+         * @param annotations - Client node annotation list
+         * @return {@code OASClientIDLMetaData} model with all the metadata to generate client.
+         */
+        private static OASClientIDLMetaData extractAnnotationDetails(NodeList<AnnotationNode> annotations) {
 
-        OASClientIDLMetaData.OASClientIDLMetaDataBuilder clientMetaDataBuilder =
-                new OASClientIDLMetaData.OASClientIDLMetaDataBuilder();
-
-        NodeList<AnnotationNode> annotations = clientNode.annotations();
-        for (AnnotationNode annotationNode : annotations) {
-            Node refNode = annotationNode.annotReference();
-            boolean isNodeExist = refNode.toString().trim().equals("openapi:ClientInfo");
-            if (!isNodeExist) {
-                continue;
+            OASClientIDLMetaData.OASClientIDLMetaDataBuilder clientMetaDataBuilder =
+                    new OASClientIDLMetaData.OASClientIDLMetaDataBuilder();
+            if (annotations == null) {
+                return clientMetaDataBuilder.build();
             }
-            Optional<MappingConstructorExpressionNode> annotFields = annotationNode.annotValue();
-            if (annotFields.isEmpty()) {
-                continue;
-            }
-            for (MappingFieldNode field : annotFields.get().fields()) {
-                if (!(field instanceof SpecificFieldNode)) {
+            for (AnnotationNode annotationNode : annotations) {
+                Node refNode = annotationNode.annotReference();
+                boolean isNodeExist = refNode.toString().trim().equals(OPENAPI_CLIENT_REFERENCE);
+                if (!isNodeExist) {
                     continue;
                 }
-                SpecificFieldNode specificField = (SpecificFieldNode) field;
-                Optional<ExpressionNode> expressionNode = specificField.valueExpr();
-                if (expressionNode.isEmpty()) {
+                Optional<MappingConstructorExpressionNode> annotFields = annotationNode.annotValue();
+                if (annotFields.isEmpty()) {
                     continue;
                 }
-                ExpressionNode expression = expressionNode.get();
-                ListConstructorExpressionNode list;
-                List<String> values = new ArrayList<>();
-                if (expression instanceof ListConstructorExpressionNode) {
-                    list = (ListConstructorExpressionNode) expression;
-                    values = setFilters(list);
-                }
-                Node fieldName = specificField.fieldName();
-                String attributeName = ((Token) fieldName).text();
-                switch (attributeName) {
-                    case "tags":
-                        clientMetaDataBuilder.withTags(values);
-                        break;
-                    case "operations":
-                        clientMetaDataBuilder.withOperations(values);
-                        break;
-                    case "nullable":
-                        clientMetaDataBuilder.withNullable(expression.toString().contains("true"));
-                        break;
-                    case "isResource":
-                        clientMetaDataBuilder.withIsResource(expression.toString().contains("true"));
-                        break;
-                    case "withTests":
-                        clientMetaDataBuilder.withTest(expression.toString().contains("true"));
-                        break;
-                    default:
-                        break;
+                for (MappingFieldNode field : annotFields.get().fields()) {
+                    if (!(field instanceof SpecificFieldNode)) {
+                        continue;
+                    }
+                    SpecificFieldNode specificField = (SpecificFieldNode) field;
+                    Optional<ExpressionNode> expressionNode = specificField.valueExpr();
+                    if (expressionNode.isEmpty()) {
+                        continue;
+                    }
+                    ExpressionNode expression = expressionNode.get();
+                    ListConstructorExpressionNode list;
+                    List<String> values = new ArrayList<>();
+                    if (expression instanceof ListConstructorExpressionNode) {
+                        list = (ListConstructorExpressionNode) expression;
+                        values = extractListValues(list);
+                    }
+                    Node fieldName = specificField.fieldName();
+                    String attributeName = ((Token) fieldName).text();
+                    switch (attributeName) {
+                        case TAGS:
+                            clientMetaDataBuilder.withTags(values);
+                            break;
+                        case OPERATIONS:
+                            clientMetaDataBuilder.withOperations(values);
+                            break;
+                        case NULLABLE:
+                            clientMetaDataBuilder.withNullable(expression.toString().contains(TRUE));
+                            break;
+                        case IS_RESOURCE:
+                            clientMetaDataBuilder.withIsResource(expression.toString().contains(TRUE));
+                            break;
+                        case WITH_TESTS:
+                            clientMetaDataBuilder.withTest(expression.toString().contains(TRUE));
+                            break;
+                        case LICENSE:
+                            clientMetaDataBuilder.withLicense(
+                                    expression.kind() == SyntaxKind.STRING_LITERAL && !expression.toString().isBlank() ?
+                                            getStringValue((BasicLiteralNode) expression) : "");
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
+            return clientMetaDataBuilder.build();
         }
-        ;
-        return clientMetaDataBuilder.build();
-    }
 
-    private static List<String> setFilters(ListConstructorExpressionNode list) {
+        /**
+         * This util is for extracting the list value from annotation field.
+         */
+        private static List<String> extractListValues(ListConstructorExpressionNode list) {
 
-        SeparatedNodeList<Node> expressions = list.expressions();
-        Iterator<Node> iterator = expressions.iterator();
-        List<String> values = new ArrayList<>();
-        while (iterator.hasNext()) {
-            Node item = iterator.next();
-            if (item.kind() == SyntaxKind.STRING_LITERAL && !item.toString().isBlank()) {
-                Token stringItem = ((BasicLiteralNode) item).literalToken();
-                String text = stringItem.text();
-                // Here we need to do some preprocessing by removing '"' from the given values.
-                if (text.length() > 1 && text.charAt(0) == '"' && text.charAt(text.length() - 1) == '"') {
-                    text = text.substring(1, text.length() - 1);
+            SeparatedNodeList<Node> expressions = list.expressions();
+            Iterator<Node> iterator = expressions.iterator();
+            List<String> values = new ArrayList<>();
+            while (iterator.hasNext()) {
+                Node item = iterator.next();
+                if (item.kind() == SyntaxKind.STRING_LITERAL && !item.toString().isBlank()) {
+                    String text = getStringValue((BasicLiteralNode) item);
+                    values.add(text);
+                }
+            }
+            return values;
+        }
+
+        /**
+         * Normalize the string value by removing extra " " from given field value.
+         */
+        private static String getStringValue(BasicLiteralNode item) {
+
+            Token stringItem = item.literalToken();
+            String text = stringItem.text();
+            // Here we need to do some preprocessing by removing '"' from the given values.
+            if (text.length() > 1 && text.charAt(0) == '"' && text.charAt(text.length() - 1) == '"') {
+                text = text.substring(1, text.length() - 1);
+            } else {
+                // Missing end quote case
+                text = text.substring(1);
+            }
+            return text;
+        }
+
+        /**
+         * Util to read license content.
+         */
+        private static String getLicenseContent(IDLSourceGeneratorContext context, Path licensePath) {
+
+            Path relativePath = null;
+            String licenseHeader = "";
+            NodeLocation location = context.clientNode().location();
+            Path ballerinaFilePath = extractBallerinaFilePath(context);
+            if (ballerinaFilePath == null) {
+                return null;
+            }
+            try {
+                if (licensePath.toString().isBlank()) {
+                    // Report Diagnostic
+                    Constants.DiagnosticMessages error = Constants.DiagnosticMessages.LICENSE_PATH_BLANK;
+                    reportDiagnostic(context, error, location);
                 } else {
-                    // Missing end quote case
-                    text = text.substring(1);
+                    Path finalLicensePath = Paths.get(licensePath.toString());
+                    if (finalLicensePath.isAbsolute()) {
+                        relativePath = finalLicensePath;
+                    } else {
+                        File file = new File(ballerinaFilePath.toString());
+                        File parentFolder = new File(file.getParent());
+                        File openapiContract = new File(parentFolder, licensePath.toString());
+                        relativePath = Paths.get(openapiContract.getCanonicalPath());
+                    }
                 }
-                values.add(text);
+                if (relativePath != null) {
+                    try {
+                        String newLine = System.lineSeparator();
+                        Path filePath = Paths.get((new File(relativePath.toString()).getCanonicalPath()));
+                        licenseHeader = Files.readString(Paths.get(filePath.toString()));
+                        if (!licenseHeader.endsWith(newLine)) {
+                            licenseHeader = licenseHeader + newLine + newLine;
+                        } else if (!licenseHeader.endsWith(newLine + newLine)) {
+                            licenseHeader = licenseHeader + newLine;
+                        }
+                    } catch (IOException e) {
+                        // Report diagnostic
+                        Constants.DiagnosticMessages error = Constants.DiagnosticMessages
+                                .ERROR_WHILE_READING_LICENSE_FILE;
+                        reportDiagnostic(context, error, location);
+                        return null;
+                    }
+                    return licenseHeader;
+                }
+            } catch (IOException e) {
+                // Report diagnostic
+                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_READING_LICENSE_FILE;
+                reportDiagnostic(context, error, location);
+                return null;
             }
+            return licenseHeader;
         }
-        return values;
+
+        public static void reportDiagnostic(IDLSourceGeneratorContext context, Constants.DiagnosticMessages error,
+                                            Location location) {
+            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error.getDescription(),
+                    error.getSeverity());
+            Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location);
+            context.reportDiagnostic(diagnostic);
+        }
+
+        private static Path extractBallerinaFilePath(IDLSourceGeneratorContext idlSourceContext) {
+            Package aPackage = idlSourceContext.currentPackage();
+            DocumentId packageDoc = aPackage.getDefaultModule().documentIds().stream().findFirst().get();
+            Optional<Path> path = aPackage.project().documentPath(packageDoc);
+            return path.orElse(null);
+        }
     }
 }
