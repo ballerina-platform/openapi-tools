@@ -37,12 +37,12 @@ public type ServiceInformation record {|
 |};
 
 # Client information code.
-# + tags - OpenAPI tags
-# + operations - OpenAPI operations
-# + nullable -
-# + withTests -
-# + isResource -
-# + license -
+# + tags - OpenAPI tags that filter the openapi operations that need to be generate as client method
+# + operations - OpenAPI operationIds that filter the openapi operations that need to be generate as client method
+# + nullable - Enable the all fields nullable in record
+# + withTests - Enable test generation for given openapi specification
+# + isResource - Choose client methods as resources for generation
+# + license - License path
 public type ClientInformation record {|
     string[]? tags = [];
     string[]? operations = [];

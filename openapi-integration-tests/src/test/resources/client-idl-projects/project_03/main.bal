@@ -1,7 +1,11 @@
-client "http://www.example.com/apis/one.yaml" as foo;
+import ballerina/openapi;
 
-public function main() {
-    client "http://www.example.com/apis/one.yaml" as bar;
-    foo:client x;
-    bar:client y;
+@openapi:ClientInfo {
+    tags:["abc", "ads"],
+    operations: ["o1"]
+    nullable: false,
+    isResource: false
+    withTests: true,
+    license: "ttt.txt"
 }
+client "https://raw.githubusercontent.com/ballerina-platform/openapi-connectors/main/openapi/openweathermap/openapi.yaml" as bar;
