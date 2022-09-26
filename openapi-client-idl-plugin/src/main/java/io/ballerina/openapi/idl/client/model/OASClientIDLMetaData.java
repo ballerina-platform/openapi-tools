@@ -30,7 +30,6 @@ public class OASClientIDLMetaData {
     private final List<String> operations;
     private final boolean nullable;
     private final boolean isResource;
-    private final boolean withTest;
     private final String license;
 
     public OASClientIDLMetaData(OASClientIDLMetaDataBuilder oasClientIDLMetaDataBuilder) {
@@ -38,7 +37,6 @@ public class OASClientIDLMetaData {
         this.operations = oasClientIDLMetaDataBuilder.operations;
         this.nullable = oasClientIDLMetaDataBuilder.nullable;
         this.isResource = oasClientIDLMetaDataBuilder.isResource;
-        this.withTest = oasClientIDLMetaDataBuilder.withTest;
         this.license = oasClientIDLMetaDataBuilder.license;
     }
 
@@ -58,10 +56,6 @@ public class OASClientIDLMetaData {
         return isResource;
     }
 
-    public boolean isWithTest() {
-        return withTest;
-    }
-
     public String getLicense() {
         return license;
     }
@@ -74,7 +68,6 @@ public class OASClientIDLMetaData {
         private List<String> operations;
         private boolean nullable = true;
         private boolean isResource = true;
-        private boolean withTest = false;
         private String license;
 
         public OASClientIDLMetaDataBuilder withTags(List<String> tags) {
@@ -89,11 +82,6 @@ public class OASClientIDLMetaData {
 
         public OASClientIDLMetaDataBuilder withNullable(boolean nullable) {
             this.nullable = nullable;
-            return this;
-        }
-
-        public OASClientIDLMetaDataBuilder withTest(boolean withTest) {
-            this.withTest = withTest;
             return this;
         }
 

@@ -18,51 +18,97 @@
 
 package io.ballerina.openapi.idl.client;
 
-import io.ballerina.projects.BuildOptions;
-import io.ballerina.projects.DiagnosticResult;
-import io.ballerina.projects.Project;
-import io.ballerina.projects.directory.BuildProject;
+import io.ballerina.openapi.cmd.TestUtil;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
+
+import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.cmd.TestUtil.RESOURCE;
+import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.cmd.TestUtil.executeRun;
 
 /**
  * Client IDL import integration tests.
  */
 public class IDLClientGenPluginTests {
-    private static final Path RESOURCE_DIRECTORY = Paths.get(
-            "src/test/resources/client-projects").toAbsolutePath();
+    public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
+    public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/client-idl-projects");
+
+    @BeforeClass
+    public void setupDistributions() throws IOException {
+        TestUtil.cleanDistribution();
+    }
+
     @Test(description = "Provide valid swagger path")
-    public void validSwaggerContract() {
-        Project project = loadBuildProject(RESOURCE_DIRECTORY.resolve("project_01"));
-        // Check whether there are any diagnostics
-        DiagnosticResult diagnosticResult = project.currentPackage().getCompilation().diagnosticResult();
+    public void validSwaggerContract() throws IOException, InterruptedException {
+        File[] matchingFiles = getMatchingFiles("project_01");
+        assert matchingFiles != null;
+        Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test(description = "When client declaration without annotation")
-    public void withOutAnnotation() {
-
+    public void withOutAnnotation() throws IOException, InterruptedException {
+        File[] matchingFiles = getMatchingFiles("project_02");
+        assert matchingFiles != null;
+        Assert.assertEquals(matchingFiles.length, 2);
     }
 
     @Test(description = "Provide client annotation symbol")
-    public void withAnnotation() {
-
+    public void withAnnotation() throws IOException, InterruptedException {
+        File[] matchingFiles = getMatchingFiles("project_03");
+        assert matchingFiles != null;
+        Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test(description = "When client declaration inside the function")
-    public void withClientDeclarationNode() {
-
+    public void withClientDeclarationNode() throws IOException, InterruptedException {
+        File[] matchingFiles = getMatchingFiles("project_04");
+        assert matchingFiles != null;
+        Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test(description = "When client declaration in module level the function")
-    public void withModuleClientDeclarationNode() {
-
+    public void withModuleClientDeclarationNode() throws IOException, InterruptedException {
+        File[] matchingFiles = getMatchingFiles("project_05");
+        assert matchingFiles != null;
+        Assert.assertEquals(matchingFiles.length, 2);
     }
 
+    @Test(description = "When multiple client declarations have same annotation")
+    public void sameAnnotation() throws IOException, InterruptedException {
+        File[] matchingFiles = getMatchingFiles("project_06");
+        assert matchingFiles != null;
+        Assert.assertEquals(matchingFiles.length, 1);
+    }
 
-    public static BuildProject loadBuildProject(Path projectPath) {
-        BuildOptions buildOptions = BuildOptions.builder().setOffline(true).build();
-        return BuildProject.load(projectPath, buildOptions);
+    @Test(description = "When client declaration has graphQl yaml")
+    public void graphQLYaml() throws IOException, InterruptedException {
+        File[] matchingFiles = getMatchingFiles("project_07");
+        assert matchingFiles != null;
+        Assert.assertEquals(matchingFiles.length, 1);
+    }
+
+    private static File[] getMatchingFiles(String project)
+            throws IOException, InterruptedException {
+        List<String> buildArgs = new LinkedList<>();
+
+        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
+        File dir = new File(RESOURCE.resolve("client-idl-projects/" + project + "/generated/").toString());
+        final String id = "openapi-client";
+        File[] matchingFiles = dir.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                return pathname.getName().contains(id);
+            }
+        });
+        return matchingFiles;
     }
 }

@@ -25,6 +25,7 @@ import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.core.generators.client.ClientMetaData;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.model.Filter;
@@ -107,8 +108,15 @@ public class BallerinaCodeGenerator {
 
         // Generate client.
         // Generate ballerina client remote.
-        BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable,
-                isResource);
+        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
+        ClientMetaData clientMetaData = clientMetaDataBuilder
+                .withFilters(filter)
+                .withNullable(nullable)
+                .withPlugin(false)
+                .withOpenAPI(openAPIDef)
+                .withResourceMode(isResource).build();
+
+        BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(clientMetaData);
         String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME, clientContent));
         String utilContent = Formatter.format(clientGenerator
@@ -306,8 +314,14 @@ public class BallerinaCodeGenerator {
         // Normalize OpenAPI definition
         OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !isResource);
         // Generate ballerina service and resources.
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable
-                , isResource);
+        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
+        ClientMetaData clientMetaData = clientMetaDataBuilder
+                .withFilters(filter)
+                .withNullable(nullable)
+                .withPlugin(false)
+                .withOpenAPI(openAPIDef)
+                .withResourceMode(isResource).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME, mainContent));
         String utilContent = Formatter.format(

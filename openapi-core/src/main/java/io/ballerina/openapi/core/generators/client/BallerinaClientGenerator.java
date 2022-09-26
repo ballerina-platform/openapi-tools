@@ -137,6 +137,7 @@ public class BallerinaClientGenerator {
     private String serverURL;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
     private final boolean resourceMode;
+    private final boolean isPlugin;
 
     /**
      * Returns a list of type definition nodes.
@@ -178,18 +179,19 @@ public class BallerinaClientGenerator {
         return serverURL;
     }
 
-    public BallerinaClientGenerator(OpenAPI openAPI, Filter filters, boolean nullable, boolean resourceMode) {
+    public BallerinaClientGenerator(ClientMetaData clientMetaData) {
 
-        this.filters = filters;
+        this.filters = clientMetaData.getFilters();
         this.imports = new ArrayList<>();
         this.typeDefinitionNodeList = new ArrayList<>();
-        this.openAPI = openAPI;
-        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, nullable);
+        this.openAPI = clientMetaData.getOpenAPI();
+        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, clientMetaData.isNullable());
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
-        this.resourceMode = resourceMode;
+        this.resourceMode = clientMetaData.isResourceMode();
+        this.isPlugin = clientMetaData.isPlugin();
     }
 
     /**
@@ -258,7 +260,8 @@ public class BallerinaClientGenerator {
         NodeList<Token> classTypeQualifiers = createNodeList(
                 createToken(ISOLATED_KEYWORD), createToken(CLIENT_KEYWORD));
         return createClassDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), classTypeQualifiers,
-                createToken(CLASS_KEYWORD), className, createToken(OPEN_BRACE_TOKEN),
+                createToken(CLASS_KEYWORD), isPlugin ? createIdentifierToken("'client") : className,
+                createToken(OPEN_BRACE_TOKEN),
                 createNodeList(memberNodeList), createToken(CLOSE_BRACE_TOKEN));
     }
 

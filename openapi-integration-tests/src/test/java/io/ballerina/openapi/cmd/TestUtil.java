@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,7 +44,7 @@ public class TestUtil {
     public static final Path DISTRIBUTIONS_DIR = Paths.get(System.getProperty("distributions.dir"));
     public static final Path TEST_DISTRIBUTION_PATH = TARGET_DIR.resolve("test-distribution");
     public static final Path RESOURCES_PATH = TARGET_DIR.resolve("resources/test");
-    public static final Path RESOURCE = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test/build");
+    public static final Path RESOURCE = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test");
     private static String balFile = "bal";
 
     /**
@@ -88,6 +89,18 @@ public class TestUtil {
         return exitCode == 0;
     }
 
+    /**
+     * Ballerina run command.
+     */
+    public static boolean executeRun(String distributionName, Path sourceDirectory,
+                                       List<String> args) throws IOException, InterruptedException {
+        args.add(0, "run");
+        Process process = getProcessBuilderResults(distributionName, sourceDirectory, args);
+        int exitCode = process.waitFor();
+        logOutput(process.getInputStream());
+        logOutput(process.getErrorStream());
+        return exitCode == 0;
+    }
     /**
      * Execute ballerina openapi command.
      *
@@ -162,5 +175,18 @@ public class TestUtil {
                 FileUtils.deleteDirectory(file);
             }
         }
+    }
+
+    /**
+     * Find the name of a file or directory that starts with a given name.
+     *
+     * @param dir     Directory to find in.
+     * @param dirName The name of the file or directory to find.
+     * @return Name of the file or directory if found. Else null.
+     */
+    public static String findFileOrDirectory(Path dir, String dirName) {
+        FilenameFilter fileNameFilter = (dir1, name) -> name.startsWith(dirName);
+        String[] fileNames = Objects.requireNonNull(dir.toFile().list(fileNameFilter));
+        return fileNames.length > 0 ? fileNames[0] : null;
     }
 }
