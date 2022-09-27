@@ -36,21 +36,21 @@ public type ServiceInformation record {|
     string 'version?;
 |};
 
-# Client information code.
+# Client configurations code.
 # + tags - OpenAPI tags that filter the openapi operations that need to be generate as client method
 # + operations - OpenAPI operationIds that filter the openapi operations that need to be generate as client method
 # + nullable - Enable the all fields nullable in record
 # + isResource - Choose client methods as resources for generation
 # + license - License path
-public type ClientInformation record {|
+public type ClientConfiguration record {|
     string[]? tags = [];
     string[]? operations = [];
-    boolean nullable = true;
+    boolean nullable = false;
     boolean isResource = true;
     string license?;
 |};
 
 # Annotation for additional OpenAPI information of a Ballerina service.
 public annotation ServiceInformation ServiceInfo on service;
-# Annotation for additional OpenAPI information of a Ballerina client.
-public const annotation ClientInformation ClientInfo on source client;
+# Annotation for additional OpenAPI configurations of a Ballerina client.
+public const annotation ClientConfiguration ClientConfig on source client;

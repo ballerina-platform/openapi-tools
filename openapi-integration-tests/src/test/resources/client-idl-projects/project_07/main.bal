@@ -1,19 +1,5 @@
-import ballerina/openapi;
-
-@openapi:ClientInfo {
-    tags:["abc", "ads"],
-    operations: ["o1"],
-    nullable: false
-}
-client "https://raw.githubusercontent.com/ballerina-platform/openapi-connectors/main/openapi/openweathermap/openapi.yaml" as foo;
+client "https://raw.githubusercontent.com/ballerina-platform/graphql-tools/main/graphql-cli/src/test/resources/specs/graphql-config-with-basic-auth-client-config.yaml" as foo;
 
 public function main() {
-    @openapi:ClientInfo {
-        tags:["abc", "ads"],
-        operations: ["o1"],
-        nullable: false
-    }
-    client "https://raw.githubusercontent.com/ballerina-platform/openapi-connectors/main/openapi/openweathermap/openapi.yaml" as bar;
-    bar:client y;
     foo:client x;
 }

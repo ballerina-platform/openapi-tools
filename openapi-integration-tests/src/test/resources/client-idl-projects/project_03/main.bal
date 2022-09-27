@@ -1,6 +1,6 @@
 import ballerina/openapi;
 
-@openapi:ClientInfo {
+@openapi:ClientConfig {
     tags:["abc", "ads"],
     operations: ["o1"],
     nullable: false,

@@ -42,5 +42,4 @@ module io.ballerina.openapi.idl.client {
     requires swagger.parser.v3;
     requires org.apache.commons.lang3;
     requires io.ballerina.openapi.core;
-
 }

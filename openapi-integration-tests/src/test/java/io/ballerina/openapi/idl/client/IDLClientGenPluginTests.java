@@ -28,6 +28,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -92,9 +93,9 @@ public class IDLClientGenPluginTests {
 
     @Test(description = "When client declaration has graphQl yaml")
     public void graphQLYaml() throws IOException, InterruptedException {
-        File[] matchingFiles = getMatchingFiles("project_07");
-        assert matchingFiles != null;
-        Assert.assertEquals(matchingFiles.length, 1);
+        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_07"), new ArrayList<>());
+        File dir = new File(RESOURCE.resolve("client-idl-projects/project_07/generated/").toString());
+        Assert.assertFalse(dir.exists());
     }
 
     private static File[] getMatchingFiles(String project)

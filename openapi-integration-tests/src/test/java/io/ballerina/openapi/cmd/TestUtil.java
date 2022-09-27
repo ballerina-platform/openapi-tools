@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -175,18 +174,5 @@ public class TestUtil {
                 FileUtils.deleteDirectory(file);
             }
         }
-    }
-
-    /**
-     * Find the name of a file or directory that starts with a given name.
-     *
-     * @param dir     Directory to find in.
-     * @param dirName The name of the file or directory to find.
-     * @return Name of the file or directory if found. Else null.
-     */
-    public static String findFileOrDirectory(Path dir, String dirName) {
-        FilenameFilter fileNameFilter = (dir1, name) -> name.startsWith(dirName);
-        String[] fileNames = Objects.requireNonNull(dir.toFile().list(fileNameFilter));
-        return fileNames.length > 0 ? fileNames[0] : null;
     }
 }

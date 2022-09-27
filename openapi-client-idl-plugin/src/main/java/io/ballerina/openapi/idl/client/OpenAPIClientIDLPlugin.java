@@ -73,8 +73,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.CONFIG_FILE_NAME;
-import static io.ballerina.openapi.core.GeneratorConstants.TEST_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.UTIL_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorUtils.modifySchemaContent;
@@ -106,7 +104,7 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
 
         @Override
         public boolean canHandle(IDLSourceGeneratorContext idlSourceGeneratorContext) {
-            // Check given contract is valid for the generating the client.
+            // check given contract is valid for the generating the client.
             Path oasPath = idlSourceGeneratorContext.resourcePath();
             // resource with yaml, json extension
             try {
@@ -119,12 +117,12 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
 
         @Override
         public void perform(IDLSourceGeneratorContext idlSourceContext) {
+
             try {
                 List<GenSrcFile> genSrcFiles = generateClientFiles(idlSourceContext);
                 if (genSrcFiles.isEmpty() || openAPI == null) {
                     return;
                 }
-                //TODO: proper module name
                 String moduleName = "openapi-client";
                 ModuleId moduleId = ModuleId.create(moduleName, idlSourceContext.currentPackage().packageId());
                 List<DocumentConfig> documents = new ArrayList<>();
@@ -151,18 +149,6 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
                                     utilId, genSrcFile.getContent(), UTIL_FILE_NAME);
                             documents.add(utilConfig);
                             break;
-                        case TEST_SRC:
-                            DocumentId testId = DocumentId.create(TEST_FILE_NAME, moduleId);
-                            DocumentConfig testConfig = DocumentConfig.from(
-                                    testId, genSrcFile.getContent(), TEST_FILE_NAME);
-                            testDocuments.add(testConfig);
-                            break;
-                        case CONFIG_SRC:
-                            DocumentId configId = DocumentId.create(CONFIG_FILE_NAME, moduleId);
-                            DocumentConfig configConfig = DocumentConfig.from(
-                                    configId, genSrcFile.getContent(), CONFIG_FILE_NAME);
-                            testDocuments.add(configConfig);
-                            break;
                         default:
                             break;
                     }
@@ -176,14 +162,12 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
                         ModuleConfig.from(moduleId, moduleDescriptor, documents, testDocuments, null,
                                 new ArrayList<>());
                 NodeList<AnnotationNode> annotations = getAnnotationNodes(idlSourceContext);
-                //Only pass openapi related annotation node.
+                //only pass openapi related annotation node.
                 List<AnnotationNode> openapiAnnot = filterOpenAPIAnnotation(annotations);
 
                 idlSourceContext.addClient(moduleConfig, openapiAnnot.isEmpty() ? NodeFactory.createEmptyNodeList() :
                         NodeFactory.createNodeList(openapiAnnot));
             } catch (IOException | BallerinaOpenApiException | FormatterException e) {
-                // Ignore need to handle with proper error handle
-                // Error while generating the client as error
                 Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
                 reportDiagnostic(idlSourceContext, error, idlSourceContext.clientNode().location());
             }
@@ -215,6 +199,9 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
             return annotations;
         }
 
+        /**
+         * Generate ballerina source file for related to client stub.
+         */
         private List<GenSrcFile> generateClientFiles(IDLSourceGeneratorContext context)
                 throws IOException, BallerinaOpenApiException, FormatterException {
 
@@ -247,10 +234,10 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
             }
 
             List<GenSrcFile> sourceFiles = new ArrayList<>();
-            // Normalize OpenAPI definition.
+            // normalize OpenAPI definition.
             OpenAPI openAPIDef = normalizeOpenAPI(openAPI, !oasClientIDLMetaData.isResource());
 
-            // Generate ballerina client files.
+            // generate ballerina client files.
             ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
             ClientMetaData clientMetaData = clientMetaDataBuilder
                     .withFilters(filter)
@@ -270,7 +257,7 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
                                 licenseContent + System.lineSeparator() + utilContent));
             }
 
-            // Generate ballerina records to represent schemas.
+            // generate ballerina records to represent schemas.
             BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef,
                     clientMetaData.isNullable());
             ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
@@ -278,7 +265,7 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
             String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
             if (filter.getTags().size() > 0) {
-                // Remove unused records and enums when generating the client by the tags given.
+                // remove unused records and enums when generating the client by the tags given.
                 schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent, null);
             }
             if (!schemaContent.isBlank()) {
@@ -298,7 +285,6 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
          *     string[]? tags = [];
          *     string[]? operations = [];
          *     boolean nullable = true;
-         *     boolean withTests = false;
          *     boolean isResource = true;
          *     string license?;
          * |};
@@ -393,11 +379,11 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
 
             Token stringItem = item.literalToken();
             String text = stringItem.text();
-            // Here we need to do some preprocessing by removing '"' from the given values.
+            // here we need to do some preprocessing by removing '"' from the given values.
             if (text.length() > 1 && text.charAt(0) == '"' && text.charAt(text.length() - 1) == '"') {
                 text = text.substring(1, text.length() - 1);
             } else {
-                // Missing end quote case
+                // missing end quote case
                 text = text.substring(1);
             }
             return text;
@@ -417,7 +403,6 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
             }
             try {
                 if (licensePath.toString().isBlank()) {
-                    // Report Diagnostic
                     Constants.DiagnosticMessages error = Constants.DiagnosticMessages.LICENSE_PATH_BLANK;
                     reportDiagnostic(context, error, location);
                 } else {
@@ -442,7 +427,6 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
                             licenseHeader = licenseHeader + newLine;
                         }
                     } catch (IOException e) {
-                        // Report diagnostic
                         Constants.DiagnosticMessages error = Constants.DiagnosticMessages
                                 .ERROR_WHILE_READING_LICENSE_FILE;
                         reportDiagnostic(context, error, location);
@@ -451,7 +435,6 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
                     return licenseHeader;
                 }
             } catch (IOException e) {
-                // Report diagnostic
                 Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_READING_LICENSE_FILE;
                 reportDiagnostic(context, error, location);
                 return null;
