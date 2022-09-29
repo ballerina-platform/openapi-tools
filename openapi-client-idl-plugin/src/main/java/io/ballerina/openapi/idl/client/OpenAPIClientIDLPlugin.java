@@ -35,7 +35,6 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.ClientMetaData;
@@ -94,64 +93,38 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
 
     @Override
     public void init(IDLPluginContext idlPluginContext) {
-
         idlPluginContext.addCodeGenerator(new OpenAPIClientGenerator());
     }
 
     private static class OpenAPIClientGenerator extends IDLClientGenerator {
-
-        private OpenAPI openAPI = null;
 
         @Override
         public boolean canHandle(IDLSourceGeneratorContext idlSourceGeneratorContext) {
             // check given contract is valid for the generating the client.
             Path oasPath = idlSourceGeneratorContext.resourcePath();
             // resource with yaml, json extension
-            try {
-                openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(oasPath);
-            } catch (IOException | BallerinaOpenApiException | NullPointerException e) {
-                return false;
-            }
-            return true;
+            return isOpenAPI(oasPath);
         }
 
         @Override
         public void perform(IDLSourceGeneratorContext idlSourceContext) {
-
+            // log the parser issues
             try {
                 List<GenSrcFile> genSrcFiles = generateClientFiles(idlSourceContext);
-                if (genSrcFiles.isEmpty() || openAPI == null) {
+                if (genSrcFiles.isEmpty()) {
                     return;
                 }
-                String moduleName = "openapi-client";
+                String moduleName = "openapi_client";
                 ModuleId moduleId = ModuleId.create(moduleName, idlSourceContext.currentPackage().packageId());
                 List<DocumentConfig> documents = new ArrayList<>();
                 List<DocumentConfig> testDocuments = new ArrayList<>();
 
                 genSrcFiles.forEach(genSrcFile -> {
-                    GenSrcFile.GenFileType fileType = genSrcFile.getType();
-                    switch (fileType) {
-                        case GEN_SRC:
-                            DocumentId documentId = DocumentId.create(CLIENT_FILE_NAME, moduleId);
-                            DocumentConfig documentConfig = DocumentConfig.from(
-                                    documentId, genSrcFile.getContent(), CLIENT_FILE_NAME);
-                            documents.add(documentConfig);
-                            break;
-                        case MODEL_SRC:
-                            DocumentId typeId = DocumentId.create(TYPE_FILE_NAME, moduleId);
-                            DocumentConfig typeConfig = DocumentConfig.from(
-                                    typeId, genSrcFile.getContent(), TYPE_FILE_NAME);
-                            documents.add(typeConfig);
-                            break;
-                        case UTIL_SRC:
-                            DocumentId utilId = DocumentId.create(UTIL_FILE_NAME, moduleId);
-                            DocumentConfig utilConfig = DocumentConfig.from(
-                                    utilId, genSrcFile.getContent(), UTIL_FILE_NAME);
-                            documents.add(utilConfig);
-                            break;
-                        default:
-                            break;
-                    }
+                    // remove switch case with normal list append
+                    DocumentId documentId = DocumentId.create(genSrcFile.getFileName(), moduleId);
+                    DocumentConfig documentConfig = DocumentConfig.from(
+                            documentId, genSrcFile.getContent(), genSrcFile.getFileName());
+                    documents.add(documentConfig);
 
                 });
 
@@ -167,9 +140,33 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
 
                 idlSourceContext.addClient(moduleConfig, openapiAnnot.isEmpty() ? NodeFactory.createEmptyNodeList() :
                         NodeFactory.createNodeList(openapiAnnot));
-            } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            } catch (BallerinaOpenApiException e) {
+                Constants.DiagnosticMessages error = Constants.DiagnosticMessages.PARSER_ERROR;
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), e.getMessage(),
+                        error.getSeverity());
+                Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                        idlSourceContext.clientNode().location());
+                idlSourceContext.reportDiagnostic(diagnostic);
+            } catch (IOException | FormatterException e) {
                 Constants.DiagnosticMessages error = Constants.DiagnosticMessages.ERROR_WHILE_GENERATING_CLIENT;
                 reportDiagnostic(idlSourceContext, error, idlSourceContext.clientNode().location());
+            }
+        }
+
+        /**
+         * This is for checking the given file can handle via OpenAPI tool.
+         */
+        private static boolean isOpenAPI(Path oasPath) {
+            try {
+                if (!(oasPath.toString().endsWith(".yaml") || oasPath.toString().endsWith(".json") ||
+                        oasPath.toString().endsWith(".yml"))) {
+                    return false;
+                }
+                String content = Files.readString(oasPath);
+                return content.startsWith("openapi:") | content.startsWith("{\n" +
+                        "  \"openapi\":");
+            } catch (IOException | NullPointerException e) {
+                return false;
             }
         }
 
@@ -188,7 +185,6 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
         }
 
         private static NodeList<AnnotationNode> getAnnotationNodes(IDLSourceGeneratorContext idlSourceContext) {
-
             Node clientNode = idlSourceContext.clientNode();
             NodeList<AnnotationNode> annotations = null;
             if (clientNode instanceof ClientDeclarationNode) {
@@ -376,7 +372,6 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
          * Normalize the string value by removing extra " " from given field value.
          */
         private static String getStringValue(BasicLiteralNode item) {
-
             Token stringItem = item.literalToken();
             String text = stringItem.text();
             // here we need to do some preprocessing by removing '"' from the given values.
@@ -442,9 +437,8 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
             return licenseHeader;
         }
 
-        public static void reportDiagnostic(IDLSourceGeneratorContext context, Constants.DiagnosticMessages error,
+        private static void reportDiagnostic(IDLSourceGeneratorContext context, Constants.DiagnosticMessages error,
                                             Location location) {
-
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error.getDescription(),
                     error.getSeverity());
             Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location);
@@ -452,7 +446,6 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
         }
 
         private static Path extractBallerinaFilePath(IDLSourceGeneratorContext idlSourceContext) {
-
             Package aPackage = idlSourceContext.currentPackage();
             DocumentId packageDoc = aPackage.getDefaultModule().documentIds().stream().findFirst().get();
             Optional<Path> path = aPackage.project().documentPath(packageDoc);

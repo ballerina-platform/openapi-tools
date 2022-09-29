@@ -41,8 +41,9 @@ public class Constants {
         ERROR_WHILE_READING_LICENSE_FILE("OAS_IDL_CLIENT_02", "unexpected error occurred while reading the license",
                 DiagnosticSeverity.ERROR),
         ERROR_WHILE_GENERATING_CLIENT("OAS_IDL_CLIENT_03", "unexpected error occurred while generating the client",
-                                         DiagnosticSeverity.ERROR);
-
+                                         DiagnosticSeverity.ERROR),
+        PARSER_ERROR("OAS_IDL_CLIENT_04", "",
+                                      DiagnosticSeverity.ERROR);
 
         private final String code;
         private final String description;
