@@ -108,7 +108,6 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
 
         @Override
         public void perform(IDLSourceGeneratorContext idlSourceContext) {
-            // log the parser issues
             try {
                 List<GenSrcFile> genSrcFiles = generateClientFiles(idlSourceContext);
                 if (genSrcFiles.isEmpty()) {
@@ -117,10 +116,8 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
                 String moduleName = "openapi_client";
                 ModuleId moduleId = ModuleId.create(moduleName, idlSourceContext.currentPackage().packageId());
                 List<DocumentConfig> documents = new ArrayList<>();
-                List<DocumentConfig> testDocuments = new ArrayList<>();
 
                 genSrcFiles.forEach(genSrcFile -> {
-                    // remove switch case with normal list append
                     DocumentId documentId = DocumentId.create(genSrcFile.getFileName(), moduleId);
                     DocumentConfig documentConfig = DocumentConfig.from(
                             documentId, genSrcFile.getContent(), genSrcFile.getFileName());
@@ -132,7 +129,7 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
                         ModuleName.from(idlSourceContext.currentPackage().packageName(), moduleName),
                         idlSourceContext.currentPackage().descriptor());
                 ModuleConfig moduleConfig =
-                        ModuleConfig.from(moduleId, moduleDescriptor, documents, testDocuments, null,
+                        ModuleConfig.from(moduleId, moduleDescriptor, documents, new ArrayList<>(), null,
                                 new ArrayList<>());
                 NodeList<AnnotationNode> annotations = getAnnotationNodes(idlSourceContext);
                 //only pass openapi related annotation node.
@@ -221,12 +218,9 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
                             new ArrayList<>());
 
             // set license header content
-            String licenseContent = "";
-            if (oasClientIDLMetaData.getLicense() != null) {
+            String licenseContent = oasClientIDLMetaData.getLicense();
+            if (licenseContent != null && !licenseContent.contains("// AUTO-GENERATED FILE. DO NOT MODIFY.")) {
                 licenseContent = getLicenseContent(context, Paths.get(oasClientIDLMetaData.getLicense()));
-                if (licenseContent == null) {
-                    return new ArrayList<>();
-                }
             }
 
             List<GenSrcFile> sourceFiles = new ArrayList<>();
@@ -243,13 +237,14 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
             BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
             String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
-                    licenseContent.isBlank() ? mainContent : licenseContent + System.lineSeparator() + mainContent));
+                    licenseContent == null || licenseContent.isBlank() ? mainContent :
+                            licenseContent + System.lineSeparator() + mainContent));
             String utilContent = Formatter.format(
                     ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
 
             if (!utilContent.isBlank()) {
                 sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, null, UTIL_FILE_NAME,
-                        licenseContent.isBlank() ? utilContent :
+                        licenseContent == null || licenseContent.isBlank() ? utilContent :
                                 licenseContent + System.lineSeparator() + utilContent));
             }
 
@@ -266,7 +261,7 @@ public class OpenAPIClientIDLPlugin extends IDLGeneratorPlugin {
             }
             if (!schemaContent.isBlank()) {
                 sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
-                        licenseContent.isBlank() ? schemaContent :
+                        licenseContent == null || licenseContent.isBlank() ? schemaContent :
                                 licenseContent + System.lineSeparator() + schemaContent));
             }
 

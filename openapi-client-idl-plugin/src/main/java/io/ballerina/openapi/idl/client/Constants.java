@@ -28,7 +28,6 @@ public class Constants {
     public static final String OPERATIONS = "operations";
     public static final String NULLABLE = "nullable";
     public static final String IS_RESOURCE = "isResource";
-    public static final String WITH_TESTS = "withTests";
     public static final String LICENSE = "license";
     public static final String TRUE = "true";
 
