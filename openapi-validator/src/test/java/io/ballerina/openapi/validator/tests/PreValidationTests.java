@@ -36,7 +36,9 @@ import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 public class PreValidationTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/pre-processing")
             .toAbsolutePath();
-    @Test(description = "Annotation with non http service")
+
+    // ToDo this wil be enable after releasing graphql with latest master
+    @Test(description = "Annotation with non http service", enabled = false)
     public void nonHttpService() {
         Path path = RES_DIR.resolve("non_http.bal");
         Project project = getProject(path);
