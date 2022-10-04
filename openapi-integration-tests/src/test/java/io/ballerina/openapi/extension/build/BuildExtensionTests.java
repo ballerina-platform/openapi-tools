@@ -61,7 +61,7 @@ public class BuildExtensionTests {
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("project_2/target/openapi/greeting_openapi.yaml")));
     }
 
-    @Test(description = "Check --export-openapi flag with graphQl service")
+    @Test(description = "Check --export-openapi flag with graphQl service", enabled = false)
     public void withNonHttpServiceWithBuildOption() throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
         buildArgs.add("--export-openapi");

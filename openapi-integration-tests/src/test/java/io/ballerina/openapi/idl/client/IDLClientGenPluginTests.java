@@ -98,6 +98,20 @@ public class IDLClientGenPluginTests {
         Assert.assertFalse(dir.exists());
     }
 
+    @Test(description = "calling client api")
+    public void invokeAPI() throws IOException, InterruptedException {
+        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_08"), new ArrayList<>());
+        Assert.assertTrue(successful);
+    }
+
+    @Test(description = "When client declarations have local path")
+    public void withLocalPath() throws IOException, InterruptedException {
+        File[] matchingFiles = getMatchingFiles("project_09");
+        assert matchingFiles != null;
+        Assert.assertEquals(matchingFiles.length, 1);
+    }
+
+
     private static File[] getMatchingFiles(String project)
             throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();

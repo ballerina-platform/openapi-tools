@@ -19,7 +19,7 @@
 package io.ballerina.openapi.core;
 
 /**
- * Container for error messages of the OpenAPI validator plugin.
+ * Container for error messages of the OpenAPI command.
  *
  * @since 1.3.0
  */
