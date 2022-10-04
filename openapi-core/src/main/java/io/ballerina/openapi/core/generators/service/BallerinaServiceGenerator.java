@@ -128,7 +128,7 @@ public class BallerinaServiceGenerator {
                         GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE),
                 null, absoluteResourcePath, createToken(SyntaxKind.ON_KEYWORD,
                         GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE), expressions,
-                createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+                createToken(SyntaxKind.OPEN_BRACE_TOKEN), members, createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
 
         // Create module member declaration
         NodeList<ModuleMemberDeclarationNode> moduleMembers = createNodeList(
@@ -275,7 +275,7 @@ public class BallerinaServiceGenerator {
                 bodyStatements.isEmpty() ?
                         createEmptyNodeList() :
                         createNodeList(bodyStatements),
-                createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
+                createToken(SyntaxKind.CLOSE_BRACE_TOKEN), null);
 
         return createFunctionDefinitionNode(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION, null,
                 qualifiersList, functionKeyWord, functionName, relativeResourcePath, functionSignatureNode,

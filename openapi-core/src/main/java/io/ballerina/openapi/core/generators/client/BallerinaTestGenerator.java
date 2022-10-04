@@ -482,7 +482,7 @@ public class BallerinaTestGenerator {
         List<StatementNode> statementsList = new ArrayList<>();
         NodeList<StatementNode> statementsNodeList = createNodeList(statementsList);
         return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
-                null, statementsNodeList, createToken(CLOSE_BRACE_TOKEN));
+                null, statementsNodeList, createToken(CLOSE_BRACE_TOKEN), null);
     }
 
     /**
