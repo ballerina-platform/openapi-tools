@@ -262,7 +262,7 @@ public class BallerinaClientGenerator {
         return createClassDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), classTypeQualifiers,
                 createToken(CLASS_KEYWORD), isPlugin ? createIdentifierToken("'client") : className,
                 createToken(OPEN_BRACE_TOKEN),
-                createNodeList(memberNodeList), createToken(CLOSE_BRACE_TOKEN));
+                createNodeList(memberNodeList), createToken(CLOSE_BRACE_TOKEN), null);
     }
 
     /**
@@ -369,7 +369,7 @@ public class BallerinaClientGenerator {
         assignmentNodes.add(returnStatementNode);
         NodeList<StatementNode> statementList = createNodeList(assignmentNodes);
         return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
-                null, statementList, createToken(CLOSE_BRACE_TOKEN));
+                null, statementList, createToken(CLOSE_BRACE_TOKEN), null);
     }
 
     /**
