@@ -369,7 +369,7 @@ public class BallerinaUtilGenerator {
 
         return createEnumDeclarationNode(null, null,
                 createToken(ENUM_KEYWORD), createIdentifierToken(ENCODING_STYLE), createToken(OPEN_BRACE_TOKEN),
-                enumMembers, createToken(CLOSE_BRACE_TOKEN));
+                enumMembers, createToken(CLOSE_BRACE_TOKEN), null);
     }
 
     /**

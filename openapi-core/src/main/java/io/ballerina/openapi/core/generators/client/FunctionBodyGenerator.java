@@ -205,7 +205,7 @@ public class FunctionBodyGenerator {
         //Create statements
         NodeList<StatementNode> statements = createNodeList(statementsList);
         return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN), null, statements,
-                createToken(CLOSE_BRACE_TOKEN));
+                createToken(CLOSE_BRACE_TOKEN), null);
     }
 
     /**
