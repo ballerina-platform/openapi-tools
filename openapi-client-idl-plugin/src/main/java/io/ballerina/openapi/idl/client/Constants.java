@@ -31,6 +31,8 @@ public class Constants {
     public static final String LICENSE = "license";
     public static final String TRUE = "true";
 
+
+
     /**
      * Enum class for contain diagnostic messages.
      */

@@ -135,6 +135,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.core.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE_PNG;
+import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
 import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
@@ -145,6 +146,8 @@ import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_NAME;
+import static io.ballerina.openapi.core.GeneratorConstants.YAML_EXTENSION;
+import static io.ballerina.openapi.core.GeneratorConstants.YML_EXTENSION;
 
 /**
  * This class util for store all the common scenarios.
@@ -380,8 +383,9 @@ public class GeneratorUtils {
         if (!Files.exists(contractPath)) {
             throw new BallerinaOpenApiException(ErrorMessages.invalidFilePath(definitionPath.toString()));
         }
-        if (!(definitionPath.toString().endsWith(".yaml") || definitionPath.toString().endsWith(".json") ||
-                definitionPath.toString().endsWith(".yml"))) {
+        if (!(definitionPath.toString().endsWith(YAML_EXTENSION) ||
+                definitionPath.toString().endsWith(JSON_EXTENSION) ||
+                definitionPath.toString().endsWith(YML_EXTENSION))) {
             throw new BallerinaOpenApiException(ErrorMessages.invalidFileType());
         }
         String openAPIFileContent = Files.readString(definitionPath);
