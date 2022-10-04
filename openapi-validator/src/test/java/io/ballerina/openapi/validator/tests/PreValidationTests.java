@@ -37,7 +37,7 @@ public class PreValidationTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/pre-processing")
             .toAbsolutePath();
 
-    // ToDo this wil be enable after releasing graphql with latest master
+    // TODO: enable after releasing graphql with latest master
     @Test(description = "Annotation with non http service", enabled = false)
     public void nonHttpService() {
         Path path = RES_DIR.resolve("non_http.bal");
