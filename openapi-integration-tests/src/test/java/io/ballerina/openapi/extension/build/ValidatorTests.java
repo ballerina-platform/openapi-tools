@@ -17,7 +17,7 @@
  */
 package io.ballerina.openapi.extension.build;
 
-import io.ballerina.openapi.cmd.TestUtil;
+import io.ballerina.openapi.TestUtil;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
 
 /**
  * This test class is for contain the openapi validator plugin tests.

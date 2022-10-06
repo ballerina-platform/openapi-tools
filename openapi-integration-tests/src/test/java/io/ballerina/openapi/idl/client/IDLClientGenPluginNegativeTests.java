@@ -19,7 +19,7 @@
 package io.ballerina.openapi.idl.client;
 
 import io.ballerina.openapi.OpenAPITest;
-import io.ballerina.openapi.cmd.TestUtil;
+import io.ballerina.openapi.TestUtil;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -30,10 +30,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCE;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
-import static io.ballerina.openapi.cmd.TestUtil.executeRun;
+import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.RESOURCE;
+import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.TestUtil.executeRun;
 
 /**
  * Client IDL import negative integration tests.

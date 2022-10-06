@@ -17,7 +17,7 @@
  */
 package io.ballerina.openapi.extension.build;
 
-import io.ballerina.openapi.cmd.TestUtil;
+import io.ballerina.openapi.TestUtil;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -29,10 +29,10 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
-import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCE;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
-import static io.ballerina.openapi.cmd.TestUtil.executeBuild;
+import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.RESOURCE;
+import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.TestUtil.executeBuild;
 
 /**
  * These tests are for capture the `--export-openapi` flag in distribution.

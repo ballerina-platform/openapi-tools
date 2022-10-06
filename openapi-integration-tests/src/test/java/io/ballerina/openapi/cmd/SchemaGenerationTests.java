@@ -1,6 +1,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.openapi.OpenAPITest;
+import io.ballerina.openapi.TestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -11,10 +12,10 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
-import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
-import static io.ballerina.openapi.cmd.TestUtil.OUT;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
-import static io.ballerina.openapi.cmd.TestUtil.TEST_DISTRIBUTION_PATH;
+import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.OUT;
+import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.TestUtil.TEST_DISTRIBUTION_PATH;
 
 /**
  * This test class is for storing the schema related integrations.

@@ -242,7 +242,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     public void testConnectorGenerationFilteringByTags() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_tags.yaml"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--tags",
-                "pets,dogs", "--mode", "client"};
+                "pets,dogs", "--mode", "client", "--client-methods", "remote"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();

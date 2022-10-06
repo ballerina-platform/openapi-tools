@@ -16,13 +16,14 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.cmd;
+package io.ballerina.openapi;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,8 +32,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+
+import static io.ballerina.openapi.idl.client.IDLClientGenPluginTests.DISTRIBUTION_FILE_NAME;
+import static io.ballerina.openapi.idl.client.IDLClientGenPluginTests.TEST_RESOURCE;
 
 /**
  * This class for storing the test utils for integration tests.
@@ -174,5 +179,19 @@ public class TestUtil {
                 FileUtils.deleteDirectory(file);
             }
         }
+    }
+
+    public static File[] getMatchingFiles(String project) throws IOException, InterruptedException {
+        List<String> buildArgs = new LinkedList<>();
+
+        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
+        File dir = new File(RESOURCE.resolve("client-idl-projects/" + project + "/generated/").toString());
+        final String id = "openapi_client";
+        File[] matchingFiles = dir.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                return pathname.getName().contains(id);
+            }
+        });
+        return matchingFiles;
     }
 }
