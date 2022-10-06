@@ -25,14 +25,22 @@ import org.testng.annotations.BeforeClass;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.ballerina.openapi.cmd.TestUtil.RESOURCE;
+import static io.ballerina.openapi.cmd.TestUtil.executeRun;
+import static io.ballerina.openapi.idl.client.IDLClientGenPluginTests.DISTRIBUTION_FILE_NAME;
+import static io.ballerina.openapi.idl.client.IDLClientGenPluginTests.TEST_RESOURCE;
 
 /**
  * This is abstract class for containing the main common test methods for the other subclasses.
@@ -95,5 +103,20 @@ public class OpenAPITest {
         generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
         expectedBallerinaContent = (expectedBallerinaContent.trim()).replaceAll("\\s+", "");
         Assert.assertTrue(generatedFile.contains(expectedBallerinaContent));
+    }
+
+    public static File[] getMatchingFiles(String project)
+            throws IOException, InterruptedException {
+        List<String> buildArgs = new LinkedList<>();
+
+        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
+        File dir = new File(RESOURCE.resolve("client-idl-projects/" + project + "/generated/").toString());
+        final String id = "openapi_client";
+        File[] matchingFiles = dir.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                return pathname.getName().contains(id);
+            }
+        });
+        return matchingFiles;
     }
 }

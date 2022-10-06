@@ -81,6 +81,7 @@ import static io.ballerina.openapi.core.GeneratorUtils.modifySchemaContent;
 import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
 import static io.ballerina.openapi.idl.client.Constants.IS_RESOURCE;
 import static io.ballerina.openapi.idl.client.Constants.LICENSE;
+import static io.ballerina.openapi.idl.client.Constants.MODULE_ALIAS;
 import static io.ballerina.openapi.idl.client.Constants.NULLABLE;
 import static io.ballerina.openapi.idl.client.Constants.OPENAPI_CLIENT_REFERENCE;
 import static io.ballerina.openapi.idl.client.Constants.OPERATIONS;
@@ -109,7 +110,8 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
             if (genSrcFiles.isEmpty()) {
                 return;
             }
-            String moduleName = "openapi_client";
+            // todo: move to constant
+            String moduleName = MODULE_ALIAS;
             ModuleId moduleId = ModuleId.create(moduleName, idlSourceContext.currentPackage().packageId());
             List<DocumentConfig> documents = new ArrayList<>();
 

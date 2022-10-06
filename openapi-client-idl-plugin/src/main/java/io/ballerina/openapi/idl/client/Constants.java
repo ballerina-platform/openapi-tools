@@ -30,6 +30,7 @@ public class Constants {
     public static final String IS_RESOURCE = "isResource";
     public static final String LICENSE = "license";
     public static final String TRUE = "true";
+    public static final String MODULE_ALIAS = "openapi_client";
 
 
 

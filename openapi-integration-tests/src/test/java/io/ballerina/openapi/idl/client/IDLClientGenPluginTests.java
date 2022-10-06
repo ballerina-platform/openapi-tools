@@ -18,29 +18,26 @@
 
 package io.ballerina.openapi.idl.client;
 
+import io.ballerina.openapi.OpenAPITest;
 import io.ballerina.openapi.cmd.TestUtil;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCE;
 import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
 import static io.ballerina.openapi.cmd.TestUtil.executeRun;
 
 /**
  * Client IDL import integration tests.
  */
-public class IDLClientGenPluginTests {
+public class IDLClientGenPluginTests extends OpenAPITest {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
     public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/client-idl-projects");
 
@@ -77,7 +74,7 @@ public class IDLClientGenPluginTests {
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
-    @Test(description = "When client declaration in module level the function")
+    @Test(description = "When client declaration in module level")
     public void withModuleClientDeclarationNode() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_05");
         assert matchingFiles != null;
@@ -92,14 +89,7 @@ public class IDLClientGenPluginTests {
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
-    @Test(description = "When client declaration has graphQl yaml")
-    public void graphQLYaml() throws IOException, InterruptedException {
-        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_07"), new ArrayList<>());
-        File dir = new File(RESOURCE.resolve("client-idl-projects/project_07/generated/").toString());
-        Assert.assertFalse(dir.exists());
-    }
-
-    @Test(description = "calling client api")
+    @Test(description = "Invoking client api")
     public void invokeAPI() throws IOException, InterruptedException {
         boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_08"), new ArrayList<>());
         Assert.assertTrue(successful);
@@ -110,21 +100,5 @@ public class IDLClientGenPluginTests {
         File[] matchingFiles = getMatchingFiles("project_09");
         assert matchingFiles != null;
         Assert.assertEquals(matchingFiles.length, 1);
-    }
-
-
-    private static File[] getMatchingFiles(String project)
-            throws IOException, InterruptedException {
-        List<String> buildArgs = new LinkedList<>();
-
-        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
-        File dir = new File(RESOURCE.resolve("client-idl-projects/" + project + "/generated/").toString());
-        final String id = "openapi_client";
-        File[] matchingFiles = dir.listFiles(new FileFilter() {
-            public boolean accept(File pathname) {
-                return pathname.getName().contains(id);
-            }
-        });
-        return matchingFiles;
     }
 }
