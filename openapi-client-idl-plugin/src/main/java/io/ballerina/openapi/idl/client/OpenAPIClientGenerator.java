@@ -89,7 +89,7 @@ import static io.ballerina.openapi.idl.client.Constants.TAGS;
 import static io.ballerina.openapi.idl.client.Constants.TRUE;
 
 /**
- * IDL client generation class.
+ * The IDL plugin implementation for OpenAPI client generation.
  *
  * @since 1.3.0
  */
@@ -149,7 +149,8 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
     }
 
     /**
-     * This is for checking the given file can handle via OpenAPI tool.
+     * This method uses to check whether given specification can be handled via the openapi client generation tool.
+     * This includes basic requirements like file extension check and file header check.
      */
     private static boolean isOpenAPI(Path oasPath) {
         try {
@@ -166,6 +167,9 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
         }
     }
 
+    /**
+     * This function uses to filter @openapi:ClientConfig annotation from given annotation list.
+     */
     private static List<AnnotationNode> filterOpenAPIAnnotation(NodeList<AnnotationNode> annotations) {
 
         List<AnnotationNode> openapiAnnot = new ArrayList<>();
@@ -192,7 +196,8 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
     }
 
     /**
-     * Generate ballerina source file for related to client stub.
+     * This method uses to generate ballerina files for openapi client stub.
+     * This will return list of (client.bal, util.bal, types.bal) {@code GenSrcFile}.
      */
     private List<GenSrcFile> generateClientFiles(IDLSourceGeneratorContext context)
             throws IOException, BallerinaOpenApiException, FormatterException {
@@ -268,10 +273,10 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
     }
 
     /**
-     * Extract openapi client annotation details.
+     * This method extracts openapi client annotation details.
      * ex: openapi annotation
      * <pre>
-     * public type ClientInformation record {|
+     * public type ClientConfig record {|
      *     string[]? tags = [];
      *     string[]? operations = [];
      *     boolean nullable = true;
@@ -363,7 +368,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
     }
 
     /**
-     * Normalize the string value by removing extra " " from given field value.
+     * Util to normalize the string value by removing extra " " from given field value.
      */
     private static String getStringValue(BasicLiteralNode item) {
         Token stringItem = item.literalToken();

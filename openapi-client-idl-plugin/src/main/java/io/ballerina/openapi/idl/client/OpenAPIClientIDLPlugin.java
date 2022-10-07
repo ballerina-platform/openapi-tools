@@ -22,7 +22,7 @@ import io.ballerina.projects.plugins.IDLGeneratorPlugin;
 import io.ballerina.projects.plugins.IDLPluginContext;
 
 /**
- * IDL client generation plugin implementation class.
+ * The IDL plugin implementation for OpeAPI client generation .
  *
  * @since 1.3.0
  */

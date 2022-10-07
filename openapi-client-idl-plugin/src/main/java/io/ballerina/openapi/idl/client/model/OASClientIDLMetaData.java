@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * This class is used to contain all the metadata that use to generate client.
+ * This class uses to contain all the metadata that use to generate client.
  *
  * @since 1.3.0
  */

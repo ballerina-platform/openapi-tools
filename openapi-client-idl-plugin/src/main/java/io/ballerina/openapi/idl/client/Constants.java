@@ -20,7 +20,7 @@ package io.ballerina.openapi.idl.client;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 /**
- * Storing constant for client IDL generator.
+ * This class includes constants for client IDL generator.
  */
 public class Constants {
     public static final String OPENAPI_CLIENT_REFERENCE = "openapi:ClientConfig";
@@ -35,7 +35,7 @@ public class Constants {
 
 
     /**
-     * Enum class for contain diagnostic messages.
+     * Enum class for containing diagnostic messages.
      */
     public enum DiagnosticMessages {
         LICENSE_PATH_BLANK("OAS_IDL_CLIENT_01", "given license file path is an empty string.",

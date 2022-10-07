@@ -21,7 +21,7 @@ import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 
 /**
- * Client meta data.
+ * This class stores metadata that related to client code generations.
  *
  * @since 1.3.0
  */

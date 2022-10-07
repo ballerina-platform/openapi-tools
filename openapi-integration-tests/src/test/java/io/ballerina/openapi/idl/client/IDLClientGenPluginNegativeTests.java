@@ -36,7 +36,7 @@ import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
 import static io.ballerina.openapi.TestUtil.executeRun;
 
 /**
- * Client IDL import negative integration tests.
+ * Negative tests for OpenAPI client IDL import.
  */
 public class IDLClientGenPluginNegativeTests extends OpenAPITest {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
@@ -47,30 +47,30 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
         TestUtil.cleanDistribution();
     }
 
-    @Test(description = "When client declaration has graphQl yaml")
-    public void graphQLYaml() throws IOException, InterruptedException {
+    @Test(description = "Here uses the graphQl yaml as non openapi client")
+    public void testNonOpenAPIClientDeclaration() throws IOException, InterruptedException {
         boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_07"),
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_07/generated/").toString());
         Assert.assertFalse(dir.exists());
     }
-    @Test(description = "Provide invalid swagger remote path")
-    public void invalidSwaggerRemotePath() throws IOException, InterruptedException {
+    @Test
+    public void testInvalidSwaggerRemotePath() throws IOException, InterruptedException {
         boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_10"),
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_10/generated/").toString());
         Assert.assertFalse(dir.exists());
     }
-    @Test(description = "Provide valid swagger local path")
-    public void invalidSwaggerLocalPath() throws IOException, InterruptedException {
+    @Test
+    public void testInvalidSwaggerLocalPath() throws IOException, InterruptedException {
         boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_11"),
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_11/generated/").toString());
         Assert.assertFalse(dir.exists());
     }
 
-    @Test(description = "Provide swagger has issue in contain")
-    public void invalidSwaggerContract() throws IOException, InterruptedException {
+    @Test
+    public void testInvalidSwaggerContract() throws IOException, InterruptedException {
         boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_12"),
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_12/generated/").toString());

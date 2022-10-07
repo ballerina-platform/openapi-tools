@@ -36,7 +36,7 @@ import static io.ballerina.openapi.TestUtil.executeRun;
 import static io.ballerina.openapi.TestUtil.getMatchingFiles;
 
 /**
- * Client IDL import integration tests.
+ * This class is for client IDL integration tests.
  */
 public class IDLClientGenPluginTests extends OpenAPITest {
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
@@ -47,36 +47,36 @@ public class IDLClientGenPluginTests extends OpenAPITest {
         TestUtil.cleanDistribution();
     }
 
-    @Test(description = "Provide valid swagger path")
-    public void validSwaggerContract() throws IOException, InterruptedException {
+    @Test
+    public void testValidSwaggerContract() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_01");
         assert matchingFiles != null;
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
-    @Test(description = "When client declaration without annotation")
-    public void withOutAnnotation() throws IOException, InterruptedException {
+    @Test
+    public void testClientDeclarationWithOutAnnotation() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_02");
         assert matchingFiles != null;
         Assert.assertEquals(matchingFiles.length, 2);
     }
 
-    @Test(description = "Provide client annotation symbol")
-    public void withAnnotation() throws IOException, InterruptedException {
+    @Test
+    public void testClientDeclarationWithAnnotation() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_03");
         assert matchingFiles != null;
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
-    @Test(description = "When client declaration inside the function")
-    public void withClientDeclarationNode() throws IOException, InterruptedException {
+    @Test
+    public void testClientDeclarationNodeInsideTheFunction() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_04");
         assert matchingFiles != null;
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
-    @Test(description = "When client declaration in module level")
-    public void withModuleClientDeclarationNode() throws IOException, InterruptedException {
+    @Test
+    public void testModuleLevelClientDeclarationNode() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_05");
         assert matchingFiles != null;
         Assert.assertEquals(matchingFiles.length, 2);
@@ -84,20 +84,21 @@ public class IDLClientGenPluginTests extends OpenAPITest {
 
     //TODO: this will be enable after fixing issue in lang
     @Test(description = "When multiple client declarations have same annotation", enabled = false)
-    public void sameAnnotation() throws IOException, InterruptedException {
+    public void testMultipleClientsWithSameAnnotation() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_06");
         assert matchingFiles != null;
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
-    @Test(description = "Invoking client api")
-    public void invokeAPI() throws IOException, InterruptedException {
-        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_08"), new ArrayList<>());
+    @Test
+    public void testInvokeAPIFromGeneratedClient() throws IOException, InterruptedException {
+        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_08"),
+                new ArrayList<>());
         Assert.assertTrue(successful);
     }
 
-    @Test(description = "When client declarations have local path")
-    public void withLocalPath() throws IOException, InterruptedException {
+    @Test
+    public void testWithLocalPathClientDeclaration() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_09");
         assert matchingFiles != null;
         Assert.assertEquals(matchingFiles.length, 1);
