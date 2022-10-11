@@ -16,13 +16,15 @@
  *  under the License.
  */
 
-package io.ballerina.openapi.cmd;
+package io.ballerina.openapi;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.testng.Assert;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,8 +33,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+
+import static io.ballerina.openapi.idl.client.IDLClientGenPluginTests.DISTRIBUTION_FILE_NAME;
+import static io.ballerina.openapi.idl.client.IDLClientGenPluginTests.TEST_RESOURCE;
 
 /**
  * This class for storing the test utils for integration tests.
@@ -43,7 +49,7 @@ public class TestUtil {
     public static final Path DISTRIBUTIONS_DIR = Paths.get(System.getProperty("distributions.dir"));
     public static final Path TEST_DISTRIBUTION_PATH = TARGET_DIR.resolve("test-distribution");
     public static final Path RESOURCES_PATH = TARGET_DIR.resolve("resources/test");
-    public static final Path RESOURCE = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test/build");
+    public static final Path RESOURCE = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test");
     private static String balFile = "bal";
 
     /**
@@ -88,6 +94,18 @@ public class TestUtil {
         return exitCode == 0;
     }
 
+    /**
+     * Ballerina run command.
+     */
+    public static boolean executeRun(String distributionName, Path sourceDirectory,
+                                       List<String> args) throws IOException, InterruptedException {
+        args.add(0, "run");
+        Process process = getProcessBuilderResults(distributionName, sourceDirectory, args);
+        int exitCode = process.waitFor();
+        logOutput(process.getInputStream());
+        logOutput(process.getErrorStream());
+        return exitCode == 0;
+    }
     /**
      * Execute ballerina openapi command.
      *
@@ -162,5 +180,20 @@ public class TestUtil {
                 FileUtils.deleteDirectory(file);
             }
         }
+    }
+
+    public static File[] getMatchingFiles(String project) throws IOException, InterruptedException {
+        List<String> buildArgs = new LinkedList<>();
+        //TODO: Change this function after fixing module name with client declaration alias.
+        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
+        Assert.assertTrue(successful);
+        File dir = new File(RESOURCE.resolve("client-idl-projects/" + project + "/generated/").toString());
+        final String id = "openapi_client";
+        File[] matchingFiles = dir.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                return pathname.getName().contains(id);
+            }
+        });
+        return matchingFiles;
     }
 }

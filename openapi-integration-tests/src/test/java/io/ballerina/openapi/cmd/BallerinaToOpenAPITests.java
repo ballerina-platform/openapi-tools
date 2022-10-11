@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.cmd;
 
+import io.ballerina.openapi.TestUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,8 +34,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
 
 /**
  * This {@code BallerinaToOpenAPITests} contains all the ballerina to openapi command with compiler annotation.

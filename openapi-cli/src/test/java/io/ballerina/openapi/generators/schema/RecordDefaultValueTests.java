@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
@@ -35,11 +35,10 @@ import java.nio.file.Paths;
  */
 public class RecordDefaultValueTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
 
     @Test(description = "Test for default optional primitive fields in records")
     public void testDefaultPrimitive() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/default_optional_primitive_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -49,7 +48,7 @@ public class RecordDefaultValueTests {
 
     @Test(description = "Test for default optional String fields in records")
     public void testDefaultString() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/default_optional_string_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -59,7 +58,7 @@ public class RecordDefaultValueTests {
 
     @Test(description = "Test for default optional String fields with value double quote in records")
     public void testDefaultWithDoubleQuote() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/default_optional_schema_with_doublequote.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -69,7 +68,7 @@ public class RecordDefaultValueTests {
 
     @Test(description = "Test for default value for array record")
     public void testDefaultArray() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/default_optional_array_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -79,7 +78,7 @@ public class RecordDefaultValueTests {
 
     @Test(description = "Test for default value for required fields")
     public void testDefaultRequired() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/default_required_field_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();

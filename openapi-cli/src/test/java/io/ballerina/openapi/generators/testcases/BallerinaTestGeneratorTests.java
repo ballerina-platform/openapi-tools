@@ -20,9 +20,11 @@ package io.ballerina.openapi.generators.testcases;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.common.TestUtils;
@@ -69,8 +71,13 @@ public class BallerinaTestGeneratorTests {
         Path definitionPath = RES_DIR.resolve("sample_yamls/" + yamlFile);
         BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         codeGenerator.setIncludeTestFiles(true);
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(openAPI);
         schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);

@@ -19,9 +19,10 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -62,9 +63,13 @@ public class ComparedGeneratedFileTests {
 //        Path definitionPath = RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml");
         Path definitionPath = RES_DIR.resolve("openapi.yaml");
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/jira_openapi.bal");
-        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
@@ -77,9 +82,13 @@ public class ComparedGeneratedFileTests {
             BallerinaOpenApiException, FormatterException, URISyntaxException {
         Path definitionPath = RES_DIR.resolve("file_provider/swagger/" + yamlFile);
         Path expectedPath = RES_DIR.resolve("file_provider/ballerina/" + expectedFile);
-        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());

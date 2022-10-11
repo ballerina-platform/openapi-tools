@@ -52,6 +52,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.model.Filter;
@@ -137,6 +138,7 @@ public class BallerinaClientGenerator {
     private String serverURL;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
     private final boolean resourceMode;
+    private final boolean isPlugin;
 
     /**
      * Returns a list of type definition nodes.
@@ -178,18 +180,19 @@ public class BallerinaClientGenerator {
         return serverURL;
     }
 
-    public BallerinaClientGenerator(OpenAPI openAPI, Filter filters, boolean nullable, boolean resourceMode) {
+    public BallerinaClientGenerator(OASClientConfig oasClientConfig) {
 
-        this.filters = filters;
+        this.filters = oasClientConfig.getFilters();
         this.imports = new ArrayList<>();
         this.typeDefinitionNodeList = new ArrayList<>();
-        this.openAPI = openAPI;
-        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, nullable);
+        this.openAPI = oasClientConfig.getOpenAPI();
+        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, oasClientConfig.isNullable());
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
-        this.resourceMode = resourceMode;
+        this.resourceMode = oasClientConfig.isResourceMode();
+        this.isPlugin = oasClientConfig.isPlugin();
     }
 
     /**
@@ -258,7 +261,8 @@ public class BallerinaClientGenerator {
         NodeList<Token> classTypeQualifiers = createNodeList(
                 createToken(ISOLATED_KEYWORD), createToken(CLIENT_KEYWORD));
         return createClassDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), classTypeQualifiers,
-                createToken(CLASS_KEYWORD), className, createToken(OPEN_BRACE_TOKEN),
+                createToken(CLASS_KEYWORD), isPlugin ? createIdentifierToken("'client") : className,
+                createToken(OPEN_BRACE_TOKEN),
                 createNodeList(memberNodeList), createToken(CLOSE_BRACE_TOKEN), null);
     }
 

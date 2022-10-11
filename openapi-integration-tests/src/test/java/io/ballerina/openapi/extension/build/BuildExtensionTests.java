@@ -17,7 +17,7 @@
  */
 package io.ballerina.openapi.extension.build;
 
-import io.ballerina.openapi.cmd.TestUtil;
+import io.ballerina.openapi.TestUtil;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -29,10 +29,10 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
-import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCE;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
-import static io.ballerina.openapi.cmd.TestUtil.executeBuild;
+import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.RESOURCE;
+import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.TestUtil.executeBuild;
 
 /**
  * These tests are for capture the `--export-openapi` flag in distribution.
@@ -67,7 +67,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_3"), buildArgs);
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_3/target/openapi/greeting_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_3/target/openapi/greeting_openapi.yaml")));
     }
 
     @Test(description = "Check --export-openapi flag with package has service on module")
@@ -76,8 +76,8 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_4"), buildArgs);
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_4/target/openapi/greeting_openapi.yaml")));
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_4/target/openapi/mod_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_4/target/openapi/greeting_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_4/target/openapi/mod_openapi.yaml")));
     }
 
     @Test(description = "Check --export-openapi flag with single service file build", enabled = false)
@@ -94,7 +94,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_6"), buildArgs);
-        Assert.assertFalse(Files.exists(RESOURCE.resolve("project_6/target/openapi/")));
+        Assert.assertFalse(Files.exists(RESOURCE.resolve("build/project_6/target/openapi/")));
     }
 
     @Test(description = "Check --export-openapi flag with webHub service")
@@ -103,7 +103,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_7"), buildArgs);
-        Assert.assertFalse(Files.exists(RESOURCE.resolve("project_7/target/openapi/")));
+        Assert.assertFalse(Files.exists(RESOURCE.resolve("build/project_7/target/openapi/")));
     }
 
     @Test(description = "Base path with special characters")
@@ -112,7 +112,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_8"), buildArgs);
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_8/target/openapi/" +
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_8/target/openapi/" +
                 "well_known_smart_configuration_openapi.yaml")));
     }
 
@@ -122,7 +122,7 @@ public class BuildExtensionTests {
         buildArgs.add("--export-openapi");
         boolean successful = executeBuild(DISTRIBUTION_FILE_NAME,
                 TEST_RESOURCE.resolve("project_9"), buildArgs);
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("project_9/target/openapi/ชื่อ_openapi.yaml")));
+        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_9/target/openapi/ชื่อ_openapi.yaml")));
     }
     private void executeCommand(String resourcePath) throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();

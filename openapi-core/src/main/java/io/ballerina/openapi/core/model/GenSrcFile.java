@@ -37,7 +37,9 @@ public class GenSrcFile {
         MODEL_SRC,
         IMPL_SRC,
         TEST_SRC,
-        RES;
+        CONFIG_SRC,
+        RES,
+        UTIL_SRC;
 
         public boolean isOverwritable() {
             if (this == GEN_SRC || this == RES || this == MODEL_SRC) {

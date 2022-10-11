@@ -29,6 +29,8 @@ public class Filter {
     private List<String> tags = new ArrayList<>();
     private List<String> operations = new ArrayList<>();
 
+    public Filter() {
+    }
     public Filter(List<String> tags, List<String> operations) {
         this.tags = tags;
         this.operations = operations;
@@ -44,5 +46,9 @@ public class Filter {
 
     public void setOperations(List<String> operations) {
         this.operations = operations;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 }

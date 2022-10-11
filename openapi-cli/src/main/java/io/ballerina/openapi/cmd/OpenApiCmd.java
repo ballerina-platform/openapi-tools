@@ -168,10 +168,10 @@ public class OpenApiCmd implements BLauncherCmd {
                     exitError(this.exitWhenFinish);
                 }
                 // Add the resource flag enable
-                clientResourceMode = generateClientMethods != null && !generateClientMethods.isBlank() &&
-                                (generateClientMethods.equals(RESOURCE));
+                clientResourceMode = generateClientMethods == null || generateClientMethods.isBlank() ||
+                        (!generateClientMethods.equals(REMOTE));
                 
-                if (clientResourceMode && mode != null && mode.equals(SERVICE)) {
+                if (!clientResourceMode && mode != null && mode.equals(SERVICE)) {
                     // Exit the code generation process
                     outStream.println("'--client-methods' option is only available in client generation mode.");
                     exitError(this.exitWhenFinish);

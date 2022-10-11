@@ -25,7 +25,7 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.FunctionSignatureGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
@@ -125,8 +125,7 @@ public class FunctionSignatureNodeTests {
 
     @Test(description = "Test for generate function signature for multipart custom header")
     public void testFunctionSignatureNodeForMultipartCustomHeader() throws IOException, BallerinaOpenApiException {
-        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RESDIR.resolve("swagger/multipart_formdata_custom.yaml"), true);
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
                 new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);

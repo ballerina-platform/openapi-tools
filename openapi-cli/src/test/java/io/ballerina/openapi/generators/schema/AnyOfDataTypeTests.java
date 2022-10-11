@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
@@ -43,13 +43,12 @@ import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedS
  */
 public class AnyOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
 
 
     @Test(description = "Test for the schema has anyOf dataType")
     public void testAnyOfInSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema schema = openAPI.getComponents().getSchemas().get("AnyOF");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, false);
@@ -62,7 +61,7 @@ public class AnyOfDataTypeTests {
     public void testAnyOfSchema() throws BallerinaOpenApiException, IOException, FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/schema15.bal");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);

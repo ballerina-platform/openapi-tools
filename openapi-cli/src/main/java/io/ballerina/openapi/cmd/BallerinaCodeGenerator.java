@@ -18,89 +18,54 @@
 
 package io.ballerina.openapi.cmd;
 
-import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.api.symbols.SymbolKind;
-import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
-import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.converter.utils.CodegenUtils;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaTestGenerator;
-import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
-import io.ballerina.projects.DocumentId;
-import io.ballerina.projects.Module;
-import io.ballerina.projects.Package;
-import io.ballerina.projects.Project;
-import io.ballerina.projects.ProjectException;
-import io.ballerina.projects.ProjectKind;
-import io.ballerina.projects.directory.ProjectLoader;
-import io.ballerina.tools.diagnostics.Location;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.Schema;
-import org.apache.commons.io.FileUtils;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static io.ballerina.openapi.cmd.CmdConstants.BALLERINA_TOML;
-import static io.ballerina.openapi.cmd.CmdConstants.BALLERINA_TOML_CONTENT;
 import static io.ballerina.openapi.cmd.CmdConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.CONFIG_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.DEFAULT_CLIENT_PKG;
 import static io.ballerina.openapi.cmd.CmdConstants.DEFAULT_MOCK_PKG;
-import static io.ballerina.openapi.cmd.CmdConstants.DOUBLE_LINE_SEPARATOR;
-import static io.ballerina.openapi.cmd.CmdConstants.GET;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_BOTH;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_CLIENT;
 import static io.ballerina.openapi.cmd.CmdConstants.GenType.GEN_SERVICE;
-import static io.ballerina.openapi.cmd.CmdConstants.HEAD;
-import static io.ballerina.openapi.cmd.CmdConstants.IDENTIFIER;
-import static io.ballerina.openapi.cmd.CmdConstants.LINE_SEPARATOR;
 import static io.ballerina.openapi.cmd.CmdConstants.OAS_PATH_SEPARATOR;
-import static io.ballerina.openapi.cmd.CmdConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.TEST_DIR;
 import static io.ballerina.openapi.cmd.CmdConstants.TEST_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.TYPE_FILE_NAME;
-import static io.ballerina.openapi.cmd.CmdConstants.TYPE_NAME;
 import static io.ballerina.openapi.cmd.CmdConstants.UNTITLED_SERVICE;
 import static io.ballerina.openapi.cmd.CmdConstants.UTIL_FILE_NAME;
 import static io.ballerina.openapi.cmd.CmdUtils.setGeneratedFileName;
-import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 
 /**
  * This class generates Ballerina Services/Clients for a provided OAS definition.
@@ -113,7 +78,6 @@ public class BallerinaCodeGenerator {
     private boolean includeTestFiles;
 
     private static final PrintStream outStream = System.err;
-    private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
 
     /**
      * Generates ballerina source for provided Open API Definition in {@code definitionPath}.
@@ -132,7 +96,7 @@ public class BallerinaCodeGenerator {
         // Normalize OpenAPI definition, in the client generation we suppose to terminate code generation when the
         // absence of the operationId in operation. Therefor we enable client flag true as default code generation.
         // if resource is enabled, we avoid checking operationId.
-        OpenAPI openAPIDef = normalizeOpenAPI(openAPIPath, !isResource);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPIPath, !isResource);
 
         // Generate service
         String concatTitle = serviceName.toLowerCase(Locale.ENGLISH);
@@ -144,15 +108,22 @@ public class BallerinaCodeGenerator {
 
         // Generate client.
         // Generate ballerina client remote.
-        BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable,
-                isResource);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withNullable(nullable)
+                .withPlugin(false)
+                .withOpenAPI(openAPIDef)
+                .withResourceMode(isResource).build();
+
+        BallerinaClientGenerator clientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String clientContent = Formatter.format(clientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME, clientContent));
         String utilContent = Formatter.format(clientGenerator
                 .getBallerinaUtilGenerator()
                 .generateUtilSyntaxTree()).toString();
         if (!utilContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, UTIL_FILE_NAME, utilContent));
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, srcPackage, UTIL_FILE_NAME, utilContent));
         }
 
         // Generate ballerina types.
@@ -172,7 +143,8 @@ public class BallerinaCodeGenerator {
 
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
-            schemaContent = modifySchemaContent(schemaSyntaxTree, clientContent, schemaContent, serviceContent);
+            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, clientContent, schemaContent,
+                    serviceContent);
         }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
@@ -340,16 +312,24 @@ public class BallerinaCodeGenerator {
         }
         List<GenSrcFile> sourceFiles = new ArrayList<>();
         // Normalize OpenAPI definition
-        OpenAPI openAPIDef = normalizeOpenAPI(openAPI, !isResource);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, !isResource);
         // Generate ballerina service and resources.
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPIDef, filter, nullable
-                , isResource);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withNullable(nullable)
+                .withPlugin(false)
+                .withOpenAPI(openAPIDef)
+                .withResourceMode(isResource)
+                .withLicense(licenseHeader)
+                .build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, CLIENT_FILE_NAME, mainContent));
         String utilContent = Formatter.format(
                 ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree()).toString();
         if (!utilContent.isBlank()) {
-            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, UTIL_FILE_NAME, utilContent));
+            sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.UTIL_SRC, srcPackage, UTIL_FILE_NAME, utilContent));
         }
 
         // Generate ballerina records to represent schemas.
@@ -359,7 +339,7 @@ public class BallerinaCodeGenerator {
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
-            schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent, null);
+            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent, null);
         }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,
@@ -382,115 +362,6 @@ public class BallerinaCodeGenerator {
         return sourceFiles;
     }
 
-    private String modifySchemaContent(SyntaxTree schemaSyntaxTree, String clientContent, String schemaContent,
-                                       String serviceContent) throws IOException, FormatterException {
-        Map<String, String> tempSourceFiles = new HashMap<>();
-        tempSourceFiles.put(CLIENT_FILE_NAME, clientContent);
-        tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
-        if (serviceContent != null) {
-            tempSourceFiles.put(SERVICE_FILE_NAME, schemaContent);
-        }
-        List<String> unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
-        while (unusedTypeDefinitionNameList.size() > 0) {
-            ModulePartNode modulePartNode = schemaSyntaxTree.rootNode();
-            NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
-            List<ModuleMemberDeclarationNode> unusedTypeDefinitionNodeList = new ArrayList<>();
-            for (ModuleMemberDeclarationNode node : members) {
-                if (node.kind().equals(SyntaxKind.TYPE_DEFINITION)) {
-                    for (ChildNodeEntry childNodeEntry : node.childEntries()) {
-                        if (childNodeEntry.name().equals(TYPE_NAME)) {
-                            if (unusedTypeDefinitionNameList.contains(childNodeEntry.node().get().toString())) {
-                                unusedTypeDefinitionNodeList.add(node);
-                            }
-                        }
-                    }
-                } else if (node.kind().equals(SyntaxKind.ENUM_DECLARATION)) {
-                    for (ChildNodeEntry childNodeEntry : node.childEntries()) {
-                        if (childNodeEntry.name().equals(IDENTIFIER)) {
-                            if (unusedTypeDefinitionNameList.contains(childNodeEntry.node().get().toString())) {
-                                unusedTypeDefinitionNodeList.add(node);
-                            }
-                        }
-                    }
-                }
-            }
-            NodeList<ModuleMemberDeclarationNode> modifiedMembers = members.removeAll
-                    (unusedTypeDefinitionNodeList);
-            ModulePartNode modiedModulePartNode = modulePartNode.modify(modulePartNode.imports(),
-                    modifiedMembers, modulePartNode.eofToken());
-            schemaSyntaxTree = schemaSyntaxTree.modifyWith(modiedModulePartNode);
-            schemaContent = Formatter.format(schemaSyntaxTree).toString();
-            tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);
-            unusedTypeDefinitionNameList = getUnusedTypeDefinitionNameList(tempSourceFiles);
-        }
-        return schemaContent;
-    }
-
-    private List<String> getUnusedTypeDefinitionNameList(Map<String, String> srcFiles) throws IOException {
-        List<String> unusedTypeDefinitionNameList = new ArrayList<>();
-        Path tmpDir = Files.createTempDirectory(".openapi-tmp" + System.nanoTime());
-        writeFilesTemp(srcFiles, tmpDir);
-        if (Files.exists(tmpDir.resolve(CLIENT_FILE_NAME)) && Files.exists(tmpDir.resolve(TYPE_FILE_NAME)) &&
-                Files.exists(tmpDir.resolve(BALLERINA_TOML))) {
-            SemanticModel semanticModel = this.getSemanticModel(tmpDir.resolve(CLIENT_FILE_NAME));
-            List<Symbol> symbols = semanticModel.moduleSymbols();
-            for (Symbol symbol : symbols) {
-                if (symbol.kind().equals(SymbolKind.TYPE_DEFINITION) || symbol.kind().equals(SymbolKind.ENUM)) {
-                    List<Location> references = semanticModel.references(symbol);
-                    if (references.size() == 1) {
-                        unusedTypeDefinitionNameList.add(symbol.getName().get());
-                    }
-                }
-            }
-        }
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                FileUtils.deleteDirectory(tmpDir.toFile());
-            } catch (IOException ex) {
-                LOGGER.error("Unable to delete the temporary directory : " + tmpDir, ex);
-            }
-        }));
-        return unusedTypeDefinitionNameList;
-    }
-
-    private void writeFilesTemp(Map<String, String> srcFiles, Path tmpDir) throws IOException {
-        srcFiles.put(BALLERINA_TOML, BALLERINA_TOML_CONTENT);
-        PrintWriter writer = null;
-        for (Map.Entry<String, String> entry : srcFiles.entrySet()) {
-            String key = entry.getKey();
-            Path filePath = tmpDir.resolve(key);
-            try {
-                writer = new PrintWriter(filePath.toString(), "UTF-8");
-                writer.print(entry.getValue());
-            } finally {
-                if (writer != null) {
-                    writer.close();
-                }
-            }
-        }
-    }
-
-    private SemanticModel getSemanticModel(Path clientPath) throws ProjectException {
-        // Load project instance for single ballerina file
-        try {
-            Project project = ProjectLoader.loadProject(clientPath);
-            Package packageName = project.currentPackage();
-            DocumentId docId;
-
-            if (project.kind().equals(ProjectKind.BUILD_PROJECT)) {
-                docId = project.documentId(clientPath);
-            } else {
-                // Take module instance for traversing the syntax tree
-                Module currentModule = packageName.getDefaultModule();
-                Iterator<DocumentId> documentIterator = currentModule.documentIds().iterator();
-                docId = documentIterator.next();
-            }
-            return project.currentPackage().getCompilation().getSemanticModel(docId.moduleId());
-        } catch (ProjectException e) {
-            throw new ProjectException(e.getMessage());
-        }
-    }
-
 
     public List<GenSrcFile> generateBallerinaService(Path openAPI, String serviceName,
                                                       Filter filter, boolean nullable)
@@ -498,7 +369,7 @@ public class BallerinaCodeGenerator {
         if (srcPackage == null || srcPackage.isEmpty()) {
             srcPackage = DEFAULT_MOCK_PKG;
         }
-        OpenAPI openAPIDef = normalizeOpenAPI(openAPI, false);
+        OpenAPI openAPIDef = GeneratorUtils.normalizeOpenAPI(openAPI, false);
         if (openAPIDef.getInfo() == null) {
             throw new BallerinaOpenApiException("Info section of the definition file cannot be empty/null: " +
                     openAPI);
@@ -528,97 +399,6 @@ public class BallerinaCodeGenerator {
                     schemaContent));
         }
         return sourceFiles;
-    }
-
-    /**
-     * Normalized OpenAPI specification with adding proper naming to schema.
-     *
-     * @param openAPIPath - openAPI file path
-     * @return - openAPI specification
-     * @throws IOException
-     * @throws BallerinaOpenApiException
-     */
-    public OpenAPI normalizeOpenAPI(Path openAPIPath, boolean isClient) throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = CmdUtils.getOpenAPIFromOpenAPIV3Parser(openAPIPath);
-        io.swagger.v3.oas.models.Paths openAPIPaths = openAPI.getPaths();
-        if (isClient) {
-            validateOperationIds(openAPIPaths.entrySet());
-        }
-        validateRequestBody(openAPIPaths.entrySet());
-
-        if (openAPI.getComponents() != null) {
-            // Refactor schema name with valid name
-            Components components = openAPI.getComponents();
-            Map<String, Schema> componentsSchemas = components.getSchemas();
-            if (componentsSchemas != null) {
-                Map<String, Schema> refacSchema = new HashMap<>();
-                for (Map.Entry<String, Schema> schemaEntry : componentsSchemas.entrySet()) {
-                    String name = getValidName(schemaEntry.getKey(), true);
-                    refacSchema.put(name, schemaEntry.getValue());
-                }
-                openAPI.getComponents().setSchemas(refacSchema);
-            }
-        }
-        return openAPI;
-    }
-
-    /**
-     * Check whether an operationId has been defined in each path. If given rename the operationId to accepted format.
-     * -- ex: GetPetName -> getPetName
-     *
-     * @param paths List of paths given in the OpenAPI definition
-     * @throws BallerinaOpenApiException When operationId is missing in any path
-     */
-    private void validateOperationIds(Set<Map.Entry<String, PathItem>> paths) throws BallerinaOpenApiException {
-        List<String> errorList = new ArrayList<>();
-        for (Map.Entry<String, PathItem> entry : paths) {
-            for (Map.Entry<PathItem.HttpMethod, Operation> operation :
-                    entry.getValue().readOperationsMap().entrySet()) {
-                if (operation.getValue().getOperationId() != null) {
-                    String operationId = getValidName(operation.getValue().getOperationId(), false);
-                    operation.getValue().setOperationId(operationId);
-                } else {
-                    errorList.add(String.format("OperationId is missing in the resource path: %s(%s)", entry.getKey(),
-                            operation.getKey()));
-                }
-            }
-        }
-        if (!errorList.isEmpty()) {
-            throw new BallerinaOpenApiException(
-                    "OpenAPI definition has errors: " +
-                            DOUBLE_LINE_SEPARATOR + String.join(LINE_SEPARATOR, errorList));
-        }
-    }
-
-    /**
-     * Validate if requestBody found in GET/DELETE/HEAD operation.
-     *
-     * @param paths - List of paths given in the OpenAPI definition
-     * @throws BallerinaOpenApiException - If requestBody found in GET/DELETE/HEAD operation
-     */
-    private void validateRequestBody(Set<Map.Entry<String, PathItem>> paths) throws BallerinaOpenApiException {
-        List<String> errorList = new ArrayList<>();
-        for (Map.Entry<String, PathItem> entry : paths) {
-            if (!entry.getValue().readOperationsMap().isEmpty()) {
-                for (Map.Entry<PathItem.HttpMethod, Operation> operation : entry.getValue().readOperationsMap()
-                        .entrySet()) {
-                    String method = operation.getKey().name().trim().toLowerCase(Locale.ENGLISH);
-                    boolean isRequestBodyInvalid = method.equals(GET) || method.equals(HEAD);
-                    if (isRequestBodyInvalid && operation.getValue().getRequestBody() != null) {
-                        errorList.add(method.toUpperCase(Locale.ENGLISH) + " operation cannot have a requestBody. "
-                                + "Error at operationId: " + operation.getValue().getOperationId());
-                    }
-                }
-            }
-        }
-
-        if (!errorList.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: " + DOUBLE_LINE_SEPARATOR);
-            for (String message : errorList) {
-                errorMessage.append(message).append(LINE_SEPARATOR);
-            }
-            throw new BallerinaOpenApiException(errorMessage.toString());
-        }
     }
 
     /**
