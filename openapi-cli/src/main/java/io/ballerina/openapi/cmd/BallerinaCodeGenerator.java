@@ -143,7 +143,7 @@ public class BallerinaCodeGenerator {
 
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
-            schemaContent = GeneratorUtils.modifySchemaContent(schemaSyntaxTree, clientContent, schemaContent,
+            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, clientContent, schemaContent,
                     serviceContent);
         }
         if (!schemaContent.isBlank()) {
@@ -337,7 +337,7 @@ public class BallerinaCodeGenerator {
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
         if (filter.getTags().size() > 0) {
             // Remove unused records and enums when generating the client by the tags given.
-            schemaContent = GeneratorUtils.modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent, null);
+            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent, null);
         }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, srcPackage, TYPE_FILE_NAME,

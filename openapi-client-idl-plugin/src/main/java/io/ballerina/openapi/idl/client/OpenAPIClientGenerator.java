@@ -35,6 +35,7 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.ClientMetaData;
@@ -77,7 +78,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.UTIL_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.YML_EXTENSION;
-import static io.ballerina.openapi.core.GeneratorUtils.modifySchemaContent;
 import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
 import static io.ballerina.openapi.idl.client.Constants.IS_RESOURCE;
 import static io.ballerina.openapi.idl.client.Constants.LICENSE;
@@ -105,12 +105,12 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
 
     @Override
     public void perform(IDLSourceGeneratorContext idlSourceContext) {
+
         try {
             List<GenSrcFile> genSrcFiles = generateClientFiles(idlSourceContext);
             if (genSrcFiles.isEmpty()) {
                 return;
             }
-            // todo: move to constant
             String moduleName = MODULE_ALIAS;
             ModuleId moduleId = ModuleId.create(moduleName, idlSourceContext.currentPackage().packageId());
             List<DocumentConfig> documents = new ArrayList<>();
@@ -153,6 +153,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
      * This includes basic requirements like file extension check and file header check.
      */
     private static boolean isOpenAPI(Path oasPath) {
+
         try {
             if (!(oasPath.toString().endsWith(YAML_EXTENSION) || oasPath.toString().endsWith(JSON_EXTENSION) ||
                     oasPath.toString().endsWith(YML_EXTENSION))) {
@@ -185,6 +186,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
     }
 
     private static NodeList<AnnotationNode> getAnnotationNodes(IDLSourceGeneratorContext idlSourceContext) {
+
         Node clientNode = idlSourceContext.clientNode();
         NodeList<AnnotationNode> annotations = null;
         if (clientNode instanceof ClientDeclarationNode) {
@@ -237,7 +239,8 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
                 .withFilters(filter)
                 .withNullable(oasClientIDLMetaData.isNullable())
                 .withPlugin(true)
-                .withOpenAPI(openAPIDef).build();
+                .withOpenAPI(openAPIDef)
+                .build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
@@ -261,7 +264,8 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
 
         if (filter.getTags().size() > 0) {
             // remove unused records and enums when generating the client by the tags given.
-            schemaContent = modifySchemaContent(schemaSyntaxTree, mainContent, schemaContent, null);
+            schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
+                    null);
         }
         if (!schemaContent.isBlank()) {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.MODEL_SRC, null, TYPE_FILE_NAME,
@@ -290,8 +294,8 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
      */
     private static OASClientIDLMetaData extractAnnotationDetails(NodeList<AnnotationNode> annotations) {
 
-        OASClientIDLMetaData.OASClientIDLMetaDataBuilder clientMetaDataBuilder =
-                new OASClientIDLMetaData.OASClientIDLMetaDataBuilder();
+        OASClientIDLMetaData.Builder clientMetaDataBuilder =
+                new OASClientIDLMetaData.Builder();
         if (annotations == null) {
             return clientMetaDataBuilder.build();
         }
@@ -371,6 +375,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
      * Util to normalize the string value by removing extra " " from given field value.
      */
     private static String getStringValue(BasicLiteralNode item) {
+
         Token stringItem = item.literalToken();
         String text = stringItem.text();
         // here we need to do some preprocessing by removing '"' from the given values.
@@ -438,6 +443,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
 
     private static void reportDiagnostic(IDLSourceGeneratorContext context, Constants.DiagnosticMessages error,
                                          Location location) {
+
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(error.getCode(), error.getDescription(),
                 error.getSeverity());
         Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location);
@@ -445,6 +451,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
     }
 
     private static Path extractBallerinaFilePath(IDLSourceGeneratorContext idlSourceContext) {
+
         Package aPackage = idlSourceContext.currentPackage();
         DocumentId packageDoc = aPackage.getDefaultModule().documentIds().stream().findFirst().get();
         Optional<Path> path = aPackage.project().documentPath(packageDoc);

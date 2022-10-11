@@ -63,7 +63,8 @@ public class BallerinaDiagnosticTests {
         ClientMetaData clientMetaData = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
-                .withResourceMode(false).build();
+                .withResourceMode(false)
+                .build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(syntaxTree, openAPI, ballerinaClientGenerator);
