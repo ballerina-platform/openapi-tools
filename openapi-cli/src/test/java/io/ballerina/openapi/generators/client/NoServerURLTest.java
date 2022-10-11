@@ -7,7 +7,7 @@ import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.ClientMetaData;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.common.TestConstants;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -39,12 +39,12 @@ public class NoServerURLTest {
         Path expectedPath = RES_DIR.resolve("ballerina/missing_server_url.bal");
 
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }

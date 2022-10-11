@@ -47,4 +47,8 @@ public class Filter {
     public void setOperations(List<String> operations) {
         this.operations = operations;
     }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
 }

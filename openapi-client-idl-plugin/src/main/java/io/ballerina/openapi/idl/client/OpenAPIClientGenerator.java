@@ -38,11 +38,10 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.ClientMetaData;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.core.model.GenSrcFile;
-import io.ballerina.openapi.idl.client.model.OASClientIDLMetaData;
 import io.ballerina.projects.DocumentConfig;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.ModuleConfig;
@@ -214,34 +213,14 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
         } else if (clientNode instanceof ModuleClientDeclarationNode) {
             annotations = ((ModuleClientDeclarationNode) clientNode).annotations();
         }
-        OASClientIDLMetaData oasClientIDLMetaData = extractAnnotationDetails(annotations);
+        OASClientConfig oasClientConfig = extractClientDetails(context, openAPI, annotations);
 
-        // create filter values (tags, operations)
-        Filter filter = new Filter(
-                oasClientIDLMetaData.getTags().isPresent() ? oasClientIDLMetaData.getTags().get() :
-                        new ArrayList<>(),
-                oasClientIDLMetaData.getOperations().isPresent() ? oasClientIDLMetaData.getOperations().get() :
-                        new ArrayList<>());
-
-        // set license header content
-        String licenseContent = oasClientIDLMetaData.getLicense();
-        if (licenseContent != null && !licenseContent.contains("// AUTO-GENERATED FILE. DO NOT MODIFY.")) {
-            licenseContent = getLicenseContent(context, Paths.get(oasClientIDLMetaData.getLicense()));
-        }
 
         List<GenSrcFile> sourceFiles = new ArrayList<>();
-        // normalize OpenAPI definition.
-        OpenAPI openAPIDef = normalizeOpenAPI(openAPI, !oasClientIDLMetaData.isResource());
 
         // generate ballerina client files.
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
-                .withFilters(filter)
-                .withNullable(oasClientIDLMetaData.isNullable())
-                .withPlugin(true)
-                .withOpenAPI(openAPIDef)
-                .build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        String licenseContent = oasClientConfig.getLicense();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         String mainContent = Formatter.format(ballerinaClientGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, null, CLIENT_FILE_NAME,
                 licenseContent == null || licenseContent.isBlank() ? mainContent :
@@ -256,13 +235,13 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
         }
 
         // generate ballerina records to represent schemas.
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef,
-                clientMetaData.isNullable());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(oasClientConfig.getOpenAPI(),
+                oasClientConfig.isNullable());
         ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
-        if (filter.getTags().size() > 0) {
+        if (oasClientConfig.getFilters().getTags().size() > 0) {
             // remove unused records and enums when generating the client by the tags given.
             schemaContent = GeneratorUtils.removeUnusedEntities(schemaSyntaxTree, mainContent, schemaContent,
                     null);
@@ -277,7 +256,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
     }
 
     /**
-     * This method extracts openapi client annotation details.
+     * This method extracts openapi client config details.
      * ex: openapi annotation
      * <pre>
      * public type ClientConfig record {|
@@ -290,15 +269,22 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
      * </pre>
      *
      * @param annotations - Client node annotation list
-     * @return {@code OASClientIDLMetaData} model with all the metadata to generate client.
+     * @return {@code ClientMetaData} model with all the metadata to generate client.
      */
-    private static OASClientIDLMetaData extractAnnotationDetails(NodeList<AnnotationNode> annotations) {
+    private static OASClientConfig extractClientDetails(IDLSourceGeneratorContext context, Path openAPI,
+                                                        NodeList<AnnotationNode> annotations)
+            throws IOException, BallerinaOpenApiException {
 
-        OASClientIDLMetaData.Builder clientMetaDataBuilder =
-                new OASClientIDLMetaData.Builder();
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        clientMetaDataBuilder.withPlugin(true);
+        Filter filter = new Filter();
         if (annotations == null) {
+            // normalize OpenAPI definition.
+            OpenAPI openAPIDef = normalizeOpenAPI(openAPI, false);
+            clientMetaDataBuilder.withOpenAPI(openAPIDef);
             return clientMetaDataBuilder.build();
         }
+        boolean isResources = true;
         for (AnnotationNode annotationNode : annotations) {
             Node refNode = annotationNode.annotReference();
             boolean isNodeExist = refNode.toString().trim().equals(OPENAPI_CLIENT_REFERENCE);
@@ -329,27 +315,34 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
                 String attributeName = ((Token) fieldName).text();
                 switch (attributeName) {
                     case TAGS:
-                        clientMetaDataBuilder.withTags(values);
+                        filter.setTags(values);
                         break;
                     case OPERATIONS:
-                        clientMetaDataBuilder.withOperations(values);
+                        filter.setOperations(values);
                         break;
                     case NULLABLE:
                         clientMetaDataBuilder.withNullable(expression.toString().contains(TRUE));
                         break;
                     case IS_RESOURCE:
-                        clientMetaDataBuilder.withIsResource(expression.toString().contains(TRUE));
+                        isResources = expression.toString().contains(TRUE);
+                        clientMetaDataBuilder.withResourceMode(isResources);
                         break;
                     case LICENSE:
                         clientMetaDataBuilder.withLicense(
                                 expression.kind() == SyntaxKind.STRING_LITERAL && !expression.toString().isBlank() ?
-                                        getStringValue((BasicLiteralNode) expression) : "");
+                                        getLicenseContent(context,
+                                                Paths.get(getStringValue((BasicLiteralNode) expression))) : "");
                         break;
                     default:
                         break;
                 }
             }
         }
+        // normalize OpenAPI definition.
+        clientMetaDataBuilder.withFilters(filter);
+        OpenAPI openAPIDef = normalizeOpenAPI(openAPI, !isResources);
+        clientMetaDataBuilder.withOpenAPI(openAPIDef);
+
         return clientMetaDataBuilder.build();
     }
 
