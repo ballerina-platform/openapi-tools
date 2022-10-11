@@ -39,6 +39,7 @@ import static io.ballerina.openapi.TestUtil.getMatchingFiles;
  * This class is for client IDL integration tests.
  */
 public class IDLClientGenPluginTests extends OpenAPITest {
+
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
     public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/client-idl-projects");
 
