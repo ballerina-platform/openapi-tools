@@ -135,6 +135,8 @@ public class Constants {
         Map<String, String> httpCodeMap = new HashMap<>();
         httpCodeMap.put("Continue", "100");
         httpCodeMap.put("SwitchingProtocols", "101");
+        httpCodeMap.put("Processing", "102");
+        httpCodeMap.put("EarlyHints", "103");
         httpCodeMap.put("Ok", "200");
         httpCodeMap.put("Created", "201");
         httpCodeMap.put("Accepted", "202");
@@ -142,6 +144,9 @@ public class Constants {
         httpCodeMap.put("NoContent", "204");
         httpCodeMap.put("RestContent", "205");
         httpCodeMap.put("PartialContent", "206");
+        httpCodeMap.put("MultiStatus", "207");
+        httpCodeMap.put("AlreadyReported", "208");
+        httpCodeMap.put("IMUsed", "226");
         httpCodeMap.put("MultipleChoices", "300");
         httpCodeMap.put("MovedPermanently", "301");
         httpCodeMap.put("Found", "302");
@@ -168,15 +173,27 @@ public class Constants {
         httpCodeMap.put("UnsupportedMediaType", "415");
         httpCodeMap.put("RangeNotSatisfiable", "416");
         httpCodeMap.put("ExpectationFailed", "417");
+        httpCodeMap.put("MisDirectedRequest", "421");
+        httpCodeMap.put("UnProcessableEntity", "422");
+        httpCodeMap.put("Locked", "423");
+        httpCodeMap.put("FailedDependency", "424");
+        httpCodeMap.put("TooEarly", "425");
         httpCodeMap.put("UpgradeRequired", "426");
+        httpCodeMap.put("PredictionRequired", "428");
         httpCodeMap.put("TooManyRequests", "429");
         httpCodeMap.put("RequestHeaderFieldsTooLarge", "431");
+        httpCodeMap.put("UnavailableDueToLegalReasons", "451");
         httpCodeMap.put("InternalServerError", "500");
         httpCodeMap.put("NotImplemented", "501");
         httpCodeMap.put("BadGateway", "502");
         httpCodeMap.put("ServiceUnavailable", "503");
         httpCodeMap.put("GatewayTimeOut", "504");
         httpCodeMap.put("HttpVersionNotSupported", "505");
+        httpCodeMap.put("VariantAlsoNegotiates", "506");
+        httpCodeMap.put("InsufficientStorage", "507");
+        httpCodeMap.put("LoopDetected", "508");
+        httpCodeMap.put("NotExtended", "510");
+        httpCodeMap.put("NetworkAuthorizationRequired", "511");
         HTTP_CODES = Collections.unmodifiableMap(httpCodeMap);
     }
     public static final String HTTP_200 = "200";
