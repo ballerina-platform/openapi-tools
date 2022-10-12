@@ -21,6 +21,8 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 /**
  * This class includes constants for client IDL generator.
+ *
+ * @since 1.3.0
  */
 public class Constants {
     public static final String OPENAPI_CLIENT_REFERENCE = "openapi:ClientConfig";
@@ -31,8 +33,6 @@ public class Constants {
     public static final String LICENSE = "license";
     public static final String TRUE = "true";
     public static final String MODULE_ALIAS = "openapi_client";
-
-
 
     /**
      * Enum class for containing diagnostic messages.

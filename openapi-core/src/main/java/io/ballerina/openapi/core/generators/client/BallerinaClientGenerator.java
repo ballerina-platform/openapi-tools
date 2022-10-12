@@ -52,6 +52,7 @@ import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.document.DocCommentsGenerator;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.core.model.Filter;
@@ -179,19 +180,19 @@ public class BallerinaClientGenerator {
         return serverURL;
     }
 
-    public BallerinaClientGenerator(ClientMetaData clientMetaData) {
+    public BallerinaClientGenerator(OASClientConfig oasClientConfig) {
 
-        this.filters = clientMetaData.getFilters();
+        this.filters = oasClientConfig.getFilters();
         this.imports = new ArrayList<>();
         this.typeDefinitionNodeList = new ArrayList<>();
-        this.openAPI = clientMetaData.getOpenAPI();
-        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, clientMetaData.isNullable());
+        this.openAPI = oasClientConfig.getOpenAPI();
+        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, oasClientConfig.isNullable());
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
-        this.resourceMode = clientMetaData.isResourceMode();
-        this.isPlugin = clientMetaData.isPlugin();
+        this.resourceMode = oasClientConfig.isResourceMode();
+        this.isPlugin = oasClientConfig.isPlugin();
     }
 
     /**

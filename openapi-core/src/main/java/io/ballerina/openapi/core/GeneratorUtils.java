@@ -753,8 +753,8 @@ public class GeneratorUtils {
         }
     }
 
-    public static String modifySchemaContent(SyntaxTree schemaSyntaxTree, String clientContent, String schemaContent,
-                                       String serviceContent) throws IOException, FormatterException {
+    public static String removeUnusedEntities(SyntaxTree schemaSyntaxTree, String clientContent, String schemaContent,
+                                              String serviceContent) throws IOException, FormatterException {
         Map<String, String> tempSourceFiles = new HashMap<>();
         tempSourceFiles.put(CLIENT_FILE_NAME, clientContent);
         tempSourceFiles.put(TYPE_FILE_NAME, schemaContent);

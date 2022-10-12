@@ -22,7 +22,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.ClientMetaData;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.AfterTest;
@@ -56,12 +56,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_basic_scenarios.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_basic_scenarios.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -71,12 +71,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_allOf_scenarios.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_allOf_scenarios.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -86,12 +86,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_oneOf_scenarios.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_oneOf_scenarios.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -101,12 +101,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_array.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_array.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -116,12 +116,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_empty_array.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_empty_array.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -131,12 +131,12 @@ public class RequestBodyTests {
     public void testRequestBodyWithUnsupportedMediaType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/unsupported_request_body.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         ballerinaClientGenerator.generateSyntaxTree();
     }
 
@@ -153,12 +153,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/url_encoded_payload.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("utils/swagger/url_encoded.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -168,12 +168,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/binary_format_octet_stream_payload.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/binary_format_octet_stream_payload.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -183,12 +183,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/byte_format_octet_stream_payload.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/byte_format_octet_stream_payload.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -198,12 +198,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/any_types_payload.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/any_types_payload.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -213,12 +213,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/vendor_specific_payload.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/vendor_specific_payload.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -228,12 +228,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/multipart_formdata.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("utils/swagger/multipart_formdata.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
@@ -243,12 +243,12 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_without_schema.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_without_schema.yaml"), true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }

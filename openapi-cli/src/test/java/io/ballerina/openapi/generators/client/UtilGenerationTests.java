@@ -9,7 +9,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.core.generators.client.ClientMetaData;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -53,12 +53,12 @@ public class UtilGenerationTests {
     public void testDefaultUtilFileGen() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RESDIR.resolve("swagger/no_util.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         SyntaxTree utlisSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("client/ballerina/default_util.bal",
@@ -70,12 +70,12 @@ public class UtilGenerationTests {
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/query_param.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<String> invalidFunctionNames = Arrays.asList(CREATE_FORM_URLENCODED_REQUEST_BODY, GET_MAP_FOR_HEADERS);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
@@ -89,12 +89,12 @@ public class UtilGenerationTests {
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/header.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<String> invalidFunctionNames = Arrays.asList(CREATE_FORM_URLENCODED_REQUEST_BODY,
                 GET_DEEP_OBJECT_STYLE_REQUEST, GET_FORM_STYLE_REQUEST, GET_SERIALIZED_ARRAY,
@@ -110,12 +110,12 @@ public class UtilGenerationTests {
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/url_encoded.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<String> invalidFunctionNames = Arrays.asList(GET_PATH_FOR_QUERY_PARAM, GET_MAP_FOR_HEADERS);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
@@ -130,12 +130,12 @@ public class UtilGenerationTests {
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/url_encoded_with_map.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<String> invalidFunctionNames = Arrays.asList(GET_PATH_FOR_QUERY_PARAM, GET_MAP_FOR_HEADERS);
         Assert.assertTrue(checkUtil(invalidFunctionNames,
@@ -149,12 +149,12 @@ public class UtilGenerationTests {
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/complete_util_gen.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
@@ -165,12 +165,12 @@ public class UtilGenerationTests {
             FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/apikey_with_no_query_param.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
@@ -180,12 +180,12 @@ public class UtilGenerationTests {
     public void testMultipartBodyParts() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/multipart_formdata.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
@@ -196,12 +196,12 @@ public class UtilGenerationTests {
     public void testMultipartCustomBodyParts() throws IOException, BallerinaOpenApiException, FormatterException {
         Path definitionPath = RESDIR.resolve("swagger/multipart_formdata_custom.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        ClientMetaData.ClientMetaDataBuilder clientMetaDataBuilder = new ClientMetaData.ClientMetaDataBuilder();
-        ClientMetaData clientMetaData = clientMetaDataBuilder
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(clientMetaData);
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, openAPI, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());

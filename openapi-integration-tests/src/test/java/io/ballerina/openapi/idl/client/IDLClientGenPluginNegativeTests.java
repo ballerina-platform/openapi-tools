@@ -39,6 +39,7 @@ import static io.ballerina.openapi.TestUtil.executeRun;
  * Negative tests for OpenAPI client IDL import.
  */
 public class IDLClientGenPluginNegativeTests extends OpenAPITest {
+
     public static final String DISTRIBUTION_FILE_NAME = DISTRIBUTIONS_DIR.toString();
     public static final Path TEST_RESOURCE = Paths.get(RESOURCES_PATH.toString() + "/client-idl-projects");
 
@@ -54,6 +55,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_07/generated/").toString());
         Assert.assertFalse(dir.exists());
     }
+
     @Test
     public void testInvalidSwaggerRemotePath() throws IOException, InterruptedException {
         boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_10"),
@@ -61,6 +63,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_10/generated/").toString());
         Assert.assertFalse(dir.exists());
     }
+
     @Test
     public void testInvalidSwaggerLocalPath() throws IOException, InterruptedException {
         boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_11"),

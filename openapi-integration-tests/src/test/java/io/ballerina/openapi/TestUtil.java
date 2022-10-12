@@ -20,6 +20,7 @@ package io.ballerina.openapi;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.testng.Assert;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -183,8 +184,9 @@ public class TestUtil {
 
     public static File[] getMatchingFiles(String project) throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
-
+        //TODO: Change this function after fixing module name with client declaration alias.
         boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
+        Assert.assertTrue(successful);
         File dir = new File(RESOURCE.resolve("client-idl-projects/" + project + "/generated/").toString());
         final String id = "openapi_client";
         File[] matchingFiles = dir.listFiles(new FileFilter() {
