@@ -179,7 +179,7 @@ public class Constants {
         httpCodeMap.put("FailedDependency", "424");
         httpCodeMap.put("TooEarly", "425");
         httpCodeMap.put("UpgradeRequired", "426");
-        httpCodeMap.put("PredictionRequired", "428");
+        httpCodeMap.put("PreconditionRequired", "428");
         httpCodeMap.put("TooManyRequests", "429");
         httpCodeMap.put("RequestHeaderFieldsTooLarge", "431");
         httpCodeMap.put("UnavailableDueToLegalReasons", "451");

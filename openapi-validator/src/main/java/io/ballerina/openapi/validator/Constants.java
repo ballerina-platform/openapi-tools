@@ -79,6 +79,8 @@ public class Constants {
         Map<String, String> httpCodes = new HashMap<>();
         httpCodes.put("Continue", "100");
         httpCodes.put("SwitchingProtocols", "101");
+        httpCodes.put("Processing", "102");
+        httpCodes.put("EarlyHints", "103");
         httpCodes.put("Ok", "200");
         httpCodes.put("Created", "201");
         httpCodes.put("Accepted", "202");
@@ -86,6 +88,9 @@ public class Constants {
         httpCodes.put("NoContent", "204");
         httpCodes.put("RestContent", "205");
         httpCodes.put("PartialContent", "206");
+        httpCodes.put("MultiStatus", "207");
+        httpCodes.put("AlreadyReported", "208");
+        httpCodes.put("IMUsed", "226");
         httpCodes.put("MultipleChoices", "300");
         httpCodes.put("MovedPermanently", "301");
         httpCodes.put("Found", "302");
@@ -112,15 +117,27 @@ public class Constants {
         httpCodes.put("UnsupportedMediaType", "415");
         httpCodes.put("RangeNotSatisfiable", "416");
         httpCodes.put("ExpectationFailed", "417");
+        httpCodes.put("MisDirectedRequest", "421");
+        httpCodes.put("UnProcessableEntity", "422");
+        httpCodes.put("Locked", "423");
+        httpCodes.put("FailedDependency", "424");
+        httpCodes.put("TooEarly", "425");
         httpCodes.put("UpgradeRequired", "426");
+        httpCodes.put("PreconditionRequired", "428");
         httpCodes.put("TooManyRequests", "429");
         httpCodes.put("RequestHeaderFieldsTooLarge", "431");
+        httpCodes.put("UnavailableDueToLegalReasons", "451");
         httpCodes.put("InternalServerError", "500");
         httpCodes.put("NotImplemented", "501");
         httpCodes.put("BadGateway", "502");
         httpCodes.put("ServiceUnavailable", "503");
         httpCodes.put("GatewayTimeOut", "504");
         httpCodes.put("HttpVersionNotSupported", "505");
+        httpCodes.put("VariantAlsoNegotiates", "506");
+        httpCodes.put("InsufficientStorage", "507");
+        httpCodes.put("LoopDetected", "508");
+        httpCodes.put("NotExtended", "510");
+        httpCodes.put("NetworkAuthorizationRequired", "511");
         HTTP_CODES = Collections.unmodifiableMap(httpCodes);
     }
     public static final String HTTP_200 = "200";
