@@ -17,7 +17,7 @@ public isolated client class Client {
     #
     # + payload - A JSON object containing pet information
     # + return - OK
-    remote isolated function postXMLUser(Path01Body payload) returns http:Response|error {
+    remote isolated function postXMLUser(Path01_body payload) returns http:Response|error {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);

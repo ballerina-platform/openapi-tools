@@ -136,7 +136,7 @@ public class FunctionSignatureNodeTests {
 
         RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
         Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
-        Assert.assertEquals(param01.typeName().toString(), "PetsBody");
+        Assert.assertEquals(param01.typeName().toString(), "Pets_body");
 
         RequiredParameterNode param02 = (RequiredParameterNode) parameters.get(1);
         Assert.assertEquals(param02.paramName().orElseThrow().text(), "xAddressHeader");

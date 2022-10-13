@@ -22,9 +22,9 @@ public isolated client class Client {
     # Get movie reviews that are critics' picks. You can either specify the reviewer name or use "all", "full-time", or "part-time".
     #
     # + return - An array of Movie Critics
-    remote isolated function criticsPicks() returns InlineResponse200|error {
+    remote isolated function criticsPicks() returns Inline_response_200|error {
         string resourcePath = string `/`;
-        InlineResponse200 response = check self.clientEp-> get(resourcePath);
+        Inline_response_200 response = check self.clientEp->get(resourcePath);
         return response;
     }
 }

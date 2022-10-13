@@ -20,7 +20,7 @@ public isolated client class Client {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {"limit": 'limit};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp-> get(resourcePath);
+        Pets response = check self.clientEp->get(resourcePath);
         return response;
     }
     # Create a pet
@@ -39,16 +39,16 @@ public isolated client class Client {
     # + return - Expected response to a valid request
     remote isolated function showPetById(string petId) returns Pets|error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
-        Pets response = check self.clientEp-> get(resourcePath);
+        Pets response = check self.clientEp->get(resourcePath);
         return response;
     }
     # Info for a specific pet
     #
-    # + dogId - The id of the pet to retrieve
+    # + dog_id - The id of the pet to retrieve
     # + return - Expected response to a valid request
-    remote isolated function getDogs(string dogId) returns Dog|error {
-        string resourcePath = string `/pets/dogs/${getEncodedUri(dogId)}`;
-        Dog response = check self.clientEp-> get(resourcePath);
+    remote isolated function getDogs(string dog_id) returns Dog|error {
+        string resourcePath = string `/pets/dogs/${getEncodedUri(dog_id)}`;
+        Dog response = check self.clientEp->get(resourcePath);
         return response;
     }
 }

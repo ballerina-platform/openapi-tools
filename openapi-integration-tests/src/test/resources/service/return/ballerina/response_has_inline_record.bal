@@ -1,8 +1,8 @@
 import ballerina/http;
 
-public type BadRequestInlineResponse400 record {|
+public type BadRequestInline_response_400 record {|
     *http:BadRequest;
-    InlineResponse400 body;
+    Inline_response_400 body;
 |};
 
 public type User record {
@@ -17,7 +17,7 @@ public type PetForm record {
     string lastName?;
 };
 
-public type InlineResponse400 record {
+public type Inline_response_400 record {
     # The error ID.
     int id?;
     # The error name.
