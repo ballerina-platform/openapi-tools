@@ -94,7 +94,7 @@ public class GeneratorConstants {
     public static final String DEFAULT_MOCK_PKG = "mock";
     public static final String OAS_PATH_SEPARATOR = "/";
     public static final String UNTITLED_SERVICE = "UntitledAPI";
-    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/\\_{}\\s|.$])";
+    public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
     public static final String URL = "url";

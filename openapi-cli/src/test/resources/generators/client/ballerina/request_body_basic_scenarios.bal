@@ -17,7 +17,7 @@ public isolated client class Client {
     # 02 Example for rb has inline requestbody.
     #
     # + return - OK
-    remote isolated function updateUser(Path01Body payload) returns http:Response|error {
+    remote isolated function updateUser(Path01_body payload) returns http:Response|error {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
@@ -62,7 +62,7 @@ public isolated client class Client {
     # 06 Example for rb has array inline requestbody.
     #
     # + return - OK
-    remote isolated function updateXMLUser(Path03Body payload) returns http:Response|error {
+    remote isolated function updateXMLUser(Path03_body payload) returns http:Response|error {
         string resourcePath = string `/path03`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
@@ -74,7 +74,7 @@ public isolated client class Client {
     # 05 Example for rb has array inline requestbody.
     #
     # + return - OK
-    remote isolated function postXMLUser(Path03Body1 payload) returns http:Response|error {
+    remote isolated function postXMLUser(Path03_body_1 payload) returns http:Response|error {
         string resourcePath = string `/path03`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);
@@ -86,7 +86,7 @@ public isolated client class Client {
     # 07 Example for rb has array inline requestbody.
     #
     # + return - OK
-    remote isolated function postXMLUserInLineArray(Path04Body[] payload) returns http:Response|error {
+    remote isolated function postXMLUserInLineArray(Path04_body[] payload) returns http:Response|error {
         string resourcePath = string `/path04`;
         http:Request request = new;
         json jsonBody = check payload.cloneWithType(json);

@@ -51,35 +51,35 @@ public class IDLClientGenPluginTests extends OpenAPITest {
     @Test
     public void testValidSwaggerContract() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_01");
-        assert matchingFiles != null;
+        Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test
     public void testClientDeclarationWithOutAnnotation() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_02");
-        assert matchingFiles != null;
+        Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 2);
     }
 
     @Test
     public void testClientDeclarationWithAnnotation() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_03");
-        assert matchingFiles != null;
+        Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test
     public void testClientDeclarationNodeInsideTheFunction() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_04");
-        assert matchingFiles != null;
+        Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test
     public void testModuleLevelClientDeclarationNode() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_05");
-        assert matchingFiles != null;
+        Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 2);
     }
 
@@ -87,7 +87,7 @@ public class IDLClientGenPluginTests extends OpenAPITest {
     @Test(description = "When multiple client declarations have same annotation", enabled = false)
     public void testMultipleClientsWithSameAnnotation() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_06");
-        assert matchingFiles != null;
+        Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
@@ -101,7 +101,7 @@ public class IDLClientGenPluginTests extends OpenAPITest {
     @Test
     public void testWithLocalPathClientDeclaration() throws IOException, InterruptedException {
         File[] matchingFiles = getMatchingFiles("project_09");
-        assert matchingFiles != null;
+        Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }
 }

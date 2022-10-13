@@ -102,9 +102,6 @@ public class TestUtil {
         args.add(0, "run");
         Process process = getProcessBuilderResults(distributionName, sourceDirectory, args);
         int exitCode = process.waitFor();
-//        logOutput(process.getInputStream());
-//        logOutput(process.getErrorStream());
-//        return exitCode == 0;
         return process;
     }
     /**
