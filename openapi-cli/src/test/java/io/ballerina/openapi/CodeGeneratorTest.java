@@ -549,6 +549,7 @@ public class CodeGeneratorTest {
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("org-invitation"), "'org\\-invitation");
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("int?"), "'int\\?");
         Assert.assertEquals(GeneratorUtils.escapeIdentifier("error"), "'error");
+        Assert.assertEquals(GeneratorUtils.escapeIdentifier("foo_bar$_baz"), "'foo_bar\\$_baz");
     }
 
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
