@@ -93,9 +93,9 @@ public class IDLClientGenPluginTests extends OpenAPITest {
 
     @Test
     public void testInvokeAPIFromGeneratedClient() throws IOException, InterruptedException {
-        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_08"),
+        Process successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_08"),
                 new ArrayList<>());
-        Assert.assertTrue(successful);
+        Assert.assertEquals(successful.waitFor(), 0);
     }
 
     @Test

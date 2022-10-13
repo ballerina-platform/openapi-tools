@@ -97,14 +97,15 @@ public class TestUtil {
     /**
      * Ballerina run command.
      */
-    public static boolean executeRun(String distributionName, Path sourceDirectory,
+    public static Process executeRun(String distributionName, Path sourceDirectory,
                                        List<String> args) throws IOException, InterruptedException {
         args.add(0, "run");
         Process process = getProcessBuilderResults(distributionName, sourceDirectory, args);
         int exitCode = process.waitFor();
-        logOutput(process.getInputStream());
-        logOutput(process.getErrorStream());
-        return exitCode == 0;
+//        logOutput(process.getInputStream());
+//        logOutput(process.getErrorStream());
+//        return exitCode == 0;
+        return process;
     }
     /**
      * Execute ballerina openapi command.
@@ -144,8 +145,7 @@ public class TestUtil {
         OUT.println("Executing: " + StringUtils.join(args, ' '));
         ProcessBuilder pb = new ProcessBuilder(args);
         pb.directory(sourceDirectory.toFile());
-        Process process = pb.start();
-        return process;
+        return pb.start();
     }
 
     /**
@@ -185,8 +185,8 @@ public class TestUtil {
     public static File[] getMatchingFiles(String project) throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
         //TODO: Change this function after fixing module name with client declaration alias.
-        boolean successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
-        Assert.assertTrue(successful);
+        Process successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
+        Assert.assertEquals(successful.waitFor(), 0);
         File dir = new File(RESOURCE.resolve("client-idl-projects/" + project + "/generated/").toString());
         final String id = "openapi_client";
         File[] matchingFiles = dir.listFiles(new FileFilter() {
