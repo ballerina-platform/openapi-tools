@@ -54,52 +54,53 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
 
     @Test(description = "Here uses the graphQl yaml as non openapi client")
     public void testNonOpenAPIClientDeclaration() throws IOException, InterruptedException {
-        Process successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_07"),
+        Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_07"),
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_07/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = " ERROR [main.bal:(1:1,1:176)] no matching plugin found for client declaration";
-        logComparison(successful, msg);
+        compareLogOutput(process, msg);
     }
 
     @Test
     public void testInvalidSwaggerRemotePath() throws IOException, InterruptedException {
-        Process successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_10"),
+        Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_10"),
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_10/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = "ERROR [main.bal:(2:5,3:13)] unable to get resource from uri, reason: ";
-        logComparison(successful, msg);
+        compareLogOutput(process, msg);
     }
 
     @Test
     public void testInvalidSwaggerLocalPath() throws IOException, InterruptedException {
-        Process successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_11"),
+        Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_11"),
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_11/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = "ERROR [main.bal:(2:5,2:35)] unable to get resource from uri, reason: no protocol: openapi2.yaml";
-        logComparison(successful, msg);
+        compareLogOutput(process, msg);
     }
 
     @Test
     public void testInvalidSwaggerContract() throws IOException, InterruptedException {
-        Process successful = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_12"),
+        Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_12"),
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_12/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = " ERROR [main.bal:(2:5,2:34)] OpenAPI definition has errors:";
-        logComparison(successful, msg);
+        compareLogOutput(process, msg);
     }
 
-    private static void logComparison(Process successful, String msg) throws IOException {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(successful.getErrorStream()))) {
+    private static void compareLogOutput(Process process, String msg) throws IOException {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining("\n"));
             logLines.close();
             generatedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
-            msg = (msg.trim()).replaceAll(WHITESPACE_PATTERN, "");
-            Assert.assertTrue(generatedLog.contains(msg), "IDL client negative test fails.");
+            msg = msg.trim().replaceAll(WHITESPACE_PATTERN, "");
+            Assert.assertTrue(generatedLog.contains(msg), String.format("compiler output doesn't contain the expected" +
+                    " output: %s", msg));
         }
     }
 }
