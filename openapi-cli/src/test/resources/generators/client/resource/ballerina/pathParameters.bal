@@ -61,15 +61,15 @@ public isolated client class Client {
     }
     # Retrieves a single customer.
     #
-    # + customerId - Customer ID
+    # + customer_id - Customer ID
     # + fields - Show only certain fields, specified by a comma-separated list of field names.
     # + return - Requested customer
-    resource isolated function get admin/api/'2021\-10/customers/[string customerIdJson](string? fields = ()) returns http:Response|error {
-        if !customerIdJson.endsWith(".json") {
+    resource isolated function get admin/api/'2021\-10/customers/[string customer_idJson](string? fields = ()) returns http:Response|error {
+        if !customer_idJson.endsWith(".json") {
             return error("bad URL");
         }
-        string customerId = customerIdJson.substring(0, customerIdJson.length() - 4);
-        string resourcePath = string `/admin/api/2021-10/customers/${getEncodedUri(customerId)}.json`;
+        string customer_id = customer_idJson.substring(0, customer_idJson.length() - 4);
+        string resourcePath = string `/admin/api/2021-10/customers/${getEncodedUri(customer_id)}.json`;
         map<anydata> queryParam = {"fields": fields};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
         http:Response response = check self.clientEp->get(resourcePath);

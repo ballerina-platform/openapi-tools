@@ -1,13 +1,13 @@
+public type Pet_type record {
+    # type id
+    string typeId?;
+    string tagType?;
+};
+
 public type Pet record {
     int id;
     # name field
     string name;
     string tag?;
-    PetType 'type?;
-};
-
-public type PetType record {
-    # type id
-    string typeId?;
-    string tagType?;
+    Pet_type 'type?;
 };

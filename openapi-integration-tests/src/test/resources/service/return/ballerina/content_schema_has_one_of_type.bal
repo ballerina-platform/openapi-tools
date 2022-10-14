@@ -10,7 +10,7 @@ public type PetForm record {
     string lastName?;
 };
 
-public type InlineResponse200 User|Pet|PetForm;
+public type Inline_response_200 User|Pet|PetForm;
 
 public type Pet record {
     string userName;
