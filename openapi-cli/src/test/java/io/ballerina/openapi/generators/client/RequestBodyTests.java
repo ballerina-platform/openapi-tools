@@ -224,7 +224,8 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Test for generating request body when operation has multipart form-data media type")
-    public void testRequestBodyWithMultipartMediaType() throws IOException, BallerinaOpenApiException {
+    public void testRequestBodyWithMultipartMediaType()
+            throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/multipart_formdata.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("utils/swagger/multipart_formdata.yaml"), true);

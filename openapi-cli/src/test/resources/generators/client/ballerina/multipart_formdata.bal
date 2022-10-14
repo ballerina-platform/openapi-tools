@@ -17,7 +17,7 @@ public isolated client class Client {
     #
     # + payload - Pet
     # + return - Null response
-    remote isolated function createPet(PetsBody payload) returns http:Response|error {
+    remote isolated function createPet(Pets_body payload) returns http:Response|error {
         string resourcePath = string `/pets`;
         http:Request request = new;
         mime:Entity[] bodyParts = check createBodyParts(payload);

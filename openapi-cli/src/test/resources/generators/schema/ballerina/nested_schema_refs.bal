@@ -1,7 +1,3 @@
-public type ProjectGidProjectStatusesBody record {
-    ProjectStatusRequest data?;
-};
-
 public type ProjectStatusBase record {
     *ProjectStatusCompact;
     UserCompact author?;
@@ -20,6 +16,10 @@ public type UserCompact record {
     *AsanaResource;
     # Read-only except when same user as requester.
     string name?;
+};
+
+public type Project_gid_project_statuses_body record {
+    ProjectStatusRequest data?;
 };
 
 # A generic Asana Resource, containing a globally unique identifier.

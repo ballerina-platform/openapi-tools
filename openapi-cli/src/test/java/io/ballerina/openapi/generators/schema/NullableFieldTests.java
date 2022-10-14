@@ -24,6 +24,7 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -99,7 +100,7 @@ public class NullableFieldTests {
     }
 
     @Test(description = "Test for union type generation for nullable anyOf schema")
-    public void testNullableUnionType() throws IOException, BallerinaOpenApiException {
+    public void testNullableUnionType() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_anyof_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
@@ -109,7 +110,7 @@ public class NullableFieldTests {
     }
 
     @Test(description = "Test for union type generation for nullable anyOf schema with array schema")
-    public void testNullableArrayUnionType() throws IOException, BallerinaOpenApiException {
+    public void testNullableArrayUnionType() throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_anyof_array_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);

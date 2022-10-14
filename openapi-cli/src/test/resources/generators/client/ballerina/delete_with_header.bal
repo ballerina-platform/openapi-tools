@@ -14,18 +14,18 @@ public isolated client class Client {
     }
     # Delete neither header nor request body.
     #
-    # + orderId - Order ID
-    # + riskId - Order Risk ID
+    # + order_id - Order ID
+    # + risk_id - Order Risk ID
     # + return - Status OK
-    remote isolated function deleteOrderRisk(string orderId, string riskId) returns http:Response|error {
-        string resourcePath = string `/admin/api/2021-10/orders/${getEncodedUri(orderId)}/risks/${getEncodedUri(riskId)}.json`;
+    remote isolated function delete_order_risk(string order_id, string risk_id) returns http:Response|error {
+        string resourcePath = string `/admin/api/2021-10/orders/${getEncodedUri(order_id)}/risks/${getEncodedUri(risk_id)}.json`;
         http:Response response = check self.clientEp-> delete(resourcePath);
         return response;
     }
     # Delete with request body.
     #
     # + return - Status OK
-    remote isolated function orderRisk(json payload) returns http:Response|error {
+    remote isolated function order_risk(json payload) returns http:Response|error {
         string resourcePath = string `/request-body`;
         http:Request request = new;
         request.setPayload(payload, "application/json");
