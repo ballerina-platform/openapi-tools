@@ -45,7 +45,10 @@ public class Constants {
         ERROR_WHILE_GENERATING_CLIENT("OAS_IDL_CLIENT_03", "unexpected error occurred while generating the client",
                                          DiagnosticSeverity.ERROR),
         PARSER_ERROR("OAS_IDL_CLIENT_04", "",
-                                      DiagnosticSeverity.ERROR);
+                                      DiagnosticSeverity.ERROR),
+        PARSER_ERROR_FOR_SWAGGER("OAS_IDL_CLIENT_05", "given openAPI specification version does not support via " +
+                "openapi tool. Please use openapi specification version 03 or higher",
+                DiagnosticSeverity.ERROR);
 
         private final String code;
         private final String description;
