@@ -58,8 +58,8 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_07/generated/").toString());
         Assert.assertFalse(dir.exists());
-        String msg = " ERROR [main.bal:(1:1,1:176)] no matching plugin found for client declaration";
-        compareLogOutput(process, msg);
+        String msg = "ERROR [main.bal:(1:1,1:176)] no matching plugin found for client declaration";
+        assertOnErrorStream(process, msg);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_10/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = "ERROR [main.bal:(2:5,3:13)] unable to get resource from uri, reason: ";
-        compareLogOutput(process, msg);
+        assertOnErrorStream(process, msg);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_11/generated/").toString());
         Assert.assertFalse(dir.exists());
         String msg = "ERROR [main.bal:(2:5,2:35)] unable to get resource from uri, reason: no protocol: openapi2.yaml";
-        compareLogOutput(process, msg);
+        assertOnErrorStream(process, msg);
     }
 
     @Test
@@ -88,11 +88,11 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_12/generated/").toString());
         Assert.assertFalse(dir.exists());
-        String msg = " ERROR [main.bal:(2:5,2:34)] OpenAPI definition has errors:";
-        compareLogOutput(process, msg);
+        String msg = "ERROR [main.bal:(2:5,2:34)] OpenAPI definition has errors:";
+        assertOnErrorStream(process, msg);
     }
 
-    private static void compareLogOutput(Process process, String msg) throws IOException {
+    private static void assertOnErrorStream(Process process, String msg) throws IOException {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining("\n"));
