@@ -98,7 +98,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_13/generated/").toString());
         Assert.assertFalse(dir.exists());
-        String msg = "ERROR [main.bal:(2:5,2:119)] given openAPI definition version is not supported";
+        String msg = "ERROR [main.bal:(2:5,2:119)] provided openAPI contract version is not supported";
         assertOnErrorStream(process, msg);
     }
 

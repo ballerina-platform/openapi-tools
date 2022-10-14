@@ -83,6 +83,7 @@ import static io.ballerina.openapi.idl.client.Constants.LICENSE;
 import static io.ballerina.openapi.idl.client.Constants.MODULE_ALIAS;
 import static io.ballerina.openapi.idl.client.Constants.NULLABLE;
 import static io.ballerina.openapi.idl.client.Constants.OPENAPI_CLIENT_REFERENCE;
+import static io.ballerina.openapi.idl.client.Constants.OPENAPI_REGEX_PATTERN;
 import static io.ballerina.openapi.idl.client.Constants.OPERATIONS;
 import static io.ballerina.openapi.idl.client.Constants.TAGS;
 import static io.ballerina.openapi.idl.client.Constants.TRUE;
@@ -159,11 +160,9 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
                 return false;
             }
             String content = Files.readString(oasPath);
-            Pattern swaggerPattern = Pattern.compile("swagger:");
-            Pattern openapiPattern = Pattern.compile("openapi:");
+            Pattern openapiPattern = Pattern.compile(OPENAPI_REGEX_PATTERN);
             Matcher openapiMatcher = openapiPattern.matcher(content);
-            Matcher swaggerMatcher = swaggerPattern.matcher(content);
-            return openapiMatcher.find() || swaggerMatcher.find();
+            return openapiMatcher.find();
         } catch (IOException | NullPointerException e) {
             return false;
         }
