@@ -38,7 +38,7 @@ public class ErrorMessages {
     }
 
     public static String unsupportedOpenAPIVersion() {
-        return String.format("given openAPI definition version does not support via openAPI tool. " +
+        return String.format("given openAPI definition version is not supported via openAPI tool. " +
                 "Please use openAPI definition version 03 or higher");
     }
 }

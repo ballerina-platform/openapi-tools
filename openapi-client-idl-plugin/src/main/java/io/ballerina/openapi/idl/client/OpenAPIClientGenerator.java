@@ -159,10 +159,11 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
                 return false;
             }
             String content = Files.readString(oasPath);
-            Pattern patternSwagger = Pattern.compile("swagger:");
-            Pattern pattern = Pattern.compile("openapi:");
-            Matcher matcher = pattern.matcher(content);
-            return matcher.find() || patternSwagger.matcher(content).find();
+            Pattern swaggerPattern = Pattern.compile("swagger:");
+            Pattern openapiPattern = Pattern.compile("openapi:");
+            Matcher openapiMatcher = openapiPattern.matcher(content);
+            Matcher swaggerMatcher = swaggerPattern.matcher(content);
+            return openapiMatcher.find() || swaggerMatcher.find();
         } catch (IOException | NullPointerException e) {
             return false;
         }
