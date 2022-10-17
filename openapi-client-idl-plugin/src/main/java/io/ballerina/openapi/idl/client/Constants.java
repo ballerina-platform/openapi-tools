@@ -33,7 +33,7 @@ public class Constants {
     public static final String LICENSE = "license";
     public static final String TRUE = "true";
     public static final String MODULE_ALIAS = "openapi_client";
-    public static final String OPENAPI_REGEX_PATTERN = "(openapi|swagger):\\s*\\d+\\.\\d+\\.\\d+";
+    public static final String OPENAPI_REGEX_PATTERN = "(openapi:|swagger:)\\s*\"*[0-9]\\d*\\.\\d+\\.\\d+";
 
     /**
      * Enum class for containing diagnostic messages.
