@@ -83,6 +83,7 @@ import static io.ballerina.openapi.idl.client.Constants.LICENSE;
 import static io.ballerina.openapi.idl.client.Constants.MODULE_ALIAS;
 import static io.ballerina.openapi.idl.client.Constants.NULLABLE;
 import static io.ballerina.openapi.idl.client.Constants.OPENAPI_CLIENT_REFERENCE;
+import static io.ballerina.openapi.idl.client.Constants.OPENAPI_REGEX_PATTERN;
 import static io.ballerina.openapi.idl.client.Constants.OPERATIONS;
 import static io.ballerina.openapi.idl.client.Constants.TAGS;
 import static io.ballerina.openapi.idl.client.Constants.TRUE;
@@ -99,7 +100,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
         // check given contract is valid for the generating the client.
         Path oasPath = idlSourceGeneratorContext.resourcePath();
         // resource with yaml, json extension
-        return isOpenAPI(oasPath);
+        return isOpenAPI(oasPath, idlSourceGeneratorContext);
     }
 
     @Override
@@ -151,7 +152,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
      * This method uses to check whether given specification can be handled via the openapi client generation tool.
      * This includes basic requirements like file extension check and file header check.
      */
-    private static boolean isOpenAPI(Path oasPath) {
+    private static boolean isOpenAPI(Path oasPath, IDLSourceGeneratorContext context) {
 
         try {
             if (!(oasPath.toString().endsWith(YAML_EXTENSION) || oasPath.toString().endsWith(JSON_EXTENSION) ||
@@ -159,9 +160,9 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
                 return false;
             }
             String content = Files.readString(oasPath);
-            Pattern pattern = Pattern.compile("openapi:");
-            Matcher matcher = pattern.matcher(content);
-            return matcher.find();
+            Pattern openapiPattern = Pattern.compile(OPENAPI_REGEX_PATTERN);
+            Matcher openapiMatcher = openapiPattern.matcher(content);
+            return openapiMatcher.find();
         } catch (IOException | NullPointerException e) {
             return false;
         }

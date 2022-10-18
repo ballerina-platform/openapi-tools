@@ -33,6 +33,7 @@ public class Constants {
     public static final String LICENSE = "license";
     public static final String TRUE = "true";
     public static final String MODULE_ALIAS = "openapi_client";
+    public static final String OPENAPI_REGEX_PATTERN = "(openapi|swagger):\\s*\"*[0-9]\\d*\\.\\d+\\.\\d+";
 
     /**
      * Enum class for containing diagnostic messages.
@@ -44,9 +45,8 @@ public class Constants {
                 DiagnosticSeverity.ERROR),
         ERROR_WHILE_GENERATING_CLIENT("OAS_IDL_CLIENT_03", "unexpected error occurred while generating the client",
                                          DiagnosticSeverity.ERROR),
-        PARSER_ERROR("OAS_IDL_CLIENT_04", "",
-                                      DiagnosticSeverity.ERROR);
-
+        PARSER_ERROR("OAS_IDL_CLIENT_04", "", DiagnosticSeverity.ERROR); // parser errors are assigned directly to
+        // diagnostic via exceptions.
         private final String code;
         private final String description;
         private final DiagnosticSeverity severity;

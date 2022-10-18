@@ -146,6 +146,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_NAME;
+import static io.ballerina.openapi.core.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.core.GeneratorConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorConstants.YML_EXTENSION;
 
@@ -394,6 +395,10 @@ public class GeneratorUtils {
         parseOptions.setFlatten(true);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
+            if (parseResult.getMessages().size() == 1 && parseResult.getMessages().get(0).
+                    contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
+                throw new BallerinaOpenApiException(ErrorMessages.unsupportedOpenAPIVersion());
+            }
             StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
             for (String message : parseResult.getMessages()) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
