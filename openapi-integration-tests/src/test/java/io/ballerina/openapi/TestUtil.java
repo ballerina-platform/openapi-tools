@@ -179,16 +179,20 @@ public class TestUtil {
         }
     }
 
-    public static File[] getMatchingFiles(String project) throws IOException, InterruptedException {
+    public static File[] getMatchingFiles(String project, List<String> ids) throws IOException, InterruptedException {
         List<String> buildArgs = new LinkedList<>();
         //TODO: Change this function after fixing module name with client declaration alias.
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve(project), buildArgs);
         Assert.assertEquals(process.waitFor(), 0);
         File dir = new File(RESOURCE.resolve("client-idl-projects/" + project + "/generated/").toString());
-        final String id = "openapi_client";
         File[] matchingFiles = dir.listFiles(new FileFilter() {
             public boolean accept(File pathname) {
-                return pathname.getName().contains(id);
+                for (String id : ids) {
+                    if (pathname.getName().contains(id)) {
+                        return true;
+                    }
+                }
+                return false;
             }
         });
         return matchingFiles;

@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
 import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
@@ -50,43 +52,54 @@ public class IDLClientGenPluginTests extends OpenAPITest {
 
     @Test
     public void testValidSwaggerContract() throws IOException, InterruptedException {
-        File[] matchingFiles = getMatchingFiles("project_01");
+        List<String> ids = new LinkedList<>();
+        ids.add("bar");
+        File[] matchingFiles = getMatchingFiles("project_01", ids);
         Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test
     public void testClientDeclarationWithOutAnnotation() throws IOException, InterruptedException {
-        File[] matchingFiles = getMatchingFiles("project_02");
+        List<String> ids = new LinkedList<>();
+        ids.add("foo");
+        File[] matchingFiles = getMatchingFiles("project_02", ids);
         Assert.assertNotNull(matchingFiles);
-        Assert.assertEquals(matchingFiles.length, 2);
+        Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test
     public void testClientDeclarationWithAnnotation() throws IOException, InterruptedException {
-        File[] matchingFiles = getMatchingFiles("project_03");
+        List<String> ids = new LinkedList<>();
+        ids.add("bar");
+        File[] matchingFiles = getMatchingFiles("project_03", ids);
         Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test
     public void testClientDeclarationNodeInsideTheFunction() throws IOException, InterruptedException {
-        File[] matchingFiles = getMatchingFiles("project_04");
+        List<String> ids = new LinkedList<>();
+        ids.add("foo");
+        File[] matchingFiles = getMatchingFiles("project_04", ids);
         Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test
     public void testModuleLevelClientDeclarationNode() throws IOException, InterruptedException {
-        File[] matchingFiles = getMatchingFiles("project_05");
+        List<String> ids = new LinkedList<>();
+        ids.add("bar");
+        File[] matchingFiles = getMatchingFiles("project_05", ids);
         Assert.assertNotNull(matchingFiles);
-        Assert.assertEquals(matchingFiles.length, 2);
+        Assert.assertEquals(matchingFiles.length, 1);
     }
 
-    //TODO: this will be enable after fixing issue in lang
-    @Test(description = "When multiple client declarations have same annotation", enabled = false)
+    @Test(description = "When multiple client declarations have same annotation")
     public void testMultipleClientsWithSameAnnotation() throws IOException, InterruptedException {
-        File[] matchingFiles = getMatchingFiles("project_06");
+        List<String> ids = new LinkedList<>();
+        ids.add("foo");
+        File[] matchingFiles = getMatchingFiles("project_06", ids);
         Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }
@@ -100,7 +113,9 @@ public class IDLClientGenPluginTests extends OpenAPITest {
 
     @Test
     public void testWithLocalPathClientDeclaration() throws IOException, InterruptedException {
-        File[] matchingFiles = getMatchingFiles("project_09");
+        List<String> ids = new LinkedList<>();
+        ids.add("bar");
+        File[] matchingFiles = getMatchingFiles("project_09", ids);
         Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }

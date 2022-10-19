@@ -166,6 +166,8 @@ public class GeneratorConstants {
     public static final String SSL_FIELD_NAME = "secureSocket";
     public static final String PROXY_CONFIG = "proxy";
     public static final String VALIDATION = "validation";
+    public static final String SOCKET = "socketConfig";
+
     public static final String DEFAULT_API_KEY_DESC = "API keys for authorization";
 
     public static final String RESPONSE = "response";
@@ -218,6 +220,8 @@ public class GeneratorConstants {
         Map<String, String> httpCodeMap = new HashMap<>();
         httpCodeMap.put("100", "Continue");
         httpCodeMap.put("101", "SwitchingProtocols");
+        httpCodeMap.put("102", "Processing");
+        httpCodeMap.put("103", "EarlyHints");
         httpCodeMap.put("200", "Ok");
         httpCodeMap.put("201", "Created");
         httpCodeMap.put("202", "Accepted");
@@ -225,6 +229,9 @@ public class GeneratorConstants {
         httpCodeMap.put("204", "NoContent");
         httpCodeMap.put("205", "RestContent");
         httpCodeMap.put("206", "PartialContent");
+        httpCodeMap.put("207", "MultiStatus");
+        httpCodeMap.put("208", "AlreadyReported");
+        httpCodeMap.put("226", "IMUsed");
         httpCodeMap.put("300", "MultipleChoices");
         httpCodeMap.put("301", "MovedPermanently");
         httpCodeMap.put("302", "Found");
@@ -251,15 +258,27 @@ public class GeneratorConstants {
         httpCodeMap.put("415", "UnsupportedMediaType");
         httpCodeMap.put("416", "RangeNotSatisfiable");
         httpCodeMap.put("417", "ExpectationFailed");
+        httpCodeMap.put("421", "MisdirectedRequest");
+        httpCodeMap.put("422", "UnprocessableEntity");
+        httpCodeMap.put("423", "Locked");
+        httpCodeMap.put("424", "FailedDependency");
+        httpCodeMap.put("425", "TooEarly");
         httpCodeMap.put("426", "UpgradeRequired");
+        httpCodeMap.put("428", "PreconditionRequired");
         httpCodeMap.put("429", "TooManyRequests");
         httpCodeMap.put("431", "RequestHeaderFieldsTooLarge");
+        httpCodeMap.put("451", "UnavailableDueToLegalReasons");
         httpCodeMap.put("500", "InternalServerError");
         httpCodeMap.put("501", "NotImplemented");
         httpCodeMap.put("502", "BadGateway");
         httpCodeMap.put("503", "ServiceUnavailable");
         httpCodeMap.put("504", "GatewayTimeOut");
         httpCodeMap.put("505", "HttpVersionNotSupported");
+        httpCodeMap.put("506", "VariantAlsoNegotiates");
+        httpCodeMap.put("507", "InsufficientStorage");
+        httpCodeMap.put("508", "LoopDetected");
+        httpCodeMap.put("510", "NotExtended");
+        httpCodeMap.put("511", "NetworkAuthorizationRequired");
         HTTP_CODES_DES = Collections.unmodifiableMap(httpCodeMap);
     }
 

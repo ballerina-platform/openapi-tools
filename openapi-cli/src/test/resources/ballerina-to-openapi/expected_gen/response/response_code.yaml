@@ -18,6 +18,10 @@ paths:
           description: Continue
         "101":
           description: SwitchingProtocols
+        "102":
+          description: Processing
+        "103":
+          description: EarlyHints
         "200":
           description: Ok
         "201":
@@ -30,6 +34,12 @@ paths:
           description: NoContent
         "206":
           description: PartialContent
+        "207":
+          description: MultiStatus
+        "208":
+          description: AlreadyReported
+        "226":
+          description: IMUsed
         "300":
           description: MultipleChoices
         "301":
@@ -80,12 +90,26 @@ paths:
           description: RangeNotSatisfiable
         "417":
           description: ExpectationFailed
+        "421":
+          description: MisdirectedRequest
+        "422":
+          description: UnprocessableEntity
+        "423":
+          description: Locked
+        "424":
+          description: FailedDependency
+        "425":
+          description: TooEarly
         "426":
           description: UpgradeRequired
+        "428":
+          description: PreconditionRequired
         "429":
           description: TooManyRequests
         "431":
           description: RequestHeaderFieldsTooLarge
+        "451":
+          description: UnavailableDueToLegalReasons
         "500":
           description: InternalServerError
         "501":
@@ -96,4 +120,14 @@ paths:
           description: ServiceUnavailable
         "505":
           description: HttpVersionNotSupported
+        "506":
+          description: VariantAlsoNegotiates
+        "507":
+          description: InsufficientStorage
+        "508":
+          description: LoopDetected
+        "510":
+          description: NotExtended
+        "511":
+          description: NetworkAuthorizationRequired
 components: {}
