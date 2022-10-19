@@ -117,8 +117,8 @@ public class Constants {
         httpCodes.put("UnsupportedMediaType", "415");
         httpCodes.put("RangeNotSatisfiable", "416");
         httpCodes.put("ExpectationFailed", "417");
-        httpCodes.put("MisDirectedRequest", "421");
-        httpCodes.put("UnProcessableEntity", "422");
+        httpCodes.put("MisdirectedRequest", "421");
+        httpCodes.put("UnprocessableEntity", "422");
         httpCodes.put("Locked", "423");
         httpCodes.put("FailedDependency", "424");
         httpCodes.put("TooEarly", "425");

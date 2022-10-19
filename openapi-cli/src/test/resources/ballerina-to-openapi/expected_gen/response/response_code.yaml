@@ -91,9 +91,9 @@ paths:
         "417":
           description: ExpectationFailed
         "421":
-          description: MisDirectedRequest
+          description: MisdirectedRequest
         "422":
-          description: UnProcessableEntity
+          description: UnprocessableEntity
         "423":
           description: Locked
         "424":
@@ -103,7 +103,7 @@ paths:
         "426":
           description: UpgradeRequired
         "428":
-          description: PredictionRequired
+          description: PreconditionRequired
         "429":
           description: TooManyRequests
         "431":

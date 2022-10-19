@@ -256,8 +256,8 @@ public class GeneratorConstants {
         httpCodeMap.put("415", "UnsupportedMediaType");
         httpCodeMap.put("416", "RangeNotSatisfiable");
         httpCodeMap.put("417", "ExpectationFailed");
-        httpCodeMap.put("421", "MisDirectedRequest");
-        httpCodeMap.put("422", "UnProcessableEntity");
+        httpCodeMap.put("421", "MisdirectedRequest");
+        httpCodeMap.put("422", "UnprocessableEntity");
         httpCodeMap.put("423", "Locked");
         httpCodeMap.put("424", "FailedDependency");
         httpCodeMap.put("425", "TooEarly");

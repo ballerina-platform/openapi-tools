@@ -173,8 +173,8 @@ public class Constants {
         httpCodeMap.put("UnsupportedMediaType", "415");
         httpCodeMap.put("RangeNotSatisfiable", "416");
         httpCodeMap.put("ExpectationFailed", "417");
-        httpCodeMap.put("MisDirectedRequest", "421");
-        httpCodeMap.put("UnProcessableEntity", "422");
+        httpCodeMap.put("MisdirectedRequest", "421");
+        httpCodeMap.put("UnprocessableEntity", "422");
         httpCodeMap.put("Locked", "423");
         httpCodeMap.put("FailedDependency", "424");
         httpCodeMap.put("TooEarly", "425");
