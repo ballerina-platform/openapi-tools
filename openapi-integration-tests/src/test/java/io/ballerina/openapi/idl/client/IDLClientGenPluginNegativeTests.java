@@ -78,7 +78,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_11/generated/").toString());
         Assert.assertFalse(dir.exists());
-        String msg = "ERROR [main.bal:(2:5,2:35)] unable to get resource from uri, reason: no protocol: openapi2.yaml";
+        String msg = "ERROR [main.bal:(2:5,2:35)]  could not locate the resource file: openapi2.yaml";
         assertOnErrorStream(process, msg);
     }
 

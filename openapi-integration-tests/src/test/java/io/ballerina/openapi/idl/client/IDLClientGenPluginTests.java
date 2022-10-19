@@ -62,11 +62,10 @@ public class IDLClientGenPluginTests extends OpenAPITest {
     @Test
     public void testClientDeclarationWithOutAnnotation() throws IOException, InterruptedException {
         List<String> ids = new LinkedList<>();
-        ids.add("bar");
         ids.add("foo");
         File[] matchingFiles = getMatchingFiles("project_02", ids);
         Assert.assertNotNull(matchingFiles);
-        Assert.assertEquals(matchingFiles.length, 2);
+        Assert.assertEquals(matchingFiles.length, 1);
     }
 
     @Test
@@ -91,17 +90,15 @@ public class IDLClientGenPluginTests extends OpenAPITest {
     public void testModuleLevelClientDeclarationNode() throws IOException, InterruptedException {
         List<String> ids = new LinkedList<>();
         ids.add("bar");
-        ids.add("foo");
         File[] matchingFiles = getMatchingFiles("project_05", ids);
         Assert.assertNotNull(matchingFiles);
-        Assert.assertEquals(matchingFiles.length, 2);
+        Assert.assertEquals(matchingFiles.length, 1);
     }
 
-    //TODO: this will be enable after fixing issue in lang
-    @Test(description = "When multiple client declarations have same annotation", enabled = false)
+    @Test(description = "When multiple client declarations have same annotation")
     public void testMultipleClientsWithSameAnnotation() throws IOException, InterruptedException {
         List<String> ids = new LinkedList<>();
-        ids.add("bar");
+        ids.add("foo");
         File[] matchingFiles = getMatchingFiles("project_06", ids);
         Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
