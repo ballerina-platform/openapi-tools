@@ -80,7 +80,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.YML_EXTENSION;
 import static io.ballerina.openapi.core.GeneratorUtils.normalizeOpenAPI;
 import static io.ballerina.openapi.idl.client.Constants.IS_RESOURCE;
 import static io.ballerina.openapi.idl.client.Constants.LICENSE;
-import static io.ballerina.openapi.idl.client.Constants.MODULE_ALIAS;
 import static io.ballerina.openapi.idl.client.Constants.NULLABLE;
 import static io.ballerina.openapi.idl.client.Constants.OPENAPI_CLIENT_REFERENCE;
 import static io.ballerina.openapi.idl.client.Constants.OPENAPI_REGEX_PATTERN;
@@ -111,7 +110,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
             if (genSrcFiles.isEmpty()) {
                 return;
             }
-            String moduleName = MODULE_ALIAS;
+            String moduleName = getAlias(idlSourceContext.clientNode());
             ModuleId moduleId = ModuleId.create(moduleName, idlSourceContext.currentPackage().packageId());
             List<DocumentConfig> documents = new ArrayList<>();
 
@@ -450,5 +449,12 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
         DocumentId packageDoc = aPackage.getDefaultModule().documentIds().stream().findFirst().get();
         Optional<Path> path = aPackage.project().documentPath(packageDoc);
         return path.orElse(null);
+    }
+
+    private String getAlias(Node clientNode) {
+        if (clientNode.kind() == SyntaxKind.MODULE_CLIENT_DECLARATION) {
+            return ((ModuleClientDeclarationNode) clientNode).clientPrefix().toString();
+        }
+        return ((ClientDeclarationNode) clientNode).clientPrefix().toString();
     }
 }
