@@ -36,4 +36,9 @@ public class ErrorMessages {
     public static String invalidPathParamType(String parameterName) {
         return String.format("Invalid path parameter data type for the parameter: '%s'", parameterName);
     }
+
+    public static String unsupportedOpenAPIVersion() {
+        return String.format("provided openAPI contract version is not supported in openAPI tool. " +
+                "Use openAPI specification version 3 or higher");
+    }
 }
