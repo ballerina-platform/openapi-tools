@@ -166,6 +166,8 @@ public class GeneratorConstants {
     public static final String SSL_FIELD_NAME = "secureSocket";
     public static final String PROXY_CONFIG = "proxy";
     public static final String VALIDATION = "validation";
+    public static final String SOCKET = "socketConfig";
+
     public static final String DEFAULT_API_KEY_DESC = "API keys for authorization";
 
     public static final String RESPONSE = "response";

@@ -154,6 +154,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.PASSWORD;
 import static io.ballerina.openapi.core.GeneratorConstants.PROXY_CONFIG;
 import static io.ballerina.openapi.core.GeneratorConstants.REFRESH_TOKEN;
 import static io.ballerina.openapi.core.GeneratorConstants.SELF;
+import static io.ballerina.openapi.core.GeneratorConstants.SOCKET;
 import static io.ballerina.openapi.core.GeneratorConstants.SSL_FIELD_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.VALIDATION;
 import static io.ballerina.openapi.core.GeneratorUtils.escapeIdentifier;
@@ -301,6 +302,8 @@ public class BallerinaAuthConfigGenerator {
      *          http:ClientSecureSocket? secureSocket = ();
      *          # Proxy server related options
      *          ProxyConfig? proxy = ();
+     *          # Provides settings related to client socket configuration
+     *          ClientSocketConfig socketConfig = {};
      * |};
      * </pre>
      * -- ex: Config record for API Key Authentication mechanism.
@@ -781,6 +784,8 @@ public class BallerinaAuthConfigGenerator {
      *     # Enables the inbound payload validation functionality which provided by the constraint package.
      *     Enabled by default
      *     boolean validation = true;
+     *     # Provides settings related to client socket configuration
+     *     http:ClientSocketConfig socketConfig = {};
      * </pre>
      *
      * @return {@link List<Node>}   ClientConfig record fields' node list
@@ -972,6 +977,17 @@ public class BallerinaAuthConfigGenerator {
                 validationMetadata, null, validationFieldType, validationFieldName,
                 equalToken, createRequiredExpressionNode(createToken(TRUE_KEYWORD)), semicolonToken);
         recordFieldNodes.add(validateFieldNode);
+
+        // add socketConfig field
+        MetadataNode socketMetadata = getMetadataNode("Provides settings related to client " +
+                "socket configuration");
+        IdentifierToken socketFieldName = AbstractNodeFactory.createIdentifierToken(SOCKET);
+        TypeDescriptorNode socketFieldType = createSimpleNameReferenceNode(createIdentifierToken("http" +
+                ":ClientSocketConfig"));
+        RecordFieldWithDefaultValueNode socketFieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
+                socketMetadata, null, socketFieldType, socketFieldName,
+                equalToken, emptyExpression, semicolonToken);
+        recordFieldNodes.add(socketFieldNode);
         return recordFieldNodes;
     }
 
