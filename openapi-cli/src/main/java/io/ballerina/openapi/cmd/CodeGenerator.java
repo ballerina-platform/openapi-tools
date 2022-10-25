@@ -151,18 +151,19 @@ public class CodeGenerator {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, UTIL_FILE_NAME, utilContent));
         }
 
-        // Generate ballerina types.
-        // Generate ballerina records to represent schemas.
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
-
         //Update type definition list
+        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
+                clientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
         List<TypeDefinitionNode> typeInclusionRecords = serviceGenerator.getTypeInclusionRecords();
         List<TypeDefinitionNode> typeDefinitionNodeList = clientGenerator.getTypeDefinitionNodeList();
-        List<TypeDefinitionNode> externalTypeDefNodes = new ArrayList<>();
-        externalTypeDefNodes.addAll(typeInclusionRecords);
-        externalTypeDefNodes.addAll(typeDefinitionNodeList);
+        preGeneratedTypeDefNodes.addAll(typeInclusionRecords);
+        preGeneratedTypeDefNodes.addAll(typeDefinitionNodeList);
 
-        ballerinaSchemaGenerator.setTypeDefinitionNodeList(externalTypeDefNodes);
+        // Generate ballerina types.
+        // Generate ballerina records to represent schemas.
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
+                openAPIDef, nullable, preGeneratedTypeDefNodes);
+
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 
@@ -348,9 +349,13 @@ public class CodeGenerator {
             sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, UTIL_FILE_NAME, utilContent));
         }
 
+        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
+                ballerinaClientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
+        preGeneratedTypeDefNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
         // Generate ballerina records to represent schemas.
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
-        ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
+                openAPIDef, nullable, preGeneratedTypeDefNodes);
+
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
         if (filter.getTags().size() > 0) {
@@ -515,9 +520,10 @@ public class CodeGenerator {
         String mainContent = Formatter.format
                 (ballerinaServiceGenerator.generateSyntaxTree()).toString();
         sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcPackage, srcFile, mainContent));
-
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPIDef, nullable);
-        ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaServiceGenerator.getTypeInclusionRecords());
+        List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
+                ballerinaServiceGenerator.getTypeInclusionRecords());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
+                openAPIDef, nullable, preGeneratedTypeDefNodes);
         String schemaContent = Formatter.format(
                 ballerinaSchemaGenerator.generateSyntaxTree()).toString();
         if (!schemaContent.isBlank()) {
