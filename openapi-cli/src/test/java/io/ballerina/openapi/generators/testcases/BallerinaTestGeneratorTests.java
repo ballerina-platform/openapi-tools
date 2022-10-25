@@ -19,6 +19,7 @@ package io.ballerina.openapi.generators.testcases;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
@@ -43,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static io.ballerina.openapi.cmd.CmdConstants.OAS_PATH_SEPARATOR;
@@ -78,10 +80,14 @@ public class BallerinaTestGeneratorTests {
                 .withOpenAPI(openAPI)
                 .withResourceMode(false).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
-        BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(openAPI);
-        schemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
-        BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
         SyntaxTree syntaxTreeClient = ballerinaClientGenerator.generateSyntaxTree();
+        List<TypeDefinitionNode> preGeneratedTypeDefinitionNodes = new LinkedList<>();
+        preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.
+                getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
+        preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        BallerinaTypesGenerator schemaGenerator = new BallerinaTypesGenerator(
+                openAPI, false, preGeneratedTypeDefinitionNodes);
+        BallerinaTestGenerator ballerinaTestGenerator = new BallerinaTestGenerator(ballerinaClientGenerator);
         SyntaxTree syntaxTreeTest = ballerinaTestGenerator.generateSyntaxTree();
         SyntaxTree syntaxTreeSchema = schemaGenerator.generateSyntaxTree();
         SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
@@ -124,7 +130,7 @@ public class BallerinaTestGeneratorTests {
                 "oauth2_implicit.yaml",
                 "query_api_key.yaml",
                 "no_auth.yaml",
-                "combination_of_apikey_and_http_oauth.yaml",
+//                "combination_of_apikey_and_http_oauth.yaml",
                 "oauth2_password.yaml"
         };
     }

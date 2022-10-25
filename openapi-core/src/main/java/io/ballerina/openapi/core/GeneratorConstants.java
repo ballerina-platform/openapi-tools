@@ -146,6 +146,7 @@ public class GeneratorConstants {
     public static final String TEXT = "text";
     public static final String IMAGE_PNG = "image/png";
     public static final String TEXT_PLAIN = "text/plain";
+    public static final String ENSURE_TYPE = "ensureType";
 
     // auth related constants
     public static final String API_KEY = "apikey";
@@ -155,6 +156,22 @@ public class GeneratorConstants {
     public static final String AUTH = "auth";
     public static final String AUTH_CONFIG = "authConfig";
     public static final String AUTH_CONFIG_RECORD = "AuthConfig";
+    public static final String HTTP_CLIENT_CONFIG = "httpClientConfig";
+    public static final String CLIENT_HTTP1_SETTINGS = "ClientHttp1Settings";
+    public static final String CLIENT_HTTP1_SETTINGS_FIELD = "http1Settings";
+    public static final String HTTP2_SETTINGS = "http:ClientHttp2Settings";
+    public static final String HTTP2_SETTINGS_FIELD = "http2Settings";
+    public static final String SETTINGS = "settings";
+    public static final String CACHE_CONFIG = "http:CacheConfig";
+    public static final String CACHE_CONFIG_FIELD = "cache";
+    public static final String RESPONSE_LIMIT = "http:ResponseLimitConfigs";
+    public static final String RESPONSE_LIMIT_FIELD = "responseLimits";
+    public static final String SECURE_SOCKET = "http:ClientSecureSocket";
+    public static final String SECURE_SOCKET_FIELD = "secureSocket";
+    public static final String PROXY = "http:ProxyConfig";
+
+    public static final String KEEP_ALIVE = "keepAlive";
+    public static final String CHUNKING = "chunking";
     public static final String BASIC = "basic";
     public static final String BEARER = "bearer";
     public static final String REFRESH_TOKEN = "refresh_token";
@@ -162,6 +179,7 @@ public class GeneratorConstants {
     public static final String PASSWORD = "password";
     public static final String CONFIG_RECORD_ARG = "clientConfig";
     public static final String CLIENT_CONFIG = "ClientConfig";
+    public static final String CONNECTION_CONFIG = "ConnectionConfig";
     public static final String OAUTH2 = "oauth2";
     public static final String SSL_FIELD_NAME = "secureSocket";
     public static final String PROXY_CONFIG = "proxy";

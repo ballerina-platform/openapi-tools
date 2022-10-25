@@ -35,6 +35,7 @@ import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
@@ -66,6 +67,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -235,9 +237,12 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
         }
 
         // generate ballerina records to represent schemas.
+        List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
+        typeDefinitionNodeList.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        typeDefinitionNodeList.addAll(ballerinaClientGenerator
+                .getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(oasClientConfig.getOpenAPI(),
-                oasClientConfig.isNullable());
-        ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
+                oasClientConfig.isNullable(), typeDefinitionNodeList);
         SyntaxTree schemaSyntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String schemaContent = Formatter.format(schemaSyntaxTree).toString();
 

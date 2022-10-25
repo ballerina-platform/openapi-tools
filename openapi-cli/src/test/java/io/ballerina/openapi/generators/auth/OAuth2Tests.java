@@ -25,6 +25,7 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
 import io.ballerina.openapi.generators.common.TestConstants;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -49,9 +51,11 @@ public class OAuth2Tests {
                 true);
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2/" + yamlFile);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
+        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap);
         String expectedConfigRecord = configRecord;
         String generatedConfigRecord = Objects.requireNonNull(
-                ballerinaAuthConfigGenerator.getConfigRecord(openAPI)).toString();
+                ballerinaAuthConfigGenerator.generateConnectionConfigRecord()).toString();
         generatedConfigRecord = (generatedConfigRecord.trim()).replaceAll("\\s+", "");
         expectedConfigRecord = (expectedConfigRecord.trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedConfigRecord, generatedConfigRecord);

@@ -456,23 +456,6 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test code generation when no schemas given")
-    public void testCodeGenerationWithoutSchemas() {
-        String definitionPath = RES_DIR.resolve("no_schema.yaml").toString();
-        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
-        try {
-            generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
-            boolean hasTypeFileGenerated = Files.exists(resourcePath.resolve("client.bal")) &&
-                    Files.notExists(resourcePath.resolve("types.bal"));
-            Assert.assertTrue(hasTypeFileGenerated, "Empty types.bal file has been generated");
-
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
-            Assert.fail("Error while generating the client. " + e.getMessage());
-        } finally {
-            deleteGeneratedFiles("client.bal");
-        }
-    }
-
     @Test(description = "Test code generation when no schemas given in service")
     public void testCodeGenerationWithoutSchemasService() {
         final String serviceName = "no_schema";
@@ -508,27 +491,6 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test code generation when no schemas given in both files (client and service)")
-    public void testCodeGenerationWithoutSchemasBothFiles() {
-        final String serviceName = "no_schema";
-        String definitionPath = RES_DIR.resolve("no_schema.yaml").toString();
-        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
-        try {
-            generator.generateClientAndService(definitionPath, serviceName, resourcePath.toString(),  filter
-                    , false, false);
-            boolean fileAvailabilityCheck = Files.exists(resourcePath.resolve("client.bal")) &&
-                    Files.exists(resourcePath.resolve("no_schema_service.bal")) &&
-                    Files.notExists(resourcePath.resolve("types.bal"));
-
-            Assert.assertTrue(fileAvailabilityCheck, "Empty types.bal file has been generated");
-
-        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
-            Assert.fail("Error while generating the both files. " + e.getMessage());
-        } finally {
-            deleteGeneratedFiles("no_schema_service.bal");
-            deleteGeneratedFiles("client.bal");
-        }
-    }
     @Test(description = "Functionality tests when invalid OpenAPI definition is given",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: .*")
