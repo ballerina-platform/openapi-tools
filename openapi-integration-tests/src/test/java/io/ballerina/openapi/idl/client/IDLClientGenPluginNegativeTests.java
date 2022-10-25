@@ -109,10 +109,11 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
             Stream<String> logLines = br.lines();
             String generatedLog = logLines.collect(Collectors.joining("\n"));
             logLines.close();
-            generatedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
-            msg = msg.trim().replaceAll(WHITESPACE_PATTERN, "");
-            Assert.assertTrue(generatedLog.contains(msg), String.format("compiler output doesn't contain the expected" +
-                    " output: %s", msg));
+            String formattedGeneratedLog = (generatedLog.trim()).replaceAll(WHITESPACE_PATTERN, "");
+            String formattedMessage = msg.trim().replaceAll(WHITESPACE_PATTERN, "");
+            Assert.assertTrue(formattedGeneratedLog.contains(formattedMessage),
+                    String.format("compiler output doesn't contain the expected" +
+                    " output: %s : generated output : %s", msg, generatedLog));
         }
     }
 }
