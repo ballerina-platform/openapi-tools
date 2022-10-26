@@ -111,11 +111,20 @@ public class IDLClientGenPluginTests extends OpenAPITest {
         Assert.assertEquals(successful.waitFor(), 0);
     }
 
-    @Test
-    public void testWithLocalPathClientDeclaration() throws IOException, InterruptedException {
+    @Test(description = "test client declarations with local YAML contract paths")
+    public void testWithLocalPathYAML() throws IOException, InterruptedException {
         List<String> ids = new LinkedList<>();
         ids.add("bar");
         File[] matchingFiles = getMatchingFiles("project_09", ids);
+        Assert.assertNotNull(matchingFiles);
+        Assert.assertEquals(matchingFiles.length, 1);
+    }
+
+    @Test(description = "test client declarations with local JSON contract paths")
+    public void testWithLocalPathJSON() throws IOException, InterruptedException {
+        List<String> ids = new LinkedList<>();
+        ids.add("bar");
+        File[] matchingFiles = getMatchingFiles("project_14", ids);
         Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
     }
