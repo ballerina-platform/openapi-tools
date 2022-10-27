@@ -103,8 +103,8 @@ import static io.ballerina.openapi.core.GeneratorConstants.API_KEY;
 import static io.ballerina.openapi.core.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.core.GeneratorConstants.BASIC;
 import static io.ballerina.openapi.core.GeneratorConstants.BEARER;
-import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_CONFIG;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_CRED;
+import static io.ballerina.openapi.core.GeneratorConstants.CONNECTION_CONFIG;
 import static io.ballerina.openapi.core.GeneratorConstants.PASSWORD;
 import static io.ballerina.openapi.core.GeneratorConstants.REFRESH_TOKEN;
 
@@ -220,7 +220,7 @@ public class BallerinaTestGenerator {
                     moduleVariableDeclarationNodes.add(getConfigurableVariable(typeBindingPattern));
                     moduleVariableDeclarationNodes.add(getAuthConfigAssignmentNode());
                     moduleVariableDeclarationNodes.add(getClientInitializationNode(
-                            GeneratorConstants.CONFIG_RECORD_ARG));
+                            GeneratorConstants.CONFIG));
                     configFileName = "basic_config.toml";
                     break;
                 case BEARER:
@@ -229,7 +229,7 @@ public class BallerinaTestGenerator {
                     moduleVariableDeclarationNodes.add(getConfigurableVariable(typeBindingPattern));
                     moduleVariableDeclarationNodes.add(getAuthConfigAssignmentNode());
                     moduleVariableDeclarationNodes.add(getClientInitializationNode(
-                            GeneratorConstants.CONFIG_RECORD_ARG));
+                            GeneratorConstants.CONFIG));
                     configFileName = "bearer_config.toml";
                     break;
                 case CLIENT_CRED:
@@ -258,11 +258,7 @@ public class BallerinaTestGenerator {
                     boolean combinationOfApiKeyAndHTTPOAuth = ballerinaClientGenerator.getBallerinaAuthConfigGenerator()
                             .isApiKey() && ballerinaClientGenerator.getBallerinaAuthConfigGenerator().isHttpOROAuth();
                     if (combinationOfApiKeyAndHTTPOAuth) {
-                        typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
-                                createIdentifierToken(GeneratorConstants.AUTH_CONFIG_RECORD + " & readonly"));
-                        moduleVariableDeclarationNodes.add(getConfigurableVariable(typeBindingPattern));
-                        moduleVariableDeclarationNodes.add(getClientInitializationNode
-                                (GeneratorConstants.AUTH_CONFIG));
+                        // todo : The test file in the combination
                     } else {
                         typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
                                 createIdentifierToken(GeneratorConstants.API_KEYS_CONFIG + " & readonly"));
@@ -293,9 +289,9 @@ public class BallerinaTestGenerator {
 
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(CLIENT_CONFIG));
+                createIdentifierToken(CONNECTION_CONFIG));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
-                createIdentifierToken(GeneratorConstants.CONFIG_RECORD_ARG));
+                createIdentifierToken(GeneratorConstants.CONFIG));
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(typeBindingPattern,
                 bindingPattern);
         NodeList<Token> nodeList = createEmptyNodeList();

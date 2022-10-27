@@ -48,7 +48,6 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
@@ -68,6 +67,7 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -186,7 +186,8 @@ public class BallerinaClientGenerator {
         this.imports = new ArrayList<>();
         this.typeDefinitionNodeList = new ArrayList<>();
         this.openAPI = oasClientConfig.getOpenAPI();
-        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, oasClientConfig.isNullable());
+        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI,
+                oasClientConfig.isNullable(), new LinkedList<>());
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
@@ -209,7 +210,7 @@ public class BallerinaClientGenerator {
         imports.add(importForHttp);
         List<ModuleMemberDeclarationNode> nodes = new ArrayList<>();
         // Add authentication related records
-        ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI, nodes);
+        ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
 
         // Add class definition node to module member nodes
         nodes.add(getClassDefinitionNode());
@@ -232,7 +233,7 @@ public class BallerinaClientGenerator {
      * <pre>
      *     public isolated client class Client {
      *     final http:Client clientEp;
-     *     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "/url")
+     *     public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "/url")
      *     returns error? {
      *         http:Client httpEp = check new (serviceUrl, clientConfig);
      *         self.clientEp = httpEp;
@@ -294,7 +295,7 @@ public class BallerinaClientGenerator {
      * -- Scenario 1: init function when authentication mechanism is API key
      * <pre>
      *   public isolated function init(ApiKeysConfig apiKeyConfig, string serviceUrl,
-     *      http:ClientConfiguration clientConfig =  {}) returns error? {
+     *     ConnectionConfig config =  {}) returns error? {
      *         http:Client httpEp = check new (serviceUrl, clientConfig);
      *         self.clientEp = httpEp;
      *         self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();
@@ -309,7 +310,7 @@ public class BallerinaClientGenerator {
      * </pre>
      * -- Scenario 3: init function when no authentication mechanism is provided
      * <pre>
-     *   public isolated function init(http:ClientConfiguration clientConfig =  {},
+     *   public isolated function init(ConnectionConfig config =  {},
      *      string serviceUrl = "base-url") returns error? {
      *         http:Client httpEp = check new (serviceUrl, clientConfig);
      *         self.clientEp = httpEp;
@@ -338,13 +339,16 @@ public class BallerinaClientGenerator {
 
         List<StatementNode> assignmentNodes = new ArrayList<>();
 
-        // If both apiKey and httpOrOAuth is supported
-        if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
-            ballerinaAuthConfigGenerator.handleInitForMixOfApiKeyAndHTTPOrOAuth(assignmentNodes);
-        }
+        assignmentNodes.add(ballerinaAuthConfigGenerator.getHttpClientConfigVariableNode());
+        assignmentNodes.add(ballerinaAuthConfigGenerator.getClientConfigDoStatementNode());
 
+        // If both apiKey and httpOrOAuth is supported
+        // todo : After revamping
+        if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
+            assignmentNodes.add(ballerinaAuthConfigGenerator.handleInitForMixOfApiKeyAndHTTPOrOAuth());
+        }
         // create initialization statement of http:Client class instance
-        VariableDeclarationNode clientInitializationNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
+        assignmentNodes.add(ballerinaAuthConfigGenerator.getClientInitializationNode());
         // create {@code self.clientEp = httpEp;} assignment node
         FieldAccessExpressionNode varRef = createFieldAccessExpressionNode(
                 createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
@@ -352,9 +356,9 @@ public class BallerinaClientGenerator {
         SimpleNameReferenceNode expr = createSimpleNameReferenceNode(createIdentifierToken("httpEp"));
         AssignmentStatementNode httpClientAssignmentStatementNode = createAssignmentStatementNode(varRef,
                 createToken(EQUAL_TOKEN), expr, createToken(SEMICOLON_TOKEN));
-
-        assignmentNodes.add(clientInitializationNode);
         assignmentNodes.add(httpClientAssignmentStatementNode);
+
+
         // Get API key assignment node if authentication mechanism type is only `apiKey`
         if (ballerinaAuthConfigGenerator.isApiKey() && !ballerinaAuthConfigGenerator.isHttpOROAuth()) {
             assignmentNodes.add(ballerinaAuthConfigGenerator.getApiKeyAssignmentNode());
@@ -412,17 +416,13 @@ public class BallerinaClientGenerator {
         }
         //todo: setInitDocComment() pass the references
         docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(clientInitDocComment, true));
-        if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
-            MarkdownParameterDocumentationLineNode authConfig = DocCommentsGenerator.createAPIParamDoc(
-                    "authConfig", "Configurations used for Authentication");
-            docs.add(authConfig);
-        } else if (ballerinaAuthConfigGenerator.isApiKey()) {
+        if (ballerinaAuthConfigGenerator.isApiKey() && !ballerinaAuthConfigGenerator.isHttpOROAuth()) {
             MarkdownParameterDocumentationLineNode apiKeyConfig = DocCommentsGenerator.createAPIParamDoc(
                     "apiKeyConfig", DEFAULT_API_KEY_DESC);
             docs.add(apiKeyConfig);
         }
         // Create method description
-        MarkdownParameterDocumentationLineNode clientConfig = DocCommentsGenerator.createAPIParamDoc("clientConfig",
+        MarkdownParameterDocumentationLineNode clientConfig = DocCommentsGenerator.createAPIParamDoc("config",
                 "The configurations to be used when initializing the `connector`");
         docs.add(clientConfig);
         MarkdownParameterDocumentationLineNode serviceUrlAPI = DocCommentsGenerator.createAPIParamDoc("serviceUrl",
