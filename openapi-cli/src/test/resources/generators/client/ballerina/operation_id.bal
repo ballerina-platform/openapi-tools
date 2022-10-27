@@ -4,7 +4,7 @@ public isolated client class Client {
     public final http:Client clientEp;
     # Gets invoked to initialize the `connector`.
     #
-    # + clientConfig - The configurations to be used when initializing the `connector`
+    # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
     public isolated function init(string serviceUrl = "http://localhost:9090/petstore/v1", http:ClientConfiguration  httpClientConfig =  {}) returns error? {

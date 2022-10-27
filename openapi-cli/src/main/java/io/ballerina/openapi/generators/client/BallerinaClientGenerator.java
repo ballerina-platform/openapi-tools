@@ -48,7 +48,6 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.cmd.Filter;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.DocCommentsGenerator;
@@ -67,6 +66,7 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -176,7 +176,7 @@ public class BallerinaClientGenerator {
         this.imports = new ArrayList<>();
         this.typeDefinitionNodeList = new ArrayList<>();
         this.openAPI = openAPI;
-        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, nullable);
+        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, nullable, new LinkedList<>());
         this.ballerinaUtilGenerator = new BallerinaUtilGenerator();
         this.remoteFunctionNameList = new ArrayList<>();
         this.serverURL = "/";
@@ -198,7 +198,7 @@ public class BallerinaClientGenerator {
         imports.add(importForHttp);
         List<ModuleMemberDeclarationNode> nodes =  new ArrayList<>();
         // Add authentication related records
-        ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI, nodes);
+        ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
 
         // Add class definition node to module member nodes
         nodes.add(getClassDefinitionNode());
@@ -220,10 +220,9 @@ public class BallerinaClientGenerator {
      * <pre>
      *     public isolated client class Client {
      *     final http:Client clientEp;
-     *     public isolated function init(http:ClientConfiguration clientConfig =  {}, string serviceUrl = "/url")
+     *     public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "/url")
      *     returns error? {
-     *         http:Client httpEp = check new (serviceUrl, clientConfig);
-     *         self.clientEp = httpEp;
+     *        ...
      *     }
      *     // Remote functions
      *     remote isolated function pathParameter(int 'version, string name) returns string|error {
@@ -277,29 +276,88 @@ public class BallerinaClientGenerator {
 
     /**
      * Create client class init function
-     * -- Scenario 1: init function when authentication mechanism is API key
+     * -- Scenario 1: init function when authentication mechanism is http or OAuth2
      * <pre>
-     *   public isolated function init(ApiKeysConfig apiKeyConfig, string serviceUrl,
-     *      http:ClientConfiguration clientConfig =  {}) returns error? {
-     *         http:Client httpEp = check new (serviceUrl, clientConfig);
+     *       public isolated function init(ConnectionConfig config =  {},
+     *       string serviceUrl = "https://petstore.swagger.io:443/v2") returns error? {
+     *         http:ClientConfiguration httpClientConfig = {
+     *             httpVersion: config.httpVersion,
+     *             timeout: config.timeout,
+     *             forwarded: config.forwarded,
+     *             poolConfig: config.poolConfig,
+     *             compression: config.compression,
+     *             circuitBreaker: config.circuitBreaker,
+     *             retryConfig: config.retryConfig,
+     *             validation: config.validation
+     *         };
+     *         do {
+     *             if config.http1Settings is ClientHttp1Settings {
+     *                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
+     *                 httpClientConfig.http1Settings = {...settings};
+     *             }
+     *             if config.http2Settings is http:ClientHttp2Settings {
+     *                 httpClientConfig.http2Settings = check config.http2Settings.ensureType(http:ClientHttp2Settings);
+     *             }
+     *             if config.cache is http:CacheConfig {
+     *                 httpClientConfig.cache = check config.cache.ensureType(http:CacheConfig);
+     *             }
+     *             if config.responseLimits is http:ResponseLimitConfigs {
+     *                 httpClientConfig.responseLimits = check
+     *                 config.responseLimits.ensureType(http:ResponseLimitConfigs);
+     *             }
+     *             if config.secureSocket is http:ClientSecureSocket {
+     *                 httpClientConfig.secureSocket = check config.secureSocket.ensureType(http:ClientSecureSocket);
+     *             }
+     *             if config.proxy is http:ProxyConfig {
+     *                 httpClientConfig.proxy = check config.proxy.ensureType(http:ProxyConfig);
+     *             }
+     *         }
+     *         http:Client httpEp = check new (serviceUrl, httpClientConfig);
      *         self.clientEp = httpEp;
-     *         self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();
-     *   }
+     *         return;
+     *     }
      * </pre>
-     * -- Scenario 2: init function when authentication mechanism is OAuth2.0
+     * -- Scenario 2: init function when authentication mechanism is API-Key
      * <pre>
-     *   public isolated function init(ClientConfig clientConfig, string serviceUrl = "base-url") returns error? {
-     *         http:Client httpEp = check new (serviceUrl, clientConfig);
+     *   public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {},
+     *      string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
+     *         http:ClientConfiguration httpClientConfig = {
+     *             httpVersion: config.httpVersion,
+     *             timeout: config.timeout,
+     *             forwarded: config.forwarded,
+     *             poolConfig: config.poolConfig,
+     *             compression: config.compression,
+     *             circuitBreaker: config.circuitBreaker,
+     *             retryConfig: config.retryConfig,
+     *             validation: config.validation
+     *         };
+     *         do {
+     *             if config.http1Settings is ClientHttp1Settings {
+     *                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
+     *                 httpClientConfig.http1Settings = {...settings};
+     *             }
+     *             if config.http2Settings is http:ClientHttp2Settings {
+     *                 httpClientConfig.http2Settings = check config.http2Settings.ensureType(http:ClientHttp2Settings);
+     *             }
+     *             if config.cache is http:CacheConfig {
+     *                 httpClientConfig.cache = check config.cache.ensureType(http:CacheConfig);
+     *             }
+     *             if config.responseLimits is http:ResponseLimitConfigs {
+     *                 httpClientConfig.responseLimits = check
+     *                 config.responseLimits.ensureType(http:ResponseLimitConfigs);
+     *             }
+     *             if config.secureSocket is http:ClientSecureSocket {
+     *                 httpClientConfig.secureSocket = check config.secureSocket.ensureType(http:ClientSecureSocket);
+     *             }
+     *             if config.proxy is http:ProxyConfig {
+     *                 httpClientConfig.proxy = check config.proxy.ensureType(http:ProxyConfig);
+     *             }
+     *         }
+     *         http:Client httpEp = check new (serviceUrl, httpClientConfig);
      *         self.clientEp = httpEp;
-     *   }
-     * </pre>
-     * -- Scenario 3: init function when no authentication mechanism is provided
-     * <pre>
-     *   public isolated function init(http:ClientConfiguration clientConfig =  {},
-     *      string serviceUrl = "base-url") returns error? {
-     *         http:Client httpEp = check new (serviceUrl, clientConfig);
-     *         self.clientEp = httpEp;
-     *   }
+     *         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
+     *         return;
+     *      }
      * </pre>
      *
      * @return {@link FunctionDefinitionNode}   Class init function
@@ -310,8 +368,9 @@ public class BallerinaClientGenerator {
         FunctionBodyNode functionBodyNode = getInitFunctionBodyNode();
         NodeList<Token> qualifierList = createNodeList(createToken(PUBLIC_KEYWORD), createToken(ISOLATED_KEYWORD));
         IdentifierToken functionName = createIdentifierToken("init");
-        return createFunctionDefinitionNode(null, getInitDocComment(), qualifierList, createToken(FUNCTION_KEYWORD),
-                functionName, createEmptyNodeList(), functionSignatureNode, functionBodyNode);
+        return createFunctionDefinitionNode(null, getInitDocComment(), qualifierList,
+                createToken(FUNCTION_KEYWORD), functionName, createEmptyNodeList(),
+                functionSignatureNode, functionBodyNode);
     }
 
     /**
@@ -322,13 +381,16 @@ public class BallerinaClientGenerator {
     private FunctionBodyNode getInitFunctionBodyNode() {
         List<StatementNode> assignmentNodes = new ArrayList<>();
 
-        // If both apiKey and httpOrOAuth is supported
-        if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
-            ballerinaAuthConfigGenerator.handleInitForMixOfApiKeyAndHTTPOrOAuth(assignmentNodes);
-        }
+        assignmentNodes.add(ballerinaAuthConfigGenerator.getHttpClientConfigVariableNode());
+        assignmentNodes.add(ballerinaAuthConfigGenerator.getClientConfigDoStatementNode());
 
+        // If both apiKey and httpOrOAuth is supported
+        // todo : After revamping
+        if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
+            assignmentNodes.add(ballerinaAuthConfigGenerator.handleInitForMixOfApiKeyAndHTTPOrOAuth());
+        }
         // create initialization statement of http:Client class instance
-        VariableDeclarationNode clientInitializationNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
+        assignmentNodes.add(ballerinaAuthConfigGenerator.getClientInitializationNode());
         // create {@code self.clientEp = httpEp;} assignment node
         FieldAccessExpressionNode varRef = createFieldAccessExpressionNode(
                 createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
@@ -336,9 +398,9 @@ public class BallerinaClientGenerator {
         SimpleNameReferenceNode expr = createSimpleNameReferenceNode(createIdentifierToken("httpEp"));
         AssignmentStatementNode httpClientAssignmentStatementNode = createAssignmentStatementNode(varRef,
                 createToken(EQUAL_TOKEN), expr, createToken(SEMICOLON_TOKEN));
-
-        assignmentNodes.add(clientInitializationNode);
         assignmentNodes.add(httpClientAssignmentStatementNode);
+
+
         // Get API key assignment node if authentication mechanism type is only `apiKey`
         if (ballerinaAuthConfigGenerator.isApiKey() && !ballerinaAuthConfigGenerator.isHttpOROAuth()) {
             assignmentNodes.add(ballerinaAuthConfigGenerator.getApiKeyAssignmentNode());
@@ -393,17 +455,13 @@ public class BallerinaClientGenerator {
         }
         //todo: setInitDocComment() pass the references
         docs.addAll(DocCommentsGenerator.createAPIDescriptionDoc(clientInitDocComment, true));
-        if (ballerinaAuthConfigGenerator.isApiKey() && ballerinaAuthConfigGenerator.isHttpOROAuth()) {
-            MarkdownParameterDocumentationLineNode authConfig = DocCommentsGenerator.createAPIParamDoc(
-                    "authConfig", "Configurations used for Authentication");
-            docs.add(authConfig);
-        } else if (ballerinaAuthConfigGenerator.isApiKey()) {
+        if (ballerinaAuthConfigGenerator.isApiKey() && !ballerinaAuthConfigGenerator.isHttpOROAuth()) {
             MarkdownParameterDocumentationLineNode apiKeyConfig = DocCommentsGenerator.createAPIParamDoc(
                     "apiKeyConfig", DEFAULT_API_KEY_DESC);
             docs.add(apiKeyConfig);
         }
         // Create method description
-        MarkdownParameterDocumentationLineNode clientConfig = DocCommentsGenerator.createAPIParamDoc("clientConfig",
+        MarkdownParameterDocumentationLineNode clientConfig = DocCommentsGenerator.createAPIParamDoc("config",
                 "The configurations to be used when initializing the `connector`");
         docs.add(clientConfig);
         MarkdownParameterDocumentationLineNode serviceUrlAPI = DocCommentsGenerator.createAPIParamDoc("serviceUrl",
