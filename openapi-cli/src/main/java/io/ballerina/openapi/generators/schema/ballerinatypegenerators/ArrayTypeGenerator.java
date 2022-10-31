@@ -31,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.schema.TypeGeneratorUtils;
+import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -87,7 +88,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         Schema<?> items = arraySchema.getItems();
-        boolean isConstraintsAvailable = hasConstraints(items);
+        boolean isConstraintsAvailable = !GeneratorMetaData.getInstance().isNullable() && hasConstraints(items);
         TypeGenerator typeGenerator;
         if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(SPECIAL_CHARACTER_REGEX, "").trim();
@@ -99,6 +100,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
             typeGenerator = TypeGeneratorUtils.getTypeGenerator(items, typeName, null);
             List<AnnotationNode> typeAnnotations = new ArrayList<>();
             AnnotationNode constraintNode = TypeGeneratorUtils.generateConstraintNode(items);
+
             if (constraintNode != null) {
                 typeAnnotations.add(constraintNode);
             }
