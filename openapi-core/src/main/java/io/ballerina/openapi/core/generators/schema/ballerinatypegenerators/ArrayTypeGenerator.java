@@ -33,6 +33,7 @@ import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
+import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -45,6 +46,7 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createParenthesisedT
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.openapi.core.GeneratorUtils.hasConstraints;
 import static io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils.getNullableType;
 
 /**
@@ -87,7 +89,7 @@ public class ArrayTypeGenerator extends TypeGenerator {
         assert schema instanceof ArraySchema;
         ArraySchema arraySchema = (ArraySchema) schema;
         Schema<?> items = arraySchema.getItems();
-        boolean isConstraintsAvailable = GeneratorUtils.hasConstraints(items);
+        boolean isConstraintsAvailable = !GeneratorMetaData.getInstance().isNullable() && hasConstraints(items);
         TypeGenerator typeGenerator;
         if (isConstraintsAvailable) {
             String normalizedTypeName = typeName.replaceAll(GeneratorConstants.SPECIAL_CHARACTER_REGEX, "").trim();
