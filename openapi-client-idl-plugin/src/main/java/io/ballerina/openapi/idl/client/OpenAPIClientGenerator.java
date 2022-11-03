@@ -20,7 +20,6 @@ package io.ballerina.openapi.idl.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
-import io.ballerina.compiler.syntax.tree.ClientDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
@@ -188,13 +187,8 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
 
     private static NodeList<AnnotationNode> getAnnotationNodes(IDLSourceGeneratorContext idlSourceContext) {
 
-        Node clientNode = idlSourceContext.clientNode();
-        NodeList<AnnotationNode> annotations = null;
-        if (clientNode instanceof ClientDeclarationNode) {
-            annotations = ((ClientDeclarationNode) clientNode).annotations();
-        } else if (clientNode instanceof ModuleClientDeclarationNode) {
-            annotations = ((ModuleClientDeclarationNode) clientNode).annotations();
-        }
+        ModuleClientDeclarationNode clientNode = idlSourceContext.clientNode();
+        NodeList<AnnotationNode> annotations = clientNode.annotations();
         return annotations;
     }
 
@@ -208,13 +202,8 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
         Path openAPI = context.resourcePath();
 
         // extract annotation details
-        Node clientNode = context.clientNode();
-        NodeList<AnnotationNode> annotations = null;
-        if (clientNode instanceof ClientDeclarationNode) {
-            annotations = ((ClientDeclarationNode) clientNode).annotations();
-        } else if (clientNode instanceof ModuleClientDeclarationNode) {
-            annotations = ((ModuleClientDeclarationNode) clientNode).annotations();
-        }
+        ModuleClientDeclarationNode clientNode = context.clientNode();
+        NodeList<AnnotationNode> annotations = clientNode.annotations();
         OASClientConfig oasClientConfig = extractClientDetails(context, openAPI, annotations);
 
 
@@ -456,10 +445,7 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
         return path.orElse(null);
     }
 
-    private String getAlias(Node clientNode) {
-        if (clientNode.kind() == SyntaxKind.MODULE_CLIENT_DECLARATION) {
-            return ((ModuleClientDeclarationNode) clientNode).clientPrefix().toString();
-        }
-        return ((ClientDeclarationNode) clientNode).clientPrefix().toString();
+    private String getAlias(ModuleClientDeclarationNode clientNode) {
+        return clientNode.clientPrefix().toString();
     }
 }
