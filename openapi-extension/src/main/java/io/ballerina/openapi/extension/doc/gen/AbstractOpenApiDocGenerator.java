@@ -147,6 +147,9 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
 
     private void generateOpenApiDoc(OpenApiDocConfig config, SyntaxNodeAnalysisContext context, NodeLocation location,
                                     boolean embed) {
+        if (!embed) {
+            return;
+        }
         int serviceId = config.getSemanticModel().hashCode();
         String targetFile = String.format(FILE_NAME_FORMAT, serviceId);
         ModulePartNode modulePartNode = config.getSyntaxTree().rootNode();
@@ -155,10 +158,8 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 config.getServiceNode(), listenerNodes, config.getSemanticModel(), targetFile, null);
         Optional<OpenAPI> openApiOpt = oasResult.getOpenAPI();
         if (!oasResult.getDiagnostics().isEmpty() || openApiOpt.isEmpty()) {
-            if (embed) {
-                OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
-                updateCompilerContext(context, location, errorCode);
-            }
+            OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
+            updateCompilerContext(context, location, errorCode);
             return;
         }
         OpenAPI openApi = openApiOpt.get();
@@ -166,7 +167,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             openApi.getInfo().setTitle(normalizeTitle(targetFile));
         }
         String openApiDefinition = Json.pretty(openApi);
-        updateOpenApiContext(context, serviceId, openApiDefinition, false);
+        updateOpenApiContext(context, serviceId, openApiDefinition, embed);
     }
 
     private List<ListenerDeclarationNode> extractListenerNodes(ModulePartNode modulePartNode) {
