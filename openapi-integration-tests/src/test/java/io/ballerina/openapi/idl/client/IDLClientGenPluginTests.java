@@ -78,15 +78,6 @@ public class IDLClientGenPluginTests extends OpenAPITest {
     }
 
     @Test
-    public void testClientDeclarationNodeInsideTheFunction() throws IOException, InterruptedException {
-        List<String> ids = new LinkedList<>();
-        ids.add("foo");
-        File[] matchingFiles = getMatchingFiles("project_04", ids);
-        Assert.assertNotNull(matchingFiles);
-        Assert.assertEquals(matchingFiles.length, 1);
-    }
-
-    @Test
     public void testModuleLevelClientDeclarationNode() throws IOException, InterruptedException {
         List<String> ids = new LinkedList<>();
         ids.add("bar");

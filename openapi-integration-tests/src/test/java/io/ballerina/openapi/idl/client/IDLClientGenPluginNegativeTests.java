@@ -52,6 +52,16 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
         TestUtil.cleanDistribution();
     }
 
+    @Test
+    public void testClientDeclarationInsideFunction() throws IOException, InterruptedException {
+        Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_04"),
+                new ArrayList<>());
+        File dir = new File(RESOURCE.resolve("client-idl-projects/project_04/generated/").toString());
+        Assert.assertFalse(dir.exists());
+        String msg = "ERROR [main.bal:(2:5,2:11)] 'client' qualifier not allowed";
+        assertOnErrorStream(process, msg);
+    }
+
     @Test(description = "Here uses the graphQl yaml as non openapi client")
     public void testNonOpenAPIClientDeclaration() throws IOException, InterruptedException {
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_07"),
@@ -68,7 +78,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_10/generated/").toString());
         Assert.assertFalse(dir.exists());
-        String msg = "ERROR [main.bal:(2:5,3:13)] unable to get resource from uri, reason: ";
+        String msg = "ERROR [main.bal:(1:1,1:132)] unable to get resource from uri, reason: ";
         assertOnErrorStream(process, msg);
     }
 
@@ -78,7 +88,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_11/generated/").toString());
         Assert.assertFalse(dir.exists());
-        String msg = "ERROR [main.bal:(2:5,2:35)] could not locate the file:";
+        String msg = "ERROR [main.bal:(1:1,1:31)] could not locate the file:";
         assertOnErrorStream(process, msg);
     }
 
@@ -88,7 +98,7 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_12/generated/").toString());
         Assert.assertFalse(dir.exists());
-        String msg = "ERROR [main.bal:(2:5,2:34)] OpenAPI definition has errors:";
+        String msg = "ERROR [main.bal:(1:1,1:30)] OpenAPI definition has errors:";
         assertOnErrorStream(process, msg);
     }
 

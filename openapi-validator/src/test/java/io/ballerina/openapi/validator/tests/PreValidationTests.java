@@ -96,6 +96,6 @@ public class PreValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = diagnostic.diagnostics().stream().filter(d ->
                         DiagnosticSeverity.WARNING == d.diagnosticInfo().severity()).toArray();
-        Assert.assertEquals(errors.length, 5);
+        Assert.assertEquals(errors.length, 3);
     }
 }

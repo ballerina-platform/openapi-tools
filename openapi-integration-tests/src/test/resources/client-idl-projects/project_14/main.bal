@@ -1,4 +1,5 @@
+client "openapi.json" as bar;
+
 public function main() {
-    client "openapi.json" as bar;
     bar:client y;
 }
