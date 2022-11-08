@@ -446,6 +446,6 @@ public class OpenAPIClientGenerator extends IDLClientGenerator {
     }
 
     private String getAlias(ModuleClientDeclarationNode clientNode) {
-        return clientNode.clientPrefix().toString();
+        return clientNode.clientPrefix().text();
     }
 }

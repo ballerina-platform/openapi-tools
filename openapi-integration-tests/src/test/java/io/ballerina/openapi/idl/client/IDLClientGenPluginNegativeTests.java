@@ -51,8 +51,9 @@ public class IDLClientGenPluginNegativeTests extends OpenAPITest {
     public void setupDistributions() throws IOException {
         TestUtil.cleanDistribution();
     }
+
     @Test
-    public void testClientDeclarationNodeInsideTheFunction() throws IOException, InterruptedException {
+    public void testClientDeclarationInsideFunction() throws IOException, InterruptedException {
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_04"),
                 new ArrayList<>());
         File dir = new File(RESOURCE.resolve("client-idl-projects/project_04/generated/").toString());
