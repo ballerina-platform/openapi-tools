@@ -93,11 +93,8 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                     updateOpenApiContext(context, serviceId, openApiDefinition, embed);
                 } else {
                     // generate open-api doc and update the context if the `contract` configuration is not available
-                    generateOpenApiDoc(config, context, location);
+                    generateOpenApiDoc(config, context, location, embed);
                 }
-            } else {
-                // generate open-api doc and update the context
-                generateOpenApiDoc(config, context, location);
             }
         } catch (IOException | RuntimeException e) {
             // currently, we do not have open-api doc generation logic for following scenarios:
@@ -148,7 +145,8 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 .map(en -> en.toString().trim());
     }
 
-    private void generateOpenApiDoc(OpenApiDocConfig config, SyntaxNodeAnalysisContext context, NodeLocation location) {
+    private void generateOpenApiDoc(OpenApiDocConfig config, SyntaxNodeAnalysisContext context, NodeLocation location,
+                                    boolean embed) {
         int serviceId = config.getSemanticModel().hashCode();
         String targetFile = String.format(FILE_NAME_FORMAT, serviceId);
         ModulePartNode modulePartNode = config.getSyntaxTree().rootNode();
@@ -157,8 +155,10 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 config.getServiceNode(), listenerNodes, config.getSemanticModel(), targetFile, null);
         Optional<OpenAPI> openApiOpt = oasResult.getOpenAPI();
         if (!oasResult.getDiagnostics().isEmpty() || openApiOpt.isEmpty()) {
-            OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
-            updateCompilerContext(context, location, errorCode);
+            if (embed) {
+                OpenApiDiagnosticCode errorCode = OpenApiDiagnosticCode.OPENAPI_107;
+                updateCompilerContext(context, location, errorCode);
+            }
             return;
         }
         OpenAPI openApi = openApiOpt.get();
