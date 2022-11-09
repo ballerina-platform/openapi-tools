@@ -93,11 +93,8 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                     updateOpenApiContext(context, serviceId, openApiDefinition, embed);
                 } else {
                     // generate open-api doc and update the context if the `contract` configuration is not available
-                    generateOpenApiDoc(config, context, location);
+                    generateOpenApiDoc(config, context, location, embed);
                 }
-            } else {
-                // generate open-api doc and update the context
-                generateOpenApiDoc(config, context, location);
             }
         } catch (IOException | RuntimeException e) {
             // currently, we do not have open-api doc generation logic for following scenarios:
@@ -148,7 +145,11 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
                 .map(en -> en.toString().trim());
     }
 
-    private void generateOpenApiDoc(OpenApiDocConfig config, SyntaxNodeAnalysisContext context, NodeLocation location) {
+    private void generateOpenApiDoc(OpenApiDocConfig config, SyntaxNodeAnalysisContext context, NodeLocation location,
+                                    boolean embed) {
+        if (!embed) {
+            return;
+        }
         int serviceId = config.getSemanticModel().hashCode();
         String targetFile = String.format(FILE_NAME_FORMAT, serviceId);
         ModulePartNode modulePartNode = config.getSyntaxTree().rootNode();
@@ -166,7 +167,7 @@ public abstract class AbstractOpenApiDocGenerator implements OpenApiDocGenerator
             openApi.getInfo().setTitle(normalizeTitle(targetFile));
         }
         String openApiDefinition = Json.pretty(openApi);
-        updateOpenApiContext(context, serviceId, openApiDefinition, false);
+        updateOpenApiContext(context, serviceId, openApiDefinition, embed);
     }
 
     private List<ListenerDeclarationNode> extractListenerNodes(ModulePartNode modulePartNode) {
