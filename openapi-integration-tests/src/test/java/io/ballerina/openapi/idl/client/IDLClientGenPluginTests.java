@@ -26,13 +26,17 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.RESOURCE;
 import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
 import static io.ballerina.openapi.TestUtil.executeRun;
 import static io.ballerina.openapi.TestUtil.getMatchingFiles;
@@ -118,5 +122,19 @@ public class IDLClientGenPluginTests extends OpenAPITest {
         File[] matchingFiles = getMatchingFiles("project_14", ids);
         Assert.assertNotNull(matchingFiles);
         Assert.assertEquals(matchingFiles.length, 1);
+    }
+
+    @Test
+    public void testWithClientClassName() throws IOException, InterruptedException {
+        String classContent = "public isolated client class Client {";
+        Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_15"), new LinkedList<>());
+        process.waitFor();
+        Path clientFile =
+                Path.of(RESOURCE.resolve("client-idl-projects/project_15/generated/bar/client.bal").toString());
+        Stream<String> expectedServiceLines = Files.lines(clientFile);
+        String generatedContent = expectedServiceLines.collect(Collectors.joining(System.lineSeparator()));
+        expectedServiceLines.close();
+        Assert.assertTrue((generatedContent.trim()).replaceAll("\\s+", "")
+                .contains(classContent.trim().replaceAll("\\s+", "")));
     }
 }
