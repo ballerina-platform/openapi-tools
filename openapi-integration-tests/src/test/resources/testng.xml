@@ -27,8 +27,8 @@
             <class name="io.ballerina.openapi.cmd.ServiceGeneratorReturnTypeTests"/>
             <class name="io.ballerina.openapi.cmd.ClientGenerationTests"/>
             <class name="io.ballerina.openapi.cmd.SchemaGenerationTests"/>
-            <class name="io.ballerina.openapi.idl.client.IDLClientGenPluginTests"/>
-            <class name="io.ballerina.openapi.idl.client.IDLClientGenPluginNegativeTests"/>
+<!--            <class name="io.ballerina.openapi.idl.client.IDLClientGenPluginTests"/>-->
+<!--            <class name="io.ballerina.openapi.idl.client.IDLClientGenPluginNegativeTests"/>-->
         </classes>
     </test>
 </suite>
