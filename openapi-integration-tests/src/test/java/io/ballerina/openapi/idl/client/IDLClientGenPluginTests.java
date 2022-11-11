@@ -126,7 +126,7 @@ public class IDLClientGenPluginTests extends OpenAPITest {
 
     @Test
     public void testWithClientClassName() throws IOException, InterruptedException {
-        String classContent = "public isolated client class Client {";
+        String clientSignature = "public isolated client class Client {";
         Process process = executeRun(DISTRIBUTION_FILE_NAME, TEST_RESOURCE.resolve("project_15"), new LinkedList<>());
         process.waitFor();
         Path clientFile =
@@ -135,6 +135,6 @@ public class IDLClientGenPluginTests extends OpenAPITest {
         String generatedContent = expectedServiceLines.collect(Collectors.joining(System.lineSeparator()));
         expectedServiceLines.close();
         Assert.assertTrue((generatedContent.trim()).replaceAll("\\s+", "")
-                .contains(classContent.trim().replaceAll("\\s+", "")));
+                .contains(clientSignature.trim().replaceAll("\\s+", "")));
     }
 }
