@@ -138,7 +138,6 @@ public class BallerinaClientGenerator {
     private String serverURL;
     private final BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator;
     private final boolean resourceMode;
-    private final boolean isPlugin;
 
     /**
      * Returns a list of type definition nodes.
@@ -193,7 +192,6 @@ public class BallerinaClientGenerator {
         this.serverURL = "/";
         this.ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false, false);
         this.resourceMode = oasClientConfig.isResourceMode();
-        this.isPlugin = oasClientConfig.isPlugin();
     }
 
     /**
@@ -262,8 +260,7 @@ public class BallerinaClientGenerator {
         NodeList<Token> classTypeQualifiers = createNodeList(
                 createToken(ISOLATED_KEYWORD), createToken(CLIENT_KEYWORD));
         return createClassDefinitionNode(metadataNode, createToken(PUBLIC_KEYWORD), classTypeQualifiers,
-                createToken(CLASS_KEYWORD), isPlugin ? createIdentifierToken("'client") : className,
-                createToken(OPEN_BRACE_TOKEN),
+                createToken(CLASS_KEYWORD), className, createToken(OPEN_BRACE_TOKEN),
                 createNodeList(memberNodeList), createToken(CLOSE_BRACE_TOKEN), null);
     }
 
