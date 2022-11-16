@@ -19,10 +19,12 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -35,11 +37,10 @@ import java.nio.file.Paths;
  */
 public class NullableFieldTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    CodeGenerator codeGenerator = new CodeGenerator();
 
     @Test(description = "Test for nullable primitive fields")
     public void testNullablePrimitive() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_primitive_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -49,7 +50,7 @@ public class NullableFieldTests {
 
     @Test(description = "Test for nullable array fields")
     public void testNullableArray() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_array_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -59,7 +60,7 @@ public class NullableFieldTests {
 
     @Test(description = "Test for nullable array referenced schemas")
     public void testNullableArrayRefSchemas() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_ref_array.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -69,7 +70,7 @@ public class NullableFieldTests {
 
     @Test(description = "Test nullable for primitive referenced type")
     public void testPrimitiveReferencedTypes() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_string_type.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -80,7 +81,7 @@ public class NullableFieldTests {
 
     @Test(description = "Test for referenced schema with no type given")
     public void testNullTypeReference() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_null_type.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -90,7 +91,7 @@ public class NullableFieldTests {
 
     @Test(description = "Test for nullable record fields")
     public void testNullableRecord() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_record_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -99,8 +100,8 @@ public class NullableFieldTests {
     }
 
     @Test(description = "Test for union type generation for nullable anyOf schema")
-    public void testNullableUnionType() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+    public void testNullableUnionType() throws IOException, BallerinaOpenApiException, FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_anyof_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
@@ -109,8 +110,8 @@ public class NullableFieldTests {
     }
 
     @Test(description = "Test for union type generation for nullable anyOf schema with array schema")
-    public void testNullableArrayUnionType() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(RES_DIR.resolve("swagger" +
+    public void testNullableArrayUnionType() throws IOException, BallerinaOpenApiException, FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/nullable_anyof_array_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();

@@ -16,7 +16,7 @@ public type PriceEstimateArr PriceEstimate[];
 public isolated client class Client {
     final http:Client clientEp;
     final readonly & map<string> apiKeys;
-    public isolated function init(ApiKeysConfig apiKeyConfig, http:ClientConfiguration clientConfig =  {}, string serviceUrl = "https://api.uber.com/v1") returns error? {
+        public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, string serviceUrl = "https://api.uber.com/v1") returns error? {
         http:Client httpEp = check new (serviceUrl, clientConfig);
         self.clientEp = httpEp;
         self.apiKeys = apiKeyConfig.apiKeys.cloneReadOnly();

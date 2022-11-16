@@ -1,5 +1,7 @@
 import ballerina/constraint;
 
+
+
 @constraint:String {maxLength: 5000}
 public type TaxratesItemsString string;
 
@@ -27,4 +29,4 @@ public type Activity record {
     string uuid?;
 };
 
-public type SubscriptionDefaultTaxRates SubscriptiondefaulttaxratesItemsString[]|string;
+public type Subscription_default_tax_rates SubscriptiondefaulttaxratesItemsString[]|string;

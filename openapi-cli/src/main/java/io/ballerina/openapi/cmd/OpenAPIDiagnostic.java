@@ -26,6 +26,7 @@ import io.ballerina.tools.text.LineRange;
 
 import java.text.MessageFormat;
 import java.util.List;
+
 /**
  * Represents a {@code Diagnostic} related to openapi command.
  *
@@ -62,7 +63,7 @@ public class OpenAPIDiagnostic extends Diagnostic {
     }
 
     @Override
-    public  String toString() {
+    public String toString() {
         LineRange lineRange = getOneBasedLineRange(this.location().lineRange());
         String var10000 = this.diagnosticInfo().severity().toString();
         return var10000 + " [" + lineRange.filePath() + ":" + lineRange + "] " + this.message();

@@ -36,7 +36,9 @@ import static io.ballerina.openapi.validator.tests.ValidatorTest.getProject;
 public class PreValidationTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/pre-processing")
             .toAbsolutePath();
-    @Test(description = "Annotation with non http service")
+
+    // TODO: enable after releasing graphql with latest master
+    @Test(description = "Annotation with non http service", enabled = false)
     public void nonHttpService() {
         Path path = RES_DIR.resolve("non_http.bal");
         Project project = getProject(path);
@@ -94,6 +96,16 @@ public class PreValidationTests {
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = diagnostic.diagnostics().stream().filter(d ->
                         DiagnosticSeverity.WARNING == d.diagnosticInfo().severity()).toArray();
-        Assert.assertEquals(errors.length, 5);
+        Assert.assertEquals(errors.length, 3);
+        String typeMismatch = "WARNING [multiple_services.bal:(5:10,5:18)] implementation type does not match with" +
+                " OpenAPI contract type (expected 'string', found 'int') for the field 'userName' of type 'User'.";
+        String unimplementedStatusCode = "WARNING [multiple_services.bal:(18:6,19:7)] undefined status code(s) " +
+                "'[500]' for return type in the counterpart Ballerina service resource (method: 'post', " +
+                "path: '/pets').";
+        String undocumentedStatusCode = "WARNING [multiple_services.bal:(18:6,19:7)] missing implementation for " +
+                "return code(s) '[200]' in the counterpart Ballerina service resource (method: 'post', path: '/pets').";
+        Assert.assertTrue(errors[0].toString().contains(typeMismatch));
+        Assert.assertTrue(errors[1].toString().contains(unimplementedStatusCode));
+        Assert.assertTrue(errors[2].toString().contains(undocumentedStatusCode));
     }
 }

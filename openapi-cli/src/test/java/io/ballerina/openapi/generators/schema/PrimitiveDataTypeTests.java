@@ -19,8 +19,9 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
@@ -41,7 +42,6 @@ public class PrimitiveDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     private SyntaxTree syntaxTree;
     private ByteArrayOutputStream outContent;
-    CodeGenerator codeGenerator = new CodeGenerator();
 
     @BeforeTest
     public void setUp() {
@@ -52,7 +52,7 @@ public class PrimitiveDataTypeTests {
     @Test(description = "Generate single record")
     public void generateScenario01() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario01.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema01.bal", syntaxTree);
@@ -61,7 +61,7 @@ public class PrimitiveDataTypeTests {
     @Test(description = "Generate multiple record")
     public void generateScenario02() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario02.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema02.bal", syntaxTree);
@@ -70,7 +70,7 @@ public class PrimitiveDataTypeTests {
     @Test(description = "Scenario for missing DataType")
     public void generateMissingDatatype() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/missDataType.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         String expected = "public type Pet record { #this is missing dataType anydata id; string name; decimal tag?; " +
@@ -82,7 +82,7 @@ public class PrimitiveDataTypeTests {
     @Test(description = "When the component schema has primitive data type instead of object schema")
     public void generateSchemaForPrimitiveData() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/schema_with_primitive.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema_with_primitive.bal",

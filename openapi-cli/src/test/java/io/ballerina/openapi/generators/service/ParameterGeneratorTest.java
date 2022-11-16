@@ -19,9 +19,10 @@
 package io.ballerina.openapi.generators.service;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.Filter;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.GeneratorUtils;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
+import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
@@ -72,7 +73,7 @@ public class ParameterGeneratorTest {
     }
 
     @Test(description = "Generate functionDefinitionNode for multiple paths")
-    public void generateMultiplePath() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateMultiplePath() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/multiPaths.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);

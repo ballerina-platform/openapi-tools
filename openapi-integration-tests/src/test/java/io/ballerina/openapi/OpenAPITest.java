@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi;
 
-import io.ballerina.openapi.cmd.TestUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterTest;

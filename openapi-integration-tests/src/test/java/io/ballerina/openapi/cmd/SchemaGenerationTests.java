@@ -1,20 +1,23 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.openapi.OpenAPITest;
+import io.ballerina.openapi.TestUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
-import static io.ballerina.openapi.cmd.TestUtil.DISTRIBUTIONS_DIR;
-import static io.ballerina.openapi.cmd.TestUtil.OUT;
-import static io.ballerina.openapi.cmd.TestUtil.RESOURCES_PATH;
-import static io.ballerina.openapi.cmd.TestUtil.TEST_DISTRIBUTION_PATH;
+import static io.ballerina.openapi.TestUtil.DISTRIBUTIONS_DIR;
+import static io.ballerina.openapi.TestUtil.OUT;
+import static io.ballerina.openapi.TestUtil.RESOURCES_PATH;
+import static io.ballerina.openapi.TestUtil.TEST_DISTRIBUTION_PATH;
 
 /**
  * This test class is for storing the schema related integrations.
@@ -67,5 +70,21 @@ public class SchemaGenerationTests extends OpenAPITest {
         // compare generated file has not included constraint annotation for scenario record field.
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", "schema/union.bal");
         process.waitFor();
+    }
+
+    @Test
+    public void testConstraintWithArrayTypeWhenNullableEnable() throws IOException, InterruptedException {
+        String openapiFilePath = "array.yaml";
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add(openapiFilePath);
+        buildArgs.add("--mode");
+        buildArgs.add("client");
+        buildArgs.add("-o");
+        buildArgs.add(tmpDir.toString());
+        buildArgs.add("--nullable");
+        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        Assert.assertTrue(Files.exists(Paths.get(tmpDir.toString()).resolve("types.bal")));
+        compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", "schema/array.bal");
     }
 }

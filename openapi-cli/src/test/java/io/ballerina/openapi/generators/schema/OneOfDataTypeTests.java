@@ -19,12 +19,14 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
+import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.TypeGenerator;
+import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
+import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
 import io.ballerina.openapi.generators.common.TestUtils;
-import io.ballerina.openapi.generators.schema.ballerinatypegenerators.TypeGenerator;
-import io.ballerina.openapi.generators.schema.ballerinatypegenerators.UnionTypeGenerator;
-import io.ballerina.openapi.generators.schema.model.GeneratorMetaData;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -42,12 +44,11 @@ import java.util.List;
  */
 public class OneOfDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
-    CodeGenerator codeGenerator = new CodeGenerator();
 
     @Test(description = "Generate record for schema has oneOF")
     public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, false);
@@ -60,7 +61,7 @@ public class OneOfDataTypeTests {
     @Test(description = "Generate record for schema has object type with OneOf")
     public void generateForSchemaObjectType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario13.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> oneOf = composedSchema.getOneOf();
@@ -73,7 +74,7 @@ public class OneOfDataTypeTests {
     @Test(description = "Generate union type when nullable is true")
     public void generateUnionTypeWhenNullableTrue() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         Schema schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, true);
@@ -85,7 +86,7 @@ public class OneOfDataTypeTests {
     @Test(description = "Tests full schema genrations with oneOf type")
     public void generateOneOFTests() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/oneOf.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/oneOf.bal", syntaxTree);
@@ -94,7 +95,7 @@ public class OneOfDataTypeTests {
     @Test(description = "Tests record generation for oneOf schemas with inline object schemas")
     public void oneOfWithInlineObject() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/oneOf_with_inline_schemas.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
@@ -104,7 +105,7 @@ public class OneOfDataTypeTests {
     @Test(description = "Tests record generation for nested OneOf schema inside AllOf schema")
     public void oneOfWithNestedAllOf() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/nested_oneOf_with_allOf.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(

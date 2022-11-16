@@ -25,10 +25,11 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.cmd.Filter;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.FunctionSignatureGenerator;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -44,7 +45,8 @@ import java.util.List;
 import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
 
 /**
- * All the tests related to the functionSignatureNode in {@link BallerinaClientGenerator} util.
+ * All the tests related to the functionSignatureNode in {
+ * {@link io.ballerina.openapi.core.generators.client.BallerinaClientGenerator}  util.
  */
 public class FunctionSignatureNodeTests {
     private static final Path RESDIR = Paths.get("src/test/resources/generators/client").toAbsolutePath();
@@ -123,8 +125,7 @@ public class FunctionSignatureNodeTests {
 
     @Test(description = "Test for generate function signature for multipart custom header")
     public void testFunctionSignatureNodeForMultipartCustomHeader() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RESDIR.resolve("swagger/multipart_formdata_custom.yaml"), true);
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
                 new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
@@ -135,7 +136,7 @@ public class FunctionSignatureNodeTests {
 
         RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
         Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
-        Assert.assertEquals(param01.typeName().toString(), "PetsBody");
+        Assert.assertEquals(param01.typeName().toString(), "Pets_body");
 
         RequiredParameterNode param02 = (RequiredParameterNode) parameters.get(1);
         Assert.assertEquals(param02.paramName().orElseThrow().text(), "xAddressHeader");

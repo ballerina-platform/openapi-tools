@@ -18,8 +18,9 @@
 package io.ballerina.openapi.generators.schema;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.annotations.AfterMethod;
@@ -38,7 +39,6 @@ import java.nio.file.Paths;
 public class ArrayDataTypeTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
     SyntaxTree syntaxTree;
-    CodeGenerator codeGenerator = new CodeGenerator();
     private final PrintStream originalStdOut = System.out;
     private ByteArrayOutputStream consoleContent = new ByteArrayOutputStream();
 
@@ -51,7 +51,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Generate record with array filed record")
     public void generateRecordWithArrayField() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario03.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema03.bal", syntaxTree);
@@ -60,7 +60,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Scenario04-Generate record with nested array filed record")
     public void generateScenario04() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario04.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema04.bal", syntaxTree);
@@ -69,7 +69,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Generate record with record type array filed record")
     public void generateRecordWithRecordArrayField() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario06.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema06.bal", syntaxTree);
@@ -79,7 +79,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Generate record for schema has array reference")
     public void generateSchemaHasArrayReference() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario08.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema08.bal", syntaxTree);
@@ -88,7 +88,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Generate Array for schema has array reference")
     public void generateSchemaArrayReference() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/schema_with_array.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema_with_array.bal",
@@ -98,7 +98,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Generate Array for schema has array reference")
     public void generateSchemaNestedArrayReference() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/schema_with_nested_array.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/schema_with_nested_array.bal",
@@ -108,7 +108,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Array schema has no data type in items")
     public void arrayNoDatatype() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/array_no_item_type.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/array_no_item_type.bal",
@@ -118,7 +118,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Array schema has max item count")
     public void arrayHasMaxItems() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/array_max_item.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/array_max_item.bal",
@@ -128,7 +128,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Array schema with allOf")
     public void arrayHasAllOfItems() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/array_with_allOf.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/array_with_allOf.bal",
@@ -138,7 +138,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Array schema with oneOf")
     public void arrayHasOneOFfItems() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/array_with_oneOf.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree("schema/ballerina/array_with_oneOf.bal",
@@ -148,7 +148,7 @@ public class ArrayDataTypeTests {
     @Test(description = "Array schema with oneOf schema with nullable item")
     public void arrayHasOneOfItemsWithNullable() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/array_with_oneOf_complex.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
@@ -160,7 +160,7 @@ public class ArrayDataTypeTests {
             expectedExceptionsMessageRegExp = "Maximum item count defined in the definition exceeds the.*")
     public void arrayHasMaxItemsExceedLimit() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/array_exceed_max_item.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
     }
@@ -170,7 +170,7 @@ public class ArrayDataTypeTests {
             expectedExceptionsMessageRegExp = "Maximum item count defined in the definition exceeds the.*")
     public void arrayHasMaxItemsExceedLimit02() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/array_exceed_max_item_02.yaml");
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
         syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
     }

@@ -20,10 +20,11 @@ package io.ballerina.openapi.generators.common;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.Filter;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.client.BallerinaClientGenerator;
-import io.ballerina.openapi.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
@@ -48,6 +49,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -70,8 +72,12 @@ public class TestUtils {
     public static List<Diagnostic> getDiagnostics(SyntaxTree syntaxTree, OpenAPI openAPI,
                                                   BallerinaClientGenerator ballerinaClientGenerator)
             throws FormatterException, IOException, BallerinaOpenApiException {
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        ballerinaSchemaGenerator.setTypeDefinitionNodeList(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        List<TypeDefinitionNode> preGeneratedTypeDefinitionNodes = new LinkedList<>();
+        preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.
+                getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
+        preGeneratedTypeDefinitionNodes.addAll(ballerinaClientGenerator.getTypeDefinitionNodeList());
+        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(
+                openAPI, false, preGeneratedTypeDefinitionNodes);
         SyntaxTree schemaSyntax = ballerinaSchemaGenerator.generateSyntaxTree();
         SyntaxTree utilSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
         writeFile(clientPath, Formatter.format(syntaxTree).toString());

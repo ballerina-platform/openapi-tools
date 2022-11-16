@@ -2,9 +2,13 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.cmd.CodeGenerator;
-import io.ballerina.openapi.cmd.Filter;
-import io.ballerina.openapi.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.cmd.BallerinaCodeGenerator;
+import io.ballerina.openapi.core.GeneratorUtils;
+import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
+import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.openapi.generators.common.TestConstants;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
@@ -30,12 +34,17 @@ public class NoServerURLTest {
 
     @Test(description = "Test for no server url with no security schema given")
     public void getClientForNoServerURL() throws IOException, BallerinaOpenApiException {
-        CodeGenerator codeGenerator = new CodeGenerator();
+        BallerinaCodeGenerator codeGenerator = new BallerinaCodeGenerator();
         Path definitionPath = RES_DIR.resolve("swagger/missing_server_url.yaml");
         Path expectedPath = RES_DIR.resolve("ballerina/missing_server_url.bal");
 
-        OpenAPI openAPI = codeGenerator.normalizeOpenAPI(definitionPath, true);
-        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(openAPI, filter, false, false);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
