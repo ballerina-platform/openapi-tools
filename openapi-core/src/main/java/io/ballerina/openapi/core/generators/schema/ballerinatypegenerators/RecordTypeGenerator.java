@@ -23,24 +23,37 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
+import io.ballerina.compiler.syntax.tree.RecordRestDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
+import io.swagger.v3.oas.models.media.MapSchema;
+import io.swagger.v3.oas.models.media.NumberSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ASTERISK_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ELLIPSIS_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for object type schema.
@@ -92,28 +105,70 @@ public class RecordTypeGenerator extends TypeGenerator {
      * Generate TypeDescriptorNode for object type schemas.
      */
     @Override
-    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException, BallerinaOpenApiException {
+    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
+        boolean isOpenRecord = false;
+        if (schema.getType() != null && schema.getType().equals("object") && schema.getProperties() == null && schema.getAdditionalProperties() == null) {
+            isOpenRecord = true;
+        }
+        RecordRestDescriptorNode recordRestDescriptorNode = null;
+        List<Node> recordFList = new LinkedList<>();
+        if (schema.getAdditionalProperties() != null) {
+            Object additionalProperties = schema.getAdditionalProperties();
+            if (additionalProperties.equals(true)) {
+                isOpenRecord = true;
+            } else if (additionalProperties instanceof Schema) {
+                Schema additionalPropSchema = (Schema) additionalProperties;
+                if (additionalPropSchema.get$ref() != null) {
+                    String ballerinaType = GeneratorUtils.getValidName(GeneratorUtils.extractReferenceType(
+                            additionalPropSchema.get$ref()), true);
+                    TypeReferenceNode typeInclusionNode =
+                            NodeFactory.createTypeReferenceNode(createToken(ASTERISK_TOKEN),
+                                    createIdentifierToken(ballerinaType), createToken(SEMICOLON_TOKEN));
+                    recordFList.add(typeInclusionNode);
+                } else if (additionalPropSchema.getType() != null) {
+                    String type = additionalPropSchema.getType();
+                    if (additionalPropSchema instanceof NumberSchema && additionalPropSchema.getFormat() != null) {
+                        type = additionalPropSchema.getFormat();
+                    } else if (additionalPropSchema instanceof ObjectSchema || additionalPropSchema instanceof MapSchema) {
+                        RecordTypeGenerator record = new RecordTypeGenerator(additionalPropSchema, null);
+                        TypeDescriptorNode recordNode = record.generateTypeDescriptorNode();
+                        recordRestDescriptorNode = NodeFactory.createRecordRestDescriptorNode(
+                                recordNode, createToken(ELLIPSIS_TOKEN),
+                                createToken(SEMICOLON_TOKEN));
+                    } else {
+                        String ballerinaType = GeneratorUtils.convertOpenAPITypeToBallerina(type.trim());
+                        recordRestDescriptorNode =
+                                NodeFactory.createRecordRestDescriptorNode(createIdentifierToken(ballerinaType),
+                                        createToken(ELLIPSIS_TOKEN), createToken(SEMICOLON_TOKEN));
+                    }
+                } else {
+                    isOpenRecord = true;
+                }
+            }
+        }
 
         if (schema.getProperties() != null) {
             Map<String, Schema> properties = schema.getProperties();
             List<String> required = schema.getRequired();
-            List<Node> recordFList = addRecordFields(required, properties.entrySet(), typeName);
+            recordFList.addAll(addRecordFields(required, properties.entrySet(), typeName));
             NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                    createToken(OPEN_BRACE_TOKEN), fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
+                    isOpenRecord ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
+                    fieldNodes, recordRestDescriptorNode,
+                    isOpenRecord ? createToken(CLOSE_BRACE_TOKEN) : createToken(CLOSE_BRACE_PIPE_TOKEN));
         } else {
-            NodeList<Node> fieldNodes = createEmptyNodeList();
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                    createToken(OPEN_BRACE_TOKEN), fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
+                    isOpenRecord ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
+                    createNodeList(recordFList), recordRestDescriptorNode,
+                    isOpenRecord ? createToken(CLOSE_BRACE_TOKEN) : createToken(CLOSE_BRACE_PIPE_TOKEN));
         }
     }
 
     /**
      * This util for generating record field with given schema properties.
      */
-    public List<Node> addRecordFields(List<String> required,
-                                      Set<Map.Entry<String, Schema>> fields,
-                                      String recordName) throws BallerinaOpenApiException {
+    public List<Node> addRecordFields(List<String> required, Set<Map.Entry<String, Schema>> fields, String recordName)
+            throws BallerinaOpenApiException {
         // TODO: Handle allOf , oneOf, anyOf
         List<Node> recordFieldList = new ArrayList<>();
         for (Map.Entry<String, Schema> field : fields) {

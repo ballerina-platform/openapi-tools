@@ -51,6 +51,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -107,7 +108,8 @@ public class TypeGeneratorUtils {
                 return new UnionTypeGenerator(schemaValue, typeName);
             }
         } else if ((schemaValue.getType() != null && schemaValue.getType().equals(GeneratorConstants.OBJECT)) ||
-                schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null) {
+                schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null ||
+                schemaValue instanceof MapSchema) {
             return new RecordTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ArraySchema) {
             return new ArrayTypeGenerator(schemaValue, typeName, parentName);
