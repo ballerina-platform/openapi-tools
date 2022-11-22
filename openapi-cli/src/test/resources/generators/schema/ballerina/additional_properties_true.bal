@@ -6,9 +6,9 @@ public type User05 record {|
 
 # Additional properties with reference
 public type User06 record {|
-    *User01;
     string? name?;
     int? id?;
+    User01...;
 |};
 
 # Additional properties with type object without properties
@@ -49,16 +49,16 @@ public type User10 record {|
 public type User11 record {|
     string? name?;
     int? id?;
-    record {|*User;|}...;
+    record {|User...;|}...;
 |};
 
-# Additional properties with true enable
+# Additional properties with `true` enable
 public type User01 record {
     string? name?;
     int? id?;
 };
 
-# Additional properties with false enable
+# Additional properties with `false` enable
 public type User12 record {|
     string? name?;
     int? id?;
@@ -92,4 +92,11 @@ public type User04 record {|
     string? name?;
     int? id?;
     string...;
+|};
+
+# Additional properties with Array
+public type User15 record {|
+    string? name?;
+    int? id?;
+    string[]?...;
 |};

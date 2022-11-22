@@ -148,7 +148,7 @@ public class TypeGeneratorUtils {
 
     public static void updateRecordFieldList(List<String> required,
                                              List<Node> recordFieldList,
-                                             Map.Entry<String, Schema> field,
+                                             Map.Entry<String, Schema<?>> field,
                                              Schema<?> fieldSchema,
                                              NodeList<Node> schemaDocNodes,
                                              IdentifierToken fieldName,
@@ -160,7 +160,7 @@ public class TypeGeneratorUtils {
 
     public static void updateRecordFieldList(List<String> required,
                                              List<Node> recordFieldList,
-                                             Map.Entry<String, Schema> field,
+                                             Map.Entry<String, Schema<?>> field,
                                              Schema<?> fieldSchema,
                                              NodeList<Node> schemaDocNodes,
                                              IdentifierToken fieldName,
@@ -200,7 +200,7 @@ public class TypeGeneratorUtils {
     }
 
     private static void setRequiredFields(List<String> required, List<Node> recordFieldList,
-                                          Map.Entry<String, Schema> field,
+                                          Map.Entry<String, Schema<?>> field,
                                           Schema<?> fieldSchema,
                                           IdentifierToken fieldName,
                                           TypeDescriptorNode fieldTypeName,

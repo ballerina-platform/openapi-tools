@@ -46,7 +46,7 @@ components:
         age:
           type: integer
     User01:
-      description: Additional properties with true enable
+      description: Additional properties with `true` enable
       type: object
       properties:
         name:
@@ -163,7 +163,7 @@ components:
         additionalProperties:
           $ref: "#/components/schemas/User"
     User12:
-      description: Additional properties with false enable
+      description: Additional properties with `false` enable
       type: object
       properties:
         name:
@@ -191,3 +191,15 @@ components:
              type: string
             place:
               type: string
+    User15:
+      description: Additional properties with Array
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+      additionalProperties:
+        type: array
+        items:
+          type: string

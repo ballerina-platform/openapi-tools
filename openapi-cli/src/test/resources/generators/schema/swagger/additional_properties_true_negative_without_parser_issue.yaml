@@ -37,8 +37,8 @@ paths:
           description: successful operation
 components:
   schemas:
-    User02:
-      description: Additional properties are with object with reference fields
+    User01:
+      description: Additional properties with object with reference fields - this is issue https://github.com/swagger-api/swagger-parser/issues/1856
       type: object
       properties:
         name:
@@ -46,3 +46,19 @@ components:
         id:
           type: integer
       additionalProperties:
+        type: object
+        $ref: "#/components/schemas/User03"
+    User03:
+      description: Additional properties type Array with constraint. constraint wont support for rest filed in record.
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+      additionalProperties:
+        type: array
+        maxItems: 9
+        items:
+          type: string
+

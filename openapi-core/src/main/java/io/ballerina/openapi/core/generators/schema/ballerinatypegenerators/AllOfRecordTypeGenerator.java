@@ -104,7 +104,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                         typeRef, createToken(SEMICOLON_TOKEN));
                 recordFieldList.add(recordField);
             } else if (allOfSchema.getProperties() != null) {
-                Map<String, Schema> properties = allOfSchema.getProperties();
+                Map<String, Schema<?>> properties = allOfSchema.getProperties();
                 List<String> required = allOfSchema.getRequired();
                 recordFieldList.addAll(addRecordFields(required, properties.entrySet(), typeName));
             } else if (allOfSchema instanceof ComposedSchema) {
