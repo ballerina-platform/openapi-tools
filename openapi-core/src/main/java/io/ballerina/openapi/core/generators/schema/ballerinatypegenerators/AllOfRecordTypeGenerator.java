@@ -22,24 +22,37 @@ import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.RecordRestDescriptorNode;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
+import io.swagger.v3.oas.models.media.NumberSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ASTERISK_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.ELLIPSIS_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
+import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for allOf schemas.
@@ -80,16 +93,21 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         assert schema instanceof ComposedSchema;
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> allOfSchemas = composedSchema.getAllOf();
+
+        RecordMetadata recordMetadata = getRecordMetadata();
+        RecordRestDescriptorNode restDescriptorNode = recordMetadata.getRestDescriptorNode();
         if (allOfSchemas.size() == 1 && allOfSchemas.get(0).get$ref() != null) {
             ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(allOfSchemas.get(0),
                     typeName);
             return referencedTypeGenerator.generateTypeDescriptorNode();
         } else {
             List<Node> recordFieldList = generateAllOfRecordFields(allOfSchemas);
+            restDescriptorNode = getRestDescriptorNodeForAllOf(restDescriptorNode, recordFieldList);
             NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFieldList);
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                    createToken(OPEN_BRACE_TOKEN), fieldNodes, null,
-                    createToken(CLOSE_BRACE_TOKEN));
+                    recordMetadata.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
+                    fieldNodes, restDescriptorNode,
+                    recordMetadata.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) : createToken(CLOSE_BRACE_PIPE_TOKEN));
         }
     }
 
@@ -107,6 +125,11 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 Map<String, Schema<?>> properties = allOfSchema.getProperties();
                 List<String> required = allOfSchema.getRequired();
                 recordFieldList.addAll(addRecordFields(required, properties.entrySet(), typeName));
+                if (allOfSchema.getAdditionalProperties() != null && allOfSchema.getAdditionalProperties() instanceof Schema) {
+                    RecordRestDescriptorNode restDescriptorNode =
+                            getRecordRestDescriptorNode((Schema<?>) allOfSchema.getAdditionalProperties());
+                    recordFieldList.add(restDescriptorNode);
+                }
             } else if (allOfSchema instanceof ComposedSchema) {
                 ComposedSchema nestedComposedSchema = (ComposedSchema) allOfSchema;
                 if (nestedComposedSchema.getAllOf() != null) {
@@ -119,5 +142,37 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             }
         }
         return recordFieldList;
+    }
+
+    /**
+     * This util is to create the union record rest fields.
+     * <pre> string|int... <pre/>
+     * @return
+     */
+    private static RecordRestDescriptorNode getRestDescriptorNodeForAllOf(RecordRestDescriptorNode restDescriptorNode,
+                                                                          List<Node> recordFieldList) {
+
+        List<RecordRestDescriptorNode> recordRestNodes = new LinkedList<>();
+        for (Node node: recordFieldList) {
+            if (node instanceof RecordRestDescriptorNode) {
+                recordRestNodes.add((RecordRestDescriptorNode) node);
+            }
+        }
+        if (restDescriptorNode != null) {
+            recordRestNodes.add(restDescriptorNode);
+        }
+        if (!recordRestNodes.isEmpty() && recordRestNodes.size() > 1) {
+            recordFieldList.removeAll(recordRestNodes);
+            StringBuilder stringBuilder = new StringBuilder();
+            for (RecordRestDescriptorNode restDescNode: recordRestNodes) {
+                stringBuilder.append(restDescNode.typeName().toString());
+                stringBuilder.append(PIPE);
+            }
+            String unionRestNode = stringBuilder.toString();
+            restDescriptorNode = NodeFactory.createRecordRestDescriptorNode(
+                    createIdentifierToken(unionRestNode.substring(0, unionRestNode.length() - 1)),
+                    createToken(ELLIPSIS_TOKEN), createToken(SEMICOLON_TOKEN));
+        }
+        return restDescriptorNode;
     }
 }

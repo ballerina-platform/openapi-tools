@@ -91,11 +91,9 @@ import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 public class RecordTypeGenerator extends TypeGenerator {
 
     private final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
-
     public RecordTypeGenerator(Schema schema, String typeName) {
         super(schema, typeName);
     }
-
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
         return typeDefinitionNodeList;
     }
@@ -106,9 +104,29 @@ public class RecordTypeGenerator extends TypeGenerator {
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
 
+        List<Node> recordFList = new LinkedList<>();
+        RecordMetadata metadataBuilder = getRecordMetadata();
+
+        if (schema.getProperties() != null) {
+            Map<String, Schema<?>> properties = schema.getProperties();
+            List<String> required = schema.getRequired();
+            recordFList.addAll(addRecordFields(required, properties.entrySet(), typeName));
+            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
+            return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                    metadataBuilder.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
+                    fieldNodes, metadataBuilder.getRestDescriptorNode(),
+                    metadataBuilder.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) : createToken(CLOSE_BRACE_PIPE_TOKEN));
+        } else {
+            return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
+                    metadataBuilder.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
+                    createNodeList(recordFList), metadataBuilder.getRestDescriptorNode(),
+                    metadataBuilder.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) : createToken(CLOSE_BRACE_PIPE_TOKEN));
+        }
+    }
+
+    public RecordMetadata getRecordMetadata() throws BallerinaOpenApiException {
         boolean isOpenRecord = false;
         RecordRestDescriptorNode recordRestDescNode = null;
-        List<Node> recordFList = new LinkedList<>();
         if (schema.getAdditionalProperties() != null) {
             Object additionalProperties = schema.getAdditionalProperties();
             if (additionalProperties.equals(true)) {
@@ -133,22 +151,9 @@ public class RecordTypeGenerator extends TypeGenerator {
                 schema.getAdditionalProperties() == null) {
             isOpenRecord = true;
         }
-
-        if (schema.getProperties() != null) {
-            Map<String, Schema<?>> properties = schema.getProperties();
-            List<String> required = schema.getRequired();
-            recordFList.addAll(addRecordFields(required, properties.entrySet(), typeName));
-            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
-            return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                    isOpenRecord ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
-                    fieldNodes, recordRestDescNode,
-                    isOpenRecord ? createToken(CLOSE_BRACE_TOKEN) : createToken(CLOSE_BRACE_PIPE_TOKEN));
-        } else {
-            return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                    isOpenRecord ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
-                    createNodeList(recordFList), recordRestDescNode,
-                    isOpenRecord ? createToken(CLOSE_BRACE_TOKEN) : createToken(CLOSE_BRACE_PIPE_TOKEN));
-        }
+        return new RecordMetadata.Builder()
+                        .withIsOpenRecord(isOpenRecord)
+                        .withRestDescriptorNode(recordRestDescNode).build();
     }
 
     /**
@@ -159,7 +164,7 @@ public class RecordTypeGenerator extends TypeGenerator {
      *     }
      * </pre>
      */
-    private static RecordRestDescriptorNode getRecordRestDescriptorNode(Schema<?> additionalPropSchema)
+    public static RecordRestDescriptorNode getRecordRestDescriptorNode(Schema<?> additionalPropSchema)
             throws BallerinaOpenApiException {
         RecordRestDescriptorNode recordRestDescNode = null;
         String type = additionalPropSchema.getType();
@@ -214,5 +219,47 @@ public class RecordTypeGenerator extends TypeGenerator {
                     fieldName, fieldTypeName);
         }
         return recordFieldList;
+    }
+}
+
+/**
+ * RecordMetadata class for containing the details to generate record.
+ */
+class RecordMetadata {
+    private final boolean isOpenRecord;
+    private final RecordRestDescriptorNode restDescriptorNode;
+
+    RecordMetadata(Builder builder) {
+
+        this.isOpenRecord = builder.isOpenRecord;
+        this.restDescriptorNode = builder.restDescriptorNode;
+    }
+
+    public boolean isOpenRecord() {
+        return isOpenRecord;
+    }
+
+    public RecordRestDescriptorNode getRestDescriptorNode() {
+        return restDescriptorNode;
+    }
+
+    /**
+     * Record meta data builder class.
+     */
+    public static class Builder {
+        private boolean isOpenRecord = false;
+        private RecordRestDescriptorNode restDescriptorNode = null;
+        public Builder withIsOpenRecord(boolean isOpenRecord) {
+            this.isOpenRecord = isOpenRecord;
+            return this;
+        }
+        public Builder withRestDescriptorNode(RecordRestDescriptorNode restDescriptorNode) {
+            this.restDescriptorNode = restDescriptorNode;
+            return this;
+        }
+
+        public RecordMetadata build() {
+            return new RecordMetadata(this);
+        }
     }
 }

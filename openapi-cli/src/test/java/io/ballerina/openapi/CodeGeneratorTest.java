@@ -260,7 +260,7 @@ public class CodeGeneratorTest {
             String expectedSchemaContent = getStringFromGivenBalFile(expectedServiceFile, 
                 "type_filtered_by_tags.bal");          
             generator.generateClient(definitionPath, resourcePath.toString(), filterCustom, false, false);
-            if (Files.exists(resourcePath.resolve("types.bal")) && Files.exists(resourcePath.resolve("types.bal"))) {
+            if (Files.exists(resourcePath.resolve("client.bal")) && Files.exists(resourcePath.resolve("types.bal"))) {
                 String generatedSchema = getStringFromGivenBalFile(resourcePath, "types.bal");
                 generatedSchema = (generatedSchema.trim()).replaceAll("\\s+", "");
                 expectedSchemaContent = (expectedSchemaContent.trim()).replaceAll("\\s+", "");

@@ -371,5 +371,6 @@ public class GeneratorConstants {
     public static final String JSON_EXTENSION = ".json";
     public static final String UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE = "attribute openapi is missing";
     public static final String HTTP_REQUEST = "http:Request";
+    public static final String PIPE = "|";
 
 }
