@@ -49,7 +49,7 @@ components:
         type: object
         $ref: "#/components/schemas/User03"
     User03:
-      description: Additional properties type Array with constraint. constraint wont support for rest filed in record.
+      description: Additional properties type Array with constraint. constraint won't support for rest filed in record.
       type: object
       properties:
         name:

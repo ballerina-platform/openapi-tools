@@ -3,7 +3,7 @@ public type User05 record {|
     *Pet;
     string? name?;
     int? id?;
-    int|string[]?...;
+    int?|string[]?...;
 |};
 
 # Additional properties with type object without properties
@@ -11,7 +11,7 @@ public type User06 record {|
     *Pet;
     string? name?;
     int? id?;
-    record {}...;
+    record {}?...;
 |};
 
 # Additional properties with object with property fields
@@ -19,7 +19,30 @@ public type User07 record {|
     *Pet;
     string? name?;
     int? id?;
-    record {|string? country?; string? state?;|}...;
+    record {|string? country?; string? state?;|}?...;
+|};
+
+# Reference has additional properties.
+public type User08 record {|
+    *Pet02;
+    string? name?;
+    int? id?;
+    Pet?|int...;
+|};
+
+# Reference has additional properties with nullable true.
+public type User09 record {|
+    *Pet02;
+    string? name?;
+    int? id?;
+    Pet?|int?...;
+|};
+
+# Mock record 02
+public type Pet02 record {|
+    string? name?;
+    int? age?;
+    Pet?...;
 |};
 
 # Without any additional field it maps to closed record.
@@ -54,5 +77,5 @@ public type User04 record {|
     *Pet;
     string? name?;
     int? id?;
-    string...;
+    string?...;
 |};

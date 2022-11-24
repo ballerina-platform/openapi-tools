@@ -92,6 +92,7 @@ components:
       additionalProperties:
         type: number
         format: float
+        nullable: false
     User06:
       description: Additional properties with reference
       type: object
@@ -203,3 +204,14 @@ components:
         type: array
         items:
           type: string
+    User16:
+      description: Additional properties with type number, nullable true
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+      additionalProperties:
+        type: number
+        format: float

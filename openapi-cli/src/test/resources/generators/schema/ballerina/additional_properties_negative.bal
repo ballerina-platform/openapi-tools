@@ -2,10 +2,10 @@
 public type User01 record {|
     string? name?;
     int? id?;
-    User03...;
+    User03?...;
 |};
 
-# Additional properties type Array with constraint. constraint wont support for rest filed in record.
+# Additional properties type Array with constraint. constraint won't support for rest filed in record.
 public type User03 record {|
     string? name?;
     int? id?;

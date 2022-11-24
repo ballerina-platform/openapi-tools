@@ -48,34 +48,12 @@ public class MapSchemaTests {
 
     @Test
     public void testForAdditionalPropertiesComposedSchema()
-            throws IOException, BallerinaOpenApiException {
+            throws IOException, BallerinaOpenApiException, FormatterException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/additional_properties_composed_schema.yaml"), true);
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
         SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/additional_properties_composed_schema.bal", syntaxTree);
-    }
-
-    @Test(description = "Negative test for additionalProperty mapping",
-    expectedExceptions = BallerinaOpenApiException.class,
-    expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
-            "\n" +
-            "attribute components.schemas.User02.additionalProperties.*")
-    public void negativeTestForAdditionalPropertiesWithParserIssue() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/additional_properties_true_negative.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-    }
-
-    @Test
-    public void negativeTestForAdditionalPropertiesWithoutParserIssue() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
-                "/additional_properties_true_negative_without_parser_issue.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, true);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-        TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-                "schema/ballerina/additional_properties_negative.bal", syntaxTree);
     }
 }

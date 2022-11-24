@@ -45,6 +45,16 @@ components:
           type: string
         age:
           type: integer
+    Pet02:
+      description: Mock record 02
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+      additionalProperties:
+        $ref: "#/components/schemas/Pet"
     User01:
       description: Without any additional field it maps to closed record.
       allOf:
@@ -134,3 +144,28 @@ components:
             type: string
           state:
             type: string
+    User08:
+      description: Reference has additional properties.
+      allOf:
+        - $ref: "#/components/schemas/Pet02"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+      additionalProperties:
+        type: integer
+        nullable: false
+    User09:
+      description: Reference has additional properties with nullable true.
+      allOf:
+        - $ref: "#/components/schemas/Pet02"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+      additionalProperties:
+        type: integer
