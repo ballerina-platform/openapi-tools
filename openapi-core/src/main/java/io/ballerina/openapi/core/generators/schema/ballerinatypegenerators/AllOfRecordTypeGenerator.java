@@ -23,17 +23,12 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.RecordRestDescriptorNode;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.MapSchema;
-import io.swagger.v3.oas.models.media.NumberSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
@@ -51,7 +46,6 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
 
 /**
@@ -80,7 +74,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
  */
 public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
     public AllOfRecordTypeGenerator(Schema schema, String typeName) {
-
         super(schema, typeName);
     }
 
@@ -89,8 +82,6 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
      */
     @Override
     public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
-
-        assert schema instanceof ComposedSchema;
         ComposedSchema composedSchema = (ComposedSchema) schema;
         List<Schema> allOfSchemas = composedSchema.getAllOf();
 
@@ -107,7 +98,8 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     recordMetadata.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
                     fieldNodes, restDescriptorNode,
-                    recordMetadata.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) : createToken(CLOSE_BRACE_PIPE_TOKEN));
+                    recordMetadata.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
+                            createToken(CLOSE_BRACE_PIPE_TOKEN));
         }
     }
 
@@ -125,7 +117,8 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 Map<String, Schema<?>> properties = allOfSchema.getProperties();
                 List<String> required = allOfSchema.getRequired();
                 recordFieldList.addAll(addRecordFields(required, properties.entrySet(), typeName));
-                if (allOfSchema.getAdditionalProperties() != null && allOfSchema.getAdditionalProperties() instanceof Schema) {
+                if (allOfSchema.getAdditionalProperties() != null &&
+                        allOfSchema.getAdditionalProperties() instanceof Schema) {
                     RecordRestDescriptorNode restDescriptorNode =
                             getRecordRestDescriptorNode((Schema<?>) allOfSchema.getAdditionalProperties());
                     recordFieldList.add(restDescriptorNode);
@@ -145,8 +138,10 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
     }
 
     /**
-     * This util is to create the union record rest fields.
-     * <pre> string|int... <pre/>
+     * This util is to create the union record rest fields, when given allOf schema has multiple additional fields.
+     * Note: This scenario only happens with AllOf scenarios since it map with type inclusions.
+     *
+     * <pre> string|int... </pre>
      * @return
      */
     private static RecordRestDescriptorNode getRestDescriptorNodeForAllOf(RecordRestDescriptorNode restDescriptorNode,

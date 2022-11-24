@@ -1,3 +1,3 @@
-public type Pets record {
+public type Pets record {|
      anydata pet_type;
-};
+|};

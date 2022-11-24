@@ -1,53 +1,53 @@
-public type PrimaryEducationExpenditure record {
+public type PrimaryEducationExpenditure record {|
     Indicator indicator?;
     Country country?;
     string date?;
     int value?;
     int 'decimal?;
-};
+|};
 
-public type YouthLiteracyRate record {
+public type YouthLiteracyRate record {|
     Indicator indicator?;
     Country country?;
     string date?;
     int value?;
     int 'decimal?;
-};
+|};
 
-public type AccessToElectricity record {
+public type AccessToElectricity record {|
     Indicator indicator?;
     Country country?;
     string date?;
     int value?;
     int 'decimal?;
-};
+|};
 
-public type GrossDomesticProduct record {
+public type GrossDomesticProduct record {|
     Indicator indicator?;
     Country country?;
     string date?;
     int value?;
     int 'decimal?;
-};
+|};
 
-public type Country record {
+public type Country record {|
     string id?;
     string value?;
-};
+|};
 
-public type Error record {
+public type Error record {|
     string name?;
-};
+|};
 
-public type CountryPolutation record {
+public type CountryPolutation record {|
     Indicator indicator?;
     Country country?;
     string date?;
     int value?;
     int 'decimal?;
-};
+|};
 
-public type Indicator record {
+public type Indicator record {|
     string id?;
     string value?;
-};
+|};

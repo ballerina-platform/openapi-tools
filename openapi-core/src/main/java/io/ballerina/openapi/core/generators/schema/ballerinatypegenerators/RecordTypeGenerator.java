@@ -115,18 +115,28 @@ public class RecordTypeGenerator extends TypeGenerator {
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     metadataBuilder.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
                     fieldNodes, metadataBuilder.getRestDescriptorNode(),
-                    metadataBuilder.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) : createToken(CLOSE_BRACE_PIPE_TOKEN));
+                    metadataBuilder.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
+                            createToken(CLOSE_BRACE_PIPE_TOKEN));
         } else {
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
                     metadataBuilder.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
                     createNodeList(recordFList), metadataBuilder.getRestDescriptorNode(),
-                    metadataBuilder.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) : createToken(CLOSE_BRACE_PIPE_TOKEN));
+                    metadataBuilder.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
+                            createToken(CLOSE_BRACE_PIPE_TOKEN));
         }
     }
 
+    /**
+     * This function is to extract the main details of the record need to be generated and return {@code
+     * RecordMetadata} object with required details.
+     *
+     * @return {@code RecordMetadata}
+     * @throws BallerinaOpenApiException throws when process has some failure.
+     */
     public RecordMetadata getRecordMetadata() throws BallerinaOpenApiException {
         boolean isOpenRecord = false;
         RecordRestDescriptorNode recordRestDescNode = null;
+
         if (schema.getAdditionalProperties() != null) {
             Object additionalProperties = schema.getAdditionalProperties();
             if (additionalProperties.equals(true)) {
@@ -149,6 +159,8 @@ public class RecordTypeGenerator extends TypeGenerator {
             }
         } else if (schema.getType() != null && schema.getType().equals(OBJECT) && schema.getProperties() == null &&
                 schema.getAdditionalProperties() == null) {
+            // this above condition for check the free-form object [ex: type:object without any fields or
+            // additional fields], that object should be mapped to the open record.
             isOpenRecord = true;
         }
         return new RecordMetadata.Builder()
@@ -157,7 +169,7 @@ public class RecordTypeGenerator extends TypeGenerator {
     }
 
     /**
-     * Generates {@code RecordRestDescriptorNode} for the additional properties.
+     * Generates {@code RecordRestDescriptorNode} for the additional properties in object schema.
      * <pre>
      *    type User record {
      *       string...;
@@ -166,9 +178,12 @@ public class RecordTypeGenerator extends TypeGenerator {
      */
     public static RecordRestDescriptorNode getRecordRestDescriptorNode(Schema<?> additionalPropSchema)
             throws BallerinaOpenApiException {
+
         RecordRestDescriptorNode recordRestDescNode = null;
         String type = additionalPropSchema.getType();
+
         if (additionalPropSchema instanceof NumberSchema && additionalPropSchema.getFormat() != null) {
+            // this is special for `NumberSchema` because it has format with its expected type.
             type = additionalPropSchema.getFormat();
         } else if (additionalPropSchema instanceof ObjectSchema || additionalPropSchema instanceof MapSchema) {
             RecordTypeGenerator record = new RecordTypeGenerator(additionalPropSchema, null);
@@ -223,7 +238,10 @@ public class RecordTypeGenerator extends TypeGenerator {
 }
 
 /**
- * RecordMetadata class for containing the details to generate record.
+ * RecordMetadata class for containing the details to generate record node. This contains the details with whether
+ * record is openapi record or not, and its restField details.
+ *
+ * @since 1.4.0
  */
 class RecordMetadata {
     private final boolean isOpenRecord;
@@ -244,7 +262,9 @@ class RecordMetadata {
     }
 
     /**
-     * Record meta data builder class.
+     * Record meta data builder class for {@code RecordMetadata}.
+     *
+     * @since 1.4.0
      */
     public static class Builder {
         private boolean isOpenRecord = false;
