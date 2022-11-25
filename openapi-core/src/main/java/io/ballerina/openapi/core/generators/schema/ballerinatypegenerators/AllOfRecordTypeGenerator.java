@@ -30,6 +30,7 @@ import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
+import io.ballerina.openapi.core.generators.schema.model.RecordMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -182,6 +183,14 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             TypeGenerator typeGenerator = getTypeGenerator(schema, null, null);
             TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
             typeDescriptorNodes.add(typeDescriptorNode);
+            // error for rest field unhandled constraint support
+            if (GeneratorUtils.hasConstraints(schema)) {
+                // use printStream for echo the error, because current openapi to ballerina implementation won't
+                // handle diagnostic message.
+                OUT_STREAM.println("WARNING: constraints in the OpenAPI contract will be ignored for the " +
+                        "additionalProperties field, as constraints are not supported on Ballerina rest record " +
+                        "field.");
+            }
         }
         if (typeDescriptorNodes.size() > 1) {
             UnionTypeDescriptorNode unionTypeDescriptorNode = null;

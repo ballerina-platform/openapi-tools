@@ -11,3 +11,9 @@ public type User03 record {|
     int? id?;
     string[]?...;
 |};
+
+# These Additional properties are complex to map.
+public type User04 record {
+    string? name?;
+    int? id?;
+};

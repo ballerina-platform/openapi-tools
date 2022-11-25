@@ -105,7 +105,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "RequestBody has oneOf scenarios")
-    public void oneOfScenarios() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void oneOfScenarios() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/oneOf_request_body.yaml");
         BallerinaServiceGenerator ballerinaServiceGenerator =
                 new BallerinaServiceGenerator(GeneratorUtils.normalizeOpenAPI(definitionPath, false), filter);
