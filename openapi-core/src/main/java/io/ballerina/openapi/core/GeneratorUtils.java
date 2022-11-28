@@ -129,7 +129,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
-import static io.ballerina.openapi.core.GeneratorConstants.DOUBLE_LINE_SEPARATOR;
 import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
@@ -399,7 +398,7 @@ public class GeneratorUtils {
                     contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
                 throw new BallerinaOpenApiException(ErrorMessages.unsupportedOpenAPIVersion());
             }
-            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n");
             for (String message : parseResult.getMessages()) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }
@@ -722,8 +721,7 @@ public class GeneratorUtils {
         }
         if (!errorList.isEmpty()) {
             throw new BallerinaOpenApiException(
-                    "OpenAPI definition has errors: " +
-                            DOUBLE_LINE_SEPARATOR + String.join(LINE_SEPARATOR, errorList));
+                    "OpenAPI definition has errors: " + LINE_SEPARATOR + String.join(LINE_SEPARATOR, errorList));
         }
     }
 
@@ -750,7 +748,7 @@ public class GeneratorUtils {
         }
 
         if (!errorList.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: " + DOUBLE_LINE_SEPARATOR);
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: " + System.lineSeparator());
             for (String message : errorList) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }

@@ -50,7 +50,6 @@ public class MapSchemaNegativeTests {
 
     @Test(expectedExceptions = BallerinaOpenApiException.class,
     expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
-            "\n" +
             "attribute components.schemas.User02.additionalProperties.*")
     public void testForAdditionalPropertiesWithParserIssue() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
@@ -70,15 +69,16 @@ public class MapSchemaNegativeTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/additional_properties_negative.bal", syntaxTree);
 
-        // This console output check failed due to not receiving generation outstream for test outstream.
-        // Tried with several scenarios by passing printstream through relevant constructors and this outstream
-        // capture doesn't work for integration tests as well. Therefore, these warnings are tested by manually, it
-        // worked as expected.
-        //TODO: update these kind of scenario with proper outstream matching test.
         String expectedOut = "WARNING: constraints in the OpenAPI contract will be ignored for the " +
                 "additionalProperties field, as constraints are not supported on Ballerina rest record field.\n" +
                 "WARNING: generating Ballerina rest record field will be ignored for the OpenAPI contract " +
                 "additionalProperties type `ComposedSchema`, as it is not supported on Ballerina rest record field.";
+        // This console output check failed due to not receiving generation outstream for test outstream.
+        // Tried with several scenarios by passing printstream through relevant constructors and this outstream
+        // capture doesn't work for integration tests as well. Therefore, these warnings are tested by manually, it
+        // worked as expected.
+        //TODO: enable this with diagnostic error message implementation.
+        // https://github.com/ballerina-platform/openapi-tools/issues/688
 //        Assert.assertEquals(this.console.toString(), expectedOut);
     }
 
