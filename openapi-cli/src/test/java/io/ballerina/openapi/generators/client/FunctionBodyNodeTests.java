@@ -108,7 +108,7 @@ public class FunctionBodyNodeTests {
                         "request.setPayload(xmlBody, \"application/xml\");" +
                         "http:Response response = check self.clientEp->post(resourcePath, request);" +
                         "return response;}"},
-                {"swagger/response_type_order.yaml", "/pet/{petId}", 
+                {"swagger/response_type_order.yaml", "/pet/{petId}",
                         "{string resourcePath = string `/pet/${getEncodedUri(petId)}`;" +
                         "Pet response = check self.clientEp->get(resourcePath);" +
                         "return response;}"},
@@ -137,7 +137,15 @@ public class FunctionBodyNodeTests {
                         "mime:Entity[] bodyParts = check createBodyParts(payload, encodingMap);\n" +
                         "request.setBodyParts(bodyParts);\n" +
                         "http:Response response = check self.clientEp->post(resourcePath, request);\n" +
-                        "return response;}"}
+                        "return response;}"},
+                {"swagger/empty_object_responnse.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
+                        "        // TODO: Update the request as needed;\n" +
+                        "        json response = check self.clientEp->post(resourcePath, request);\n" +
+                        "        return response;}"},
+                {"swagger/map_schema_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
+                        "        // TODO: Update the request as needed;\n" +
+                        "        json response = check self.clientEp->post(resourcePath, request);\n" +
+                        "        return response;}"}
         };
     }
 
