@@ -399,7 +399,7 @@ public class GeneratorUtils {
                     contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
                 throw new BallerinaOpenApiException(ErrorMessages.unsupportedOpenAPIVersion());
             }
-            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n");
             for (String message : parseResult.getMessages()) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }
@@ -722,8 +722,7 @@ public class GeneratorUtils {
         }
         if (!errorList.isEmpty()) {
             throw new BallerinaOpenApiException(
-                    "OpenAPI definition has errors: " +
-                            DOUBLE_LINE_SEPARATOR + String.join(LINE_SEPARATOR, errorList));
+                    "OpenAPI definition has errors: " + LINE_SEPARATOR + String.join(LINE_SEPARATOR, errorList));
         }
     }
 
@@ -750,7 +749,7 @@ public class GeneratorUtils {
         }
 
         if (!errorList.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: " + DOUBLE_LINE_SEPARATOR);
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: " + System.lineSeparator());
             for (String message : errorList) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }

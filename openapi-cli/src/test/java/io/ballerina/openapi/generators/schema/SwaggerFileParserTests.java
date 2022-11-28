@@ -59,7 +59,6 @@ public class SwaggerFileParserTests {
     @Test(description = "Test swagger file has undocumented reference in schema.",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
-                    "\n" +
                     "attribute components.schemas.Person.Person01 is not of type `schema`.*")
     public void testForUndocumentedReference() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/undocument_ref.yaml"), true);

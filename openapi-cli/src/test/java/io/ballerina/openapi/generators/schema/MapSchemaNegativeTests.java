@@ -50,7 +50,6 @@ public class MapSchemaNegativeTests {
 
     @Test(expectedExceptions = BallerinaOpenApiException.class,
     expectedExceptionsMessageRegExp = "OpenAPI definition has errors: \n" +
-            "\n" +
             "attribute components.schemas.User02.additionalProperties.*")
     public void testForAdditionalPropertiesWithParserIssue() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +

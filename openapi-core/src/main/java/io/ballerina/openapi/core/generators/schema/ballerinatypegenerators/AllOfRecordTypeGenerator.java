@@ -166,7 +166,6 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 createToken(SEMICOLON_TOKEN));
     }
 
-
     /**
      * Creates the UnionType done for a given schema list.
      *
@@ -177,7 +176,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
     private static TypeDescriptorNode getUnionType(List<Schema<?>> schemas) throws BallerinaOpenApiException {
 
         // TODO: this has issue with generating union type with `string?|int?...
-        // this issue will be address via this issue https://github.com/ballerina-platform/openapi-tools/issues/810
+        // this will be tracked via https://github.com/ballerina-platform/openapi-tools/issues/810
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema schema : schemas) {
             TypeGenerator typeGenerator = getTypeGenerator(schema, null, null);
