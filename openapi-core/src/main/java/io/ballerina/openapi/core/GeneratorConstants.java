@@ -122,6 +122,8 @@ public class GeneratorConstants {
     public static final String HEADER_VALUES = "headerValues";
     public static final String PAYLOAD = "payload";
     public static final String PAYLOAD_KEYWORD = "Payload";
+    public static final String REQUEST = "request";
+    public static final String HTTP_REQUEST = "http:Request";
     public static final String PDF = "pdf";
     public static final String QUERY_PARAM = "queryParam";
     public static final String SELF = "self";

@@ -20,5 +20,9 @@ paths:
               items:
                 type: string
       responses:
-        '201':
-          description: Null response
+        '200':
+          description: Successful operation
+          content:
+            '*/*':
+              example:
+                summary: Pet Response

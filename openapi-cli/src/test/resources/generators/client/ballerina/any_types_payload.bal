@@ -36,13 +36,11 @@ public isolated client class Client {
     }
     # Create a pet
     #
-    # + return - Null response
-    remote isolated function createPet(byte[] payload) returns http:Response|error {
+    # + return - Successful operation
+    remote isolated function createPet(http:Request request) returns http:Response|error {
         string resourcePath = string `/pets`;
-        http:Request request = new;
-        request.setPayload(payload);
+        // TODO: Update the request as needed;
         http:Response response = check self.clientEp->post(resourcePath, request);
         return response;
     }
 }
-

@@ -133,6 +133,8 @@ import static io.ballerina.openapi.core.GeneratorConstants.DOUBLE_LINE_SEPARATOR
 import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
+import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
+import static io.ballerina.openapi.core.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
@@ -141,7 +143,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.GeneratorConstants.SPECIAL_CHARACTERS_REGEX;
-import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
@@ -409,9 +410,9 @@ public class GeneratorUtils {
     }
 
     /**
-     * Generate BallerinaMediaType for all the mediaTypes.
+     * Generate BallerinaMediaType for all the return mediaTypes.
      */
-    public static String getBallerinaMediaType(String mediaType) {
+    public static String getBallerinaMediaType(String mediaType, boolean isRequest) {
 
         switch (mediaType) {
             case MediaType.APPLICATION_JSON:
@@ -426,10 +427,9 @@ public class GeneratorUtils {
             case MediaType.APPLICATION_OCTET_STREAM:
             case APPLICATION_PDF:
             case ANY_TYPE:
-                return SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
+                return isRequest ? HTTP_REQUEST : HTTP_RESPONSE;
             default:
                 return SyntaxKind.JSON_KEYWORD.stringValue();
-            // TODO: fill other types
         }
     }
 
