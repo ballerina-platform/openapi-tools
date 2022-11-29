@@ -37,6 +37,7 @@ import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -80,10 +81,16 @@ import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtil
  * @since 1.3.0
  */
 public class ReturnTypeGenerator {
+    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
+
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
 
     public Map<String, TypeDefinitionNode> getTypeInclusionRecords() {
         return this.typeInclusionRecords;
+    }
+
+    public ReturnTypeGenerator(BallerinaTypesGenerator ballerinaSchemaGenerator) {
+        this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
     }
 
     /**
@@ -277,7 +284,7 @@ public class ReturnTypeGenerator {
     private UnionTypeDescriptorNode getUnionNodeForContent(Iterator<Map.Entry<String, MediaType>> iterator)
             throws BallerinaOpenApiException {
 
-        List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
+        List<TypeDescriptorNode> qualifiedNodes = new ArrayList<>();
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
             Map.Entry<String, MediaType> contentType = iterator.next();
@@ -285,10 +292,10 @@ public class ReturnTypeGenerator {
             if (node.isEmpty()) {
                 continue;
             }
-            qualifiedNodes.add((SimpleNameReferenceNode) node.get());
+            qualifiedNodes.add(node.get());
         }
-        SimpleNameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
-        SimpleNameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
+        TypeDescriptorNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
+        TypeDescriptorNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
         UnionTypeDescriptorNode traversUnion = createUnionTypeDescriptorNode(traversRight, pipeToken, right);
         if (qualifiedNodes.size() >= 3) {
             for (int i = qualifiedNodes.size() - 3; i >= 0; i--) {

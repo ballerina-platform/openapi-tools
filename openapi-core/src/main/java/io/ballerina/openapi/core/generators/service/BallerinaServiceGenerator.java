@@ -43,6 +43,9 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
+import io.ballerina.openapi.core.generators.schema.model.GeneratorMetaData;
+import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
@@ -55,6 +58,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -84,12 +88,16 @@ public class BallerinaServiceGenerator {
     private boolean isNullableRequired;
     private final OpenAPI openAPI;
     private final Filter filter;
+    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
+
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
 
-    public BallerinaServiceGenerator(OpenAPI openAPI, Filter filter) {
-        this.openAPI = openAPI;
-        this.filter = filter;
+    public BallerinaServiceGenerator(OASServiceMetadata oasServiceMetadata) {
+        this.openAPI = oasServiceMetadata.getOpenAPI();
+        this.filter = oasServiceMetadata.getFilters();
         this.isNullableRequired = false;
+        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, oasServiceMetadata.isNullable(), new LinkedList<>());
+        GeneratorMetaData.createInstance(openAPI, oasServiceMetadata.isNullable());
     }
 
     public List<TypeDefinitionNode> getTypeInclusionRecords() {
@@ -239,7 +247,7 @@ public class BallerinaServiceGenerator {
             requestBody = resolveRequestBodyReference(requestBody);
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGen = new RequestBodyGenerator(this.openAPI.getComponents(),
-                        requestBody);
+                        requestBody, ballerinaSchemaGenerator);
                 params.add(requestBodyGen.createNodeForRequestBody());
                 params.add(createToken(SyntaxKind.COMMA_TOKEN));
             }
@@ -257,7 +265,7 @@ public class BallerinaServiceGenerator {
             isNullableRequired = parametersGenerator.isNullableRequired();
         }
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
-        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator();
+        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator);
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
                 createEmptyNodeList(), path);
         typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());

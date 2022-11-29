@@ -37,6 +37,7 @@ import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -72,10 +73,13 @@ import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtil
 public class RequestBodyGenerator {
     private final Components components;
     private final RequestBody requestBody;
+    private final BallerinaTypesGenerator ballerinaSchemaGenerator;
 
-    public RequestBodyGenerator(Components components, RequestBody requestBody) {
+
+    public RequestBodyGenerator(Components components, RequestBody requestBody, BallerinaTypesGenerator ballerinaSchemaGenerator) {
         this.components = components;
         this.requestBody = requestBody;
+        this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
     }
 
     /**

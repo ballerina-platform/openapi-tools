@@ -37,8 +37,10 @@ import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.schema.ballerinatypegenerators.RecordTypeGenerator;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -144,6 +146,10 @@ public class ServiceGenerationUtils {
         if (schema.get$ref() != null) {
             String schemaName = GeneratorUtils.getValidName(extractReferenceType(schema.get$ref()), true);
             return Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(schemaName)));
+        } else if (schema instanceof MapSchema) {
+            RecordTypeGenerator recordTypeGenerator = new RecordTypeGenerator(schema, null);
+            TypeDescriptorNode record = recordTypeGenerator.generateTypeDescriptorNode();
+            return Optional.ofNullable(record);
         } else if (schema.getType() != null) {
             String schemaType = schema.getType();
             boolean isPrimitiveType = schemaType.equals(INTEGER) || schemaType.equals(NUMBER) ||
