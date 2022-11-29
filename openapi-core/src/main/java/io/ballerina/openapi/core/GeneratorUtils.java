@@ -129,7 +129,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
-import static io.ballerina.openapi.core.GeneratorConstants.DOUBLE_LINE_SEPARATOR;
 import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;

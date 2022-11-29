@@ -25,7 +25,6 @@ import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
@@ -415,8 +414,7 @@ public class ReturnTypeTests {
                 .build();
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
-        System.out.println(Formatter.format(syntaxTree));
-        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/unsupportedPayload.bal",
-                syntaxTree);
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "response/response_has_additional_properties.bal", syntaxTree);
     }
 }

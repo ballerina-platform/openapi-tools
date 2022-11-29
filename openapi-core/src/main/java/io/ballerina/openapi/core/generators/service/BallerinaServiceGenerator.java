@@ -96,7 +96,8 @@ public class BallerinaServiceGenerator {
         this.openAPI = oasServiceMetadata.getOpenAPI();
         this.filter = oasServiceMetadata.getFilters();
         this.isNullableRequired = false;
-        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, oasServiceMetadata.isNullable(), new LinkedList<>());
+        this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI, oasServiceMetadata.isNullable(),
+                new LinkedList<>());
         GeneratorMetaData.createInstance(openAPI, oasServiceMetadata.isNullable());
     }
 
@@ -247,7 +248,7 @@ public class BallerinaServiceGenerator {
             requestBody = resolveRequestBodyReference(requestBody);
             if (requestBody.getContent() != null) {
                 RequestBodyGenerator requestBodyGen = new RequestBodyGenerator(this.openAPI.getComponents(),
-                        requestBody, ballerinaSchemaGenerator);
+                        requestBody);
                 params.add(requestBodyGen.createNodeForRequestBody());
                 params.add(createToken(SyntaxKind.COMMA_TOKEN));
             }

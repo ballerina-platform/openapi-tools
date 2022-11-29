@@ -292,7 +292,11 @@ public class ReturnTypeGenerator {
             if (node.isEmpty()) {
                 continue;
             }
-            qualifiedNodes.add(node.get());
+            TypeDescriptorNode typeDescriptorNode = node.get();
+            if (typeDescriptorNode instanceof RecordTypeDescriptorNode) {
+                RecordTypeDescriptorNode recordNode = (RecordTypeDescriptorNode) typeDescriptorNode;
+            }
+            qualifiedNodes.add(typeDescriptorNode);
         }
         TypeDescriptorNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
         TypeDescriptorNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
