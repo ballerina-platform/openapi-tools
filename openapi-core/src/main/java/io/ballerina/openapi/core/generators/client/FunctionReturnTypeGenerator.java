@@ -206,12 +206,12 @@ public class FunctionReturnTypeGenerator {
                     media.getKey().trim().equals("image/png") ||
                     media.getKey().trim().equals("application/octet-stream")) {
                 String typeName = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false) + "Arr";
-                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
-                type = generateCustomTypeDefine(type, typeName, isSignature);
+                String mappedType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
+                type = generateCustomTypeDefine(mappedType, typeName, isSignature);
             } else {
                 String typeName = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false) + "Arr";
-                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false) + "[]";
-                type = generateCustomTypeDefine(type, typeName, isSignature);
+                String mappedType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false) + "[]";
+                type = generateCustomTypeDefine(mappedType, typeName, isSignature);
             }
         } else {
             String typeName;
