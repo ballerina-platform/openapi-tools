@@ -33,6 +33,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorConstants;
 import io.ballerina.openapi.core.GeneratorUtils;
@@ -42,6 +43,7 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -170,7 +172,9 @@ public class RequestBodyGenerator {
                     typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
             }
         } else {
-            typeName = getMediaTypeToken(mediaType);
+            ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeTokens =
+                    getMediaTypeToken(mediaType);
+            typeName = mediaTypeTokens.left;
         }
         return typeName;
     }

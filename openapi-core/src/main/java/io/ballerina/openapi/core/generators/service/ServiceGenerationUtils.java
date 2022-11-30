@@ -206,8 +206,9 @@ public class ServiceGenerationUtils {
     /**
      * Generate TypeDescriptor for all the mediaTypes.
      */
-    public static Optional<TypeDescriptorNode> getMediaTypeToken(Map.Entry<String, MediaType> mediaType)
-            throws BallerinaOpenApiException {
+    //TODO: add immutablePair
+    public static ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> getMediaTypeToken(
+            Map.Entry<String, MediaType> mediaType, String recordName) throws BallerinaOpenApiException {
 
         String mediaTypeContent = mediaType.getKey().trim();
         if (mediaTypeContent.matches("text/.*")) {
@@ -219,27 +220,40 @@ public class ServiceGenerationUtils {
         switch (mediaTypeContent) {
             case GeneratorConstants.APPLICATION_JSON:
                 Optional<TypeDescriptorNode> returnTypeDecNode = generateTypeDescNodeForOASSchema(schema);
-                return returnTypeDecNode.isEmpty() ?
-                        Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken("json"))) :
-                        returnTypeDecNode;
+                if (returnTypeDecNode.isEmpty()) {
+                    return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(
+                            "json"))), null);
+                } else if (returnTypeDecNode.get() instanceof RecordTypeDescriptorNode) {
+                    RecordTypeDescriptorNode recordNode = (RecordTypeDescriptorNode) returnTypeDecNode.get();
+                    TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
+                            createToken(PUBLIC_KEYWORD),
+                            createToken(TYPE_KEYWORD),
+                            createIdentifierToken(recordName),
+                            recordNode,
+                            createToken(SEMICOLON_TOKEN));
+                    return ImmutablePair.of(returnTypeDecNode, typeDefinitionNode);
+                } else {
+                    return ImmutablePair.of(returnTypeDecNode, null);
+                }
             case GeneratorConstants.APPLICATION_XML:
                 identifierToken = createIdentifierToken(GeneratorConstants.XML);
-                return Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
+                return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(identifierToken)), null);
             case GeneratorConstants.APPLICATION_URL_ENCODE:
                 identifierToken = createIdentifierToken(GeneratorConstants.MAP_STRING);
-                return Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
+                return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(identifierToken)), null);
             case GeneratorConstants.TEXT:
                 identifierToken = createIdentifierToken(GeneratorConstants.STRING);
-                return Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
+                return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(identifierToken)), null);
             case GeneratorConstants.APPLICATION_OCTET_STREAM:
                 ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                         createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
                         createToken(SyntaxKind.CLOSE_BRACKET_TOKEN));
-                return Optional.ofNullable(createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(
-                                null, createIdentifierToken(GeneratorConstants.BYTE)),
-                        NodeFactory.createNodeList(dimensionNode)));
+                return ImmutablePair.of(Optional.ofNullable(
+                        createArrayTypeDescriptorNode(createBuiltinSimpleNameReferenceNode(null,
+                                        createIdentifierToken(GeneratorConstants.BYTE)),
+                        NodeFactory.createNodeList(dimensionNode))), null);
             default:
-                return Optional.empty();
+                return ImmutablePair.nullPair();
         }
     }
 

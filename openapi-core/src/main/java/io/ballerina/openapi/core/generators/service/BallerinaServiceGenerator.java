@@ -266,7 +266,8 @@ public class BallerinaServiceGenerator {
             isNullableRequired = parametersGenerator.isNullableRequired();
         }
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
-        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator);
+        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator,
+                GeneratorUtils.getValidName(path, true));
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
                 createEmptyNodeList(), path);
         typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());

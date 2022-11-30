@@ -46,6 +46,7 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,6 +83,8 @@ import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtil
  */
 public class ReturnTypeGenerator {
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
+    private final String pathRecord;
+    private static int countForRecord = 0;
 
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
 
@@ -89,8 +92,9 @@ public class ReturnTypeGenerator {
         return this.typeInclusionRecords;
     }
 
-    public ReturnTypeGenerator(BallerinaTypesGenerator ballerinaSchemaGenerator) {
+    public ReturnTypeGenerator(BallerinaTypesGenerator ballerinaSchemaGenerator, String pathRecord) {
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
+        this.pathRecord = pathRecord;
     }
 
     /**
@@ -140,17 +144,31 @@ public class ReturnTypeGenerator {
                             } else {
                                 while (iterator.hasNext()) {
                                     Map.Entry<String, MediaType> next = iterator.next();
-
-                                    Optional<TypeDescriptorNode> mediaTypeToken = getMediaTypeToken(next);
+                                    ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeTokens =
+                                            getMediaTypeToken(next);
+                                    Optional<TypeDescriptorNode> mediaTypeToken = mediaTypeTokens.getLeft();
                                     if (mediaTypeToken.isEmpty()) {
                                         BuiltinSimpleNameReferenceNode type = createBuiltinSimpleNameReferenceNode(null,
                                                 createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
                                         returnNode = createReturnTypeDescriptorNode(returnKeyWord,
                                                 createEmptyNodeList(), type);
                                         break;
+                                    } else if (mediaTypeTokens.getRight() != null) {
+                                        TypeDefinitionNode rightNode = mediaTypeTokens.getRight();
+                                        countForRecord = countForRecord + 1;
+                                        String recordName = countForRecord == 0 ?
+                                                pathRecord + "Response" : pathRecord + "Response_" + countForRecord;
+                                        typeInclusionRecords.put(recordName, rightNode);
+                                        returnNode = createReturnTypeDescriptorNode(returnKeyWord,
+                                                createEmptyNodeList(), rightNode);
+                                    } else {
+
+                                        returnNode = createReturnTypeDescriptorNode(returnKeyWord,
+                                                createEmptyNodeList(), mediaTypeToken.get());
                                     }
-                                    returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
-                                            mediaTypeToken.get());
+
+//                                    returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
+//                                            mediaTypeToken.get());
                                 }
                             }
                         } else if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
@@ -216,7 +234,18 @@ public class ReturnTypeGenerator {
                     Iterator<Schema> iterator = ((ComposedSchema) schema).getOneOf().iterator();
                     type = Optional.ofNullable(getUnionNodeForOneOf(iterator));
                 } else {
-                    type = getMediaTypeToken(mediaTypeEntry);
+                    ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeToken =
+                            getMediaTypeToken(mediaTypeEntry);
+                    type = mediaTypeToken.left;
+                    TypeDefinitionNode rightNode = mediaTypeToken.right;
+                    if (rightNode != null) {
+                        countForRecord = countForRecord + 1;
+                        String recordName = countForRecord == 0 ? pathRecord + "Response" :
+                                pathRecord + "Response_" + countForRecord;
+                        typeInclusionRecords.put(recordName, rightNode);
+
+                        type = Optional.of(createSimpleNameReferenceNode(createIdentifierToken(recordName)));
+                    }
                 }
             }
         }
@@ -252,11 +281,24 @@ public class ReturnTypeGenerator {
                 qualifiedNodes.add(node);
             } else if (response.getValue().getContent() != null) {
                 TypeDescriptorNode record;
-                Optional<TypeDescriptorNode> returnNode = getMediaTypeToken(response.getValue().getContent().entrySet()
-                        .iterator().next());
+                Map.Entry<String, MediaType> contentType = response.getValue().getContent().entrySet()
+                        .iterator().next();
+
+                ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeToken =
+                        getMediaTypeToken(contentType);
+                Optional<TypeDescriptorNode> returnNode = mediaTypeToken.left;
+                TypeDefinitionNode rightNode = mediaTypeToken.right;
+
                 if (returnNode.isEmpty()) {
                     record = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
-                } else {
+                } else if (rightNode != null) {
+                    countForRecord = countForRecord + 1;
+                    String recordName = countForRecord == 0 ? pathRecord + "Response" :
+                            pathRecord + "Response_" + countForRecord;
+                    typeInclusionRecords.put(recordName, rightNode);
+
+                    record = createSimpleNameReferenceNode(createIdentifierToken(recordName));
+                } else  {
                     record = returnNode.get();
                 }
                 if (responseCode.equals(GeneratorConstants.HTTP_200)) {
@@ -288,15 +330,24 @@ public class ReturnTypeGenerator {
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
             Map.Entry<String, MediaType> contentType = iterator.next();
-            Optional<TypeDescriptorNode> node = getMediaTypeToken(contentType);
-            if (node.isEmpty()) {
+            ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeToken =
+                    getMediaTypeToken(contentType);
+
+            Optional<TypeDescriptorNode> leftNode = mediaTypeToken.left;
+            TypeDefinitionNode rightNode = mediaTypeToken.right;
+
+            if (leftNode.isEmpty()) {
                 continue;
+            } else if (rightNode != null) {
+                countForRecord = countForRecord + 1;
+                String recordName = countForRecord == 0 ? pathRecord + "Response" :
+                        pathRecord + "Response_" + countForRecord;
+                typeInclusionRecords.put(recordName, rightNode);
+                qualifiedNodes.add(createSimpleNameReferenceNode(createIdentifierToken(recordName)));
+            } else {
+                TypeDescriptorNode typeDescriptorNode = leftNode.get();
+                qualifiedNodes.add(typeDescriptorNode);
             }
-            TypeDescriptorNode typeDescriptorNode = node.get();
-            if (typeDescriptorNode instanceof RecordTypeDescriptorNode) {
-                RecordTypeDescriptorNode recordNode = (RecordTypeDescriptorNode) typeDescriptorNode;
-            }
-            qualifiedNodes.add(typeDescriptorNode);
         }
         TypeDescriptorNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
         TypeDescriptorNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
