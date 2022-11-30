@@ -145,6 +145,14 @@ public class FunctionBodyNodeTests {
                 {"swagger/map_schema_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
                         "        // TODO: Update the request as needed;\n" +
                         "        json response = check self.clientEp->post(resourcePath, request);\n" +
+                        "        return response;}"},
+                {"swagger/array_response_pdf.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
+                        "        // TODO: Update the request as needed;\n" +
+                        "        http:Response response = check self.clientEp->post(resourcePath, request);\n" +
+                        "        return response;}"},
+                {"swagger/any_type_response.yaml", "/pets", "{string resourcePath = string `/pets`;\n" +
+                        "        // TODO: Update the request as needed;\n" +
+                        "        http:Response response = check self.clientEp->post(resourcePath, request);\n" +
                         "        return response;}"}
         };
     }
