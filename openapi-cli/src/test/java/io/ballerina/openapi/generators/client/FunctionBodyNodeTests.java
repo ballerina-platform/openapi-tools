@@ -38,6 +38,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -62,7 +63,7 @@ public class FunctionBodyNodeTests {
                 display.getPaths().get(path).readOperationsMap().entrySet();
         Iterator<Map.Entry<PathItem.HttpMethod, Operation>> iterator = operation.iterator();
         FunctionBodyGenerator functionBodyGenerator = new FunctionBodyGenerator(new ArrayList<>(),
-                new ArrayList<>(), display, new BallerinaTypesGenerator(display),
+                new LinkedHashSet<>(), display, new BallerinaTypesGenerator(display),
                 new BallerinaAuthConfigGenerator(false, false), new BallerinaUtilGenerator(),
                 false);
         FunctionBodyNode bodyNode = functionBodyGenerator.getFunctionBodyNode(path, iterator.next());

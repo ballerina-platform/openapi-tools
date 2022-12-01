@@ -67,6 +67,7 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -129,7 +130,7 @@ public class BallerinaClientGenerator {
 
     private final Filter filters;
     private List<ImportDeclarationNode> imports;
-    private List<TypeDefinitionNode> typeDefinitionNodeList;
+    private Set<TypeDefinitionNode> typeDefinitionNodeList;
     private List<String> apiKeyNameList = new ArrayList<>();
     private final OpenAPI openAPI;
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
@@ -142,7 +143,7 @@ public class BallerinaClientGenerator {
     /**
      * Returns a list of type definition nodes.
      */
-    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
+    public Set<TypeDefinitionNode> getTypeDefinitionNodeList() {
 
         return typeDefinitionNodeList;
     }
@@ -159,7 +160,7 @@ public class BallerinaClientGenerator {
      * Set the typeDefinitionNodeList.
      */
     public void setTypeDefinitionNodeList(
-            List<TypeDefinitionNode> typeDefinitionNodeList) {
+            Set<TypeDefinitionNode> typeDefinitionNodeList) {
 
         this.typeDefinitionNodeList = typeDefinitionNodeList;
     }
@@ -183,7 +184,7 @@ public class BallerinaClientGenerator {
 
         this.filters = oasClientConfig.getFilters();
         this.imports = new ArrayList<>();
-        this.typeDefinitionNodeList = new ArrayList<>();
+        this.typeDefinitionNodeList = new LinkedHashSet<>();
         this.openAPI = oasClientConfig.getOpenAPI();
         this.ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI,
                 oasClientConfig.isNullable(), new LinkedList<>());

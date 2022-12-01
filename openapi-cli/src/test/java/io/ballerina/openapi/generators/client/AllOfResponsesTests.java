@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
 
@@ -44,7 +44,7 @@ public class AllOfResponsesTests {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_allof_reference.yaml"));
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
-                ballerinaSchemaGenerator, new ArrayList<>());
+                ballerinaSchemaGenerator, new LinkedHashSet<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true), "CompoundTestsProductsResponse|error");
     }
@@ -53,7 +53,7 @@ public class AllOfResponsesTests {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_all_of_response.yaml"));
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
-                ballerinaSchemaGenerator, new ArrayList<>());
+                ballerinaSchemaGenerator, new LinkedHashSet<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/users/{userId}/meetings")
                         .getPost(), true), "CompoundCreateMeetingResponse|error");
     }
@@ -63,7 +63,7 @@ public class AllOfResponsesTests {
                 "response_without_properties_with_additional.yaml"));
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
-                ballerinaSchemaGenerator, new ArrayList<>());
+                ballerinaSchemaGenerator, new LinkedHashSet<>());
 
         String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true);
@@ -76,7 +76,7 @@ public class AllOfResponsesTests {
                 ".yaml"));
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
-                ballerinaSchemaGenerator, new ArrayList<>());
+                ballerinaSchemaGenerator, new LinkedHashSet<>());
 
         String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true);
@@ -89,7 +89,7 @@ public class AllOfResponsesTests {
                 "/response_without_properties_without_additional.yaml"));
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
-                ballerinaSchemaGenerator, new ArrayList<>());
+                ballerinaSchemaGenerator, new LinkedHashSet<>());
 
         String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true);
@@ -102,7 +102,7 @@ public class AllOfResponsesTests {
                 "response_with_properties_without_additional.yaml"));
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(
-                response, ballerinaSchemaGenerator, new ArrayList<>());
+                response, ballerinaSchemaGenerator, new LinkedHashSet<>());
 
         String returnType = functionReturnType.getReturnType(response.getPaths().get("/products").getGet(),
                 true);

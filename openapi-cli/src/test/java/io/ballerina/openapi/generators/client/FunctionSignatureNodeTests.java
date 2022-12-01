@@ -40,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
@@ -61,7 +62,7 @@ public class FunctionSignatureNodeTests {
     public void getFunctionSignatureNodeTests() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/valid_operation.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
+                new BallerinaTypesGenerator(openAPI), new LinkedHashSet<>(), false);
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/products/{country}").getGet(), new ArrayList<>());
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
@@ -91,7 +92,7 @@ public class FunctionSignatureNodeTests {
     public void testFunctionSignatureNodeForXMLPayload() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/xml_request_payload.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
+                new BallerinaTypesGenerator(openAPI), new LinkedHashSet<>(), false);
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/pets").getPost(), new ArrayList<>());
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
@@ -109,7 +110,7 @@ public class FunctionSignatureNodeTests {
     public void testFunctionSignatureNodeForJSONPayload() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/json_request_payload.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
+                new BallerinaTypesGenerator(openAPI), new LinkedHashSet<>(), false);
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/pets").getPost(), new ArrayList<>());
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
@@ -128,7 +129,7 @@ public class FunctionSignatureNodeTests {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RESDIR.resolve("swagger/multipart_formdata_custom.yaml"), true);
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
+                new BallerinaTypesGenerator(openAPI), new LinkedHashSet<>(), false);
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/pets").getPost(), new ArrayList<>());
         SeparatedNodeList<ParameterNode> parameters = signature.parameters();
@@ -154,7 +155,7 @@ public class FunctionSignatureNodeTests {
     public void getFunctionSignatureForNestedArrayResponse() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/response_nested_array.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
+                new BallerinaTypesGenerator(openAPI), new LinkedHashSet<>(), false);
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/timestags").getGet(), new ArrayList<>());
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
@@ -165,7 +166,7 @@ public class FunctionSignatureNodeTests {
     public void getFunctionSignatureForStringArrayResponse() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/response_string_array.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
+                new BallerinaTypesGenerator(openAPI), new LinkedHashSet<>(), false);
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/timestags").getGet(), new ArrayList<>());
         ReturnTypeDescriptorNode returnTypeNode = signature.returnTypeDesc().orElseThrow();
@@ -178,7 +179,7 @@ public class FunctionSignatureNodeTests {
     public void testNestedArrayQueryParamGeneration() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/invalid_array_query_params.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
+                new BallerinaTypesGenerator(openAPI), new LinkedHashSet<>(), false);
         functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/pets").getGet(), new ArrayList<>());
     }
@@ -189,7 +190,7 @@ public class FunctionSignatureNodeTests {
     public void testArrayQueryParamWithNoTypeGeneration() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/invalid_array_query_params.yaml"));
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
+                new BallerinaTypesGenerator(openAPI), new LinkedHashSet<>(), false);
         functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/dogs").getGet(), new ArrayList<>());
     }
