@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -113,19 +114,19 @@ import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 public class FunctionSignatureGenerator {
     private final OpenAPI openAPI;
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
-    private final List<TypeDefinitionNode> typeDefinitionNodeList;
+    private final Set<TypeDefinitionNode> typeDefinitionNodeList;
     private FunctionReturnTypeGenerator functionReturnType;
     private boolean deprecatedParamFound = false;
 
     private boolean isResource;
 
-    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
+    public Set<TypeDefinitionNode> getTypeDefinitionNodeList() {
         return typeDefinitionNodeList;
     }
 
     public FunctionSignatureGenerator(OpenAPI openAPI,
                                       BallerinaTypesGenerator ballerinaSchemaGenerator,
-                                      List<TypeDefinitionNode> typeDefinitionNodeList, boolean isResource) {
+                                      Set<TypeDefinitionNode> typeDefinitionNodeList, boolean isResource) {
 
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
@@ -147,9 +148,10 @@ public class FunctionSignatureGenerator {
             throws BallerinaOpenApiException {
         // Store the parameters for method.
         List<Node> parameterList = new ArrayList<>();
+
+        setFunctionParameters(operation, parameterList, createToken(COMMA_TOKEN), remoteFunctionDoc);
         functionReturnType = new FunctionReturnTypeGenerator
                 (openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
-        setFunctionParameters(operation, parameterList, createToken(COMMA_TOKEN), remoteFunctionDoc);
 
         if (parameterList.size() >= 2) {
             parameterList.remove(parameterList.size() - 1);
@@ -233,14 +235,12 @@ public class FunctionSignatureGenerator {
         // Handle RequestBody
         if (operation.getRequestBody() != null) {
             RequestBody requestBody = operation.getRequestBody();
-            if (requestBody.getContent() != null) {
+            if (requestBody.getContent() != null || requestBody.get$ref() != null) {
                 setRequestBodyParameters(operation.getOperationId(), requestBody, remoteFunctionDoc, parameterList,
                         defaultable);
-            } else if (requestBody.get$ref() != null) {
-                String requestBodyName = extractReferenceType(requestBody.get$ref());
-                RequestBody requestBodySchema = openAPI.getComponents().getRequestBodies().get(requestBodyName.trim());
-                setRequestBodyParameters(operation.getOperationId(), requestBodySchema, remoteFunctionDoc,
-                        parameterList, defaultable);
+            } else {
+                throw new BallerinaOpenApiException(
+                        "Unsupported request body found in the Operation : " + operation.getOperationId());
             }
         }
         remoteFunctionDoc.addAll(deprecatedParamDocComments);
@@ -483,8 +483,21 @@ public class FunctionSignatureGenerator {
                                           List<Node> parameterList, List<Node> defaultable)
             throws BallerinaOpenApiException {
 
-        Content content = requestBody.getContent();
-        Iterator<Map.Entry<String, MediaType>> iterator = content.entrySet().iterator();
+        Content requestBodyContent;
+        String referencedRequestBodyName = "";
+        if (requestBody.get$ref() != null) {
+            referencedRequestBodyName = extractReferenceType(requestBody.get$ref()).trim();
+            RequestBody referencedRequestBody = openAPI.getComponents()
+                    .getRequestBodies().get(referencedRequestBodyName);
+            requestBodyContent = referencedRequestBody.getContent();
+            // note : when there is referenced request body, the description at the reference is ignored.
+            // Need to consider the description at the component level
+            requestBody.setDescription(referencedRequestBody.getDescription());
+        } else {
+            requestBodyContent = requestBody.getContent();
+        }
+
+        Iterator<Map.Entry<String, MediaType>> iterator = requestBodyContent.entrySet().iterator();
         while (iterator.hasNext()) {
             // This implementation currently for first content type
             Map.Entry<String, MediaType> next = iterator.next();
@@ -509,6 +522,10 @@ public class FunctionSignatureGenerator {
                     //TODO: handle nested array - this is impossible to handle
                     ArraySchema arraySchema = (ArraySchema) schema;
                     paramType = getRequestBodyParameterForArraySchema(operationId, next, arraySchema);
+                } else if (schema instanceof ObjectSchema) {
+                    ObjectSchema objectSchema = (ObjectSchema) schema;
+                    paramType = referencedRequestBodyName.isBlank() ? paramType : referencedRequestBodyName;
+                    getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
                 } else { // composed and object schemas are handled by the flatten
                     paramType = GeneratorUtils.getBallerinaMediaType(next.getKey());
                 }
@@ -557,6 +574,13 @@ public class FunctionSignatureGenerator {
         }
     }
 
+    private void getRequestBodyParameterForObjectSchema (String recordName, ObjectSchema objectSchema)
+            throws BallerinaOpenApiException {
+        TypeDefinitionNode record =
+                ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, recordName, new ArrayList<>());
+        typeDefinitionNodeList.add(record);
+    }
+
     /**
      * Generate RequestBody for array type schema.
      */
@@ -574,7 +598,7 @@ public class FunctionSignatureGenerator {
             // TODO - Add API doc by checking requestBody
             TypeDefinitionNode arrayTypeNode =
                     ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());
-            functionReturnType.updateTypeDefinitionNodeList(paramType, arrayTypeNode);
+            typeDefinitionNodeList.add(arrayTypeNode);
         } else {
             paramType = GeneratorUtils.getBallerinaMediaType(next.getKey().trim()) + SQUARE_BRACKETS;
         }

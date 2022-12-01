@@ -38,7 +38,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,14 +66,14 @@ import static io.ballerina.openapi.core.GeneratorUtils.isValidSchemaName;
 public class FunctionReturnTypeGenerator {
     private OpenAPI openAPI;
     private BallerinaTypesGenerator ballerinaSchemaGenerator;
-    private List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
+    private Set<TypeDefinitionNode> typeDefinitionNodeList = new LinkedHashSet<>();
 
     public FunctionReturnTypeGenerator() {
 
     }
 
     public FunctionReturnTypeGenerator(OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
-                                       List<TypeDefinitionNode> typeDefinitionNodeList) {
+                                       Set<TypeDefinitionNode> typeDefinitionNodeList) {
 
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;

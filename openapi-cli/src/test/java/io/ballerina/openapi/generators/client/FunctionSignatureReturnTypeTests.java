@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
 
@@ -71,7 +71,7 @@ public class FunctionSignatureReturnTypeTests {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/" +
                 "response_with_properties_with_additional.yaml"));
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
-                new BallerinaTypesGenerator(array), new ArrayList<>());
+                new BallerinaTypesGenerator(array), new LinkedHashSet<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
                 true);
         Assert.assertEquals(returnType, "TestsProductsResponse|error");
@@ -93,7 +93,7 @@ public class FunctionSignatureReturnTypeTests {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_with_properties_without_additional" +
                 ".yaml"));
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
-                new BallerinaTypesGenerator(array), new ArrayList<>());
+                new BallerinaTypesGenerator(array), new LinkedHashSet<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/products").getGet(),
                 true);
         Assert.assertEquals(returnType, "TestsProductsResponse|error");
@@ -103,7 +103,7 @@ public class FunctionSignatureReturnTypeTests {
     public void getReturnTypeForResponseWithoutSchema() throws IOException, BallerinaOpenApiException {
         OpenAPI array = getOpenAPI(RES_DIR.resolve("swagger/return_type/response_no_schema.yaml"));
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(array,
-                new BallerinaTypesGenerator(array), new ArrayList<>());
+                new BallerinaTypesGenerator(array), new LinkedHashSet<>());
         String returnType = functionReturnType.getReturnType(array.getPaths().get("/path01").getGet(),
                 true);
         Assert.assertEquals(returnType, "json|error");
