@@ -1,7 +1,7 @@
 import ballerina/http;
 import ballerina/openapi;
 
-type User record {
+public type User record {
      int userName;
      string firstName?;
      string lastName?;
