@@ -173,6 +173,20 @@ public class FunctionSignatureNodeTests {
         Assert.assertEquals(returnTypeNode.type().toString(), "string[]|error");
     }
 
+    @Test(description = "Test parameter generation for request body with reference")
+    public void getFunctionSignatureForRequestBodyWithRef() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = getOpenAPI(RESDIR.resolve("swagger/request_body_with_ref.yaml"));
+        FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
+                new BallerinaTypesGenerator(openAPI), new LinkedHashSet<>(), false);
+        FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/pets").getPost(), new ArrayList<>());
+        SeparatedNodeList<ParameterNode> parameters = signature.parameters();
+        Assert.assertFalse(parameters.isEmpty());
+        RequiredParameterNode param01 = (RequiredParameterNode) parameters.get(0);
+        Assert.assertEquals(param01.paramName().orElseThrow().text(), "payload");
+        Assert.assertEquals(param01.typeName().toString(), "CreatedPet");
+    }
+
     @Test(description = "Test unsupported nested array type query parameter generation",
             expectedExceptions = BallerinaOpenApiException.class,
             expectedExceptionsMessageRegExp = "Unsupported parameter type is found in the parameter : .*")

@@ -236,14 +236,8 @@ public class FunctionSignatureGenerator {
 
         // Handle RequestBody
         if (operation.getRequestBody() != null) {
-            RequestBody requestBody = operation.getRequestBody();
-            if (requestBody.getContent() != null || requestBody.get$ref() != null) {
-                setRequestBodyParameters(operation.getOperationId(), requestBody, remoteFunctionDoc, parameterList,
-                        defaultable);
-            } else {
-                throw new BallerinaOpenApiException(
-                        "Unsupported request body found in the Operation : " + operation.getOperationId());
-            }
+            setRequestBodyParameters(operation.getOperationId(), operation.getRequestBody(), remoteFunctionDoc,
+                    parameterList, defaultable);
         }
         remoteFunctionDoc.addAll(deprecatedParamDocComments);
         //Filter defaultable parameters
