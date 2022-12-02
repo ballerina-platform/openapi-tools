@@ -38,7 +38,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,14 +66,14 @@ import static io.ballerina.openapi.core.GeneratorUtils.isValidSchemaName;
 public class FunctionReturnTypeGenerator {
     private OpenAPI openAPI;
     private BallerinaTypesGenerator ballerinaSchemaGenerator;
-    private Set<TypeDefinitionNode> typeDefinitionNodeList = new LinkedHashSet<>();
+    private List<TypeDefinitionNode> typeDefinitionNodeList = new LinkedList<>();
 
     public FunctionReturnTypeGenerator() {
 
     }
 
     public FunctionReturnTypeGenerator(OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
-                                       Set<TypeDefinitionNode> typeDefinitionNodeList) {
+                                       List<TypeDefinitionNode> typeDefinitionNodeList) {
 
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
@@ -162,7 +162,7 @@ public class FunctionReturnTypeGenerator {
                 }
                 TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                         (componentSchema, type, responseDocs);
-                typeDefinitionNodeList.add(typeDefinitionNode);
+                updateTypeDefinitionNodeList(type, typeDefinitionNode);
             }
         } else if (schema instanceof ArraySchema) {
             ArraySchema arraySchema = (ArraySchema) schema;
@@ -195,7 +195,7 @@ public class FunctionReturnTypeGenerator {
                     createSimpleNameReferenceNode(createIdentifierToken(type)),
                     createToken(SEMICOLON_TOKEN));
             // Check already typeDescriptor has same name
-            typeDefinitionNodeList.add(typeDefNode);
+            updateTypeDefinitionNodeList(typeName, typeDefNode);
             if (!isSignature) {
                 type = typeName;
             }
@@ -243,7 +243,7 @@ public class FunctionReturnTypeGenerator {
             String typeName = "OneOf" + getValidName(operation.getOperationId().trim(), true) + "Response";
             TypeDefinitionNode typeDefNode = ballerinaSchemaGenerator.getTypeDefinitionNode(
                     composedSchema, typeName, new ArrayList<>());
-            typeDefinitionNodeList.add(typeDefNode);
+            updateTypeDefinitionNodeList(typeName, typeDefNode);
             type = typeDefNode.typeDescriptor().toString();
             if (!isSignature) {
                 type = typeName;
@@ -253,7 +253,7 @@ public class FunctionReturnTypeGenerator {
                     "Response";
             TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                     (composedSchema, recordName, new ArrayList<>());
-            typeDefinitionNodeList.add(allOfTypeDefinitionNode);
+            updateTypeDefinitionNodeList(recordName, allOfTypeDefinitionNode);
             type = recordName;
         }
         return type;
@@ -284,7 +284,7 @@ public class FunctionReturnTypeGenerator {
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                         (objectSchema, type, returnTypeDocs);
-                typeDefinitionNodeList.add(recordNode);
+                updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {
             type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
@@ -316,7 +316,7 @@ public class FunctionReturnTypeGenerator {
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                         (mapSchema, type, schemaDocs);
-                typeDefinitionNodeList.add(recordNode);
+                updateTypeDefinitionNodeList(type, recordNode);
             }
         } else {
             type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
@@ -338,7 +338,7 @@ public class FunctionReturnTypeGenerator {
                 createIdentifierToken(typeName),
                 createSimpleNameReferenceNode(createIdentifierToken(type)),
                 createToken(SEMICOLON_TOKEN));
-        typeDefinitionNodeList.add(typeDefNode);
+        updateTypeDefinitionNodeList(typeName, typeDefNode);
         if (!isSignature) {
             return typeName;
         } else {
@@ -346,4 +346,25 @@ public class FunctionReturnTypeGenerator {
         }
     }
 
+    /**
+     * This util function for update the typeDefinition node after check it duplicates.
+     *
+     * @param typeName    - Given Node name
+     * @param typeDefNode - Generated Node
+     */
+    private void updateTypeDefinitionNodeList(String typeName, TypeDefinitionNode typeDefNode) {
+        boolean isExit = false;
+        if (!typeDefinitionNodeList.isEmpty()) {
+            for (TypeDefinitionNode typeNode : typeDefinitionNodeList) {
+                if (typeNode.typeName().toString().trim().equals(typeName)) {
+                    isExit = true;
+                }
+            }
+            if (!isExit) {
+                typeDefinitionNodeList.add(typeDefNode);
+            }
+        } else {
+            typeDefinitionNodeList.add(typeDefNode);
+        }
+    }
 }
