@@ -95,8 +95,10 @@ public class ReferenceResolveTests {
                 "/request_body_with_ref.yaml"), true);
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
                 new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
-        FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+        FunctionSignatureNode signature1 = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/pets").getPost(), new ArrayList<>());
+        FunctionSignatureNode signature2 = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
+                .get("/pets/dogs").getPost(), new ArrayList<>());
         List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
                 functionSignatureGenerator.getTypeDefinitionNodeList());
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI,
