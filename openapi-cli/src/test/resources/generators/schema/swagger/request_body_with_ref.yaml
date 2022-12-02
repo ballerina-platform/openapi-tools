@@ -55,6 +55,18 @@ paths:
       responses:
         '200':
           description: Successful operation
+  /pets/dogs:
+    post:
+      summary: Create a dog pet
+      operationId: createDogPet
+      tags:
+        - pets
+      requestBody:
+        description: "Request to add a pet"
+        $ref: "#/components/requestBodies/CreatedPet"
+      responses:
+        '200':
+          description: Successful operation
 
 components:
   requestBodies:
