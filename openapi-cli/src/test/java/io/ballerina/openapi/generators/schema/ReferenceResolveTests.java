@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -95,7 +94,7 @@ public class ReferenceResolveTests {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
                 "/request_body_with_ref.yaml"), true);
         FunctionSignatureGenerator functionSignatureGenerator = new FunctionSignatureGenerator(openAPI,
-                new BallerinaTypesGenerator(openAPI), new LinkedHashSet<>(), false);
+                new BallerinaTypesGenerator(openAPI), new ArrayList<>(), false);
         FunctionSignatureNode signature = functionSignatureGenerator.getFunctionSignatureNode(openAPI.getPaths()
                 .get("/pets").getPost(), new ArrayList<>());
         List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(

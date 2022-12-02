@@ -47,7 +47,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -131,7 +130,7 @@ public class BallerinaCodeGenerator {
         List<TypeDefinitionNode> preGeneratedTypeDefNodes = new ArrayList<>(
                 clientGenerator.getBallerinaAuthConfigGenerator().getAuthRelatedTypeDefinitionNodes());
         List<TypeDefinitionNode> typeInclusionRecords = serviceGenerator.getTypeInclusionRecords();
-        Set<TypeDefinitionNode> typeDefinitionNodeList = clientGenerator.getTypeDefinitionNodeList();
+        List<TypeDefinitionNode> typeDefinitionNodeList = clientGenerator.getTypeDefinitionNodeList();
         preGeneratedTypeDefNodes.addAll(typeInclusionRecords);
         preGeneratedTypeDefNodes.addAll(typeDefinitionNodeList);
 

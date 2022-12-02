@@ -60,7 +60,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -114,19 +113,19 @@ import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
 public class FunctionSignatureGenerator {
     private final OpenAPI openAPI;
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
-    private final Set<TypeDefinitionNode> typeDefinitionNodeList;
+    private final List<TypeDefinitionNode> typeDefinitionNodeList;
     private FunctionReturnTypeGenerator functionReturnType;
     private boolean deprecatedParamFound = false;
 
     private boolean isResource;
 
-    public Set<TypeDefinitionNode> getTypeDefinitionNodeList() {
+    public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
         return typeDefinitionNodeList;
     }
 
     public FunctionSignatureGenerator(OpenAPI openAPI,
                                       BallerinaTypesGenerator ballerinaSchemaGenerator,
-                                      Set<TypeDefinitionNode> typeDefinitionNodeList, boolean isResource) {
+                                      List<TypeDefinitionNode> typeDefinitionNodeList, boolean isResource) {
 
         this.openAPI = openAPI;
         this.ballerinaSchemaGenerator = ballerinaSchemaGenerator;
@@ -572,7 +571,7 @@ public class FunctionSignatureGenerator {
             throws BallerinaOpenApiException {
         TypeDefinitionNode record =
                 ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, recordName, new ArrayList<>());
-        typeDefinitionNodeList.add(record);
+        updateTypeDefinitionNodeList(recordName, record);
     }
 
     /**
@@ -592,10 +591,32 @@ public class FunctionSignatureGenerator {
             // TODO - Add API doc by checking requestBody
             TypeDefinitionNode arrayTypeNode =
                     ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());
-            typeDefinitionNodeList.add(arrayTypeNode);
+            updateTypeDefinitionNodeList(paramType, arrayTypeNode);
         } else {
             paramType = GeneratorUtils.getBallerinaMediaType(next.getKey().trim()) + SQUARE_BRACKETS;
         }
         return paramType;
+    }
+
+    /**
+     * This util function for update the typeDefinition node after check it duplicates.
+     *
+     * @param typeName    - Given Node name
+     * @param typeDefNode - Generated Node
+     */
+    private void updateTypeDefinitionNodeList(String typeName, TypeDefinitionNode typeDefNode) {
+        boolean isExit = false;
+        if (!typeDefinitionNodeList.isEmpty()) {
+            for (TypeDefinitionNode typeNode : typeDefinitionNodeList) {
+                if (typeNode.typeName().toString().trim().equals(typeName)) {
+                    isExit = true;
+                }
+            }
+            if (!isExit) {
+                typeDefinitionNodeList.add(typeDefNode);
+            }
+        } else {
+            typeDefinitionNodeList.add(typeDefNode);
+        }
     }
 }

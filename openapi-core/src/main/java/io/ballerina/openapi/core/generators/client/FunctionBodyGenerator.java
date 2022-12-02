@@ -132,7 +132,7 @@ public class FunctionBodyGenerator {
 
     private List<ImportDeclarationNode> imports;
     private boolean isHeader;
-    private final Set<TypeDefinitionNode> typeDefinitionNodeList;
+    private final List<TypeDefinitionNode> typeDefinitionNodeList;
     private final OpenAPI openAPI;
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
@@ -147,7 +147,7 @@ public class FunctionBodyGenerator {
         this.imports = imports;
     }
 
-    public FunctionBodyGenerator(List<ImportDeclarationNode> imports, Set<TypeDefinitionNode> typeDefinitionNodeList,
+    public FunctionBodyGenerator(List<ImportDeclarationNode> imports, List<TypeDefinitionNode> typeDefinitionNodeList,
                                  OpenAPI openAPI, BallerinaTypesGenerator ballerinaSchemaGenerator,
                                  BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator,
                                  BallerinaUtilGenerator ballerinaUtilGenerator, boolean resourceMode) {

@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
 
 import static io.ballerina.openapi.generators.common.TestUtils.getOpenAPI;
 
@@ -44,7 +44,7 @@ public class OneOfResponsesTests {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_oneOf_response.yaml"));
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
-                ballerinaSchemaGenerator,  new LinkedHashSet<>());
+                ballerinaSchemaGenerator,  new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
                 true), "ChannelDetails[]|string[]|error");
     }
@@ -54,7 +54,7 @@ public class OneOfResponsesTests {
         OpenAPI response = getOpenAPI(RES_DIR.resolve("swagger/return_type/inline_oneOf_response.yaml"));
         BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(response);
         FunctionReturnTypeGenerator functionReturnType = new FunctionReturnTypeGenerator(response,
-                ballerinaSchemaGenerator, new LinkedHashSet<>());
+                ballerinaSchemaGenerator, new ArrayList<>());
         Assert.assertEquals(functionReturnType.getReturnType(response.getPaths().get("/pet").getGet(),
                 false), "OneOfOperationId01Response|error");
     }
