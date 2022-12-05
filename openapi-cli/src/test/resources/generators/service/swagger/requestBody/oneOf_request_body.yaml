@@ -88,6 +88,21 @@ paths:
           description: Successful operation.
         400:
           description: Invalid storage space name supplied
+  /storageSpaces03:
+    post:
+      summary: "Unsupported scenario 03: Request body with oneOf schema"
+      operationId: postKey03
+      requestBody:
+        description: "Ballerina not support for oneOf data type in request body"
+        content:
+          application/snowflake+xml:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        200:
+          description: Successful operation.
 components:
   schemas:
     HandleRequest_RequestBody:
