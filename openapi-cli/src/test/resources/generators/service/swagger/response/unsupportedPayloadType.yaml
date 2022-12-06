@@ -42,3 +42,72 @@ paths:
                 additionalProperties:
                   type: integer
                   format: int32
+    put:
+      tags:
+        - store
+        - pet
+      operationId: "id_02"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/snowflake+json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+    delete:
+      tags:
+        - store
+        - pet
+      operationId: "id_03"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+            application/snowflake+json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+            application/snowflake+xml:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+    post:
+      tags:
+        - store
+        - pet
+      operationId: "id_04"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json+v:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+            application/snowflake+json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+            application/snowflake+xml:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
