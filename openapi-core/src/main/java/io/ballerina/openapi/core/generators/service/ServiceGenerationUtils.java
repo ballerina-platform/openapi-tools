@@ -69,6 +69,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.core.GeneratorConstants.INTEGER;
+import static io.ballerina.openapi.core.GeneratorConstants.JSON;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 
@@ -137,6 +138,7 @@ public class ServiceGenerationUtils {
      */
     public static Optional<TypeDescriptorNode> generateTypeDescNodeForOASSchema(Schema<?> schema)
             throws BallerinaOpenApiException {
+
         if (schema == null) {
             return Optional.empty();
         }
@@ -171,17 +173,19 @@ public class ServiceGenerationUtils {
      */
     private static Optional<TypeDescriptorNode> getTypeDescNodeForArraySchema(ArraySchema schema)
             throws BallerinaOpenApiException {
+
         TypeDescriptorNode member;
+        String schemaType = schema.getItems().getType();
         if (schema.getItems().get$ref() != null) {
             member = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(GeneratorUtils.getValidName(
                             extractReferenceType(schema.getItems().get$ref()), true)));
-        } else if (!(schema.getItems() instanceof ArraySchema)) {
-            member = createBuiltinSimpleNameReferenceNode(null,
-                    createIdentifierToken(GeneratorConstants.JSON));
-        } else {
+        } else if (schemaType != null && (schemaType.equals(INTEGER) || schemaType.equals(NUMBER) ||
+                schemaType.equals(BOOLEAN) || schemaType.equals(STRING))) {
             member = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
                     GeneratorUtils.convertOpenAPITypeToBallerina(schema.getItems().getType())));
+        } else {
+            return Optional.empty();
         }
         ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                 createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
@@ -207,7 +211,7 @@ public class ServiceGenerationUtils {
             case GeneratorConstants.APPLICATION_JSON:
                 Optional<TypeDescriptorNode> returnTypeDecNode = generateTypeDescNodeForOASSchema(schema);
                 return returnTypeDecNode.isEmpty() ?
-                        Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken("json"))) :
+                        Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(JSON))) :
                         returnTypeDecNode;
             case GeneratorConstants.APPLICATION_XML:
                 identifierToken = createIdentifierToken(GeneratorConstants.XML);
@@ -216,7 +220,7 @@ public class ServiceGenerationUtils {
                 identifierToken = createIdentifierToken(GeneratorConstants.MAP_STRING);
                 return Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
             case GeneratorConstants.TEXT:
-                identifierToken = createIdentifierToken(GeneratorConstants.STRING);
+                identifierToken = createIdentifierToken(STRING);
                 return Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
             case GeneratorConstants.APPLICATION_OCTET_STREAM:
                 ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
