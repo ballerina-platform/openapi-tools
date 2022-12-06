@@ -30,6 +30,7 @@ components:
         rel:
           type: string
         pet:
+          nullable: true
           oneOf:
             - $ref: '#/components/schemas/Dog'
             - $ref: '#/components/schemas/Cat'

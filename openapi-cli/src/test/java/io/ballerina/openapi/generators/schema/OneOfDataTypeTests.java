@@ -36,20 +36,20 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 /**
- * All the tests related to OneOF data binding handling the {@link BallerinaTypesGenerator}
- * util.
+ * Test implementation to verify the `anyOf` property related scenarios in openAPI schema generation, handled by
+ * the {@link BallerinaTypesGenerator}.
  */
 public class OneOfDataTypeTests {
+
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
 
     @Test(description = "Generate record for schema has oneOF")
     public void generateForSchemaHasOneOf() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        Schema schema = openAPI.getComponents().getSchemas().get("Error");
+        Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, false);
         UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error");
@@ -62,9 +62,8 @@ public class OneOfDataTypeTests {
     public void generateForSchemaObjectType() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario13.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        Schema schema = openAPI.getComponents().getSchemas().get("Error");
+        Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         ComposedSchema composedSchema = (ComposedSchema) schema;
-        List<Schema> oneOf = composedSchema.getOneOf();
         GeneratorMetaData.createInstance(openAPI, false);
         UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "Error");
         String oneOfUnionType = unionTypeGenerator.generateTypeDescriptorNode().toString().trim();
@@ -75,8 +74,7 @@ public class OneOfDataTypeTests {
     public void generateUnionTypeWhenNullableTrue() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("generators/schema/swagger/scenario12.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        Schema schema = openAPI.getComponents().getSchemas().get("Error");
-        ComposedSchema composedSchema = (ComposedSchema) schema;
+        Schema<?> schema = openAPI.getComponents().getSchemas().get("Error");
         GeneratorMetaData.createInstance(openAPI, true);
         TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema, "Error", null);
         String oneOfUnionType = typeGenerator.generateTypeDescriptorNode().toString().trim();
