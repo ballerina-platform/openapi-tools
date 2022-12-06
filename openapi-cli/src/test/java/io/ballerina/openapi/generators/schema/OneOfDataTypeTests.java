@@ -38,7 +38,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Test implementation to verify the `anyOf` property related scenarios in openAPI schema generation, handled by
+ * Test implementation to verify the `oneOf` property related scenarios in openAPI schema generation, handled by
  * the {@link BallerinaTypesGenerator}.
  */
 public class OneOfDataTypeTests {

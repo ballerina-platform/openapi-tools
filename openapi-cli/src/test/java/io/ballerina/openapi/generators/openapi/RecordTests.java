@@ -86,7 +86,7 @@ public class RecordTests {
     @Test(description = "When the record field has nullable field , which has record type reference data type")
     public void testUnionTypeWithNullable() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("record/union_with_nullable.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/union.yaml");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/union_with_nullable.yaml");
     }
 
     @Test(description = "When the record field has cyclic record type")
