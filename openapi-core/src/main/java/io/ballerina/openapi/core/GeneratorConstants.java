@@ -122,6 +122,8 @@ public class GeneratorConstants {
     public static final String HEADER_VALUES = "headerValues";
     public static final String PAYLOAD = "payload";
     public static final String PAYLOAD_KEYWORD = "Payload";
+    public static final String REQUEST = "request";
+    public static final String HTTP_REQUEST = "http:Request";
     public static final String PDF = "pdf";
     public static final String QUERY_PARAM = "queryParam";
     public static final String SELF = "self";
@@ -370,7 +372,6 @@ public class GeneratorConstants {
     public static final String YML_EXTENSION = ".yml";
     public static final String JSON_EXTENSION = ".json";
     public static final String UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE = "attribute openapi is missing";
-    public static final String HTTP_REQUEST = "http:Request";
     public static final String PIPE = "|";
 
 }
