@@ -748,7 +748,7 @@ public class GeneratorUtils {
         }
 
         if (!errorList.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: " + System.lineSeparator());
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: " + LINE_SEPARATOR);
             for (String message : errorList) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }
