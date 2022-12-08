@@ -1,4 +1,4 @@
-public type Address record {
+public type Address record {|
     # Street No
     string streetNo?;
     # House number
@@ -7,7 +7,7 @@ public type Address record {
     string streatName?;
     # Countri Name
     string country?;
-}|record {
+|}|record {|
     # Zip code
     int zipCode?;
-};
+|};

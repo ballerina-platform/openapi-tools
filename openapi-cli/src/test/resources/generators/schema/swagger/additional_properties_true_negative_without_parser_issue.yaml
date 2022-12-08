@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: refComponent
+  description: refComponent
+  version: 1.0.0
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+        description: this value is assigned by the service provider
+  - url: https://{subdomain}.swagger.io:{port}/{basePath}
+    description: The production API server
+    variables:
+      subdomain:
+        default: petstore
+        description: this value is assigned by the service provider
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '443'
+      basePath:
+        default: v2
+paths:
+  /store/inventory:
+    get:
+      tags:
+        - store
+        - pet
+      summary: Returns pet inventories by status
+      description: Returns a map of status codes to quantities
+      operationId: "wws"
+      responses:
+        "200":
+          description: successful operation
+components:
+  schemas:
+    User01:
+      description: Additional properties with object with reference fields - this is issue https://github.com/swagger-api/swagger-parser/issues/1856
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+      additionalProperties:
+        type: object
+        $ref: "#/components/schemas/User03"
+    User03:
+      description: Additional properties type Array with constraint. constraint won't support for rest filed in record.
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+      additionalProperties:
+        type: array
+        maxItems: 9
+        items:
+          type: string
+    User04:
+      description: These Additional properties are complex to map.
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+      additionalProperties:
+        allOf:
+          - $ref: "#/components/schemas/User03"
+          - type: string

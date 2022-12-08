@@ -1,0 +1,171 @@
+openapi: 3.0.0
+info:
+  title: refComponent
+  description: refComponent
+  version: 1.0.0
+servers:
+  - url: http://petstore.{host}.io/v1
+    description: The production API server
+    variables:
+      host:
+        default: openapi
+        description: this value is assigned by the service provider
+  - url: https://{subdomain}.swagger.io:{port}/{basePath}
+    description: The production API server
+    variables:
+      subdomain:
+        default: petstore
+        description: this value is assigned by the service provider
+      port:
+        enum:
+          - '8443'
+          - '443'
+        default: '443'
+      basePath:
+        default: v2
+paths:
+  /store/inventory:
+    get:
+      tags:
+        - store
+        - pet
+      summary: Returns pet inventories by status
+      description: Returns a map of status codes to quantities
+      operationId: "wws"
+      responses:
+        "200":
+          description: successful operation
+components:
+  schemas:
+    Pet:
+      description: Mock record
+      type: object
+      properties:
+        name :
+          type: string
+        age:
+          type: integer
+    Pet02:
+      description: Mock record 02
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+      additionalProperties:
+        $ref: "#/components/schemas/Pet"
+    User01:
+      description: Without any additional field it maps to closed record.
+      allOf:
+        - $ref: "#/components/schemas/Pet"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+    User02:
+      description: Additional properties with `true` enable
+      allOf:
+        - $ref: "#/components/schemas/Pet"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+      additionalProperties: true
+    User03:
+      description: Additional properties with {}
+      allOf:
+        - $ref: "#/components/schemas/Pet"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+      additionalProperties: { }
+    User04:
+      description: Additional properties with type string
+      allOf:
+        - $ref: "#/components/schemas/Pet"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+      additionalProperties:
+        type: string
+    User05:
+      description: Multiple additional fields , result can not have multiple field
+      allOf:
+        - $ref: "#/components/schemas/Pet"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+          additionalProperties:
+            type: integer
+      additionalProperties:
+        type: array
+        items:
+          type: string
+    User06:
+      description: Additional properties with type object without properties
+      allOf:
+        - $ref: "#/components/schemas/Pet"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+      additionalProperties:
+        type: object
+    User07:
+      description: Additional properties with object with property fields
+      allOf:
+        - $ref: "#/components/schemas/Pet"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+      additionalProperties:
+        type: object
+        properties:
+          country:
+            type: string
+          state:
+            type: string
+    User08:
+      description: Reference has additional properties.
+      allOf:
+        - $ref: "#/components/schemas/Pet02"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+      additionalProperties:
+        type: integer
+        nullable: false
+    User09:
+      description: Reference has additional properties with nullable true.
+      allOf:
+        - $ref: "#/components/schemas/Pet02"
+        - type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: integer
+      additionalProperties:
+        type: integer
