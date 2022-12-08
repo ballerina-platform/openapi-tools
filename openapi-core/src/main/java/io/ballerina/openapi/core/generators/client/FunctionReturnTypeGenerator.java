@@ -162,7 +162,7 @@ public class FunctionReturnTypeGenerator {
                 }
                 TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                         (componentSchema, type, responseDocs);
-                updateTypeDefinitionNodeList(type, typeDefinitionNode);
+                GeneratorUtils.updateTypeDefNodeList(type, typeDefinitionNode, typeDefinitionNodeList);
             }
         } else if (schema instanceof ArraySchema) {
             ArraySchema arraySchema = (ArraySchema) schema;
@@ -195,7 +195,7 @@ public class FunctionReturnTypeGenerator {
                     createSimpleNameReferenceNode(createIdentifierToken(type)),
                     createToken(SEMICOLON_TOKEN));
             // Check already typeDescriptor has same name
-            updateTypeDefinitionNodeList(typeName, typeDefNode);
+            GeneratorUtils.updateTypeDefNodeList(typeName, typeDefNode, typeDefinitionNodeList);
             if (!isSignature) {
                 type = typeName;
             }
@@ -243,7 +243,7 @@ public class FunctionReturnTypeGenerator {
             String typeName = "OneOf" + getValidName(operation.getOperationId().trim(), true) + "Response";
             TypeDefinitionNode typeDefNode = ballerinaSchemaGenerator.getTypeDefinitionNode(
                     composedSchema, typeName, new ArrayList<>());
-            updateTypeDefinitionNodeList(typeName, typeDefNode);
+            GeneratorUtils.updateTypeDefNodeList(typeName, typeDefNode, typeDefinitionNodeList);
             type = typeDefNode.typeDescriptor().toString();
             if (!isSignature) {
                 type = typeName;
@@ -253,7 +253,7 @@ public class FunctionReturnTypeGenerator {
                     "Response";
             TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                     (composedSchema, recordName, new ArrayList<>());
-            updateTypeDefinitionNodeList(recordName, allOfTypeDefinitionNode);
+            GeneratorUtils.updateTypeDefNodeList(recordName, allOfTypeDefinitionNode, typeDefinitionNodeList);
             type = recordName;
         }
         return type;
@@ -284,7 +284,7 @@ public class FunctionReturnTypeGenerator {
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                         (objectSchema, type, returnTypeDocs);
-                updateTypeDefinitionNodeList(type, recordNode);
+                GeneratorUtils.updateTypeDefNodeList(type, recordNode, typeDefinitionNodeList);
             }
         } else {
             type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
@@ -316,7 +316,7 @@ public class FunctionReturnTypeGenerator {
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                         (mapSchema, type, schemaDocs);
-                updateTypeDefinitionNodeList(type, recordNode);
+                GeneratorUtils.updateTypeDefNodeList(type, recordNode, typeDefinitionNodeList);
             }
         } else {
             type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
@@ -338,33 +338,11 @@ public class FunctionReturnTypeGenerator {
                 createIdentifierToken(typeName),
                 createSimpleNameReferenceNode(createIdentifierToken(type)),
                 createToken(SEMICOLON_TOKEN));
-        updateTypeDefinitionNodeList(typeName, typeDefNode);
+        GeneratorUtils.updateTypeDefNodeList(typeName, typeDefNode, typeDefinitionNodeList);
         if (!isSignature) {
             return typeName;
         } else {
             return type;
-        }
-    }
-
-    /**
-     * This util function for update the typeDefinition node after check it duplicates.
-     *
-     * @param typeName    - Given Node name
-     * @param typeDefNode - Generated Node
-     */
-    private void updateTypeDefinitionNodeList(String typeName, TypeDefinitionNode typeDefNode) {
-        boolean isExit = false;
-        if (!typeDefinitionNodeList.isEmpty()) {
-            for (TypeDefinitionNode typeNode : typeDefinitionNodeList) {
-                if (typeNode.typeName().toString().trim().equals(typeName)) {
-                    isExit = true;
-                }
-            }
-            if (!isExit) {
-                typeDefinitionNodeList.add(typeDefNode);
-            }
-        } else {
-            typeDefinitionNodeList.add(typeDefNode);
         }
     }
 }

@@ -576,7 +576,7 @@ public class FunctionSignatureGenerator {
             throws BallerinaOpenApiException {
         TypeDefinitionNode record =
                 ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, recordName, new ArrayList<>());
-        updateTypeDefinitionNodeList(recordName, record);
+        GeneratorUtils.updateTypeDefNodeList(recordName, record, typeDefinitionNodeList);
     }
 
     /**
@@ -596,32 +596,11 @@ public class FunctionSignatureGenerator {
             // TODO - Add API doc by checking requestBody
             TypeDefinitionNode arrayTypeNode =
                     ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());
-            updateTypeDefinitionNodeList(paramType, arrayTypeNode);
+            GeneratorUtils.updateTypeDefNodeList(paramType, arrayTypeNode, typeDefinitionNodeList);
         } else {
             paramType = GeneratorUtils.getBallerinaMediaType(next.getKey().trim(), true) + SQUARE_BRACKETS;
         }
         return paramType;
     }
 
-    /**
-     * This util function for update the typeDefinition node after check it duplicates.
-     *
-     * @param typeName    - Given Node name
-     * @param typeDefNode - Generated Node
-     */
-    private void updateTypeDefinitionNodeList(String typeName, TypeDefinitionNode typeDefNode) {
-        boolean isExit = false;
-        if (!typeDefinitionNodeList.isEmpty()) {
-            for (TypeDefinitionNode typeNode : typeDefinitionNodeList) {
-                if (typeNode.typeName().toString().trim().equals(typeName)) {
-                    isExit = true;
-                }
-            }
-            if (!isExit) {
-                typeDefinitionNodeList.add(typeDefNode);
-            }
-        } else {
-            typeDefinitionNodeList.add(typeDefNode);
-        }
-    }
 }
