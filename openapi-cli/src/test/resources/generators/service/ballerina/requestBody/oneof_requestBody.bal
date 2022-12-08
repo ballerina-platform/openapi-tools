@@ -13,4 +13,6 @@ service / on ep0 {
     }
     resource function put storageSpaces/[string name](@http:Payload json payload) returns http:Ok|http:BadRequest {
     }
+    resource function post storageSpaces03(http:Request payload) returns http:Ok {
+    }
 }

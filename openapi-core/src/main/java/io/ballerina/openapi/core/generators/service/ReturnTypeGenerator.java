@@ -52,6 +52,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
@@ -126,11 +127,13 @@ public class ReturnTypeGenerator {
                         returnNode = createReturnTypeDescriptorNode(returnKeyWord, annotations, statues);
                     } else if (response.getValue().getContent() != null) {
                         if (response.getKey().trim().equals(GeneratorConstants.HTTP_200)) {
-                            Iterator<Map.Entry<String, MediaType>> iterator = response.getValue().getContent()
-                                    .entrySet().iterator();
-                            int contentTypeNumber = response.getValue().getContent().entrySet().size();
+                            Set<Map.Entry<String, MediaType>> contentEntries = response.getValue().getContent()
+                                    .entrySet();
+                            Iterator<Map.Entry<String, MediaType>> iterator = contentEntries.iterator();
+
+                            int contentTypeNumber = contentEntries.size();
                             if (contentTypeNumber > 1) {
-                                Optional<UnionTypeDescriptorNode> unionNode = getUnionNodeForContent(iterator);
+                                Optional<UnionTypeDescriptorNode> unionNode = getUnionNodeForContent(contentEntries);
                                 TypeDescriptorNode type = unionNode.isPresent() ? unionNode.get() :
                                         createSimpleNameReferenceNode(createIdentifierToken(
                                                 GeneratorConstants.HTTP_RESPONSE));
@@ -163,13 +166,15 @@ public class ReturnTypeGenerator {
                             TypeDescriptorNode type;
                             if (content.entrySet().size() > 1) {
                                 Optional<UnionTypeDescriptorNode> unionNodeForContent =
-                                        getUnionNodeForContent(contentItr);
+                                        getUnionNodeForContent(content.entrySet());
+
                                 if (unionNodeForContent.isEmpty()) {
                                     type = createSimpleNameReferenceNode(createIdentifierToken(
                                             GeneratorConstants.HTTP_RESPONSE));
                                 } else {
                                     type = unionNodeForContent.get();
                                 }
+
                             } else {
                                 // Handle for only first content type
                                 Optional<TypeDescriptorNode> nodeForContent = getNodeForContent(contentItr);
@@ -284,14 +289,13 @@ public class ReturnTypeGenerator {
     /**
      * Generate union type node when response has multiple content types.
      */
-    private Optional<UnionTypeDescriptorNode> getUnionNodeForContent(Iterator<Map.Entry<String, MediaType>> iterator)
+    private Optional<UnionTypeDescriptorNode> getUnionNodeForContent(Set<Map.Entry<String, MediaType>> contentEntries)
             throws BallerinaOpenApiException {
 
         List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
         Token pipeToken = createIdentifierToken(PIPE_TOKEN.stringValue());
         SimpleNameReferenceNode httpResponseNode = null;
-        while (iterator.hasNext()) {
-            Map.Entry<String, MediaType> contentType = iterator.next();
+        for (Map.Entry<String, MediaType> contentType : contentEntries) {
             Optional<TypeDescriptorNode> node = getMediaTypeToken(contentType);
             if (node.isEmpty()) {
                 httpResponseNode = createSimpleNameReferenceNode(createIdentifierToken(
@@ -303,7 +307,7 @@ public class ReturnTypeGenerator {
         if (httpResponseNode != null) {
             qualifiedNodes.add(httpResponseNode);
         }
-        if (qualifiedNodes.size() == 0) {
+        if (qualifiedNodes.size() == 1) {
             return Optional.empty();
         }
         SimpleNameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
