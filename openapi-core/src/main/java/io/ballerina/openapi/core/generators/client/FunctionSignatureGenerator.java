@@ -90,11 +90,13 @@ import static io.ballerina.openapi.core.GeneratorConstants.ARRAY;
 import static io.ballerina.openapi.core.GeneratorConstants.BINARY;
 import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.core.GeneratorConstants.BYTE;
+import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.INTEGER;
 import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 import static io.ballerina.openapi.core.GeneratorConstants.PAYLOAD;
+import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.GeneratorConstants.VENDOR_SPECIFIC_TYPE;
@@ -496,9 +498,12 @@ public class FunctionSignatureGenerator {
             Map.Entry<String, MediaType> next = iterator.next();
             Schema schema = next.getValue().getSchema();
             String paramType = "";
+            String paramName = next.getKey().equals(ANY_TYPE) ? REQUEST : PAYLOAD;
             //Take payload type
             if (schema != null) {
-                if (next.getKey().equals(ANY_TYPE) || next.getKey().contains(VENDOR_SPECIFIC_TYPE)) {
+                if (next.getKey().equals(ANY_TYPE)) {
+                    paramType = HTTP_REQUEST;
+                } else if (next.getKey().contains(VENDOR_SPECIFIC_TYPE)) {
                     paramType = SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
                 } else if (schema.get$ref() != null) {
                     paramType = getValidName(extractReferenceType(schema.get$ref().trim()), true);
@@ -520,21 +525,21 @@ public class FunctionSignatureGenerator {
                     paramType = referencedRequestBodyName.isBlank() ? paramType : referencedRequestBodyName;
                     getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
                 } else { // composed and object schemas are handled by the flatten
-                    paramType = GeneratorUtils.getBallerinaMediaType(next.getKey());
+                    paramType = GeneratorUtils.getBallerinaMediaType(next.getKey(), true);
                 }
             } else {
-                paramType = GeneratorUtils.getBallerinaMediaType(next.getKey());
+                paramType = GeneratorUtils.getBallerinaMediaType(next.getKey(), true);
             }
             if (!paramType.isBlank()) {
                 List<AnnotationNode> annotationNodes = new ArrayList<>();
                 DocCommentsGenerator.extractDisplayAnnotation(requestBody.getExtensions(), annotationNodes);
                 SimpleNameReferenceNode typeName = createSimpleNameReferenceNode(createIdentifierToken(paramType));
-                IdentifierToken paramName = createIdentifierToken(PAYLOAD);
+                IdentifierToken paramNameToken = createIdentifierToken(paramName);
                 RequiredParameterNode payload = createRequiredParameterNode(
-                        createNodeList(annotationNodes), typeName, paramName);
+                        createNodeList(annotationNodes), typeName, paramNameToken);
                 if (requestBody.getDescription() != null && !requestBody.getDescription().isBlank()) {
                     MarkdownParameterDocumentationLineNode paramAPIDoc =
-                            DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(PAYLOAD),
+                            DocCommentsGenerator.createAPIParamDoc(escapeIdentifier(paramName),
                                     requestBody.getDescription().split("\n")[0]);
                     requestBodyDoc.add(paramAPIDoc);
                 }
@@ -593,7 +598,7 @@ public class FunctionSignatureGenerator {
                     ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());
             GeneratorUtils.updateTypeDefNodeList(paramType, arrayTypeNode, typeDefinitionNodeList);
         } else {
-            paramType = GeneratorUtils.getBallerinaMediaType(next.getKey().trim()) + SQUARE_BRACKETS;
+            paramType = GeneratorUtils.getBallerinaMediaType(next.getKey().trim(), true) + SQUARE_BRACKETS;
         }
         return paramType;
     }

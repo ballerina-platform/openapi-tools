@@ -20,7 +20,6 @@ package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.mime.AnyType;
 import io.ballerina.openapi.core.generators.client.mime.CustomType;
 import io.ballerina.openapi.core.generators.client.mime.JsonType;
 import io.ballerina.openapi.core.generators.client.mime.MimeType;
@@ -34,7 +33,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.openapi.core.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE;
 import static io.ballerina.openapi.core.GeneratorConstants.JSON;
 import static io.ballerina.openapi.core.GeneratorConstants.PDF;
@@ -84,8 +82,6 @@ public class MimeFactory {
                 return new OctedStreamType();
             } else if (mediaType.equals(MULTIPART_FORM_DATA)) {
                 return new MultipartFormData(imports, ballerinaUtilGenerator);
-            } else if (mediaType.contains(ANY_TYPE)) {
-                return new AnyType();
             } else {
                 throw new BallerinaOpenApiException(String.format(UNSUPPORTED_MEDIA_ERROR, mediaType));
             }
