@@ -88,7 +88,7 @@ public class ReferenceResolveTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/resolve_reference_docs.bal", syntaxTree);
     }
-
+    
     @Test(description = "Test for type generation for request body with reference")
     public void testRequestBodyReferences() throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger" +
