@@ -46,12 +46,12 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.identifier.Utils;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
 import io.ballerina.openapi.converter.model.OASResult;
+import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
@@ -519,7 +519,7 @@ public class ConverterCommonUtils {
     }
 
     public static String unescapeIdentifier(String parameterName) {
-        String unescapedParamName = Utils.unescapeBallerina(parameterName);
+        String unescapedParamName = IdentifierUtils.unescapeBallerina(parameterName);
         return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
     }
 }
