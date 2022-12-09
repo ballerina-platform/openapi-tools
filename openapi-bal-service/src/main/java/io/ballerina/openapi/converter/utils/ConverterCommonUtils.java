@@ -46,6 +46,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.identifier.Utils;
 import io.ballerina.openapi.converter.Constants;
 import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
@@ -71,8 +72,6 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -516,17 +515,7 @@ public class ConverterCommonUtils {
     }
 
     public static String unescapeIdentifier(String parameterName) {
-        // NOTE: This is a temporary fix to decode unicode until we come up with a proper api.
-        // This already implemented API from {@link io.ballerina.identifier.Utils} can be access, if it is available
-        // in some which we can access in external class. That API is need to be implemented.
-        try {
-            Class<?> uClass = Class.forName("io.ballerina.identifier.Utils");
-            Method unescapeBallerina = uClass.getDeclaredMethod("unescapeBallerina", java.lang.String.class);
-            parameterName = (String) unescapeBallerina.invoke(null, parameterName);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
-                InvocationTargetException e) {
-            return parameterName;
-        }
-        return parameterName.replaceAll("\\\\", "").replaceAll("'", "");
+        String unescapedParamName = Utils.unescapeBallerina(parameterName);
+        return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
     }
 }
