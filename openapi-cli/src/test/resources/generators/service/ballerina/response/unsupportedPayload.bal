@@ -7,7 +7,7 @@ service /v1 on ep0 {
     }
     resource function put store/inventory() returns http:Response {
     }
-    resource function post store/inventory() returns http:Response {
+    resource function post store/inventory() returns json|InternalServerErrorString|http:Response {
     }
     resource function delete store/inventory() returns json|http:Response {
     }
