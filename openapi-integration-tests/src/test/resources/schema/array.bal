@@ -56,7 +56,7 @@ public type ProxyConfig record {|
     string password = "";
 |};
 
-public type User record {
+public type User record {|
     string? id?;
     string[]? address?;
-};
+|};

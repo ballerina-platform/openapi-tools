@@ -1,19 +1,19 @@
-public type Address record {
+public type Address record {|
     # Street Number
     string streetNo?;
     # House Number
     string houseNo?;
-}|record {
+|}|record {|
     # Street Name
     string streatName?;
     # Country Name
     string country?;
-}|record {
+|}|record {|
     # Zipcode
     int zipCode?;
-}|record {}|CountryDetails;
+|}|record {}|CountryDetails;
 
-public type CountryDetails record {
+public type CountryDetails record {|
     string iso_code?;
     string name?;
-};
+|};

@@ -106,7 +106,7 @@ public class FunctionReturnTypeGenerator {
                                 Schema schema = media.getValue().getSchema();
                                 type = getDataType(operation, isSignature, response, media, type, schema);
                             } else {
-                                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
+                                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
                             }
                             returnTypes.add(type);
                             // Currently support for first media type
@@ -162,7 +162,7 @@ public class FunctionReturnTypeGenerator {
                 }
                 TypeDefinitionNode typeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                         (componentSchema, type, responseDocs);
-                updateTypeDefinitionNodeList(type, typeDefinitionNode);
+                GeneratorUtils.updateTypeDefNodeList(type, typeDefinitionNode, typeDefinitionNodeList);
             }
         } else if (schema instanceof ArraySchema) {
             ArraySchema arraySchema = (ArraySchema) schema;
@@ -173,7 +173,7 @@ public class FunctionReturnTypeGenerator {
         } else if (media.getKey().trim().equals("application/xml")) {
             type = generateCustomTypeDefine("xml", "XML", isSignature);
         } else {
-            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
+            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
         }
         return type;
     }
@@ -195,7 +195,7 @@ public class FunctionReturnTypeGenerator {
                     createSimpleNameReferenceNode(createIdentifierToken(type)),
                     createToken(SEMICOLON_TOKEN));
             // Check already typeDescriptor has same name
-            updateTypeDefinitionNodeList(typeName, typeDefNode);
+            GeneratorUtils.updateTypeDefNodeList(typeName, typeDefNode, typeDefinitionNodeList);
             if (!isSignature) {
                 type = typeName;
             }
@@ -205,13 +205,13 @@ public class FunctionReturnTypeGenerator {
             } else if (media.getKey().trim().equals("application/pdf") ||
                     media.getKey().trim().equals("image/png") ||
                     media.getKey().trim().equals("application/octet-stream")) {
-                String typeName = GeneratorUtils.getBallerinaMediaType(media.getKey().trim()) + "Arr";
-                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
-                type = generateCustomTypeDefine(type, typeName, isSignature);
+                String typeName = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false) + "Arr";
+                String mappedType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
+                type = generateCustomTypeDefine(mappedType, typeName, isSignature);
             } else {
-                String typeName = GeneratorUtils.getBallerinaMediaType(media.getKey().trim()) + "Arr";
-                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim()) + "[]";
-                type = generateCustomTypeDefine(type, typeName, isSignature);
+                String typeName = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false) + "Arr";
+                String mappedType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false) + "[]";
+                type = generateCustomTypeDefine(mappedType, typeName, isSignature);
             }
         } else {
             String typeName;
@@ -243,7 +243,7 @@ public class FunctionReturnTypeGenerator {
             String typeName = "OneOf" + getValidName(operation.getOperationId().trim(), true) + "Response";
             TypeDefinitionNode typeDefNode = ballerinaSchemaGenerator.getTypeDefinitionNode(
                     composedSchema, typeName, new ArrayList<>());
-            updateTypeDefinitionNodeList(typeName, typeDefNode);
+            GeneratorUtils.updateTypeDefNodeList(typeName, typeDefNode, typeDefinitionNodeList);
             type = typeDefNode.typeDescriptor().toString();
             if (!isSignature) {
                 type = typeName;
@@ -253,7 +253,7 @@ public class FunctionReturnTypeGenerator {
                     "Response";
             TypeDefinitionNode allOfTypeDefinitionNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                     (composedSchema, recordName, new ArrayList<>());
-            updateTypeDefinitionNodeList(recordName, allOfTypeDefinitionNode);
+            GeneratorUtils.updateTypeDefNodeList(recordName, allOfTypeDefinitionNode, typeDefinitionNodeList);
             type = recordName;
         }
         return type;
@@ -274,7 +274,7 @@ public class FunctionReturnTypeGenerator {
             type = extractReferenceType(ref.trim());
         } else if (properties != null) {
             if (properties.isEmpty()) {
-                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
+                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
             } else {
                 List<Node> returnTypeDocs = new ArrayList<>();
                 String description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
@@ -284,10 +284,10 @@ public class FunctionReturnTypeGenerator {
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                         (objectSchema, type, returnTypeDocs);
-                updateTypeDefinitionNodeList(type, recordNode);
+                GeneratorUtils.updateTypeDefNodeList(type, recordNode, typeDefinitionNodeList);
             }
         } else {
-            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
+            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
         }
         return type;
     }
@@ -306,7 +306,7 @@ public class FunctionReturnTypeGenerator {
             type = extractReferenceType(ref.trim());
         } else if (properties != null) {
             if (properties.isEmpty()) {
-                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
+                type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
             } else {
                 List<Node> schemaDocs = new ArrayList<>();
                 String description = operation.getResponses().entrySet().iterator().next().getValue().getDescription();
@@ -316,10 +316,10 @@ public class FunctionReturnTypeGenerator {
                 }
                 TypeDefinitionNode recordNode = ballerinaSchemaGenerator.getTypeDefinitionNode
                         (mapSchema, type, schemaDocs);
-                updateTypeDefinitionNodeList(type, recordNode);
+                GeneratorUtils.updateTypeDefNodeList(type, recordNode, typeDefinitionNodeList);
             }
         } else {
-            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim());
+            type = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
         }
         return type;
     }
@@ -338,33 +338,11 @@ public class FunctionReturnTypeGenerator {
                 createIdentifierToken(typeName),
                 createSimpleNameReferenceNode(createIdentifierToken(type)),
                 createToken(SEMICOLON_TOKEN));
-        updateTypeDefinitionNodeList(typeName, typeDefNode);
+        GeneratorUtils.updateTypeDefNodeList(typeName, typeDefNode, typeDefinitionNodeList);
         if (!isSignature) {
             return typeName;
         } else {
             return type;
-        }
-    }
-
-    /**
-     * This util function for update the typeDefinition node after check it duplicates.
-     *
-     * @param typeName    - Given Node name
-     * @param typeDefNode - Generated Node
-     */
-    public void updateTypeDefinitionNodeList(String typeName, TypeDefinitionNode typeDefNode) {
-        boolean isExit = false;
-        if (!typeDefinitionNodeList.isEmpty()) {
-            for (TypeDefinitionNode typeNode : typeDefinitionNodeList) {
-                if (typeNode.typeName().toString().trim().equals(typeName)) {
-                    isExit = true;
-                }
-            }
-            if (!isExit) {
-                typeDefinitionNodeList.add(typeDefNode);
-            }
-        } else {
-            typeDefinitionNodeList.add(typeDefNode);
         }
     }
 }

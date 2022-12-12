@@ -48,6 +48,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxInfo;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
@@ -129,10 +130,11 @@ import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.GeneratorConstants.BALLERINA_TOML_CONTENT;
 import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.CLOSE_CURLY_BRACE;
-import static io.ballerina.openapi.core.GeneratorConstants.DOUBLE_LINE_SEPARATOR;
 import static io.ballerina.openapi.core.GeneratorConstants.EXPLODE;
 import static io.ballerina.openapi.core.GeneratorConstants.GET;
 import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
+import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
+import static io.ballerina.openapi.core.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.GeneratorConstants.IDENTIFIER;
 import static io.ballerina.openapi.core.GeneratorConstants.IMAGE_PNG;
 import static io.ballerina.openapi.core.GeneratorConstants.JSON_EXTENSION;
@@ -141,7 +143,6 @@ import static io.ballerina.openapi.core.GeneratorConstants.OPEN_CURLY_BRACE;
 import static io.ballerina.openapi.core.GeneratorConstants.SERVICE_FILE_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.GeneratorConstants.SPECIAL_CHARACTERS_REGEX;
-import static io.ballerina.openapi.core.GeneratorConstants.SQUARE_BRACKETS;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.GeneratorConstants.STYLE;
 import static io.ballerina.openapi.core.GeneratorConstants.TYPE_FILE_NAME;
@@ -161,7 +162,6 @@ public class GeneratorUtils {
     public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
-
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
 
@@ -340,6 +340,23 @@ public class GeneratorUtils {
     }
 
     /**
+     * This util function is for updating the list of nodes {@link TypeDefinitionNode}.
+     * It updates the list while checking the duplicates.
+     *
+     * @param typeName               - Given node name
+     * @param typeDefNode            - Generated node
+     * @param typeDefinitionNodeList - Current node list
+     */
+    public static void updateTypeDefNodeList(String typeName, TypeDefinitionNode typeDefNode,
+                                             List<TypeDefinitionNode> typeDefinitionNodeList) {
+        boolean anyMatch = typeDefinitionNodeList.stream().anyMatch(node ->
+                (node.typeName().text().trim().equals(typeName)));
+        if (!anyMatch) {
+            typeDefinitionNodeList.add(typeDefNode);
+        }
+    }
+
+    /**
      * Check the given recordName is valid name.
      *
      * @param recordName - String record name
@@ -399,7 +416,7 @@ public class GeneratorUtils {
                     contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
                 throw new BallerinaOpenApiException(ErrorMessages.unsupportedOpenAPIVersion());
             }
-            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n\n");
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n");
             for (String message : parseResult.getMessages()) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }
@@ -409,9 +426,9 @@ public class GeneratorUtils {
     }
 
     /**
-     * Generate BallerinaMediaType for all the mediaTypes.
+     * Generate BallerinaMediaType for all the return mediaTypes.
      */
-    public static String getBallerinaMediaType(String mediaType) {
+    public static String getBallerinaMediaType(String mediaType, boolean isRequest) {
 
         switch (mediaType) {
             case MediaType.APPLICATION_JSON:
@@ -426,10 +443,9 @@ public class GeneratorUtils {
             case MediaType.APPLICATION_OCTET_STREAM:
             case APPLICATION_PDF:
             case ANY_TYPE:
-                return SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
+                return isRequest ? HTTP_REQUEST : HTTP_RESPONSE;
             default:
                 return SyntaxKind.JSON_KEYWORD.stringValue();
-            // TODO: fill other types
         }
     }
 
@@ -722,8 +738,7 @@ public class GeneratorUtils {
         }
         if (!errorList.isEmpty()) {
             throw new BallerinaOpenApiException(
-                    "OpenAPI definition has errors: " +
-                            DOUBLE_LINE_SEPARATOR + String.join(LINE_SEPARATOR, errorList));
+                    "OpenAPI definition has errors: " + LINE_SEPARATOR + String.join(LINE_SEPARATOR, errorList));
         }
     }
 
@@ -750,7 +765,7 @@ public class GeneratorUtils {
         }
 
         if (!errorList.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: " + DOUBLE_LINE_SEPARATOR);
+            StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: " + LINE_SEPARATOR);
             for (String message : errorList) {
                 errorMessage.append(message).append(LINE_SEPARATOR);
             }

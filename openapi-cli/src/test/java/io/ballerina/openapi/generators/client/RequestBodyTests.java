@@ -194,7 +194,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Test for generating request body when operation has */* media type")
-    public void testRequestBodyWithAllTypeMediaType() throws IOException, BallerinaOpenApiException {
+    public void testRequestBodyWithWildCardeMediaType() throws IOException, BallerinaOpenApiException {
         Path expectedPath = RES_DIR.resolve("ballerina/any_types_payload.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/any_types_payload.yaml"), true);
@@ -244,6 +244,21 @@ public class RequestBodyTests {
         Path expectedPath = RES_DIR.resolve("ballerina/request_body_without_schema.bal");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
                 RES_DIR.resolve("swagger/request_body_without_schema.yaml"), true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
+    @Test(description = "Test for generating request body with reference")
+    public void testRequestBodyWithReference() throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/request_body_with_ref.bal");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
+                RES_DIR.resolve("swagger/request_body_with_ref.yaml"), true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)

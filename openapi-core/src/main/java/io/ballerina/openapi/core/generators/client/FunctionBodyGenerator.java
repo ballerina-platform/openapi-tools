@@ -100,6 +100,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_KEYWORD;
+import static io.ballerina.openapi.core.GeneratorConstants.ANY_TYPE;
 import static io.ballerina.openapi.core.GeneratorConstants.API_KEYS_CONFIG;
 import static io.ballerina.openapi.core.GeneratorConstants.API_KEY_CONFIG_PARAM;
 import static io.ballerina.openapi.core.GeneratorConstants.DELETE;
@@ -109,12 +110,15 @@ import static io.ballerina.openapi.core.GeneratorConstants.HEAD;
 import static io.ballerina.openapi.core.GeneratorConstants.HEADER;
 import static io.ballerina.openapi.core.GeneratorConstants.HEADER_VALUES;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_HEADERS;
+import static io.ballerina.openapi.core.GeneratorConstants.HTTP_REQUEST;
+import static io.ballerina.openapi.core.GeneratorConstants.NEW;
 import static io.ballerina.openapi.core.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.GeneratorConstants.PATCH;
 import static io.ballerina.openapi.core.GeneratorConstants.POST;
 import static io.ballerina.openapi.core.GeneratorConstants.PUT;
 import static io.ballerina.openapi.core.GeneratorConstants.QUERY;
 import static io.ballerina.openapi.core.GeneratorConstants.QUERY_PARAM;
+import static io.ballerina.openapi.core.GeneratorConstants.REQUEST;
 import static io.ballerina.openapi.core.GeneratorConstants.RESOURCE_PATH;
 import static io.ballerina.openapi.core.GeneratorConstants.RESPONSE;
 import static io.ballerina.openapi.core.GeneratorConstants.SELF;
@@ -645,10 +649,12 @@ public class FunctionBodyGenerator {
 
         //Create Request statement
         Map.Entry<String, MediaType> next = iterator.next();
-        VariableDeclarationNode requestVariable = GeneratorUtils.getSimpleStatement("http:Request",
-                "request", "new");
-        statementsList.add(requestVariable);
-        if (next.getValue() != null) {
+        if (!next.getKey().contains(ANY_TYPE)) {
+            VariableDeclarationNode requestVariable = GeneratorUtils.getSimpleStatement(HTTP_REQUEST,
+                    REQUEST, NEW);
+            statementsList.add(requestVariable);
+        }
+        if (next.getValue() != null && !next.getKey().contains(ANY_TYPE)) {
             genStatementsForRequestMediaType(statementsList, next);
             // TODO:Fill with other mime type
         } else {
