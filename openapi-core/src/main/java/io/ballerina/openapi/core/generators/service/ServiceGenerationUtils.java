@@ -203,6 +203,10 @@ public class ServiceGenerationUtils {
         String mediaTypeContent = mediaType.getKey().trim();
         if (mediaTypeContent.matches("text/.*")) {
             mediaTypeContent = GeneratorConstants.TEXT;
+        } else if (mediaTypeContent.matches("application/.*.json")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
+        } else if (mediaTypeContent.matches("application/.*.xml")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_XML;
         }
         MediaType value = mediaType.getValue();
         Schema<?> schema = value.getSchema();
