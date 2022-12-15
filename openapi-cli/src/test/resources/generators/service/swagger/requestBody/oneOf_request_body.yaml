@@ -90,12 +90,25 @@ paths:
           description: Invalid storage space name supplied
   /storageSpaces03:
     post:
-      summary: "Unsupported scenario 03: Request body with oneOf schema"
+      summary: "Request body content type is with subset of xml"
       operationId: postKey03
       requestBody:
-        description: "Ballerina not support for oneOf data type in request body"
         content:
           application/snowflake+xml:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        200:
+          description: Successful operation.
+  /storageSpaces04:
+    post:
+      operationId: postKey04
+      requestBody:
+        description: "Media type is with not main standard type. "
+        content:
+          application/zip:
             schema:
               type: object
               additionalProperties:

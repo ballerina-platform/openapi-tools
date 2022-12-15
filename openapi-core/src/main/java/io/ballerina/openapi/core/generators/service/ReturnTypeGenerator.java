@@ -23,6 +23,7 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RecordFieldNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
@@ -48,6 +49,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP;
 import static io.ballerina.openapi.core.GeneratorConstants.HTTP_RESPONSE;
+import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
 import static io.ballerina.openapi.core.GeneratorConstants.RETURNS;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
@@ -147,20 +150,17 @@ public class ReturnTypeGenerator {
                             Iterator<Map.Entry<String, MediaType>> contentItr = responseContent.entrySet().iterator();
                             TypeDescriptorNode type;
                             if (responseContent.entrySet().size() > 1) {
-                                Optional<UnionTypeDescriptorNode> unionNodeForContent =
+                                Optional<TypeDescriptorNode> unionNodeForContent =
                                         handleMultipleContents(responseContent.entrySet());
 
-                                if (unionNodeForContent.isEmpty()) {
-                                    type = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
-                                } else {
-                                    type = unionNodeForContent.get();
-                                }
+                                type = unionNodeForContent.orElseGet(
+                                        () -> createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE)));
 
                             } else {
                                 // Handle for only first content type
                                 Optional<TypeDescriptorNode> nodeForContent = getNodeForContent(contentItr);
                                 type = nodeForContent.orElseGet(
-                                        () -> createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE)));
+                                        () -> createSimpleNameReferenceNode(createIdentifierToken("anydata")));
                             }
                             if (!type.toString().equals(HTTP_RESPONSE)) {
                                 SimpleNameReferenceNode recordType = createReturnTypeInclusionRecord(code, type);
@@ -200,16 +200,16 @@ public class ReturnTypeGenerator {
 
         int contentTypeNumber = contentEntries.size();
         if (contentTypeNumber > 1) {
-            Optional<UnionTypeDescriptorNode> unionNode = handleMultipleContents(contentEntries);
-            TypeDescriptorNode type = unionNode.isPresent() ? unionNode.get() :
-                    createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
+            Optional<TypeDescriptorNode> unionNode = handleMultipleContents(contentEntries);
+            TypeDescriptorNode type =
+                    unionNode.orElseGet(() -> createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE)));
             returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), type);
         } else {
             for (Map.Entry<String, MediaType> next : contentEntries) {
                 Optional<TypeDescriptorNode> mediaTypeToken = getMediaTypeToken(next);
                 if (mediaTypeToken.isEmpty()) {
                     BuiltinSimpleNameReferenceNode type = createBuiltinSimpleNameReferenceNode(null,
-                            createIdentifierToken(HTTP_RESPONSE));
+                            createIdentifierToken("anydata"));
                     returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(), type);
                     break;
                 }
@@ -256,9 +256,7 @@ public class ReturnTypeGenerator {
     private TypeDescriptorNode handleMultipleResponse(Iterator<Map.Entry<String, ApiResponse>> responseIter)
             throws BallerinaOpenApiException {
 
-        List<TypeDescriptorNode> qualifiedNodes = new ArrayList<>();
-        Token pipeToken = createToken(PIPE_TOKEN);
-        TypeDescriptorNode httpResponseNode = null;
+        Set<String> qualifiedNodes = new HashSet<>();
         while (responseIter.hasNext()) {
             Map.Entry<String, ApiResponse> response = responseIter.next();
             String responseCode = response.getKey().trim();
@@ -271,81 +269,59 @@ public class ReturnTypeGenerator {
             if (responseCode.equals(GeneratorConstants.DEFAULT)) {
                 TypeDescriptorNode record = createSimpleNameReferenceNode(createIdentifierToken(
                         HTTP_RESPONSE));
-                qualifiedNodes.add(record);
+                qualifiedNodes.add(record.toString());
             } else if (response.getValue().getContent() == null && response.getValue().get$ref() == null ||
                     response.getValue().getContent() != null && response.getValue().getContent().size() == 0) {
                 //key and value
                 QualifiedNameReferenceNode node = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
                         code);
-                qualifiedNodes.add(node);
+                qualifiedNodes.add(node.toString());
             } else if (response.getValue().getContent() != null) {
+                Set<Map.Entry<String, MediaType>> entries = response.getValue().getContent().entrySet();
+                Optional<TypeDescriptorNode> returnNode = handleMultipleContents(entries);
                 TypeDescriptorNode record;
-                Optional<TypeDescriptorNode> returnNode = getMediaTypeToken(response.getValue().getContent().entrySet()
-                        .iterator().next());
                 record = returnNode.orElseGet(
-                        () -> createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE)));
+                        () -> createSimpleNameReferenceNode(createIdentifierToken("anydata")));
                 if (responseCode.equals(GeneratorConstants.HTTP_200)) {
-                    qualifiedNodes.add(record);
-                } else if (!record.toString().trim().equals(HTTP_RESPONSE)) {
-                    SimpleNameReferenceNode node = createReturnTypeInclusionRecord(code, record);
-                    qualifiedNodes.add(node);
+                    qualifiedNodes.add(record.toString());
                 } else {
-                    httpResponseNode = record;
+                    SimpleNameReferenceNode node = createReturnTypeInclusionRecord(code, record);
+                    qualifiedNodes.add(node.name().text());
                 }
             }
         }
-        if (httpResponseNode != null) {
-            QualifiedNameReferenceNode httpResponse = createQualifiedNameReferenceNode(
-                    createIdentifierToken(HTTP), createToken(COLON_TOKEN), createIdentifierToken("Response"));
-            qualifiedNodes.add(httpResponse);
-        }
 
-        if (qualifiedNodes.size() == 1) {
-            return qualifiedNodes.get(0);
+        String unionType = String.join(PIPE, qualifiedNodes);
+        if (qualifiedNodes.contains("anydata")) {
+            return NodeParser.parseTypeDescriptor("anydata");
         }
-        TypeDescriptorNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
-        TypeDescriptorNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
-        UnionTypeDescriptorNode traversUnion = createUnionTypeDescriptorNode(traversRight, pipeToken, right);
-        if (qualifiedNodes.size() >= 3) {
-            for (int i = qualifiedNodes.size() - 3; i >= 0; i--) {
-                traversUnion = createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken, traversUnion);
-            }
-        }
-        return traversUnion;
+        return NodeParser.parseTypeDescriptor(unionType);
     }
 
     /**
      * Generate union type node when response has multiple content types.
      */
-    private Optional<UnionTypeDescriptorNode> handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries)
+    private Optional<TypeDescriptorNode> handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries)
             throws BallerinaOpenApiException {
 
-        List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
-        Token pipeToken = createIdentifierToken(PIPE_TOKEN.stringValue());
-        SimpleNameReferenceNode httpResponseNode = null;
+        Set<String> qualifiedNodes = new HashSet<>();
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
             Optional<TypeDescriptorNode> node = getMediaTypeToken(contentType);
             if (node.isEmpty()) {
-                httpResponseNode = createSimpleNameReferenceNode(createIdentifierToken(HTTP_RESPONSE));
+                SimpleNameReferenceNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken("anydata"));
+                qualifiedNodes.add(httpResponse.name().text());
                 continue;
             }
-            qualifiedNodes.add((SimpleNameReferenceNode) node.get());
-        }
-        if (httpResponseNode != null) {
-            qualifiedNodes.add(httpResponseNode);
+            qualifiedNodes.add(node.get().toString());
         }
         if (qualifiedNodes.size() == 1) {
-            return Optional.empty();
+            return Optional.of(NodeParser.parseTypeDescriptor(qualifiedNodes.iterator().next()));
         }
-        SimpleNameReferenceNode right = qualifiedNodes.get(qualifiedNodes.size() - 1);
-        SimpleNameReferenceNode traversRight = qualifiedNodes.get(qualifiedNodes.size() - 2);
-        UnionTypeDescriptorNode traversUnion = createUnionTypeDescriptorNode(traversRight, pipeToken, right);
-        if (qualifiedNodes.size() >= 3) {
-            for (int i = qualifiedNodes.size() - 3; i >= 0; i--) {
-                traversUnion = createUnionTypeDescriptorNode(qualifiedNodes.get(i), pipeToken, traversUnion);
-            }
+        String unionType = String.join(PIPE, qualifiedNodes);
+        if (qualifiedNodes.contains("anydata")) {
+            return Optional.of(NodeParser.parseTypeDescriptor("anydata"));
         }
-        return Optional.ofNullable(traversUnion);
+        return Optional.of(NodeParser.parseTypeDescriptor(unionType));
     }
 
     /**

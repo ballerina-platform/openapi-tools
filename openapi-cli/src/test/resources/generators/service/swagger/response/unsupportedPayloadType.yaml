@@ -25,38 +25,38 @@ servers:
         default: v2
 paths:
   /store/inventory:
-    get:
-      tags:
-        - store
-        - pet
-      summary: Returns pet inventories by status
-      description: Returns a map of status codes to quantities
-      operationId: "id_01"
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
-    put:
-      tags:
-        - store
-        - pet
-      operationId: "id_02"
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/snowflake+json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
+#    get:
+#      tags:
+#        - store
+#        - pet
+#      summary: Returns pet inventories by status
+#      description: Returns a map of status codes to quantities
+#      operationId: "id_01"
+#      responses:
+#        "200":
+#          description: successful operation
+#          content:
+#            application/json:
+#              schema:
+#                type: object
+#                additionalProperties:
+#                  type: integer
+#                  format: int32
+#    put:
+#      tags:
+#        - store
+#        - pet
+#      operationId: "id_02"
+#      responses:
+#        "200":
+#          description: successful operation
+#          content:
+#            application/snowflake+json:
+#              schema:
+#                type: object
+#                additionalProperties:
+#                  type: integer
+#                  format: int32
     delete:
       tags:
         - store
@@ -79,6 +79,18 @@ paths:
                   type: integer
                   format: int32
             application/snowflake+xml:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+            application/zip:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+            application/zip_0:
               schema:
                 type: object
                 additionalProperties:
