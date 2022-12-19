@@ -91,11 +91,9 @@ import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtil
  * @since 1.3.0
  */
 public class ReturnTypeGenerator {
-
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
 
     public Map<String, TypeDefinitionNode> getTypeInclusionRecords() {
-
         return this.typeInclusionRecords;
     }
 
