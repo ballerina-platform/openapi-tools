@@ -99,12 +99,12 @@ public class UnionTypeGenerator extends TypeGenerator {
         List<TypeDescriptorNode> typeDescriptorNodes = new ArrayList<>();
         for (Schema<?> schema : schemas) {
             TypeGenerator typeGenerator = getTypeGenerator(schema, typeName, null);
-            TypeDescriptorNode typeDescriptorNode = typeGenerator.generateTypeDescriptorNode();
-            if (typeDescriptorNode instanceof OptionalTypeDescriptorNode && GeneratorMetaData.getInstance().isNullable()) {
-                Node internalTypeDesc = ((OptionalTypeDescriptorNode) typeDescriptorNode).typeDescriptor();
-                typeDescriptorNode = (TypeDescriptorNode) internalTypeDesc;
+            TypeDescriptorNode typeDescNode = typeGenerator.generateTypeDescriptorNode();
+            if (typeDescNode instanceof OptionalTypeDescriptorNode && GeneratorMetaData.getInstance().isNullable()) {
+                Node internalTypeDesc = ((OptionalTypeDescriptorNode) typeDescNode).typeDescriptor();
+                typeDescNode = (TypeDescriptorNode) internalTypeDesc;
             }
-            typeDescriptorNodes.add(typeDescriptorNode);
+            typeDescriptorNodes.add(typeDescNode);
             if (typeGenerator instanceof ArrayTypeGenerator &&
                     ((ArrayTypeGenerator) typeGenerator).getArrayItemWithConstraint() != null) {
                 TypeDefinitionNode arrayItemWithConstraint =
@@ -123,22 +123,22 @@ public class UnionTypeGenerator extends TypeGenerator {
             return typeDescNodes.get(0);
         }
 
-        // if any of the subtypes is an optional type descriptor, simplify the resultant union type by extracting out
-        // the optional operators from all the member subtypes and, adding to the last one.
+        // if any of the member subtypes is an optional type descriptor, simplify the resultant union type by
+        // extracting out the optional operators from all the member subtypes and, adding only to the last one.
+        //
         // i.e: T1?|T2?|...|Tn? <=> T1|T2|...|Tn?
         if (typeDescNodes.stream().anyMatch(node -> node.kind() == OPTIONAL_TYPE_DESC)) {
-            typeDescNodes = typeDescNodes.stream()
-                    .map(node -> {
-                        if (node instanceof OptionalTypeDescriptorNode) {
-                            return (TypeDescriptorNode) ((OptionalTypeDescriptorNode) node).typeDescriptor();
-                        } else {
-                            return node;
-                        }
-                    })
-                    .collect(Collectors.toList());
+            typeDescNodes = typeDescNodes.stream().map(node -> {
+                if (node instanceof OptionalTypeDescriptorNode) {
+                    return (TypeDescriptorNode) ((OptionalTypeDescriptorNode) node).typeDescriptor();
+                } else {
+                    return node;
+                }
+            }).collect(Collectors.toList());
+
             OptionalTypeDescriptorNode optionalTypeDesc = createOptionalTypeDescriptorNode(
                     typeDescNodes.get(typeDescNodes.size() - 1), createToken(QUESTION_MARK_TOKEN));
-            typeDescNodes.add(typeDescNodes.size() - 1, optionalTypeDesc);
+            typeDescNodes.set(typeDescNodes.size() - 1, optionalTypeDesc);
         }
 
         UnionTypeDescriptorNode unionTypeDescNode = null;
