@@ -50,7 +50,6 @@ dependencies {
     implementation "io.ballerina.stdlib:http-native"
     implementation "com.google.code.findbugs:jsr305"
     testImplementation "org.testng:testng"
-    testImplementation 'junit:junit:4.13.1'
 
     balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
