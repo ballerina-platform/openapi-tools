@@ -1,5 +1,5 @@
-public type Pet record {|
+public type Pet record {
     int id;
     string name;
     string 'type?;
-|};
+};

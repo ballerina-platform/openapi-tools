@@ -23,42 +23,24 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
-import io.ballerina.compiler.syntax.tree.RecordRestDescriptorNode;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.TypeGeneratorUtils;
-import io.ballerina.openapi.core.generators.schema.model.RecordMetadata;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.BooleanSchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.IntegerSchema;
-import io.swagger.v3.oas.models.media.MapSchema;
-import io.swagger.v3.oas.models.media.NumberSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
+import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.ELLIPSIS_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for object type schema.
@@ -97,10 +79,11 @@ import static io.ballerina.openapi.core.GeneratorConstants.OBJECT;
 public class RecordTypeGenerator extends TypeGenerator {
 
     private final List<TypeDefinitionNode> typeDefinitionNodeList = new ArrayList<>();
-    public static final PrintStream OUT_STREAM = System.err;
+
     public RecordTypeGenerator(Schema schema, String typeName) {
         super(schema, typeName);
     }
+
     public List<TypeDefinitionNode> getTypeDefinitionNodeList() {
         return typeDefinitionNodeList;
     }
@@ -109,142 +92,31 @@ public class RecordTypeGenerator extends TypeGenerator {
      * Generate TypeDescriptorNode for object type schemas.
      */
     @Override
-    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException {
-
-        List<Node> recordFields = new LinkedList<>();
-        // extract metadata with additional properties
-        RecordMetadata metadataBuilder = getRecordMetadata();
+    public TypeDescriptorNode generateTypeDescriptorNode() throws BallerinaOpenApiException, BallerinaOpenApiException {
 
         if (schema.getProperties() != null) {
-            Map<String, Schema<?>> properties = schema.getProperties();
+            Map<String, Schema> properties = schema.getProperties();
             List<String> required = schema.getRequired();
-            recordFields.addAll(addRecordFields(required, properties.entrySet(), typeName));
-            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFields);
+            List<Node> recordFList = addRecordFields(required, properties.entrySet(), typeName);
+            NodeList<Node> fieldNodes = AbstractNodeFactory.createNodeList(recordFList);
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                    metadataBuilder.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
-                    fieldNodes, metadataBuilder.getRestDescriptorNode(),
-                    metadataBuilder.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
-                            createToken(CLOSE_BRACE_PIPE_TOKEN));
+                    createToken(OPEN_BRACE_TOKEN), fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
         } else {
+            NodeList<Node> fieldNodes = createEmptyNodeList();
             return NodeFactory.createRecordTypeDescriptorNode(createToken(RECORD_KEYWORD),
-                    metadataBuilder.isOpenRecord() ? createToken(OPEN_BRACE_TOKEN) : createToken(OPEN_BRACE_PIPE_TOKEN),
-                    createNodeList(recordFields), metadataBuilder.getRestDescriptorNode(),
-                    metadataBuilder.isOpenRecord() ? createToken(CLOSE_BRACE_TOKEN) :
-                            createToken(CLOSE_BRACE_PIPE_TOKEN));
+                    createToken(OPEN_BRACE_TOKEN), fieldNodes, null, createToken(CLOSE_BRACE_TOKEN));
         }
-    }
-
-    /**
-     * This function is to extract the main details of the record need to be generated and return {@code
-     * RecordMetadata} object with required details.
-     *
-     * @return {@code RecordMetadata}
-     * @throws BallerinaOpenApiException throws when process has some failure.
-     */
-    public RecordMetadata getRecordMetadata() throws BallerinaOpenApiException {
-        boolean isOpenRecord = false;
-        RecordRestDescriptorNode recordRestDescNode = null;
-
-        if (schema.getAdditionalProperties() != null) {
-            Object additionalProperties = schema.getAdditionalProperties();
-            if (additionalProperties.equals(true)) {
-                isOpenRecord = true;
-            } else if (additionalProperties instanceof Schema) {
-                Schema<?> additionalPropSchema = (Schema<?>) additionalProperties;
-                if (GeneratorUtils.hasConstraints(additionalPropSchema)) {
-                    // use printStream to echo the error, because current openapi to ballerina implementation doesn't
-                    // handle diagnostic message.
-                    OUT_STREAM.println("WARNING: constraints in the OpenAPI contract will be ignored for the " +
-                            "additionalProperties field, as constraints are not supported on Ballerina rest record " +
-                            "field.");
-                }
-                if (additionalPropSchema.get$ref() != null) {
-                    recordRestDescNode = getRestDescriptorNodeForReference(additionalPropSchema);
-                } else if (additionalPropSchema.getType() != null) {
-                    recordRestDescNode = getRecordRestDescriptorNode(additionalPropSchema);
-                } else if (additionalPropSchema instanceof ComposedSchema) {
-                    isOpenRecord = true;
-                    OUT_STREAM.println("WARNING: generating Ballerina rest record field will be ignored for the " +
-                            "OpenAPI contract additionalProperties type `ComposedSchema`, as it is not supported on " +
-                            "Ballerina rest record field.");
-                } else {
-                    isOpenRecord = true;
-                }
-            }
-        } else if (schema.getType() != null && schema.getType().equals(OBJECT) && schema.getProperties() == null &&
-                schema.getAdditionalProperties() == null) {
-            // this above condition is to check the free-form object [ex: type:object without any fields or
-            // additional fields], that object should be mapped to the open record.
-            isOpenRecord = true;
-        }
-        return new RecordMetadata.Builder()
-                        .withIsOpenRecord(isOpenRecord)
-                        .withRestDescriptorNode(recordRestDescNode).build();
-    }
-
-    /**
-     * Creates reference rest node when additional property has reference.
-     */
-    public static RecordRestDescriptorNode getRestDescriptorNodeForReference(Schema<?> additionalPropSchema)
-            throws BallerinaOpenApiException {
-        ReferencedTypeGenerator referencedTypeGenerator = new ReferencedTypeGenerator(additionalPropSchema, null);
-        TypeDescriptorNode refNode = referencedTypeGenerator.generateTypeDescriptorNode();
-        return NodeFactory.createRecordRestDescriptorNode(refNode, createToken(ELLIPSIS_TOKEN),
-                createToken(SEMICOLON_TOKEN));
-    }
-
-    /**
-     * Generates {@code RecordRestDescriptorNode} for the additional properties in object schema.
-     * <pre>
-     *    type User record {
-     *       string...;
-     *     }
-     * </pre>
-     */
-    public static RecordRestDescriptorNode getRecordRestDescriptorNode(Schema<?> additionalPropSchema)
-            throws BallerinaOpenApiException {
-
-        RecordRestDescriptorNode recordRestDescNode = null;
-        if (additionalPropSchema instanceof NumberSchema && additionalPropSchema.getFormat() != null) {
-            // this is special for `NumberSchema` because it has format with its expected type.
-            String type = additionalPropSchema.getFormat();
-            SimpleNameReferenceNode numberNode = NodeFactory.createSimpleNameReferenceNode(createIdentifierToken(type));
-            recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(
-                    TypeGeneratorUtils.getNullableType(additionalPropSchema, numberNode),
-                    createToken(ELLIPSIS_TOKEN),
-                    createToken(SEMICOLON_TOKEN));
-        } else if (additionalPropSchema instanceof ObjectSchema || additionalPropSchema instanceof MapSchema) {
-            RecordTypeGenerator record = new RecordTypeGenerator(additionalPropSchema, null);
-            TypeDescriptorNode recordNode = TypeGeneratorUtils.getNullableType(additionalPropSchema,
-                    record.generateTypeDescriptorNode());
-            recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(recordNode, createToken(ELLIPSIS_TOKEN),
-                    createToken(SEMICOLON_TOKEN));
-        } else if (additionalPropSchema instanceof ArraySchema) {
-            ArrayTypeGenerator arrayTypeGenerator = new ArrayTypeGenerator(additionalPropSchema, null, null);
-            TypeDescriptorNode arrayNode = arrayTypeGenerator.generateTypeDescriptorNode();
-            recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(arrayNode, createToken(ELLIPSIS_TOKEN),
-                    createToken(SEMICOLON_TOKEN));
-        } else if (additionalPropSchema instanceof IntegerSchema || additionalPropSchema instanceof StringSchema ||
-                additionalPropSchema instanceof BooleanSchema) {
-            PrimitiveTypeGenerator primitiveTypeGenerator = new PrimitiveTypeGenerator(additionalPropSchema, null);
-            TypeDescriptorNode primitiveNode = primitiveTypeGenerator.generateTypeDescriptorNode();
-            recordRestDescNode = NodeFactory.createRecordRestDescriptorNode(primitiveNode, createToken(ELLIPSIS_TOKEN),
-                    createToken(SEMICOLON_TOKEN));
-        } else {
-            OUT_STREAM.printf("WARNING: the Ballerina rest record field does not support with the data type `%s`",
-                    additionalPropSchema.getType());
-        }
-        return recordRestDescNode;
     }
 
     /**
      * This util for generating record field with given schema properties.
      */
-    public List<Node> addRecordFields(List<String> required, Set<Map.Entry<String, Schema<?>>> fields,
+    public List<Node> addRecordFields(List<String> required,
+                                      Set<Map.Entry<String, Schema>> fields,
                                       String recordName) throws BallerinaOpenApiException {
         // TODO: Handle allOf , oneOf, anyOf
         List<Node> recordFieldList = new ArrayList<>();
-        for (Map.Entry<String, Schema<?>> field : fields) {
+        for (Map.Entry<String, Schema> field : fields) {
             String fieldNameStr = GeneratorUtils.escapeIdentifier(field.getKey().trim());
             // API doc generations
             Schema<?> fieldSchema = field.getValue();

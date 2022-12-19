@@ -51,7 +51,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
-import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -108,8 +107,7 @@ public class TypeGeneratorUtils {
                 return new UnionTypeGenerator(schemaValue, typeName);
             }
         } else if ((schemaValue.getType() != null && schemaValue.getType().equals(GeneratorConstants.OBJECT)) ||
-                schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null ||
-                schemaValue instanceof MapSchema) {
+                schemaValue instanceof ObjectSchema || schemaValue.getProperties() != null) {
             return new RecordTypeGenerator(schemaValue, typeName);
         } else if (schemaValue instanceof ArraySchema) {
             return new ArrayTypeGenerator(schemaValue, typeName, parentName);
@@ -148,7 +146,7 @@ public class TypeGeneratorUtils {
 
     public static void updateRecordFieldList(List<String> required,
                                              List<Node> recordFieldList,
-                                             Map.Entry<String, Schema<?>> field,
+                                             Map.Entry<String, Schema> field,
                                              Schema<?> fieldSchema,
                                              NodeList<Node> schemaDocNodes,
                                              IdentifierToken fieldName,
@@ -160,7 +158,7 @@ public class TypeGeneratorUtils {
 
     public static void updateRecordFieldList(List<String> required,
                                              List<Node> recordFieldList,
-                                             Map.Entry<String, Schema<?>> field,
+                                             Map.Entry<String, Schema> field,
                                              Schema<?> fieldSchema,
                                              NodeList<Node> schemaDocNodes,
                                              IdentifierToken fieldName,
@@ -200,7 +198,7 @@ public class TypeGeneratorUtils {
     }
 
     private static void setRequiredFields(List<String> required, List<Node> recordFieldList,
-                                          Map.Entry<String, Schema<?>> field,
+                                          Map.Entry<String, Schema> field,
                                           Schema<?> fieldSchema,
                                           IdentifierToken fieldName,
                                           TypeDescriptorNode fieldTypeName,
