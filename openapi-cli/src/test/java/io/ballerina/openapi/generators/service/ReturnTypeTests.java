@@ -167,6 +167,7 @@ public class ReturnTypeTests {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_14_rs.bal", syntaxTree);
     }
 
