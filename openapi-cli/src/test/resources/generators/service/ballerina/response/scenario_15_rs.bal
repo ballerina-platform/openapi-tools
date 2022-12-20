@@ -9,6 +9,6 @@ service /v1 on ep0 {
     }
     resource function post pets03() returns json {
     }
-    resource function post pets04() returns http:Response {
+    resource function post pets04() returns json {
     }
 }

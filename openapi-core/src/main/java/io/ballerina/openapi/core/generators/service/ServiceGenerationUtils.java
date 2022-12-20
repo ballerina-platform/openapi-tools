@@ -113,7 +113,7 @@ public class ServiceGenerationUtils {
         List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
-            Schema contentType = iterator.next();
+            Schema<?> contentType = iterator.next();
             Optional<TypeDescriptorNode> qualifiedNodeType = generateTypeDescNodeForOASSchema(contentType);
             if (qualifiedNodeType.isEmpty()) {
                 continue;
