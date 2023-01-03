@@ -38,18 +38,18 @@ import java.nio.file.Paths;
 import static io.ballerina.openapi.generators.common.TestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 
 /**
- * All the tests related to AnyDataType handling the
- * {@link io.ballerina.openapi.generators.client.BallerinaClientGenerator} util.
+ * Test implementation to verify the `anyOf` property related scenarios in openAPI schema generation, handled by
+ * the {@link BallerinaTypesGenerator}.
  */
 public class AnyOfDataTypeTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
 
+    private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
 
     @Test(description = "Test for the schema has anyOf dataType")
     public void testAnyOfInSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/scenario15.yaml");
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
-        Schema schema = openAPI.getComponents().getSchemas().get("AnyOF");
+        Schema<?> schema = openAPI.getComponents().getSchemas().get("AnyOF");
         ComposedSchema composedSchema = (ComposedSchema) schema;
         GeneratorMetaData.createInstance(openAPI, false);
         UnionTypeGenerator unionTypeGenerator = new UnionTypeGenerator(composedSchema, "AnyOF");

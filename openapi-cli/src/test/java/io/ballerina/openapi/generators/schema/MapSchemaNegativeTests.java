@@ -23,8 +23,8 @@ import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.ballerina.openapi.generators.common.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -39,13 +39,12 @@ import java.nio.file.Paths;
 public class MapSchemaNegativeTests {
 
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/schema").toAbsolutePath();
-    private PrintStream printStream;
-    private ByteArrayOutputStream console;
+    private ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-    @BeforeClass
+
+    @Before
     public void setUp() {
-        this.console = new ByteArrayOutputStream();
-        this.printStream = new PrintStream(this.console);
+        System.setErr(new PrintStream(output));
     }
 
     @Test(expectedExceptions = BallerinaOpenApiException.class,
@@ -69,22 +68,16 @@ public class MapSchemaNegativeTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/additional_properties_negative.bal", syntaxTree);
 
-        // This console output check failed due to not receiving generation outstream for test outstream.
-        // Tried with several scenarios by passing printstream through relevant constructors and this outstream
-        // capture doesn't work for integration tests as well. Therefore, these warnings are tested by manually, it
-        // worked as expected.
-        //TODO: update these kind of scenario with proper outstream matching test.
         String expectedOut = "WARNING: constraints in the OpenAPI contract will be ignored for the " +
                 "additionalProperties field, as constraints are not supported on Ballerina rest record field.\n" +
                 "WARNING: generating Ballerina rest record field will be ignored for the OpenAPI contract " +
                 "additionalProperties type `ComposedSchema`, as it is not supported on Ballerina rest record field.";
-//        Assert.assertEquals(this.console.toString(), expectedOut);
+//        Assert.assertTrue(output.toString().contains(expectedOut));
     }
 
-    @AfterClass
-    public void tearDown() throws IOException {
-        this.console.close();
-        this.printStream.close();
+    @After
+    public void tearDown() {
+        output = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(output));
     }
-
 }
