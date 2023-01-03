@@ -172,7 +172,7 @@ public class RequestBodyGenerator {
                     typeName = Optional.ofNullable(createSimpleNameReferenceNode(identifierToken));
             }
         } else {
-             typeName = getMediaTypeToken(mediaType);
+            typeName = getMediaTypeToken(mediaType);
         }
         return typeName;
     }
