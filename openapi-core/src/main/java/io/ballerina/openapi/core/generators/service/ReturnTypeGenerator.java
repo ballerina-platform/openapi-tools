@@ -276,13 +276,13 @@ public class ReturnTypeGenerator {
             if (responseCode.equals(GeneratorConstants.DEFAULT)) {
                 TypeDescriptorNode record = createSimpleNameReferenceNode(createIdentifierToken(
                         HTTP_RESPONSE));
-                qualifiedNodes.add(record.toString());
+                qualifiedNodes.add(record.toSourceCode());
             } else if (response.getValue().getContent() == null && response.getValue().get$ref() == null ||
                     response.getValue().getContent() != null && response.getValue().getContent().size() == 0) {
                 //key and value
                 QualifiedNameReferenceNode node = GeneratorUtils.getQualifiedNameReferenceNode(GeneratorConstants.HTTP,
                         code);
-                qualifiedNodes.add(node.toString());
+                qualifiedNodes.add(node.toSourceCode());
             } else if (response.getValue().getContent() != null) {
                 Set<Map.Entry<String, MediaType>> entries = response.getValue().getContent().entrySet();
                 Optional<TypeDescriptorNode> returnNode = handleMultipleContents(entries);
@@ -290,7 +290,7 @@ public class ReturnTypeGenerator {
                 record = returnNode.orElseGet(
                         () -> createSimpleNameReferenceNode(createIdentifierToken(ANYDATA)));
                 if (responseCode.equals(GeneratorConstants.HTTP_200)) {
-                    qualifiedNodes.add(record.toString());
+                    qualifiedNodes.add(record.toSourceCode());
                 } else {
                     SimpleNameReferenceNode node = createReturnTypeInclusionRecord(code, record);
                     qualifiedNodes.add(node.name().text());

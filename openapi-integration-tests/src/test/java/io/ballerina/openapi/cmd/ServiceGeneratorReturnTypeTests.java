@@ -51,24 +51,20 @@ public class ServiceGeneratorReturnTypeTests extends OpenAPITest {
         boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
         compareGeneratedSyntaxTreewithExpectedSyntaxTree("types.bal", expectedFilePath);
     }
-
     @DataProvider(name = "returnSampleProvider")
     public Object[][] dataProvider() {
         return new Object[][]{
-                {"content_schema_null.yaml", "service/return/ballerina/content_schema_null.bal"}, // When the
-                // response content payload schema type is null
+                {"content_schema_null.yaml", "service/return/ballerina/content_schema_null.bal"},
                 {"content_schema_has_one_of_type.yaml", "service/return/ballerina/" +
-                        "content_schema_has_one_of_type.bal"}, // content type has one of type schemas
+                        "content_schema_has_one_of_type.bal"},
                 {"multiple_media_types_for_one_response_code.yaml", "service/return/ballerina/" +
                         "multiple_mediatype_for_one_response_code.bal"}, //
                 // one response code has multiple media types (content types)
                 {"response_has_inline_record.yaml", "service/return/ballerina/" +
-                        "response_has_inline_record.bal"}, // Response has inline object
-                // schema for content schema.
+                        "response_has_inline_record.bal"},
                 {"same_response.yaml", "service/return/ballerina/same_response.bal"}, // Two resources have
                 // same error code with same body type for return type.
-                {"unsupported_payload_type.yaml", "service/return/ballerina/unsupported_payload_type.bal"} //
-                // Response is with unhandled payload type
+                {"unsupported_payload_type.yaml", "service/return/ballerina/unsupported_payload_type.bal"}
         };
     }
 }
