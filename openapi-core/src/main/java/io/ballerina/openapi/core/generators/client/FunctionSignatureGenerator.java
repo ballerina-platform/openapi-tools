@@ -149,9 +149,10 @@ public class FunctionSignatureGenerator {
             throws BallerinaOpenApiException {
         // Store the parameters for method.
         List<Node> parameterList = new ArrayList<>();
+
+        setFunctionParameters(operation, parameterList, createToken(COMMA_TOKEN), remoteFunctionDoc);
         functionReturnType = new FunctionReturnTypeGenerator
                 (openAPI, ballerinaSchemaGenerator, typeDefinitionNodeList);
-        setFunctionParameters(operation, parameterList, createToken(COMMA_TOKEN), remoteFunctionDoc);
 
         if (parameterList.size() >= 2) {
             parameterList.remove(parameterList.size() - 1);
@@ -234,16 +235,8 @@ public class FunctionSignatureGenerator {
 
         // Handle RequestBody
         if (operation.getRequestBody() != null) {
-            RequestBody requestBody = operation.getRequestBody();
-            if (requestBody.getContent() != null) {
-                setRequestBodyParameters(operation.getOperationId(), requestBody, remoteFunctionDoc, parameterList,
-                        defaultable);
-            } else if (requestBody.get$ref() != null) {
-                String requestBodyName = extractReferenceType(requestBody.get$ref());
-                RequestBody requestBodySchema = openAPI.getComponents().getRequestBodies().get(requestBodyName.trim());
-                setRequestBodyParameters(operation.getOperationId(), requestBodySchema, remoteFunctionDoc,
-                        parameterList, defaultable);
-            }
+            setRequestBodyParameters(operation.getOperationId(), operation.getRequestBody(), remoteFunctionDoc,
+                    parameterList, defaultable);
         }
         remoteFunctionDoc.addAll(deprecatedParamDocComments);
         //Filter defaultable parameters
@@ -485,8 +478,21 @@ public class FunctionSignatureGenerator {
                                           List<Node> parameterList, List<Node> defaultable)
             throws BallerinaOpenApiException {
 
-        Content content = requestBody.getContent();
-        Iterator<Map.Entry<String, MediaType>> iterator = content.entrySet().iterator();
+        Content requestBodyContent;
+        String referencedRequestBodyName = "";
+        if (requestBody.get$ref() != null) {
+            referencedRequestBodyName = extractReferenceType(requestBody.get$ref()).trim();
+            RequestBody referencedRequestBody = openAPI.getComponents()
+                    .getRequestBodies().get(referencedRequestBodyName);
+            requestBodyContent = referencedRequestBody.getContent();
+            // note : when there is referenced request body, the description at the reference is ignored.
+            // Need to consider the description at the component level
+            requestBody.setDescription(referencedRequestBody.getDescription());
+        } else {
+            requestBodyContent = requestBody.getContent();
+        }
+
+        Iterator<Map.Entry<String, MediaType>> iterator = requestBodyContent.entrySet().iterator();
         while (iterator.hasNext()) {
             // This implementation currently for first content type
             Map.Entry<String, MediaType> next = iterator.next();
@@ -514,6 +520,10 @@ public class FunctionSignatureGenerator {
                     //TODO: handle nested array - this is impossible to handle
                     ArraySchema arraySchema = (ArraySchema) schema;
                     paramType = getRequestBodyParameterForArraySchema(operationId, next, arraySchema);
+                } else if (schema instanceof ObjectSchema) {
+                    ObjectSchema objectSchema = (ObjectSchema) schema;
+                    paramType = referencedRequestBodyName.isBlank() ? paramType : referencedRequestBodyName;
+                    getRequestBodyParameterForObjectSchema(referencedRequestBodyName, objectSchema);
                 } else { // composed and object schemas are handled by the flatten
                     paramType = GeneratorUtils.getBallerinaMediaType(next.getKey(), true);
                 }
@@ -562,6 +572,13 @@ public class FunctionSignatureGenerator {
         }
     }
 
+    private void getRequestBodyParameterForObjectSchema (String recordName, ObjectSchema objectSchema)
+            throws BallerinaOpenApiException {
+        TypeDefinitionNode record =
+                ballerinaSchemaGenerator.getTypeDefinitionNode(objectSchema, recordName, new ArrayList<>());
+        GeneratorUtils.updateTypeDefNodeList(recordName, record, typeDefinitionNodeList);
+    }
+
     /**
      * Generate RequestBody for array type schema.
      */
@@ -579,10 +596,11 @@ public class FunctionSignatureGenerator {
             // TODO - Add API doc by checking requestBody
             TypeDefinitionNode arrayTypeNode =
                     ballerinaSchemaGenerator.getTypeDefinitionNode(arraySchema, paramType, new ArrayList<>());
-            functionReturnType.updateTypeDefinitionNodeList(paramType, arrayTypeNode);
+            GeneratorUtils.updateTypeDefNodeList(paramType, arrayTypeNode, typeDefinitionNodeList);
         } else {
             paramType = GeneratorUtils.getBallerinaMediaType(next.getKey().trim(), true) + SQUARE_BRACKETS;
         }
         return paramType;
     }
+
 }
