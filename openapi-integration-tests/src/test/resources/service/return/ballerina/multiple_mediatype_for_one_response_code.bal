@@ -1,8 +1,8 @@
 import ballerina/http;
 
-public type BadRequestUserStringXml record {|
+public type BadRequestUserXmlString record {|
     *http:BadRequest;
-    User|string|xml body;
+    User|xml|string body;
 |};
 
 public type User record {
