@@ -48,8 +48,8 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -263,7 +263,7 @@ public class ReturnTypeGenerator {
     private TypeDescriptorNode handleMultipleResponse(ApiResponses responses)
             throws BallerinaOpenApiException {
 
-        Set<String> qualifiedNodes = new HashSet<>();
+        Set<String> qualifiedNodes = new LinkedHashSet<>();
 
         for (Map.Entry<String, ApiResponse> response : responses.entrySet()) {
             String responseCode = response.getKey().trim();
@@ -311,7 +311,7 @@ public class ReturnTypeGenerator {
     private Optional<TypeDescriptorNode> handleMultipleContents(Set<Map.Entry<String, MediaType>> contentEntries)
             throws BallerinaOpenApiException {
 
-        Set<String> qualifiedNodes = new HashSet<>();
+        Set<String> qualifiedNodes = new LinkedHashSet<>();
         for (Map.Entry<String, MediaType> contentType : contentEntries) {
             Optional<TypeDescriptorNode> node = getMediaTypeToken(contentType);
             if (node.isEmpty()) {
