@@ -40,6 +40,7 @@ import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -107,21 +108,23 @@ public class MultipartFormData extends MimeType {
 
     private VariableDeclarationNode getMultipartMap(Map.Entry<String, MediaType> mediaTypeEntry) {
         if (mediaTypeEntry.getValue().getEncoding() != null) {
-            List<Node> filedOfMap = new ArrayList<>();
+            List<Node> mapFields = new LinkedList<>();
             BuiltinSimpleNameReferenceNode mapType = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken("map<Encoding>"));
             CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
                     createIdentifierToken("encodingMap"));
             TypedBindingPatternNode bindingPatternNode = createTypedBindingPatternNode(mapType, bindingPattern);
 
-            Set<Map.Entry<String, Encoding>> endcodingEntries = mediaTypeEntry.getValue().getEncoding().entrySet();
-            for (Map.Entry<String, Encoding> entry : endcodingEntries) {
-                getEncoding(entry, filedOfMap);
+            Set<Map.Entry<String, Encoding>> encodingEntries = mediaTypeEntry.getValue().getEncoding().entrySet();
+            for (Map.Entry<String, Encoding> entry : encodingEntries) {
+                getEncoding(entry, mapFields);
             }
 
-            filedOfMap.remove(filedOfMap.size() - 1);
+            if (!mapFields.isEmpty()) {
+                mapFields.remove(mapFields.size() - 1);
+            }
             MappingConstructorExpressionNode initialize = createMappingConstructorExpressionNode(
-                    createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(filedOfMap), createToken(CLOSE_BRACE_TOKEN));
+                    createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(mapFields), createToken(CLOSE_BRACE_TOKEN));
             return createVariableDeclarationNode(createEmptyNodeList(), null, bindingPatternNode,
                     createToken(EQUAL_TOKEN), initialize, createToken(SEMICOLON_TOKEN));
 
@@ -129,7 +132,7 @@ public class MultipartFormData extends MimeType {
         return null;
     }
 
-    private void getEncoding(Map.Entry<String, Encoding> entry, List<Node> filedOfMap) {
+    private void getEncoding(Map.Entry<String, Encoding> entry, List<Node> mapFields) {
         SpecificFieldNode contentField = null;
         SpecificFieldNode headersField = null;
         IdentifierToken fieldName = createIdentifierToken('"' + entry.getKey() + '"');
@@ -158,8 +161,8 @@ public class MultipartFormData extends MimeType {
                 createToken(OPEN_BRACE_TOKEN), separatedNodeList, createToken(CLOSE_BRACE_TOKEN));
         SpecificFieldNode specificFieldNode = createSpecificFieldNode(null, fieldName,
                 createToken(COLON_TOKEN), expressionNode);
-        filedOfMap.add(specificFieldNode);
-        filedOfMap.add(createToken(COMMA_TOKEN));
+        mapFields.add(specificFieldNode);
+        mapFields.add(createToken(COMMA_TOKEN));
     }
 
     private SpecificFieldNode getHeaderEncoding(Map.Entry<String, Encoding> entry) {
@@ -173,7 +176,9 @@ public class MultipartFormData extends MimeType {
             headerMap.add(specificFieldNode);
             headerMap.add(createToken(COMMA_TOKEN));
         }
-        headerMap.remove(headerMap.size() - 1);
+        if (!headerMap.isEmpty()) {
+            headerMap.remove(headerMap.size() - 1);
+        }
         MappingConstructorExpressionNode initialize = createMappingConstructorExpressionNode(
                 createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(headerMap),
                 createToken(CLOSE_BRACE_TOKEN));
