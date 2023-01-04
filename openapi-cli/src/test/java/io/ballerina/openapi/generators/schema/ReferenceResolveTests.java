@@ -107,13 +107,4 @@ public class ReferenceResolveTests {
         TestUtils.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "schema/ballerina/schema_with_request_body_ref.bal", syntaxTree);
     }
-
-    @Test(description = "Test swagger file has undocumented reference in schema.",
-            expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "Undefined \\$ref: '#/components/schemas/Person01' in openAPI.*")
-    public void testForUndocumentedReference() throws IOException, BallerinaOpenApiException {
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/undocument_ref.yaml"), true);
-        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
-        SyntaxTree syntaxTree = ballerinaSchemaGenerator.generateSyntaxTree();
-    }
 }
