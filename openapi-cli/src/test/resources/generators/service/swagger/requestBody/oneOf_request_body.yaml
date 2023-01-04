@@ -88,6 +88,34 @@ paths:
           description: Successful operation.
         400:
           description: Invalid storage space name supplied
+  /storageSpaces03:
+    post:
+      summary: "Request body content type is with subset of xml"
+      operationId: postKey03
+      requestBody:
+        content:
+          application/snowflake+xml:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        200:
+          description: Successful operation.
+  /storageSpaces04:
+    post:
+      operationId: postKey04
+      requestBody:
+        description: "Media type is with not main standard type. "
+        content:
+          application/zip:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        200:
+          description: Successful operation.
 components:
   schemas:
     HandleRequest_RequestBody:

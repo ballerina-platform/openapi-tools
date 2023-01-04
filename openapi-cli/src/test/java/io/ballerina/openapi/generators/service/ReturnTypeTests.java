@@ -24,7 +24,6 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class ReturnTypeTests {
 
     // Response scenarios
     @Test(description = "Scenario 01 - Response has single response without content type")
-    public void generateResponseScenario01() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario01() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_01_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -55,7 +54,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 02 - Single response with content type")
-    public void generateResponseScenario02() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario02() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_02_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -64,7 +63,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 03 - Single response with content type application/json")
-    public void generateResponseScenario03() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario03() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_03_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -73,7 +72,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 04 - Response has multiple responses without content type")
-    public void generateResponseScenario04() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario04() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_04_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -82,7 +81,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 05 - Error response with a schema")
-    public void generateResponseScenario05() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario05() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_05_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -91,7 +90,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 06 - Error response with a schema with application/json")
-    public void generateResponseScenario06() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario06() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_06_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -100,7 +99,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 07 - Single response has multiple content types")
-    public void generateResponseScenario07() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario07() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_07_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -109,7 +108,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 08 - Single response has inline record for dataType")
-    public void generateResponseScenario08() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario08() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_08_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -118,7 +117,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 09 - Single response has inline record for dataType with different status code")
-    public void generateResponseScenario09() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario09() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_09_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -127,7 +126,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 10 - Response with a custom media type")
-    public void generateResponseScenario10() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario10() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_10_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -136,7 +135,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 11 - Response has OneOf and AnyOf type 200 ok")
-    public void generateResponseScenario11() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario11() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_11_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -145,7 +144,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 12 - Response has OneOf and AnyOf type for error status code")
-    public void generateResponseScenario12() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario12() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_12_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -154,7 +153,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 13 - Single response has multiple content types with different error code")
-    public void generateResponseScenario13() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario13() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_13_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -163,16 +162,17 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 14 - Multiple response with same mediaType")
-    public void generateResponseScenario14() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario14() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_14_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree("response/scenario_14_rs.bal", syntaxTree);
     }
 
     @Test(description = "Scenario 15 - Response has array type data Binding")
-    public void generateResponseScenario15() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario15() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_15_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -181,7 +181,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 16 - Response has array type data Binding with error code")
-    public void generateResponseScenario16() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario16() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_16_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -190,7 +190,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Scenario 19 - Multiple response with different mediaType")
-    public void generateResponseScenario19() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateResponseScenario19() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/scenario_19_rs.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -217,8 +217,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Default response handling")
-    public void generateResponseDefault() throws IOException, BallerinaOpenApiException,
-            FormatterException {
+    public void generateResponseDefault() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/petstore_default.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -228,7 +227,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Path with special characters ")
-    public void testWithSpecialCharacters() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testWithSpecialCharacters() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/path_with_special_characters.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -238,7 +237,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Response has different status code except 200")
-    public void testWithDifferentStatusCode() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testWithDifferentStatusCode() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/different_status_code.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -257,7 +256,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Response and Request body have inline object schema")
-    public void testWithInlineObjectSchema() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void testWithInlineObjectSchema() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/inline_record_type_request_response.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
@@ -277,7 +276,7 @@ public class ReturnTypeTests {
     }
 
     @Test(description = "Single response without content type.")
-    public void singleResponseWithOutContent() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void singleResponseWithOutContent() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/content_null.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(openAPI, filter);
