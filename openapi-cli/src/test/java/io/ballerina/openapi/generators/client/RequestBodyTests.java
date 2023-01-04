@@ -254,6 +254,21 @@ public class RequestBodyTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
+    @Test(description = "Test for generating request body with reference")
+    public void testRequestBodyWithReference() throws IOException, BallerinaOpenApiException {
+        Path expectedPath = RES_DIR.resolve("ballerina/request_body_with_ref.bal");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
+                RES_DIR.resolve("swagger/request_body_with_ref.yaml"), true);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(filter)
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+    }
+
     @AfterTest
     private void deleteGeneratedFiles() {
         try {

@@ -85,7 +85,8 @@ public class BallerinaDiagnosticTests {
                 {"xml_payload.yaml"},
                 {"xml_payload_with_ref.yaml"},
                 {"duplicated_response.yaml"},
-                {"complex_oneOf_schema.yaml"}
+                {"complex_oneOf_schema.yaml"},
+                {"request_body_ref.yaml"}
         };
     }
 

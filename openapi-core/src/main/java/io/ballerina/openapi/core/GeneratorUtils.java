@@ -48,6 +48,7 @@ import io.ballerina.compiler.syntax.tree.SyntaxInfo;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
@@ -161,7 +162,6 @@ public class GeneratorUtils {
     public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
     private static final Logger LOGGER = LoggerFactory.getLogger(BallerinaUtilGenerator.class);
-
 
     public static ImportDeclarationNode getImportDeclarationNode(String orgName, String moduleName) {
 
@@ -336,6 +336,23 @@ public class GeneratorUtils {
             return identifier.substring(0, 1).toUpperCase(Locale.ENGLISH) + identifier.substring(1);
         } else {
             return escapeIdentifier(identifier.substring(0, 1).toLowerCase(Locale.ENGLISH) + identifier.substring(1));
+        }
+    }
+
+    /**
+     * This util function is for updating the list of nodes {@link TypeDefinitionNode}.
+     * It updates the list while checking the duplicates.
+     *
+     * @param typeName               - Given node name
+     * @param typeDefNode            - Generated node
+     * @param typeDefinitionNodeList - Current node list
+     */
+    public static void updateTypeDefNodeList(String typeName, TypeDefinitionNode typeDefNode,
+                                             List<TypeDefinitionNode> typeDefinitionNodeList) {
+        boolean anyMatch = typeDefinitionNodeList.stream().anyMatch(node ->
+                (node.typeName().text().trim().equals(typeName)));
+        if (!anyMatch) {
+            typeDefinitionNodeList.add(typeDefNode);
         }
     }
 
