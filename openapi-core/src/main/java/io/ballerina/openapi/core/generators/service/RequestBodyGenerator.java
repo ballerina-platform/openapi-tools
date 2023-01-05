@@ -105,22 +105,24 @@ public class RequestBodyGenerator {
                         createToken(SyntaxKind.OPEN_BRACE_TOKEN), fields, createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
             }
         }
+        AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, annotValue);
+        NodeList<AnnotationNode> annotation = NodeFactory.createNodeList(annotationNode);
+        Token paramName = createIdentifierToken(PAYLOAD, GeneratorUtils.SINGLE_WS_MINUTIAE,
+                GeneratorUtils.SINGLE_WS_MINUTIAE);
+
         if (typeName.isEmpty()) {
             return createRequiredParameterNode(createEmptyNodeList(),
                     createSimpleNameReferenceNode(createIdentifierToken(HTTP_REQUEST)), createIdentifierToken(PAYLOAD));
         }
-        AnnotationNode annotationNode = getAnnotationNode(GeneratorConstants.PAYLOAD_KEYWORD, annotValue);
-        NodeList<AnnotationNode> annotation = NodeFactory.createNodeList(annotationNode);
-        Token paramName = createIdentifierToken(GeneratorConstants.PAYLOAD, GeneratorUtils.SINGLE_WS_MINUTIAE,
-                GeneratorUtils.SINGLE_WS_MINUTIAE);
         return createRequiredParameterNode(annotation, typeName.get(), paramName);
     }
 
     /**
      * This util function is for generating type node for request payload in resource function.
      */
-    private Optional<TypeDescriptorNode> getNodeForPayloadType(Components components, Map.Entry<String,
-            MediaType> mediaType) throws BallerinaOpenApiException {
+    private Optional<TypeDescriptorNode> getNodeForPayloadType(Components components,
+                                                              Map.Entry<String, MediaType> mediaType)
+            throws BallerinaOpenApiException {
 
         Optional<TypeDescriptorNode> typeName;
         if (mediaType.getValue().getSchema().get$ref() != null) {
