@@ -63,6 +63,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -268,8 +269,8 @@ public class BallerinaServiceGenerator {
             isNullableRequired = parametersGenerator.isNullableRequired();
         }
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
-        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator,
-                GeneratorUtils.getValidName(path, true));
+        String pathForRecord = Objects.equals(path, "/") ? "" : GeneratorUtils.getValidName(path, true);
+        ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator, pathForRecord);
         if (!paths.contains(path)) {
             returnTypeGenerator.setCountForRecord(0);
             paths.add(path);

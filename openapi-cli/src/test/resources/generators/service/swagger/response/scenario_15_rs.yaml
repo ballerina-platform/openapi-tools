@@ -36,7 +36,44 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Pet'
-
+  /pets02:
+    post:
+      summary: Creates a new pets.
+      responses:
+        '200':
+          description: A list of pets.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /pets03:
+    post:
+      summary: Creates a new pets.
+      responses:
+        '200':
+          description: A list of pets.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: {}
+  /pets04:
+    post:
+      summary: Creates a new pets.
+      responses:
+        '200':
+          description: A list of pets.
+          content:
+            application/snowflake+json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: { }
 
 
 components:

@@ -78,6 +78,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.STRING_LITERAL;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.GeneratorConstants.BOOLEAN;
 import static io.ballerina.openapi.core.GeneratorConstants.INTEGER;
+import static io.ballerina.openapi.core.GeneratorConstants.JSON;
 import static io.ballerina.openapi.core.GeneratorConstants.NUMBER;
 import static io.ballerina.openapi.core.GeneratorConstants.STRING;
 
@@ -121,7 +122,7 @@ public class ServiceGenerationUtils {
         List<SimpleNameReferenceNode> qualifiedNodes = new ArrayList<>();
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
-            Schema contentType = iterator.next();
+            Schema<?> contentType = iterator.next();
             Optional<TypeDescriptorNode> qualifiedNodeType = generateTypeDescNodeForOASSchema(contentType);
             if (qualifiedNodeType.isEmpty()) {
                 continue;
@@ -185,16 +186,17 @@ public class ServiceGenerationUtils {
     private static Optional<TypeDescriptorNode> getTypeDescNodeForArraySchema(ArraySchema schema)
             throws BallerinaOpenApiException {
         TypeDescriptorNode member;
+        String schemaType = schema.getItems().getType();
         if (schema.getItems().get$ref() != null) {
             member = createBuiltinSimpleNameReferenceNode(null,
                     createIdentifierToken(GeneratorUtils.getValidName(
                             extractReferenceType(schema.getItems().get$ref()), true)));
-        } else if (!(schema.getItems() instanceof ArraySchema)) {
-            member = createBuiltinSimpleNameReferenceNode(null,
-                    createIdentifierToken(GeneratorConstants.JSON));
-        } else {
+        } else if (schemaType != null && (schemaType.equals(INTEGER) || schemaType.equals(NUMBER) ||
+                schemaType.equals(BOOLEAN) || schemaType.equals(STRING))) {
             member = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken(
                     GeneratorUtils.convertOpenAPITypeToBallerina(schema.getItems().getType())));
+        } else {
+            return Optional.empty();
         }
         ArrayDimensionNode dimensionNode = NodeFactory.createArrayDimensionNode(
                 createToken(SyntaxKind.OPEN_BRACKET_TOKEN), null,
@@ -205,14 +207,22 @@ public class ServiceGenerationUtils {
 
     /**
      * Generate TypeDescriptor for all the mediaTypes.
+     *
+     * Here return the @code{ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode>} for return type.
+     * Left node(key) of the return tuple represents the return type node for given mediaType details, Right Node
+     * (Value) of the return tuple represents the newly generated TypeDefinitionNode for return type if it has inline
+     * objects.
      */
-    //TODO: add immutablePair
     public static ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> getMediaTypeToken(
             Map.Entry<String, MediaType> mediaType, String recordName) throws BallerinaOpenApiException {
 
         String mediaTypeContent = mediaType.getKey().trim();
         if (mediaTypeContent.matches("text/.*")) {
             mediaTypeContent = GeneratorConstants.TEXT;
+        } else if (mediaTypeContent.matches("application/.*.json")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
+        } else if (mediaTypeContent.matches("application/.*.xml")) {
+            mediaTypeContent = GeneratorConstants.APPLICATION_XML;
         }
         MediaType value = mediaType.getValue();
         Schema<?> schema = value.getSchema();
@@ -222,7 +232,7 @@ public class ServiceGenerationUtils {
                 Optional<TypeDescriptorNode> returnTypeDecNode = generateTypeDescNodeForOASSchema(schema);
                 if (returnTypeDecNode.isEmpty()) {
                     return ImmutablePair.of(Optional.ofNullable(createSimpleNameReferenceNode(createIdentifierToken(
-                            "json"))), null);
+                            JSON))), null);
                 } else if (returnTypeDecNode.get() instanceof RecordTypeDescriptorNode) {
                     RecordTypeDescriptorNode recordNode = (RecordTypeDescriptorNode) returnTypeDecNode.get();
                     TypeDefinitionNode typeDefinitionNode = createTypeDefinitionNode(null,
@@ -253,7 +263,7 @@ public class ServiceGenerationUtils {
                                         createIdentifierToken(GeneratorConstants.BYTE)),
                         NodeFactory.createNodeList(dimensionNode))), null);
             default:
-                return ImmutablePair.nullPair();
+                return ImmutablePair.of(Optional.empty(), null);
         }
     }
 
@@ -266,7 +276,6 @@ public class ServiceGenerationUtils {
      * </pre>
      */
     public static MetadataNode generateServiceConfigAnnotation() {
-
         MetadataNode metadataNode;
         BasicLiteralNode valueExpr = createBasicLiteralNode(STRING_LITERAL,
                 createLiteralValueToken(SyntaxKind.STRING_LITERAL_TOKEN, GeneratorConstants.FALSE,
@@ -289,7 +298,6 @@ public class ServiceGenerationUtils {
      * This util function is for generating the import node for http module.
      */
     public static NodeList<ImportDeclarationNode> createImportDeclarationNodes() {
-
         List<ImportDeclarationNode> imports = new ArrayList<>();
         ImportDeclarationNode importForHttp = GeneratorUtils.getImportDeclarationNode(GeneratorConstants.BALLERINA
                 , GeneratorConstants.HTTP);

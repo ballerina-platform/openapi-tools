@@ -10,8 +10,7 @@ paths:
     get:
       tags:
         - store
-      summary: Returns pet inventories by status
-      description: Returns a map of status codes to quantities
+      description: Return has inline object property with additional property
       operationId: getInventory
       responses:
         "200":
@@ -28,12 +27,11 @@ paths:
                 additionalProperties:
                   type: integer
                   format: int32
-  /store/inventory02:
+  /:
     get:
       tags:
         - store
-      summary: Returns pet inventories by status
-      description: Returns a map of status codes to quantities
+      description: Return has inline object with additional property without property
       operationId: getInventory02
       responses:
         "200":
@@ -46,7 +44,7 @@ paths:
                   type: object
                   properties:
                     id:
-                     type: integer
+                      type: integer
                     age:
                       type: integer
             text/plain:
@@ -56,8 +54,7 @@ paths:
     get:
       tags:
         - store
-      summary: Returns pet inventories by status
-      description: Returns a map of status codes to quantities
+      description: Return has inline object with nested additional property
       operationId: getInventory03
       responses:
         "200":
@@ -79,8 +76,7 @@ paths:
     get:
       tags:
         - store
-      summary: Returns pet inventories by status
-      description: Returns a map of status codes to quantities
+      description: Return has inline object with additional property has reference value
       operationId: getInventory04
       responses:
         "200":
@@ -96,6 +92,7 @@ paths:
       tags:
         - store
       operationId: getInventory05
+      description: Return has inline object with additional property with reference and different status code
       responses:
         "400":
           description: successful operation

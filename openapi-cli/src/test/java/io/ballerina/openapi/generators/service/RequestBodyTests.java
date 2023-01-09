@@ -25,7 +25,6 @@ import io.ballerina.openapi.core.generators.service.BallerinaServiceGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -88,7 +87,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Scenario 03 - Request Body has multiple content types with Different dataBind schema types.")
-    public void generateMultipleContent() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateMultipleContent() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/scenario03_rb.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
@@ -102,7 +101,7 @@ public class RequestBodyTests {
     }
 
     @Test(description = "Scenario 04 - Request Body has record name with special characters.")
-    public void generateRecordName() throws IOException, BallerinaOpenApiException, FormatterException {
+    public void generateRecordName() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/requestBody/record_name_refactor.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

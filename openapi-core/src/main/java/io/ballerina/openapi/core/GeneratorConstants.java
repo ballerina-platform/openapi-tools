@@ -86,14 +86,7 @@ public class GeneratorConstants {
             "name= \"testopenapi\"\n" +
             "version= \"0.0.0\"\n";
 
-    public static final String TEMPLATES_SUFFIX = ".mustache";
-    public static final String TEMPLATES_DIR_PATH_KEY = "templates.dir.path";
-    public static final String DEFAULT_TEMPLATE_DIR = "/templates";
-    public static final String DEFAULT_CLIENT_DIR = DEFAULT_TEMPLATE_DIR + "/client";
-    public static final String DEFAULT_CLIENT_PKG = "client";
-    public static final String DEFAULT_MOCK_PKG = "mock";
     public static final String OAS_PATH_SEPARATOR = "/";
-    public static final String UNTITLED_SERVICE = "UntitledAPI";
     public static final String ESCAPE_PATTERN = "([\\[\\]\\\\?!<>@#&~`*\\-=^+();:\\/{}\\s|.$])";
     //ClientCode generator
     public static final String HTTP = "http";
@@ -147,17 +140,14 @@ public class GeneratorConstants {
     public static final String APPLICATION_URL_ENCODE = "application/x-www-form-urlencoded";
     public static final String TEXT = "text";
     public static final String IMAGE_PNG = "image/png";
-    public static final String TEXT_PLAIN = "text/plain";
     public static final String ENSURE_TYPE = "ensureType";
 
     // auth related constants
     public static final String API_KEY = "apikey";
     public static final String API_KEYS_CONFIG = "ApiKeysConfig";
     public static final String API_KEY_CONFIG_PARAM = "apiKeyConfig";
-    public static final String API_KEY_CONFIG_RECORD_FIELD = "apiKeys";
     public static final String AUTH = "auth";
     public static final String AUTH_CONFIG = "authConfig";
-    public static final String AUTH_CONFIG_RECORD = "AuthConfig";
     public static final String HTTP_CLIENT_CONFIG = "httpClientConfig";
     public static final String CLIENT_HTTP1_SETTINGS = "ClientHttp1Settings";
     public static final String CLIENT_HTTP1_SETTINGS_FIELD = "http1Settings";
@@ -179,14 +169,11 @@ public class GeneratorConstants {
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String CLIENT_CRED = "client_cred";
     public static final String PASSWORD = "password";
-    public static final String CONFIG_RECORD_ARG = "clientConfig";
-    public static final String CLIENT_CONFIG = "ClientConfig";
     public static final String CONNECTION_CONFIG = "ConnectionConfig";
     public static final String OAUTH2 = "oauth2";
     public static final String SSL_FIELD_NAME = "secureSocket";
     public static final String PROXY_CONFIG = "proxy";
     public static final String VALIDATION = "validation";
-    public static final String SOCKET = "socketConfig";
 
     public static final String DEFAULT_API_KEY_DESC = "API keys for authorization";
 
@@ -202,10 +189,7 @@ public class GeneratorConstants {
     public static final String PATCH = "patch";
     public static final String EXECUTE = "execute";
     public static final String HEAD = "head";
-    public static final String CONNECT = "connect";
     public static final String OPTIONS = "options";
-    public static final String TRACE = "trace";
-
     //Encoding related constants
     public static final String DEEP_OBJECT = "DEEPOBJECT";
     public static final String FORM = "FORM";
@@ -373,5 +357,7 @@ public class GeneratorConstants {
     public static final String JSON_EXTENSION = ".json";
     public static final String UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE = "attribute openapi is missing";
     public static final String PIPE = "|";
-
+    public static final String RETURNS = "returns";
+    public static final String ANYDATA = "anydata";
+    public static final String RESPONSE_RECORD_NAME = "Response";
 }

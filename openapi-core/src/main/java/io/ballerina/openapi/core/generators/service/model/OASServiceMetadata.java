@@ -56,7 +56,7 @@ public class OASServiceMetadata {
     }
 
     /**
-     * Client IDL plugin meta data builder class.
+     * Service generation meta data builder class.
      */
     public static class Builder {
         private OpenAPI openAPI;
