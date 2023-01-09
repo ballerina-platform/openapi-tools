@@ -173,7 +173,7 @@ public class RequestBodyGenerator {
             }
         } else {
             ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeTokens =
-                    getMediaTypeToken(mediaType);
+                    getMediaTypeToken(mediaType, null);
             typeName = mediaTypeTokens.left;
         }
         return typeName;

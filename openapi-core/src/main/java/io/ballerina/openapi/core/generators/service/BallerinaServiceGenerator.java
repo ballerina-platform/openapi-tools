@@ -58,6 +58,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -91,6 +92,8 @@ public class BallerinaServiceGenerator {
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
 
     private final Map<String, TypeDefinitionNode> typeInclusionRecords = new HashMap<>();
+    private final Set<String> paths = new LinkedHashSet<>();
+
 
     public BallerinaServiceGenerator(OASServiceMetadata oasServiceMetadata) {
         this.openAPI = oasServiceMetadata.getOpenAPI();
@@ -230,7 +233,6 @@ public class BallerinaServiceGenerator {
     private FunctionDefinitionNode getResourceFunction(Map.Entry<PathItem.HttpMethod, Operation> operation,
                                                        List<Node> pathNodes, String path)
             throws BallerinaOpenApiException {
-
         NodeList<Token> qualifiersList = createNodeList(createIdentifierToken(GeneratorConstants.RESOURCE,
                 GeneratorUtils.SINGLE_WS_MINUTIAE, GeneratorUtils.SINGLE_WS_MINUTIAE));
         Token functionKeyWord = createIdentifierToken(GeneratorConstants.FUNCTION, GeneratorUtils.SINGLE_WS_MINUTIAE,
@@ -268,6 +270,10 @@ public class BallerinaServiceGenerator {
         SeparatedNodeList<ParameterNode> parameters = createSeparatedNodeList(params);
         ReturnTypeGenerator returnTypeGenerator = new ReturnTypeGenerator(ballerinaSchemaGenerator,
                 GeneratorUtils.getValidName(path, true));
+        if (!paths.contains(path)) {
+            returnTypeGenerator.setCountForRecord(0);
+            paths.add(path);
+        }
         ReturnTypeDescriptorNode returnNode = returnTypeGenerator.getReturnTypeDescriptorNode(operation,
                 createEmptyNodeList(), path);
         typeInclusionRecords.putAll(returnTypeGenerator.getTypeInclusionRecords());

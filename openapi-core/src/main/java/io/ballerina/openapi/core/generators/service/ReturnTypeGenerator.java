@@ -82,6 +82,7 @@ import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtil
  * @since 1.3.0
  */
 public class ReturnTypeGenerator {
+
     private final BallerinaTypesGenerator ballerinaSchemaGenerator;
     private final String pathRecord;
     private static int countForRecord = 0;
@@ -90,6 +91,14 @@ public class ReturnTypeGenerator {
 
     public Map<String, TypeDefinitionNode> getTypeInclusionRecords() {
         return this.typeInclusionRecords;
+    }
+
+    public static void setCount(int count) {
+        ReturnTypeGenerator.countForRecord = count;
+    }
+
+    public void setCountForRecord(int count) {
+        setCount(count);
     }
 
     public ReturnTypeGenerator(BallerinaTypesGenerator ballerinaSchemaGenerator, String pathRecord) {
@@ -144,8 +153,11 @@ public class ReturnTypeGenerator {
                             } else {
                                 while (iterator.hasNext()) {
                                     Map.Entry<String, MediaType> next = iterator.next();
+                                    String recordName = countForRecord == 0 ?
+                                            pathRecord + "Response" : pathRecord + "Response_" + countForRecord;
+
                                     ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeTokens =
-                                            getMediaTypeToken(next);
+                                            getMediaTypeToken(next, recordName);
                                     Optional<TypeDescriptorNode> mediaTypeToken = mediaTypeTokens.getLeft();
                                     if (mediaTypeToken.isEmpty()) {
                                         BuiltinSimpleNameReferenceNode type = createBuiltinSimpleNameReferenceNode(null,
@@ -155,20 +167,15 @@ public class ReturnTypeGenerator {
                                         break;
                                     } else if (mediaTypeTokens.getRight() != null) {
                                         TypeDefinitionNode rightNode = mediaTypeTokens.getRight();
-                                        countForRecord = countForRecord + 1;
-                                        String recordName = countForRecord == 0 ?
-                                                pathRecord + "Response" : pathRecord + "Response_" + countForRecord;
                                         typeInclusionRecords.put(recordName, rightNode);
                                         returnNode = createReturnTypeDescriptorNode(returnKeyWord,
-                                                createEmptyNodeList(), rightNode);
+                                                createEmptyNodeList(), createSimpleNameReferenceNode(
+                                                        createIdentifierToken(recordName)));
+                                        setCountForRecord(countForRecord + 1);
                                     } else {
-
                                         returnNode = createReturnTypeDescriptorNode(returnKeyWord,
                                                 createEmptyNodeList(), mediaTypeToken.get());
                                     }
-
-//                                    returnNode = createReturnTypeDescriptorNode(returnKeyWord, createEmptyNodeList(),
-//                                            mediaTypeToken.get());
                                 }
                             }
                         } else if (response.getKey().trim().equals(GeneratorConstants.DEFAULT)) {
@@ -185,9 +192,9 @@ public class ReturnTypeGenerator {
                             } else {
                                 // Handle for only first content type
                                 Optional<TypeDescriptorNode> nodeForContent = getNodeForContent(contentItr);
-                                type = nodeForContent.isEmpty() ?
-                                        createSimpleNameReferenceNode(createIdentifierToken(
-                                                GeneratorConstants.HTTP_RESPONSE)) : nodeForContent.get();
+                                type = nodeForContent.orElseGet(
+                                        () -> createSimpleNameReferenceNode(createIdentifierToken(
+                                                GeneratorConstants.HTTP_RESPONSE)));
                             }
                             SimpleNameReferenceNode recordType = createReturnTypeInclusionRecord(code, type);
                             NodeList<AnnotationNode> annotation = createEmptyNodeList();
@@ -234,16 +241,15 @@ public class ReturnTypeGenerator {
                     Iterator<Schema> iterator = ((ComposedSchema) schema).getOneOf().iterator();
                     type = Optional.ofNullable(getUnionNodeForOneOf(iterator));
                 } else {
+                    String recordName = countForRecord == 0 ? pathRecord + "Response" :
+                            pathRecord + "Response_" + countForRecord;
                     ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeToken =
-                            getMediaTypeToken(mediaTypeEntry);
+                            getMediaTypeToken(mediaTypeEntry, recordName);
                     type = mediaTypeToken.left;
                     TypeDefinitionNode rightNode = mediaTypeToken.right;
                     if (rightNode != null) {
-                        countForRecord = countForRecord + 1;
-                        String recordName = countForRecord == 0 ? pathRecord + "Response" :
-                                pathRecord + "Response_" + countForRecord;
                         typeInclusionRecords.put(recordName, rightNode);
-
+                        setCountForRecord(countForRecord + 1);
                         type = Optional.of(createSimpleNameReferenceNode(createIdentifierToken(recordName)));
                     }
                 }
@@ -283,22 +289,24 @@ public class ReturnTypeGenerator {
                 TypeDescriptorNode record;
                 Map.Entry<String, MediaType> contentType = response.getValue().getContent().entrySet()
                         .iterator().next();
+                String recordName = countForRecord == 0 ? pathRecord + "Response" :
+                        pathRecord + "Response_" + countForRecord;
 
                 ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeToken =
-                        getMediaTypeToken(contentType);
+                        getMediaTypeToken(contentType, recordName);
                 Optional<TypeDescriptorNode> returnNode = mediaTypeToken.left;
                 TypeDefinitionNode rightNode = mediaTypeToken.right;
 
                 if (returnNode.isEmpty()) {
                     record = createSimpleNameReferenceNode(createIdentifierToken(GeneratorConstants.HTTP_RESPONSE));
                 } else if (rightNode != null) {
-                    countForRecord = countForRecord + 1;
-                    String recordName = countForRecord == 0 ? pathRecord + "Response" :
-                            pathRecord + "Response_" + countForRecord;
+//                    String recordName = countForRecord == 0 ? pathRecord + "Response" :
+//                            pathRecord + "Response_" + countForRecord;
                     typeInclusionRecords.put(recordName, rightNode);
+                    setCountForRecord(countForRecord + 1);
 
                     record = createSimpleNameReferenceNode(createIdentifierToken(recordName));
-                } else  {
+                } else {
                     record = returnNode.get();
                 }
                 if (responseCode.equals(GeneratorConstants.HTTP_200)) {
@@ -330,8 +338,10 @@ public class ReturnTypeGenerator {
         Token pipeToken = createIdentifierToken("|");
         while (iterator.hasNext()) {
             Map.Entry<String, MediaType> contentType = iterator.next();
+            String recordName = countForRecord == 0 ? pathRecord + "Response" :
+                    pathRecord + "Response_" + countForRecord;
             ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeToken =
-                    getMediaTypeToken(contentType);
+                    getMediaTypeToken(contentType, recordName);
 
             Optional<TypeDescriptorNode> leftNode = mediaTypeToken.left;
             TypeDefinitionNode rightNode = mediaTypeToken.right;
@@ -339,10 +349,8 @@ public class ReturnTypeGenerator {
             if (leftNode.isEmpty()) {
                 continue;
             } else if (rightNode != null) {
-                countForRecord = countForRecord + 1;
-                String recordName = countForRecord == 0 ? pathRecord + "Response" :
-                        pathRecord + "Response_" + countForRecord;
                 typeInclusionRecords.put(recordName, rightNode);
+                setCountForRecord(countForRecord + 1);
                 qualifiedNodes.add(createSimpleNameReferenceNode(createIdentifierToken(recordName)));
             } else {
                 TypeDescriptorNode typeDescriptorNode = leftNode.get();
