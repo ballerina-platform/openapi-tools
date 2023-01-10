@@ -8,7 +8,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-    public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "http://petstore.{host}.io/v1") returns error? {
+    public isolated function init(ConnectionConfig config = {}, string serviceUrl = "http://petstore.{host}.io/v1") returns error? {
         http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
@@ -41,6 +41,19 @@ public isolated client class Client {
     # + return - Null response
     remote isolated function createPet(Pets_body payload) returns http:Response|error {
         string resourcePath = string `/pets`;
+        http:Request request = new;
+        mime:Entity[] bodyParts = check createBodyParts(payload);
+        request.setBodyParts(bodyParts);
+        http:Response response = check self.clientEp->post(resourcePath, request);
+        return response;
+    }
+
+    # Create an user
+    #
+    # + payload - User
+    # + return - Null response
+    remote isolated function createUser(User_body payload) returns http:Response|error {
+        string resourcePath = string `/user`;
         http:Request request = new;
         mime:Entity[] bodyParts = check createBodyParts(payload);
         request.setBodyParts(bodyParts);
