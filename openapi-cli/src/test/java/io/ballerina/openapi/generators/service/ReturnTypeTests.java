@@ -404,6 +404,20 @@ public class ReturnTypeTests {
     }
 
     @Test
+    public void testForResponseHasReference() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/response/reference_response.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        BallerinaServiceGenerator ballerinaServiceGenerator = new BallerinaServiceGenerator(oasServiceMetadata);
+        syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "response/reference_response.bal", syntaxTree);
+    }
+
+    @Test
     public void testForAdditionalProReturnPayload() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/response/response_has_additional_properties.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);

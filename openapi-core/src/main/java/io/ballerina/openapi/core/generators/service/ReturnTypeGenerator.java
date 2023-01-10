@@ -40,10 +40,8 @@ import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.schema.BallerinaTypesGenerator;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -79,9 +77,7 @@ import static io.ballerina.openapi.core.GeneratorConstants.PIPE;
 import static io.ballerina.openapi.core.GeneratorConstants.RESPONSE_RECORD_NAME;
 import static io.ballerina.openapi.core.GeneratorConstants.RETURNS;
 import static io.ballerina.openapi.core.generators.service.ServiceDiagnosticMessages.OAS_SERVICE_107;
-import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.extractReferenceType;
 import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getMediaTypeToken;
-import static io.ballerina.openapi.core.generators.service.ServiceGenerationUtils.getUnionNodeForOneOf;
 
 /**
  * This class for generating return type definition node according to the OpenAPI specification response section.
@@ -199,9 +195,18 @@ public class ReturnTypeGenerator {
                     // handle single media type
                     Iterator<Map.Entry<String, MediaType>> contentItr = responseContent.entrySet().iterator();
                     Map.Entry<String, MediaType> mediaTypeEntry = contentItr.next();
-                    Optional<TypeDescriptorNode> nodeForContent = handleSingleContent(mediaTypeEntry);
-                    type = nodeForContent.orElseGet(
-                            () -> createSimpleNameReferenceNode(createIdentifierToken(ANYDATA)));
+                    String recordName = getNewRecordName();
+                    ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeToken =
+                            getMediaTypeToken(mediaTypeEntry, recordName);
+                    TypeDefinitionNode rightNode = mediaTypeToken.right;
+                    if (rightNode != null) {
+                        typeInclusionRecords.put(recordName, rightNode);
+                        setCountForRecord(countForRecord + 1);
+                        type = createSimpleNameReferenceNode(createIdentifierToken(recordName));
+                    } else {
+                        type = mediaTypeToken.left.orElseGet(
+                                () -> createSimpleNameReferenceNode(createIdentifierToken(ANYDATA)));
+                    }
                 }
                 if (!type.toString().equals(HTTP_RESPONSE)) {
                     SimpleNameReferenceNode recordType = createReturnTypeInclusionRecord(code, type);
@@ -251,43 +256,6 @@ public class ReturnTypeGenerator {
             }
         }
         return returnNode;
-    }
-
-    /**
-     * This function uses to handle the content details in OAS to map ballerina return node.
-     *
-     * @param mediaTypeEntry - Media type from OAS
-     * @return - {@link TypeDescriptorNode} for content type in ballerina
-     * @throws BallerinaOpenApiException proceed when the process break.
-     */
-    private Optional<TypeDescriptorNode> handleSingleContent(Map.Entry<String, MediaType> mediaTypeEntry)
-            throws BallerinaOpenApiException {
-
-        String dataType;
-        Optional<TypeDescriptorNode> type = Optional.empty();
-        if (mediaTypeEntry.getValue().getSchema() != null) {
-            Schema schema = mediaTypeEntry.getValue().getSchema();
-            if (schema.get$ref() != null) {
-                dataType = GeneratorUtils.getValidName(extractReferenceType(schema.get$ref().trim()), true);
-                type = Optional.ofNullable(createBuiltinSimpleNameReferenceNode(null,
-                        createIdentifierToken(dataType)));
-            } else if (schema instanceof ComposedSchema) {
-                Iterator<Schema> iterator = ((ComposedSchema) schema).getOneOf().iterator();
-                type = Optional.ofNullable(getUnionNodeForOneOf(iterator));
-            } else {
-                String recordName = getNewRecordName();
-                ImmutablePair<Optional<TypeDescriptorNode>, TypeDefinitionNode> mediaTypeToken =
-                        getMediaTypeToken(mediaTypeEntry, recordName);
-                type = mediaTypeToken.left;
-                TypeDefinitionNode rightNode = mediaTypeToken.right;
-                if (rightNode != null) {
-                    typeInclusionRecords.put(recordName, rightNode);
-                    setCountForRecord(countForRecord + 1);
-                    type = Optional.of(createSimpleNameReferenceNode(createIdentifierToken(recordName)));
-                }
-            }
-        }
-        return type;
     }
 
     /**
