@@ -50,6 +50,7 @@ public isolated client class Client {
 
     # Create an user
     #
+    # + payload - User
     # + return - Null response
     remote isolated function createUser(User_body payload) returns http:Response|error {
         string resourcePath = string `/user`;
