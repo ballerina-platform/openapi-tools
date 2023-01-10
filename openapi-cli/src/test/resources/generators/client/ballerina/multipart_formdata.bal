@@ -55,8 +55,7 @@ public isolated client class Client {
     remote isolated function createUser(User_body payload) returns http:Response|error {
         string resourcePath = string `/user`;
         http:Request request = new;
-        map<Encoding> encodingMap = {};
-        mime:Entity[] bodyParts = check createBodyParts(payload, encodingMap);
+        mime:Entity[] bodyParts = check createBodyParts(payload);
         request.setBodyParts(bodyParts);
         http:Response response = check self.clientEp->post(resourcePath, request);
         return response;

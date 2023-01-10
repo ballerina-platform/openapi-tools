@@ -120,15 +120,17 @@ public class MultipartFormData extends MimeType {
                 getEncoding(entry, mapFields);
             }
 
-            if (!mapFields.isEmpty()) {
-                mapFields.remove(mapFields.size() - 1);
+            if (mapFields.isEmpty()) {
+                return null;
             }
+
+            mapFields.remove(mapFields.size() - 1);
             MappingConstructorExpressionNode initialize = createMappingConstructorExpressionNode(
                     createToken(OPEN_BRACE_TOKEN), createSeparatedNodeList(mapFields), createToken(CLOSE_BRACE_TOKEN));
             return createVariableDeclarationNode(createEmptyNodeList(), null, bindingPatternNode,
                     createToken(EQUAL_TOKEN), initialize, createToken(SEMICOLON_TOKEN));
-
         }
+
         return null;
     }
 
