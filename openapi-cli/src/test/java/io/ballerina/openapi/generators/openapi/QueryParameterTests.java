@@ -18,7 +18,6 @@
 
 package io.ballerina.openapi.generators.openapi;
 
-import io.ballerina.openapi.converter.OpenApiConverterException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
@@ -45,50 +44,50 @@ public class QueryParameterTests {
     // public type  QueryParamType <map>json | () |BasicType|BasicType[];
 
     @Test(description = "Required query parameter")
-    public void testQueryScenario01() throws OpenApiConverterException, IOException {
+    public void testQueryScenario01() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario01.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario01.yaml");
     }
 
     @Test(description = "When the query parameter has nullable enable it default behave as optional parameter")
-    public void testQueryScenario02() throws OpenApiConverterException, IOException {
+    public void testQueryScenario02() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario02.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario02.yaml");
     }
 
     @Test(description = "Require query parameter array type.")
-    public void testQueryscenario03() throws OpenApiConverterException, IOException {
+    public void testQueryscenario03() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario03.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario03.yaml");
     }
 
     @Test(description = "Query parameter has array type with nullable value (ex: int[]? offset)")
-    public void testQueryscenario04() throws OpenApiConverterException, IOException {
+    public void testQueryscenario04() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario04.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario04.yaml");
     }
 
     @Test(description = "Query parameter has service config with optional field false")
-    public void testQueryscenario05() throws OpenApiConverterException, IOException {
+    public void testQueryscenario05() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario05.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario05.yaml");
     }
 
     @Test(description = "Query parameter has default parameter.")
-    public void testQueryscenario06() throws OpenApiConverterException, IOException {
+    public void testQueryscenario06() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario06.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario06.yaml");
     }
 
     //Disable till http module support the nilable array `int?[]` in query parameter
     @Test(description = "Query parameter has array type with null values (ex: int?[] offset)", enabled = false)
-    public void testQueryscenario07() throws OpenApiConverterException, IOException {
+    public void testQueryscenario07() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario07.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario07.yaml");
     }
 
     @Test(description = "Default parameter scenarios do not support with tool")
-    public void testQueryscenario08() throws OpenApiConverterException, IOException {
+    public void testQueryscenario08() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("query/query_scenario08.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "query/query_scenario08.yaml");
     }

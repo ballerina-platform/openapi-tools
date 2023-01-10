@@ -337,7 +337,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     }
 
     @Test(description = "Test generation without including test files")
-    public void testClientGenerationWithoutIncludeTestFilesOption() throws IOException, BallerinaOpenApiException {
+    public void testClientGenerationWithoutIncludeTestFilesOption() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore_with_oauth.yaml"));
         Path licenseHeader = resourceDir.resolve(Paths.get("license.txt"));
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString(), "--license",
