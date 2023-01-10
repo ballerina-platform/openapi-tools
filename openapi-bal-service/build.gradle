@@ -32,7 +32,7 @@ configurations {
 
 dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind"
-    implementation("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
+    implementation ("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
         exclude group: "io.swagger", module: "swagger-compat-spec-parser"
         exclude group: "org.slf4j", module: "slf4j-ext"
         exclude group: "javax.validation", module: "validation-api"

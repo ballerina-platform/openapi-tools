@@ -31,6 +31,8 @@ dependencies {
     testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
+    testImplementation group: 'io.swagger.parser.v3', name: 'swagger-parser', version: '2.1.10'
+
     testImplementation "org.testng:testng:${testngVersion}"
     testImplementation "net.lingala.zip4j:zip4j:${netLingalaZip4jVersion}"
     testImplementation "commons-io:commons-io:${commonsIoVersion}"

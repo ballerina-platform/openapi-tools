@@ -30,7 +30,6 @@ apply plugin: 'jacoco'
 apply plugin: "org.javamodularity.moduleplugin"
 apply from: "$rootDir/gradle/javaProject.gradle"
 
-
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.testngVersion = project.testngVersion
 ext.commonsLang3Version = project.commonsLang3Version

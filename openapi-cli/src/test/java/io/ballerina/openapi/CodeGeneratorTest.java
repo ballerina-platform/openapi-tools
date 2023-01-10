@@ -103,7 +103,7 @@ public class CodeGeneratorTest {
         }
     }
 
-    @Test(description = "Test Ballerina service skeleton generation for OAS 2.0",  enabled = false)
+    @Test(description = "Test Ballerina service skeleton generation for OAS 2.0")
     public void generateServiceForOAS2() {
         final String serviceName = "openapipetstore";
         String definitionPath = RES_DIR.resolve("petstore_swagger.yaml").toString();
