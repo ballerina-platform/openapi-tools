@@ -28,6 +28,8 @@ apply plugin: 'java'
 apply plugin: "com.github.spotbugs"
 apply plugin: 'jacoco'
 apply plugin: "org.javamodularity.moduleplugin"
+apply from: "$rootDir/gradle/javaProject.gradle"
+
 
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.testngVersion = project.testngVersion
@@ -56,7 +58,7 @@ ext.stdlibWebsubVersion = project.stdlibWebsubVersion
 ext.stdlibConstraintVersion = project.stdlibConstraintVersion
 ext.stdlibWebsocketVersion = project.stdlibWebsocketVersion
 ext.jacocoVersion = project.jacocoVersion
-ext.puppycrawlCheckstyleVersion = "8.18"
+ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 
 allprojects {
     group = 'io.ballerina'

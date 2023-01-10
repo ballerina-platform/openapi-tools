@@ -103,6 +103,53 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test Ballerina service skeleton generation for OAS 2.0",  enabled = false)
+    public void generateServiceForOAS2() {
+        final String serviceName = "openapipetstore";
+        String definitionPath = RES_DIR.resolve("petstore_swagger.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+
+        try {
+            String expectedServiceContent = getStringFromGivenBalFile(expectedServiceFile,
+                    "petstore_service_swagger.bal");
+            generator.generateService(definitionPath, serviceName, resourcePath.toString(), filter, false);
+            if (Files.exists(resourcePath.resolve("openapipetstore_service.bal"))) {
+                String generatedService = getStringFromGivenBalFile(resourcePath, "openapipetstore_service.bal");
+                generatedService = (generatedService.trim()).replaceAll("\\s+", "");
+                expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedService.contains(expectedServiceContent));
+            } else {
+                Assert.fail("Service was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("openapipetstore_service.bal");
+        }
+    }
+    @Test(description = "Test Ballerina client generation for OAS 2.0")
+    public void generateClientForOAS2() {
+        String definitionPath = RES_DIR.resolve("petstore_swagger.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(expectedServiceFile,
+                    "petstore_client_swagger.bal");
+            generator.generateClient(definitionPath, resourcePath.toString(), filter, false, false);
+            if (Files.exists(resourcePath.resolve("client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+            } else {
+                Assert.fail("Client was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException | FormatterException e) {
+            Assert.fail("Error while generating the client. " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
     @Test(description = "Test duplicated files generation")
     public void generateDuplicatedFiles() {
         List<File> duplicatedFileList = new ArrayList<>();
